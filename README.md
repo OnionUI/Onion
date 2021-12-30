@@ -13,7 +13,7 @@ Note: Please upgrade to the newest official firmware using the instructions here
 **
 
 Supported systems:
-Amstrad CPC
+<br>Amstrad CPC
 Arcade (FBA2012 by default)
 Atari 2600
 Atari 5200
