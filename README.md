@@ -3,7 +3,7 @@
 CFW for Miyoo Mini, based off the stock OS.
 Pre-configured, debloated, skinnable.
 
-**Credit to Shaun Inman for the Commander port, Onionizer Theme Engine and Onion logo**
+**HUGE Thank you and full credit to Shaun Inman for the Commander port, Onionizer theme engine and Onion logo**
 
 Note: Please upgrade to the newest official firmware using the instructions here: (link). 
 
@@ -13,12 +13,42 @@ Note: Please upgrade to the newest official firmware using the instructions here
 **
 
 Supported systems:
-Arcade
+Amstrad CPC
+Arcade (FBA2012 by default)
 Atari 2600
 Atari 5200
 Atari 7800
 Atari 800
+Atari Lynx
+Bandai Wonderswan/Color
+Commodore 64
+Elektronika BK
 Fairchild Channel F
+Famicom Disk System
+GCE Vectrex
+Magnavox Odyssey/Odyssey2
+MS-DOS
+MSX/MSX2
+NEC PC Engine
+NEC PC Engine CD
+Nintendo Entertainment System
+Nintendo Game & Watch
+Nintendo Game Boy
+Nintendo Game Boy Color
+Nintendo Game Boy Advance
+Nintendo Pokemon Mini
+Nintendo Super NES
+Sega 32X
+Sega CD
+Sega GameGear
+Sega Genesis
+Sega Master System Mk. III
+Sega SG-1000
+SNK NEOGEO
+SNK NEOGEO Pocket/Color
+Sony Playstation
+ZX Spectrum
+& more to come!
 
 Installation:
 1. Format your microSD to FAT32.
