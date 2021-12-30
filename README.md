@@ -12,43 +12,43 @@ Note: Please upgrade to the newest official firmware using the instructions here
 **Disclaimer: This is an untested WIP. I am not liable for bricks, borks, bugs or barf. Proceed with caution and use at your own risk.
 **
 
-Supported systems:
-<br>Amstrad CPC
-Arcade (FBA2012 by default)
-Atari 2600
-Atari 5200
-Atari 7800
-Atari 800
-Atari Lynx
-Bandai Wonderswan/Color
-Commodore 64
-Elektronika BK
-Fairchild Channel F
-Famicom Disk System
-GCE Vectrex
-Magnavox Odyssey/Odyssey2
-MS-DOS
-MSX/MSX2
-NEC PC Engine
-NEC PC Engine CD
-Nintendo Entertainment System
-Nintendo Game & Watch
-Nintendo Game Boy
-Nintendo Game Boy Color
-Nintendo Game Boy Advance
-Nintendo Pokemon Mini
-Nintendo Super NES
-Sega 32X
-Sega CD
-Sega GameGear
-Sega Genesis
-Sega Master System Mk. III
-Sega SG-1000
-SNK NEOGEO
-SNK NEOGEO Pocket/Color
-Sony Playstation
-ZX Spectrum
-& more to come!
+Supported systems:<br>
+Amstrad CPC<br>
+Arcade (FBA2012 by default)<br>
+Atari 2600<br>
+Atari 5200<br>
+Atari 7800<br>
+Atari 800<br>
+Atari Lynx<br>
+Bandai Wonderswan/Color<br>
+Commodore 64<br>
+Elektronika BK<br>
+Fairchild Channel F<br>
+Famicom Disk System<br>
+GCE Vectrex<br>
+Magnavox Odyssey/Odyssey2<br>
+MS-DOS<br>
+MSX/MSX2<br>
+NEC PC Engine<br>
+NEC PC Engine CD<br>
+Nintendo Entertainment System<br>
+Nintendo Game & Watch<br>
+Nintendo Game Boy<br>
+Nintendo Game Boy Color<br>
+Nintendo Game Boy Advance<br>
+Nintendo Pokemon Mini<br>
+Nintendo Super NES<br>
+Sega 32X<br>
+Sega CD<br>
+Sega GameGear<br>
+Sega Genesis<br>
+Sega Master System Mk. III<br>
+Sega SG-1000<br>
+SNK NEOGEO<br>
+SNK NEOGEO Pocket/Color<br>
+Sony Playstation<br>
+ZX Spectrum<br>
+& more to come!<br>
 
 Installation:
 1. Format your microSD to FAT32.
