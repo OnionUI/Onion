@@ -67,3 +67,5 @@ and cannot be modified).
 4. Inside that folder are two hidden folders: .onion and .tmp_update. Copy both to the root of your SD card.
 5. Customize the images in the .onion folder
 6. Next time you boot your Miyoo Mini it will launch the MainUI binary in .tmp_update that has been patched to load images from .onion.
+NOTE: To use a prebuilt theme, make sure you have run Onionizer at least once since your last firmware update, then simply download the
+theme and drag and drop the ".onion" folder to the root of your SD card.
