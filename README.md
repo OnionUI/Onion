@@ -48,13 +48,16 @@ SNK NEOGEO<br>
 SNK NEOGEO Pocket/Color<br>
 Sony Playstation<br>
 ZX Spectrum<br>
-& more to come!<br>
+& an entire section of experimental cores for the tinkerers out there!<br>
 
 Installation:
 1. Format your microSD to FAT32.
 2. Unzip the contents of Onion to the root of your SD Card. 
 3. Drag and drop your legally supplied ROMs to the appropriate folders (see Wiki for details)
 4. Drag and drop your legally acquired Retroarch BIOS set to "/RetroArch/system"
+5. OPTIONAL: Open Apps > Onionizer on your Miyoo Mini. The device will shutdown after about 10 seconds.
+6. OPTIONAL: Reinsert your SD card into your computer and navigate to the new /App/Onionizer/output folder.
+7. OPTIONAL: Inside that folder are two hidden folders: .onion and .tmp_update. Copy **only the .tmp_update folder** to the root of your SD card. If you copy the .onion folder, you will reset the theme. See below for how to update your theme.
 
 Onionizer Theme Engine by Shaun Inman:
 The Onionizer will create a skin-able copy of the stock launcher 
