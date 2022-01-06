@@ -7,7 +7,7 @@
 **Disclaimer**: Proceed with caution and use at your own risk. (It all boots off SD so there really should be zero risk)
 
 Install Instructions:
-1. IMPORTANT: Update your Miyoo Mini to the 20211226 Update or newer.
+1. IMPORTANT: Update your Miyoo Mini to the 20211226 Update or newer (Instructions: https://github.com/TriForceX/MiyooCFW/wiki/Miyoo-Mini#firmware-update-guide)
 2. Format your microSD to FAT32.
 3. Unzip the contents of Onion to the root of your SD Card.
 4. Drag and drop your legally supplied ROMs to "/Roms/*system name*
@@ -42,6 +42,7 @@ Credit (I am a glorified Project Manager, these folks are the reason this exists
 <br>PixelShift#2272 on Discord - Galaxy theme, Black and invaluable input
 <br>Totofaki - Hotkey Mapping and Retroarch assistance
 <br>e1000 - Newly compiled cores for most systems
+<br>Triforce Team - Translated instructions and english update (https://github.com/TriForceX/MiyooCFW/wiki/Miyoo-Mini#firmware-update-guide)
 <br>Boiler - Port of Powder (Licensed under a deprecated CC license (https://creativecommons.org/licenses/sampling+/1.0/))
 <br>Team Ruka - Various July 2021 cores compiled for RK3128 - https://github.com/Ruka-CFW/rk3128-cfw
 <br>Simple30 team for their PSX core: https://retrogamecorps.com/2021/02/13/introducing-simple30-an-optimized-pocketgo-s30-firmware/#BIOS
@@ -57,7 +58,7 @@ Button Shortcuts:
 <br>Hotkey + Select - Toggle Menu
 <br>Hotkey + Start - Quit
 <br>Select + Start + L2 - Brightness Down
-<br>Select + Start + R2 - Brightness Up
+<br>Select + Start + R2 - Brightness Up (Only works on home screen)
 
 Note: Please upgrade to the newest official firmware using the instructions here: https://github.com/TriForceX/MiyooCFW/wiki/Miyoo-Mini#firmware-update-guide 
 <br>**DO NOT USE ONION WITHOUT FIRST PERFORMING THIS UPGRADE**
@@ -98,13 +99,14 @@ Watara Supervision - - - .bin - .zip<br>
 & an entire section of experimental cores for the tinkerers out there!<br>
 
 Required BIOS files:
-<br>SEGA CD - bios_CD_E.bin, bios_CD_J.bin, bios_CD_U.bin
+<br>Atari Lynx - lynxboot.img
 <br>FAMICOM DISK SYSTEM - disksys.rom
 <br>GAME BOY (Optional - for boot logo) - gb_bios.bin
 <br>GAME BOY COLOR (Optional - for boot logo) - gbc_bios.bin
 <br>GAME BOY ADVANCE (Optional) - gba_bios.bin
 <br>NEOGEO - neogeo.zip
-<br>PLAYSTATION - scph1001.bin (any scphXXXX.bin file should work)
+<br>PLAYSTATION - scph1001.bin (optional but recommended - any scphXXXX.bin file should work)
+<br>SEGA CD - bios_CD_E.bin, bios_CD_J.bin, bios_CD_U.bin
 <br>TURBOGRAFX-CD - syscard1.pce, syscard2.pce, syscard3.pce
 
 Tips & Tricks:
