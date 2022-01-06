@@ -1,0 +1,30 @@
+# Software Information
+display_name = "Nintendo - NES / Famicom (Nestopia UE)"
+authors = "Martin Freij|R. Belmont|R. Danbrook"
+supported_extensions = "nes|fds|unf|unif"
+corename = "Nestopia"
+license = "GPLv2"
+permissions = ""
+categories = "Emulator"
+display_version = "v1.47-WIP"
+
+# Hardware Information
+manufacturer = "Nintendo"
+systemname = "Nintendo Entertainment System"
+systemid = "nes"
+
+# Libretro Features
+supports_no_game = "false"
+database = "Nintendo - Nintendo Entertainment System|Nintendo - Family Computer Disk System"
+
+# Firmware / BIOS
+firmware_count = 2
+firmware0_desc = "NstDatabase.xml (Nestopia UE Database file)"
+firmware0_path = "NstDatabase.xml"
+firmware0_opt = "true"
+firmware1_desc = "disksys.rom (Family Computer Disk System BIOS)"
+firmware1_path = "disksys.rom"
+firmware1_opt = "true"
+notes = "Get NstDatabase.xml from https://github.com/0ldsk00l/nestopia|(!) disksys.rom (md5): ca30b50f880eb660a320674ed365ef7a|Press Retropad L1 to switch disk side."
+
+description = "Nestopia is based on the most up-to-date code from the Nestopia-Undead emulator. This core strikes a good balance between performance and accuracy, with support for a wide variety of games and mappers. However, it needs the NstDatabase.xml to determine which games support the Zapper light gun and various other peripherals, as well as to pick certain mappers, so make sure you have that file in place to avoid unnecessary problems. In general, this core is a good choice for most users on desktop and mobile platforms."

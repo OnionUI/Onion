@@ -1,0 +1,12 @@
+{
+"label":"quicknes",
+"icon":"quicknes.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../ROMS/FC",
+"imgpath":"../../Imgs/FC",
+"useswap":0,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

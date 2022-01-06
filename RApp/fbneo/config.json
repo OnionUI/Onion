@@ -1,0 +1,12 @@
+{
+"label":"fbneo",
+"icon":"fbneo.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../ROMS/FBNEO",
+"imgpath":"../../Imgs/FBNEO",
+"useswap":1,
+"shortname":1,
+"hidebios":1,
+"extlist":"zip"
+}

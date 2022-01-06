@@ -1,0 +1,18 @@
+# Software Information
+display_name = "Commodore - C64 (Frodo)"
+authors = "Frodo Team Members"
+supported_extensions = "d64|t64|x64|p00|lnx|zip"
+corename = "Frodo"
+license = "GPLv2"
+permissions = ""
+display_version = "v4.2"
+categories = "Emulator"
+
+# Hardware Information
+manufacturer = "Commodore"
+systemid = "commodore_64"
+systemname = "C64"
+
+# Libretro Features
+supports_no_game = "false"
+database = "Commodore - 64"

@@ -1,0 +1,12 @@
+{
+"label":"1982: VEC",
+"icon":"vectrex.png",
+"iconsel":"vectrex_sel.png",
+"launch":"launch.sh",
+"rompath":"../../Roms/VECTREX",
+"imgpath":"../../Imgs/VECTREX",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

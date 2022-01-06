@@ -1,0 +1,12 @@
+{
+"label":"o2em",
+"icon":"o2em.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/ODY",
+"imgpath":"../../Imgs/ODY",
+"useswap":0,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

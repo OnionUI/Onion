@@ -1,0 +1,19 @@
+# Software Information
+display_name = "Commodore - PLUS/4 (VICE xplus4)"
+categories = "Emulator"
+authors = "VICE Team"
+corename = "VICE xplus4"
+supported_extensions = "d64|d71|d80|d81|d82|g64|g41|x64|t64|tap|prg|p00|crt|bin|zip|gz|d6z|d7z|d8z|g6z|g4z|x6z|cmd|m3u|vfl|vsf|nib|nbz|d2m|d4m"
+license = "GPLv2"
+permissions = ""
+display_version = "3.5"
+description = "Versatile Commodore Emulator - PLUS/4"
+
+# Hardware Information
+manufacturer = "Commodore"
+systemname = "PLUS/4"
+systemid = "commodore_plus4"
+
+# Libretro Features
+database = "Commodore - PLUS-4"
+supports_no_game = "true"

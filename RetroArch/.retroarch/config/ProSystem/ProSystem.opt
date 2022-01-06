@@ -1,0 +1,4 @@
+prosystem_color_depth = "24bit"
+prosystem_gamepad_dual_stick_hack = "disabled"
+prosystem_low_pass_filter = "disabled"
+prosystem_low_pass_range = "60"

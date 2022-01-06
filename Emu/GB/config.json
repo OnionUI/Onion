@@ -1,0 +1,12 @@
+{
+"label":"1989: GB",
+"icon":"gb.png",
+"iconsel":"gb_sel.png",
+"launch":"launch.sh",
+"rompath":"../../Roms/GB",
+"imgpath":"../../Imgs/GB",
+"useswap":0,
+"shortname":0,
+"hidebios":0,
+"extlist":""
+}

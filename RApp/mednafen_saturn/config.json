@@ -1,0 +1,12 @@
+{
+"label":"mednafen_saturn",
+"icon":"mednafen_saturn.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../ROMS/SATURN",
+"imgpath":"../../Imgs/SATURN",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

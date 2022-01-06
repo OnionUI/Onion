@@ -1,0 +1,12 @@
+{
+"label":"1976: ARC",
+"icon":"arcade.png",
+"iconsel":"arcade_sel.png",
+"launch":"launch.sh",
+"rompath":"../../Roms/ARCADE",
+"imgpath":"../../Imgs/ARCADE",
+"useswap":1,
+"shortname":1,
+"hidebios":1,
+"extlist":"*"
+}

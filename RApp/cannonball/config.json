@@ -1,0 +1,12 @@
+{
+"label":"cannonball",
+"icon":"cannonball.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/CANNONBALL",
+"imgpath":"../../Imgs/",
+"useswap":0,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

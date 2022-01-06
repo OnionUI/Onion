@@ -1,0 +1,12 @@
+{
+"label":"1989: SGFX",
+"icon":"sgfx.png",
+"iconsel":"sgfx_sel.png",
+"launch":"launch.sh",
+"rompath":"../../Roms/SGFX",
+"imgpath":"../../Imgs/SGFX",
+"useswap":0,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

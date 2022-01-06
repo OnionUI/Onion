@@ -1,0 +1,12 @@
+{
+"label":"CPS1",
+"icon":"fbalpha2012_cps1.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../ROMS/CPS1",
+"imgpath":"../../Imgs/cps1",
+"useswap":1,
+"shortname":1,
+"hidebios":1,
+"extlist":"zip"
+}

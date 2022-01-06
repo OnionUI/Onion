@@ -1,0 +1,12 @@
+{
+"label":"1991: SCD",
+"icon":"segacd.png",
+"iconsel":"segacd_sel.png",
+"launch":"launch.sh",
+"rompath":"../../Roms/SEGACD",
+"imgpath":"../../Imgs/SEGACD",
+"useswap":1,
+"shortname":0,
+"hidebios":0,
+"extlist":""
+}

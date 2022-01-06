@@ -1,0 +1,31 @@
+# Software Information
+display_name = "Atari - Jaguar (Virtual Jaguar)"
+authors = "David Raingeard|Shamus"
+supported_extensions = "j64|jag|rom|abs|cof|bin|prg"
+corename = "Virtual Jaguar"
+license = "GPLv3"
+permissions = ""
+display_version = "v2.1.0"
+categories = "Emulator"
+
+# Hardware Information
+manufacturer = "Atari"
+systemname = "Jaguar"
+systemid = "atari_jaguar"
+
+# Libretro Features
+supports_no_game = "false"
+database = "Atari - Jaguar"
+savestate = "false"
+cheats = "false"
+input_descriptors = "true"
+memory_descriptors = "true"
+libretro_saves = "true"
+core_options = "true"
+load_subsystem = "false"
+hw_render = "false"
+needs_fullpath = "false"
+disk_control = "false"
+is_experimental = "false"
+
+description = "A port of the Virtual Jaguar emulator, which itself is based on Potato Emulation, to libretro. This core has known issues with a number of popular games, but it still represents the state of the art for open source Atari Jaguar emulation at the time of this writing. It is quite demanding but also includes a core option--Fast Blitter--that forces the use of an older, less compatible but faster blitter, though some games will not work properly with this option enabled."

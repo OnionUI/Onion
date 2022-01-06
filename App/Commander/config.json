@@ -1,0 +1,8 @@
+{
+"label":"Commander",
+"icon":"commander.png",
+"iconsel":"commander_sel.png",
+"launch":"launch.sh",
+"description":"DinguxCommander for Miyoo Mini"
+}
+#ported by Shaun Inman

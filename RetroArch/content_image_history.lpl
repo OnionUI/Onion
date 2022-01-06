@@ -1,0 +1,43 @@
+{
+  "version": "1.4",
+  "default_core_path": "",
+  "default_core_name": "",
+  "label_display_mode": 0,
+  "right_thumbnail_mode": 0,
+  "left_thumbnail_mode": 0,
+  "sort_mode": 2,
+  "items": [
+    {
+      "path": "/mnt/SDCARD/Roms/EXPERIMENTAL/PALMOS/brickbreak/1226-brickbreak.bmp",
+      "label": "",
+      "core_path": "builtin",
+      "core_name": "imageviewer",
+      "crc32": "",
+      "db_name": ""
+    },
+    {
+      "path": "/mnt/SDCARD/RRoms/scummvm/ft/ft.jpg",
+      "label": "",
+      "core_path": "builtin",
+      "core_name": "imageviewer",
+      "crc32": "",
+      "db_name": ""
+    },
+    {
+      "path": "/mnt/SDCARD/RRoms/scummvm/tentacle-zh-cn/tentacle-zh-cn.jpg",
+      "label": "",
+      "core_path": "builtin",
+      "core_name": "imageviewer",
+      "crc32": "",
+      "db_name": ""
+    },
+    {
+      "path": "/mnt/SDCARD/RRoms/scummvm/ATLANTIS/ATLANTIS.jpg",
+      "label": "",
+      "core_path": "builtin",
+      "core_name": "imageviewer",
+      "crc32": "",
+      "db_name": ""
+    }
+  ]
+}

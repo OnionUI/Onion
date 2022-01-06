@@ -1,0 +1,12 @@
+{
+"label":"1994: 32X",
+"icon":"32X.png",
+"iconsel":"32X_sel.png",
+"launch":"launch.sh",
+"rompath":"../../Roms/THIRTYTWOX",
+"imgpath":"../../Imgs/THIRTYTWOX",
+"useswap":1,
+"shortname":0,
+"hidebios":0,
+"extlist":""
+}

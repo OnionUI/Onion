@@ -1,0 +1,12 @@
+{
+"label":"2001: GBA",
+"icon":"gba.png",
+"iconsel":"gba_sel.png",
+"launch":"launch.sh",
+"rompath":"../../Roms/GBA",
+"imgpath":"../../Imgs/GBA",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

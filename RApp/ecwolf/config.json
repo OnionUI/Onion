@@ -1,0 +1,12 @@
+{
+"label":"ecwolf",
+"icon":"ecwolf.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/ECWOLF",
+"imgpath":"../../Imgs/ECWOLF",
+"useswap":0,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

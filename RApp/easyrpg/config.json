@@ -1,0 +1,12 @@
+{
+"label":"easyrpg",
+"icon":"easyrpg.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/EASYRPG",
+"imgpath":"../../Imgs/EASYRPG",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

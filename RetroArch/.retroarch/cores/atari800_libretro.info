@@ -1,0 +1,41 @@
+# Software Information
+display_name = "Atari - 5200 (Atari800)"
+authors = "Petr Stehlik"
+supported_extensions = "xfd|atr|cdm|cas|bin|a52|zip|atx|car|com|xex"
+corename = "Atari800"
+categories = "Emulator"
+license = "GPLv2"
+permissions = ""
+
+# Hardware Information
+manufacturer = "Atari"
+systemname = "Atari 5200"
+systemid = "atari_5200"
+database = "Atari - 5200"
+display_version = "3.1.0"
+
+# Libretro Features
+supports_no_game = "false"
+savestate = "false"
+savestate_features = "null"
+cheats = "false"
+input_descriptors = "true"
+memory_descriptors = "false"
+libretro_saves = "false"
+core_options = "true"
+core_options_version = "1.0"
+load_subsystem = "false"
+hw_render = "false"
+needs_fullpath = "true"
+disk_control = "false"
+is_experimental = "false"
+needs_kbd_mouse_focus = "true"
+
+# BIOS/Firmware
+firmware_count = 1
+firmware0_desc = "5200.rom (5200 BIOS)"
+firmware0_path = "5200.rom"
+firmware0_opt = "false"
+notes = "(!) 5200.rom (md5): 281f20ea4320404ec820fb7ec0693b38"
+
+description = "A port of the free and portable Atari800 emulator to libretro. This core supports games and programs written for the Atari 8-bit computers (400, 800, 600 XL, 800XL, 130XE) and 5200 console. When loaded, the core should boot to the Atari Computer - Memo Pad screen and will generate a .atari800.cfg config file in the frontend's home directory and will add the required BIOS files it detects in the frontend's system directory to the config file. Once that is done, users may manually select which Atari system to emulate through the Atari System core option. These and other options can also be modified through the core's own menu, accessible through the retrokeyboard's F1 key."

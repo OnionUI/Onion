@@ -1,0 +1,12 @@
+{
+"label":"tyrquake",
+"icon":"tyrquake.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../ROMS/TYRQUAKE",
+"imgpath":"../../Imgs/",
+"useswap":0,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}
