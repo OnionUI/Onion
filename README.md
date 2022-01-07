@@ -98,13 +98,14 @@ Watara Supervision - - - .bin - .zip<br>
 & an entire section of experimental cores for the tinkerers out there!<br>
 
 Required BIOS files:
-<br>SEGA CD - bios_CD_E.bin, bios_CD_J.bin, bios_CD_U.bin
+<br>Atari Lynx - lynxboot.img
 <br>FAMICOM DISK SYSTEM - disksys.rom
 <br>GAME BOY (Optional - for boot logo) - gb_bios.bin
 <br>GAME BOY COLOR (Optional - for boot logo) - gbc_bios.bin
 <br>GAME BOY ADVANCE (Optional) - gba_bios.bin
 <br>NEOGEO - neogeo.zip
 <br>PLAYSTATION - scph1001.bin (optional but recommended - any scphXXXX.bin file should work)
+<br>SEGA CD - bios_CD_E.bin, bios_CD_J.bin, bios_CD_U.bin
 <br>TURBOGRAFX-CD - syscard1.pce, syscard2.pce, syscard3.pce
 
 Tips & Tricks:
