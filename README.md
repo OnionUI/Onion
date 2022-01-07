@@ -55,37 +55,39 @@ Button Shortcuts:
 Note: Please upgrade to the newest official firmware using the instructions here: https://github.com/TriForceX/MiyooCFW/wiki/Miyoo-Mini#firmware-update-guide 
 <br>**DO NOT USE ONION WITHOUT FIRST PERFORMING THIS UPGRADE**
 
-Supported systems:<br>
-Arcade (FBA2012 by default)<br>
-Atari 2600<br>
-Atari 7800<br>
-Atari Lynx<br>
-Bandai Wonderswan/Color<br>
-Fairchild Channel F<br>
-Famicom Disk System<br>
-GCE Vectrex<br>
-MSX/MSX2<br>
-NEC PC Engine<br>
-NEC PC Engine CD<br>
-NEC SuperGrafx<br>
-Nintendo Entertainment System<br>
-Nintendo Game & Watch<br>
-Nintendo Game Boy<br>
-Nintendo Game Boy Color<br>
-Nintendo Game Boy Advance<br>
-Nintendo Pokemon Mini<br>
-Nintendo Super NES<br>
-PICO-8<br>
-Sega 32X<br>
-Sega CD<br>
-Sega GameGear<br>
-Sega Genesis<br>
-Sega Master System Mk. III<br>
-Sega SG-1000<br>
-SNK NEOGEO<br>
-SNK NEOGEO CD<br>
-SNK NEOGEO Pocket/Color<br>
-Sony Playstation<br>
+Supported systems - - - supported filetype:<br>
+Arcade (FBA2012 by default) - - - .zip<br>
+Atari 2600 - - - .a26 - .zip<br>
+Atari 7800 - - - .a78 - .zip<br>
+Atari Lynx - - - .lnx - .zip<br>
+Bandai Wonderswan/Color - - - .ws - .wsc - .zip<br>
+Fairchild Channel F - - - .bin - .zip<br>
+Famicom Disk System - - - .fds - zip<br>
+GCE Vectrex - - - .vec - .zip<br>
+MSX/MSX2 - - - .mx2 - .zip<br>
+NEC PC Engine - - - .pce - .zip<br>
+NEC PC Engine CD - - - .bin/cue - .chd - .zip<br>
+NEC SuperGrafx - - - .pce - .zip<br>
+Nintendo Entertainment System - - - .nes - .zip<br>
+Nintendo Game & Watch - - - .mgw - .zip<br>
+Nintendo Game Boy - - - .gb - .zip<br>
+Nintendo Game Boy Color - - - .gbc - .zip<br>
+Nintendo Game Boy Advance - - - .gba - .zip<br>
+Nintendo Pokemon Mini - - - .min - .zip<br>
+Nintendo Super NES - - - .sfc - .smc - .zip<br>
+Nintendo Virtual Boy - - - .vb - .zip<br>
+PICO-8 - - - .p8<br>
+Sega 32X - - - .32x - .zip<br>
+Sega CD - - - .bin/.cue - .chd<br>
+Sega GameGear - - - .gg - .zip<br>
+Sega Genesis - - - .bin - .gen - .md - .zip<br>
+Sega Master System MKIII - - - .sms - .zip<br>
+Sega SG-1000 - - - .sg<br>
+SNK NEOGEO - - - .zip<br>
+SNK NEOGEO CD - - - .chd<br>
+SNK NEOGEO Pocket/Color - - - .ngp - .ngpc - .zip<br>
+Sony Playstation - - - .chd - .pbp<br>
+Watara Supervision - - - .bin - .zip<br>
 & an entire section of experimental cores for the tinkerers out there!<br>
 
 Required BIOS files:
