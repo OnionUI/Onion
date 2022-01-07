@@ -6,16 +6,16 @@ Pre-configured, debloated, fully skinnable.
 Disclaimer: Proceed with caution and use at your own risk. (It all boots off SD so there really should be zero risk)
 
 Credit (I am a glorified Project Manager, these folks are the reason this exists): 
-Shaun Inman - Inspiration, Onion Logo, Onionizer theme engine, logo, Commander port
-StubbornPixel for the Lightbox photos
-PixelShift#2272 for the Galaxy theme, Black and invaluable input
-Totofaki - Hotkey Mapping and Retroarch assistance
-e1000 - Newly compiled cores for most systems
-Boiler - Port of Powder (Licensed under a deprecated CC license (https://creativecommons.org/licenses/sampling+/1.0/))
-Team Ruka - Various July 2021 cores compiled for RK3128
-The whole Simple30 team for their PSX core
-Home screen icons: Detailed Outline Icons by khld939 on Flaticon (https://www.flaticon.com/premium-icon/credit-card_2470194?related_id=2470194&origin=pack)
-All my amazing testers!
+<br>Shaun Inman - Inspiration, Onion Logo, Onionizer theme engine, logo, Commander port: http://shauninman.com/
+<br>StubbornPixel - Lightbox photos and shoutouts: https://brbgaming.simplecast.com/
+<br>PixelShift#2272 on Discord - Galaxy theme, Black and invaluable input
+<br>Totofaki - Hotkey Mapping and Retroarch assistance
+<br>e1000 - Newly compiled cores for most systems
+<br>Boiler - Port of Powder (Licensed under a deprecated CC license (https://creativecommons.org/licenses/sampling+/1.0/))
+<br>Team Ruka - Various July 2021 cores compiled for RK3128 - https://github.com/Ruka-CFW/rk3128-cfw
+<br>Simple30 team for their PSX core: https://retrogamecorps.com/2021/02/13/introducing-simple30-an-optimized-pocketgo-s30-firmware/#BIOS
+<br>Home screen icons: Detailed Outline Icons by khld939 on Flaticon (https://www.flaticon.com/premium-icon/credit-card_2470194?related_id=2470194&origin=pack)
+<br>All our amazing testers!
 
 Install Instructions:
 1. IMPORTANT: Update your Miyoo Mini to the 12262021 Update or newer.
@@ -25,17 +25,17 @@ Install Instructions:
 5. Drag and drop your legally acquired Retroarch BIOS set to "/BIOS" (Currently provided for testing purposes)
 
 Button Shortcuts:
-Hotkey Enable - Menu Button
-Hotkey + L - Load State
-Hotkey + R - Save State
-Hotkey + L2 - Rewind
-Hotkey + R2 - Fast Forward
-Hotkey + Select - Toggle Menu
-Hotkey + Start - Quit
-Select + start - Toggle Menu
+<br>Hotkey Enable - Menu Button
+<br>Hotkey + L - Load State
+<br>Hotkey + R - Save State
+<br>Hotkey + L2 - Rewind
+<br>Hotkey + R2 - Fast Forward
+<br>Hotkey + Select - Toggle Menu
+<br>Hotkey + Start - Quit
+<br>Select + start - Toggle Menu
 
 Note: Please upgrade to the newest official firmware using the instructions here: https://github.com/TriForceX/MiyooCFW/wiki/Miyoo-Mini#firmware-update-guide 
-**DO NOT USE ONION WITHOUT FIRST PERFORMING THIS UPGRADE**
+<br>**DO NOT USE ONION WITHOUT FIRST PERFORMING THIS UPGRADE**
 
 Supported systems:<br>
 Arcade (FBA2012 by default)<br>
@@ -78,17 +78,3 @@ Installation:
 5. OPTIONAL: Open Apps > Onionizer on your Miyoo Mini. The device will shutdown after about 10 seconds.
 6. OPTIONAL: Reinsert your SD card into your computer and navigate to the new /App/Onionizer/output folder.
 7. OPTIONAL: Inside that folder are two hidden folders: .onion and .tmp_update. Copy **only the .tmp_update folder** to the root of your SD card. If you copy the .onion folder, you will reset the theme. See below for how to update your theme.
-
-Onionizer Theme Engine by Shaun Inman:
-The Onionizer will create a skin-able copy of the stock launcher 
-that lives on your SD card instead of NAND (which is write-only
-and cannot be modified).
-
-1. Copy the Onionizer folder into the /App folder on your SD card.
-2. Open Apps > Onionizer on your Miyoo Mini. The device will shutdown after about 10 seconds.
-3. Reinsert your SD card into your computer and navigate to the new /App/Onionizer/output folder.
-4. Inside that folder are two hidden folders: .onion and .tmp_update. Copy both to the root of your SD card.
-5. Customize the images in the .onion folder
-6. Next time you boot your Miyoo Mini it will launch the MainUI binary in .tmp_update that has been patched to load images from .onion.
-NOTE: To use a prebuilt theme, make sure you have run Onionizer at least once since your last firmware update, then simply download the
-theme and drag and drop the ".onion" folder to the root of your SD card.
