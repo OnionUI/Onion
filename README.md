@@ -61,7 +61,7 @@ Button Shortcuts:
 Note: Please upgrade to the newest official firmware using the instructions here: https://github.com/TriForceX/MiyooCFW/wiki/Miyoo-Mini#firmware-update-guide 
 <br>**DO NOT USE ONION WITHOUT FIRST PERFORMING THIS UPGRADE**
 
-Supported systems - - - supported filetype:<br>
+Supported systems - - - supported filetypes:<br>
 Arcade (FBA2012 by default) - - - .zip<br>
 Atari 2600 - - - .a26 - .zip<br>
 Atari 7800 - - - .a78 - .zip<br>
@@ -105,3 +105,7 @@ Required BIOS files:
 <br>NEOGEO - neogeo.zip
 <br>PLAYSTATION - scph1001.bin (any scphXXXX.bin file should work)
 <br>TURBOGRAFX-CD - syscard1.pce, syscard2.pce, syscard3.pce
+
+Tips & Tricks:
+- Prefer an experimental core to one in the GAME section? Simply move the .so file and the launch.sh file from the core's folder in /RApps for the appropriate folder in /Emus
+- Too many systems? To hide systems or cores simply delete their folder from the /Emus folder or the /RApps folder, respectively.
