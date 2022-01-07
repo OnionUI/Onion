@@ -13,6 +13,23 @@ Install Instructions:
 4. Drag and drop your legally supplied ROMs to "/Roms/*system name*
 5. Drag and drop your legally acquired Retroarch BIOS set to "/BIOS" (Currently provided for testing purposes)
 
+Coming soon:
+- More native ports
+- Detailed Wiki
+- Drag and drop mods and themes.
+- Cleaned up per-system configs to hide redundant files (disc-based systems, etc)
+- More systems and enhancements!
+
+Known Issues (Most are stock kernel related):
+- Some NES roms crash. Seems to only pertain to ones that are meant for virtual console on 3DS.
+- .bin/.cue not recognized by PSX core.
+- Occasionally after adding or removing ROMs, ROM titles will vanish until you select them. Delete the *.db file in that systems ROM folder. 
+- SNES core has some flickering on SuperFX chip games but runs faster than other cores. Will continue to try and find the best SNES core.
+- Large romsets (500ish) crash the menu back to the home screen. The current workaround is to press right on the D-Pad to enter coverart preview mode and scroll through the list there.
+- Favorites section missing. Only known workaround is to delete (or not copy over) .tmp_update folder. This *will* disable custom themes.
+- Some systems refuse to recognize boxart. No known workaround.
+- Due to a memory leak at the kernel level, sometimes after switching roms or systems multiple times (typically over a dozen), the UI glitches out and requires a reboot.
+
 Credit (I am a glorified Project Manager, these folks are the reason this exists): 
 <br>Shaun Inman - Inspiration, Onion Logo, Onionizer theme engine, logo, Commander port: http://shauninman.com/
 <br>StubbornPixel - Lightbox photos and shoutouts: https://brbgaming.simplecast.com/
