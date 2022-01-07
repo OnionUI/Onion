@@ -42,6 +42,7 @@ Credit (I am a glorified Project Manager, these folks are the reason this exists
 <br>PixelShift#2272 on Discord - Galaxy theme, Black and invaluable input
 <br>Totofaki - Hotkey Mapping and Retroarch assistance
 <br>e1000 - Newly compiled cores for most systems
+<br>Triforce Team - Translated instructions and english update (https://github.com/TriForceX/MiyooCFW/wiki/Miyoo-Mini#firmware-update-guide)
 <br>Boiler - Port of Powder (Licensed under a deprecated CC license (https://creativecommons.org/licenses/sampling+/1.0/))
 <br>Team Ruka - Various July 2021 cores compiled for RK3128 - https://github.com/Ruka-CFW/rk3128-cfw
 <br>Simple30 team for their PSX core: https://retrogamecorps.com/2021/02/13/introducing-simple30-an-optimized-pocketgo-s30-firmware/#BIOS
