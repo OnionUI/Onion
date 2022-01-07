@@ -58,7 +58,7 @@ Button Shortcuts:
 <br>Hotkey + Select - Toggle Menu
 <br>Hotkey + Start - Quit
 <br>Select + Start + L2 - Brightness Down
-<br>Select + Start + R2 - Brightness Up
+<br>Select + Start + R2 - Brightness Up (Only works on home screen)
 
 Note: Please upgrade to the newest official firmware using the instructions here: https://github.com/TriForceX/MiyooCFW/wiki/Miyoo-Mini#firmware-update-guide 
 <br>**DO NOT USE ONION WITHOUT FIRST PERFORMING THIS UPGRADE**
