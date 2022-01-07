@@ -1,36 +1,55 @@
-![onionlogo](https://user-images.githubusercontent.com/85693713/147612352-97b0cf56-bb0b-4078-992f-1c408a42d088.png)
+![githubcover](https://user-images.githubusercontent.com/85693713/148580152-0bc4aec1-310d-405c-8ab3-e7655991a7f3.png)
 
-CFW for Miyoo Mini, based off the stock OS.
-Pre-configured, debloated, skinnable.
+Custom Drag and Drop Solution for Miyoo Mini, based off the stock OS.
+Pre-configured, debloated, fully skinnable.
 
-**HUGE Thank you and full credit to Shaun Inman for the Commander port, Onionizer theme engine and Onion logo**
+Disclaimer: Proceed with caution and use at your own risk. (It all boots off SD so there really should be zero risk)
 
-Note: Please upgrade to the newest official firmware using the instructions here: (link). 
+Credit (I am a glorified Project Manager, these folks are the reason this exists): 
+Shaun Inman - Inspiration, Onion Logo, Onionizer theme engine, logo, Commander port
+StubbornPixel for the Lightbox photos
+PixelShift#2272 for the Galaxy theme, Black and invaluable input
+Totofaki - Hotkey Mapping and Retroarch assistance
+e1000 - Newly compiled cores for most systems
+Boiler - Port of Powder (Licensed under a deprecated CC license (https://creativecommons.org/licenses/sampling+/1.0/))
+Team Ruka - Various July 2021 cores compiled for RK3128
+The whole Simple30 team for their PSX core
+Home screen icons: Detailed Outline Icons by khld939 on Flaticon (https://www.flaticon.com/premium-icon/credit-card_2470194?related_id=2470194&origin=pack)
+All my amazing testers!
 
-**DO NOT ATTEMPT TO INSTALL THIS FIRMWARE WITHOUT FIRST PERFORMING THIS UPGRADE**
+Install Instructions:
+1. IMPORTANT: Update your Miyoo Mini to the 12262021 Update or newer.
+2. Format your microSD to FAT32.
+3. Unzip the contents of Onion to the root of your SD Card.
+4. Drag and drop your legally supplied ROMs to "/Roms/*system name*
+5. Drag and drop your legally acquired Retroarch BIOS set to "/BIOS" (Currently provided for testing purposes)
 
-**Disclaimer: This is an untested WIP. I am not liable for bricks, borks, bugs or barf. Proceed with caution and use at your own risk.
-**
+Button Shortcuts:
+Hotkey Enable - Menu Button
+Hotkey + L - Load State
+Hotkey + R - Save State
+Hotkey + L2 - Rewind
+Hotkey + R2 - Fast Forward
+Hotkey + Select - Toggle Menu
+Hotkey + Start - Quit
+Select + start - Toggle Menu
+
+Note: Please upgrade to the newest official firmware using the instructions here: https://github.com/TriForceX/MiyooCFW/wiki/Miyoo-Mini#firmware-update-guide 
+**DO NOT USE ONION WITHOUT FIRST PERFORMING THIS UPGRADE**
 
 Supported systems:<br>
-Amstrad CPC<br>
 Arcade (FBA2012 by default)<br>
 Atari 2600<br>
-Atari 5200<br>
 Atari 7800<br>
-Atari 800<br>
 Atari Lynx<br>
 Bandai Wonderswan/Color<br>
-Commodore 64<br>
-Elektronika BK<br>
 Fairchild Channel F<br>
 Famicom Disk System<br>
 GCE Vectrex<br>
-Magnavox Odyssey/Odyssey2<br>
-MS-DOS<br>
 MSX/MSX2<br>
 NEC PC Engine<br>
 NEC PC Engine CD<br>
+NEC SuperGrafx<br>
 Nintendo Entertainment System<br>
 Nintendo Game & Watch<br>
 Nintendo Game Boy<br>
@@ -38,6 +57,7 @@ Nintendo Game Boy Color<br>
 Nintendo Game Boy Advance<br>
 Nintendo Pokemon Mini<br>
 Nintendo Super NES<br>
+PICO-8<br>
 Sega 32X<br>
 Sega CD<br>
 Sega GameGear<br>
@@ -45,9 +65,9 @@ Sega Genesis<br>
 Sega Master System Mk. III<br>
 Sega SG-1000<br>
 SNK NEOGEO<br>
+SNK NEOGEO CD
 SNK NEOGEO Pocket/Color<br>
 Sony Playstation<br>
-ZX Spectrum<br>
 & an entire section of experimental cores for the tinkerers out there!<br>
 
 Installation:
