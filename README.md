@@ -88,11 +88,12 @@ SNK NEOGEO Pocket/Color<br>
 Sony Playstation<br>
 & an entire section of experimental cores for the tinkerers out there!<br>
 
-Installation:
-1. Format your microSD to FAT32.
-2. Unzip the contents of Onion to the root of your SD Card. 
-3. Drag and drop your legally supplied ROMs to the appropriate folders (see Wiki for details)
-4. Drag and drop your legally acquired Retroarch BIOS set to "/RetroArch/system"
-5. OPTIONAL: Open Apps > Onionizer on your Miyoo Mini. The device will shutdown after about 10 seconds.
-6. OPTIONAL: Reinsert your SD card into your computer and navigate to the new /App/Onionizer/output folder.
-7. OPTIONAL: Inside that folder are two hidden folders: .onion and .tmp_update. Copy **only the .tmp_update folder** to the root of your SD card. If you copy the .onion folder, you will reset the theme. See below for how to update your theme.
+Required BIOS files:
+<br>SEGA CD - bios_CD_E.bin, bios_CD_J.bin, bios_CD_U.bin
+<br>FAMICOM DISK SYSTEM - disksys.rom
+<br>GAME BOY (Optional - for boot logo) - gb_bios.bin
+<br>GAME BOY COLOR (Optional - for boot logo) - gbc_bios.bin
+<br>GAME BOY ADVANCE (Optional) - gba_bios.bin
+<br>NEOGEO - neogeo.zip
+<br>PLAYSTATION - scph1001.bin (any scphXXXX.bin file should work)
+<br>TURBOGRAFX-CD - syscard1.pce, syscard2.pce, syscard3.pce
