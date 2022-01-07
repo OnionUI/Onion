@@ -1,7 +1,8 @@
 ![githubcover](https://user-images.githubusercontent.com/85693713/148580152-0bc4aec1-310d-405c-8ab3-e7655991a7f3.png)
 
 **Custom Drag and Drop Solution for Miyoo Mini, based off the stock OS.
-**Pre-configured, debloated, fully skinnable.
+**
+<br>Pre-configured, debloated, fully skinnable.
 
 **Disclaimer**: Proceed with caution and use at your own risk. (It all boots off SD so there really should be zero risk)
 
