@@ -104,7 +104,7 @@ Required BIOS files:
 <br>GAME BOY COLOR (Optional - for boot logo) - gbc_bios.bin
 <br>GAME BOY ADVANCE (Optional) - gba_bios.bin
 <br>NEOGEO - neogeo.zip
-<br>PLAYSTATION - scph1001.bin (any scphXXXX.bin file should work)
+<br>PLAYSTATION - scph1001.bin (optional but recommended - any scphXXXX.bin file should work)
 <br>TURBOGRAFX-CD - syscard1.pce, syscard2.pce, syscard3.pce
 
 Tips & Tricks:
