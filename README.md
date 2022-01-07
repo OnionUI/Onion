@@ -11,7 +11,8 @@ Install Instructions:
 2. Format your microSD to FAT32.
 3. Unzip the contents of Onion to the root of your SD Card.
 4. Drag and drop your legally supplied ROMs to "/Roms/*system name*
-5. Drag and drop your legally acquired Retroarch BIOS set to "/BIOS" (Currently provided for testing purposes)
+5. Drag and drop your legally acquired Retroarch BIOS set to "/BIOS"
+<br>Note for the visually impaired, after installing and before ejecting your SD card from your PC, navigate to /Themes/Business/ and copy and paste the contents to the root of your SD card. 
 
 Theme Instructions:
 - OnionOS comes with PixelShift's "Galaxy" theme preinstalled and ShaunInman's Onionizer theme engine pre-configured (1226 update or newer)
