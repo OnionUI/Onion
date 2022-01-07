@@ -7,11 +7,16 @@
 **Disclaimer**: Proceed with caution and use at your own risk. (It all boots off SD so there really should be zero risk)
 
 Install Instructions:
-1. IMPORTANT: Update your Miyoo Mini to the 12262021 Update or newer.
+1. IMPORTANT: Update your Miyoo Mini to the 20211226 Update or newer.
 2. Format your microSD to FAT32.
 3. Unzip the contents of Onion to the root of your SD Card.
 4. Drag and drop your legally supplied ROMs to "/Roms/*system name*
 5. Drag and drop your legally acquired Retroarch BIOS set to "/BIOS" (Currently provided for testing purposes)
+
+Theme Instructions:
+- OnionOS comes with PixelShift's "Galaxy" theme preinstalled and ShaunInman's Onionizer theme engine pre-configured (1226 update or newer)
+- To swap a theme (using Dingux Commander or your PC) simply copy and paste the contents of your chosen theme's folder to the root of your SD card, overwriting any existing theme's files.
+- Reboot and enjoy!
 
 Coming soon:
 - More native ports
