@@ -1,9 +1,16 @@
 ![githubcover](https://user-images.githubusercontent.com/85693713/148580152-0bc4aec1-310d-405c-8ab3-e7655991a7f3.png)
 
-Custom Drag and Drop Solution for Miyoo Mini, based off the stock OS.
-Pre-configured, debloated, fully skinnable.
+**Custom Drag and Drop Solution for Miyoo Mini, based off the stock OS.
+**Pre-configured, debloated, fully skinnable.
 
-Disclaimer: Proceed with caution and use at your own risk. (It all boots off SD so there really should be zero risk)
+**Disclaimer**: Proceed with caution and use at your own risk. (It all boots off SD so there really should be zero risk)
+
+Install Instructions:
+1. IMPORTANT: Update your Miyoo Mini to the 12262021 Update or newer.
+2. Format your microSD to FAT32.
+3. Unzip the contents of Onion to the root of your SD Card.
+4. Drag and drop your legally supplied ROMs to "/Roms/*system name*
+5. Drag and drop your legally acquired Retroarch BIOS set to "/BIOS" (Currently provided for testing purposes)
 
 Credit (I am a glorified Project Manager, these folks are the reason this exists): 
 <br>Shaun Inman - Inspiration, Onion Logo, Onionizer theme engine, logo, Commander port: http://shauninman.com/
@@ -16,13 +23,6 @@ Credit (I am a glorified Project Manager, these folks are the reason this exists
 <br>Simple30 team for their PSX core: https://retrogamecorps.com/2021/02/13/introducing-simple30-an-optimized-pocketgo-s30-firmware/#BIOS
 <br>Home screen icons: Detailed Outline Icons by khld939 on Flaticon (https://www.flaticon.com/premium-icon/credit-card_2470194?related_id=2470194&origin=pack)
 <br>All our amazing testers!
-
-Install Instructions:
-1. IMPORTANT: Update your Miyoo Mini to the 12262021 Update or newer.
-2. Format your microSD to FAT32.
-3. Unzip the contents of Onion to the root of your SD Card.
-4. Drag and drop your legally supplied ROMs to "/Roms/*system name*
-5. Drag and drop your legally acquired Retroarch BIOS set to "/BIOS" (Currently provided for testing purposes)
 
 Button Shortcuts:
 <br>Hotkey Enable - Menu Button
@@ -65,7 +65,7 @@ Sega Genesis<br>
 Sega Master System Mk. III<br>
 Sega SG-1000<br>
 SNK NEOGEO<br>
-SNK NEOGEO CD
+SNK NEOGEO CD<br>
 SNK NEOGEO Pocket/Color<br>
 Sony Playstation<br>
 & an entire section of experimental cores for the tinkerers out there!<br>
