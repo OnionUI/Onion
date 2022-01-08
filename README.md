@@ -4,7 +4,10 @@
 **
 <br>Pre-configured, debloated, fully skinnable.
 
-**Disclaimer**: Proceed with caution and use at your own risk. (It all boots off SD so there really should be zero risk)
+**Disclaimers - If you read nothing else on this page, read this part**: 
+<br>Proceed with caution and use at your own risk. (It all boots off SD so there really should be zero risk)
+<br>Do not report bugs for the cores in the retroarch section, those are provided for experimental purposes and are mostly untested.
+<br>
 
 Please submit feedback/bugs/requests to onionsarentgross@gmail.com
 
@@ -49,7 +52,7 @@ Credit (I am a glorified Project Manager, these folks are the reason this exists
 <br>Team Ruka - Various July 2021 cores compiled for RK3128 - https://github.com/Ruka-CFW/rk3128-cfw
 <br>Simple30 team for their PSX core: https://retrogamecorps.com/2021/02/13/introducing-simple30-an-optimized-pocketgo-s30-firmware/#BIOS
 <br>Home screen icons: Detailed Outline Icons by khld939 on Flaticon (https://www.flaticon.com/premium-icon/credit-card_2470194?related_id=2470194&origin=pack)
-<br>All our amazing testers!
+<br>All our amazing testers, especially HYJINX187, Totofaki, Jutleys, jmaroeder, JDewitz, Tshroom, Sezuko, therecanonlybeoneandrew and NexLevel!
 
 Button Shortcuts:
 <br>Hotkey Enable - Menu Button
