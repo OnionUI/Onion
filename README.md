@@ -6,10 +6,10 @@
 
 **Disclaimers - If you read nothing else on this page, read this part**: 
 <br>Proceed with caution and use at your own risk. (It all boots off SD so there really should be zero risk)
-<br>Do not report bugs for the cores in the retroarch section, those are provided for experimental purposes and are mostly untested.
+<br>Do not report bugs for the cores in the retroarch section, those are provided for experimental purposes and are mostly untested. Report fixes and enhancements only.
 <br>
 
-Please submit feedback/bugs/requests to onionsarentgross@gmail.com
+Please submit feedback/bugs/core requests to onionsarentgross@gmail.com
 
 Install Instructions:
 1. IMPORTANT: Update your Miyoo Mini to the 20211226 Update or newer (Instructions: https://github.com/TriForceX/MiyooCFW/wiki/Miyoo-Mini#firmware-update-guide)
