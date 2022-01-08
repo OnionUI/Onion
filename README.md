@@ -6,8 +6,8 @@
 
 **Disclaimers - If you read nothing else on this page, read this part**: 
 <br>Proceed with caution and use at your own risk. (It all boots off SD so there really should be zero risk)
+<br>Please submit feedback/bugs/core requests to onionsarentgross@gmail.com
 <br>Do not report bugs for the cores in the retroarch section, those are provided for experimental purposes and are mostly untested. Report fixes and enhancements only.
-<br>
 
 Please submit feedback/bugs/core requests to onionsarentgross@gmail.com
 
