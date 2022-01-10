@@ -4,12 +4,16 @@
 **
 <br>Pre-configured, debloated, fully skinnable.
 
-**Disclaimer**: Proceed with caution and use at your own risk. (It all boots off SD so there really should be zero risk)
+**Disclaimers - If you read nothing else on this page, read this part**: 
+<br>Proceed with caution and use at your own risk. (It all boots off SD so there really should be zero risk)
+<br>Please submit feedback/bugs/core requests to onionsarentgross@gmail.com
+<br>Do not report bugs for the cores in the retroarch section, those are provided for experimental purposes and are mostly untested. Report fixes and enhancements only.
 
-Please submit feedback/bugs/requests to onionsarentgross@gmail.com
+Please submit feedback/bugs/core requests to onionsarentgross@gmail.com
 
 Install Instructions:
-1. IMPORTANT: Update your Miyoo Mini to the 20211226 Update or newer (Instructions: https://github.com/TriForceX/MiyooCFW/wiki/Miyoo-Mini#firmware-update-guide)
+1. IMPORTANT: You must be on the 20211226 firmware. (Flashing instructions: https://github.com/TriForceX/MiyooCFW/wiki/Miyoo-Mini#firmware-update-guide)
+  - 20220108 update support is coming soon!
 2. Format your microSD to FAT32.
 3. Unzip the contents of Onion to the root of your SD Card.
 4. Drag and drop your legally supplied ROMs to "/Roms/*system name*
@@ -49,7 +53,7 @@ Credit (I am a glorified Project Manager, these folks are the reason this exists
 <br>Team Ruka - Various July 2021 cores compiled for RK3128 - https://github.com/Ruka-CFW/rk3128-cfw
 <br>Simple30 team for their PSX core: https://retrogamecorps.com/2021/02/13/introducing-simple30-an-optimized-pocketgo-s30-firmware/#BIOS
 <br>Home screen icons: Detailed Outline Icons by khld939 on Flaticon (https://www.flaticon.com/premium-icon/credit-card_2470194?related_id=2470194&origin=pack)
-<br>All our amazing testers!
+<br>All our amazing testers, especially HYJINX187, Totofaki, Jutleys, jmaroeder, JDewitz, Tshroom, Sezuko, therecanonlybeoneandrew and NexLevel!
 
 Button Shortcuts:
 <br>Hotkey Enable - Menu Button
