@@ -1,0 +1,12 @@
+{
+"label":"dinothawr",
+"icon":"dinothawr.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/DINOTHAWR",
+"imgpath":"../../Imgs/",
+"useswap":0,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

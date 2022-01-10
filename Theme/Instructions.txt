@@ -1,2 +1,2 @@
-- Using Dingux Commander or your PC simply copy and paste the folders inside your theme of choice to the root of your SD card, overwriting any existing theme.
+- Using Dingux Commander or your PC simply copy and paste the miyoo folder inside your theme of choice to the root of your SD card, overwriting any existing theme.
 - Reboot and enjoy!

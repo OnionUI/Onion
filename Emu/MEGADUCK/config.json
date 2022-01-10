@@ -1,0 +1,12 @@
+{
+"label":"1993: DUCK",
+"icon":"megaduck.png",
+"iconsel":"megaduck_sel.png",
+"launch":"launch.sh",
+"rompath":"../../Roms/MEGADUCK",
+"imgpath":"../../Imgs/MEGADUCK",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

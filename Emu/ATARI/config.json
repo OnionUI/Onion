@@ -5,7 +5,7 @@
 "launch":"launch.sh",
 "rompath":"../../Roms/ATARI",
 "imgpath":"../../Imgs/ATARI",
-"useswap":0,
+"useswap":1,
 "shortname":0,
 "hidebios":1,
 "extlist":""

@@ -1,6 +1,6 @@
 {
 "label":"nestopia",
-"icon":"nestopia.png",
+"icon":"nestopia_libretro.png",
 "iconsel":"",
 "launch":"launch.sh",
 "rompath":"../../Roms/FC",
