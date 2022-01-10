@@ -12,7 +12,8 @@
 Please submit feedback/bugs/core requests to onionsarentgross@gmail.com
 
 Install Instructions:
-1. IMPORTANT: Update your Miyoo Mini to the 20211226 Update or newer (Instructions: https://github.com/TriForceX/MiyooCFW/wiki/Miyoo-Mini#firmware-update-guide)
+1. IMPORTANT: You must be on the 20211226 firmware. (Flashing instructions: https://github.com/TriForceX/MiyooCFW/wiki/Miyoo-Mini#firmware-update-guide)
+  - 20220108 update support is coming soon!
 2. Format your microSD to FAT32.
 3. Unzip the contents of Onion to the root of your SD Card.
 4. Drag and drop your legally supplied ROMs to "/Roms/*system name*
