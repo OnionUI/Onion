@@ -12,17 +12,16 @@
 Please submit feedback/bugs/core requests to onionsarentgross@gmail.com
 
 Install Instructions:
-1. IMPORTANT: You must be on the 20211226 firmware. (Flashing instructions: https://github.com/TriForceX/MiyooCFW/wiki/Miyoo-Mini#firmware-update-guide)
-  - 20220108 update support is coming soon!
-2. Format your microSD to FAT32.
-3. Unzip the contents of Onion to the root of your SD Card.
+1. IMPORTANT: You must be on the 20220108 firmware. (Flashing instructions: https://github.com/jimgraygit/OnionOS/wiki/Official-Miyoo-Firmware)
+2. Format your microSD to FAT32 (if upgrading from a previous Onion build, delete all folders except BIOS, Roms and Retroarch).
+3. Unzip the contents of Onion to the root of your SD Card (if upgrading, overwrite all existing files).
 4. Drag and drop your legally supplied ROMs to "/Roms/*system name*
 5. Drag and drop your legally acquired Retroarch BIOS set to "/BIOS"
 <br>Note for the visually impaired, after installing and before ejecting your SD card from your PC, navigate to /Themes/Business/ and copy and paste the contents to the root of your SD card. 
 
 Theme Instructions:
-- OnionOS comes with PixelShift's "Galaxy" theme preinstalled and ShaunInman's Onionizer theme engine pre-configured (1226 update or newer)
-- To swap a theme (using Dingux Commander or your PC) simply copy and paste the contents of your chosen theme's folder to the root of your SD card, overwriting any existing theme's files.
+- OnionOS comes with PixelShift's "Galaxy" theme preinstalled
+- To swap a theme (using Dingux Commander or your PC) simply copy and paste the miyoo directory of your chosen theme's folder to the root of your SD card, overwriting any existing theme's files.
 - Reboot and enjoy!
 
 Coming soon:
