@@ -1,7 +1,7 @@
 ![githubcover](https://user-images.githubusercontent.com/85693713/148580152-0bc4aec1-310d-405c-8ab3-e7655991a7f3.png)
 
-#Custom Overhaul Solution for Miyoo Mini. Made by the community FOR the community.
-##Pre-configured, streamlined, fully skinnable and stuffed to the gills with retro systems.
+**Custom Overhaul Solution for Miyoo Mini. Made by the community FOR the community.
+Pre-configured, streamlined, fully skinnable and stuffed to the gills with retro systems.**
 
 ###Disclaimers - If you read nothing else on this page, read this part: 
 <br>Proceed with caution and use at your own risk. (It all boots off SD so there really should be zero risk)
