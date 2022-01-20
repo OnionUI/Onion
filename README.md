@@ -32,5 +32,7 @@ Credit (I am a glorified Project Manager, these folks are the reason this exists
 <br>Team Ruka - Various July 2021 cores compiled for RK3128 - https://github.com/Ruka-CFW/rk3128-cfw
 <br>Simple30 team for their PSX core: https://retrogamecorps.com/2021/02/13/introducing-simple30-an-optimized-pocketgo-s30-firmware/#BIOS
 <br>Home screen icons: Detailed Outline Icons by khld939 on Flaticon (https://www.flaticon.com/premium-icon/credit-card_2470194?related_id=2470194&origin=pack)
-<br>Totofaki - The_Onion_Installer, theme installers, immensely helpful input
+<br>Totofaki - The_Onion_Installer, theme installers, immensely helpful input, Auto Shutdown app, DB Nuker
+<br>Lucario - Expert mode icons
+<br>Gaspacho - High Noon RTC App
 <br>All our amazing testers: HYJINX187, Jutleys, jmaroeder, JDewitz, Tshroom, Sezuko, therecanonlybeoneandrew, NexLevel and so many more I am probably forgetting!
