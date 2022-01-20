@@ -1,0 +1,12 @@
+{
+"label":"gen_plus_gx-ms",
+"icon":"genesis_plus_gx.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/MS",
+"imgpath":"../../Imgs/MS",
+"useswap":0,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

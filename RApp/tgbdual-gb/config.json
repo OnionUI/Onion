@@ -1,0 +1,12 @@
+{
+"label":"tgbdual-gb",
+"icon":"tgbdual.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/GB",
+"imgpath":"../../Imgs/GB",
+"useswap":0,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

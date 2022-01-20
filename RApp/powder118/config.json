@@ -1,0 +1,16 @@
+{
+"label":"Powder 118",
+"icon":"powder.png",
+"iconsel":"powder_sel.png",
+"launch":"powder",
+"rompath":"./Launch",
+"imgpath":"./Launch",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}
+
+#(Licensed under a deprecated CC license (https://creativecommons.org/licenses/sampling+/1.0/ sourced from http://www.zincland.com/powder/index.php?pagename=release) which allows distribution for non-commercial purposes with proper attribution (original author's name is displayed in the app). 
+#"Roguelike game by Jeff Lait"
+#ported by boiler

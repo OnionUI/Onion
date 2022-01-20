@@ -1,0 +1,21 @@
+{
+	"88":	"Abre",
+	"89":	"Regreso",
+	"90":	"NAV",
+	"91":	"Menú",
+	"92":	"Continuar",
+	"93":	"Guardar",
+	"94":	"Cargar",
+	"95":	"Volumen",
+	"96":	"Salir del juego",
+	"97":	"Ranura de guardar %d/%d",
+	"98":	"Vacío",
+	"99":	"No hay imágenes",
+	"100":	"load fail",
+	"101":	"save fail",
+	"102":	"slot%d saved",
+	"103":	"Pantalla completa",
+	"104":	"Abre",
+	"105":	"Cierre",
+	"106":  "Menú antiguo"
+}

@@ -1,0 +1,12 @@
+{
+"label":"vice_x64",
+"icon":"vice_x64.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/COMMODORE",
+"imgpath":"../../Imgs/COMMODORE",
+"useswap":0,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

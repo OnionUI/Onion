@@ -1,0 +1,5 @@
+scummvm_analog_deadzone = "15"
+scummvm_analog_response = "linear"
+scummvm_gamepad_cursor_speed = "1.0"
+scummvm_mouse_speed = "3.0"
+scummvm_speed_hack = "enabled"

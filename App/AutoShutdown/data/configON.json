@@ -1,0 +1,7 @@
+{
+"label":"Auto shutdown - Enabled",
+"icon":"autoshutON.png",
+"iconsel":"autoshutON.png",
+"launch":"launch.sh",
+"description":"Turn off your handheld automatically"
+}

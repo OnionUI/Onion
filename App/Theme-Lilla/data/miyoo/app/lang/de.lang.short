@@ -1,0 +1,21 @@
+{
+	"88":	"ÖFFNEN",
+	"89":	"ZURÜCK",
+	"90":	"NAVIGATION",
+	"91":	"MENÜ",
+	"92":	"Fortsetzen",
+	"93":	"Speichern",
+	"94":	"Laden",
+	"95":	"Lautstärke",
+	"96":	"Spiel verlassen",
+	"97":	"Spielstand %d/%d",
+	"98":	"Leer",
+	"99":	"Keine Vorschau",
+	"100":	"Laden fehlgeschlagen",
+	"101":	"Speichern fehlgeschlagen",
+	"102":	"Spielstand%d gespeichert",
+	"103":  "Vollbild",
+	"104":  "An",
+	"105":  "Aus",
+	"106":  "Natives Menü"	
+}

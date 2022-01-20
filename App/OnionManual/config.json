@@ -1,0 +1,7 @@
+{
+"label":"Onion manual",
+"icon":"icon.png",
+"iconsel":"icon.png",
+"launch":"launch.sh",
+"description":"Find help on how to use it"
+}

@@ -1,0 +1,5 @@
+void main() {
+	changemodelproperty("Chris",4,1);
+	changemodelproperty("Jack",4,1);
+	changemodelproperty("Jasmin",4,1);
+}

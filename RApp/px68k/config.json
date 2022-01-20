@@ -1,0 +1,12 @@
+{
+"label":"px68k",
+"icon":"px68k.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/SHARP",
+"imgpath":"../../Imgs/SHARP",
+"useswap":0,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

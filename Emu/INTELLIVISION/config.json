@@ -1,0 +1,12 @@
+{
+"label":"1979: ITV",
+"icon":"itv.png",
+"iconsel":"itv_sel.png",
+"launch":"launch.sh",
+"rompath":"../../Roms/INTELLIVISION",
+"imgpath":"../../Imgs/INTELLIVISION",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

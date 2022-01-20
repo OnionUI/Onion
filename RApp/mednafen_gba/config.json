@@ -1,0 +1,12 @@
+{
+"label":"mednafen_gba",
+"icon":"mednafen_gba.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../ROMS/GBA",
+"imgpath":"../../Imgs/GBA",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

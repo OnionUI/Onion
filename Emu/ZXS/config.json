@@ -1,0 +1,12 @@
+{
+"label":"1982: ZXS",
+"icon":"zxs.png",
+"iconsel":"zxs_sel.png",
+"launch":"launch.sh",
+"rompath":"../../Roms/ZXS",
+"imgpath":"../../Imgs/ZXS",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

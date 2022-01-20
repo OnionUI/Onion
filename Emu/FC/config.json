@@ -5,7 +5,7 @@
 "launch":"launch.sh",
 "rompath":"../../Roms/FC",
 "imgpath":"../../Imgs/FC",
-"useswap":0,
+"useswap":1,
 "shortname":0,
 "hidebios":0,
 "extlist":""
