@@ -1,7 +1,0 @@
-{
-"label":"Screenshot",
-"icon":"screenshot.png",
-"iconsel":"screenshot.png",
-"launch":"launch.sh",
-"description":"Screenshot tool (L2+R2)"
-}

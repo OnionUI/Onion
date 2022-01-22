@@ -1,6 +1,0 @@
-- Original image by fezz: https://commons.wikimedia.org/wiki/File:Gameboy_Pocket.jpg
-
-- Modified by jdgleaver
-
-- Licensed under the terms of the Creative Commons Attribution-Share Alike 3.0 Unported license:
-  https://creativecommons.org/licenses/by-sa/3.0/deed.en

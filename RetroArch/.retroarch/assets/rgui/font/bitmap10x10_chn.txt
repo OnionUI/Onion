@@ -1,8 +1,0 @@
-이 폰트는 PixelMPlus 입니다.
-입수 경로:http://itouhiro.hatenablog.com/entry/20130602/font
-생성일 : 2020.11.10
-These fonts are free software.
-Unlimited permission is granted to use, copy, and distribute them, with
-or without modification, either commercially or noncommercially.
-THESE FONTS ARE PROVIDED "AS IS" WITHOUT WARRANTY.
-http://mplus-fonts.sourceforge.jp/mplus-outline-fonts/

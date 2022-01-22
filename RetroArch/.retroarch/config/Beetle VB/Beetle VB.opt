@@ -1,5 +1,0 @@
-vb_3dmode = "anaglyph"
-vb_anaglyph_preset = "disabled"
-vb_color_mode = "black & red"
-vb_cpu_emulation = "fast"
-vb_right_analog_to_digital = "disabled"
