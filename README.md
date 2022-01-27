@@ -1,17 +1,23 @@
-SEE RELEASES FOR DOWNLOAD AND WIKI FOR INSTRUCTIONS AND INFORMATION
+![Photo by Stubbs](https://github.com/jimgraygit/Onion/blob/main/Lightbox%20Photos/stubbsmini2.jpg)
 
+# ONION - Unlock your Miyoo Mini in one click!
+
+# [Download newest release here!](https://github.com/jimgraygit/Onion/releases)
+
+### Features & Enhancements
 **********
-HOW TO USE 
-**********
-
-0) Make a backup of your Sd Card
-1) Copy the folder "The_Onion_Installer" in your App folder
-2) Make sure that the hibernation timer is disabled: Settings page - Hibernate - Never
-3) Launch the installer from the App section
-4) Wait for your unit to turn off
-
-Depending on your SD Card configuration, your unit will be unresponsive for a few minutes :
-- New installation : around 15 minutes
-- Onion update : 3-4 minutes
-
-Onion icon credit : BomSymbols
+- One-click installation
+- 48 pre-configured systems (*NEW* in this update: CPS1/2/3, Super Game Boy, Philips Videopac+, Sufami Turbo, Satellaview, TIC-80)
+- Easily toggle-able “Expert Mode” with another 68 apps.
+- RTC (Real-Time Clock) emulation
+- *NEW* LSDJ Chiptune Sequencer
+- One-click Theme installers (themes available in the wiki)
+- Upgraded DinguxCommander file explorer
+- *NEW* Cartridge: an app for your next longplay. Simply run the app and select a game. When you boot up next, it will go directly into the game. When you close the game, the device powers off. Get in the zone!
+- Updated cores sourced from all over the world wide web, chosen for performance and configured for you to play, not tinker endlessly with outdated cores or standalone emulators.
+- Massive improvements to audio latency.
+- *NEW* Enabled rumble motor
+- Auto-save/auto-load enabled for most systems.
+- Numerous hotkey bindings
+- Streamlined folder structure, UI and Retroarch menus.
+- Please refer to the wiki for instructions, credits, questions, and further information.
