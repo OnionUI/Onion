@@ -38,14 +38,21 @@ int main(void) {
 	SDL_Surface*	imageBatt;
 	SDL_Surface*	imageLum;
 	SDL_Surface*	imagePlay;
-	
+
 	SDL_Rect	rectBatt;
 	SDL_Rect	rectLum;
 	SDL_Rect	rectWhiteLigne;
 	SDL_Rect	rectMenuBar;
 	SDL_Rect	rectTime;
-	SDL_Rect	rectBatteryIcon;
+	SDL_Rect	rectBatteryIcon;	
+	SDL_Rect	rectTuto;
 
+	int bTuto = file_exists(".modeTuto");
+	
+	if ( file_exists(".modeTuto2") == 1) {
+		remove(".modeTuto2");
+		bTuto = 5;
+	}
 
 	// Check current brightness value
 	FILE *fp;
@@ -82,7 +89,6 @@ int main(void) {
 		fclose(fp);	
 	
 		sscanf(currBat, "%d", &nBat);
-
 		
 		if (nBat != 500){
 			// If the handheld is not charging
@@ -92,12 +98,8 @@ int main(void) {
 		else{
 		strcpy(currBat, "");
 		}
-		
-	
-		
 	}
 	
-	 
 	// Check current playtime
 	char *currPlay;
 	fp = fopen ( "/mnt/SDCARD/App/PlayActivity/currentTotalTime" , "rb" );
@@ -121,12 +123,12 @@ int main(void) {
 	   
 	SDL_Surface* video = SDL_SetVideoMode(640,480, 32, SDL_HWSURFACE);
 	SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640,480, 32, 0,0,0,0);
-	
-	
+		
 	font = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 30);
 	imageLum = TTF_RenderUTF8_Blended(font, currLum, color);
 	imageBatt = TTF_RenderUTF8_Blended(font, currBat, color);
 	imagePlay = TTF_RenderUTF8_Blended(font, currPlay, color);	
+	
 	free(currLum);
 	free(currBat);
 	free(currPlay);
@@ -157,7 +159,7 @@ int main(void) {
 							
 	SDL_Surface* imageBackground = IMG_Load("bootScr.png");
 	for (int i = 1; i < 150; ++i){
-		if ( file_exists(".menuStart")) {
+		if (file_exists(".menuStart")) {
 			remove(".menuStart");
 			imageBackground = IMG_Load("screenshotGame.bmp");
 	 		break;    
@@ -165,10 +167,10 @@ int main(void) {
 	usleep(100);
 	}
 	
-
 	SDL_Surface* imageMenuBar = IMG_Load("menuBar.png");
 	SDL_Surface* imagewhiteLigne = IMG_Load("whiteLigne.png");
-
+	
+	SDL_Surface* imageTuto;
 	
 	rectTime = { 244, 9, 150, 29};
 	rectMenuBar = {0,0,640,59};
@@ -176,27 +178,81 @@ int main(void) {
 	rectBatteryIcon = {541,16,13,27};
 	rectBatt = { 566, 9, 113, 29};
 	
-
-	Sint16 xBox = 0;
 	int bShowBoot = 0;
 
 	SDL_BlitSurface(imageBackground, NULL, screen, NULL);
 
+	int nTuto = 0;
+
 	for (int i = 1; i < 67; ++i){
 		
-		rectWhiteLigne = { xBox, 56, 640, 5};
-		xBox -= 10;
+		rectWhiteLigne = { -(i*10), 56, 640, 5};
+				
+		if ((i == 1) || (i == 33)){
+			if (bTuto > 0) {
+				char sImageTuto[20];
+				sprintf(sImageTuto,"./Tuto/tuto0%d.png",bTuto);
+				logMessage(sImageTuto);
+				imageTuto = IMG_Load(sImageTuto);
+				if(bTuto<4){
+					bTuto ++;	
+				}
+					
+			}
+		}
 		
+
+		if (bTuto > 0) {
+			SDL_BlitSurface(imageBackground, NULL, screen, NULL);
+		}	
+				
+
 		SDL_BlitSurface(imageMenuBar, NULL, screen, &rectMenuBar);
-		SDL_BlitSurface(imagewhiteLigne, NULL, screen, &rectWhiteLigne);
 		
+		if ((bTuto >= 0)&&(bTuto < 4)){
+			
+			SDL_BlitSurface(imagewhiteLigne, NULL, screen, &rectWhiteLigne);	
+		}
+			
 		SDL_BlitSurface(imageBatt, NULL, screen, &rectBatt);
 		SDL_BlitSurface(imageLum, NULL, screen, &rectLum);
 		SDL_BlitSurface(imagePlay, NULL, screen, &rectTime);
 		SDL_BlitSurface(imageBatteryIcon, NULL, screen, &rectBatteryIcon);
 		
+		if (bTuto > 0) {
+			SDL_BlitSurface(imageTuto, NULL, screen, NULL);
+		}	
+		
+		
+			
+		
 		if ( file_exists(".menuStart") || file_exists(".menuA") ) {
-			break;
+	
+			if ( bTuto > 0){
+				if (bTuto < 4){
+					remove (".menuStart");
+					remove (".menuA");
+				}
+				else{
+					if ((bTuto == 4)&&file_exists(".menuStart")){
+						remove(".menuA");
+						remove(".modeTuto");
+						int fd = creat(".modeTuto2", 777);
+						close(fd); 	
+						break ;
+					}
+					else if ((bTuto == 5)&&file_exists(".menuA")){
+						remove(".menuStart");
+						break ;
+					}
+					
+					
+	
+				}
+			}
+			else {
+				break;
+			}
 		}
 		
 		if ((i % 6) == 0){
@@ -224,9 +280,17 @@ int main(void) {
 			
 		}		
 	
-		if (i ==66){
-			bShowBoot = 1;	
-		}
+
+	
+		if (i == 66){
+			// Show onion logo
+			if (bTuto > 0)
+			{
+				i = 0;
+			}			
+			bShowBoot = 1;
+			}	
+		
 		// HW to HW rotates automatically on stock
 		SDL_BlitSurface(screen, NULL, video, NULL); 
 		SDL_Flip(video);
