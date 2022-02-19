@@ -21,14 +21,15 @@
 - Restore your backed up saves and states.
 - Optional: To restore your box art, copy each system's box art folder into the system's respective folder in /Roms/ and rename each folder to "Imgs"
   
-## Streamlined custom installer (Credit: Totofaki & PixelShift)  
+## Changelog and new features
+#### Streamlined custom installer (Credit: Totofaki & PixelShift)  
 <img src="https://user-images.githubusercontent.com/16885275/154789504-84253d41-373d-4c84-b194-547c6343f904.png" width="400">  
 
 > - Install only the systems and apps you need.
 > - Relaunch any time to add more. 
 > - Community presets, homebrew and more!
    
-## Onion Launcher & Play Activity (Credit: Totofaki)  
+#### Onion Launcher & Play Activity (Credit: Totofaki)  
 <img src="https://user-images.githubusercontent.com/16885275/154789764-5b92ee55-f3a3-4552-ab90-bf5abcb36c20.png" width="400">  
 
 <img src="https://user-images.githubusercontent.com/16885275/154789497-3c3ea0e5-aac3-4935-86d5-92b4921732ce.png" width="400">  
@@ -44,7 +45,7 @@
 - Updated PICO emulator to Fake08 standalone (Credit: Supergrom)
 - Updated screenshot tool to v4 (Credit: eggs)
   
-## Theme Switcher app (Credit: PixelShift and Totofaki)   
+#### Theme Switcher app (Credit: PixelShift and Totofaki)   
 <img src="https://user-images.githubusercontent.com/16885275/154789609-320620c4-b945-429a-8b0d-177cb30dbdeb.png" width="400">  
   
 > - Preview and change themes on the fly, no reboot required.
