@@ -5,12 +5,13 @@
 <img src="https://user-images.githubusercontent.com/16885275/154790941-2f9a5912-3844-4a6b-a533-7bffccb50ffd.jpg" width="600"> 
 ### This release was made possible by PixelShift, Totofaki and the Onion community.
   
-### Installation (Fresh Install):
+## Installation
+#### Installation (Fresh Install):
 - Format your SD card as Fat32
 - Unzip the ".tmp_archive" folder to the root of your SD.
 - Boot up your Miyoo Mini and follow the on-screen instructions to get started.
   
-### Installation (Upgrade):
+#### Installation (Upgrade):
 - Backup your saves, states and scraped images.
 > - Saves are located at /Retroarch/.retroarch/saves/_corename_
 > - States are located at /Retroarch/.retroarch/states/_corename_
