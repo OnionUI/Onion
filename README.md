@@ -49,7 +49,7 @@
 - Preview and change themes on the fly, no reboot required.
 - 26 themes from our community!
   
-#### RetroArch improvements   
+#### RetroArch UI improvements   
 <img src="https://user-images.githubusercontent.com/16885275/154791260-d1a4d0b2-5582-45cc-a291-bead843a5171.png" width="400">  
 
 - Crisp 640*480 resolution
