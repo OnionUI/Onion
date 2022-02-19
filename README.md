@@ -1,7 +1,5 @@
 ![Photo by Stubbs](https://github.com/jimgraygit/Onion/blob/main/Lightbox%20Photos/stubbsmini2.jpg)
 
-# ONION - Unlock your Miyoo Mini in one click!
-
 # [Download newest release here!](https://github.com/jimgraygit/Onion/releases)
 
 # Onion V3: Definitive Edition
