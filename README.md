@@ -27,6 +27,7 @@
 > - Relaunch any time to add more. 
 > - Community presets, homebrew and more!
 - Onion Launcher & Play Activity (Credit: Totofaki)
+![alt text](https://i.imgur.com/wWgMvFo.png)
 > - Track your game play, including your total time played. Works system-wide!
 > - Reduced startup time by almost half to get you into your game without any hassle.
 > - Full overlay with accurate brightness and battery readings.
@@ -38,6 +39,7 @@
 - Updated PICO emulator to Fake08 standalone (Credit: Supergrom)
 - Updated screenshot tool to v4 (Credit: eggs)
 - Theme Switcher app (Credit: PixelShift and Totofaki)
+![alt text](https://i.imgur.com/FI66wVS.png)
 > - Preview and change themes on the fly, no reboot required.
 > - 26 themes from our community!
 - Fixed Super Game Boy default config (Credit: Updog)
