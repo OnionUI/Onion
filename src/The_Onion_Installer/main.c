@@ -26,6 +26,7 @@ int nb_Layers;
 int nSelection = 0; 
 int nListPostion = 0;
 int nTab = 0;
+int allActivated = 0;
 
 SDL_Surface* video = SDL_SetVideoMode(640,480, 32, SDL_HWSURFACE);
 SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640,480, 32, 0,0,0,0);
@@ -66,7 +67,7 @@ bool file_exists (char *filename) {
 
 void setLayersInstall (int bInstallValue){
 	for(int n = 0 ; n < 3 ; n++){
-		for(int i = 0 ; i < nb_Layers ; i++){
+		for(int i = 0 ; i < NUMBER_OF_LAYERS ; i++){
 			bInstall[n][i] = bInstallValue;
 		}	
 	}
@@ -91,11 +92,12 @@ void loadRessources(char* ressourcesPath){
 				strcpy(cShort, ep->d_name);	
 				cShort[MAY_LAYER_DISPLAY] = '\0';
 				size_t len = strlen(cShort);
-				if (len > 2){
+				if ((len > 2)||(cShort[0]!='.')){
 					//logMessage(cShort);
 					strcpy(layers[nb_Layers],cShort);
 					nb_Layers ++;   		
     			}
+    		   			
     		}    
     		
     		(void) closedir (dp);
@@ -104,10 +106,11 @@ void loadRessources(char* ressourcesPath){
   		else{
   			perror ("Couldn't open the directory");
   		}	
+  		
 }
 
 void displayLayersNames(){
-	SDL_Rect rectRessName;	
+SDL_Rect rectRessName;	
 	SDL_Surface* surfaceRessName;
 	TTF_Font* font25 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 25);
 	SDL_Color color_white={255,255,255,0};
@@ -115,7 +118,7 @@ void displayLayersNames(){
 	for (int i = 0 ; i < 7 ; i++){
 		if ((i + nListPostion) < nb_Layers){
 			surfaceRessName = TTF_RenderUTF8_Blended(font25, layers[i + nListPostion], color_white);
-			rectRessName = { 35, 94 + (i*46) , 80, 20};
+			rectRessName = { 35, 92 + (i*47) , 80, 20};
 			SDL_BlitSurface(surfaceRessName, NULL, screen, &rectRessName);
 		}
 	}
@@ -131,7 +134,7 @@ void displayLayersInstall(){
 	for (int i = 0 ; i < 7 ; i++){
 		if ((i + nListPostion) < nb_Layers){
 		
-			rectInstall = { 567, 96 + (i*46) , 27, 27};
+			rectInstall = { 567, 96 + (i*47) , 27, 27};
 			if (bInstall[nTab][i + nListPostion] == 1){
 				SDL_BlitSurface(surfaceCheck, NULL, screen, &rectInstall);			
 			} 
@@ -179,9 +182,13 @@ void refreshScreen(){
 	SDL_BlitSurface(surfaceTableau, NULL, screen, NULL);
 	
 	SDL_BlitSurface(surfaceSelection, NULL, screen, &rectSelection);
-	displayLayersNames();
-	showScroller();
-	displayLayersInstall();
+	
+	if (nb_Layers > 0){
+		displayLayersNames();
+		showScroller();
+		displayLayersInstall();
+	}
+
 
 
 	SDL_BlitSurface(screen, NULL, video, NULL); 
@@ -203,8 +210,8 @@ int main(void) {
 
 	uint32_t		a_pressed = 0;
 	uint32_t		b_pressed = 0;
-//	uint32_t		x_pressed = 0;
-//	uint32_t		y_pressed = 0;
+	uint32_t		x_pressed = 0;
+	uint32_t		y_pressed = 0;
 	uint32_t		start_pressed = 0;
 	uint32_t		select_pressed = 0;	
 
@@ -280,8 +287,28 @@ int main(void) {
 											else
 												if ( ev.code == KEY_DOWN ) {
 														down_pressed = val;
-												}								
-												
+												}
+												else
+													if ( ev.code == BUTTON_X){
+														x_pressed = val;
+													}
+													else
+														if ( ev.code == BUTTON_Y){
+															y_pressed = val;
+														}											
+		if (y_pressed) {			
+			if (allActivated == 0){
+				allActivated = 1; 
+				setLayersInstall(1);
+			}
+			else {
+				allActivated = 0; 
+				setLayersInstall(0);
+			}
+			
+
+			refreshScreen();
+		}	 										
 		if (right_pressed) {			
 			if (nTab < 2){
 				nTab ++;
@@ -324,7 +351,7 @@ int main(void) {
 		}	
 		
 		
-		if (r2_pressed) {			
+		if ((r2_pressed)&&(nb_Layers > 0)) {			
 			if ((nListPostion + 14) <nb_Layers){
 				nListPostion += 7;
 			}
@@ -335,7 +362,7 @@ int main(void) {
 			refreshScreen();
 		}	 
 		
-		if (l2_pressed) {			
+		if ((l2_pressed)&&(nb_Layers > 0)) {			
 			if ((nListPostion - 7) > 0) {
 				nListPostion -= 7;
 			}
@@ -347,7 +374,7 @@ int main(void) {
 			refreshScreen();
 		}	
 		
-		if (down_pressed) {			
+		if ((down_pressed)&&(nb_Layers > 0)) {			
 			if (nSelection < 6){
 				nSelection ++;
 			}
@@ -356,7 +383,7 @@ int main(void) {
 			}
 			refreshScreen();
 		}
-		if (up_pressed) {			
+		if ((up_pressed)&&(nb_Layers > 0)) {			
 			if (nSelection > 0){
 				nSelection --;
 			}
@@ -369,7 +396,7 @@ int main(void) {
 		if (b_pressed) {			
 			break;
 		}
-		if (a_pressed) {		
+		if ((a_pressed)&&(nb_Layers > 0)) {		
 			if (nListPostion+nSelection<nb_Layers){
 				if (bInstall[nTab][nListPostion+nSelection] == 1){
 					bInstall[nTab][nListPostion+nSelection] = 0;
@@ -426,27 +453,17 @@ int main(void) {
 						SDL_Flip(video);
 						sprintf(cCommand, "cd /mnt/SDCARD/App/The_Onion_Installer/ressources ; ./install.sh \"%s\" \"%s\"",param1, layers[nLayer]);
 						system(cCommand);
-						logMessage(cCommand);
-					}
-			
-			
+						
+					}			
 			}		
-
 			
 		}
 		SDL_FreeSurface(surfaceBackground);
 		SDL_FreeSurface(surfaceMessage);
 		break;
 
-		
-
-		
 		}
 	
-	
-		
-	
-
 	}
 
 

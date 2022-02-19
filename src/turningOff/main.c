@@ -224,7 +224,9 @@ int main(void) {
 		}	
 		
 		
-			
+		if (file_exists(".menuSelect")){
+			break;
+		}
 		
 		if ( file_exists(".menuStart") || file_exists(".menuA") ) {
 	

@@ -271,6 +271,10 @@ int main() {
 			int fd = creat(".menuA", 777);
 			close(fd);	
 		}	
+		if (menu_pressed & select_pressed) {
+			int fd = creat(".menuSelect", 777);
+			close(fd);	
+		}	
 		// Exit / Return game shortcut 
 		if (menu_pressed & start_pressed) {
 			

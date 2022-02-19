@@ -42,7 +42,7 @@ int main(void) {
 		SDL_BlitSurface(image, NULL, screen, NULL);
 		
 		if (file_exists("/mnt/SDCARD/.tmp_update/.ressources/.coreInstalled") == 1){
-			surfaceMessage = TTF_RenderUTF8_Blended(font35, "Core installed, cleanning ...", color_white);
+			surfaceMessage = TTF_RenderUTF8_Blended(font35, "Core installed, cleaning ...", color_white);
 			run = 0;
 		}
 		
