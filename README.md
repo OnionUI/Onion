@@ -21,16 +21,14 @@
 - Restore your backed up saves and states.
 - Optional: To restore your box art, copy each system's box art folder into the system's respective folder in /Roms/ and rename each folder to "Imgs"
   
-### Features, Changes & Improvements:  
-  
-Streamlined custom installer (Credit: Totofaki & PixelShift)  
+## Streamlined custom installer (Credit: Totofaki & PixelShift)  
 ![themeinstaller](https://user-images.githubusercontent.com/16885275/154789504-84253d41-373d-4c84-b194-547c6343f904.png)  
   
 > - Install only the systems and apps you need.
 > - Relaunch any time to add more. 
 > - Community presets, homebrew and more!
    
-Onion Launcher & Play Activity (Credit: Totofaki)  
+## Onion Launcher & Play Activity (Credit: Totofaki)  
 ![playactivity](https://user-images.githubusercontent.com/16885275/154789764-5b92ee55-f3a3-4552-ab90-bf5abcb36c20.png)   
 
 ![onionlauncher](https://user-images.githubusercontent.com/16885275/154789497-3c3ea0e5-aac3-4935-86d5-92b4921732ce.png)  
@@ -46,7 +44,7 @@ Onion Launcher & Play Activity (Credit: Totofaki)
 - Updated PICO emulator to Fake08 standalone (Credit: Supergrom)
 - Updated screenshot tool to v4 (Credit: eggs)
   
-Theme Switcher app (Credit: PixelShift and Totofaki)   
+## Theme Switcher app (Credit: PixelShift and Totofaki)   
 ![installer](https://user-images.githubusercontent.com/16885275/154789609-320620c4-b945-429a-8b0d-177cb30dbdeb.png)  
   
 > - Preview and change themes on the fly, no reboot required.
@@ -56,6 +54,6 @@ Theme Switcher app (Credit: PixelShift and Totofaki)
 - Boxart moved to /Roms/_systemname_/Imgs for easier scraping
 - Various bug fixes and optimizations.
 
-### Known Issues:
+###### Known Issues:
 - Apps do not sort alphabetically.
 - Miyoo creates a new IMG folder on the root of your SD card. Ignore this.
