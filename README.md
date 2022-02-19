@@ -23,11 +23,15 @@
 
 ### Features, Changes & Improvements:
 - Streamlined custom installer (Credit: Totofaki & PixelShift)
+- ![themeinstaller](https://user-images.githubusercontent.com/16885275/154789504-84253d41-373d-4c84-b194-547c6343f904.png)
+
 > - Install only the systems and apps you need.
 > - Relaunch any time to add more. 
 > - Community presets, homebrew and more!
 - Onion Launcher & Play Activity (Credit: Totofaki)
 ![alt text](https://i.imgur.com/wWgMvFo.png)
+![onionlauncher](https://user-images.githubusercontent.com/16885275/154789497-3c3ea0e5-aac3-4935-86d5-92b4921732ce.png)
+
 > - Track your game play, including your total time played. Works system-wide!
 > - Reduced startup time by almost half to get you into your game without any hassle.
 > - Full overlay with accurate brightness and battery readings.
