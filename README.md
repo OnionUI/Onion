@@ -1,5 +1,5 @@
 # Onion V3: Definitive Edition
-### [V3 Release is beeing reviewed for a bug fix - Please be patient]
+### V3 Release is beeing reviewed for a bug fix in the installer - Please be patient
 
   
 <img src="https://user-images.githubusercontent.com/16885275/154790941-2f9a5912-3844-4a6b-a533-7bffccb50ffd.jpg" width="600"> 
