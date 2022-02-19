@@ -41,15 +41,27 @@
 > - Improved Sleep mode with full game suspension.
 > - No more memory leaks or kernel panic!
 > - Automatic shutdown.
-- Experimental Arduboy support (Credit: JMARoeder)
-- Updated PICO emulator to Fake08 standalone (Credit: Supergrom)
-- Updated screenshot tool to v4 (Credit: eggs)
   
 #### Theme Switcher app (Credit: PixelShift and Totofaki)   
 <img src="https://user-images.githubusercontent.com/16885275/154789504-84253d41-373d-4c84-b194-547c6343f904.png" width="400">  
   
 > - Preview and change themes on the fly, no reboot required.
 > - 26 themes from our community!
+  
+#### RetroArch improvements   
+<img src="https://user-images.githubusercontent.com/16885275/154791260-d1a4d0b2-5582-45cc-a291-bead843a5171.png" width="400">  
+
+> - Crisp 640*480 resolution
+> - Lag free
+> - Now a game launcher :
+> - Cores embedded
+> - Playlists unlocked
+> - Favorites unlocked
+
+#### Others  
+- Experimental Arduboy support (Credit: JMARoeder)
+- Updated PICO emulator to Fake08 standalone (Credit: Supergrom)
+- Updated screenshot tool to v4 (Credit: eggs)
 - Fixed Super Game Boy default config (Credit: Updog)
 - Support for Icon Packs! Drag and drop your custom icons into the "Icons" folder at the root of your SD.
 - Boxart moved to /Roms/_systemname_/Imgs for easier scraping
@@ -57,4 +69,4 @@
 
 ###### Known Issues:
 - Apps do not sort alphabetically.
-- Miyoo creates a new IMG folder on the root of your SD card. Ignore this.
+- Miyoo creates a new IMG folder on the root of your SD card. You can ignore this.
