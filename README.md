@@ -3,10 +3,9 @@
 # [Download newest release here!](https://github.com/jimgraygit/Onion/releases)
 
 # Onion V3: Definitive Edition
-https://i.imgur.com/wCma2Wy.png
+![alt text](https://i.imgur.com/wCma2Wy.png)
 ### This release was made possible by PixelShift, Totofaki and the Onion community.
 
-![alt text](https://i.imgur.com/wCma2Wy.png)
 ### Installation (Fresh Install):
 - Format your SD card as Fat32
 - Unzip the ".tmp_archive" folder to the root of your SD.
