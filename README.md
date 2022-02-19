@@ -53,10 +53,7 @@
 
 > - Crisp 640*480 resolution
 > - Lag free
-> - Now a game launcher :
-> - Cores embedded
-> - Playlists unlocked
-> - Favorites unlocked
+> - Now a game launcher (Cores embedded, Playlists unlocked, Favorites unlocked)
 
 #### Others  
 - Experimental Arduboy support (Credit: JMARoeder)
