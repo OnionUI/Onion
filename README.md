@@ -3,7 +3,8 @@
 ### [Download newest release here!](https://github.com/jimgraygit/Onion/releases)
   
 <img src="https://user-images.githubusercontent.com/16885275/154790941-2f9a5912-3844-4a6b-a533-7bffccb50ffd.jpg" width="600"> 
-### This release was made possible by PixelShift, Totofaki and the Onion community.
+
+#### This release was made possible by PixelShift, Totofaki and the Onion community.
   
 ## Installation
 #### Installation (Fresh Install):
