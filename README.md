@@ -1,9 +1,11 @@
-![Photo by Stubbs](https://github.com/jimgraygit/Onion/blob/main/Lightbox%20Photos/stubbsmini2.jpg)
-  
-# [Download newest release here!](https://github.com/jimgraygit/Onion/releases)
-  
 # Onion V3: Definitive Edition
+
+
+  
+### [Download newest release here!](https://github.com/jimgraygit/Onion/releases)
+![Photo by Stubbs](https://github.com/jimgraygit/Onion/blob/main/Lightbox%20Photos/stubbsmini2.jpg)
 ![1](https://user-images.githubusercontent.com/16885275/154789618-9ac5510e-d016-42f7-8978-bee50d395693.png)
+
 ### This release was made possible by PixelShift, Totofaki and the Onion community.
   
 ### Installation (Fresh Install):
