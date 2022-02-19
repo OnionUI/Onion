@@ -23,7 +23,7 @@
   
 ## Changelog and new features
 #### Streamlined custom installer (Credit: Totofaki & PixelShift)  
-<img src="https://user-images.githubusercontent.com/16885275/154789504-84253d41-373d-4c84-b194-547c6343f904.png" width="400">  
+<img src="https://user-images.githubusercontent.com/16885275/154789609-320620c4-b945-429a-8b0d-177cb30dbdeb.png" width="400">  
 
 > - Install only the systems and apps you need.
 > - Relaunch any time to add more. 
@@ -46,7 +46,7 @@
 - Updated screenshot tool to v4 (Credit: eggs)
   
 #### Theme Switcher app (Credit: PixelShift and Totofaki)   
-<img src="https://user-images.githubusercontent.com/16885275/154789609-320620c4-b945-429a-8b0d-177cb30dbdeb.png" width="400">  
+<img src="https://user-images.githubusercontent.com/16885275/154789504-84253d41-373d-4c84-b194-547c6343f904.png" width="400">  
   
 > - Preview and change themes on the fly, no reboot required.
 > - 26 themes from our community!
