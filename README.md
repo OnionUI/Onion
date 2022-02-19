@@ -26,35 +26,35 @@
 #### Streamlined custom installer (Credit: Totofaki & PixelShift)  
 <img src="https://user-images.githubusercontent.com/16885275/154789609-320620c4-b945-429a-8b0d-177cb30dbdeb.png" width="400">  
 
-> - Install only the systems and apps you need.
-> - Relaunch any time to add more. 
-> - Community presets, homebrew and more!
+- Install only the systems and apps you need.
+- Relaunch any time to add more. 
+- Community presets, homebrews and more!
    
 #### Onion Launcher & Play Activity (Credit: Totofaki)  
 <img src="https://user-images.githubusercontent.com/16885275/154789764-5b92ee55-f3a3-4552-ab90-bf5abcb36c20.png" width="400">  
 
 <img src="https://user-images.githubusercontent.com/16885275/154789497-3c3ea0e5-aac3-4935-86d5-92b4921732ce.png" width="400">  
   
-> - Track your game play, including your total time played. Works system-wide!
-> - Reduced startup time by almost half to get you into your game without any hassle.
-> - Full overlay with accurate brightness and battery readings.
-> - Improved brightness curve for better low-light gaming.
-> - Improved Sleep mode with full game suspension.
-> - No more memory leaks or kernel panic!
-> - Automatic shutdown.
+- Track your game play, including your total time played. Works system-wide!
+- Reduced startup time by almost half to get you into your game without any hassle.
+- Full overlay with accurate brightness and battery readings.
+- Improved brightness curve for better low-light gaming.
+- Improved Sleep mode with full game suspension.
+- No more memory leaks or kernel panic!
+- Automatic shutdown.
   
 #### Theme Switcher app (Credit: PixelShift and Totofaki)   
 <img src="https://user-images.githubusercontent.com/16885275/154789504-84253d41-373d-4c84-b194-547c6343f904.png" width="400">  
   
-> - Preview and change themes on the fly, no reboot required.
-> - 26 themes from our community!
+- Preview and change themes on the fly, no reboot required.
+- 26 themes from our community!
   
 #### RetroArch improvements   
 <img src="https://user-images.githubusercontent.com/16885275/154791260-d1a4d0b2-5582-45cc-a291-bead843a5171.png" width="400">  
 
-> - Crisp 640*480 resolution
-> - Lag free
-> - Now a game launcher (Cores embedded, Playlists unlocked, Favorites unlocked)
+- Crisp 640*480 resolution
+- Lag free
+- Now a game launcher (Cores embedded, Playlists unlocked, Favorites unlocked)
 
 #### Others  
 - Experimental Arduboy support (Credit: JMARoeder)
