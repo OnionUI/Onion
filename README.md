@@ -67,3 +67,5 @@
 
 ###### Known Issues:
 - Miyoo creates a new IMG folder on the root of your SD card. You can ignore this.
+
+Help us improve Onion here: https://docs.google.com/spreadsheets/d/1mocDiQFzC-b8hpWmhN-VQxWEf8hV14Jsit6P0_-DQNU/edit?usp=sharing
