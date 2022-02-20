@@ -40,6 +40,8 @@
 - Full overlay with accurate brightness and battery readings.
 - Improved brightness curve for better low-light gaming.
 - Improved Sleep mode with full game suspension.
+- Custom charging screen that prevent screen burnings.
+- Custom low battery notification, no more flickering icon.
 - No more memory leaks or kernel panic!
 - Automatic shutdown.
   
