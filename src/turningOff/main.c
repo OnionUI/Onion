@@ -46,6 +46,7 @@ int main(void) {
 	SDL_Rect	rectTime;
 	SDL_Rect	rectBatteryIcon;	
 	SDL_Rect	rectTuto;
+	SDL_Rect	rectFooter;
 
 	int bTuto = file_exists(".modeTuto");
 	
@@ -115,7 +116,7 @@ int main(void) {
 		fclose(fp);	
 	}
 	
-	logMessage(currPlay);
+//	logMessage(currPlay);
 	
 	SDL_Init(SDL_INIT_VIDEO);
 	SDL_ShowCursor(SDL_DISABLE);
@@ -167,7 +168,12 @@ int main(void) {
 	usleep(100);
 	}
 	
+	if (file_exists("./RACommand.txt")!=1){
+		imageBackground = IMG_Load("noGame.png");
+	}
+	
 	SDL_Surface* imageMenuBar = IMG_Load("menuBar.png");
+	SDL_Surface* imageFooter = IMG_Load("footer.png");
 	SDL_Surface* imagewhiteLigne = IMG_Load("whiteLigne.png");
 	
 	SDL_Surface* imageTuto;
@@ -177,6 +183,7 @@ int main(void) {
 	rectLum = { 419, 9, 113, 29};
 	rectBatteryIcon = {541,16,13,27};
 	rectBatt = { 566, 9, 113, 29};
+	rectFooter = { 0, 450, 640, 30};
 	
 	int bShowBoot = 0;
 
@@ -192,7 +199,7 @@ int main(void) {
 			if (bTuto > 0) {
 				char sImageTuto[20];
 				sprintf(sImageTuto,"./Tuto/tuto0%d.png",bTuto);
-				logMessage(sImageTuto);
+				//logMessage(sImageTuto);
 				imageTuto = IMG_Load(sImageTuto);
 				if(bTuto<4){
 					bTuto ++;	
@@ -208,6 +215,7 @@ int main(void) {
 				
 
 		SDL_BlitSurface(imageMenuBar, NULL, screen, &rectMenuBar);
+		SDL_BlitSurface(imageFooter, NULL, screen, &rectFooter);
 		
 		if ((bTuto >= 0)&&(bTuto < 4)){
 			

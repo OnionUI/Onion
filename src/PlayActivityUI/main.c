@@ -13,6 +13,7 @@
 #include <sys/stat.h>  
 #include "sys/ioctl.h"
 
+
 // Max number of records in the DB
 #define MAXVALUES 1000
 
@@ -66,48 +67,40 @@ bool file_exists (char *filename) {
   return (stat (filename, &buffer) == 0);
 }
 
-char* load_file(char const* path)
-{
-    char* buffer = 0;
-    long length;
-    FILE * f = fopen (path, "rb"); 
 
-    if (f)
-    {
-      fseek (f, 0, SEEK_END);
-      length = ftell (f);
-      fseek (f, 0, SEEK_SET);
-      buffer = (char*)malloc ((length+1)*sizeof(char));
-      if (buffer)
-      {
-        fread (buffer, sizeof(char), length, f);
-      }
-      fclose (f);
-    }
-    buffer[length] = '\0';
-    return buffer;
 
-}
 
-void readRomDB(){
-    FILE * file= fopen("/mnt/SDCARD/RetroArch/.retroarch/saves/playActivity.db", "rb");
+int readRomDB(){
 
-	if (file != NULL) {
+  	// Check to avoid corruption
+  	if (file_exists("/mnt/SDCARD/RetroArch/.retroarch/saves/playActivity.db") == 1){
+  	
+    	FILE * file= fopen("/mnt/SDCARD/RetroArch/.retroarch/saves/playActivity.db", "rb");
 
-    	fread(romList, sizeof(romList), 1, file);
-    	
-     	tailleStructure = 0;
-    	
-    	for (int i=0; i<MAXVALUES; i++){
-    		if (strlen(romList[i].name) == 0){
-    			break;
+		if (file != NULL) {
+
+    		fread(romList, sizeof(romList), 1, file);
+    		
+     		tailleStructure = 0;
+    		
+    		for (int i=0; i<MAXVALUES; i++){
+    			if (strlen(romList[i].name) == 0){
+    				break;
+    			}
+    			tailleStructure++;
     		}
-    		tailleStructure++;
-    	}
-    	fclose(file);
+    		fclose(file);
+		}
+		else {
+    		// The file exists but could not be opened
+    		// Something went wrong, the program is terminated
+    		return -1;
+		}
 	}
-
+	return 1;	
 }
+
+
 
 void writeRomDB(void){
 	FILE * file= fopen("/mnt/SDCARD/RetroArch/.retroarch/saves/playActivity.db", "wb");
@@ -193,8 +186,10 @@ int main(void) {
  	SDL_Surface* imageMileage;
 
 	// Loading DB
-	readRomDB();
-
+	if (readRomDB()  == -1){
+		// To avoid a DB overwrite
+			return EXIT_SUCCESS;
+	}
 
 	//displayRomDB();
 	// Sorting DB
@@ -231,7 +226,7 @@ int main(void) {
 	int h, m;
 	h = (ntotalTime/3600); 		
 	m = (ntotalTime -(3600*h))/60;		
-	sprintf(cTotalHandheldMileage, "%dh%02dm", h,m);		
+	sprintf(cTotalHandheldMileage, "%d:%02d", h,m);		
 	
 	//displayRomDB();
 	
@@ -266,7 +261,7 @@ int main(void) {
 		m = (romList[i].playTime -(3600*h))/60;	
 			
 		if (strlen(romList[i].name) != 0){
-			sprintf(cTotalTimePlayed, "%dh%02dm", h,m);	
+			sprintf(cTotalTimePlayed, "%d:%02d", h,m);	
 		}	
 		else{
 			sprintf(cTotalTimePlayed, "");
@@ -368,7 +363,7 @@ int main(void) {
 		m = (romList[(nCurrentPage*4)+i].playTime -(3600*h))/60;		
 		
 		if (strlen(romList[(nCurrentPage*4)+i].name) != 0){
-			sprintf(cTotalTimePlayed, "%dh%02dm", h,m);	
+			sprintf(cTotalTimePlayed, "%d:%02d", h,m);	
 		}	
 		else{
 			sprintf(cTotalTimePlayed, "");

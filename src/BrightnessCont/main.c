@@ -13,7 +13,7 @@
 #include "sys/ioctl.h"
 #include <signal.h>
 #include <dirent.h>
- 
+
 
 //	for ev.value
 #define RELEASED	0
@@ -30,7 +30,7 @@ bool file_exists (char *filename) {
 }
 
 //
-//	Suspend
+//	Suspend 
 //
 void suspend(void) {
 	DIR *procdp;

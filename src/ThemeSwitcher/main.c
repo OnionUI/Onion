@@ -111,8 +111,10 @@ int main(void) {
 	SDL_Surface* video = SDL_SetVideoMode(640,480, 32, SDL_HWSURFACE);
 	SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640,480, 32, 0,0,0,0);
 	TTF_Font* font40 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 40);
-	TTF_Font* font25 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 25);
+	TTF_Font* font21 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 21);
 	TTF_Font* font30 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 30);
+	
+
 	SDL_Color color_white={255,255,255,0};
 	// Prepare for Poll button input
 	int			input_fd;
@@ -123,17 +125,24 @@ int main(void) {
 
 
 	SDL_Surface* surfaceThemeBackground;
+
 	SDL_Surface* imagePages;	
+	SDL_Surface* imageThemeNom;	
 	
-	SDL_Rect rectTheme1 = { 0, 0, 320, 240};
-	SDL_Rect rectTheme2 = { 320, 0, 320, 240};
-	SDL_Rect rectTheme3 = { 0, 240, 320, 240};
-	SDL_Rect rectTheme4 = { 320, 240, 320, 240};
-	SDL_Rect rectPages = { 561, 430, 90, 44};
+	SDL_Surface* surfaceBackGround = IMG_Load(".appRessources/background.png");
+	SDL_Surface* surfaceArrowLeft = IMG_Load(".appRessources/arrowLeft.png");
+	SDL_Surface* surfaceArrowRight = IMG_Load(".appRessources/arrowRight.png");
+	
+	SDL_Rect rectArrowLeft = { 24, 210, 28, 32};
+	SDL_Rect rectArrowRight = { 588, 210, 28, 32};
+	SDL_Rect rectPages = { 559, 440, 85, 54};
 	SDL_Rect rectThemeDescription = { 10, 175, 600, 44};
-	 
-	SDL_Rect rectWhiteSelection = { 319, 0, 321, 241};
-	
+	SDL_Rect rectThemeBackground = { 80, 46, 480, 360};
+	SDL_Rect rectImageThemeNom = { 77, 7, 557, 54};	
+	int levelPage = 0; 
+	FILE *fp;
+	long lSize;	
+
 	//char* tempt = "BirdShot";
 	sprintf(cThemePath, "./Themes/%s/preview.png", themes[nCurrentPage]);
 	surfaceThemeBackground = IMG_Load(cThemePath);
@@ -142,15 +151,41 @@ int main(void) {
 	sprintf(cPages,"%d/%d",(nCurrentPage+1),nb_themes);
 	imagePages = TTF_RenderUTF8_Blended(font30, cPages, color_white);
 
-	SDL_BlitSurface(surfaceThemeBackground, NULL, screen, NULL);
+	SDL_BlitSurface(surfaceThemeBackground, NULL, screen, &rectThemeBackground);
+	
+	SDL_BlitSurface(surfaceBackGround, NULL, screen, NULL);
+	//SDL_BlitSurface(surfaceArrowLeft, NULL, screen, &rectArrowLeft);
+	SDL_BlitSurface(surfaceArrowRight, NULL, screen, &rectArrowRight);
+	
 	SDL_BlitSurface(imagePages, NULL, screen, &rectPages);
+	
 
+	
+	char *currPlay;
+	sprintf(cThemePath, "./Themes/%s/description.txt", themes[0]);
+	fp = fopen ( cThemePath, "rb" );
+	if( fp > 0 ) {
+		fseek( fp , 0L , SEEK_END);
+		lSize = ftell( fp );
+		rewind( fp );
+		currPlay = (char*)calloc( 1, lSize+1 );
+		if( !currPlay ) fclose(fp),fputs("memory alloc fails",stderr),exit(1);
+	
+		if( 1!=fread( currPlay , lSize, 1 , fp) )
+  		fclose(fp),free(currPlay),fputs("entire read fails",stderr),exit(1);
+		fclose(fp);	
+
+		imageThemeNom = TTF_RenderUTF8_Blended(font21, currPlay, color_white);
+		SDL_BlitSurface(imageThemeNom, NULL, screen, &rectImageThemeNom);
+	}
+	free(currPlay);
+
+		
 	SDL_BlitSurface(screen, NULL, video, NULL); 
 	SDL_Flip(video);
+	
+	SDL_FreeSurface(surfaceThemeBackground);
 
-	int levelPage = 0; 
-	FILE *fp;
-	long lSize;	
 
 	while( read(input_fd, &ev, sizeof(ev)) == sizeof(ev) ) {
 		
@@ -230,16 +265,44 @@ int main(void) {
 		if (levelPage==0){
 			sprintf(cThemePath, "./Themes/%s/preview.png", themes[nCurrentPage]);
 			surfaceThemeBackground = IMG_Load(cThemePath);
-			SDL_BlitSurface(surfaceThemeBackground, NULL, screen, NULL);
+			SDL_BlitSurface(surfaceThemeBackground, NULL, screen, &rectThemeBackground);
+			
+			
+			
+			SDL_BlitSurface(surfaceBackGround, NULL, screen, NULL);
+			if (nCurrentPage != 0){
+				SDL_BlitSurface(surfaceArrowLeft, NULL, screen, &rectArrowLeft);
+			}
+			if (nCurrentPage != (nb_themes-1)){
+				SDL_BlitSurface(surfaceArrowRight, NULL, screen, &rectArrowRight);
+			}
 			
 			sprintf(cPages,"%d/%d",(nCurrentPage+1),nb_themes);
-			imagePages = TTF_RenderUTF8_Blended(font30, cPages, color_white);
+			imagePages = TTF_RenderUTF8_Blended(font30, cPages, color_white);			
 			SDL_BlitSurface(imagePages, NULL, screen, &rectPages);
-	
-	
+			
+			char *currPlay;
+			sprintf(cThemePath, "./Themes/%s/description.txt", themes[nCurrentPage]);
+			fp = fopen ( cThemePath, "rb" );
+			if( fp > 0 ) {
+				fseek( fp , 0L , SEEK_END);
+				lSize = ftell( fp );
+				rewind( fp );
+				currPlay = (char*)calloc( 1, lSize+1 );
+				if( !currPlay ) fclose(fp),fputs("memory alloc fails",stderr),exit(1);
+			
+				if( 1!=fread( currPlay , lSize, 1 , fp) )
+  				fclose(fp),free(currPlay),fputs("entire read fails",stderr),exit(1);
+				fclose(fp);	
+
+				imageThemeNom = TTF_RenderUTF8_Blended(font21, currPlay, color_white);
+				SDL_BlitSurface(imageThemeNom, NULL, screen, &rectImageThemeNom);
+			}
+			free(currPlay);
+			SDL_FreeSurface(surfaceThemeBackground);	
 		}
 		else {
-			surfaceThemeBackground = IMG_Load("themeDetail.png");
+			surfaceThemeBackground = IMG_Load(".appRessources/themeDetail.png");
 			SDL_BlitSurface(surfaceThemeBackground, NULL, screen, NULL);
 			
 			char *currPlay;
@@ -258,6 +321,7 @@ int main(void) {
 				imagePages = TTF_RenderUTF8_Blended(font40, currPlay, color_white);
 				SDL_BlitSurface(imagePages, NULL, screen, &rectThemeDescription);
 			}
+			free(currPlay);
 			
 		
 		}
@@ -266,12 +330,13 @@ int main(void) {
 		SDL_BlitSurface(screen, NULL, video, NULL); 
 		SDL_Flip(video);
 		
-		SDL_FreeSurface(imagePages);
-		SDL_FreeSurface(surfaceThemeBackground);
-	
 
 	}
-
+		SDL_FreeSurface(imagePages);
+		SDL_FreeSurface(surfaceThemeBackground);
+		SDL_FreeSurface(surfaceBackGround);	
+		SDL_FreeSurface(surfaceArrowLeft);	
+		SDL_FreeSurface(surfaceArrowRight);	
 	
     return EXIT_SUCCESS;
 }

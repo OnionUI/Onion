@@ -1,5 +1,4 @@
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,14 +8,13 @@
 #include <sys/stat.h>  
 #include <fcntl.h>
 
-
 void logMessage(char* Message) {
 	FILE *file = fopen("/mnt/SDCARD/.tmp_update/log_lastMessage.txt", "a");
 	/*char tempMess[] = "\r\n";
     strcat(Message,tempMess);
     */
     char valLog[200];
-    sprintf(valLog, "%s %s", Message, "\n");
+    sprintf(valLog, "%s%s", Message, "\n");
     fputs(valLog, file);
 	fclose(file); 
 }
@@ -59,7 +57,6 @@ char* load_file(char const* path)
     }
     buffer[length] = '\0';
 
-
     return buffer;
 }
 
@@ -82,41 +79,67 @@ int main(void) {
     path = cJSON_GetObjectItem(subitem, "path");
     core_path = cJSON_GetObjectItem(subitem, "core_path");
 
-	FILE *file = fopen("/mnt/SDCARD/.tmp_update/RACommand.txt", "w");
+	//logMessage(cJSON_Print(core_path));
+	//logMessage(cJSON_Print(path));
 
-	fputs("./retroarch -v -L ", file);
-	fputs(cJSON_Print(core_path), file);
-	fputs(" ", file);
-	fputs(cJSON_Print(path), file);
-	fclose(file); 
+	
+	char *cPath = cJSON_Print(path) ;
+	char *cCore_path = cJSON_Print(core_path) ;
+	
+	if ((strlen(cCore_path)>1) && (strlen(cPath)>1)) {
+		// Quote character removal
+		
+		char *cCore_path1 = cCore_path+1;
+		char *cPath1 = cPath+1;
+		
+		cCore_path1[strlen(cCore_path1)-1] = '\0';
+		cPath1[strlen(cPath1)-1] = '\0';
+
+		logMessage(cCore_path1);
+		logMessage(cPath1);
+
+		if ((file_exists(cCore_path1) == 1) && (file_exists(cPath1) == 1)){
+		
+			FILE *file = fopen("/mnt/SDCARD/.tmp_update/RACommand.txt", "w");
+		
+			fputs("./retroarch -v -L ", file);
+			fputs(cJSON_Print(core_path), file);
+			fputs(" ", file);
+			fputs(cJSON_Print(path), file);
+			fclose(file); 
+		
+			// Rom name copy for timers
+			char *bname;
+    		char *path2 = strdup(cJSON_Print(path));
+       		
+			//  Complete path  
+   			//logMessage(path2);
+    		
+    		// File name
+    		bname = (char *)basename(path2);
+    		
+    		// Cut the last " character
+    		if (strlen( bname ) > 0){
+    			bname[strlen( bname )-1] = '\0';
+    		}
+  			bname = (char *)basename(path2);  
+    		
+    		//File name without ext
+			//char *bnameWOExt = removeExt(bname);
+		
+			remove("/mnt/SDCARD/.tmp_update/romName.txt");
+			FILE *fileRom = fopen("/mnt/SDCARD/.tmp_update/romName.txt", "w");
+			fputs(bname, fileRom);
+			fclose(fileRom); 
+		}
+		else {
+			remove ("/mnt/SDCARD/.tmp_update/RACommand.txt");
+			remove ("/mnt/SDCARD/.tmp_update/romName.txt");
+		}
+	
 
 
-	// Rom name copy for timers
-	char *bname;
-    char *path2 = strdup(cJSON_Print(path));
-       
-	//  Complete path  
-   	//logMessage(path2);
-    
-    // File name
-    bname = (char *)basename(path2);
-    
-    // Cut the last " character
-    if (strlen( bname ) > 0){
-    	bname[strlen( bname )-1] = '\0';
-    }
-  	bname = (char *)basename(path2);  
-    
-    
-    
-    //File name without ext
-	//char *bnameWOExt = removeExt(bname);
-
-	remove("/mnt/SDCARD/.tmp_update/romName.txt");
-	FILE *fileRom = fopen("/mnt/SDCARD/.tmp_update/romName.txt", "w");
-	fputs(bname, fileRom);
-	fclose(fileRom); 
-
-
+	}
+	
     return EXIT_SUCCESS;
 }

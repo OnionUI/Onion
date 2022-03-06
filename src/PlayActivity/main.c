@@ -9,7 +9,7 @@
 #include <time.h>
 
 // Max number of records in the DB
-#define MAXVALUES 100
+#define MAXVALUES 1000
 
 struct structom {                  /*struct called list*/
              char name[100]   ;
@@ -40,52 +40,41 @@ char *removeExt(char* myStr) {
     return retStr;
 }
 
+
 bool file_exists (char *filename) {
   struct stat   buffer;   
   return (stat (filename, &buffer) == 0);
 }
 
-char* load_file(char const* path)
-{
-    char* buffer = 0;
-    long length;
-    FILE * f = fopen (path, "rb"); 
 
-    if (f)
-    {
-      fseek (f, 0, SEEK_END);
-      length = ftell (f);
-      fseek (f, 0, SEEK_SET);
-      buffer = (char*)malloc ((length+1)*sizeof(char));
-      if (buffer)
-      {
-        fread (buffer, sizeof(char), length, f);
-      }
-      fclose (f);
-    }
-    buffer[length] = '\0';
-    return buffer;
+int readRomDB(){
 
-}
+  	// Check to avoid corruption
+  	if (file_exists("/mnt/SDCARD/RetroArch/.retroarch/saves/playActivity.db") == 1){
+  	
+    	FILE * file= fopen("/mnt/SDCARD/RetroArch/.retroarch/saves/playActivity.db", "rb");
 
-void readRomDB(){
-    FILE * file= fopen("/mnt/SDCARD/RetroArch/.retroarch/saves/playActivity.db", "rb");
+		if (file != NULL) {
 
-	if (file != NULL) {
-
-    	fread(romList, sizeof(romList), 1, file);
-    	
-     	tailleStructure = 0;
-    	
-    	for (int i=0; i<MAXVALUES; i++){
-    		if (strlen(romList[i].name) == 0){
-    			break;
+    		fread(romList, sizeof(romList), 1, file);
+    		
+     		tailleStructure = 0;
+    		
+    		for (int i=0; i<MAXVALUES; i++){
+    			if (strlen(romList[i].name) == 0){
+    				break;
+    			}
+    			tailleStructure++;
     		}
-    		tailleStructure++;
-    	}
-    	fclose(file);
+    		fclose(file);
+		}
+		else {
+    		// The file exists but could not be opened
+    		// Something went wrong, the program is terminated
+    		return -1;
+		}
 	}
-
+	return 1;	
 }
 
 void writeRomDB(void){
@@ -171,7 +160,10 @@ int main(int argc, char *argv[]) {
 	
 				
 				// Loading DB
-				readRomDB();
+				if (readRomDB()  == -1){
+					// To avoid a DB overwrite
+					 return EXIT_SUCCESS;
+				}
     			 
     			//Addition of the new time
     			int totalPlayTime;
@@ -197,6 +189,7 @@ int main(int argc, char *argv[]) {
     			    			
     			// Write total current time for the onion launcher				 	
 				char cTotalTimePlayed[50];	 	
+				remove("currentTotalTime");
 				int totalTime_fd = open("currentTotalTime", O_CREAT | O_WRONLY);
 
 				if (totalTime_fd > 0) {
@@ -206,10 +199,12 @@ int main(int argc, char *argv[]) {
 						
 						h = (totalPlayTime/3600); 
 						
-						m = (totalPlayTime -(3600*h))/60;		
+						m = (totalPlayTime -(3600*h))/60;	
+						
+						//s = (totalPlayTime -(3600*h)-(m*60));
 
-						//sprintf(cTotalTimePlayed, "%02d:%02d:%02d", h,m,s);
-					 	sprintf(cTotalTimePlayed, "%dh%02dm", h,m);
+						sprintf(cTotalTimePlayed, "%d:%02d", h,m);
+					 	//sprintf(cTotalTimePlayed, "%dh%02dm", h,m);
 					 	//logMessage(cTotalTimePlayed);
 					 	
 					}

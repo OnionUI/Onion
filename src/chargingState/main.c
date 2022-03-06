@@ -104,7 +104,7 @@ int main(void) {
 	while (run) {	
 		checkCharging();
 		if (is_charging == 0){
-			SetBrightness(8);
+			//SetBrightness(8);
 			run = 0;
 		}
 		usleep(100000);
