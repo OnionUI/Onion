@@ -33,8 +33,9 @@
 #### Onion Launcher & Play Activity (Credit: Totofaki)  
 <img src="https://user-images.githubusercontent.com/16885275/154789764-5b92ee55-f3a3-4552-ab90-bf5abcb36c20.png" width="400">  
 
-<img src="https://user-images.githubusercontent.com/16885275/154789497-3c3ea0e5-aac3-4935-86d5-92b4921732ce.png" width="400">  
-  
+<img src="https://user-images.githubusercontent.com/16885275/157870119-fc9fd688-22e4-4eda-a080-81ec398c60d9.png" width="400">  
+
+- Quick launch any game in your history
 - Track your game play, including your total time played. Works system-wide!
 - Reduced startup time by almost half to get you into your game without any hassle.
 - Full overlay with accurate brightness and battery readings.
