@@ -30,9 +30,11 @@
 - Relaunch any time to add more. 
 - Community presets, homebrews and more!
    
-#### Play Activity & Onion Launcher (Credit: Totofaki)  
-<img src="https://user-images.githubusercontent.com/16885275/154789764-5b92ee55-f3a3-4552-ab90-bf5abcb36c20.png" width="350">  
+#### Play Activity & Onion Launcher (Credit: Totofaki)
+
 - Track your game play times.   
+<img src="https://user-images.githubusercontent.com/16885275/154789764-5b92ee55-f3a3-4552-ab90-bf5abcb36c20.png" width="350">  
+
 
 <img src="https://user-images.githubusercontent.com/16885275/157870119-fc9fd688-22e4-4eda-a080-81ec398c60d9.png" width="350">  
 
