@@ -13,7 +13,7 @@
 - Boot up your Miyoo Mini and follow the on-screen instructions to get started.
   
 #### Installation (Upgrade):
-- Backup your saves, states and scraped images.
+- Backup your saves, states, scraped images and play times (RetroArch\.retroarch\playlists)
 > - Saves are located at /Retroarch/.retroarch/saves/_corename_
 > - States are located at /Retroarch/.retroarch/states/_corename_
 - Delete all folders from your SD except "BIOS" and "Roms"
