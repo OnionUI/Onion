@@ -95,8 +95,8 @@ int main(void) {
 		cCore_path1[strlen(cCore_path1)-1] = '\0';
 		cPath1[strlen(cPath1)-1] = '\0';
 
-		logMessage(cCore_path1);
-		logMessage(cPath1);
+		//logMessage(cCore_path1);
+		//logMessage(cPath1);
 
 		if ((file_exists(cCore_path1) == 1) && (file_exists(cPath1) == 1)){
 		
@@ -139,6 +139,10 @@ int main(void) {
 	
 
 
+	}
+	else {
+	remove ("/mnt/SDCARD/.tmp_update/RACommand.txt");
+	remove ("/mnt/SDCARD/.tmp_update/romName.txt");
 	}
 	
     return EXIT_SUCCESS;

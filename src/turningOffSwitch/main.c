@@ -18,6 +18,7 @@
 #define MAXHISTORY 30
 #define MAXHROMNAMESIZE 150
 #define MAXHRACOMMAND 500
+#define LOWBATRUMBLE 10
 
 // Max number of records in the DB
 #define MAXVALUES 1000
@@ -342,6 +343,31 @@ int main(void) {
 	free(currBat);
 	
 	
+	SDL_Surface* imageBackgroundDefault = IMG_Load("bootScr.png");
+	SDL_Surface* imageBackgroundLowBat = IMG_Load("lowBat.png");
+	SDL_Surface* imageBackgroundNoGame= IMG_Load("noGame.png");
+	SDL_Surface* imageBackgroundGame;
+	
+	for (int i = 1; i < 150; ++i){
+		if (file_exists(".menuStart")) {
+			// The screenshot is ready 
+			remove(".menuStart");
+			
+			imageBackgroundGame = IMG_Load("screenshotGame.bmp");
+	 	
+	 		// Printscreen save for specific game
+			char currPicture[MAXHROMNAMESIZE+44];
+	 		sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",gameList[0].name,".png");	 		
+
+			// Move screenshot to destination
+			rename("screenshotGame.bmp", currPicture);
+	
+	 		break;    
+	 	}
+		usleep(100);
+
+	}
+
 	// Battery icon
 	SDL_Surface* imageBatteryIcon;
 	if (nBat > 100){
@@ -364,29 +390,6 @@ int main(void) {
 							else if (nBat >= 0){
 								imageBatteryIcon = IMG_Load("batt0.png");	
 							}
-							
-	SDL_Surface* imageBackground = IMG_Load("bootScr.png");
-	for (int i = 1; i < 150; ++i){
-		if (file_exists(".menuStart")) {
-			// The screenshot is ready 
-			remove(".menuStart");
-			
-			imageBackground = IMG_Load("screenshotGame.bmp");
-	 	
-	 		// Printscreen save for specific game
-			char currPicture[MAXHROMNAMESIZE+44];
-	 		sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",gameList[0].name,".png");	 		
-
-			// Move screenshot to destination
-			rename("screenshotGame.bmp", currPicture);
-				
-	 		break;    
-	 	}
-	usleep(100);
-	}
-	if (file_exists("./RACommand.txt")!=1){
-		imageBackground = IMG_Load("noGame.png");
-	}
 	
 	SDL_Surface* imageMenuBar = IMG_Load("menuBar.png");
 	SDL_Surface* imageFooter = IMG_Load("footer.png");
@@ -406,7 +409,8 @@ int main(void) {
 	
 	int bShowBoot = 0;
 
-	SDL_BlitSurface(imageBackground, NULL, screen, NULL);
+
+
 	if (taillestructGames > 1){
 		SDL_BlitSurface(surfaceArrowRight, NULL, screen, &rectArrowRight);
 	}
@@ -421,11 +425,16 @@ int main(void) {
 	
 	SDL_BlitSurface(imageFooterHelp, NULL, screen, &rectFooterHelp);
 	
-	int nTuto = 0;
 	int nSlower = 0;
 	for (int i = 1; i < 67; ++i){
+	
+		if (bTuto>=4){
+			rectWhiteLigne = { 0, 0, 1280, 39};
+		}
+		else {
+			rectWhiteLigne = { -((i-1)*10), 0, 1280, 39};
+		}
 		
-		rectWhiteLigne = { -((i-1)*10), 0, 1280, 39};
 				
 		if ((i == 1) || (i == 33)){
 			if (bTuto > 0) {
@@ -439,62 +448,7 @@ int main(void) {
 			}
 		}
 		
-		if (bTuto > 0) {
-			SDL_BlitSurface(imageBackground, NULL, screen, NULL);
-		}	
-
-		
-
-		if ((bTuto >= 0)&&(bTuto < 4)){
-			
-			SDL_BlitSurface(imagewhiteLigne, NULL, screen, &rectWhiteLigne);	
-		}
-		SDL_BlitSurface(imageMenuBar, NULL, screen, &rectMenuBar);	
-		SDL_BlitSurface(imageBatt, NULL, screen, &rectBatt);
-		SDL_BlitSurface(imageLum, NULL, screen, &rectLum);
-		
-		imagePlay = TTF_RenderUTF8_Blended(font, gameList[currentGame].totalTime, color);	
-		SDL_BlitSurface(imagePlay, NULL, screen, &rectTime);
-		
-		SDL_BlitSurface(imageBatteryIcon, NULL, screen, &rectBatteryIcon);
-		
-		if (bTuto > 0) {
-			SDL_BlitSurface(imageTuto, NULL, screen, NULL);
-		}	
-		
-		
-		if (file_exists(".menuSelect")){
-			break;
-		}
-		if ( file_exists(".menuStart") || file_exists(".menuA") ) {
-	
-			if ( bTuto > 0){
-				if (bTuto < 4){
-					remove (".menuStart");
-					remove (".menuA");
-				}
-				else{
-					if ((bTuto == 4)&&file_exists(".menuStart")){
-						remove(".menuA");
-						remove(".modeTuto");
-						int fd = creat(".modeTuto2", 777);
-						close(fd); 	
-						break ;
-					}
-					else if ((bTuto == 5)&&file_exists(".menuA")){
-						remove(".menuStart");
-						break ;
-					}
-					
-					
-	
-				}
-			}
-			else {
-				break;
-			}
-		}
-		
+ 
 		if ((i % 6) == 0){
 		// Brightness update
 			FILE *fp;
@@ -520,135 +474,168 @@ int main(void) {
 			
 		}		
 	
-
-	
 		if (i == 66){
 			// Show onion logo
 			if (bTuto > 0)
 			{
 				i = 0;
-			}			
-			bShowBoot = 1;
 			}	
+			else{
+				bShowBoot = 1;
+			}		
+			
+		}	
 		
-		// HW to HW rotates automatically on stock
-		SDL_BlitSurface(screen, NULL, video, NULL); 
-		SDL_Flip(video);
+
 		
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
-			if (event.type==SDL_KEYDOWN) {
+			if ((event.type==SDL_KEYDOWN)&&(file_exists("./RACommand.txt")==1)) {
 				switch( event.key.keysym.sym ){
 					    case SDLK_RIGHT:
 					    
                      		if ((bTuto==0)&&(currentGame<(taillestructGames-1))){
                      			currentGame ++;
                      			nSlower = 1;
-                     			char currPicture[MAXHROMNAMESIZE+44];
-	 							sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",gameList[currentGame].name,".png");	
-                     			
-                     			if (file_exists(currPicture)==1){
-                     				imageBackground = IMG_Load(currPicture);
-                     			}
-                     			else{
-                     				imageBackground = IMG_Load("bootScr.png");
-                     			}
-                     			
-                     			SDL_BlitSurface(imageBackground, NULL, screen, NULL);
-								
-								SDL_BlitSurface(surfaceArrowLeft, NULL, screen, &rectArrowLeft);
-								if (currentGame!=taillestructGames-1){
-									SDL_BlitSurface(surfaceArrowRight, NULL, screen, &rectArrowRight);
-								}
-						
-								SDL_BlitSurface(imageFooter, NULL, screen, &rectFooter);
-	
-								imageGameName = TTF_RenderUTF8_Blended(font, gameList[currentGame].name, color);
-								SDL_BlitSurface(imageGameName, NULL, screen, &rectGameName);
-								
-								SDL_BlitSurface(imageFooterHelp, NULL, screen, &rectFooterHelp);
-                     			i = 0;
+                     			i=0;
+ 
                      		}
-
-						
 							break;
 							
 						case SDLK_LEFT:
 							if ((bTuto==0)&&(currentGame>0)){
                      			currentGame --;
-                     			
-                     			char currPicture[MAXHROMNAMESIZE+44];
-	 							sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",gameList[currentGame].name,".png");	
-                     			
-                     			if (file_exists(currPicture)==1){
-                     				imageBackground = IMG_Load(currPicture);
-                     			}
-                     			else{
-                     				imageBackground = IMG_Load("bootScr.png");
-                     			}
-                     			
-                     			SDL_BlitSurface(imageBackground, NULL, screen, NULL);
-								
-								
-								SDL_BlitSurface(surfaceArrowRight, NULL, screen, &rectArrowRight);
-								if (currentGame!=0){
-									SDL_BlitSurface(surfaceArrowLeft, NULL, screen, &rectArrowLeft);
-								}
-						
-								SDL_BlitSurface(imageFooter, NULL, screen, &rectFooter);
-	
-								imageGameName = TTF_RenderUTF8_Blended(font, gameList[currentGame].name, color);
-								SDL_BlitSurface(imageGameName, NULL, screen, &rectGameName);
-								
-								SDL_BlitSurface(imageFooterHelp, NULL, screen, &rectFooterHelp);
                      			i = 0;
                      		}
-
-						
 							break;
 						default:
                        		break;
 				}
 			
 			}
-		} 	
+		}
+		char currPicture[MAXHROMNAMESIZE+44];
+		sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",gameList[currentGame].name,".png");	
+
+		if (i==0){
+			// Loading game screens	hot 
+	 	    if (file_exists(currPicture)==1){
+				imageBackgroundGame = IMG_Load(currPicture);
+			}
+		}
+
+      	if (bTuto > 0) {
+			SDL_BlitSurface(imageBackgroundDefault, NULL, screen, NULL);
+		}	
+		else {
+			if (file_exists("./RACommand.txt")!=1){
+				SDL_BlitSurface(imageBackgroundNoGame, NULL, screen, NULL);
+			}
+			else{
+  				if (nBat > LOWBATRUMBLE){
+            		if (file_exists(currPicture)==1){
+                		SDL_BlitSurface(imageBackgroundGame, NULL, screen, NULL);
+            		}
+            		else{
+                		SDL_BlitSurface(imageBackgroundDefault, NULL, screen, NULL);
+            		}
+        		}
+        		else {		
+            		SDL_BlitSurface(imageBackgroundLowBat, NULL, screen, NULL); 
+        		}
+			}
+		}
+		
+		if (currentGame!=0){
+			SDL_BlitSurface(surfaceArrowLeft, NULL, screen, &rectArrowLeft);
+		}
+	
+		if (currentGame!=taillestructGames-1){
+			SDL_BlitSurface(surfaceArrowRight, NULL, screen, &rectArrowRight);
+		}
+
+
+		SDL_BlitSurface(imageFooter, NULL, screen, &rectFooter);
+		imageGameName = TTF_RenderUTF8_Blended(font, gameList[currentGame].name, color);
+		SDL_BlitSurface(imageGameName, NULL, screen, &rectGameName);
+		SDL_BlitSurface(imageFooterHelp, NULL, screen, &rectFooterHelp);
+		SDL_BlitSurface(imagewhiteLigne, NULL, screen, &rectWhiteLigne);	
+		SDL_BlitSurface(imageMenuBar, NULL, screen, &rectMenuBar);	
+		SDL_BlitSurface(imageBatt, NULL, screen, &rectBatt);
+		SDL_BlitSurface(imageLum, NULL, screen, &rectLum);
+		imagePlay = TTF_RenderUTF8_Blended(font, gameList[currentGame].totalTime, color);	
+		SDL_BlitSurface(imagePlay, NULL, screen, &rectTime);
+		SDL_BlitSurface(imageBatteryIcon, NULL, screen, &rectBatteryIcon);
+		if (bTuto > 0) {
+			SDL_BlitSurface(imageTuto, NULL, screen, NULL);
+		}	
+		if (file_exists(".menuSelect")){
+			break;
+		}
+		if ( file_exists(".menuStart") || file_exists(".menuA") ) {
+	
+			if ( bTuto > 0){
+				if (bTuto < 4){
+					remove (".menuStart");
+					remove (".menuA");
+				}
+				else{
+					if ((bTuto == 4)&&file_exists(".menuStart")){
+						remove(".menuA");
+						remove(".modeTuto");
+						int fd = creat(".modeTuto2", 777);
+						close(fd); 	
+						break ;
+					}
+					else if ((bTuto == 5)&&file_exists(".menuA")){
+						remove(".menuStart");
+						break ;
+					}
+				}
+			}
+			else {
+				break;
+			}
+		}
+		
+		
+		
+		SDL_BlitSurface(screen, NULL, video, NULL); 
+		SDL_Flip(video);
 		
 		usleep(50000);
 		if (nSlower == 1){
 			usleep(80000);
 		}
 	}
-
-
 	screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640,480, 32, 0,0,0,0);
-	
 	if (bShowBoot == 1){
-		imageBackground = IMG_Load("bootScr.png");
-		SDL_BlitSurface(imageBackground, NULL, screen, NULL);
+		SDL_BlitSurface(imageBackgroundDefault, NULL, screen, NULL);
 	}
 	else{
-	if (currentGame != 0){
-		// A new game has been chosen
-		remove("/mnt/SDCARD/.tmp_update/RACommand.txt");
-		FILE *file = fopen("/mnt/SDCARD/.tmp_update/RACommand.txt", "w");
-		fputs(gameList[currentGame].RACommand, file);
-		fclose(file); 	
-		
-		remove("/mnt/SDCARD/.tmp_update/romName.txt");
-
-		
-	}
-	
+		if (currentGame != 0){
+			// A new game has been chosen
+			remove("/mnt/SDCARD/.tmp_update/RACommand.txt");
+			FILE *file = fopen("/mnt/SDCARD/.tmp_update/RACommand.txt", "w");
+			fputs(gameList[currentGame].RACommand, file);
+			fclose(file); 	
+			
+			remove("/mnt/SDCARD/.tmp_update/romName.txt");			
+		}
 	}
 	 
-	
 	SDL_BlitSurface(screen, NULL, video, NULL); 
 	SDL_Flip(video);
 	
    	SDL_FreeSurface(screen);
    	SDL_FreeSurface(video);
-   	
-   	SDL_FreeSurface(imageBackground);  	
+   		
+  
+   	SDL_FreeSurface(imageBackgroundDefault);  
+   	SDL_FreeSurface(imageBackgroundLowBat);  	
+   	SDL_FreeSurface(imageBackgroundGame);  
+   	SDL_FreeSurface(imageBackgroundNoGame); 
+   		
    	SDL_FreeSurface(imageMenuBar);
    	SDL_FreeSurface(imagewhiteLigne);
    	SDL_FreeSurface(imagePlay);

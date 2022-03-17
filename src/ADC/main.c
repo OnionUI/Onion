@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <fcntl.h>
 #include "sys/ioctl.h"
+#include <linux/input.h>
 
 typedef struct {
     int channel_value;
@@ -119,7 +120,7 @@ static void checkADC(void) {
         close(adc_fd); 
         
         // Rumble in case of low battery
-  		if ((percBat<20) && (countChecks % 30)){
+  		if (percBat<=10){
   			rumble(1);
 			usleep(3000000);	//3s
 			rumble(0);		
@@ -131,15 +132,30 @@ static void checkADC(void) {
 
 static void* runADC(void *arg) {
     while(1) {
-        sleep(15);
         checkADC();
+        sleep(15);
+     
     }
     return 0;
 }
 
 int main (int argc, char *argv[]) {
+	/*
+	sleep(15);
+	//sleep(10); 10 seconds
 
+	int input_fd = open("/dev/input/event0", O_WRONLY);
+	struct input_event	ev;
+
+	ev.type = EV_KEY;
+	ev.code = KEY_SPACE;
+	ev.value = 1;		// Press
+
+	write(input_fd, &ev, sizeof(ev));
+	close(input_fd);
+*/
+	
+	
 	initADC();   
-	checkADC();   
 	runADC(NULL);
 }

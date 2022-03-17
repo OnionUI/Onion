@@ -10,6 +10,7 @@
 
 // Max number of records in the DB
 #define MAXVALUES 1000
+#define MAXBACKUPFILES 80
 
 struct structom {                  /*struct called list*/
              char name[100]   ;
@@ -61,10 +62,10 @@ int readRomDB(){
      		tailleStructure = 0;
     		
     		for (int i=0; i<MAXVALUES; i++){
-    			if (strlen(romList[i].name) == 0){
-    				break;
+    			if (strlen(romList[i].name) != 0){
+    				tailleStructure=i+1;
     			}
-    			tailleStructure++;
+    			
     		}
     		fclose(file);
 		}
@@ -111,6 +112,40 @@ int searchRomDB(char* romName){
 	return position;
 }
 
+
+void backupDB(void){
+
+	char fileNameToBackup[120];
+	char fileNameNextSlot[120];
+	char command[250];	
+	int i;
+	mkdir("/mnt/SDCARD/RetroArch/.retroarch/saves/PlayActivityBackup", 0700);
+	for (i=0; i<MAXBACKUPFILES; i++) {
+		snprintf(fileNameToBackup,sizeof(fileNameToBackup),"/mnt/SDCARD/RetroArch/.retroarch/saves/PlayActivityBackup/playActivityBackup%02d.db",i);
+		if ( access(fileNameToBackup, F_OK) != 0 ) break;
+	} 
+			
+	// Backup		
+	if (i<MAXBACKUPFILES){
+		snprintf(fileNameNextSlot,sizeof(fileNameNextSlot),"/mnt/SDCARD/RetroArch/.retroarch/saves/PlayActivityBackup/playActivityBackup%02d.db",i+1);
+	}else{
+		snprintf(fileNameToBackup,sizeof(fileNameToBackup),"/mnt/SDCARD/RetroArch/.retroarch/saves/PlayActivityBackup/playActivityBackup00.db");
+		snprintf(fileNameNextSlot,sizeof(fileNameNextSlot),"/mnt/SDCARD/RetroArch/.retroarch/saves/PlayActivityBackup/playActivityBackup01.db");
+	}
+	// Next slot for backup
+	remove(fileNameToBackup);
+	remove(fileNameNextSlot);
+			
+	sprintf(command, "cp /mnt/SDCARD/RetroArch/.retroarch/saves/playActivity.db %s", fileNameToBackup);
+	system(command);
+
+
+	
+	
+}
+
+
+
 int main(int argc, char *argv[]) {
   	
 	if (argc > 1){
@@ -129,107 +164,113 @@ int main(int argc, char *argv[]) {
 		}
 	
 		else {
-			FILE *fp;
-			long lSize;
-			char *baseTime;
-			
-			char *gameName = (char *)basename(argv[1]);
-			gameName[99] = '\0';
-			fp = fopen ( "initTimer" , "rb" );
-			if( fp > 0 ) {
-				fseek( fp , 0L , SEEK_END);
-				lSize = ftell( fp );
-				rewind( fp );
-				baseTime = (char*)calloc( 1, lSize+1 );
-				if( !baseTime ) fclose(fp),fputs("memory alloc fails",stderr),exit(1);
-			
-				if( 1!=fread( baseTime , lSize, 1 , fp) )
-  				fclose(fp),free(baseTime),fputs("entire read fails",stderr),exit(1);
-				fclose(fp);
-	
-				int iBaseTime = atoi(baseTime) ;
-    			
-    			int iEndEpochTime = (int)time(NULL);
-				char cEndEpochTime[15];
-				sprintf(cEndEpochTime, "%d", iEndEpochTime);
-
-				char cTempsDeJeuSession[15];	
-    			int iTempsDeJeuSession = iEndEpochTime - iBaseTime ;
-    			sprintf(cTempsDeJeuSession, "%d", iTempsDeJeuSession);
+			if (strcmp(argv[1],"") != 0) {
+				FILE *fp;
+				long lSize;
+				char *baseTime;
 				
-	
+				char *gameName = (char *)basename(argv[1]);
+				gameName[99] = '\0';
+				fp = fopen ( "initTimer" , "rb" );
+				if( fp > 0 ) {
+					fseek( fp , 0L , SEEK_END);
+					lSize = ftell( fp );
+					rewind( fp );
+					baseTime = (char*)calloc( 1, lSize+1 );
+					if( !baseTime ) fclose(fp),fputs("memory alloc fails",stderr),exit(1);
 				
-				// Loading DB
-				if (readRomDB()  == -1){
-					// To avoid a DB overwrite
-					 return EXIT_SUCCESS;
-				}
-    			 
-    			//Addition of the new time
-    			int totalPlayTime;
-    			int searchPosition = searchRomDB(gameName);
-    			if (searchPosition>=0){
-    				// Game found
-    				romList[searchPosition].playTime += iTempsDeJeuSession;
-    				totalPlayTime = romList[searchPosition].playTime;
-					}
-    			else {
-    				// Game inexistant, add to the DB	
-    				if (tailleStructure<MAXVALUES-1){
-    					romList[tailleStructure].playTime = iTempsDeJeuSession;
-    					totalPlayTime = iTempsDeJeuSession ;
-    					strcpy (romList[tailleStructure].name, gameName);	
-    					tailleStructure ++;
-    				}
-    				else {
-    					totalPlayTime = -1;
-    				}	
-    			}
-    		
-    			    			
-    			// Write total current time for the onion launcher				 	
-				char cTotalTimePlayed[50];	 	
-				remove("currentTotalTime");
-				int totalTime_fd = open("currentTotalTime", O_CREAT | O_WRONLY);
-
-				if (totalTime_fd > 0) {
-				
-					if (totalPlayTime >=  0) {				
-						int h, m;
-						
-						h = (totalPlayTime/3600); 
-						
-						m = (totalPlayTime -(3600*h))/60;	
-						
-						//s = (totalPlayTime -(3600*h)-(m*60));
-
-						sprintf(cTotalTimePlayed, "%d:%02d", h,m);
-					 	//sprintf(cTotalTimePlayed, "%dh%02dm", h,m);
-					 	//logMessage(cTotalTimePlayed);
-					 	
-					}
-					else {
-						if (totalPlayTime == -1) {
-							// DB full, needs to be cleaned
-						strcpy(cTotalTimePlayed,"DB:FU");
-						}
-						else{
-						strcpy(cTotalTimePlayed,"ERROR");
-						
-						}
-					}
-					write(totalTime_fd, cTotalTimePlayed, strlen(cTotalTimePlayed));
-        			close(totalTime_fd);		
-				}
-				
-	
-   				// We save the DB
-
-   				writeRomDB();		
-    			//displayRomDB();
-	
-			}
+					if( 1!=fread( baseTime , lSize, 1 , fp) )
+  					fclose(fp),free(baseTime),fputs("entire read fails",stderr),exit(1);
+					fclose(fp);
 		
+					int iBaseTime = atoi(baseTime) ;
+    				
+    				int iEndEpochTime = (int)time(NULL);
+					char cEndEpochTime[15];
+					sprintf(cEndEpochTime, "%d", iEndEpochTime);
+	
+					char cTempsDeJeuSession[15];	
+    				int iTempsDeJeuSession = iEndEpochTime - iBaseTime ;
+    				sprintf(cTempsDeJeuSession, "%d", iTempsDeJeuSession);
+					
+					// Loading DB
+					if (readRomDB()  == -1){
+						// To avoid a DB overwrite
+					 	return EXIT_SUCCESS;
+					}
+    			 	
+    				//Addition of the new time
+    				int totalPlayTime;
+    				int searchPosition = searchRomDB(gameName);
+    				if (searchPosition>=0){
+    					// Game found
+    					romList[searchPosition].playTime += iTempsDeJeuSession;
+    					totalPlayTime = romList[searchPosition].playTime;
+						}
+    				else {
+    					// Game inexistant, add to the DB	
+    					if (tailleStructure<MAXVALUES-1){
+    						romList[tailleStructure].playTime = iTempsDeJeuSession;
+    						totalPlayTime = iTempsDeJeuSession ;
+    						strcpy (romList[tailleStructure].name, gameName);	
+    						tailleStructure ++;
+    					}
+    					else {
+    						totalPlayTime = -1;
+    					}	
+    				}
+    			
+    			    				
+    				// Write total current time for the onion launcher				 	
+					char cTotalTimePlayed[50];	 	
+					remove("currentTotalTime");
+					int totalTime_fd = open("currentTotalTime", O_CREAT | O_WRONLY);
+	
+					if (totalTime_fd > 0) {
+					
+						if (totalPlayTime >=  0) {				
+							int h, m;
+							
+							h = (totalPlayTime/3600); 
+							
+							m = (totalPlayTime -(3600*h))/60;	
+							
+							//s = (totalPlayTime -(3600*h)-(m*60));
+	
+							sprintf(cTotalTimePlayed, "%d:%02d", h,m);
+					 		//sprintf(cTotalTimePlayed, "%dh%02dm", h,m);
+					 		//logMessage(cTotalTimePlayed);
+					 		
+						}
+						else {
+							if (totalPlayTime == -1) {
+								// DB full, needs to be cleaned
+							strcpy(cTotalTimePlayed,"DB:FU");
+							}
+							else{
+							strcpy(cTotalTimePlayed,"ERROR");
+							
+							}
+						}
+						write(totalTime_fd, cTotalTimePlayed, strlen(cTotalTimePlayed));
+        				close(totalTime_fd);		
+					}
+					
+		
+   					// DB Backup
+   					backupDB();
+   					
+   					// We save the DB
+   					writeRomDB();		
+   					
+   					
+   						
+				}
+			
+			}
+			
+		
+			
 		}		
 		
 	}

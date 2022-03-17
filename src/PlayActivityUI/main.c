@@ -84,10 +84,10 @@ int readRomDB(){
      		tailleStructure = 0;
     		
     		for (int i=0; i<MAXVALUES; i++){
-    			if (strlen(romList[i].name) == 0){
-    				break;
+    			if (strlen(romList[i].name) != 0){
+    				tailleStructure++;
     			}
-    			tailleStructure++;
+    			
     		}
     		fclose(file);
 		}
@@ -210,7 +210,7 @@ int main(void) {
 
 	}
 
-	writeRomDB();
+	//writeRomDB();
 		
 	//	Mileage
 	int ntotalTime = 0;
@@ -273,7 +273,7 @@ int main(void) {
 		imageRomPlayTime = TTF_RenderUTF8_Blended(font40, cTotalTimePlayed, color_white);
 		imageRomName = TTF_RenderUTF8_Blended(font25, bnameWOExt , color_white);
 
-		SDL_Rect rectPosition = { 20, 78+(90*i), 76, 39};
+		SDL_Rect rectPosition = { 16, 78+(90*i), 76, 39};
 		SDL_Rect rectRomPlayTime = { 77, 66+(90*i), 254, 56};
 		SDL_Rect rectRomNames = { 78, 104+(90*i), 600, 40};	
 		
@@ -374,7 +374,7 @@ int main(void) {
 		imageRomPlayTime = TTF_RenderUTF8_Blended(font40, cTotalTimePlayed, color_white);
 		imageRomName = TTF_RenderUTF8_Blended(font25, bnameWOExt , color_white);
 
-		SDL_Rect rectPosition = { 20, 78+(90*i), 76, 39};
+		SDL_Rect rectPosition = { 16, 78+(90*i), 76, 39};
 		SDL_Rect rectRomPlayTime = { 77, 66+(90*i), 254, 56};
 		SDL_Rect rectRomNames = { 78, 104+(90*i), 600, 40};	
 		

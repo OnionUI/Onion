@@ -297,6 +297,7 @@ int main(void) {
 
 				imageThemeNom = TTF_RenderUTF8_Blended(font21, currPlay, color_white);
 				SDL_BlitSurface(imageThemeNom, NULL, screen, &rectImageThemeNom);
+				
 			}
 			free(currPlay);
 			SDL_FreeSurface(surfaceThemeBackground);	
@@ -325,6 +326,7 @@ int main(void) {
 			
 		
 		}
+		
 		
 
 		SDL_BlitSurface(screen, NULL, video, NULL); 
