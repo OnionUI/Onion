@@ -71,6 +71,30 @@
 - Boxart moved to /Roms/_systemname_/Imgs for easier scraping
 - Various bug fixes and optimizations.
 
+#### Shortcuts
+
+Menu + Start : Exit game
+Menu + Select : Retroarch menu
+
+Menu + R2 : Save state
+Menu + L2 : Load state
+
+Menu + R (Just R in GB games) : Fast forward
+Menu + L : Rewind (If enabled)
+
+Select + Start + R2 : Brightness up
+Select + Start + L2 : Brightness down
+
+Menu + Up : Save slot increase
+Menu + Down : Save slot decrease
+Menu + Left : Toggle FPS display
+
+(In launcher mode)
+Power button : Deep sleep
+Menu + Power : Light sleep
+Select + Start + R1 + R2 : Force shutdown
+Select + Start + R1 + R2 + Menu : Disable the launcher and restart
+
 ###### Known Issues:
 - Miyoo creates a new IMG folder on the root of your SD card. You can ignore this.
 
