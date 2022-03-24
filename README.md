@@ -17,7 +17,7 @@
 > - Saves are located at /Retroarch/.retroarch/saves/_corename_
 > - States are located at /Retroarch/.retroarch/states/_corename_
 - Delete all folders from your SD except "BIOS" and "Roms"
-- Unzip the ".tmp_archive" folder to the root of your SD.
+- Unzip the ".tmp_update" folder to the root of your SD.
 - Boot up your Miyoo Mini and follow the on-screen instructions to get started.
 - Restore your backed up saves and states.
 - Optional: To restore your box art, copy each system's box art folder into the system's respective folder in /Roms/ and rename each folder to "Imgs"
