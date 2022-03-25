@@ -1,4 +1,4 @@
-# Onion V3: Definitive Edition
+# Onion (and Eggs) V3: Definitive Edition
 ### [Download newest release here!](https://github.com/jimgraygit/Onion/releases)
 
   
