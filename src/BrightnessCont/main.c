@@ -13,7 +13,7 @@
 #include "sys/ioctl.h"
 #include <signal.h>
 #include <dirent.h>
-
+#include <signal.h>
 
 //	for ev.value
 #define RELEASED	0
@@ -162,9 +162,6 @@ void turnScreenOff(void) {
 
 
 
-
-
-
 #define	BUTTON_A	KEY_SPACE
 #define	BUTTON_B	KEY_LEFTCTRL  
 
@@ -195,6 +192,7 @@ int main() {
 //	uint32_t		x_pressed = 0;
 //	uint32_t		y_pressed = 0;
 	uint32_t		start_pressed = 0;
+	uint32_t		power_pressed = 0;
 	uint32_t		select_pressed = 0;	
 	
 
@@ -253,30 +251,43 @@ int main() {
 								if ( ev.code == BUTTON_B ) {
 										b_pressed = val;
 								}
+								else
+									if ( ev.code == BUTTON_POWER ) {
+											power_pressed = val;
+									}	
 							
 		// Shorcuts handlers	
 		// Panic mode
+		
 		if (start_pressed & select_pressed & menu_pressed & r2_pressed & l2_pressed) {
-			 system("rm updater"); 
+			 system("rm /mnt/SDCARD/App/OnionLauncher/data/.enabled"); 
 			 system("reboot");
 		}
 		
 		// Force turn off
 		if (start_pressed & select_pressed & r2_pressed & l2_pressed) {
 			 system("reboot");
+			 sleep(10);
 		}
 			
 		// Return to MainUI
 		if (menu_pressed & a_pressed) {
 			int fd = creat(".menuA", 777);
 			close(fd);	
+			menu_pressed = 0;
+			a_pressed = 0;
+			
 		}	
 		if (menu_pressed & select_pressed) {
 			int fd = creat(".menuSelect", 777);
 			close(fd);	
+			menu_pressed = 0;
+			select_pressed = 0;
 		}	
 		// Exit / Return game shortcut 
 		if (menu_pressed & start_pressed) {
+			menu_pressed = 0;
+			start_pressed = 0;
 			
 			if (file_exists(".scrOrder") == 1){
 				// We are leaving RA, not the panel
@@ -288,9 +299,74 @@ int main() {
 			close(fd); 
 				
 		}	
+
+		if (power_pressed && ! menu_pressed){
+		power_pressed = 0;
+		menu_pressed = 0;
+
+		SetRawBrightness(0);
+		system("killall -15 retroarch");
+		int fd = creat(".deepSleep", 777);
+		close(fd);	
+		
+		//system("killall turningOff");
+		//system("cd /mnt/SDCARD/RetroArch/ ; ./retroarch --verbose --command QUIT");
+		
+		
+		/*	
+			struct input_event	ev_menu;
+			struct input_event	ev_start;
+		
+			ev_menu.type = EV_KEY;
+			ev_start.type = EV_KEY;
+			
+			ev_menu.code = BUTTON_MENU;
+			ev_start.code = BUTTON_START;		
+		
+		
+		
+			//SetRawBrightness(0);
+			int input_fd = open("/dev/input/event0", O_WRONLY);
+			if(input_fd > 0) {
+			int fd = creat(".deepSleep", 777);
+			close(fd);
+			
+			
+				for (int i = 0 ; i <10000 ; i++) {
+					
+					
+						ev_menu.value = 1;
+						ev_start.value = 1;
+								
+						write(input_fd, &ev_menu, sizeof(ev_menu));			
+						write(input_fd, &ev_start, sizeof(ev_start));		
+				
+		
+						
+						ev_menu.value = 0;
+						ev_start.value = 0;		
+						
+						
+						write(input_fd, &ev_menu, sizeof(ev_menu));
+						write(input_fd, &ev_start, sizeof(ev_start));	
+			
+					
+				}	
+			close(input_fd);
+			
+			}
+			
+		
+			power_pressed = 0;
+			
+		*/
+		}
 		 
 		// Sleep mode
-		if (( ev.code == BUTTON_POWER ) && ( val==1 )) {
+		if (power_pressed && menu_pressed) {
+			power_pressed = 0 ;
+			menu_pressed = 0 ;
+			
 			// suspend
 			turnScreenOff(); 
 			// Timer registration
@@ -299,7 +375,7 @@ int main() {
 			usleep(200000); 
 			suspend(); 
 			rumble(0);
-			// Wait for Release button
+			// Wait for Resleeplease button
 			do { 
 				if ( read(input_fd, &ev, sizeof(ev)) != sizeof(ev) ) {
 					break;
@@ -313,16 +389,13 @@ int main() {
 			
 			usleep(200000); 
 			SetBrightness(brightness_value);
-		
-
-			
 		}	
-				
+			
 		// Brightness possible values
 		// 0 1 2 4 6 8 10
 		
 		if (start_pressed & select_pressed & l2_pressed) {
-			
+		//	start_pressed = select_pressed = l2_pressed = 0;
 			if (brightness_value >= 1){
 				brightness_value--;
 				if (brightness_value > 2){
@@ -344,7 +417,7 @@ int main() {
 
 			
 		if (start_pressed & select_pressed & r2_pressed) {
-			
+		//	start_pressed = select_pressed = r2_pressed = 0;
 			if (brightness_value <= 8){
 				brightness_value++;
 				if (brightness_value > 2){

@@ -153,7 +153,10 @@ int main(void) {
 	uint32_t		select_pressed = 0;	
 
 	uint32_t		left_pressed = 0;
-	uint32_t		right_pressed = 0;		
+	uint32_t		right_pressed = 0;	
+	uint32_t		power_pressed = 0;	
+	
+		
 	
 	
 	SDL_Init(SDL_INIT_VIDEO);
@@ -329,7 +332,16 @@ int main(void) {
 									else
 										if ( ev.code == KEY_RIGHT ) {
 												right_pressed = val;
-										}								
+										}
+									else
+										if ( ev.code == BUTTON_POWER ) {
+												power_pressed = val;
+										}									
+			
+		if (power_pressed) {			
+			system("reboot");
+			sleep(10);
+		}	
 										
 		if (b_pressed) {			
 			break;

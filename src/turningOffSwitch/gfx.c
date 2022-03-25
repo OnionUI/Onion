@@ -9,7 +9,7 @@
 #include <mi_gfx.h>
 
 //#define	DOUBLEBUF
-
+ 
 int			fd_fb = 0;
 struct			fb_fix_screeninfo finfo;
 struct			fb_var_screeninfo vinfo;

@@ -69,7 +69,7 @@ int main(void) {
 	cJSON* path = NULL;
 	cJSON* core_path = NULL;
 	
-	const char *request_body = load_file("/mnt/SDCARD/RetroArch/content_history.lpl");
+	const char *request_body = load_file("/mnt/SDCARD/RetroArch/.retroarch/content_history.lpl");
 	
 	request_json = cJSON_Parse(request_body);
 	 

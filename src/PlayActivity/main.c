@@ -79,10 +79,25 @@ int readRomDB(){
 }
 
 void writeRomDB(void){
-	FILE * file= fopen("/mnt/SDCARD/RetroArch/.retroarch/saves/playActivity.db", "wb");
+	remove("/mnt/SDCARD/RetroArch/.retroarch/saves/playActivity_tmp.db");
+	
+	FILE * file= fopen("/mnt/SDCARD/RetroArch/.retroarch/saves/playActivity_tmp.db", "wb");
 	if (file != NULL) {
     	fwrite(romList, sizeof(romList), 1, file);
     	fclose(file);
+	}
+	
+	// Check anti corruption before overwrite
+	long int sz=0;
+	FILE * fp= fopen("/mnt/SDCARD/RetroArch/.retroarch/saves/playActivity_tmp.db", "ro");
+	if (fp != NULL){
+		fseek(fp, 0L, SEEK_END);
+		sz = ftell(fp);
+		fclose(fp);
+		if (sz>10000){
+		system("cp /mnt/SDCARD/RetroArch/.retroarch/saves/playActivity_tmp.db /mnt/SDCARD/RetroArch/.retroarch/saves/playActivity.db");
+	
+		}
 	}
 }
 

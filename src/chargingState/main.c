@@ -49,6 +49,8 @@ int main(void) {
 	SDL_Surface* image4 = IMG_Load("chargingState4.png");
 	SDL_Surface* image5 = IMG_Load("chargingState5.png");
 	
+	SetBrightness(8);
+	
 	for (int i = 1; i < 10; ++i){
 		
 		SDL_BlitSurface(image0, NULL, screen, NULL);
@@ -89,9 +91,6 @@ int main(void) {
 	}
 	
 
-	
-	
-	
 	int run = 1;
 	SetBrightness(8);
 	//usleep(5000000);	//5s
@@ -101,14 +100,22 @@ int main(void) {
 	
 	SetBrightness(0);
 	
-	while (run) {	
+	SDL_Event event;
+	
+	while ((SDL_PollEvent(&event))||(run==1)) {
+		if (event.type==SDL_KEYDOWN) {
+			if (event.key.keysym.sym == SDLK_SPACE){	    
+				SetBrightness(8);
+				run = 0;
+			}
+		}	
 		checkCharging();
 		if (is_charging == 0){
-			//SetBrightness(8);
-			run = 0;
+			system("reboot");	
 		}
 		usleep(100000);
 	}
+	
 	
    	SDL_FreeSurface(screen);
   
