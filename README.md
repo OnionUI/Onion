@@ -49,7 +49,7 @@
 - No more memory leaks or kernel panic!
 - Low bat (<10%) big visual battery warning indicator.
 - Your handheld will also rumble periodically in game to indicate that your battery is bellow 10%
-- When the battery goes < 4%, the game is now saved to not loose progression and the handheld turned off.
+- When the battery goes < 4%, the game is now saved to prevent loosing progression, and the handheld turned off.
   
 #### Theme Switcher app (Credit: PixelShift and Totofaki)   
 <img src="https://user-images.githubusercontent.com/16885275/154789504-84253d41-373d-4c84-b194-547c6343f904.png" width="350">  
