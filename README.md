@@ -42,8 +42,6 @@
 
 - Reduced startup time by almost half to get you into your game without any hassle.
 - Full overlay with accurate brightness and battery readings.
-- Quick launch any game in your history
-- Press right and left to choose your game, then menu to launch it.
 - Improved brightness curve for better low-light gaming.
 - Improved Sleep mode with full game suspension.
 - Custom charging screen that prevent screen burnings.
