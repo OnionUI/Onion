@@ -38,7 +38,7 @@
 
 <img src="https://user-images.githubusercontent.com/16885275/157870119-fc9fd688-22e4-4eda-a080-81ec398c60d9.png" width="350">  
 
-- Quick launch any game in your history
+- Quick launch any switch any game from your history
 
 - Reduced startup time by almost half to get you into your game without any hassle.
 - Full overlay with accurate brightness and battery readings.
