@@ -11,6 +11,7 @@
 - Format your SD card as Fat32
 - Unzip the ".tmp_update" folder and its content to the root of your SD.
 - Boot up your Miyoo Mini and follow the on-screen instructions to get started.
+- Your Mini will turn off after the installation is completed.
   
 #### Installation (Upgrade):
 - Backup your saves, states and scraped images 
