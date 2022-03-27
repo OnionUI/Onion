@@ -42,12 +42,16 @@
 
 - Reduced startup time by almost half to get you into your game without any hassle.
 - Full overlay with accurate brightness and battery readings.
+- Quick launch any game in your history
+- Press right and left to choose your game, then menu+start to launch it.
 - Improved brightness curve for better low-light gaming.
 - Improved Sleep mode with full game suspension.
 - Custom charging screen that prevent screen burnings.
 - Custom low battery notification, no more flickering icon.
 - No more memory leaks or kernel panic!
-- Automatic shutdown.
+- Low bat (<10%) big visual battery warning indicator.
+- Your handheld will also rumble periodically in game to indicate that your battery is bellow 10%
+- When the battery goes < 4%, the game is now saved to not loose progression and the handheld turned off.
   
 #### Theme Switcher app (Credit: PixelShift and Totofaki)   
 <img src="https://user-images.githubusercontent.com/16885275/154789504-84253d41-373d-4c84-b194-547c6343f904.png" width="350">  
@@ -85,18 +89,18 @@ Menu + L : Rewind (If enabled)
 Select + Start + R2 : Brightness up   
 Select + Start + L2 : Brightness down   
    
-Menu + Up : Save slot increase      
-Menu + Down : Save slot decrease   
-Menu + Left : Toggle FPS display   
+Menu + Right : Save slot increase      
+Menu + Left : Save slot decrease   
    
 (In launcher mode)   
+Menu : Toggle Game / launcher panel
+Select : Play activity 
+A : Exit to Miyoo menu
+Menu + Up : Brightness up  
+Menu + Down : Brightness down
 Power button : Deep sleep   
 Menu + Power : Light sleep   
 Select + Start + R1 + R2 : Force shutdown   
-Select + Start + R1 + R2 + Menu : Disable the launcher and restart   
-   
-###### Known Issues:   
-- Miyoo creates a new IMG folder on the root of your SD card. You can ignore this.   
-   
+     
 Help us improve Onion here: https://docs.google.com/spreadsheets/d/1mocDiQFzC-b8hpWmhN-VQxWEf8hV14Jsit6P0_-DQNU/edit?usp=sharing
    
