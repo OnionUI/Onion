@@ -8,7 +8,7 @@
   
 ## Installation
 #### Installation (Fresh Install):
-- Format your SD card as Fat32
+- Format your SD card as Fat32. (Use a fast, trusted brand not the one sent with the handheld)
 - Unzip the ".tmp_update" folder and its content to the root of your SD.
 - Boot up your Miyoo Mini and follow the on-screen instructions to get started.
 - Your Mini will turn off after the installation is completed.
