@@ -12,7 +12,8 @@
 - Unzip the ".tmp_update" folder and its content to the root of your SD.
 - Boot up your Miyoo Mini and follow the on-screen instructions to get started.
 - Your Mini will turn off after the installation is completed.
-  
+ (Don't delete the .tmp_update folder, it is now part of the Onion installation) 
+
 #### Installation (Upgrade):
 - Backup your saves, states and scraped images 
 > - Saves are located at /Retroarch/.retroarch/saves/_corename_
