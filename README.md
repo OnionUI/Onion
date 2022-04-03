@@ -91,7 +91,9 @@ Select + Start + L2 : Brightness down
    
 Menu + Right : Save slot increase      
 Menu + Left : Save slot decrease   
-   
+
+Menu + X : Toggle FPS display
+
 (In launcher mode)   
 Menu : Toggle Game / launcher panel
 Select : Play activity 
@@ -101,6 +103,9 @@ Menu + Down : Brightness down
 Power button : Deep sleep   
 Menu + Power : Light sleep   
 Select + Start + R1 + R2 : Force shutdown   
+
+(In a Game boy game)
+R2/L2 : Change palette
      
 Help us improve Onion here: https://docs.google.com/spreadsheets/d/1mocDiQFzC-b8hpWmhN-VQxWEf8hV14Jsit6P0_-DQNU/edit?usp=sharing
    
