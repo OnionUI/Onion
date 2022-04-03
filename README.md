@@ -65,6 +65,7 @@
 - Crisp 640*480 resolution
 - Lag free
 - Now a game launcher (Cores embedded, Playlists unlocked, Favorites unlocked)
+- Compiled from scratch by Eggs for incredible performances. Custom audio, display and input driver. 
 
 #### Others  
 - Experimental Arduboy support (Credit: JMARoeder)
