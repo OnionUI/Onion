@@ -5,8 +5,8 @@
 #include <linux/fb.h>
 #include <sys/ioctl.h>
 #include <SDL/SDL.h>
-#include <mi_sys.h>
-#include <mi_gfx.h>
+#include </usr/local/include/mi_sys.h>
+#include </usr/local/include/mi_gfx.h>
 
 //#define	DOUBLEBUF
  
@@ -20,7 +20,7 @@ MI_GFX_Surface_t	stDst;
 MI_GFX_Rect_t		stDstRect;
 MI_GFX_Opt_t		stOpt;
 
-//
+// 
 //	GFX Init
 //		Prepare for HW Blit to FB
 //

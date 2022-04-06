@@ -45,7 +45,7 @@ int tailleStructPlayActivity = 0;
 
 
 void logMessage(char* Message) {
-	FILE *file = fopen("log_turnMessage.txt", "a");
+	FILE *file = fopen("/mnt/SDCARD/.tmp_update/log_turnMessage.txt", "a");
 	/*char tempMess[] = "\r\n";
     strcat(Message,tempMess);
     */
@@ -291,7 +291,7 @@ int main(void) {
 	// Check current battery value
 	char *currBat;
 	int nBat;
-	
+		
 	fp = fopen ( "/tmp/percBat" , "rb" );
 	if( fp > 0 ) {
 		fseek( fp , 0L , SEEK_END);
@@ -342,19 +342,24 @@ int main(void) {
 	
 	char currPicture[MAXHROMNAMESIZE+44];
 	
-	for (int i = 1; i < 150; ++i){
-		if (file_exists(".menuStart")) {
-			// The screenshot is ready 
-			remove(".menuStart");
-			imageBackgroundGame = IMG_Load("screenshotGame.bmp");
-	 		// Printscreen save for specific game
-	 		sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",gameList[0].name,".png");	 		
-			// Move screenshot to destination
-			rename("screenshotGame.bmp", currPicture);
-	 		break;    
-	 	}
-		usleep(100);
+
+	if (file_exists(".menuStart")) {
+		// The screenshot is ready 
+		remove(".menuStart");
+		imageBackgroundGame = IMG_Load("screenshotGame.bmp");
+	 	// Printscreen save for specific game
+	 	sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",gameList[0].name,".png");	 		
+		// Move screenshot to destination
+		rename("screenshotGame.bmp", currPicture);  
 	}
+	else {
+    	sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",gameList[0].name,".png");
+    	if (file_exists(currPicture)==1){
+			imageBackgroundGame = IMG_Load(currPicture);
+		}
+	
+	}
+	
 
 	// Battery icon
 	SDL_Surface* imageBatteryIcon;
@@ -444,7 +449,28 @@ int main(void) {
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
 			if (event.type==SDL_KEYDOWN) {
+						
 				switch( event.key.keysym.sym ){	    
+
+						case SDLK_SPACE:
+							{
+							int fd = creat(".menuStart", 777);
+							close(fd); 
+							break;
+							}
+						case SDLK_LCTRL:
+							{
+							
+							int fd = creat(".menuA", 777);
+							close(fd); 
+							break;
+							}
+						case SDLK_RCTRL:
+							{
+							int fd = creat(".menuSelect", 777);
+							close(fd); 
+							break;
+							}
 					    case SDLK_RIGHT:
                      		if (currentGame<(taillestructGames-1)){
                      			currentGame ++;
@@ -452,7 +478,6 @@ int main(void) {
                      			if (file_exists(currPicture)==1){
 									imageBackgroundGame = IMG_Load(currPicture);
 								}
-                     			nSlower = 1;
                      		}
 							break;		
 						case SDLK_LEFT:
@@ -464,6 +489,8 @@ int main(void) {
 								}
                      		}
 							break;
+						
+
 						default:
                        		break;
 				}
