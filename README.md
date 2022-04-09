@@ -2,9 +2,9 @@
 ### [Download newest release here!](https://github.com/jimgraygit/Onion/releases)
 
   
-<img src="https://user-images.githubusercontent.com/16885275/154790941-2f9a5912-3844-4a6b-a533-7bffccb50ffd.jpg" width="600"> 
+<img src="https://user-images.githubusercontent.com/16885275/154790941-2f9a5912-3844-4a6b-a533-7bffccb50ffd.jpg" width="500"> 
 
-#### This release was made possible by PixelShift, Totofaki and the Onion community.
+#### This release was made possible by Totofaki, PixelShift and the Onion community.
   
 ## Installation
 #### Installation (Fresh Install):
@@ -25,23 +25,21 @@
 - Optional: To restore your box art, copy each system's box art folder into the system's respective folder in /Roms/ and rename each folder to "Imgs"
   
 ## Changelog and new features
-#### Streamlined custom installer (Credit: Totofaki & PixelShift)  
-<img src="https://user-images.githubusercontent.com/16885275/154789609-320620c4-b945-429a-8b0d-177cb30dbdeb.png" width="350">  
+### Custom installer 
+<img src="https://user-images.githubusercontent.com/16885275/162589315-1d127c72-d404-4487-b379-3bde8179f566.png" width="350">  
 
-- Install and uninstall only the systems and apps you need. Any action is reversible.
+- Install / uninstall only the systems and apps you need. Any action is reversible.
 - Community presets, homebrews and more!
    
-#### Play Activity & Onion Launcher (Credit: Totofaki)
-
+### Play Activity 
+<img src="https://user-images.githubusercontent.com/16885275/162589339-e779c6dd-4e9d-47f0-8543-4646d84fc748.png" width="350">  
 - Track your game play times.   
-<img src="https://user-images.githubusercontent.com/16885275/154789764-5b92ee55-f3a3-4552-ab90-bf5abcb36c20.png" width="350">  
 
-
+### Onion Launcher
 <img src="https://user-images.githubusercontent.com/16885275/157870119-fc9fd688-22e4-4eda-a080-81ec398c60d9.png" width="350">  
 
-- Quick launch any game from your history
-- Quickly change games from your history
-- Reduced startup time by almost half to get you into your game without any hassle.
+- Quick boot on your last game played.
+- Quickly switch game from your history.
 - Full overlay with accurate brightness, battery readings and playtimes.
 - Improved brightness curve for better low-light gaming.
 - Improved Sleep mode with full game suspension. (menu + power)
@@ -52,21 +50,23 @@
 - Your handheld will also rumble periodically in game to indicate that your battery is bellow 10%
 - When the battery goes < 4%, the game is now saved to prevent loosing progression, and the handheld turned off.
   
-#### Theme Switcher app (Credit: PixelShift and Totofaki)   
+### Theme Switcher app   
 <img src="https://user-images.githubusercontent.com/16885275/154789504-84253d41-373d-4c84-b194-547c6343f904.png" width="350">  
   
 - Preview and change themes on the fly, no reboot required.
 - 26 themes from our community!
   
-#### RetroArch UI improvements   
+### RetroArch UI improvements   
 <img src="https://user-images.githubusercontent.com/16885275/154791260-d1a4d0b2-5582-45cc-a291-bead843a5171.png" width="350">  
 
+- Compiled and partially rebuild by Eggs for incredible performances. Custom audio driver, scalers, display driver and input driver for mindblowing performances.
+- Customs cores
+- Everything is finetuned with the best settings in mind.
 - Crisp 640*480 resolution
 - Lag free
 - Now a game launcher (Cores embedded, Playlists unlocked, Favorites unlocked)
-- Compiled from scratch by Eggs for incredible performances. Custom audio, display and input driver. 
 
-#### Others  
+### Others  
 - Experimental Arduboy support (Credit: JMARoeder)
 - Updated PICO emulator to Fake08 standalone (Credit: Supergrom)
 - Updated screenshot tool to v4 (Credit: eggs)
@@ -75,7 +75,7 @@
 - Boxart moved to /Roms/_systemname_/Imgs for easier scraping
 - Various bug fixes and optimizations.
 
-#### Shortcuts
+### Shortcuts
 
 Menu + Start : Exit game   
 Menu + Select : Retroarch menu   
