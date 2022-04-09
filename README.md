@@ -37,7 +37,8 @@
 - Track your game play times.   
 
 ### Onion Launcher
-<img src="https://user-images.githubusercontent.com/16885275/157870119-fc9fd688-22e4-4eda-a080-81ec398c60d9.png" width="350">  
+<img src="https://user-images.githubusercontent.com/16885275/162589962-9d2f4036-bb64-496e-bd7b-13c0b427808d.png" width="350">  
+
 
 The launcher is a user interface designed to launch when the miyoo mini starts.
 It allows you to launch the last game played in 8 seconds, and at the press of a button to save your game and turn off the console.
@@ -72,10 +73,10 @@ It also allows you to quickly change games among the last played and many other 
 - Now a game launcher (Cores embedded, Playlists unlocked, Favorites unlocked)
 
 ### Others  
+- Many additional systems supported
 - Experimental Arduboy support (Credit: JMARoeder)
 - Updated PICO emulator to Fake08 standalone (Credit: Supergrom)
 - Updated screenshot tool to v4 (Credit: eggs)
-- Fixed Super Game Boy default config (Credit: Updog)
 - Support for Icon Packs! Drag and drop your custom icons into the "Icons" folder at the root of your SD.
 - Boxart moved to /Roms/_systemname_/Imgs for easier scraping
 - Various bug fixes and optimizations.
