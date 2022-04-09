@@ -4,7 +4,7 @@
   
 <img src="https://user-images.githubusercontent.com/16885275/154790941-2f9a5912-3844-4a6b-a533-7bffccb50ffd.jpg" width="500"> 
 
-#### This release was made possible by Totofaki, PixelShift and the Onion community.
+#### This release was made possible by Totofaki, Eggs, JimGray, Pixelshift and many more from the Onion community.
   
 ## Installation
 #### Installation (Fresh Install):
@@ -24,6 +24,7 @@
 - Restore your backed up saves and states.
 - Optional: To restore your box art, copy each system's box art folder into the system's respective folder in /Roms/ and rename each folder to "Imgs"
   
+  
 ## Changelog and new features
 ### Custom installer 
 <img src="https://user-images.githubusercontent.com/16885275/162589315-1d127c72-d404-4487-b379-3bde8179f566.png" width="350">  
@@ -37,6 +38,10 @@
 
 ### Onion Launcher
 <img src="https://user-images.githubusercontent.com/16885275/157870119-fc9fd688-22e4-4eda-a080-81ec398c60d9.png" width="350">  
+
+The launcher is a user interface designed to launch when the miyoo mini starts.
+It allows you to launch the last game played in 8 seconds, and at the press of a button to save your game and turn off the console.
+It also allows you to quickly change games among the last played and many other advantages for a very straighforward experience.
 
 - Quick boot on your last game played.
 - Quickly switch game from your history.
@@ -59,7 +64,7 @@
 ### RetroArch UI improvements   
 <img src="https://user-images.githubusercontent.com/16885275/154791260-d1a4d0b2-5582-45cc-a291-bead843a5171.png" width="350">  
 
-- Compiled and partially rebuild by Eggs for incredible performances. Custom audio driver, scalers, display driver and input driver for mindblowing performances.
+- Compiled and partially rebuild by Eggs. Custom audio driver, scalers, display driver and input driver for mindblowing performances.
 - Customs cores
 - Everything is finetuned with the best settings in mind.
 - Crisp 640*480 resolution
@@ -75,8 +80,17 @@
 - Boxart moved to /Roms/_systemname_/Imgs for easier scraping
 - Various bug fixes and optimizations.
 
+
 ### Shortcuts
 
+(In the Onion launcher)   
+Menu : Toggle Game / launcher panel
+Menu + Up : Brightness up  
+Menu + Down : Brightness down
+Power button : Deep sleep   
+Menu + Power : Light sleep   
+
+(In the regular menu)
 Menu + Start : Exit game   
 Menu + Select : Retroarch menu   
    
@@ -88,24 +102,13 @@ Menu + L : Rewind (If enabled)
    
 Select + Start + R2 : Brightness up   
 Select + Start + L2 : Brightness down   
+
+Menu + X : Toggle FPS display
    
 Menu + Right : Save slot increase      
 Menu + Left : Save slot decrease   
 
-Menu + X : Toggle FPS display
-
-(In launcher mode)   
-Menu : Toggle Game / launcher panel
-Select : Play activity 
-A : Exit to Miyoo menu
-Menu + Up : Brightness up  
-Menu + Down : Brightness down
-Power button : Deep sleep   
-Menu + Power : Light sleep   
-Select + Start + R1 + R2 : Force shutdown   
-
 (In a Game boy game)
 R2/L2 : Change palette
-     
-Help us improve Onion here: https://docs.google.com/spreadsheets/d/1mocDiQFzC-b8hpWmhN-VQxWEf8hV14Jsit6P0_-DQNU/edit?usp=sharing
+
    
