@@ -99,7 +99,7 @@ Menu + Select : Retroarch menu
 Menu + R2 : Save state   
 Menu + L2 : Load state   
    
-Menu + R (Just R in GB games) : Fast forward   
+Menu + R : Fast forward   
 Menu + L : Rewind (If enabled)   
    
 Select + Start + R2 : Brightness up   
