@@ -16,7 +16,7 @@
 
 #### Installation (Upgrade):
 - Backup your saves, states and scraped images 
-> - Saves are located at /Retroarch/.retroarch/saves/_corename_
+> - Saves and playtimes are located at /Retroarch/.retroarch/saves/_corename_
 > - States are located at /Retroarch/.retroarch/states/_corename_
 - Delete all folders from your SD except "BIOS" and "Roms"
 - Unzip the ".tmp_update" folder to the root of your SD.
@@ -28,8 +28,7 @@
 #### Streamlined custom installer (Credit: Totofaki & PixelShift)  
 <img src="https://user-images.githubusercontent.com/16885275/154789609-320620c4-b945-429a-8b0d-177cb30dbdeb.png" width="350">  
 
-- Install only the systems and apps you need.
-- Relaunch any time to add more. 
+- Install and uninstall only the systems and apps you need. Any action is reversible.
 - Community presets, homebrews and more!
    
 #### Play Activity & Onion Launcher (Credit: Totofaki)
@@ -40,15 +39,15 @@
 
 <img src="https://user-images.githubusercontent.com/16885275/157870119-fc9fd688-22e4-4eda-a080-81ec398c60d9.png" width="350">  
 
-- Quick launch any switch any game from your history
-
+- Quick launch any game from your history
+- Quickly change games from your history
 - Reduced startup time by almost half to get you into your game without any hassle.
-- Full overlay with accurate brightness and battery readings.
+- Full overlay with accurate brightness, battery readings and playtimes.
 - Improved brightness curve for better low-light gaming.
-- Improved Sleep mode with full game suspension.
+- Improved Sleep mode with full game suspension. (menu + power)
 - Custom charging screen that prevent screen burnings.
-- Custom low battery notification, no more flickering icon.
-- No more memory leaks or kernel panic!
+- No more low bat flickering icon.
+- No more memory leaks.
 - Low bat (<10%) big visual battery warning indicator.
 - Your handheld will also rumble periodically in game to indicate that your battery is bellow 10%
 - When the battery goes < 4%, the game is now saved to prevent loosing progression, and the handheld turned off.
