@@ -66,6 +66,7 @@ It also allows you to quickly change games among the last played and many other 
 <img src="https://user-images.githubusercontent.com/16885275/154791260-d1a4d0b2-5582-45cc-a291-bead843a5171.png" width="350">  
 
 - Compiled and partially rebuild by Eggs. Custom audio driver, scalers, display driver and input driver for mindblowing performances.
+- Minimal input and audio lag. 
 - Customs cores
 - Everything is finetuned with the best settings in mind.
 - Crisp 640*480 resolution
