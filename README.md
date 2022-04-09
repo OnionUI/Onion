@@ -86,7 +86,7 @@ It also allows you to quickly change games among the last played and many other 
 ### Shortcuts
 
 (In the Onion launcher)   
-Menu : Toggle Game / launcher panel   
+Menu button : Toggle Game / launcher panel   
 Menu + Up : Brightness up   
 Menu + Down : Brightness down  
 Power button : Deep sleep    
