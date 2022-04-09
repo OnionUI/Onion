@@ -63,16 +63,19 @@ char* load_file(char const* path)
 int main(void) {
   	
 	//logMessage(" ");
-  	
+
 	cJSON* request_json = NULL;
 	cJSON* items = cJSON_CreateArray();
 	cJSON* path = NULL;
 	cJSON* core_path = NULL;
 	
+	remove ("/mnt/SDCARD/.tmp_update/RACommand.txt");
+	remove ("/mnt/SDCARD/.tmp_update/romName.txt");
+	
 	const char *request_body = load_file("/mnt/SDCARD/RetroArch/.retroarch/content_history.lpl");
 	
 	request_json = cJSON_Parse(request_body);
-	 
+	
 	items = cJSON_GetObjectItem(request_json, "items");
 	
 	cJSON * subitem = cJSON_GetArrayItem(items, 0);
@@ -98,15 +101,21 @@ int main(void) {
 		//logMessage(cCore_path1);
 		//logMessage(cPath1);
 
+
 		if ((file_exists(cCore_path1) == 1) && (file_exists(cPath1) == 1)){
 		
 			FILE *file = fopen("/mnt/SDCARD/.tmp_update/RACommand.txt", "w");
-		
-			fputs("./retroarch -v -L ", file);
-			fputs(cJSON_Print(core_path), file);
-			fputs(" ", file);
-			fputs(cJSON_Print(path), file);
+			 if (file_exists("RADirectLaunch.enable") == 1){
+				fputs("./retroarch", file);
+				}
+			else {
+				fputs("./retroarch -v -L ", file);
+				fputs(cJSON_Print(core_path), file);
+				fputs(" ", file);
+				fputs(cJSON_Print(path), file);
+			}
 			fclose(file); 
+
 		
 			// Rom name copy for timers
 			char *bname;
@@ -136,14 +145,16 @@ int main(void) {
 			remove ("/mnt/SDCARD/.tmp_update/RACommand.txt");
 			remove ("/mnt/SDCARD/.tmp_update/romName.txt");
 		}
-	
-
 
 	}
 	else {
 	remove ("/mnt/SDCARD/.tmp_update/RACommand.txt");
 	remove ("/mnt/SDCARD/.tmp_update/romName.txt");
 	}
+
+
+  	
+
 	
     return EXIT_SUCCESS;
 }

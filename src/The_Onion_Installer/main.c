@@ -13,7 +13,8 @@
 #include <sys/stat.h>  
 #include "sys/ioctl.h"
 #include <dirent.h>
- 
+#include <stdlib.h>
+
 // Max number of records in the DB
 #define NUMBER_OF_LAYERS 200
 #define MAX_LAYER_NAME_SIZE 256
@@ -21,6 +22,7 @@
 
 char layers[3][NUMBER_OF_LAYERS][MAX_LAYER_NAME_SIZE];
 int bInstall[3][NUMBER_OF_LAYERS];
+int bInstallChange[3][NUMBER_OF_LAYERS];
 int nb_Layers[3];
 int nSelection = 0; 
 int nListPostion = 0;
@@ -66,21 +68,196 @@ void logMessage(char* Message) {
 
 
 bool file_exists (char *filename) {
+    int status;
+    struct stat st_buf;
+    
+    status = stat (filename, &st_buf);
+    if (status != 0) {
+        return 0;
+    }
+  
+  	if (S_ISREG (st_buf.st_mode)) {
+  		return 1;
+  	}
+  	return 0;
+  	
+}
+
+bool folder_exists (char *filename) {
+    int status;
+    struct stat st_buf;
+    
+    status = stat (filename, &st_buf);
+    if (status != 0) {
+        return 0;
+    }
+  
+  	if (S_ISDIR (st_buf.st_mode)) {
+  		return 1;
+  	}
+  	return 0;
+
+}
+
+
+bool file_folder_exists (char *filename) {
   struct stat   buffer;   
   return (stat (filename, &buffer) == 0);
 }
 
-void setLayersInstall (int bInstallValue){
+
+void loadingScreen() {
+	SDL_Surface* surfaceBackground = IMG_Load("./ressources/loading.png");
+	SDL_BlitSurface(surfaceBackground, NULL, screen, NULL);
+	SDL_BlitSurface(screen, NULL, video, NULL); 
+	SDL_Flip(video);
+	SDL_FreeSurface(surfaceBackground);
+
+}
+
+void setLayersInstall (int bInstallValue, int bInstallValueChange){
 	for(int n = 0 ; n < 3 ; n++){
 		for(int i = 0 ; i < NUMBER_OF_LAYERS ; i++){
 			bInstall[n][i] = bInstallValue;
+			bInstallChange[n][i] = bInstallValueChange;
 		}	
 	}
 }
 
-void loadRessources(){
 
+
+void appUninstall(char *basePath, int nT, int index, int strlenBase)
+{
+    char path[1000];
+    char pathInstalledApp[1000];
+    char *basePathDestination = "/mnt/SDCARD";
+   	
+    struct dirent *dp;
+    DIR *dir = opendir(basePath);
+	
+	int run = 1;
+
+    // Unable to open directory stream
+    if (!dir)
+        return;
+
+    while (((dp = readdir(dir)) != NULL) && (run == 1))
+    	
+        {
+        if (strcmp(dp->d_name, ".") != 0 && strcmp(dp->d_name, "..") != 0)
+        {
+        
+        		
+        	// Construct new path from our base path
+        	strcpy(path, basePath);
+        	strcat(path, "/");
+        	strcat(path, dp->d_name);
+
+			if (file_folder_exists(path)){
+				char pathInstalledApp[1000];
+		
+				int nIndex = 0;
+				
+				strcpy(pathInstalledApp, basePathDestination);
+
+				
+				for (int i = strlenBase ; i < strlen(path)+strlen(basePathDestination) ; i++){
+					pathInstalledApp[nIndex+strlen(basePathDestination)] = path[i];
+					nIndex ++;
+				}	
+				pathInstalledApp[nIndex]= '\0';		
+			
+				if  (file_exists (pathInstalledApp)) {			
+					remove(pathInstalledApp);
+				}
+				
+				if  (folder_exists (pathInstalledApp)) {			
+					rmdir(pathInstalledApp);
+				}		
+				
+				
+				
+			}
+			
+			appUninstall(path, nT, index, strlenBase);
+     	
+        }
+    }
+
+    closedir(dir);
+}
+
+
+
+void checkAppInstalled(char *basePath, int nT, int index, int strlenBase)
+{
+    char path[1000];
+    char pathInstalledApp[1000];
+    char *basePathDestination = "/mnt/SDCARD";
+   	
+   	
+  //  char file_path[1000];
+    struct dirent *dp;
+    DIR *dir = opendir(basePath);
+	
+	int run = 1;
+
+    // Unable to open directory stream
+    if (!dir)
+        return;
+	
+    while (((dp = readdir(dir)) != NULL) && (run == 1))
+    	
+        {
+        if (strcmp(dp->d_name, ".") != 0 && strcmp(dp->d_name, "..") != 0)
+        {
+        
+
+        	// Construct new path from our base path
+        	strcpy(path, basePath);
+        	strcat(path, "/");
+        	strcat(path, dp->d_name);
+		
+			
+			
+			if (file_exists(path)){
+				char pathInstalledApp[1000];
+				int nIndex = 0;	
+				strcpy(pathInstalledApp, basePathDestination);
+				
+				for (int i = strlenBase ; i < strlen(path)+strlen(basePathDestination) ; i++){
+				
+				pathInstalledApp[nIndex+strlen(basePathDestination)] = path[i];
+				nIndex ++;
+				
+				}	
+				pathInstalledApp[nIndex]= '\0';		
+
+				//logMessage(path);
+				//logMessage(pathInstalledApp);
+				
+				if  (file_exists (pathInstalledApp)) {			
+			
+					bInstall[nT][index] = 1;						
+					run = 0;
+				}
+			}
+			
+			// Recursive call
+			checkAppInstalled(path, nT, index, strlenBase);
+
+        }
+    }
+
+    closedir(dir);
+}
+
+
+
+void loadRessources(){
+	
 	int nT = 0;	
+	char cCommand[500];
 	for (int nT = 0 ; nT < 3 ; nT ++){
 			DIR *dp;
 			struct dirent *ep;  
@@ -91,8 +268,6 @@ void loadRessources(){
 			nb_Layers[nT]=0;
 			
 			switch(nT){
-			
-			
 				case 0 :
 					sprintf(ressourcesPath,"%s","./data/Layer1");
 					break;
@@ -115,10 +290,26 @@ void loadRessources(){
 					cShort[MAY_LAYER_DISPLAY] = '\0';
 					size_t len = strlen(cShort);
 					if ((len > 2)||(cShort[0]!='.')){
-						//logMessage(cShort);
 					
-						strcpy(layers[nT][nb_Layers[nT]],cShort);
-						nb_Layers[nT] ++;   		
+				
+					//logMessage(ressourcesPath);
+					//logMessage(cShort);
+					
+					
+					// Installation check
+    				char basePath[1000];
+    				sprintf(basePath,"%s%s%s",ressourcesPath,"/",cShort);
+					//logMessage(basePath);
+					//logMessage("");
+    				
+    				checkAppInstalled(basePath, nT , nb_Layers[nT], strlen(basePath));
+					
+					//sprintf(cCommand, "cd /mnt/SDCARD/App/The_Onion_Installer/ressources ; ./searchInstall.sh \"%s\" \"%s\"",ressourcesPath, cShort);
+					//logMessage(cCommand);
+					//system(cCommand);
+				
+					strcpy(layers[nT][nb_Layers[nT]],cShort);
+					nb_Layers[nT] ++;   		
     				}
     		   				
     			}    
@@ -176,6 +367,8 @@ void showScroller(){
 
 }
 
+
+
 void refreshScreen(){
 
 	SDL_Color color_pink={136,97,252,0};
@@ -223,12 +416,17 @@ int main(void) {
 	SDL_ShowCursor(SDL_DISABLE);
 	TTF_Init();
 	
+	loadingScreen();
+	
 	// Prepare for Poll button input
 	int			input_fd;
 	input_fd = open("/dev/input/event0", O_RDONLY);
-	
+	setLayersInstall (0,0);
 	loadRessources();
-	setLayersInstall(0);
+	
+	
+//	system("reboot");
+	
 	refreshScreen();
 	
 	struct input_event	ev;
@@ -295,11 +493,11 @@ int main(void) {
 		if (y_pressed) {			
 			if (allActivated == 0){
 				allActivated = 1; 
-				setLayersInstall(1);
+				setLayersInstall(1,1);
 			}
 			else {
 				allActivated = 0; 
-				setLayersInstall(0);
+				setLayersInstall(0,1);
 			}
 			
 
@@ -367,7 +565,7 @@ int main(void) {
 			}
 			refreshScreen();
 		}
-	
+	 
 		if (b_pressed) {			
 			break;
 		}
@@ -375,9 +573,11 @@ int main(void) {
 			if (nListPostion+nSelection<nb_Layers[nTab]){
 				if (bInstall[nTab][nListPostion+nSelection] == 1){
 					bInstall[nTab][nListPostion+nSelection] = 0;
+					bInstallChange[nTab][nListPostion+nSelection] = 1;
 				}
 				else{
 					bInstall[nTab][nListPostion+nSelection] = 1;
+					bInstallChange[nTab][nListPostion+nSelection] = 1;
 		 		}
 				if (nSelection < 6){
 					nSelection ++;
@@ -419,9 +619,8 @@ int main(void) {
 	
 			
 			for (int nLayer = 0 ; nLayer < nb_Layers[nT] ; nLayer++){
-				
+				if (bInstallChange[nT][nLayer] == 1){
 					if (bInstall[nT][nLayer] == 1){
-						
 						surfaceMessage = TTF_RenderUTF8_Blended(font35, layers[nT][nLayer], color_white);
 						SDL_BlitSurface(surfaceBackground, NULL, screen, NULL);
 						SDL_BlitSurface(surfaceMessage, NULL, screen, &rectMessage); 
@@ -429,17 +628,25 @@ int main(void) {
 						SDL_BlitSurface(screen, NULL, video, NULL); 
 						SDL_Flip(video);
 						
-						
-						if (layers[nT][nLayer][0]=='_'){
-						sprintf(cCommand, "cd /mnt/SDCARD/App/The_Onion_Installer/ressources ; ./installSett.sh \"%s\" \"%s\"",param1, layers[nT][nLayer]);
-						}
-						else{
 						sprintf(cCommand, "cd /mnt/SDCARD/App/The_Onion_Installer/ressources ; ./install.sh \"%s\" \"%s\"",param1, layers[nT][nLayer]);
-						}
-						logMessage(cCommand);
-						system(cCommand);
 						
-					}			
+						//logMessage(cCommand);
+						system(cCommand);
+					}
+					else {
+					// app uninstallation
+					char pathAppUninstal[1000];
+					pathAppUninstal[0]='\0';
+					strcat(pathAppUninstal,param1);
+					strcat(pathAppUninstal,"/");
+					strcat(pathAppUninstal,layers[nT][nLayer]);
+					//logMessage(pathAppUninstal);
+					appUninstall(pathAppUninstal, nT, nLayer, strlen(pathAppUninstal));		
+					// A second pass for deleting the empty folders
+					appUninstall(pathAppUninstal, nT, nLayer, strlen(pathAppUninstal));		
+					}				
+				}
+		
 			}		
 			
 		}

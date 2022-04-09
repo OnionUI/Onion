@@ -126,6 +126,14 @@ static void checkADC(void) {
 			rumble(0);		
   		}
   		
+  		if (percBat<=4){
+			// Force retroarch to end its session
+			
+			int fd = creat(".deepSleep", 777);
+			close(fd);	
+			system("killall -15 retroarch");
+  		}
+  		
   		countChecks ++;
     }
 }

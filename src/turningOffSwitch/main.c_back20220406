@@ -23,34 +23,11 @@
 // Max number of records in the DB
 #define MAXVALUES 1000
 
-
-#define	BUTTON_A	KEY_SPACE
-#define	BUTTON_B	KEY_LEFTCTRL  
-
-#define	BUTTON_X	KEY_LEFTSHIFT
-#define	BUTTON_Y	KEY_LEFTALT  
-
-#define	BUTTON_START	KEY_ENTER
-#define	BUTTON_SELECT	KEY_RIGHTCTRL
-
-#define	BUTTON_MENU	KEY_ESC
-#define	BUTTON_POWER	KEY_POWER
-
-#define	BUTTON_L2	KEY_TAB
-#define	BUTTON_R2	KEY_BACKSPACE
-
-#define	BUTTON_UP	KEY_UP
-#define	BUTTON_DOWN	KEY_DOWN
-
-#define	BUTTON_LEFT		KEY_LEFT
-#define	BUTTON_RIGHT	KEY_RIGHT
-
 // Game history list
 struct structGames {                 
              char name[MAXHROMNAMESIZE]   ;
              char RACommand[500] ;
            	 char totalTime[10];
-           	 int jsonIndex;
            	 }
             gameList[MAXHISTORY];   
             
@@ -65,10 +42,8 @@ struct structPlayActivity {
             romList[MAXVALUES];        
 int tailleStructPlayActivity = 0;
 
-cJSON* request_json = NULL;
-cJSON* items = cJSON_CreateArray();
-	
-	
+
+
 void logMessage(char* Message) {
 	FILE *file = fopen("/mnt/SDCARD/.tmp_update/log_turnMessage.txt", "a");
 	/*char tempMess[] = "\r\n";
@@ -177,16 +152,42 @@ int searchRomDB(char* romName){
 	return position;
 }
 
+int main(void) {
 
-void readHistory(){
-// History extraction
-	taillestructGames = 0;
+	SDL_Color	color={255,255,255,0};
+	TTF_Font*	font; 
+	SDL_Surface*	imageBatt;
+	SDL_Surface*	imageLum;
+	SDL_Surface*	imagePlay;
+	SDL_Surface*	imageGameName;
+	SDL_Surface* 	surfaceArrowLeft = IMG_Load("arrowLeft.png");
+	SDL_Surface* 	surfaceArrowRight = IMG_Load("arrowRight.png");
+
+	SDL_Rect	rectBatt;
+	SDL_Rect	rectLum;
+	SDL_Rect	rectWhiteLigne;
+	SDL_Rect	rectMenuBar;
+	SDL_Rect	rectTime;
+	SDL_Rect	rectBatteryIcon;	
+	SDL_Rect	rectTuto;
+	SDL_Rect	rectFooter;
+	SDL_Rect	rectFooterHelp;
+	SDL_Rect	rectGameName;	
+	
+	SDL_Rect 	rectArrowLeft = { 0, 222, 28, 32};
+	SDL_Rect 	rectArrowRight = { 612, 222, 28, 32};
+	
+
+	readRomDB();
+
+	// History extraction
+	cJSON* request_json = NULL;
+	cJSON* items = cJSON_CreateArray();
+	
 	const char *request_body = load_file("/mnt/SDCARD/RetroArch/.retroarch/content_history.lpl");	
 	if (request_body != NULL){
 			request_json = cJSON_Parse(request_body);	 
 			items = cJSON_GetObjectItem(request_json, "items");	
-						
-	
 			
 			for (int nbGame = 0 ; nbGame < MAXHISTORY ; nbGame ++){
 				cJSON* path = NULL;
@@ -254,7 +255,7 @@ void readHistory(){
     						
     						strcpy(gameList[taillestructGames].name, bnameWOExt);
     						strcpy(gameList[taillestructGames].RACommand, RACommand);
-							gameList[taillestructGames].jsonIndex = nbGame;
+		
     						taillestructGames ++; 				
 						}
 					}
@@ -265,67 +266,6 @@ void readHistory(){
     				
 			}	
 	}
-}
-
-
-void removeCurrentItem(){
-	
-	cJSON_DeleteItemFromArray(items, gameList[currentGame].jsonIndex);
-	
-	FILE *file = fopen("/mnt/SDCARD/RetroArch/.retroarch/content_history.lpl", "w");
-	
-	char *test = cJSON_Print(request_json);
-	
-	fputs(test, file);
-	fclose(file); 
-
-}
-
-int main(void) {
-
-	SDL_Color	color={255,255,255,0};
-	TTF_Font*	font; 
-	SDL_Surface*	imageBatt;
-	SDL_Surface*	imageLum;
-	SDL_Surface*	imagePlay;
-	SDL_Surface*	imageGameName;
-	SDL_Surface* 	surfaceArrowLeft = IMG_Load("arrowLeft.png");
-	SDL_Surface* 	surfaceArrowRight = IMG_Load("arrowRight.png");
-
-	SDL_Rect	rectBatt;
-	SDL_Rect	rectLum;
-	SDL_Rect	rectWhiteLigne;
-	SDL_Rect	rectMenuBar;
-	SDL_Rect	rectTime;
-	SDL_Rect	rectBatteryIcon;	
-	SDL_Rect	rectTuto;
-	SDL_Rect	rectFooter;
-	SDL_Rect	rectFooterHelp;
-	SDL_Rect	rectGameName;	
-
-	
-	SDL_Rect 	rectArrowLeft = { 6, 222, 28, 32};
-	SDL_Rect 	rectArrowRight = { 603, 222, 28, 32};
-	
-	uint32_t		val;
-	uint32_t		l2_pressed = 0;
-	uint32_t		r2_pressed = 0;
-	uint32_t		menu_pressed = 0;
-
-	uint32_t		a_pressed = 0;
-	uint32_t		b_pressed = 0;
-	uint32_t		up_pressed = 0;
-	uint32_t		down_pressed = 0;
-	uint32_t		x_pressed = 0;
-	uint32_t		y_pressed = 0;
-	uint32_t		start_pressed = 0;
-	uint32_t		power_pressed = 0;
-	uint32_t		select_pressed = 0;	
-	uint32_t		left_pressed = 0;
-	uint32_t		right_pressed = 0;	
-
-	readRomDB();
-	readHistory();
 	
 	// Check current brightness value
 	FILE *fp;
@@ -373,7 +313,49 @@ int main(void) {
 		}
 	}
 	
+	// Check current playtime
+	
+	SDL_Init(SDL_INIT_VIDEO);
+	SDL_ShowCursor(SDL_DISABLE);
+	TTF_Init();
+	   
+	SDL_Surface* video = SDL_SetVideoMode(640,480, 32, SDL_HWSURFACE);
+	SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640,480, 32, 0,0,0,0);
+		
+	font = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 30);
+	
+	imageLum = TTF_RenderUTF8_Blended(font, currLum, color);
+	imageBatt = TTF_RenderUTF8_Blended(font, currBat, color);
 
+	
+	free(currLum);
+	free(currBat);
+	
+	
+	SDL_Surface* imageBackgroundDefault = IMG_Load("bootScr.png");
+	SDL_Surface* imageBackgroundLowBat = IMG_Load("lowBat.png");
+	SDL_Surface* imageBackgroundNoGame= IMG_Load("noGame.png");
+	SDL_Surface* imageBackgroundGame;
+	
+	char currPicture[MAXHROMNAMESIZE+44];
+	
+
+	if (file_exists(".menuStart")) {
+		// The screenshot is ready 
+		remove(".menuStart");
+		imageBackgroundGame = IMG_Load("screenshotGame.bmp");
+	 	// Printscreen save for specific game
+	 	sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",gameList[0].name,".png");	 		
+		// Move screenshot to destination
+		rename("screenshotGame.bmp", currPicture);  
+	}
+	else {
+    	sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",gameList[0].name,".png");
+    	if (file_exists(currPicture)==1){
+			imageBackgroundGame = IMG_Load(currPicture);
+		}
+	
+	}
 	
 
 	// Battery icon
@@ -400,189 +382,43 @@ int main(void) {
 							}
 	
 	SDL_Surface* imageMenuBar = IMG_Load("menuBar.png");
+	SDL_Surface* imageFooter = IMG_Load("footer.png");
+	SDL_Surface* imageFooterHelp = IMG_Load("footerHelp.png");
+	SDL_Surface* imagewhiteLigne = IMG_Load("whiteLigne.png");
 	
 	SDL_Surface* imageTuto;
 	
 	rectTime = { 244, 0, 150, 39};
-	rectMenuBar = {0,0,640,480};
+	rectMenuBar = {0,0,640,39};
 	rectLum = { 419, 0, 113, 39};
 	rectBatteryIcon = {541,7,13,27};
 	rectBatt = { 566, 0, 113, 29};
-	rectFooterHelp = { 420, 441, 220, 39};
-
-	rectGameName = { 9, 439, 640, 39};
+	rectFooter = { 0, 441, 637, 39};
+	rectFooterHelp = { 413, 403, 227, 39};
+	rectGameName = { 5, 439, 640, 39};
 	
 	int bShowBoot = 0;
 
-	
-	
-	int			input_fd;
-	input_fd = open("/dev/input/event0", O_RDONLY);
-	struct input_event	ev;
-	
-	
-	int run = 1;
-	int firstPass = 1;
-	int comboKey = 0;
-	
-	SDL_Surface* video = SDL_SetVideoMode(640,480, 32, SDL_HWSURFACE);
-	SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640,480, 32, 0,0,0,0);
-	
-	
-	SDL_Init(SDL_INIT_VIDEO);
-	SDL_ShowCursor(SDL_DISABLE);
-	TTF_Init();
-	
 
-		
-	font = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 30);
-	
-	imageLum = TTF_RenderUTF8_Blended(font, currLum, color);
-	imageBatt = TTF_RenderUTF8_Blended(font, currBat, color);
 
-	
-	free(currLum);
-	free(currBat);
-	
-	
-	SDL_Surface* imageBackgroundDefault = IMG_Load("bootScr.png");
-	SDL_Surface* imageBackgroundLowBat = IMG_Load("lowBat.png");
-	SDL_Surface* imageBackgroundNoGame= IMG_Load("noGame.png");
-	SDL_Surface* imageRemoveDialog= IMG_Load("removeDialog.png");
-	SDL_Surface* imageBackgroundGame;
-	SDL_Surface* imageFooterHelp = IMG_Load("footerHelp.png");	
-	char currPicture[MAXHROMNAMESIZE+44];
-	
-	if (file_exists(".scrOrder")==0) {
-	// The screenshot is ready 
-	// Printscreen save for specific game
-	sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",gameList[currentGame].name,".png");	 		
-	// Move screenshot to destination
-	rename("screenshotGame.bmp", currPicture);  
+	if (taillestructGames > 1){
+		SDL_BlitSurface(surfaceArrowRight, NULL, screen, &rectArrowRight);
 	}
-
-	while(run) { 
-		if (firstPass > 0){
-			// First screen draw
-			firstPass ++ ;
-			
-			// Needs another refresh 
-			if (firstPass > 2)
-			firstPass = 0;
-			
-			
-    		sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",gameList[currentGame].name,".png");
-    		if (file_exists(currPicture)==1){
-				imageBackgroundGame = IMG_Load(currPicture);
-			}
-			
-			if (taillestructGames > 1){
-				SDL_BlitSurface(surfaceArrowRight, NULL, screen, &rectArrowRight);
-			}
-		}
-		else {
-			if(read(input_fd, &ev, sizeof(ev)) == sizeof(ev) ){
-
-				val = ev.value;
-				
-				if (( ev.code != BUTTON_MENU )&&(val == 1)) {
-					comboKey = 1;
-				}
-				
-				if (( ev.type != EV_KEY ) || ( val > 1 )) continue;
-				
-				
-				if ( ev.code == BUTTON_SELECT ) {
-						select_pressed = val;
-				}
-				else
-				if ( ev.code == BUTTON_A ) {
-						a_pressed = val;
-				}
-				else
-					if ( ev.code == BUTTON_B ) {
-							b_pressed = val;
-				}
-				else
-				if ( ev.code == BUTTON_LEFT ) {
-						left_pressed = val;
-				}
-				else
-					if ( ev.code == BUTTON_RIGHT ) {
-							right_pressed = val;
-				}
-				else
-					if ( ev.code == BUTTON_MENU ) {
-							menu_pressed = val;
-				}
-				else
-					if ( ev.code == BUTTON_X ) {
-							x_pressed = val;
-				}
-				else
-					if ( ev.code == BUTTON_Y ) {
-							y_pressed = val;
-				}
-				
-				
-				
-				if (right_pressed) {	
-				
-            		if (currentGame<(taillestructGames-1)){
-                		currentGame ++;
-                		sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",gameList[currentGame].name,".png");
-                		if (file_exists(currPicture)==1){
-							imageBackgroundGame = IMG_Load(currPicture);
-						}
-					}
-				}
-				
-				if (left_pressed) {	
-								if (currentGame>0){
-                     				currentGame --;
-                     				sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",gameList[currentGame].name,".png");
-                     				if (file_exists(currPicture)==1){
-										imageBackgroundGame = IMG_Load(currPicture);
-									}
-                     			}
-				}
-				
-				if (y_pressed) {	
-					int fd = creat(".menuSelect", 777);
-					close(fd); 
-					break;
-				}
-				
-				if (a_pressed) {	
-					break;
-				}		
-				
-				if (b_pressed) {	
-					int fd = creat(".menuA", 777);
-					close(fd); 
-					break;
-				}
+	
+	SDL_BlitSurface(imageFooter, NULL, screen, &rectFooter);
+	
+	if (taillestructGames>0){
 		
-						
-				if ( ev.code == BUTTON_MENU ) {
+		imageGameName = TTF_RenderUTF8_Blended(font, gameList[currentGame].name, color);
+		SDL_BlitSurface(imageGameName, NULL, screen, &rectGameName);
+	}
+	
+	SDL_BlitSurface(imageFooterHelp, NULL, screen, &rectFooterHelp);
+	int run = 1;
+	int nSlower = 0;
 
-						menu_pressed = val;
-						if (menu_pressed == 1){
-							comboKey = 0 ;
-						}
-						else {
-							if (comboKey == 0){
-								comboKey = 1 ;
-								break;
+	while(run == 1){
 
-							}
-						
-						}
-				}				
-				
-			}
-		}
-			
 		rectWhiteLigne = { 0, 0, 1280, 39};
 			
 		// Brightness update
@@ -607,22 +443,73 @@ int main(void) {
 		}
 			
 		
+		SDL_Event event;
+		while (SDL_PollEvent(&event)) {
+			if (event.type==SDL_KEYDOWN) {
+						
+				switch( event.key.keysym.sym ){	    
+
+						case SDLK_SPACE:
+							{
+							int fd = creat(".menuStart", 777);
+							close(fd); 
+							break;
+							}
+						case SDLK_LCTRL:
+							{
+							
+							int fd = creat(".menuA", 777);
+							close(fd); 
+							break;
+							}
+						case SDLK_RCTRL:
+							{
+							int fd = creat(".menuSelect", 777);
+							close(fd); 
+							break;
+							}
+					    case SDLK_RIGHT:
+                     		if (currentGame<(taillestructGames-1)){
+                     			currentGame ++;
+                     			sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",gameList[currentGame].name,".png");
+                     			if (file_exists(currPicture)==1){
+									imageBackgroundGame = IMG_Load(currPicture);
+								}
+                     		}
+							break;		
+						case SDLK_LEFT:
+							if (currentGame>0){
+                     			currentGame --;
+                     			sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",gameList[currentGame].name,".png");
+                     			if (file_exists(currPicture)==1){
+									imageBackgroundGame = IMG_Load(currPicture);
+								}
+                     		}
+							break;
+						
+
+						default:
+                       		break;
+				}
+			}
+		}
+		
+
 		if (file_exists(".deepSleep")==1){
 			remove(".deepSleep");
-			bShowBoot = 1;
+			//bShowBoot = 1;
 			system("reboot");
 			sleep(10);
 		}
 		
 
-		if (taillestructGames==0){
+		if (file_exists("./RACommand.txt")!=1){
 			SDL_BlitSurface(imageBackgroundNoGame, NULL, screen, NULL);
 		}
 		else{
   			if (nBat > LOWBATRUMBLE){
             	if (file_exists(currPicture)==1){
                 	SDL_BlitSurface(imageBackgroundGame, NULL, screen, NULL);
-                	SDL_FreeSurface(imageBackgroundGame);  
             	}
             	else{
                 	SDL_BlitSurface(imageBackgroundDefault, NULL, screen, NULL);
@@ -638,78 +525,53 @@ int main(void) {
 			SDL_BlitSurface(surfaceArrowLeft, NULL, screen, &rectArrowLeft);
 		}
 	
-		if (taillestructGames!=0){
-			if (currentGame!=taillestructGames-1){
-				SDL_BlitSurface(surfaceArrowRight, NULL, screen, &rectArrowRight);
-			}
-		
+		if (currentGame!=taillestructGames-1){
+			SDL_BlitSurface(surfaceArrowRight, NULL, screen, &rectArrowRight);
 		}
 
 
-	
-		SDL_BlitSurface(imageMenuBar, NULL, screen, &rectMenuBar);
-		if (taillestructGames>0){
-			imageGameName = TTF_RenderUTF8_Blended(font, gameList[currentGame].name, color);
-			SDL_BlitSurface(imageGameName, NULL, screen, &rectGameName);
-		}
-		
+		SDL_BlitSurface(imageFooter, NULL, screen, &rectFooter);
+		imageGameName = TTF_RenderUTF8_Blended(font, gameList[currentGame].name, color);
+		SDL_BlitSurface(imageGameName, NULL, screen, &rectGameName);
 		SDL_BlitSurface(imageFooterHelp, NULL, screen, &rectFooterHelp);
-	
-			
+		SDL_BlitSurface(imagewhiteLigne, NULL, screen, &rectWhiteLigne);	
+		SDL_BlitSurface(imageMenuBar, NULL, screen, &rectMenuBar);	
 		SDL_BlitSurface(imageBatt, NULL, screen, &rectBatt);
 		SDL_BlitSurface(imageLum, NULL, screen, &rectLum);
 		imagePlay = TTF_RenderUTF8_Blended(font, gameList[currentGame].totalTime, color);	
 		SDL_BlitSurface(imagePlay, NULL, screen, &rectTime);
 		SDL_BlitSurface(imageBatteryIcon, NULL, screen, &rectBatteryIcon);
 
-		if (x_pressed) {		
-			if (taillestructGames != 0){
-				x_pressed = 0;
-				SDL_BlitSurface(imageRemoveDialog, NULL, screen, NULL);
-				SDL_BlitSurface(screen, NULL, video, NULL); 
-				SDL_Flip(video);
-				
-				while(read(input_fd, &ev, sizeof(ev)) == sizeof(ev) ){
-				val = ev.value;
-				
-					if (( ev.code == BUTTON_A)&&(val == 1)) {
-						removeCurrentItem();
-						readHistory();
-						currentGame = 0;
-						firstPass = 1;
-						break;
-					}
-					if (( ev.code == BUTTON_B)&&(val == 1)) {
-						
-						firstPass = 1;
-						break;
-					}	
-				}
-				
-
-	
-			}
-
+		if (file_exists(".menuSelect")){
+			break;
 		}
-
+		if ( file_exists(".menuStart") || file_exists(".menuA") ) {
+				break;
+		}
 		
 		SDL_BlitSurface(screen, NULL, video, NULL); 
 		SDL_Flip(video);
 		
+		usleep(50000);
 	}
 	
 	
+	
 	screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640,480, 32, 0,0,0,0);
-	
-
-	remove("/mnt/SDCARD/.tmp_update/RACommand.txt");
-	FILE *file = fopen("/mnt/SDCARD/.tmp_update/RACommand.txt", "w");
-	fputs(gameList[currentGame].RACommand, file);
-	fclose(file); 	
-	
-	remove("/mnt/SDCARD/.tmp_update/romName.txt");			
-	
-	
+	if (bShowBoot == 1){
+		SDL_BlitSurface(imageBackgroundDefault, NULL, screen, NULL);
+	}
+	else{
+		if (currentGame != 0){
+			// A new game has been chosen
+			remove("/mnt/SDCARD/.tmp_update/RACommand.txt");
+			FILE *file = fopen("/mnt/SDCARD/.tmp_update/RACommand.txt", "w");
+			fputs(gameList[currentGame].RACommand, file);
+			fclose(file); 	
+			
+			remove("/mnt/SDCARD/.tmp_update/romName.txt");			
+		}
+	}
 	 
 	SDL_BlitSurface(screen, NULL, video, NULL); 
 	SDL_Flip(video);
@@ -724,7 +586,7 @@ int main(void) {
    	SDL_FreeSurface(imageBackgroundNoGame); 
    		
    	SDL_FreeSurface(imageMenuBar);
-
+   	SDL_FreeSurface(imagewhiteLigne);
    	SDL_FreeSurface(imagePlay);
    	SDL_FreeSurface(surfaceArrowLeft);
 	SDL_FreeSurface(surfaceArrowRight);

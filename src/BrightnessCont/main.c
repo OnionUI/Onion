@@ -177,6 +177,8 @@ void turnScreenOff(void) {
 #define	BUTTON_L2	KEY_TAB
 #define	BUTTON_R2	KEY_BACKSPACE
 
+#define	BUTTON_UP	KEY_UP
+#define	BUTTON_DOWN	KEY_DOWN
 
 
 int main() {
@@ -189,6 +191,8 @@ int main() {
 
 	uint32_t		a_pressed = 0;
 	uint32_t		b_pressed = 0;
+	uint32_t		up_pressed = 0;
+	uint32_t		down_pressed = 0;
 //	uint32_t		x_pressed = 0;
 //	uint32_t		y_pressed = 0;
 	uint32_t		start_pressed = 0;
@@ -218,8 +222,14 @@ int main() {
 
 	SetBrightness(brightness_value);
 	
+	int comboKey = 0; 
+	
 	while( read(input_fd, &ev, sizeof(ev)) == sizeof(ev) ) {
 		val = ev.value;
+		
+		if (( ev.code != BUTTON_MENU )&&(val == 1)) {
+			comboKey = 1;
+		}
 		
 		
 		if (( ev.type != EV_KEY ) || ( val > 1 )) continue;
@@ -242,6 +252,25 @@ int main() {
 					else	
 						if ( ev.code == BUTTON_MENU ) {
 								menu_pressed = val;
+								if (menu_pressed == 1){
+									comboKey = 0 ;
+								}
+								else {
+									if (comboKey == 0){
+										comboKey = 1 ;
+
+										if (file_exists(".scrOrder") == 1){
+											// We are leaving RA, not the panel
+											screenshot();
+											
+											remove(".scrOrder");
+											system("killall -15 retroarch");
+										}
+		
+
+									}
+								
+								}
 						}
 						else
 							if ( ev.code == BUTTON_A ) {
@@ -255,9 +284,19 @@ int main() {
 									if ( ev.code == BUTTON_POWER ) {
 											power_pressed = val;
 									}	
+									else
+										if ( ev.code == BUTTON_UP ) {
+												up_pressed = val;
+										}
+										else
+											if ( ev.code == BUTTON_DOWN ) {
+													down_pressed = val;
+											}
+
 							
 		// Shorcuts handlers	
-		// Panic mode
+		// Panic mode 
+		
 		
 		if (start_pressed & select_pressed & menu_pressed & r2_pressed & l2_pressed) {
 			 system("rm /mnt/SDCARD/App/OnionLauncher/data/.enabled"); 
@@ -270,96 +309,21 @@ int main() {
 			 sleep(10);
 		}
 			
-		// Return to MainUI
-		if (menu_pressed & a_pressed) {
-			int fd = creat(".menuA", 777);
-			close(fd);	
-			menu_pressed = 0;
-			a_pressed = 0;
-			
-		}	
-		if (menu_pressed & select_pressed) {
-			int fd = creat(".menuSelect", 777);
-			close(fd);	
-			menu_pressed = 0;
-			select_pressed = 0;
-		}	
-		// Exit / Return game shortcut 
-		if (menu_pressed & start_pressed) {
-			menu_pressed = 0;
-			start_pressed = 0;
-			
-			if (file_exists(".scrOrder") == 1){
-				// We are leaving RA, not the panel
-				screenshot();
-				remove(".scrOrder");
-			}
-		
-			int fd = creat(".menuStart", 777);
-			close(fd); 
-				
-		}	
+
 
 		if (power_pressed && ! menu_pressed){
+		
+		SetRawBrightness(0);
+		
 		power_pressed = 0;
 		menu_pressed = 0;
 
-		SetRawBrightness(0);
-		system("killall -15 retroarch");
+		
 		int fd = creat(".deepSleep", 777);
 		close(fd);	
-		
-		//system("killall turningOff");
-		//system("cd /mnt/SDCARD/RetroArch/ ; ./retroarch --verbose --command QUIT");
+		system("killall -15 retroarch");
 		
 		
-		/*	
-			struct input_event	ev_menu;
-			struct input_event	ev_start;
-		
-			ev_menu.type = EV_KEY;
-			ev_start.type = EV_KEY;
-			
-			ev_menu.code = BUTTON_MENU;
-			ev_start.code = BUTTON_START;		
-		
-		
-		
-			//SetRawBrightness(0);
-			int input_fd = open("/dev/input/event0", O_WRONLY);
-			if(input_fd > 0) {
-			int fd = creat(".deepSleep", 777);
-			close(fd);
-			
-			
-				for (int i = 0 ; i <10000 ; i++) {
-					
-					
-						ev_menu.value = 1;
-						ev_start.value = 1;
-								
-						write(input_fd, &ev_menu, sizeof(ev_menu));			
-						write(input_fd, &ev_start, sizeof(ev_start));		
-				
-		
-						
-						ev_menu.value = 0;
-						ev_start.value = 0;		
-						
-						
-						write(input_fd, &ev_menu, sizeof(ev_menu));
-						write(input_fd, &ev_start, sizeof(ev_start));	
-			
-					
-				}	
-			close(input_fd);
-			
-			}
-			
-		
-			power_pressed = 0;
-			
-		*/
 		}
 		 
 		// Sleep mode
@@ -394,7 +358,7 @@ int main() {
 		// Brightness possible values
 		// 0 1 2 4 6 8 10
 		
-		if (start_pressed & select_pressed & l2_pressed) {
+		if ((start_pressed & select_pressed & l2_pressed)||(menu_pressed & down_pressed)) {
 		//	start_pressed = select_pressed = l2_pressed = 0;
 			if (brightness_value >= 1){
 				brightness_value--;
@@ -416,7 +380,7 @@ int main() {
 		
 
 			
-		if (start_pressed & select_pressed & r2_pressed) {
+		if ((start_pressed & select_pressed & r2_pressed)||(menu_pressed & up_pressed)) {
 		//	start_pressed = select_pressed = r2_pressed = 0;
 			if (brightness_value <= 8){
 				brightness_value++;

@@ -310,17 +310,17 @@ int main() {
 			
 
 
-		if (power_pressed && ! menu_pressed){
+	/*	if (power_pressed && menu_pressed){
 		power_pressed = 0;
 		menu_pressed = 0;
 		system("killall -15 retroarch");
 		system("reboot");
 
 		
-		}
+		}*/
 		 
 		// Sleep mode
-		if (power_pressed && menu_pressed) {
+		if (power_pressed) {
 		
 			power_pressed = 0 ;
 			menu_pressed = 0 ;
