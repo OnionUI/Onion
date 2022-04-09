@@ -39,7 +39,7 @@
 ### Onion Launcher
 <img src="https://user-images.githubusercontent.com/16885275/162589962-9d2f4036-bb64-496e-bd7b-13c0b427808d.png" width="350">  
     
-The launcher is a user interface designed to launch when the miyoo mini starts up.
+The launcher is a user interface designed to launch when the miyoo mini starts up.    
 It allows you to launch the last game played in a few seconds, and with a simple press of a button to save your game and turn off the console.
 It also allows you to quickly change games from last played and many other advantages for a very simple experience.
 
