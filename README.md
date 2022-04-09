@@ -41,7 +41,7 @@
     
 The launcher is a user interface designed to be triggered when the miyoo mini starts.  
 It allows you to launch the last game played in a few seconds, and with a simple press of a button to save your progression and turn off the console.   
-It also allows you to quickly change games and many other advantages for a very simple experience.   
+It also allows you to quickly change games and many other advantages for a very simple experience :   
    
 - Quick boot on your last game played.
 - Quickly switch game from your history.
