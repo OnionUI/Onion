@@ -112,4 +112,6 @@ Menu + Left : Save slot decrease
 (In a Game boy game)  
 R2/L2 : Change palette  
 
+Other :
+Force uninstall the launcher : start+select+menu+R2+L2
    
