@@ -27,7 +27,7 @@
 - Optional: To restore your box art, copy each system's box art folder into the system's respective folder in /Roms/ and rename each folder to "Imgs"
   
   
-## Features : Its all about fun.
+## Features :
 ### Custom installer 
 <img src="https://user-images.githubusercontent.com/16885275/162589315-1d127c72-d404-4487-b379-3bde8179f566.png" width="350">  
 
