@@ -85,16 +85,15 @@ It also allows you to quickly change games and many other advantages for a very 
 
 
 ### Shortcuts
+  
+Menu button : Exit Game  
 
-(In the Onion launcher)   
-Menu button : Toggle Game / launcher panel   
-Menu + Up : Brightness up   
-Menu + Down : Brightness down  
+Select + Start + R2 : Brightness up   
+Select + Start + L2 : Brightness down  
+
 Power button : Deep sleep    
 Menu + Power : Light sleep   
-  
-(In the regular menu)  
-Menu + Start : Exit game     
+   
 Menu + Select : Retroarch menu     
    
 Menu + R2 : Save state   
@@ -103,13 +102,7 @@ Menu + L2 : Load state
 Menu + R : Fast forward   
 Menu + L : Rewind (If enabled)   
    
-Select + Start + R2 : Brightness up   
-Select + Start + L2 : Brightness down   
-  
 Menu + X : Toggle FPS display  
-    
-Menu + Right : Save slot increase      
-Menu + Left : Save slot decrease   
   
 (In a Game boy game)  
 R2/L2 : Change palette  
