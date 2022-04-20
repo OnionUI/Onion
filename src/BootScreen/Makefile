@@ -1,34 +1,25 @@
-# CROSS_COMPILE=/usr/bin/arm-linux-gnueabihf-
+
 
 TARGET = bootScreen
 
-CC 		= $(CROSS_COMPILE)gcc
-CXX 	= $(CROSS_COMPILE)g++
-STRIP 	= $(CROSS_COMPILE)strip
+CC 	= $(CROSS_COMPILE)g++
 
 SOURCES = . 
 CFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.c))
-CPPFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.cpp))
-OFILES = $(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
+OFILES = $(CFILES:.c=.o)
 
-# NOTE: These flags aren't strickly necessary...
-CFLAGS = -marm -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7ve 
-CXXFLAGS = $(CFLAGS)
-LDFLAGS = -lSDL -lSDL_image
+CFLAGS = -O3 -marm -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7ve -Wall
+LDFLAGS = -lSDL -lSDL_ttf -lmi_sys -lmi_gfx -s -lSDL -lSDL_image
 
 $(TARGET): $(OFILES)
-	$(CXX) $(OFILES) -o $@ $(LDFLAGS)
-	#$(STRIP) $@
+	$(CC) $(OFILES) -o $@ $(LDFLAGS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# %.o: %.cpp
-# 	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+
 
 clean:
 	rm -f $(TARGET) $(OFILES)
 
-
-install:
-	echo do nothing for install

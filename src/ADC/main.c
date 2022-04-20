@@ -6,6 +6,7 @@
 #include "sys/ioctl.h"
 #include <linux/input.h>
 
+
 typedef struct {
     int channel_value;
     int adc_value;
@@ -14,6 +15,38 @@ typedef struct {
 #define SARADC_IOC_MAGIC                     'a'
 #define IOCTL_SAR_INIT                       _IO(SARADC_IOC_MAGIC, 0)
 #define IOCTL_SAR_SET_CHANNEL_READ_VALUE     _IO(SARADC_IOC_MAGIC, 1)
+//	libshmvar header
+typedef enum {
+	MONITOR_VOLUME,			// vol
+	MONITOR_BRIGHTNESS,		// brightness
+	MONITOR_KEYMAP,			// keymap (maybe unused)
+	MONITOR_MUTE,			// mute
+	MONITOR_VOLUME_CHANGED,		// volume change (internal use)
+	MONITOR_BGM_VOLUME,		// bgmvol
+	MONITOR_HIBERNATE_DELAY,	// hibernate
+	MONITOR_ADC_VALUE,		// charging state (internal use)
+	MONITOR_LUMINATION,		// lumination
+	MONITOR_HUE,			// hue
+	MONITOR_SATURATION,		// saturation
+	MONITOR_CONTRAST,		// contrast
+	MONITOR_VALUE_MAX,
+} MonitorValue;
+
+typedef struct _KeyShmInfo {
+	int id;
+	void *addr;
+} KeyShmInfo;
+
+
+int	InitKeyShm(KeyShmInfo *);
+int	SetKeyShm(KeyShmInfo* info, MonitorValue key, int value);
+int	GetKeyShm(KeyShmInfo* info, MonitorValue key);
+int	UninitKeyShm(KeyShmInfo *);
+
+//
+//	handling libshmvar sample
+//
+
 
 static SAR_ADC_CONFIG_READ  adcCfg = {0,0};
 static int sar_fd = 0;
@@ -21,6 +54,18 @@ static int sar_fd = 0;
 static void initADC(void) {
     sar_fd = open("/dev/sar", O_WRONLY);
     ioctl(sar_fd, IOCTL_SAR_INIT, NULL);
+}
+
+
+void logMessage(char* Message) {
+	FILE *file = fopen("/mnt/SDCARD/.tmp_update/log_ADC.txt", "a");
+	/*char tempMess[] = "\r\n";
+    strcat(Message,tempMess);
+    */
+    char valLog[200];
+    sprintf(valLog, "%s %s", Message, "\n");
+    fputs(valLog, file);
+	fclose(file); 
 }
 
 static int is_charging = 0;
@@ -65,6 +110,7 @@ int firstLaunch = 1;
 int countChecks = 0;
 
 static void checkADC(void) {  
+
     ioctl(sar_fd, IOCTL_SAR_SET_CHANNEL_READ_VALUE, &adcCfg);
     remove("/tmp/percBat"); 
     int adc_fd = open("/tmp/percBat", O_CREAT | O_WRONLY);
@@ -73,10 +119,14 @@ static void checkADC(void) {
 	checkCharging();
 	
     if (adc_fd>0) {
-        char val[3];
-                
+        char val[3];     
   		int percBatTemp = 0;
   		if (is_charging == 0){
+  			KeyShmInfo	info;
+			InitKeyShm(&info);
+			SetKeyShm(&info, MONITOR_ADC_VALUE, adcCfg.adc_value);
+			UninitKeyShm(&info);
+  		
 			if (adcCfg.adc_value >= 528){
   				percBatTemp = adcCfg.adc_value-478;
   			}
@@ -148,22 +198,7 @@ static void* runADC(void *arg) {
 }
 
 int main (int argc, char *argv[]) {
-	/*
-	sleep(15);
-	//sleep(10); 10 seconds
 
-	int input_fd = open("/dev/input/event0", O_WRONLY);
-	struct input_event	ev;
-
-	ev.type = EV_KEY;
-	ev.code = KEY_SPACE;
-	ev.value = 1;		// Press
-
-	write(input_fd, &ev, sizeof(ev));
-	close(input_fd);
-*/
-	
-	
 	initADC();   
 	runADC(NULL);
 }

@@ -22,6 +22,17 @@ void checkCharging(void) {
     is_charging = i;
 }
 
+void logMessage(char* Message) {
+	FILE *file = fopen("/mnt/SDCARD/.tmp_update/log_charging_Message.txt", "a");
+	/*char tempMess[] = "\r\n";
+    strcat(Message,tempMess);
+    */
+    char valLog[200];
+    sprintf(valLog, "%s %s", Message, "\n");
+    fputs(valLog, file);
+	fclose(file); 
+}
+
 void SetRawBrightness(int val) {  // val = 0-100
     int fd = open("/sys/class/pwm/pwmchip0/pwm0/duty_cycle", O_WRONLY);
     if (fd>=0) {
@@ -91,7 +102,6 @@ int main(void) {
 	}
 	
 
-	int run = 1;
 	SetBrightness(8);
 	//usleep(5000000);	//5s
 	screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640,480, 32, 0,0,0,0);
@@ -102,20 +112,24 @@ int main(void) {
 	
 	SDL_Event event;
 	
+	int run = 1;
+	char valeur[100];
 	while ((SDL_PollEvent(&event))||(run==1)) {
 		if (event.type==SDL_KEYDOWN) {
-			if (event.key.keysym.sym == SDLK_SPACE){	    
+			if (event.key.keysym.sym == 0){	    
 				SetBrightness(8);
 				run = 0;
 			}
+			
 		}	
+		sprintf(valeur,"%d",event.key.keysym.sym);
+		logMessage(valeur);
 		checkCharging();
 		if (is_charging == 0){
 			system("reboot");	
 		}
 		usleep(100000);
 	}
-	
 	
    	SDL_FreeSurface(screen);
   

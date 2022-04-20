@@ -1,6 +1,6 @@
 
 
-TARGET = turningOff
+TARGET = onionLauncher
 
 CC 	= $(CROSS_COMPILE)g++
 

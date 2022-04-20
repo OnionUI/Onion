@@ -32,7 +32,7 @@ void logMessage(char* Message) {
 char *removeExt(char* myStr) {
     char *retStr;
     char *lastExt;
-    if (myStr == NULL) return NULL;
+    if (myStr == NULL) returninitTimer NULL;
     if ((retStr = malloc (strlen (myStr) + 1)) == NULL) return NULL;
     strcpy (retStr, myStr);
     lastExt = strrchr (retStr, '.');
@@ -94,7 +94,7 @@ void writeRomDB(void){
 		fseek(fp, 0L, SEEK_END);
 		sz = ftell(fp);
 		fclose(fp);
-		if (sz>10000){
+		if (sz>50000){
 		system("cp /mnt/SDCARD/RetroArch/.retroarch/saves/playActivity_tmp.db /mnt/SDCARD/RetroArch/.retroarch/saves/playActivity.db");
 	
 		}
@@ -234,7 +234,6 @@ int main(int argc, char *argv[]) {
     						totalPlayTime = -1;
     					}	
     				}
-    			
     			    				
     				// Write total current time for the onion launcher				 	
 					char cTotalTimePlayed[50];	 	
@@ -271,13 +270,13 @@ int main(int argc, char *argv[]) {
         				close(totalTime_fd);		
 					}
 					
-		
    					// DB Backup
    					backupDB();
    					
    					// We save the DB
    					writeRomDB();		
-   					
+					
+					remove("initTimer");   					
    					
    						
 				}

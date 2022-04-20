@@ -16,7 +16,7 @@ OFILES = $(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
 # NOTE: These flags aren't strickly necessary...
 CFLAGS = -marm -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7ve 
 CXXFLAGS = $(CFLAGS)
-LDFLAGS = -lSDL -lSDL_image -pthread -lshmvar 
+LDFLAGS = -lSDL -lSDL_image -pthread
 
 
 

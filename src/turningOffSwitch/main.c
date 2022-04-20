@@ -327,6 +327,8 @@ int main(void) {
 	readRomDB();
 	readHistory();
 	
+	int nExitToMiyoo = 0;
+	
 	// Check current brightness value
 	FILE *fp;
 	long lSize;
@@ -433,7 +435,6 @@ int main(void) {
 	SDL_ShowCursor(SDL_DISABLE);
 	TTF_Init();
 	
-
 		
 	font = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 30);
 	
@@ -445,7 +446,7 @@ int main(void) {
 	free(currBat);
 	
 	
-	SDL_Surface* imageBackgroundDefault = IMG_Load("bootScr.png");
+	SDL_Surface* imageBackgroundDefault = IMG_Load("bootScreen.png");
 	SDL_Surface* imageBackgroundLowBat = IMG_Load("lowBat.png");
 	SDL_Surface* imageBackgroundNoGame= IMG_Load("noGame.png");
 	SDL_Surface* imageRemoveDialog= IMG_Load("removeDialog.png");
@@ -453,13 +454,13 @@ int main(void) {
 	SDL_Surface* imageFooterHelp = IMG_Load("footerHelp.png");	
 	char currPicture[MAXHROMNAMESIZE+44];
 	
-	if (file_exists(".scrOrder")==0) {
+	//if (file_exists(".RALaunched")==0) {
 	// The screenshot is ready 
 	// Printscreen save for specific game
-	sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",gameList[currentGame].name,".png");	 		
+	sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",gameList[currentGame].name,".png");	 	
 	// Move screenshot to destination
 	rename("screenshotGame.bmp", currPicture);  
-	}
+	//}
 
 	while(run) { 
 		if (firstPass > 0){
@@ -548,7 +549,7 @@ int main(void) {
 				}
 				
 				if (y_pressed) {	
-					int fd = creat(".menuSelect", 777);
+					int fd = creat(".menuActivity", 777);
 					close(fd); 
 					break;
 				}
@@ -558,14 +559,11 @@ int main(void) {
 				}		
 				
 				if (b_pressed) {	
-					int fd = creat(".menuA", 777);
-					close(fd); 
+					nExitToMiyoo = 1;
 					break;
 				}
-		
-						
+								
 				if ( ev.code == BUTTON_MENU ) {
-
 						menu_pressed = val;
 						if (menu_pressed == 1){
 							comboKey = 0 ;
@@ -573,6 +571,7 @@ int main(void) {
 						else {
 							if (comboKey == 0){
 								comboKey = 1 ;
+								
 								break;
 
 							}
@@ -606,14 +605,6 @@ int main(void) {
 			free(currLum);
 		}
 			
-		
-		if (file_exists(".deepSleep")==1){
-			remove(".deepSleep");
-			bShowBoot = 1;
-			system("reboot");
-			sleep(10);
-		}
-		
 
 		if (taillestructGames==0){
 			SDL_BlitSurface(imageBackgroundNoGame, NULL, screen, NULL);
@@ -701,15 +692,13 @@ int main(void) {
 	
 	screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640,480, 32, 0,0,0,0);
 	
-
-	remove("/mnt/SDCARD/.tmp_update/RACommand.txt");
-	FILE *file = fopen("/mnt/SDCARD/.tmp_update/RACommand.txt", "w");
-	fputs(gameList[currentGame].RACommand, file);
-	fclose(file); 	
-	
-	remove("/mnt/SDCARD/.tmp_update/romName.txt");			
-	
-	
+	if (nExitToMiyoo == 0){
+		remove("/tmp/cmd_to_run_launcher.sh");
+		FILE *file = fopen("/tmp/cmd_to_run_launcher.sh", "w");
+		fputs(gameList[currentGame].RACommand, file);
+		fclose(file); 	
+		remove("/tmp/romName.txt");		
+	}
 	 
 	SDL_BlitSurface(screen, NULL, video, NULL); 
 	SDL_Flip(video);

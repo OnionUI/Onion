@@ -69,8 +69,8 @@ int main(void) {
 	cJSON* path = NULL;
 	cJSON* core_path = NULL;
 	
-	remove ("/mnt/SDCARD/.tmp_update/RACommand.txt");
-	remove ("/mnt/SDCARD/.tmp_update/romName.txt");
+	remove ("/tmp/cmd_to_run_launcher.sh");
+	remove ("/tmp/romName.txt");
 	
 	const char *request_body = load_file("/mnt/SDCARD/RetroArch/.retroarch/content_history.lpl");
 	
@@ -104,7 +104,7 @@ int main(void) {
 
 		if ((file_exists(cCore_path1) == 1) && (file_exists(cPath1) == 1)){
 		
-			FILE *file = fopen("/mnt/SDCARD/.tmp_update/RACommand.txt", "w");
+			FILE *file = fopen("/tmp/cmd_to_run_launcher.sh", "w");
 			 if (file_exists("RADirectLaunch.enable") == 1){
 				fputs("./retroarch", file);
 				}
@@ -136,20 +136,20 @@ int main(void) {
     		//File name without ext
 			//char *bnameWOExt = removeExt(bname);
 		
-			remove("/mnt/SDCARD/.tmp_update/romName.txt");
-			FILE *fileRom = fopen("/mnt/SDCARD/.tmp_update/romName.txt", "w");
+			remove("/tmp/romName.txt");
+			FILE *fileRom = fopen("/tmp/romName.txt", "w");
 			fputs(bname, fileRom);
 			fclose(fileRom); 
 		}
 		else {
-			remove ("/mnt/SDCARD/.tmp_update/RACommand.txt");
-			remove ("/mnt/SDCARD/.tmp_update/romName.txt");
+			remove ("/tmp/cmd_to_run_launcher.sh");
+			remove ("/tmp/romName.txt");
 		}
 
 	}
 	else {
-	remove ("/mnt/SDCARD/.tmp_update/RACommand.txt");
-	remove ("/mnt/SDCARD/.tmp_update/romName.txt");
+	remove ("/tmp/cmd_to_run_launcher.sh");
+	remove ("/tmp/romName.txt");
 	}
 
 

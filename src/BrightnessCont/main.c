@@ -14,6 +14,8 @@
 #include <signal.h>
 #include <dirent.h>
 #include <signal.h>
+#include "cJSON.h"
+
 
 //	for ev.value
 #define RELEASED	0
@@ -24,9 +26,47 @@
 #define		PIDMAX	32
 uint32_t	suspendpid[PIDMAX];
 
+typedef enum {
+	MONITOR_VOLUME,			// vol
+	MONITOR_BRIGHTNESS,		// brightness
+	MONITOR_KEYMAP,			// keymap (maybe unused)
+	MONITOR_MUTE,			// mute
+	MONITOR_VOLUME_CHANGED,		// volume change (internal use)
+	MONITOR_BGM_VOLUME,		// bgmvol
+	MONITOR_HIBERNATE_DELAY,	// hibernate
+	MONITOR_ADC_VALUE,		// charging state (internal use)
+	MONITOR_LUMINATION,		// lumination
+	MONITOR_HUE,			// hue
+	MONITOR_SATURATION,		// saturation
+	MONITOR_CONTRAST,		// contrast
+	MONITOR_VALUE_MAX,
+} MonitorValue;
+
+typedef struct _KeyShmInfo {
+	int id;
+	void *addr;
+} KeyShmInfo;
+
+
+int	InitKeyShm(KeyShmInfo *);
+int	SetKeyShm(KeyShmInfo* info, MonitorValue key, int value);
+int	GetKeyShm(KeyShmInfo* info, MonitorValue key);
+int	UninitKeyShm(KeyShmInfo *);
+
 bool file_exists (char *filename) {
   struct stat   buffer;   
   return (stat (filename, &buffer) == 0);
+}
+
+void logMessage(char* Message) {
+	FILE *file = fopen("/mnt/SDCARD/.tmp_update/log_BrightnessCont.txt", "a");
+	/*char tempMess[] = "\r\n";
+    strcat(Message,tempMess);
+    */
+    char valLog[200];
+    sprintf(valLog, "%s %s", Message, "\n");
+    fputs(valLog, file);
+	fclose(file); 
 }
 
 //
@@ -66,7 +106,8 @@ void suspend(void) {
 					     (strncmp(comm,"(mmcqd/",7)) && (strcmp(comm,"(bioset)")) ) {
 						if ( suspendpid[0] < PIDMAX ) {
 							suspendpid[++suspendpid[0]] = pid;
-							kill(pid,SIGSTOP);
+							kill(pid,SIGSTOP);		
+							
 						}
 					}
 				}
@@ -76,6 +117,101 @@ void suspend(void) {
 	closedir(procdp);
 }
 
+void killAll(void) {
+	DIR *procdp;
+	struct dirent *dir;
+	char fname[32];
+	pid_t suspend_pid = getpid();
+	pid_t parent_pid = getppid();
+	pid_t pid;
+	pid_t ppid;
+	char state;
+	char comm[128];
+	
+
+	// Send SIGSTOP to active processes
+	// Cond:1. PID is greater than suspend's
+	// 	2. PPID is greater than or equal to suspend's
+	//	3. state is "R" or "S" or "D"
+	//	4. comm is not "(sh)" or "(kworker/.." "(mmcqd/.." "(bioset)"
+	suspendpid[0] = 0;
+	procdp = opendir("/proc");
+	while ((dir = readdir(procdp))) {
+		if (dir->d_type == DT_DIR) {
+			pid = atoi(dir->d_name);
+			if ( pid > suspend_pid) {
+				sprintf(fname, "/proc/%d/stat", pid);
+				FILE *fd = fopen(fname, "r");
+				if (fd != NULL) {
+					fscanf(fd, "%*d %128s %c %d", (char*)&comm, &state, &ppid);
+					fclose(fd);
+				}
+				//fprintf(stdout, "pid: %d ppid:%d parent:%d state:%c comm:%s\n",pid,ppid,parent_pid,state,comm);
+				if ((ppid >= parent_pid)&&((state == 'R')||(state == 'S')||(state == 'D'))) {
+					if ( (strcmp(comm,"(sh)")) && (strncmp(comm,"(kworker/",9)) &&
+					     (strncmp(comm,"(mmcqd/",7)) && (strcmp(comm,"(bioset)")) ) {
+						if ( suspendpid[0] < PIDMAX ) {
+							suspendpid[++suspendpid[0]] = pid;
+							kill(pid,SIGKILL);
+						}
+					}
+				}
+			}
+		}
+	}
+	closedir(procdp);
+}
+
+int sigTermAll(void) {
+	DIR *procdp;
+	struct dirent *dir;
+	char fname[32];
+	pid_t suspend_pid = getpid();
+	pid_t parent_pid = getppid();
+	pid_t pid;
+	pid_t ppid;
+	char state;
+	char comm[128];
+	int nfound = 0;
+
+	// Send SIGSTOP to active processes
+	// Cond:1. PID is greater than suspend's
+	// 	2. PPID is greater than or equal to suspend's
+	//	3. state is "R" or "S" or "D"
+	//	4. comm is not "(sh)" or "(kworker/.." "(mmcqd/.." "(bioset)"
+	suspendpid[0] = 0;
+	procdp = opendir("/proc");
+	while ((dir = readdir(procdp))) {
+		if (dir->d_type == DT_DIR) {
+			pid = atoi(dir->d_name);
+			if ( pid > suspend_pid) {
+				sprintf(fname, "/proc/%d/stat", pid);
+				FILE *fd = fopen(fname, "r");
+				if (fd != NULL) {
+					fscanf(fd, "%*d %128s %c %d", (char*)&comm, &state, &ppid);
+					fclose(fd);
+				}
+				//fprintf(stdout, "pid: %d ppid:%d parent:%d state:%c comm:%s\n",pid,ppid,parent_pid,state,comm);
+				if ((ppid >= parent_pid)&&((state == 'R')||(state == 'S')||(state == 'D'))) {
+					if ( (strcmp(comm,"(sh)")) && (strncmp(comm,"(kworker/",9)) &&
+					     (strncmp(comm,"(mmcqd/",7)) && (strcmp(comm,"(bioset)")) ) {
+						if ( suspendpid[0] < PIDMAX ) {
+							suspendpid[++suspendpid[0]] = pid;
+							if (kill(pid,SIGTERM)==0){
+								nfound = 1;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	closedir(procdp);
+	return nfound;
+}
+
+
+
 void resume(void) {
 	// Send SIGCONT to suspended processes
 	if (suspendpid[0]) {
@@ -83,8 +219,7 @@ void resume(void) {
 			kill(suspendpid[i],SIGCONT);
 		}
 	}
-}
-
+} 
 void screenshot(void) {
 	const uint8_t bmpheader[] = {		// 640x480 RGB888 32bit BMP Header
 		0x42,0x4D,0x36,0xC0,0x12,0x00,0x00,0x00,0x00,0x00,0x36,0x00,0x00,0x00,0x28,0x00,
@@ -153,11 +288,62 @@ void SetRawBrightness(int val) {  // val = 0-100
 }
 
 void SetBrightness(int value) {  // value = 0-10
+    KeyShmInfo	info;
+    InitKeyShm(&info);
+	SetKeyShm(&info, MONITOR_BRIGHTNESS, value);
+	UninitKeyShm(&info);
     SetRawBrightness(value==0?6:value*10);
 }
 
 void turnScreenOff(void) {  
     SetRawBrightness(0);
+}
+
+char* load_file(char const* path)
+{
+    char* buffer = 0;
+    long length;
+    FILE * f = fopen (path, "rb"); //was "rb"
+
+    if (f)
+    {
+      fseek (f, 0, SEEK_END);
+      length = ftell (f);
+      fseek (f, 0, SEEK_SET);
+      buffer = (char*)malloc ((length+1)*sizeof(char));
+      if (buffer)
+      {
+        fread (buffer, sizeof(char), length, f);
+      }
+      fclose (f);
+    }
+    buffer[length] = '\0';
+
+    return buffer;
+}
+
+
+void setMiyooLum(int nLum){
+
+	cJSON* request_json = NULL;
+	cJSON* itemBrightness;
+
+	char sBrightness[20]; 
+	
+	const char *request_body = load_file("/appconfigs/system.json");
+	request_json = cJSON_Parse(request_body);
+	itemBrightness = cJSON_GetObjectItem(request_json, "brightness");
+
+	int dBrightness = cJSON_GetNumberValue(itemBrightness);
+	sprintf(sBrightness, "%d", dBrightness);
+	
+	
+	cJSON_SetNumberValue(itemBrightness, nLum);
+
+	FILE *file = fopen("/appconfigs/system.json", "w");	
+	char *test = cJSON_Print(request_json);	
+	fputs(test, file);
+	fclose(file); 	
 }
 
 
@@ -200,6 +386,8 @@ int main() {
 	uint32_t		select_pressed = 0;	
 	
 
+	
+	
 	// Safe boot exit called once
 	int 			bSafeExitDone = 0;	
 	// Prepare for Poll button input
@@ -258,16 +446,9 @@ int main() {
 								else {
 									if (comboKey == 0){
 										comboKey = 1 ;
-
-										if (file_exists(".scrOrder") == 1){
-											// We are leaving RA, not the panel
+											system("killall -15 retroarch");
 											screenshot();
 											
-											remove(".scrOrder");
-											system("killall -15 retroarch");
-										}
-		
-
 									}
 								
 								}
@@ -294,10 +475,21 @@ int main() {
 											}
 
 							
+
+		
+		if (start_pressed & select_pressed & a_pressed & b_pressed) {
+			 if (file_exists(".altBrightShortcut")==1){
+			 	remove(".altBrightShortcut");
+			 }
+			 else {
+			 	int fd = creat(".altBrightShortcut", 777);
+				close(fd); 
+			 }
+		}
+		
+		
 		// Shorcuts handlers	
 		// Panic mode 
-		
-		
 		if (start_pressed & select_pressed & menu_pressed & r2_pressed & l2_pressed) {
 			 system("rm /mnt/SDCARD/App/OnionLauncher/data/.enabled"); 
 			 system("reboot");
@@ -308,22 +500,59 @@ int main() {
 			 system("reboot");
 			 sleep(10);
 		}
-			
-
-
+			 
 		if (power_pressed && ! menu_pressed){
+	
+		//SetRawBrightness(0);
+		int fd = creat(".offOrder", 777);
+		close(fd); 
+
 		
-		SetRawBrightness(0);
+		if (file_exists("/tmp/cmd_to_run_launcher.sh")==1){
+			// One game is running
+			system("killall -15 retroarch");
+		}
+		else{
+			if (file_exists("/tmp/cmd_to_run.sh")==1){
+				// One game/app is running
+				sigTermAll();		
+					
+			}
+			else {
+				killAll();
+			}	
+		}
 		
+		
+		
+		//system("killall -15 retroarch");
+		
+
+		/*
+		while(file_exists("/tmp/App/PlayActivity/initTimer")==1){
+			usleep(200000);
+		}
+
+		sleep(5);
+		*/
+		
+		
+		// All processes are shutdown
+
+		// Waiting for the device to turn off
+	 
+	 	//system("cd /mnt/SDCARD/.tmp_update/ ; ./bootScreen 0");
+		
+		//kill(-1, SIGTERM);
+		//sleep(1);
+		//kill(-1, SIGKILL);
+		//sleep(5);
+		
+		//system("cd /mnt/SDCARD/.tmp_update/ ; ./freemma");
+
 		power_pressed = 0;
 		menu_pressed = 0;
-
-		
-		int fd = creat(".deepSleep", 777);
-		close(fd);	
-		system("killall -15 retroarch");
-		
-		
+	
 		}
 		 
 		// Sleep mode
@@ -334,7 +563,7 @@ int main() {
 			// suspend
 			turnScreenOff(); 
 			// Timer registration
-			system("cd /mnt/SDCARD/.tmp_update/; value=$(cat romName.txt); cd /mnt/SDCARD/App/PlayActivity; ./playActivity \"$value\"");
+			system("cd /tmp/; value=$(cat romName.txt); cd /mnt/SDCARD/App/PlayActivity; ./playActivity \"$value\"");
 
 			usleep(200000); 
 			suspend(); 
@@ -358,7 +587,7 @@ int main() {
 		// Brightness possible values
 		// 0 1 2 4 6 8 10
 		
-		if ((start_pressed & select_pressed & l2_pressed)||(menu_pressed & down_pressed)) {
+		if ((start_pressed & select_pressed & l2_pressed)&&(file_exists(".altBrightShortcut")==0)) {
 		//	start_pressed = select_pressed = l2_pressed = 0;
 			if (brightness_value >= 1){
 				brightness_value--;
@@ -366,7 +595,9 @@ int main() {
 					brightness_value--;
 				}	
 				remove("brightSett");
+				
 				SetBrightness(brightness_value);	
+				setMiyooLum(brightness_value);
 				fclose(fopen("/mnt/SDCARD/.tmp_update/brightSett","w"));
 				int adc_fd = open("/mnt/SDCARD/.tmp_update/brightSett", O_CREAT | O_WRONLY);
 				if (adc_fd>0) {
@@ -377,10 +608,29 @@ int main() {
 				}
 			}
 		}
-		
+		if ((menu_pressed & down_pressed)&&(file_exists(".altBrightShortcut")==1)) {
+		//	start_pressed = select_pressed = l2_pressed = 0;
+			if (brightness_value >= 1){
+				brightness_value--;
+				if (brightness_value > 2){
+					brightness_value--;
+				}	
+				remove("brightSett");
+				
+				SetBrightness(brightness_value);	
+				setMiyooLum(brightness_value);
+				fclose(fopen("/mnt/SDCARD/.tmp_update/brightSett","w"));
+				int adc_fd = open("/mnt/SDCARD/.tmp_update/brightSett", O_CREAT | O_WRONLY);
+				if (adc_fd>0) {
+					char val[3];
+					sprintf(val, "%d", brightness_value);
+        			write(adc_fd, val, strlen(val));
+        			close(adc_fd);
+				}
+			}
+		}	
 
-			
-		if ((start_pressed & select_pressed & r2_pressed)||(menu_pressed & up_pressed)) {
+		if ((start_pressed & select_pressed & r2_pressed)&&(file_exists(".altBrightShortcut")==0)) {
 		//	start_pressed = select_pressed = r2_pressed = 0;
 			if (brightness_value <= 8){
 				brightness_value++;
@@ -388,7 +638,9 @@ int main() {
 					brightness_value++;
 				}	
 				remove("brightSett");
+				
 				SetBrightness(brightness_value);	
+				setMiyooLum(brightness_value);
 				fclose(fopen("/mnt/SDCARD/.tmp_update/brightSett","w"));
 				int adc_fd = open("/mnt/SDCARD/.tmp_update/brightSett", O_CREAT | O_WRONLY);
 				if (adc_fd>0) {
@@ -398,7 +650,29 @@ int main() {
         			close(adc_fd);
 				}	
 			}
-		}			
+		}	
+		if ((menu_pressed & up_pressed)&&(file_exists(".altBrightShortcut")==1)) {
+		//	start_pressed = select_pressed = r2_pressed = 0;
+			if (brightness_value <= 8){
+				brightness_value++;
+				if (brightness_value > 2){
+					brightness_value++;
+				}	
+				remove("brightSett");
+				
+				SetBrightness(brightness_value);	
+				setMiyooLum(brightness_value);
+				fclose(fopen("/mnt/SDCARD/.tmp_update/brightSett","w"));
+				int adc_fd = open("/mnt/SDCARD/.tmp_update/brightSett", O_CREAT | O_WRONLY);
+				if (adc_fd>0) {
+					char val[3];
+					sprintf(val, "%d", brightness_value);
+        			write(adc_fd, val, strlen(val));
+        			close(adc_fd);
+				}	
+			}
+		}					
+				
 	}
 	
 	close(input_fd);
