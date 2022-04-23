@@ -34,14 +34,14 @@
 <img src="https://user-images.githubusercontent.com/16885275/154789504-84253d41-373d-4c84-b194-547c6343f904.png" width="350">  
   
 - Preview and change themes on the fly, no reboot required.
-- 26 themes from our community on this Github !   
+- 26 themes from our community on this Github    
 
 
 ### Custom installer 
 <img src="https://user-images.githubusercontent.com/16885275/162589315-1d127c72-d404-4487-b379-3bde8179f566.png" width="350">  
 
 - Install / uninstall only the systems and apps you need. Any action is reversible.
-- Community presets, homebrews and more!
+- Community presets, homebrews and more
    
 ### Play Activity 
 <img src="https://user-images.githubusercontent.com/16885275/162589339-e779c6dd-4e9d-47f0-8543-4646d84fc748.png" width="350">  
@@ -82,7 +82,7 @@ It also allows you to quickly change games and many other advantages for a very 
 - Experimental Arduboy support (Credit: JMARoeder)
 - Updated PICO emulator to Fake08 standalone (Credit: Supergrom)
 - Updated screenshot tool to v4 (Credit: eggs)
-- Support for Icon Packs! Drag and drop your custom icons into the "Icons" folder at the root of your SD.
+- Support for Icon Packs. Drag and drop your custom icons into the "Icons" folder at the root of your SD.
 - Boxart moved to /Roms/_systemname_/Imgs for easier scraping
 - Various bug fixes and optimizations.
 
