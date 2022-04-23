@@ -1,18 +1,11 @@
 # Onion (and Eggs) V3: Definitive Edition
 ### [Download newest release here](https://github.com/jimgraygit/Onion/releases)
 
-<img src="https://user-images.githubusercontent.com/16885275/164891118-efbcfc2e-bd25-4b88-8851-34862f550690.png" width="456"> 
-
+<img src="https://user-images.githubusercontent.com/16885275/164891137-2bbdcfb5-e2c2-4658-8049-79b01d57dfed.png" width="948"> 
 
 #### This release was made possible by Totofaki, Eggs, JimGray, Pixelshift, Shauninman and many more from the Onion community.
   
 ## Installation
-#### Installation (Fresh Install):
-- Format your SD card as Fat32. (Use a fast, trusted brand not the one sent with the handheld. The default miyoo SD card is slow, it will ruin your experience and likely loose your data)
-- Unzip the ".tmp_update" folder and its content to the root of your SD.
-- Boot up your Miyoo Mini and follow the on-screen instructions to get started.
-- Your Mini will turn off after the installation is completed.
- (Don't delete the .tmp_update folder, it is now part of the Onion installation)  
 
 #### Installation (Upgrade):
 - Backup your saves, states and scraped images 
@@ -25,9 +18,17 @@
  (Don't delete the .tmp_update folder, it is now part of the Onion installation)  
 - Restore your backed up saves and states.
 - Optional: To restore your box art, copy each system's box art folder into the system's respective folder in /Roms/ and rename each folder to "Imgs"
+
+#### Installation (Fresh Install):
+- Format your SD card as Fat32. (Use a fast, trusted brand not the one sent with the handheld. The default miyoo SD card is slow, it will ruin your experience and likely loose your data)
+- Unzip the ".tmp_update" folder and its content to the root of your SD.
+- Boot up your Miyoo Mini and follow the on-screen instructions to get started.
+- Your Mini will turn off after the installation is completed.
+ (Don't delete the .tmp_update folder, it is now part of the Onion installation)  
   
+<img src="https://user-images.githubusercontent.com/16885275/164891118-efbcfc2e-bd25-4b88-8851-34862f550690.png" width="456">   
   
-## Features :
+# Features
 ### Theme Switcher app / Custom themes  
 <img src="https://user-images.githubusercontent.com/16885275/164838712-d45b3779-b30f-491c-b5ff-0bbc2a10865b.png" width="350"> 
 <img src="https://user-images.githubusercontent.com/16885275/164838718-326f5590-96c2-4644-8fa2-1dd56f36a9bc.png" width="350"> 
@@ -50,7 +51,7 @@
 ### Onion Launcher
 <img src="https://user-images.githubusercontent.com/16885275/164890313-c83dfc84-a684-416b-bd40-9f54c9f4e7db.png" width="350">  
  
-The launcher is a user interface designed to be triggered when the miyoo mini starts.  
+The launcher is an user interface designed to be triggered when the miyoo mini starts.  
 It allows you to launch the last game played in a few seconds, and with a simple press of a button to save your progression and turn off the console.   
 It also allows you to quickly change games and many other advantages for a very simple experience :   
    
