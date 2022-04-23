@@ -28,6 +28,15 @@
   
   
 ## Features :
+### Theme Switcher app / Custom themes  
+<img src="https://user-images.githubusercontent.com/16885275/164838712-d45b3779-b30f-491c-b5ff-0bbc2a10865b.png" width="350"> 
+<img src="https://user-images.githubusercontent.com/16885275/164838718-326f5590-96c2-4644-8fa2-1dd56f36a9bc.png" width="350"> 
+<img src="https://user-images.githubusercontent.com/16885275/154789504-84253d41-373d-4c84-b194-547c6343f904.png" width="350">  
+  
+- Preview and change themes on the fly, no reboot required.
+- 26 themes from our community on this Github !   
+
+
 ### Custom installer 
 <img src="https://user-images.githubusercontent.com/16885275/162589315-1d127c72-d404-4487-b379-3bde8179f566.png" width="350">  
 
@@ -56,12 +65,6 @@ It also allows you to quickly change games and many other advantages for a very 
 - Low bat (<10%) big visual battery warning indicator.
 - Your handheld will also rumble periodically in game to indicate that your battery is bellow 10%
 - When the battery goes < 4%, the game is now saved to prevent loosing progression, and the handheld turned off.
-  
-### Theme Switcher app   
-<img src="https://user-images.githubusercontent.com/16885275/154789504-84253d41-373d-4c84-b194-547c6343f904.png" width="350">  
-  
-- Preview and change themes on the fly, no reboot required.
-- 26 themes from our community!
   
 ### RetroArch UI improvements   
 <img src="https://user-images.githubusercontent.com/16885275/154791260-d1a4d0b2-5582-45cc-a291-bead843a5171.png" width="350">  
