@@ -1,5 +1,5 @@
 # Onion (and Eggs) V3: Definitive Edition
-### [Download newest release here!](https://github.com/jimgraygit/Onion/releases)
+### [Download newest release here](https://github.com/jimgraygit/Onion/releases)
 
   
 <img src="https://user-images.githubusercontent.com/16885275/154790941-2f9a5912-3844-4a6b-a533-7bffccb50ffd.jpg" width="500"> 
