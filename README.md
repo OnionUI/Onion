@@ -116,4 +116,3 @@ Force uninstall the launcher : start+select+menu+R2+L2
 
 <img src="https://user-images.githubusercontent.com/16885275/164891039-665fffcf-b454-4b3c-87c6-13a92cb88a8b.png" width="1594">  
 <img src="https://user-images.githubusercontent.com/16885275/164890923-3d42f03a-acb2-4983-be57-ec2a8bb04cf5.jpg" width="3000"> 
-<img src="https://user-images.githubusercontent.com/16885275/164891137-2bbdcfb5-e2c2-4658-8049-79b01d57dfed.png" width="948"> 
