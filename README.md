@@ -25,6 +25,7 @@
 - Boot up your Miyoo Mini and follow the on-screen instructions to get started.
 - Your Mini will turn off after the installation is completed.
  (Don't delete the .tmp_update folder, it is now part of the Onion installation)  
+- Copy your Bios files into the BIOS folder. 
   
 <img src="https://user-images.githubusercontent.com/16885275/164891118-efbcfc2e-bd25-4b88-8851-34862f550690.png" width="456">   
   
