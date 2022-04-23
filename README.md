@@ -4,7 +4,7 @@
   
 <img src="https://user-images.githubusercontent.com/16885275/154790941-2f9a5912-3844-4a6b-a533-7bffccb50ffd.jpg" width="500"> 
 
-#### This release was made possible by Totofaki, Eggs, JimGray, Pixelshift and many more from the Onion community.
+#### This release was made possible by Totofaki, Eggs, JimGray, Pixelshift, Shauninman and many more from the Onion community.
   
 ## Installation
 #### Installation (Fresh Install):
