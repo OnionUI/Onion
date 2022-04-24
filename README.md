@@ -7,8 +7,6 @@
   
 ## Installation
 
-system's box art folder into the system's respective folder in /Roms/ and rename each folder to "Imgs"
-
 #### Installation (Fresh Install):
 - Format your SD card as Fat32. (Use a fast, trusted brand not the one sent with the handheld. The default miyoo SD card is slow, it will ruin your experience and likely loose your data)
 - Unzip the ".tmp_update" folder and its content to the root of your SD.
@@ -27,7 +25,8 @@ system's box art folder into the system's respective folder in /Roms/ and rename
 - Your Mini will turn off after the installation is completed.
  (Don't delete the .tmp_update folder, it is now part of the Onion installation)  
 - Restore your backed up saves and states.
-- Optional: To restore your box art, copy each 
+- Optional: To restore your box art, copy each system's box art folder into the system's respective folder in /Roms/ and rename each folder to "Imgs"
+
 
 <img src="https://user-images.githubusercontent.com/16885275/164891118-efbcfc2e-bd25-4b88-8851-34862f550690.png" width="456">   
   
