@@ -1,7 +1,7 @@
 # Onion (and Eggs) V3: Definitive Edition
 ### [Download newest release here](https://github.com/jimgraygit/Onion/releases)
 
-
+<img src="https://user-images.githubusercontent.com/16885275/164891645-707cddc5-5b96-4d2c-ae22-de36ad187526.png"> 
 
 #### This release was made possible by Totofaki, Eggs, JimGray, Pixelshift, Shauninman and many more from the Onion community.
   
@@ -27,7 +27,7 @@
 - Restore your backed up saves and states.
 - Optional: To restore your box art, copy each system's box art folder into the system's respective folder in /Roms/ and rename each folder to "Imgs"
 
-
+<img src="https://user-images.githubusercontent.com/16885275/164891118-efbcfc2e-bd25-4b88-8851-34862f550690.png" width="456">   
   
 # Features
 ### Theme Switcher app / Custom themes  
@@ -114,8 +114,7 @@ R2/L2 : Change palette
 
 Other :
 Force uninstall the launcher : start+select+menu+R2+L2
-<img src="https://user-images.githubusercontent.com/16885275/164891645-707cddc5-5b96-4d2c-ae22-de36ad187526.png"> 
-<img src="https://user-images.githubusercontent.com/16885275/164891118-efbcfc2e-bd25-4b88-8851-34862f550690.png" width="456">   
+
 <img src="https://user-images.githubusercontent.com/16885275/164891137-2bbdcfb5-e2c2-4658-8049-79b01d57dfed.png" width="948"> 
 <img src="https://user-images.githubusercontent.com/16885275/164890923-3d42f03a-acb2-4983-be57-ec2a8bb04cf5.jpg" width="3000">
 <img src="https://user-images.githubusercontent.com/16885275/164891039-665fffcf-b454-4b3c-87c6-13a92cb88a8b.png" width="1594">   
