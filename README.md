@@ -101,7 +101,7 @@ It also allows you to quickly change games and many other advantages for a very 
 
 ### Shortcuts
 
-<img src="https://user-images.githubusercontent.com/16885275/165266775-63e24f1b-d734-4eee-99c5-8bad502cd87e.png" width="350">  
+<img src="https://user-images.githubusercontent.com/16885275/165266775-63e24f1b-d734-4eee-99c5-8bad502cd87e.png" width="500">  
   
 Menu button : Exit Game  
 
