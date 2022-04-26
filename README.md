@@ -9,6 +9,8 @@
 * [Features](#features)
 * [Shortcuts](#shortcuts)
 
+#### [Check also our wiki here](https://github.com/jimgraygit/Onion/wiki)
+
 ## Installation
 
 #### Installation (Fresh Install):
