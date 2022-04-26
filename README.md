@@ -6,12 +6,13 @@
 #### This release was made possible by Totofaki, Eggs, JimGray, Pixelshift, Shauninman and many more from the Onion community.
 
 * [Installation](#installation) 
+* [Latest miyoo UI menu](#theme-switcher-app--custom-themes)
 * [Onion installer](#onion-installer)
 * [Play activity](#play-activity)
 * [Onion launcher](#onion-launcher)
-* [Latest miyoo UI menu](#theme-switcher-app--custom-themes)
-* [RetroArch complete redesign](#retroarch-complete-redesign)
-  
+* [RetroArch complete redesign](#retroarch-rebuilt-from-scratch)
+* [Shortcuts](#shortcuts)
+
 ## Installation
 
 #### Installation (Fresh Install):
@@ -37,6 +38,14 @@
 <img src="https://user-images.githubusercontent.com/16885275/164891118-efbcfc2e-bd25-4b88-8851-34862f550690.png" width="456">   
   
 # Features
+
+### Theme Switcher app / Custom themes  
+<img src="https://user-images.githubusercontent.com/16885275/164838712-d45b3779-b30f-491c-b5ff-0bbc2a10865b.png" width="350"> 
+<img src="https://user-images.githubusercontent.com/16885275/164838718-326f5590-96c2-4644-8fa2-1dd56f36a9bc.png" width="350"> 
+<img src="https://user-images.githubusercontent.com/16885275/154789504-84253d41-373d-4c84-b194-547c6343f904.png" width="350">  
+  
+- Preview and change themes on the fly, no reboot required.
+- 26 themes from our community on this Github    
 
 ## Onion installer
 
@@ -68,25 +77,22 @@ It also allows you to quickly change games and many other advantages for a very 
 - Your handheld will also rumble periodically in game to indicate that your battery is bellow 10%
 - When the battery goes < 4%, the game is now saved to prevent loosing progression, and the handheld turned off.
 
-### Theme Switcher app / Custom themes  
-<img src="https://user-images.githubusercontent.com/16885275/164838712-d45b3779-b30f-491c-b5ff-0bbc2a10865b.png" width="350"> 
-<img src="https://user-images.githubusercontent.com/16885275/164838718-326f5590-96c2-4644-8fa2-1dd56f36a9bc.png" width="350"> 
-<img src="https://user-images.githubusercontent.com/16885275/154789504-84253d41-373d-4c84-b194-547c6343f904.png" width="350">  
-  
-- Preview and change themes on the fly, no reboot required.
-- 26 themes from our community on this Github    
 
-### RetroArch rebuilt for precision and performance
+### RetroArch rebuilt from scratch
 <img src="https://user-images.githubusercontent.com/16885275/154791260-d1a4d0b2-5582-45cc-a291-bead843a5171.png" width="350">  
 
-- Compiled and partially rebuild by Eggs. Custom audio driver, scalers, display driver and input driver for mindblowing performances.
-- Minimal input and audio lag. 
-- Customs cores
-- Everything is finetuned with the best settings in mind.
-- Crisp 640*480 resolution
-- Lag free
-- Now a game launcher (Cores embedded, Playlists unlocked, Favorites unlocked)
-
+- Compiled and partially rebuild by Eggs (Discord user no 968407509364772924) for precision and performance.   
+    Custom audio driver.   
+    Custom scalers.   
+    New display driver.   
+    New input driver.   
+- Minimal input and audio lag.    
+- Customs cores.    
+- Finetuned with the best settings in mind.   
+- Crisp 640*480 resolution.   
+- Lag free.      
+- Also a game launcher (Cores embedded, Playlists unlocked, Favorites unlocked)   
+  
 ### Others  
 - Many additional systems supported
 - Experimental Arduboy support (Credit: JMARoeder)
@@ -98,6 +104,8 @@ It also allows you to quickly change games and many other advantages for a very 
 
 
 ### Shortcuts
+
+<img src="https://user-images.githubusercontent.com/16885275/165266775-63e24f1b-d734-4eee-99c5-8bad502cd87e.png" width="350">  
   
 Menu button : Exit Game  
 
