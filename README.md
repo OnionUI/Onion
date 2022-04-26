@@ -6,11 +6,7 @@
 #### This release was made possible by Totofaki, Eggs, JimGray, Pixelshift, Shauninman and many more from the Onion community.
 
 * [Installation](#installation) 
-* [Latest miyoo UI menu](#theme-switcher-app--custom-themes)
-* [Onion installer](#onion-installer)
-* [Play activity](#play-activity)
-* [Onion launcher](#onion-launcher)
-* [RetroArch complete redesign](#retroarch-rebuilt-from-scratch)
+* [Features](#features)
 * [Shortcuts](#shortcuts)
 
 ## Installation
