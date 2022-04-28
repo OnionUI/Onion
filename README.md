@@ -1,5 +1,5 @@
 # Onion (and Eggs) V3: Definitive Edition
-#### A portable retro gaming museum in your pocket
+#### A retro gaming museum in your pocket.
 ### [Download newest release here](https://github.com/jimgraygit/Onion/releases)
 
 <img src="https://user-images.githubusercontent.com/16885275/164891137-2bbdcfb5-e2c2-4658-8049-79b01d57dfed.png" width="948"> 
