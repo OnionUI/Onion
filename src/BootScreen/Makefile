@@ -18,8 +18,7 @@ $(TARGET): $(OFILES)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 
-
-
 clean:
 	rm -f $(TARGET) $(OFILES)
+
 

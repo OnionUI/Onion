@@ -21,18 +21,19 @@ struct structom {                  /*struct called list*/
 int tailleStructure = 0;
 
 void logMessage(char* Message) {
-	FILE *file = fopen("/mnt/SDCARD/App/PlayActivity/log_lastMessage.txt", "a");
+	FILE *file = fopen("/mnt/SDCARD/App/PlayActivity/log_PlayActivity.txt", "a");
 
     char valLog[200];
     sprintf(valLog, "%s %s", Message, "\n");
     fputs(valLog, file);
 	fclose(file); 
+	system("sync");
 }
 
 char *removeExt(char* myStr) {
     char *retStr;
     char *lastExt;
-    if (myStr == NULL) returninitTimer NULL;
+    if (myStr == NULL) return NULL;
     if ((retStr = malloc (strlen (myStr) + 1)) == NULL) return NULL;
     strcpy (retStr, myStr);
     lastExt = strrchr (retStr, '.');
@@ -41,6 +42,29 @@ char *removeExt(char* myStr) {
     return retStr;
 }
 
+char* load_file(char const* path)
+{
+    char* buffer = 0;
+    long length;
+    FILE * f = fopen (path, "rb"); 
+
+    if (f)
+    {
+      fseek (f, 0, SEEK_END);
+      length = ftell (f);
+      fseek (f, 0, SEEK_SET);
+      buffer = (char*)malloc ((length+1)*sizeof(char));
+      if (buffer)
+      {
+        fread (buffer, sizeof(char), length, f);
+      }
+      fclose (f);
+      system("sync");
+    }
+    buffer[length] = '\0';
+
+    return buffer;
+}
 
 bool file_exists (char *filename) {
   struct stat   buffer;   
@@ -49,6 +73,7 @@ bool file_exists (char *filename) {
 
 
 int readRomDB(){
+
 
   	// Check to avoid corruption
   	if (file_exists("/mnt/SDCARD/RetroArch/.retroarch/saves/playActivity.db") == 1){
@@ -79,26 +104,42 @@ int readRomDB(){
 }
 
 void writeRomDB(void){
-	remove("/mnt/SDCARD/RetroArch/.retroarch/saves/playActivity_tmp.db");
-	
-	FILE * file= fopen("/mnt/SDCARD/RetroArch/.retroarch/saves/playActivity_tmp.db", "wb");
-	if (file != NULL) {
-    	fwrite(romList, sizeof(romList), 1, file);
-    	fclose(file);
+
+	if (tailleStructure > 0){
+		remove("/mnt/SDCARD/RetroArch/.retroarch/saves/playActivity.db");
+		FILE * file= fopen("/mnt/SDCARD/RetroArch/.retroarch/saves/playActivity.db", "wb");
+		if (file != NULL) {
+    		fwrite(romList, sizeof(romList), 1, file);
+    		fclose(file);
+    		system("sync");
+		}
 	}
 	
+
+	/*
 	// Check anti corruption before overwrite
 	long int sz=0;
-	FILE * fp= fopen("/mnt/SDCARD/RetroArch/.retroarch/saves/playActivity_tmp.db", "ro");
+	FILE * fp= fopen("/mnt/SDCARD/RetroArch/.retroarch/saves/playActivity_tmp.db", "rb");
 	if (fp != NULL){
+		
+
+		
 		fseek(fp, 0L, SEEK_END);
 		sz = ftell(fp);
 		fclose(fp);
-		if (sz>50000){
+		
+		char tailleSZ[100];
+		sprintf(tailleSZ, "%d", sz);
+		logMessage("tailleSZ");
+		logMessage(tailleSZ);
+		
+		if (sz>100000){
+		logMessage("ICI3");
 		system("cp /mnt/SDCARD/RetroArch/.retroarch/saves/playActivity_tmp.db /mnt/SDCARD/RetroArch/.retroarch/saves/playActivity.db");
-	
+
 		}
 	}
+	*/
 }
 
 
@@ -144,7 +185,7 @@ void backupDB(void){
 	if (i<MAXBACKUPFILES){
 		snprintf(fileNameNextSlot,sizeof(fileNameNextSlot),"/mnt/SDCARD/RetroArch/.retroarch/saves/PlayActivityBackup/playActivityBackup%02d.db",i+1);
 	}else{
-		snprintf(fileNameToBackup,sizeof(fileNameToBackup),"/mnt/SDCARD/RetroArch/.retroarch/saves/PlayActivityBackup/playActivityBackup00.db");
+		snprintf(fileNameToBackup,sizeof(fileNameToBackup),"/mnt/SDCARD/RetroArch/.retroarch/saves/PlayActivityBackup/play<ActivityBackup00.db");
 		snprintf(fileNameNextSlot,sizeof(fileNameNextSlot),"/mnt/SDCARD/RetroArch/.retroarch/saves/PlayActivityBackup/playActivityBackup01.db");
 	}
 	// Next slot for backup
@@ -154,14 +195,12 @@ void backupDB(void){
 	sprintf(command, "cp /mnt/SDCARD/RetroArch/.retroarch/saves/playActivity.db %s", fileNameToBackup);
 	system(command);
 
-
-	
-	
 }
 
 
 
 int main(int argc, char *argv[]) {
+  	
   	
 	if (argc > 1){
 		if (strcmp(argv[1],"init") == 0) {
@@ -174,6 +213,7 @@ int main(int argc, char *argv[]) {
 			if (init_fd>0) {
         		write(init_fd, baseTime, strlen(baseTime));
         		close(init_fd);
+        		system("sync");
         
 			}			
 		}
@@ -183,10 +223,10 @@ int main(int argc, char *argv[]) {
 				FILE *fp;
 				long lSize;
 				char *baseTime;
-				
 				char *gameName = (char *)basename(argv[1]);
 				gameName[99] = '\0';
 				fp = fopen ( "initTimer" , "rb" );
+			
 				if( fp > 0 ) {
 					fseek( fp , 0L , SEEK_END);
 					lSize = ftell( fp );
@@ -197,6 +237,7 @@ int main(int argc, char *argv[]) {
 					if( 1!=fread( baseTime , lSize, 1 , fp) )
   					fclose(fp),free(baseTime),fputs("entire read fails",stderr),exit(1);
 					fclose(fp);
+				
 		
 					int iBaseTime = atoi(baseTime) ;
     				
@@ -207,7 +248,7 @@ int main(int argc, char *argv[]) {
 					char cTempsDeJeuSession[15];	
     				int iTempsDeJeuSession = iEndEpochTime - iBaseTime ;
     				sprintf(cTempsDeJeuSession, "%d", iTempsDeJeuSession);
-					
+			
 					// Loading DB
 					if (readRomDB()  == -1){
 						// To avoid a DB overwrite
@@ -216,6 +257,8 @@ int main(int argc, char *argv[]) {
     			 	
     				//Addition of the new time
     				int totalPlayTime;
+    				//logMessage("gameName");
+    				//logMessage(gameName);
     				int searchPosition = searchRomDB(gameName);
     				if (searchPosition>=0){
     					// Game found
@@ -234,7 +277,7 @@ int main(int argc, char *argv[]) {
     						totalPlayTime = -1;
     					}	
     				}
-    			    				
+    					
     				// Write total current time for the onion launcher				 	
 					char cTotalTimePlayed[50];	 	
 					remove("currentTotalTime");
@@ -246,7 +289,6 @@ int main(int argc, char *argv[]) {
 							int h, m;
 							
 							h = (totalPlayTime/3600); 
-							
 							m = (totalPlayTime -(3600*h))/60;	
 							
 							//s = (totalPlayTime -(3600*h)-(m*60));
@@ -266,8 +308,10 @@ int main(int argc, char *argv[]) {
 							
 							}
 						}
+				
 						write(totalTime_fd, cTotalTimePlayed, strlen(cTotalTimePlayed));
         				close(totalTime_fd);		
+        				system("sync");
 					}
 					
    					// DB Backup
@@ -277,7 +321,7 @@ int main(int argc, char *argv[]) {
    					writeRomDB();		
 					
 					remove("initTimer");   					
-   					
+   		
    						
 				}
 			

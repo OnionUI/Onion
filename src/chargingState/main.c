@@ -123,7 +123,7 @@ int main(void) {
 			
 		}	
 		sprintf(valeur,"%d",event.key.keysym.sym);
-		logMessage(valeur);
+		//logMessage(valeur);
 		checkCharging();
 		if (is_charging == 0){
 			system("reboot");	

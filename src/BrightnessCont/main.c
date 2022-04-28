@@ -16,7 +16,6 @@
 #include <signal.h>
 #include "cJSON.h"
 
-
 //	for ev.value
 #define RELEASED	0
 #define PRESSED		1
@@ -363,9 +362,14 @@ void setMiyooLum(int nLum){
 #define	BUTTON_L2	KEY_TAB
 #define	BUTTON_R2	KEY_BACKSPACE
 
+#define	BUTTON_L1	KEY_E
+#define	BUTTON_R1	KEY_T
+
 #define	BUTTON_UP	KEY_UP
 #define	BUTTON_DOWN	KEY_DOWN
 
+#define	BUTTON_LEFT	KEY_LEFT
+#define	BUTTON_RIGHT KEY_RIGHT
 
 int main() {
 	int			input_fd;
@@ -373,19 +377,20 @@ int main() {
 	uint32_t		val;
 	uint32_t		l2_pressed = 0;
 	uint32_t		r2_pressed = 0;
+	uint32_t		l1_pressed = 0;
+	uint32_t		r1_pressed = 0;
 	uint32_t		menu_pressed = 0;
-
 	uint32_t		a_pressed = 0;
 	uint32_t		b_pressed = 0;
 	uint32_t		up_pressed = 0;
 	uint32_t		down_pressed = 0;
-//	uint32_t		x_pressed = 0;
-//	uint32_t		y_pressed = 0;
+	uint32_t		left_pressed = 0;
+	uint32_t		right_pressed = 0;
+	uint32_t		x_pressed = 0;
+	uint32_t		y_pressed = 0;
 	uint32_t		start_pressed = 0;
 	uint32_t		power_pressed = 0;
 	uint32_t		select_pressed = 0;	
-	
-
 	
 	
 	// Safe boot exit called once
@@ -393,16 +398,28 @@ int main() {
 	// Prepare for Poll button input
 	input_fd = open("/dev/input/event0", O_RDONLY);
 	
-	int brightness_value=10;
-	int adc_fd = open("/mnt/SDCARD/.tmp_update/brightSett", O_RDONLY);
-	if (adc_fd>0) {
-		char val[2];
+	// Check current brightness value
+	int brightness_value = 10;
+	FILE *fp;
+	long lSize;
+	char *currLum;
+	fp = fopen ( "/mnt/SDCARD/.tmp_update/brightSett" , "rb" );
+	if( fp > 0 ) {
+		fseek( fp , 0L , SEEK_END);
+		lSize = ftell( fp );
+		rewind( fp );
+		currLum = (char*)calloc( 1, lSize+1 );
+		if( !currLum ) fclose(fp),fputs("memory alloc fails",stderr),exit(1);
 	
-    	read(adc_fd, val, strlen(val));
-    	close(adc_fd);
-    	
-		sscanf(val, "%d", &brightness_value);
+		if( 1!=fread( currLum , lSize, 1 , fp) )
+  		fclose(fp),free(currLum),fputs("entire read fails",stderr),exit(1);
+		fclose(fp);
 	}
+	
+	sscanf(currLum, "%d", &brightness_value);
+
+	//logMessage(currLum);
+	//logMessage("----------");
 	
 	if (brightness_value > 10) {
 		brightness_value = 8;
@@ -410,71 +427,111 @@ int main() {
 
 	SetBrightness(brightness_value);
 	
-	int comboKey = 0; 
+	int keyNotMenuPressed=0;
+	int comboKey=0;
+		
 	
 	while( read(input_fd, &ev, sizeof(ev)) == sizeof(ev) ) {
-		val = ev.value;
 		
-		if (( ev.code != BUTTON_MENU )&&(val == 1)) {
+		val = ev.value;
+			
+		if (( ev.type != EV_KEY ) || ( val > 1 )) continue;
+
+		if ( ev.code == BUTTON_UP ) {
+				keyNotMenuPressed = val;
+				up_pressed = val;
+		}
+		else
+			if ( ev.code == BUTTON_DOWN ) {
+					keyNotMenuPressed = val;
+					down_pressed = val;
+			}
+			else
+				if ( ev.code == BUTTON_LEFT ) {
+						keyNotMenuPressed = val;
+						left_pressed = val;
+				}
+			else
+				if ( ev.code == BUTTON_RIGHT ) {
+						keyNotMenuPressed = val;
+						right_pressed = val;
+				}	
+			
+			
+			else								
+				if ( ev.code == BUTTON_A ) {
+						keyNotMenuPressed = val;
+						a_pressed = val;
+				}
+				else
+					if ( ev.code == BUTTON_B ) {
+							keyNotMenuPressed = val;
+							b_pressed = val;
+					}		
+				else
+					if ( ev.code == BUTTON_X ) {
+							keyNotMenuPressed = val;
+							x_pressed = val;
+					}	
+					
+				else
+					if ( ev.code == BUTTON_Y ) {
+							keyNotMenuPressed = val;
+							y_pressed = val;
+					}	
+							
+					else
+					if ( ev.code == BUTTON_L2 ) {
+							keyNotMenuPressed = val;
+							l2_pressed = val;
+					}
+					else
+						if ( ev.code == BUTTON_R2 ) {
+								keyNotMenuPressed = val;
+								r2_pressed = val;
+						}
+					if ( ev.code == BUTTON_L1 ) {
+							keyNotMenuPressed = val;
+							l1_pressed = val;
+					}
+					else
+						if ( ev.code == BUTTON_R1 ) {
+								keyNotMenuPressed = val;
+								r1_pressed = val;
+						}
+						else
+							if ( ev.code == BUTTON_START ) {
+									keyNotMenuPressed = val;
+									start_pressed = val;
+							}
+							else
+								if ( ev.code == BUTTON_SELECT ) {
+										keyNotMenuPressed = val;
+										select_pressed = val;
+								}
+								else	
+									if ( ev.code == BUTTON_MENU ) {
+										menu_pressed = val;
+									}
+									else
+										if ( ev.code == BUTTON_POWER ) {
+												keyNotMenuPressed = val;
+												power_pressed = val;
+										}	
+		
+		
+		if ((menu_pressed == 1)&&(keyNotMenuPressed == 1)){
+		
 			comboKey = 1;
 		}
 		
-		
-		if (( ev.type != EV_KEY ) || ( val > 1 )) continue;
-
-		if ( ev.code == BUTTON_L2 ) {
-				l2_pressed = val;
-		}
-		else
-			if ( ev.code == BUTTON_R2 ) {
-					r2_pressed = val;
+		if ((ev.code == BUTTON_MENU)&&(menu_pressed == 0)){
+			if (comboKey == 0){
+				system("killall -15 retroarch");
+				screenshot();		
 			}
-			else
-				if ( ev.code == BUTTON_START ) {
-						start_pressed = val;
-				}
-				else
-					if ( ev.code == BUTTON_SELECT ) {
-							select_pressed = val;
-					}
-					else	
-						if ( ev.code == BUTTON_MENU ) {
-								menu_pressed = val;
-								if (menu_pressed == 1){
-									comboKey = 0 ;
-								}
-								else {
-									if (comboKey == 0){
-										comboKey = 1 ;
-											system("killall -15 retroarch");
-											screenshot();
-											
-									}
-								
-								}
-						}
-						else
-							if ( ev.code == BUTTON_A ) {
-									a_pressed = val;
-							}
-							else
-								if ( ev.code == BUTTON_B ) {
-										b_pressed = val;
-								}
-								else
-									if ( ev.code == BUTTON_POWER ) {
-											power_pressed = val;
-									}	
-									else
-										if ( ev.code == BUTTON_UP ) {
-												up_pressed = val;
-										}
-										else
-											if ( ev.code == BUTTON_DOWN ) {
-													down_pressed = val;
-											}
-
-							
+			comboKey = 0;
+		}
 
 		
 		if (start_pressed & select_pressed & a_pressed & b_pressed) {
@@ -493,7 +550,8 @@ int main() {
 		if (start_pressed & select_pressed & menu_pressed & r2_pressed & l2_pressed) {
 			 system("rm /mnt/SDCARD/App/OnionLauncher/data/.enabled"); 
 			 system("reboot");
-		}
+			 sleep(10);
+		} 
 		
 		// Force turn off
 		if (start_pressed & select_pressed & r2_pressed & l2_pressed) {
@@ -503,62 +561,37 @@ int main() {
 			 
 		if (power_pressed && ! menu_pressed){
 	
-		//SetRawBrightness(0);
-		int fd = creat(".offOrder", 777);
-		close(fd); 
-
-		
-		if (file_exists("/tmp/cmd_to_run_launcher.sh")==1){
-			// One game is running
-			system("killall -15 retroarch");
-		}
-		else{
-			if (file_exists("/tmp/cmd_to_run.sh")==1){
-				// One game/app is running
-				sigTermAll();		
-					
+			//SetRawBrightness(0);
+			int fd = creat(".offOrder", 777);
+			close(fd); 
+			
+			if (file_exists("/tmp/cmd_to_run_launcher.sh")==1){
+				// One game is running
+				system("sync");			
+				system("killall -15 retroarch");
+				
 			}
-			else {
-				killAll();
-			}	
-		}
-		
-		
-		
-		//system("killall -15 retroarch");
-		
+			else{
+				if (file_exists("/tmp/cmd_to_run.sh")==1){
+					// One game/app is running
+					system("sync");
+					sigTermAll();	
+				}
+				else {
+					
+					system("sync");
+					system("killall -9 MainUI");
+					system("killall -9 onionLauncher");
+					system("sleep 5");
+					killAll();
+					system("sleep 10");
+				}	
+			}
 
-		/*
-		while(file_exists("/tmp/App/PlayActivity/initTimer")==1){
-			usleep(200000);
-		}
-
-		sleep(5);
-		*/
-		
-		
-		// All processes are shutdown
-
-		// Waiting for the device to turn off
-	 
-	 	//system("cd /mnt/SDCARD/.tmp_update/ ; ./bootScreen 0");
-		
-		//kill(-1, SIGTERM);
-		//sleep(1);
-		//kill(-1, SIGKILL);
-		//sleep(5);
-		
-		//system("cd /mnt/SDCARD/.tmp_update/ ; ./freemma");
-
-		power_pressed = 0;
-		menu_pressed = 0;
-	
 		}
 		 
 		// Sleep mode
 		if (power_pressed && menu_pressed) {
-			power_pressed = 0 ;
-			menu_pressed = 0 ;
 			
 			// suspend
 			turnScreenOff(); 
@@ -587,92 +620,101 @@ int main() {
 		// Brightness possible values
 		// 0 1 2 4 6 8 10
 		
-		if ((start_pressed & select_pressed & l2_pressed)&&(file_exists(".altBrightShortcut")==0)) {
+		if (start_pressed & select_pressed & l2_pressed) {
 		//	start_pressed = select_pressed = l2_pressed = 0;
-			if (brightness_value >= 1){
-				brightness_value--;
-				if (brightness_value > 2){
+			if(file_exists(".altBrightShortcut")==0){	
+				if (brightness_value >= 1){
 					brightness_value--;
-				}	
-				remove("brightSett");
-				
-				SetBrightness(brightness_value);	
-				setMiyooLum(brightness_value);
-				fclose(fopen("/mnt/SDCARD/.tmp_update/brightSett","w"));
-				int adc_fd = open("/mnt/SDCARD/.tmp_update/brightSett", O_CREAT | O_WRONLY);
-				if (adc_fd>0) {
-					char val[3];
-					sprintf(val, "%d", brightness_value);
-        			write(adc_fd, val, strlen(val));
-        			close(adc_fd);
+					if (brightness_value > 2){
+						brightness_value--;
+					}	
+					remove("brightSett");
+					
+					SetBrightness(brightness_value);	
+					//setMiyooLum(brightness_value);
+					fclose(fopen("/mnt/SDCARD/.tmp_update/brightSett","w"));
+					int adc_fd = open("/mnt/SDCARD/.tmp_update/brightSett", O_CREAT | O_WRONLY);
+					if (adc_fd>0) {
+						char val[3];
+						sprintf(val, "%d", brightness_value);
+        				write(adc_fd, val, strlen(val));
+        				close(adc_fd);
+					}
 				}
-			}
+			}	
 		}
-		if ((menu_pressed & down_pressed)&&(file_exists(".altBrightShortcut")==1)) {
+		if (menu_pressed & down_pressed) {
 		//	start_pressed = select_pressed = l2_pressed = 0;
-			if (brightness_value >= 1){
-				brightness_value--;
-				if (brightness_value > 2){
+			if(file_exists(".altBrightShortcut")==1){
+			
+				if (brightness_value >= 1){
 					brightness_value--;
-				}	
-				remove("brightSett");
-				
-				SetBrightness(brightness_value);	
-				setMiyooLum(brightness_value);
-				fclose(fopen("/mnt/SDCARD/.tmp_update/brightSett","w"));
-				int adc_fd = open("/mnt/SDCARD/.tmp_update/brightSett", O_CREAT | O_WRONLY);
-				if (adc_fd>0) {
-					char val[3];
-					sprintf(val, "%d", brightness_value);
-        			write(adc_fd, val, strlen(val));
-        			close(adc_fd);
+					if (brightness_value > 2){
+						brightness_value--;
+					}	
+					remove("brightSett");
+					
+					SetBrightness(brightness_value);	
+					//setMiyooLum(brightness_value);
+					fclose(fopen("/mnt/SDCARD/.tmp_update/brightSett","w"));
+					int adc_fd = open("/mnt/SDCARD/.tmp_update/brightSett", O_CREAT | O_WRONLY);
+					if (adc_fd>0) {
+						char val[3];
+						sprintf(val, "%d", brightness_value);
+        				write(adc_fd, val, strlen(val));
+        				close(adc_fd);
+					}
 				}
 			}
 		}	
 
-		if ((start_pressed & select_pressed & r2_pressed)&&(file_exists(".altBrightShortcut")==0)) {
-		//	start_pressed = select_pressed = r2_pressed = 0;
-			if (brightness_value <= 8){
-				brightness_value++;
-				if (brightness_value > 2){
+		if (start_pressed & select_pressed & r2_pressed) {
+			if (file_exists(".altBrightShortcut")==0) {
+				if (brightness_value <= 8){
 					brightness_value++;
-				}	
-				remove("brightSett");
-				
-				SetBrightness(brightness_value);	
-				setMiyooLum(brightness_value);
-				fclose(fopen("/mnt/SDCARD/.tmp_update/brightSett","w"));
-				int adc_fd = open("/mnt/SDCARD/.tmp_update/brightSett", O_CREAT | O_WRONLY);
-				if (adc_fd>0) {
-					char val[3];
-					sprintf(val, "%d", brightness_value);
-        			write(adc_fd, val, strlen(val));
-        			close(adc_fd);
-				}	
+					if (brightness_value > 2){
+						brightness_value++;
+					}	
+					remove("brightSett");
+					
+					SetBrightness(brightness_value);	
+					//setMiyooLum(brightness_value);
+					fclose(fopen("/mnt/SDCARD/.tmp_update/brightSett","w"));
+					int adc_fd = open("/mnt/SDCARD/.tmp_update/brightSett", O_CREAT | O_WRONLY);
+					if (adc_fd>0) {
+						char val[3];
+						sprintf(val, "%d", brightness_value);
+        				write(adc_fd, val, strlen(val));
+        				close(adc_fd);
+					}	
+				}
 			}
 		}	
-		if ((menu_pressed & up_pressed)&&(file_exists(".altBrightShortcut")==1)) {
+		if (menu_pressed & up_pressed) {
 		//	start_pressed = select_pressed = r2_pressed = 0;
-			if (brightness_value <= 8){
-				brightness_value++;
-				if (brightness_value > 2){
+			if (file_exists(".altBrightShortcut")==1){
+				if (brightness_value <= 8){
 					brightness_value++;
-				}	
-				remove("brightSett");
-				
-				SetBrightness(brightness_value);	
-				setMiyooLum(brightness_value);
-				fclose(fopen("/mnt/SDCARD/.tmp_update/brightSett","w"));
-				int adc_fd = open("/mnt/SDCARD/.tmp_update/brightSett", O_CREAT | O_WRONLY);
-				if (adc_fd>0) {
-					char val[3];
-					sprintf(val, "%d", brightness_value);
-        			write(adc_fd, val, strlen(val));
-        			close(adc_fd);
-				}	
+					if (brightness_value > 2){
+						brightness_value++;
+					}	
+					remove("brightSett");
+					
+					SetBrightness(brightness_value);	
+					//setMiyooLum(brightness_value);
+					fclose(fopen("/mnt/SDCARD/.tmp_update/brightSett","w"));
+					int adc_fd = open("/mnt/SDCARD/.tmp_update/brightSett", O_CREAT | O_WRONLY);
+					if (adc_fd>0) {
+						char val[3];
+						sprintf(val, "%d", brightness_value);
+        				write(adc_fd, val, strlen(val));
+        				close(adc_fd);
+					}	
+				}
+			
 			}
 		}					
-				
+			
 	}
 	
 	close(input_fd);

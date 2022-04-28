@@ -6,11 +6,60 @@
 #include <unistd.h>
 #include <sys/stat.h> 
 
+#include </usr/local/include/mi_sys.h>
+
 bool file_exists (char *filename) {
   struct stat   buffer;   
   return (stat (filename, &buffer) == 0);
 }
+/*
+void freeMMA(void){
+	int		fd_fb;
+	struct		fb_fix_screeninfo finfo;
+	FILE		*fp;
+	const char	*heapinfoname = "/proc/mi_modules/mi_sys_mma/mma_heap_name0";
+	char		str[256];
+	uint32_t	baseaddr, offset, length, usedflag;
 
+	// print MMA information (before)
+	fprintf(stdout, "------------------------------------------ before\n");
+	fflush(stdout); system("cat /proc/mi_modules/mi_sys_mma/mma_heap_name0"); fflush(stdout);
+	fprintf(stdout, "------------------------------------------ \n");
+
+	// open FB to get physical address of FB (finfo.smem_start)
+	fd_fb = open("/dev/fb0", O_RDONLY);
+	ioctl(fd_fb, FBIOGET_FSCREENINFO, &finfo);
+	baseaddr = finfo.smem_start - 0x021000;	// default baseaddr (tmp)
+	fprintf(stdout, "MMA baseaddr(tmp) : %08X\n", baseaddr);
+	// clear entire FB (in addition)
+	MI_SYS_MemsetPa(finfo.smem_start, 0, finfo.smem_len);
+	close(fd_fb);
+
+	// open heap information file
+	fp = fopen(heapinfoname, "r");
+	if (fp) {
+		// skip reading until chunk information
+		do { if (fscanf(fp, "%255s", str) == EOF) { fclose(fp); return 0; } } while (strcmp(str,"sys-logConfig"));
+		// get MMA each chunk information and release
+		while(fscanf(fp, "%x %x %x %255s", &offset, &length, &usedflag, str) != EOF) {
+			if (!usedflag) continue; // NA
+			if (!strcmp(str,"fb_device")) { // FB .. fix baseaddr
+				baseaddr = finfo.smem_start - offset;
+				fprintf(stdout, "MMA baseaddr(fix) : %08X\n", baseaddr);
+				continue;
+			}
+			if (!strcmp(str,"ao-Dev0-tmp")) continue; // ao .. Audio buffer, skip
+			// For daemon program authors, MMA allocated as "daemon" will not be released (read daemon/main.c)
+			if (strncmp(str,"daemon",6)) { // others except "daemon" .. release
+				fprintf(stdout, "Released %s offset : %08X length : %08X\n", str, offset, length);
+				MI_SYS_MMA_Free(baseaddr + offset);
+			}
+		}
+		fclose(fp);
+
+
+}
+*/
 int main(int argc, char *argv[]) {
 	
 	// Boot 
@@ -18,11 +67,10 @@ int main(int argc, char *argv[]) {
 	// Boot : Loading screen
 	// End_Save : Ending screen with save
 	// End : Ending screen without save
-	
-	SDL_Init(SDL_INIT_VIDEO);
-	SDL_ShowCursor(SDL_DISABLE);
+
+    SDL_Init(SDL_INIT_VIDEO);
+
 	TTF_Init();
-	
 	
 	TTF_Font*	font; 
 	SDL_Color	color={255,255,255,0};
@@ -66,7 +114,7 @@ int main(int argc, char *argv[]) {
   		fclose(fp),free(cVersion),fputs("entire read fails",stderr),exit(1);
 		fclose(fp);
 	}
-
+ 
 		
 	SDL_Surface* imageVer = TTF_RenderUTF8_Blended(font, cVersion, color);
 	
@@ -76,20 +124,12 @@ int main(int argc, char *argv[]) {
 	SDL_BlitSurface(screen, NULL, video, NULL); 
 	SDL_Flip(video);
 	
-	/*
-	if (argc > 1){
-		if (strcmp(argv[1],"0") == 0) {
-			// Wait for the device to turn off
-			sleep(100);
-		}
-
-	}
-		*/
 	if (argc > 1){
 		if (strcmp(argv[1],"Boot") != 0) {
 				remove(".offOrder");
+				system("sync");
 				system("reboot");
-				sleep(10);
+				system("sleep 10");
 		}	
 	}
 

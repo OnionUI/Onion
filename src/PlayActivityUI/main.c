@@ -338,9 +338,10 @@ int main(void) {
 												power_pressed = val;
 										}									
 			
-		if (power_pressed) {			
-			system("reboot");
-			sleep(10);
+		if (power_pressed) {	
+			int fd = creat("/mnt/SDCARD/.tmp_update/.offOrder", 777);
+			close(fd); 		
+			break;
 		}	
 										
 		if (b_pressed) {			
