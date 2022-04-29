@@ -127,8 +127,8 @@ Menu + X : Toggle FPS display
 (In a Game boy game)  
 R2/L2 : Change palette  
 
-Other :
-Force uninstall the launcher : start+select+menu+R2+L2
+Other :  
+Force uninstall the launcher : start+select+menu+R2+L2    
 Menu + Select : Retroarch menu     
 
 
