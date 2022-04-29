@@ -115,9 +115,7 @@ Select + Start + L2 : Brightness down
 
 Power button : Deep sleep    
 Menu + Power : Light sleep   
-   
-Menu + Select : Retroarch menu     
-   
+     
 Menu + R2 : Save state   
 Menu + L2 : Load state   
    
@@ -131,6 +129,7 @@ R2/L2 : Change palette
 
 Other :
 Force uninstall the launcher : start+select+menu+R2+L2
+Menu + Select : Retroarch menu     
 
 
 <img src="https://user-images.githubusercontent.com/16885275/164891039-665fffcf-b454-4b3c-87c6-13a92cb88a8b.png" width="500">   
