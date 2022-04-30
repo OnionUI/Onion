@@ -113,7 +113,7 @@ Menu button : Exit Game
 Select + Start + R2 : Brightness up   
 Select + Start + L2 : Brightness down  
 
-Power button : Deep sleep    
+Power button : Save progress and shutdown    
 Menu + Power : Light sleep   
      
 Menu + R2 : Save state   
