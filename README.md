@@ -1,4 +1,4 @@
-# Onion (and Eggs) V3: Definitive Edition
+# Onion (and Eggs)
 #### A performant and straighforward retro gaming museum in your pocket.
 ### [Download newest release here](https://github.com/jimgraygit/Onion/releases)
 
@@ -40,7 +40,6 @@
 <img src="https://user-images.githubusercontent.com/16885275/164838712-d45b3779-b30f-491c-b5ff-0bbc2a10865b.png" width="350"> 
 <img src="https://user-images.githubusercontent.com/16885275/164838718-326f5590-96c2-4644-8fa2-1dd56f36a9bc.png" width="350"> 
 
-Will come back soon :  
 <img src="https://user-images.githubusercontent.com/16885275/154789504-84253d41-373d-4c84-b194-547c6343f904.png" width="350">  
   
 - Preview and change themes on the fly, no reboot required.
