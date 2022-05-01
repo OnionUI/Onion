@@ -2,8 +2,6 @@
 #### A performant and straighforward retro gaming museum in your pocket.
 ### [Download newest release here](https://github.com/jimgraygit/Onion/releases)
 
-<img src="https://user-images.githubusercontent.com/16885275/164891137-2bbdcfb5-e2c2-4658-8049-79b01d57dfed.png" width="948"> 
-
 #### This release was made possible by Totofaki, Eggs, JimGray, Pixelshift, Shauninman and many more from the Onion community.
 
 * [Installation](#installation) 
@@ -133,3 +131,4 @@ Menu + Select : Retroarch menu
 
 
 <img src="https://user-images.githubusercontent.com/16885275/164891039-665fffcf-b454-4b3c-87c6-13a92cb88a8b.png" width="500">   
+<img src="https://user-images.githubusercontent.com/16885275/164891137-2bbdcfb5-e2c2-4658-8049-79b01d57dfed.png" width="948"> 
