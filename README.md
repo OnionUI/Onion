@@ -23,7 +23,7 @@
 - Copy your Bios files into the BIOS folder. 
   
 #### Installation (Upgrade):
-- Backup your saves, states and scraped images 
+- Backup your saves, states and scraped images. 
 > - Saves and playtimes are located at /Retroarch/.retroarch/saves/_corename_
 > - States are located at /Retroarch/.retroarch/states/_corename_
 - Delete all folders from your SD except "BIOS", "Roms" and "Themes"
@@ -32,7 +32,7 @@
 - Your Mini will turn off after the installation is completed.
  (Don't delete the .tmp_update folder, it is now part of the Onion installation)  
 - Restore your backed up saves and states.
-- Optional: To restore your box art, copy each system's box art folder into the system's respective folder in /Roms/ and rename each folder to "Imgs"
+- Optional: To restore your box art, copy each system's box art folder into the system's respective folder in /Roms/ and rename each folder to "Imgs".
 
 <img src="https://user-images.githubusercontent.com/16885275/164891118-efbcfc2e-bd25-4b88-8851-34862f550690.png" width="456">   
   
@@ -52,7 +52,7 @@
 <img src="https://user-images.githubusercontent.com/16885275/162589315-1d127c72-d404-4487-b379-3bde8179f566.png" width="350">  
 
 - Install / uninstall only the systems and apps you need. Any action is reversible.
-- Community presets, homebrews and more
+- Community presets, homebrews and more.
    
 ### Play Activity 
 <img src="https://user-images.githubusercontent.com/16885275/162589339-e779c6dd-4e9d-47f0-8543-4646d84fc748.png" width="350">  
@@ -74,7 +74,7 @@ It also allows you to quickly change games and many other advantages for a very 
 - No more low bat flickering icon.
 - No more memory leaks.
 - Low bat (<10%) big visual battery warning indicator.
-- Your handheld will also rumble periodically in game to indicate that your battery is bellow 10%
+- Your handheld will also rumble periodically in game to indicate that your battery is bellow 10%.
 - When the battery goes < 4%, the game is now saved to prevent loosing progression, and the handheld turned off.
 
 
@@ -91,15 +91,15 @@ It also allows you to quickly change games and many other advantages for a very 
 - Finetuned with the best settings in mind.   
 - Crisp 640*480 resolution.   
 - Lag free.      
-- Also a game launcher (Cores embedded, Playlists unlocked, Favorites unlocked)   
+- Also a game launcher. (Cores embedded, Playlists unlocked, Favorites unlocked)   
   
 ### Others  
-- Many additional systems supported
-- Experimental Arduboy support (Credit: JMARoeder)
-- Updated PICO emulator to Fake08 standalone (Credit: Supergrom)
-- Updated screenshot tool to v4 (Credit: eggs)
+- Many additional systems supported.
+- Experimental Arduboy support. (Credit: JMARoeder)
+- Updated PICO emulator to Fake08 standalone. (Credit: Supergrom)
+- Updated screenshot tool to v4. (Credit: eggs)
 - Support for Icon Packs. Drag and drop your custom icons into the "Icons" folder at the root of your SD.
-- Boxart moved to /Roms/_systemname_/Imgs for easier scraping
+- Boxart moved to /Roms/_systemname_/Imgs for easier scraping.
 - Various bug fixes and optimizations.
 
 
