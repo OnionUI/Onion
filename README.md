@@ -45,7 +45,7 @@
 <img src="https://user-images.githubusercontent.com/16885275/154789504-84253d41-373d-4c84-b194-547c6343f904.png" width="350">  
   
 - Preview and change themes on the fly, no reboot required.
-- 40+ themes from our community on this Github    
+- [40+ themes from our community](https://github.com/jimgraygit/Onion/wiki/4.-Theme-Repository)   
 
 ## Onion installer
 
