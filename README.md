@@ -72,7 +72,6 @@ It also allows you to quickly change games and many other advantages for a very 
 - Improved Sleep mode with full game suspension. (menu + power)
 - Custom charging screen that prevent screen burnings.
 - No more low bat flickering icon.
-- No more memory leaks.
 - Low bat (<10%) big visual battery warning indicator.
 - Your handheld will also rumble periodically in game to indicate that your battery is below 10%.
 - When the battery goes < 4%, the game is now saved to prevent loosing progression, and the handheld turned off.
