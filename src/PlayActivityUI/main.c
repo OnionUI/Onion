@@ -175,6 +175,7 @@ int main(void) {
 	TTF_Font* font40 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 40);
 	TTF_Font* font25 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 25);
 	TTF_Font* font30 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 30);
+	TTF_Font* fontRomName25 = TTF_OpenFont("/customer/app/wqy-microhei.ttc", 25);
 	
 	SDL_Color color_white={255,255,255,0};
 	SDL_Color color_lilla={136,97,252,0};
@@ -274,7 +275,7 @@ int main(void) {
 		char *bnameWOExt = removeExt(romList[i].name);
 		imageRomPosition = TTF_RenderUTF8_Blended(font40, cPosition, color_lilla);
 		imageRomPlayTime = TTF_RenderUTF8_Blended(font40, cTotalTimePlayed, color_white);
-		imageRomName = TTF_RenderUTF8_Blended(font25, bnameWOExt , color_white);
+		imageRomName = TTF_RenderUTF8_Blended(fontRomName25, bnameWOExt , color_white);
 
 		SDL_Rect rectPosition = { 16, 78+(90*i), 76, 39};
 		SDL_Rect rectRomPlayTime = { 77, 66+(90*i), 254, 56};
@@ -385,7 +386,7 @@ int main(void) {
 		char *bnameWOExt = removeExt(romList[(nCurrentPage*4)+i].name);
 		imageRomPosition = TTF_RenderUTF8_Blended(font40, cPosition, color_lilla);
 		imageRomPlayTime = TTF_RenderUTF8_Blended(font40, cTotalTimePlayed, color_white);
-		imageRomName = TTF_RenderUTF8_Blended(font25, bnameWOExt , color_white);
+		imageRomName = TTF_RenderUTF8_Blended(fontRomName25, bnameWOExt , color_white);
 
 		SDL_Rect rectPosition = { 16, 78+(90*i), 76, 39};
 		SDL_Rect rectRomPlayTime = { 77, 66+(90*i), 254, 56};
