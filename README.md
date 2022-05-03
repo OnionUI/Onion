@@ -127,7 +127,7 @@ Menu + X : Toggle FPS display
 R2/L2 : Change palette  
 
 Other :  
-Force uninstall the launcher : start+select+menu+R2+L2    
+Force disable the launcher : start+select+menu+R2+L2    
 Menu + Select : Retroarch menu     
 
 
