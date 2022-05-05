@@ -109,7 +109,7 @@ int main(void) {
 				fputs("./retroarch", file);
 				}
 			else {
-				fputs("./retroarch -v -L ", file);
+				fputs("LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v -L ", file);
 				fputs(cJSON_Print(core_path), file);
 				fputs(" ", file);
 				fputs(cJSON_Print(path), file);

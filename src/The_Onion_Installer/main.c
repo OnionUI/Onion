@@ -141,13 +141,10 @@ void appUninstall(char *basePath, int nT, int index, int strlenBase)
     if (!dir)
         return;
 
-    while (((dp = readdir(dir)) != NULL) && (run == 1))
-    	
-        {
+    while (((dp = readdir(dir)) != NULL) && (run == 1)){
+
         if (strcmp(dp->d_name, ".") != 0 && strcmp(dp->d_name, "..") != 0)
-        {
-        
-        		
+        {	
         	// Construct new path from our base path
         	strcpy(path, basePath);
         	strcat(path, "/");
@@ -186,8 +183,6 @@ void appUninstall(char *basePath, int nT, int index, int strlenBase)
 
     closedir(dir);
 }
-
-
 
 void checkAppInstalled(char *basePath, int nT, int index, int strlenBase)
 {
@@ -313,14 +308,42 @@ void loadRessources(){
     				}
     		   				
     			}    
-    			
     			(void) closedir (dp);
+
   			}
   			
   			else{
   				perror ("Couldn't open the directory");
   			}
-  		}																						
+		}			
+    		// Sort function
+							
+
+		for (int nT = 0 ; nT < 3 ; nT ++){
+			char tempFolder[MAX_LAYER_NAME_SIZE];
+			int bInstallTemp;
+			
+			int bFound = 1;		
+			while (bFound == 1){
+				bFound = 0;
+				for (int i = 0 ; i < nb_Layers[nT]-1; i ++){
+					if (strcmp(layers[nT][i], layers[nT][i+1])>0){
+			
+						strcpy(tempFolder, layers[nT][i+1]);
+						strcpy(layers[nT][i+1], layers[nT][i]);
+						strcpy(layers[nT][i], tempFolder);
+						 
+						bInstallTemp = bInstall[nT][i+1];
+						bInstall[nT][i+1] = bInstall[nT][i];
+						bInstall[nT][i] = bInstallTemp;
+										
+						bFound = 1 ;
+					}	
+				}
+
+			} 
+		
+	}
 }
 
 void displayLayersNames(){
@@ -615,9 +638,7 @@ int main(void) {
 			sprintf(param1,"%s%d","/mnt/SDCARD/App/The_Onion_Installer/data/Layer",(nT+1));
 
 			SDL_Rect rectMessage = { 10, 420 , 603, 48};
-			
 	
-			
 			for (int nLayer = 0 ; nLayer < nb_Layers[nT] ; nLayer++){
 				if (bInstallChange[nT][nLayer] == 1){
 					if (bInstall[nT][nLayer] == 1){
@@ -652,9 +673,7 @@ int main(void) {
 		}
 			TTF_CloseFont(font35);	
 			break;
-
 		}
-	
 	}
 	
 	

@@ -527,8 +527,10 @@ int main() {
 		
 		if ((ev.code == BUTTON_MENU)&&(menu_pressed == 0)){
 			if (comboKey == 0){
-				system("killall -15 retroarch");
-				screenshot();		
+				 if (file_exists(".disableMenu")!=1){
+				 	system("killall -15 retroarch");
+					screenshot();		
+				 }			
 			}
 			comboKey = 0;
 		}
@@ -582,6 +584,9 @@ int main() {
 					system("sync");
 					system("killall -9 MainUI");
 					system("killall -9 onionLauncher");
+					// Reset framebuffer
+					
+					
 					system("sleep 5");
 					killAll();
 					system("sleep 10");

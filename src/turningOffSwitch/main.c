@@ -185,9 +185,7 @@ void readHistory(){
 	if (request_body != NULL){
 			request_json = cJSON_Parse(request_body);	 
 			items = cJSON_GetObjectItem(request_json, "items");	
-						
-	
-			
+									
 			for (int nbGame = 0 ; nbGame < MAXHISTORY ; nbGame ++){
 				cJSON* path = NULL;
 				cJSON* core_path = NULL;
@@ -215,7 +213,7 @@ void readHistory(){
 						
 							char RACommand[MAXHRACOMMAND];
 						
-							sprintf(RACommand, "./retroarch -v -L %s %s", cJSON_Print(core_path), cJSON_Print(path));
+							sprintf(RACommand, "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v -L %s %s", cJSON_Print(core_path), cJSON_Print(path));
 												
 							// Rom name 
 							char *bname;

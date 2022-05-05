@@ -13,6 +13,7 @@
 #include <sys/stat.h>  
 #include "sys/ioctl.h"
 #include <dirent.h>
+#include "cJSON.h"
  
 // Max number of records in the DB
 #define NUMBER_OF_THEMES 100
@@ -48,6 +49,29 @@ void logMessage(char* Message) {
 	fclose(file); 
 }
 
+char* load_file(char const* path)
+{
+    char* buffer = 0;
+    long length;
+    FILE * f = fopen (path, "rb"); 
+
+    if (f)
+    {
+      fseek (f, 0, SEEK_END);
+      length = ftell (f);
+      fseek (f, 0, SEEK_SET);
+      buffer = (char*)malloc ((length+1)*sizeof(char));
+      if (buffer)
+      {
+        fread (buffer, sizeof(char), length, f);
+      }
+      fclose (f);
+    }
+    buffer[length] = '\0';
+
+    return buffer;
+}
+
 
 bool file_exists (char *filename) {
   struct stat   buffer;   
@@ -79,13 +103,13 @@ int main(void) {
   	int nb_themes = 0;
   	char themes[NUMBER_OF_THEMES][MAX_THEME_NAME_SIZE];
 	char cThemePath[250]; 
-  	dp = opendir ("./Themes");
+  	dp = opendir ("/mnt/SDCARD/Themes");
 	
   	if (dp != NULL)
   	{
     	while (ep = readdir (dp)){
     		
-			sprintf(cThemePath, "./Themes/%s/preview.png", ep->d_name);
+			sprintf(cThemePath, "/mnt/SDCARD/Themes/%s/config.json", ep->d_name);
     		if (file_exists(cThemePath) == 1){
     	    	
     	    	strcpy(themes[nb_themes], ep->d_name);		
@@ -99,10 +123,8 @@ int main(void) {
   	}
     	
 
-	
-	
 	int current_page = 0;
-
+	int hideIconTitle = 0;
 	
 	SDL_Init(SDL_INIT_VIDEO);
 	SDL_ShowCursor(SDL_DISABLE);
@@ -142,10 +164,17 @@ int main(void) {
 	int levelPage = 0; 
 	FILE *fp;
 	long lSize;	
-
+	
 	//char* tempt = "BirdShot";
-	sprintf(cThemePath, "./Themes/%s/preview.png", themes[nCurrentPage]);
-	surfaceThemeBackground = IMG_Load(cThemePath);
+	sprintf(cThemePath, "/mnt/SDCARD/Themes/%s/preview.png", themes[nCurrentPage]);
+	
+	if (file_exists(cThemePath) == 1){
+		surfaceThemeBackground = IMG_Load(cThemePath);
+	}
+	
+	else{
+		surfaceThemeBackground = IMG_Load(".appRessources/noThemePreview.png");
+	}
 	
 	char cPages[10];
 	sprintf(cPages,"%d/%d",(nCurrentPage+1),nb_themes);
@@ -159,26 +188,25 @@ int main(void) {
 	
 	SDL_BlitSurface(imagePages, NULL, screen, &rectPages);
 	
+	sprintf(cThemePath, "/mnt/SDCARD/Themes/%s/config.json", themes[0]);
 
-	
-	char *currPlay;
-	sprintf(cThemePath, "./Themes/%s/description.txt", themes[0]);
-	fp = fopen ( cThemePath, "rb" );
-	if( fp > 0 ) {
-		fseek( fp , 0L , SEEK_END);
-		lSize = ftell( fp );
-		rewind( fp );
-		currPlay = (char*)calloc( 1, lSize+1 );
-		if( !currPlay ) fclose(fp),fputs("memory alloc fails",stderr),exit(1);
-	
-		if( 1!=fread( currPlay , lSize, 1 , fp) )
-  		fclose(fp),free(currPlay),fputs("entire read fails",stderr),exit(1);
-		fclose(fp);	
 
-		imageThemeNom = TTF_RenderUTF8_Blended(font21, currPlay, color_white);
-		SDL_BlitSurface(imageThemeNom, NULL, screen, &rectImageThemeNom);
-	}
-	free(currPlay);
+	if (file_exists(cThemePath) == 1){
+		const char *request_body = load_file(cThemePath);	
+		
+		cJSON* request_json = NULL;
+		cJSON* themeName;
+		
+		if (request_body != NULL){
+			request_json = cJSON_Parse(request_body);	
+			
+			themeName = cJSON_GetObjectItem(request_json, "name");
+			
+			imageThemeNom = TTF_RenderUTF8_Blended(font21, cJSON_GetStringValue(themeName), color_white);
+			SDL_BlitSurface(imageThemeNom, NULL, screen, &rectImageThemeNom);
+		}
+
+    }
 
 		
 	SDL_BlitSurface(screen, NULL, video, NULL); 
@@ -240,10 +268,46 @@ int main(void) {
 				
 		if (a_pressed) {			
 			if (levelPage==1){
-				//Launch script then exit
-				char cCommandScript[100];
-				sprintf(cCommandScript, "./themeInstall.sh %s",themes[nCurrentPage]);
-				system(cCommandScript);
+								
+				if (hideIconTitle == 1){
+					system("./themeLangInstall.sh hideTitle");
+				}
+				else
+				{
+					system("./themeLangInstall.sh showTitle");
+				}
+				
+				
+				cJSON* request_json = NULL;
+				cJSON* itemTheme;
+			
+				char sBrightness[20]; 
+				
+				const char *request_body = load_file("/appconfigs/system.json");
+				request_json = cJSON_Parse(request_body);
+				itemTheme = cJSON_GetObjectItem(request_json, "theme");
+
+				logMessage("cJSON_GetStringValue(itemTheme)");
+				logMessage(cJSON_GetStringValue(itemTheme));
+
+				char cThemePath[200];
+				sprintf(cThemePath, "/mnt/SDCARD/Themes/%s/", themes[nCurrentPage]);
+				logMessage(cThemePath);
+				logMessage("  ");
+			
+				cJSON_SetValuestring(itemTheme, cThemePath);
+				
+
+				FILE *file = fopen("/appconfigs/system.json", "w");	
+				
+				char *test = cJSON_Print(request_json);	
+				fputs(test, file);
+				fclose(file); 					
+				
+			
+				
+				
+				
 				break;
 			}
 			else{
@@ -263,13 +327,22 @@ int main(void) {
 		}
 
 		if (levelPage==0){
-			sprintf(cThemePath, "./Themes/%s/preview.png", themes[nCurrentPage]);
-			surfaceThemeBackground = IMG_Load(cThemePath);
+		
+			sprintf(cThemePath, "/mnt/SDCARD/Themes/%s/preview.png", themes[nCurrentPage]);
+			
+			if (file_exists(cThemePath) == 1){
+				surfaceThemeBackground = IMG_Load(cThemePath);
+			}
+			
+			else{
+				surfaceThemeBackground = IMG_Load(".appRessources/noThemePreview.png");
+			}
+				
 			SDL_BlitSurface(surfaceThemeBackground, NULL, screen, &rectThemeBackground);
 			
-			
-			
+		
 			SDL_BlitSurface(surfaceBackGround, NULL, screen, NULL);
+			
 			if (nCurrentPage != 0){
 				SDL_BlitSurface(surfaceArrowLeft, NULL, screen, &rectArrowLeft);
 			}
@@ -281,48 +354,61 @@ int main(void) {
 			imagePages = TTF_RenderUTF8_Blended(font30, cPages, color_white);			
 			SDL_BlitSurface(imagePages, NULL, screen, &rectPages);
 			
-			char *currPlay;
-			sprintf(cThemePath, "./Themes/%s/description.txt", themes[nCurrentPage]);
-			fp = fopen ( cThemePath, "rb" );
-			if( fp > 0 ) {
-				fseek( fp , 0L , SEEK_END);
-				lSize = ftell( fp );
-				rewind( fp );
-				currPlay = (char*)calloc( 1, lSize+1 );
-				if( !currPlay ) fclose(fp),fputs("memory alloc fails",stderr),exit(1);
-			
-				if( 1!=fread( currPlay , lSize, 1 , fp) )
-  				fclose(fp),free(currPlay),fputs("entire read fails",stderr),exit(1);
-				fclose(fp);	
-
-				imageThemeNom = TTF_RenderUTF8_Blended(font21, currPlay, color_white);
-				SDL_BlitSurface(imageThemeNom, NULL, screen, &rectImageThemeNom);
+			sprintf(cThemePath, "/mnt/SDCARD/Themes/%s/config.json", themes[nCurrentPage]);
+		
+			if (file_exists(cThemePath) == 1){
+				const char *request_body = load_file(cThemePath);	
 				
-			}
-			free(currPlay);
+				cJSON* request_json = NULL;
+				cJSON* themeName;
+				
+				if (request_body != NULL){
+					request_json = cJSON_Parse(request_body);	
+					
+					themeName = cJSON_GetObjectItem(request_json, "name");
+					
+					imageThemeNom = TTF_RenderUTF8_Blended(font21, cJSON_GetStringValue(themeName), color_white);
+					SDL_BlitSurface(imageThemeNom, NULL, screen, &rectImageThemeNom);
+				}
+		
+    		}
+
 			SDL_FreeSurface(surfaceThemeBackground);	
 		}
 		else {
 			surfaceThemeBackground = IMG_Load(".appRessources/themeDetail.png");
 			SDL_BlitSurface(surfaceThemeBackground, NULL, screen, NULL);
+
+			sprintf(cThemePath, "/mnt/SDCARD/Themes/%s/config.json", themes[nCurrentPage]);
+		
+			if (file_exists(cThemePath) == 1){
+				const char *request_body = load_file(cThemePath);	
+				
+				cJSON* request_json = NULL;
+				cJSON* themeName;
+				cJSON* themeIconTitle;
+				
+				if (request_body != NULL){
+					request_json = cJSON_Parse(request_body);	
+					
+					themeName = cJSON_GetObjectItem(request_json, "name");
+					themeIconTitle = cJSON_GetObjectItem(request_json, "hideIconTitle");
+					
+					
+					
+					if(cJSON_IsTrue(themeIconTitle)){
+						hideIconTitle = 1;
+					}
+					else {
+						hideIconTitle = 0;
+					}
+									
+					imagePages = TTF_RenderUTF8_Blended(font40, cJSON_GetStringValue(themeName), color_white);
+					SDL_BlitSurface(imagePages, NULL, screen, &rectThemeDescription);
+				}
+		
+    		}
 			
-			char *currPlay;
-			sprintf(cThemePath, "./Themes/%s/description.txt", themes[nCurrentPage]);
-			fp = fopen ( cThemePath, "rb" );
-			if( fp > 0 ) {
-				fseek( fp , 0L , SEEK_END);
-				lSize = ftell( fp );
-				rewind( fp );
-				currPlay = (char*)calloc( 1, lSize+1 );
-				if( !currPlay ) fclose(fp),fputs("memory alloc fails",stderr),exit(1);
-			
-				if( 1!=fread( currPlay , lSize, 1 , fp) )
-  				fclose(fp),free(currPlay),fputs("entire read fails",stderr),exit(1);
-				fclose(fp);	
-				imagePages = TTF_RenderUTF8_Blended(font40, currPlay, color_white);
-				SDL_BlitSurface(imagePages, NULL, screen, &rectThemeDescription);
-			}
-			free(currPlay);
 			
 		
 		}

@@ -61,6 +61,10 @@ int main(void) {
 	SDL_Surface* image5 = IMG_Load("chargingState5.png");
 	
 	SetBrightness(8);
+	int run = 1;
+
+	SDL_Event event;
+		
 	
 	for (int i = 1; i < 10; ++i){
 		
@@ -99,30 +103,36 @@ int main(void) {
 			break;
 		}
 		
-	}
+		if(SDL_PollEvent(&event)){
+			if ((event.type==SDL_KEYDOWN)&&(event.key.keysym.sym == 0)){
+				run = 0;
+				break;
+			}
+		}
 	
+	}
 
-	SetBrightness(8);
+
+	
 	//usleep(5000000);	//5s
 	screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640,480, 32, 0,0,0,0);
 	SDL_BlitSurface(screen, NULL, video, NULL); 
 	SDL_Flip(video);
+	if (run ==1){
+		SetBrightness(0);
+	}
 	
-	SetBrightness(0);
-	
-	SDL_Event event;
-	
-	int run = 1;
+
 	char valeur[100];
 	while ((SDL_PollEvent(&event))||(run==1)) {
+		SetBrightness(0);
 		if (event.type==SDL_KEYDOWN) {
 			if (event.key.keysym.sym == 0){	    
 				SetBrightness(8);
 				run = 0;
-			}
-			
+			}	
 		}	
-		sprintf(valeur,"%d",event.key.keysym.sym);
+		//sprintf(valeur,"%d",event.key.keysym.sym);
 		//logMessage(valeur);
 		checkCharging();
 		if (is_charging == 0){
