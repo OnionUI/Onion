@@ -75,7 +75,7 @@ It also allows you to quickly change games and many other features:
 - Custom charging screen that prevents screen burn-in.
 - Removed low bat flickering icon.
 - Large new low battery (<10%) indicator with periodic warning rumble.
-- When the battery goes < 4%, the game is automatically saved to prevent losing progress, and the handheld is turned off.
+- When the battery goes below 4%, the game is automatically saved to prevent losing progress, and the handheld is turned off.
 
 ### RetroArch Rebuilt From Scratch
 <img src="https://user-images.githubusercontent.com/16885275/154791260-d1a4d0b2-5582-45cc-a291-bead843a5171.png" width="350">
