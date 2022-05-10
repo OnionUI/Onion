@@ -10,7 +10,7 @@
 * [Features](#features)
 * [Shortcuts](#shortcuts)
 
-#### [Also, check our wiki here](https://github.com/jimgraygit/Onion/wiki)
+#### [Check our wiki for additional documentation!](https://github.com/jimgraygit/Onion/wiki)
 
 ## Installation
 
