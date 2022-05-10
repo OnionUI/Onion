@@ -62,9 +62,9 @@
 ### Onion Launcher
 <img src="https://user-images.githubusercontent.com/16885275/164890313-c83dfc84-a684-416b-bd40-9f54c9f4e7db.png" width="350">
 
-Although it's optional, we consider the launcher to be central to the Onion OS experience.
-The Onion Launcher is a user interface designed to be triggered when the Miyoo Mini starts.
-It allows you to launch the last game played in a few seconds, and, with a simple press of a button, save your progress and turn off the console.
+Although it's optional, we consider the launcher to be central to the Onion OS experience.  
+The Onion Launcher is a user interface designed to be triggered when the Miyoo Mini starts.  
+It allows you to launch the last game played in a few seconds, and, with a simple press of a button, save your progress and turn off the console.  
 It also allows you to quickly change games and many other features:
 
 - Quick boot your last game played.
