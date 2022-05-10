@@ -107,23 +107,23 @@ It also allows you to quickly change games and many other features:
 
 Menu button: Exit Game
 
-Select + Start + R2: Brightness up
+Select + Start + R2: Brightness up  
 Select + Start + L2: Brightness down
 
-Power button: Save progress and shutdown
+Power button: Save progress and shutdown  
 Menu + Power: Light sleep
 
-Menu + R2: Save state
+Menu + R2: Save state  
 Menu + L2: Load state
 
-Menu + R: Fast forward
+Menu + R: Fast forward  
 Menu + L: Rewind (if enabled)
 
 Menu + X: Toggle FPS display
 
 R2/L2: Change palette (Game Boy only)
 
-Start + Select + Menu + R2 + L2: Force disable the launcher
+Start + Select + Menu + R2 + L2: Force disable the launcher  
 Menu + Select : Retroarch menu
 
 <img src="https://user-images.githubusercontent.com/16885275/164891039-665fffcf-b454-4b3c-87c6-13a92cb88a8b.png" width="500">
