@@ -23,16 +23,12 @@
 - Copy your Bios files into the `BIOS` folder.
 
 #### Installation (Upgrade):
-- Back up your saves, states and scraped images.
-> - Saves and playtimes are located at `/Retroarch/.retroarch/saves/_corename_`
-> - States are located at `/Retroarch/.retroarch/states/_corename_`
-- Delete all folders from your SD except `BIOS`, `Roms` and `Themes`.
+
+- Delete all folders from your SD except `BIOS`, `Roms`, `Saves` and `Themes`.
 - Unzip the `.tmp_update` folder to the root of your SD.
 - Boot up your Miyoo Mini and follow the on-screen instructions to get started.
 - Your Mini will turn off once installation is complete.
  (Don't delete the `.tmp_update` folder, it is now part of the Onion installation.)
-- Restore your backed up saves and states.
-- Optional: To restore your box art, copy each system's box art folder into the system's respective folder in `/Roms/` and rename each folder to `Imgs`.
 
 <img src="https://user-images.githubusercontent.com/16885275/164891118-efbcfc2e-bd25-4b88-8851-34862f550690.png" width="456">
 
