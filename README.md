@@ -107,8 +107,8 @@ It also allows you to quickly change games and many other features:
 
 Menu button: Exit Game
 
-Select + Start + R2: Brightness up  
-Select + Start + L2: Brightness down
+Select + R2: Brightness up  
+Select + L2: Brightness down
 
 Power button: Save progress and shutdown  
 Menu + Power: Light sleep
