@@ -23,7 +23,7 @@
 - Copy your Bios files into the `BIOS` folder.
 
 #### Installation (Upgrade):
-- (If coming from <= V3.09, backup your saves, you will have to copy them afterwards in the Saves folder of your SD)
+- (If coming from <= V3.09, backup your saves, you will have to copy them afterwards in the `Saves` folder of your SD)
 - Delete all folders from your SD except `BIOS`, `Roms`, `Saves` and `Themes`.
 - Unzip the `.tmp_update` folder to the root of your SD.
 - Boot up your Miyoo Mini and follow the on-screen instructions to get started.
