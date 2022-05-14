@@ -14,7 +14,7 @@
 #include "sys/ioctl.h"
 #include <dirent.h>
 #include "cJSON.h"
- 
+   
 // Max number of records in the DB
 #define NUMBER_OF_THEMES 100
 #define MAX_THEME_NAME_SIZE 256

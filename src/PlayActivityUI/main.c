@@ -73,9 +73,9 @@ bool file_exists (char *filename) {
 int readRomDB(){
 
   	// Check to avoid corruption
-  	if (file_exists("/mnt/SDCARD/RetroArch/.retroarch/saves/playActivity.db") == 1){
+  	if (file_exists("/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db") == 1){
   	
-    	FILE * file= fopen("/mnt/SDCARD/RetroArch/.retroarch/saves/playActivity.db", "rb");
+    	FILE * file= fopen("/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db", "rb");
 
 		if (file != NULL) {
 
@@ -103,7 +103,7 @@ int readRomDB(){
 
 
 void writeRomDB(void){
-	FILE * file= fopen("/mnt/SDCARD/RetroArch/.retroarch/saves/playActivity.db", "wb");
+	FILE * file= fopen("/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db", "wb");
 	if (file != NULL) {
     	fwrite(romList, sizeof(romList), 1, file);
     	fclose(file);

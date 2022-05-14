@@ -76,9 +76,9 @@ int readRomDB(){
 
 
   	// Check to avoid corruption
-  	if (file_exists("/mnt/SDCARD/RetroArch/.retroarch/saves/playActivity.db") == 1){
+  	if (file_exists("/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db") == 1){
   	
-    	FILE * file= fopen("/mnt/SDCARD/RetroArch/.retroarch/saves/playActivity.db", "rb");
+    	FILE * file= fopen("/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db", "rb");
 
 		if (file != NULL) {
 
@@ -106,8 +106,8 @@ int readRomDB(){
 void writeRomDB(void){
 
 	if (tailleStructure > 0){
-		remove("/mnt/SDCARD/RetroArch/.retroarch/saves/playActivity.db");
-		FILE * file= fopen("/mnt/SDCARD/RetroArch/.retroarch/saves/playActivity.db", "wb");
+		remove("/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db");
+		FILE * file= fopen("/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db", "wb");
 		if (file != NULL) {
     		fwrite(romList, sizeof(romList), 1, file);
     		fclose(file);
@@ -135,7 +135,7 @@ void writeRomDB(void){
 		
 		if (sz>100000){
 		logMessage("ICI3");
-		system("cp /mnt/SDCARD/RetroArch/.retroarch/saves/playActivity_tmp.db /mnt/SDCARD/RetroArch/.retroarch/saves/playActivity.db");
+		system("cp /mnt/SDCARD/RetroArch/.retroarch/saves/playActivity_tmp.db /mnt/SDCARD/Saves/saves/playActivity.db");
 
 		}
 	}
@@ -175,24 +175,24 @@ void backupDB(void){
 	char fileNameNextSlot[120];
 	char command[250];	
 	int i;
-	mkdir("/mnt/SDCARD/RetroArch/.retroarch/saves/PlayActivityBackup", 0700);
+	mkdir("/mnt/SDCARD/Saves/CurrentProfile/saves/PlayActivityBackup", 0700);
 	for (i=0; i<MAXBACKUPFILES; i++) {
-		snprintf(fileNameToBackup,sizeof(fileNameToBackup),"/mnt/SDCARD/RetroArch/.retroarch/saves/PlayActivityBackup/playActivityBackup%02d.db",i);
+		snprintf(fileNameToBackup,sizeof(fileNameToBackup),"/mnt/SDCARD/Saves/CurrentProfile/saves/PlayActivityBackup/playActivityBackup%02d.db",i);
 		if ( access(fileNameToBackup, F_OK) != 0 ) break;
 	} 
 			
 	// Backup		
 	if (i<MAXBACKUPFILES){
-		snprintf(fileNameNextSlot,sizeof(fileNameNextSlot),"/mnt/SDCARD/RetroArch/.retroarch/saves/PlayActivityBackup/playActivityBackup%02d.db",i+1);
+		snprintf(fileNameNextSlot,sizeof(fileNameNextSlot),"/mnt/SDCARD/Saves/CurrentProfile/saves/PlayActivityBackup/playActivityBackup%02d.db",i+1);
 	}else{
-		snprintf(fileNameToBackup,sizeof(fileNameToBackup),"/mnt/SDCARD/RetroArch/.retroarch/saves/PlayActivityBackup/play<ActivityBackup00.db");
-		snprintf(fileNameNextSlot,sizeof(fileNameNextSlot),"/mnt/SDCARD/RetroArch/.retroarch/saves/PlayActivityBackup/playActivityBackup01.db");
+		snprintf(fileNameToBackup,sizeof(fileNameToBackup),"/mnt/SDCARD/Saves/CurrentProfile/saves/PlayActivityBackup/play<ActivityBackup00.db");
+		snprintf(fileNameNextSlot,sizeof(fileNameNextSlot),"/mnt/SDCARD/Saves/CurrentProfile/saves/PlayActivityBackup/playActivityBackup01.db");
 	}
 	// Next slot for backup
 	remove(fileNameToBackup);
 	remove(fileNameNextSlot);
 			
-	sprintf(command, "cp /mnt/SDCARD/RetroArch/.retroarch/saves/playActivity.db %s", fileNameToBackup);
+	sprintf(command, "cp /mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db %s", fileNameToBackup);
 	system(command);
 
 }

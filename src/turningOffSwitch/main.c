@@ -71,9 +71,6 @@ cJSON* items = cJSON_CreateArray();
 	
 void logMessage(char* Message) {
 	FILE *file = fopen("/mnt/SDCARD/.tmp_update/log_turnMessage.txt", "a");
-	/*char tempMess[] = "\r\n";
-    strcat(Message,tempMess);
-    */
     char valLog[200];
     sprintf(valLog, "%s %s", Message, "\n");
     fputs(valLog, file);
@@ -136,9 +133,9 @@ void SetRawBrightness(int val) {  // val = 0-100
 int readRomDB(){
 
   	// Check to avoid corruption
-  	if (file_exists("/mnt/SDCARD/RetroArch/.retroarch/saves/playActivity.db") == 1){
+  	if (file_exists("/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db") == 1){
   	
-    	FILE * file= fopen("/mnt/SDCARD/RetroArch/.retroarch/saves/playActivity.db", "rb");
+    	FILE * file= fopen("/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db", "rb");
 
 		if (file != NULL) {
 
@@ -181,7 +178,7 @@ int searchRomDB(char* romName){
 void readHistory(){
 // History extraction
 	taillestructGames = 0;
-	const char *request_body = load_file("/mnt/SDCARD/RetroArch/.retroarch/content_history.lpl");	
+	const char *request_body = load_file("/mnt/SDCARD/Saves/CurrentProfile/lists/content_history.lpl");	
 	if (request_body != NULL){
 			request_json = cJSON_Parse(request_body);	 
 			items = cJSON_GetObjectItem(request_json, "items");	
@@ -270,7 +267,7 @@ void removeCurrentItem(){
 	
 	cJSON_DeleteItemFromArray(items, gameList[currentGame].jsonIndex);
 	
-	FILE *file = fopen("/mnt/SDCARD/RetroArch/.retroarch/content_history.lpl", "w");
+	FILE *file = fopen("/mnt/SDCARD/Saves/CurrentProfile/lists/content_history.lpl", "w");
 	
 	char *test = cJSON_Print(request_json);
 	
@@ -522,6 +519,10 @@ int main(void) {
 					if ( ev.code == BUTTON_Y ) {
 							y_pressed = val;
 				}
+				else 
+					if ( ev.code == BUTTON_START ) {
+							start_pressed = val;
+				}
 				
 				
 				
@@ -551,12 +552,12 @@ int main(void) {
 					close(fd); 
 					break;
 				}
-				
+				/*
 				if (a_pressed) {	
 					break;
 				}		
-				
-				if (b_pressed) {	
+				*/
+				if (start_pressed) {	
 					nExitToMiyoo = 1;
 					break;
 				}

@@ -285,7 +285,6 @@ void loadRessources(){
 					cShort[MAY_LAYER_DISPLAY] = '\0';
 					size_t len = strlen(cShort);
 					if ((len > 2)||(cShort[0]!='.')){
-					
 				
 					//logMessage(ressourcesPath);
 					//logMessage(cShort);
@@ -446,10 +445,7 @@ int main(void) {
 	input_fd = open("/dev/input/event0", O_RDONLY);
 	setLayersInstall (0,0);
 	loadRessources();
-	
-	
-//	system("reboot");
-	
+		
 	refreshScreen();
 	
 	struct input_event	ev;
@@ -512,7 +508,8 @@ int main(void) {
 													else
 														if ( ev.code == BUTTON_Y){
 															y_pressed = val;
-														}											
+														}
+		/*																							
 		if (y_pressed) {			
 			if (allActivated == 0){
 				allActivated = 1; 
@@ -522,10 +519,10 @@ int main(void) {
 				allActivated = 0; 
 				setLayersInstall(0,1);
 			}
-			
-
 			refreshScreen();
-		}	 										
+		}
+		*/
+			 										
 		if (right_pressed) {			
 			if (nTab < 2){
 				nTab ++;
