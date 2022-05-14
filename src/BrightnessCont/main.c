@@ -519,6 +519,8 @@ int main() {
 												power_pressed = val;
 										}	
 		
+
+	
 		
 		if ((menu_pressed == 1)&&(keyNotMenuPressed == 1)){
 		
@@ -566,12 +568,11 @@ int main() {
 			//SetRawBrightness(0);
 			int fd = creat(".offOrder", 777);
 			close(fd); 
-			
+			 
 			if (file_exists("/tmp/cmd_to_run_launcher.sh")==1){
 				// One game is running
 				system("sync");			
 				system("killall -15 retroarch");
-				
 			}
 			else{
 				if (file_exists("/tmp/cmd_to_run.sh")==1){
@@ -620,12 +621,13 @@ int main() {
 			
 			usleep(200000); 
 			SetBrightness(brightness_value);
+			menu_pressed = 0;
 		}	
 			
 		// Brightness possible values
 		// 0 1 2 4 6 8 10
 		
-		if (start_pressed & select_pressed & l2_pressed) {
+		if (select_pressed & l2_pressed) {
 		//	start_pressed = select_pressed = l2_pressed = 0;
 			if(file_exists(".altBrightShortcut")==0){	
 				if (brightness_value >= 1){
@@ -673,7 +675,7 @@ int main() {
 			}
 		}	
 
-		if (start_pressed & select_pressed & r2_pressed) {
+		if (select_pressed & r2_pressed) {
 			if (file_exists(".altBrightShortcut")==0) {
 				if (brightness_value <= 8){
 					brightness_value++;

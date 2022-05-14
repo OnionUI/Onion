@@ -4,7 +4,11 @@
 #include <stdint.h>
 #include <fcntl.h>
 #include "sys/ioctl.h"
-#include <linux/input.h>
+#include <linux/input.h> 
+#include <SDL/SDL.h>
+#include <SDL/SDL_image.h>
+#include <SDL/SDL_ttf.h>
+#include <stdbool.h> 
 
 
 typedef struct {
@@ -15,33 +19,6 @@ typedef struct {
 #define SARADC_IOC_MAGIC                     'a'
 #define IOCTL_SAR_INIT                       _IO(SARADC_IOC_MAGIC, 0)
 #define IOCTL_SAR_SET_CHANNEL_READ_VALUE     _IO(SARADC_IOC_MAGIC, 1)
-//	libshmvar header
-typedef enum {
-	MONITOR_VOLUME,			// vol
-	MONITOR_BRIGHTNESS,		// brightness
-	MONITOR_KEYMAP,			// keymap (maybe unused)
-	MONITOR_MUTE,			// mute
-	MONITOR_VOLUME_CHANGED,		// volume change (internal use)
-	MONITOR_BGM_VOLUME,		// bgmvol
-	MONITOR_HIBERNATE_DELAY,	// hibernate
-	MONITOR_ADC_VALUE,		// charging state (internal use)
-	MONITOR_LUMINATION,		// lumination
-	MONITOR_HUE,			// hue
-	MONITOR_SATURATION,		// saturation
-	MONITOR_CONTRAST,		// contrast
-	MONITOR_VALUE_MAX,
-} MonitorValue;
-
-typedef struct _KeyShmInfo {
-	int id;
-	void *addr;
-} KeyShmInfo;
-
-
-int	InitKeyShm(KeyShmInfo *);
-int	SetKeyShm(KeyShmInfo* info, MonitorValue key, int value);
-int	GetKeyShm(KeyShmInfo* info, MonitorValue key);
-int	UninitKeyShm(KeyShmInfo *);
 
 //
 //	handling libshmvar sample
@@ -51,9 +28,15 @@ int	UninitKeyShm(KeyShmInfo *);
 static SAR_ADC_CONFIG_READ  adcCfg = {0,0};
 static int sar_fd = 0;
 
+
 static void initADC(void) {
     sar_fd = open("/dev/sar", O_WRONLY);
     ioctl(sar_fd, IOCTL_SAR_INIT, NULL);
+}
+
+bool file_exists (char *filename) {
+  struct stat   buffer;   
+  return (stat (filename, &buffer) == 0);
 }
 
 
@@ -107,26 +90,21 @@ void rumble(uint32_t val) {
 
 int percBat = 0;
 int firstLaunch = 1; 
-int countChecks = 0;
 
 static void checkADC(void) {  
 
     ioctl(sar_fd, IOCTL_SAR_SET_CHANNEL_READ_VALUE, &adcCfg);
     remove("/tmp/percBat"); 
-    int adc_fd = open("/tmp/percBat", O_CREAT | O_WRONLY);
+    int adc_fd = open("/tmp/percBat", O_CREAT | O_WRONLY | O_TRUNC);
 	
 	int old_is_charging = is_charging;
 	checkCharging();
-	
+
     if (adc_fd>0) {
         char val[3];     
   		int percBatTemp = 0;
   		if (is_charging == 0){
-  			KeyShmInfo	info;
-			InitKeyShm(&info);
-			SetKeyShm(&info, MONITOR_ADC_VALUE, adcCfg.adc_value);
-			UninitKeyShm(&info);
-  		
+
 			if (adcCfg.adc_value >= 528){
   				percBatTemp = adcCfg.adc_value-478;
   			}
@@ -140,7 +118,7 @@ static void checkADC(void) {
   			if ((firstLaunch == 1) || (old_is_charging == 1)){
         		// Calibration needed at first launch or when the 
         		// user just unplugged his charger
-        		firstLaunch = 0;
+        		
         		percBat =  percBatTemp;
         	}
         	else {
@@ -163,28 +141,35 @@ static void checkADC(void) {
   		// The handheld is currently charging
   		percBat = 500 ;
   		}
-  
   		
         sprintf(val, "%d", percBat);
+        //strcat(val, "%");
+        
         write(adc_fd, val, strlen(val)); 
         close(adc_fd); 
-        
+  		  	
+
         // Rumble in case of low battery
-  		if (percBat<=10){
+  		/*
+  		if (percBat<=5){
   			rumble(1);
-			usleep(3000000);	//3s
+			usleep(1000000);	//3s
 			rumble(0);		
   		}
+  		*/
   		
   		if (percBat<=4){
 			// Force retroarch to end its session
-			
 			int fd = creat(".deepSleep", 777);
 			close(fd);	
 			system("killall -15 retroarch");
   		}
+  				
   		
-  		countChecks ++;
+  		if (firstLaunch == 1){
+  			firstLaunch = 0;  	
+  		}
+  	
     }
 }
 

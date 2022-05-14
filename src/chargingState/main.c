@@ -121,7 +121,6 @@ int main(void) {
 	if (run ==1){
 		SetBrightness(0);
 	}
-	
 
 	char valeur[100];
 	while ((SDL_PollEvent(&event))||(run==1)) {
@@ -138,7 +137,7 @@ int main(void) {
 		if (is_charging == 0){
 			system("reboot");	
 		}
-		usleep(100000);
+		usleep(500000);
 	}
 	
    	SDL_FreeSurface(screen);

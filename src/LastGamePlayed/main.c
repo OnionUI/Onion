@@ -8,6 +8,7 @@
 #include <sys/stat.h>  
 #include <fcntl.h>
 
+
 void logMessage(char* Message) {
 	FILE *file = fopen("/mnt/SDCARD/.tmp_update/log_lastMessage.txt", "a");
 	/*char tempMess[] = "\r\n";
@@ -72,7 +73,7 @@ int main(void) {
 	remove ("/tmp/cmd_to_run_launcher.sh");
 	remove ("/tmp/romName.txt");
 	
-	const char *request_body = load_file("/mnt/SDCARD/RetroArch/.retroarch/content_history.lpl");
+	const char *request_body = load_file("/mnt/SDCARD/Saves/CurrentProfile/lists/content_history.lpl");
 	
 	request_json = cJSON_Parse(request_body);
 	
@@ -151,10 +152,7 @@ int main(void) {
 	remove ("/tmp/cmd_to_run_launcher.sh");
 	remove ("/tmp/romName.txt");
 	}
-
-
-  	
-
 	
+
     return EXIT_SUCCESS;
 }
