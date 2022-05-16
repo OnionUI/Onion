@@ -25,6 +25,7 @@
 #### Installation (Upgrade):
 - (If coming from <= V3.09, backup your saves (retroarch / .retroarch / saves | states), you will have to copy them afterwards in the `Saves` folder of your SD)
 - Delete all folders from your SD except `BIOS`, `Roms`, `Saves` and `Themes`.
+- Note : Save your `Saves` folder to copy it back if you want to keep your custom emulator settings.
 - Unzip the `.tmp_update` folder to the root of your SD.
 - Boot up your Miyoo Mini and follow the on-screen instructions to get started.
 - Your Mini will turn off once installation is complete.
