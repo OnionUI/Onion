@@ -287,11 +287,13 @@ void SetRawBrightness(int val) {  // val = 0-100
 }
 
 void SetBrightness(int value) {  // value = 0-10
+    //setMiyooLum(value);
+    SetRawBrightness(value==0?6:value*10);
     KeyShmInfo	info;
     InitKeyShm(&info);
 	SetKeyShm(&info, MONITOR_BRIGHTNESS, value);
 	UninitKeyShm(&info);
-    SetRawBrightness(value==0?6:value*10);
+	system("sync");
 }
 
 void turnScreenOff(void) {  
@@ -638,7 +640,7 @@ int main() {
 					remove("brightSett");
 					
 					SetBrightness(brightness_value);	
-					//setMiyooLum(brightness_value);
+				
 					fclose(fopen("/mnt/SDCARD/.tmp_update/brightSett","w"));
 					int adc_fd = open("/mnt/SDCARD/.tmp_update/brightSett", O_CREAT | O_WRONLY);
 					if (adc_fd>0) {
@@ -662,7 +664,7 @@ int main() {
 					remove("brightSett");
 					
 					SetBrightness(brightness_value);	
-					//setMiyooLum(brightness_value);
+				
 					fclose(fopen("/mnt/SDCARD/.tmp_update/brightSett","w"));
 					int adc_fd = open("/mnt/SDCARD/.tmp_update/brightSett", O_CREAT | O_WRONLY);
 					if (adc_fd>0) {
@@ -685,7 +687,7 @@ int main() {
 					remove("brightSett");
 					
 					SetBrightness(brightness_value);	
-					//setMiyooLum(brightness_value);
+					
 					fclose(fopen("/mnt/SDCARD/.tmp_update/brightSett","w"));
 					int adc_fd = open("/mnt/SDCARD/.tmp_update/brightSett", O_CREAT | O_WRONLY);
 					if (adc_fd>0) {
@@ -708,7 +710,7 @@ int main() {
 					remove("brightSett");
 					
 					SetBrightness(brightness_value);	
-					//setMiyooLum(brightness_value);
+				
 					fclose(fopen("/mnt/SDCARD/.tmp_update/brightSett","w"));
 					int adc_fd = open("/mnt/SDCARD/.tmp_update/brightSett", O_CREAT | O_WRONLY);
 					if (adc_fd>0) {
