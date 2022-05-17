@@ -120,9 +120,10 @@ Menu + X: Toggle FPS display
 
 R2/L2: Change palette (Game Boy only)
 
-Start + Select + R2 + L2: Force turn off
-Menu + Select : Retroarch menu
-Start + Select + Menu + R2 + L2: Force disable the launcher
+Start + Select + R2 + L2: Force turn off  
+Menu + Select : Retroarch menu.
+   
+Start + Select + Menu + R2 + L2: Force disable the launcher   
 
 <img src="https://user-images.githubusercontent.com/16885275/164891039-665fffcf-b454-4b3c-87c6-13a92cb88a8b.png" width="500">
 <img src="https://user-images.githubusercontent.com/16885275/164891137-2bbdcfb5-e2c2-4658-8049-79b01d57dfed.png" width="500">
