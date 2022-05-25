@@ -15,7 +15,7 @@
   
 ## Installation
 
-Miyoo firmware 20220419 is needed for Onion v3.10 and above    
+Firmware 20220419 is needed for Onion v3.10 and above    
 (You can check your current version in Settings - Device info - Version)  
 If you can't or don't want to update, there are other solutions: Older Onion versions and MiniUI are compatible with all firmwares.   
 I can't take responsibility if your device is bricked in the process.   
