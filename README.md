@@ -11,14 +11,15 @@
 * [Shortcuts](#shortcuts)
 
 #### [Check our wiki for additional documentation!](https://github.com/jimgraygit/Onion/wiki)
-
+  
+  
 ## Installation
 
-The Miyoo firmware 20220419 is needed from Onion v3.10   
-(You can check your current version in Settings - Device info - Version)
-If you can't or don't want to update, there are other solutions: Older Onion versions and MiniUI are compatible with all firmwares.
-I can't take responsibility if your device is bricked in the process.
-Update instructions : [Here]([https://user-images.githubusercontent.com/16885275/170203242-a69d9295-02b6-4e0c-a97b-44019e309692.png](https://user-images.githubusercontent.com/16885275/170205258-8add4be7-1a1e-4ae5-a8f2-cb13c6703e06.png))
+Miyoo firmware 20220419 is needed for Onion v3.10 and above    
+(You can check your current version in Settings - Device info - Version)  
+If you can't or don't want to update, there are other solutions: Older Onion versions and MiniUI are compatible with all firmwares.   
+I can't take responsibility if your device is bricked in the process.   
+Update instructions : [Here](https://user-images.githubusercontent.com/16885275/170205258-8add4be7-1a1e-4ae5-a8f2-cb13c6703e06.png)
 
 
 #### Installation (Fresh Install):
