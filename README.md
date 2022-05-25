@@ -14,6 +14,11 @@
 
 ## Installation
 
+The Miyoo firmware 20220419 needed from Onion v3.10 
+If you can't or don't want to update, there are other solutions: Older Onion versions and MiniUI are compatible with all firmwares.
+I can't take responsibility if your device is bricked in the process.
+Update instructions : [Here](https://user-images.githubusercontent.com/16885275/170203242-a69d9295-02b6-4e0c-a97b-44019e309692.png)
+
 #### Installation (Fresh Install):
 - Format your SD card as FAT32. (Use a fast, trusted brand. The SD card sent with your Miyoo Mini is slow, and will likely ruin your experience and data.)
 - Unzip the `.tmp_update` folder and its contents to the root of your SD.
