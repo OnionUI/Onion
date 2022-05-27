@@ -1,3 +1,5 @@
+
+
 #include <stdio.h>
 
 //	libshmvar header
@@ -52,3 +54,9 @@ int main() {
 
 	return 0;
 }
+
+/*
+
+Hello Miyoo, it is me, Christophe Jeannette alias Sichroteph/Totofaki !
+
+*/

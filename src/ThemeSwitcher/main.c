@@ -125,6 +125,7 @@ int main(void) {
 
 	int current_page = 0;
 	int hideIconTitle = 0;
+    	int useThemeLang = 0;
 	
 	SDL_Init(SDL_INIT_VIDEO);
 	SDL_ShowCursor(SDL_DISABLE);
@@ -268,14 +269,6 @@ int main(void) {
 				
 		if (a_pressed) {			
 			if (levelPage==1){
-								
-				if (hideIconTitle == 1){
-					system("./themeLangInstall.sh hideTitle");
-				}
-				else
-				{
-					system("./themeLangInstall.sh showTitle");
-				}
 				
 				
 				cJSON* request_json = NULL;
@@ -303,17 +296,28 @@ int main(void) {
 				char *test = cJSON_Print(request_json);	
 				fputs(test, file);
 				fclose(file); 					
+				char themeLangInstall[] = "./themeLangInstall.sh ";
+				logMessage("installing language");
+				if (useThemeLang) {
+				    strcat(themeLangInstall, cThemePath);
+				    strcat(themeLangInstall, "lang");
+				} else if (hideIconTitle == 1){
+				    strcat(themeLangInstall, "/mnt/SDCARD/APP/ThemeSwitcher/.appRessources/hideTitle");
+				} else {
+				    strcat(themeLangInstall, "/mnt/SDCARD/APP/ThemeSwitcher/.appRessources/showTitle");
+				}
+				logMessage(themeLangInstall);
+				system(themeLangInstall);
 				
-			
-				
-				
-				
+					
+					
+					
 				break;
 			}
-			else{
-				levelPage = 1;
-			}
-		}		
+				else{
+					levelPage = 1;
+				}
+			}		
 		
 		if (right_pressed) {			
 			if (nCurrentPage < (nb_themes-1)){
@@ -387,21 +391,22 @@ int main(void) {
 				cJSON* request_json = NULL;
 				cJSON* themeName;
 				cJSON* themeIconTitle;
+				cJSON* themeLang;
 				
 				if (request_body != NULL){
 					request_json = cJSON_Parse(request_body);	
 					
 					themeName = cJSON_GetObjectItem(request_json, "name");
 					themeIconTitle = cJSON_GetObjectItem(request_json, "hideIconTitle");
+                    themeLang = cJSON_GetObjectItem(request_json, "useThemeLang");
 					
 					
-					
-					if(cJSON_IsTrue(themeIconTitle)){
-						hideIconTitle = 1;
-					}
-					else {
-						hideIconTitle = 0;
-					}
+					if (cJSON_IsTrue(themeLang)){
+                        useThemeLang = 1;
+                    }
+                    else if (cJSON_IsTrue(themeIconTitle)){
+                            hideIconTitle = 1;
+                    }
 									
 					imagePages = TTF_RenderUTF8_Blended(font40, cJSON_GetStringValue(themeName), color_white);
 					SDL_BlitSurface(imagePages, NULL, screen, &rectThemeDescription);

@@ -160,6 +160,21 @@ int readRomDB(){
 	return 1;	
 }
 
+int getMiyooLum(void){
+
+	cJSON* request_json = NULL;
+	cJSON* itemBrightness;
+
+	char sBrightness[20]; 
+	
+	const char *request_body = load_file("/appconfigs/system.json");
+	request_json = cJSON_Parse(request_body);
+	itemBrightness = cJSON_GetObjectItem(request_json, "brightness");
+
+	int dBrightness = cJSON_GetNumberValue(itemBrightness);
+		
+	return dBrightness;
+}
 
 	
 int searchRomDB(char* romName){
@@ -231,7 +246,7 @@ void readHistory(){
     						//logMessage(bname);
     						
     						if (nTimePosition >= 0){
-    							//logMessage("Trouvé");
+    							
     							int nTime = romList[nTimePosition].playTime;
     							
     							if (nTime >=  0) {				
@@ -325,9 +340,10 @@ int main(void) {
 	int nExitToMiyoo = 0;
 	
 	// Check current brightness value
-	FILE *fp;
-	long lSize;
-	char *currLum;
+	/*
+	F
+	
+	
 	fp = fopen ( "/mnt/SDCARD/.tmp_update/brightSett" , "rb" );
 	if( fp > 0 ) {
 		fseek( fp , 0L , SEEK_END);
@@ -342,10 +358,20 @@ int main(void) {
 		char tempLum[] = "/10";
     	strcat(currLum,tempLum);
 	}
+	*/
+	char currLum[20];
+	long lSize;
+	FILE *fp;
+	int nLum = getMiyooLum();
+	sprintf(currLum, "%d", nLum);
+	
+	char tempLum[] = "/10";
+    strcat(currLum,tempLum);
+    
 	// Check current battery value
 	char *currBat;
 	int nBat;
-		
+	
 	fp = fopen ( "/tmp/percBat" , "rb" );
 	if( fp > 0 ) {
 		fseek( fp , 0L , SEEK_END);
@@ -369,7 +395,6 @@ int main(void) {
 		strcpy(currBat, "");
 		}
 	}
-	
 
 	
 
@@ -424,20 +449,20 @@ int main(void) {
 	
 	SDL_Surface* video = SDL_SetVideoMode(640,480, 32, SDL_HWSURFACE);
 	SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640,480, 32, 0,0,0,0);
-	
+
 	
 	SDL_Init(SDL_INIT_VIDEO);
 	SDL_ShowCursor(SDL_DISABLE);
 	TTF_Init();
 	
-		
+	
 	font = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 30);
 	
 	imageLum = TTF_RenderUTF8_Blended(font, currLum, color);
 	imageBatt = TTF_RenderUTF8_Blended(font, currBat, color);
 
 	
-	free(currLum);
+
 	free(currBat);
 	
 	
@@ -458,6 +483,7 @@ int main(void) {
 	//}
 
 	while(run) { 
+	logMessage("a");
 		if (firstPass > 0){
 			// First screen draw
 			firstPass ++ ;
@@ -524,7 +550,7 @@ int main(void) {
 							start_pressed = val;
 				}
 				
-				
+				logMessage("b");
 				
 				if (right_pressed) {	
 				
@@ -557,6 +583,7 @@ int main(void) {
 					break;
 				}		
 				*/
+				logMessage("c");
 				if (start_pressed) {	
 					nExitToMiyoo = 1;
 					break;
@@ -584,41 +611,39 @@ int main(void) {
 		rectWhiteLigne = { 0, 0, 1280, 39};
 			
 		// Brightness update
-		FILE *fp;
+
+		char currLum[20];
 		long lSize;
-		char *currLum;
-		fp = fopen ( "/mnt/SDCARD/.tmp_update/brightSett" , "rb" );
-		if( fp > 0 ) {
-			fseek( fp , 0L , SEEK_END);
-			lSize = ftell( fp );
-			rewind( fp );
-			currLum = (char*)calloc( 1, lSize+1 );
-			if( !currLum ) fclose(fp),fputs("memory alloc fails",stderr),exit(1);
-		
-			if( 1!=fread( currLum , lSize, 1 , fp) )
-  			fclose(fp),free(currLum),fputs("entire read fails",stderr),exit(1);
-			fclose(fp);
-			char tempLum[] = "/10";
-    		strcat(currLum,tempLum);
-			imageLum = TTF_RenderUTF8_Blended(font, currLum, color);
-			free(currLum);
-		}
-			
+		FILE *fp;
+		int nLum = getMiyooLum();
+		sprintf(currLum, "%d", nLum);
+	
+		char tempLum[] = "/10";
+    	strcat(currLum,tempLum);
+    	
+		imageLum = TTF_RenderUTF8_Blended(font, currLum, color);
 
 		if (taillestructGames==0){
 			SDL_BlitSurface(imageBackgroundNoGame, NULL, screen, NULL);
+		
 		}
 		else{
   			if (nBat > LOWBATRUMBLE){
+  		
             	if (file_exists(currPicture)==1){
-                	SDL_BlitSurface(imageBackgroundGame, NULL, screen, NULL);
-                	SDL_FreeSurface(imageBackgroundGame);  
+            	
+                
+                		SDL_BlitSurface(imageBackgroundGame, NULL, screen, NULL);
+                	//	SDL_FreeSurface(imageBackgroundGame);           	
+                
             	}
             	else{
+            	
                 	SDL_BlitSurface(imageBackgroundDefault, NULL, screen, NULL);
             	}
         	}
-        	else {		
+        	else {	
+        	
             	SDL_BlitSurface(imageBackgroundLowBat, NULL, screen, NULL); 
         	}
 		}
@@ -682,7 +707,7 @@ int main(void) {
 
 		}
 
-		
+
 		SDL_BlitSurface(screen, NULL, video, NULL); 
 		SDL_Flip(video);
 		

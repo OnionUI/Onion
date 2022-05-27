@@ -3,7 +3,7 @@
 #find -name "libpng.so"
 #tout enlever !
 
-rm /usr/lib/libpng.so
+#rm /usr/lib/libpng.so
 rm /usr/lib/arm-linux-gnueabihf/libpng.so
 
 ln -s /usr/lib/libpng12.so /usr/lib/arm-linux-gnueabihf/libpng.so

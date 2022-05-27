@@ -107,7 +107,7 @@ int main(void) {
 		
 			FILE *file = fopen("/tmp/cmd_to_run_launcher.sh", "w");
 			 if (file_exists("RADirectLaunch.enable") == 1){
-				fputs("./retroarch", file);
+				fputs("LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch", file);
 				}
 			else {
 				fputs("LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v -L ", file);
