@@ -25,6 +25,7 @@
 #define		PIDMAX	32
 uint32_t	suspendpid[PIDMAX];
 
+
 typedef enum {
 	MONITOR_VOLUME,			// vol
 	MONITOR_BRIGHTNESS,		// brightness
@@ -278,6 +279,8 @@ void rumble(uint32_t val) {
 		}
 }
 
+
+
 void SetRawBrightness(int val) {  // val = 0-100
     int fd = open("/sys/class/pwm/pwmchip0/pwm0/duty_cycle", O_WRONLY);
     if (fd>=0) {
@@ -287,13 +290,14 @@ void SetRawBrightness(int val) {  // val = 0-100
 }
 
 void SetBrightness(int value) {  // value = 0-10
-    //setMiyooLum(value);
-    SetRawBrightness(value==0?6:value*10);
+    SetRawBrightness(value==0?6:value*10);   
+
+    setMiyooLum(value);
+   
     KeyShmInfo	info;
     InitKeyShm(&info);
 	SetKeyShm(&info, MONITOR_BRIGHTNESS, value);
 	UninitKeyShm(&info);
-	system("sync");
 }
 
 void turnScreenOff(void) {  
@@ -347,6 +351,22 @@ void setMiyooLum(int nLum){
 	fclose(file); 	
 }
 
+int getMiyooLum(void){
+
+	cJSON* request_json = NULL;
+	cJSON* itemBrightness;
+
+	char sBrightness[20]; 
+	
+	const char *request_body = load_file("/appconfigs/system.json");
+	request_json = cJSON_Parse(request_body);
+	itemBrightness = cJSON_GetObjectItem(request_json, "brightness");
+
+	int dBrightness = cJSON_GetNumberValue(itemBrightness);
+		
+	return dBrightness;
+}
+
 
 
 #define	BUTTON_A	KEY_SPACE
@@ -394,7 +414,6 @@ int main() {
 	uint32_t		power_pressed = 0;
 	uint32_t		select_pressed = 0;	
 	
-	
 	// Safe boot exit called once
 	int 			bSafeExitDone = 0;	
 	// Prepare for Poll button input
@@ -405,24 +424,9 @@ int main() {
 	FILE *fp;
 	long lSize;
 	char *currLum;
-	fp = fopen ( "/mnt/SDCARD/.tmp_update/brightSett" , "rb" );
-	if( fp > 0 ) {
-		fseek( fp , 0L , SEEK_END);
-		lSize = ftell( fp );
-		rewind( fp );
-		currLum = (char*)calloc( 1, lSize+1 );
-		if( !currLum ) fclose(fp),fputs("memory alloc fails",stderr),exit(1);
 	
-		if( 1!=fread( currLum , lSize, 1 , fp) )
-  		fclose(fp),free(currLum),fputs("entire read fails",stderr),exit(1);
-		fclose(fp);
-	}
-	
-	sscanf(currLum, "%d", &brightness_value);
-
-	//logMessage(currLum);
-	//logMessage("----------");
-	
+	brightness_value = getMiyooLum();
+		
 	if (brightness_value > 10) {
 		brightness_value = 8;
 	}
@@ -604,11 +608,10 @@ int main() {
 			// suspend
 			turnScreenOff(); 
 			// Timer registration
-			system("cd /tmp/; value=$(cat romName.txt); cd /mnt/SDCARD/App/PlayActivity; ./playActivity \"$value\"");
+system("cd /mnt/SDCARD/.tmp_update/; ./lastGame; cd /tmp/; value=$(cat romName.txt); cd /mnt/SDCARD/App/PlayActivity; ./playActivity \"$value\"");
 
 			usleep(200000); 
 			suspend(); 
-			rumble(0);
 			// Wait for Resleeplease button
 			do { 
 				if ( read(input_fd, &ev, sizeof(ev)) != sizeof(ev) ) {
@@ -637,18 +640,10 @@ int main() {
 					if (brightness_value > 2){
 						brightness_value--;
 					}	
-					remove("brightSett");
+					
 					
 					SetBrightness(brightness_value);	
 				
-					fclose(fopen("/mnt/SDCARD/.tmp_update/brightSett","w"));
-					int adc_fd = open("/mnt/SDCARD/.tmp_update/brightSett", O_CREAT | O_WRONLY);
-					if (adc_fd>0) {
-						char val[3];
-						sprintf(val, "%d", brightness_value);
-        				write(adc_fd, val, strlen(val));
-        				close(adc_fd);
-					}
 				}
 			}	
 		}
@@ -661,18 +656,10 @@ int main() {
 					if (brightness_value > 2){
 						brightness_value--;
 					}	
-					remove("brightSett");
+					
 					
 					SetBrightness(brightness_value);	
-				
-					fclose(fopen("/mnt/SDCARD/.tmp_update/brightSett","w"));
-					int adc_fd = open("/mnt/SDCARD/.tmp_update/brightSett", O_CREAT | O_WRONLY);
-					if (adc_fd>0) {
-						char val[3];
-						sprintf(val, "%d", brightness_value);
-        				write(adc_fd, val, strlen(val));
-        				close(adc_fd);
-					}
+
 				}
 			}
 		}	
@@ -684,18 +671,9 @@ int main() {
 					if (brightness_value > 2){
 						brightness_value++;
 					}	
-					remove("brightSett");
-					
+	
 					SetBrightness(brightness_value);	
-					
-					fclose(fopen("/mnt/SDCARD/.tmp_update/brightSett","w"));
-					int adc_fd = open("/mnt/SDCARD/.tmp_update/brightSett", O_CREAT | O_WRONLY);
-					if (adc_fd>0) {
-						char val[3];
-						sprintf(val, "%d", brightness_value);
-        				write(adc_fd, val, strlen(val));
-        				close(adc_fd);
-					}	
+
 				}
 			}
 		}	
@@ -707,18 +685,9 @@ int main() {
 					if (brightness_value > 2){
 						brightness_value++;
 					}	
-					remove("brightSett");
 					
 					SetBrightness(brightness_value);	
 				
-					fclose(fopen("/mnt/SDCARD/.tmp_update/brightSett","w"));
-					int adc_fd = open("/mnt/SDCARD/.tmp_update/brightSett", O_CREAT | O_WRONLY);
-					if (adc_fd>0) {
-						char val[3];
-						sprintf(val, "%d", brightness_value);
-        				write(adc_fd, val, strlen(val));
-        				close(adc_fd);
-					}	
 				}
 			
 			}

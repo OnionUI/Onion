@@ -24,7 +24,6 @@ typedef struct {
 //	handling libshmvar sample
 //
 
-
 static SAR_ADC_CONFIG_READ  adcCfg = {0,0};
 static int sar_fd = 0;
 
@@ -61,6 +60,7 @@ void checkCharging(void) {
     }
     is_charging = i;
 }
+
 
 
 void rumble(uint32_t val) {
@@ -151,13 +151,16 @@ static void checkADC(void) {
 
         // Rumble in case of low battery
   		/*
-  		if (percBat<=5){
-  			rumble(1);
-			usleep(1000000);	//3s
-			rumble(0);		
+  		if (percBat<= 7){
+  			for (int i=0;i < 5; i++){
+  				rumble(1);
+				usleep(100000);	//3s
+				rumble(0);		
+  				usleep(100000);
+  			}		
   		}
-  		*/
   		
+  		*/
   		if (percBat<=4){
 			// Force retroarch to end its session
 			int fd = creat(".deepSleep", 777);
