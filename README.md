@@ -75,7 +75,7 @@ It also allows you to quickly change games and many other features:
 - Quick boot your last game played.
 - Quickly switch games from your history.
 - Full overlay with accurate brightness, battery readings and playtimes.
-- Improved brightness curve for better low-light gaming.
+- Improved brightness hotkeys increments for better low-light gaming.
 - Improved Sleep Mode with full game suspension (menu + power).
 - Custom charging screen that prevents screen burn-in.
 - Removed low bat flickering icon.
