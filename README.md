@@ -93,7 +93,6 @@ It also allows you to quickly change games and many other features:
 - Customs cores.
 - Fine-tuned with optimal best settings for the Miyoo Mini in mind.
 - Crisp 640*480 resolution.
-- Lag free.
 - Also a game launcher (cores embedded, playlists and favorites unlocked).
 
 ### Others
