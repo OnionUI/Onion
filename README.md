@@ -87,7 +87,7 @@ It also allows you to quickly change games and many other features:
 1. Rotation support for arcade games.
 2. Custom video filters. You can now modify, or create your own.
 
-Some examples made for this RetroArch release :  
+Some examples made for this RetroArch port :  
 Normal_3X
 <img src="https://user-images.githubusercontent.com/16885275/166151805-fa2315c6-f783-4c7d-ba59-fd1996352fef.png" width="500"> 
 
