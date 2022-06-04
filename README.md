@@ -96,6 +96,49 @@ It also allows you to quickly change games and many other features:
 - Crisp 640*480 resolution.
 - Also a game launcher (cores embedded, playlists and favorites unlocked).
 
+## Guest mode 
+<img src="https://user-images.githubusercontent.com/16885275/168300116-7e0895c6-c28a-49ef-bf2a-009d4c9196a8.png" width="50">
+
+Guest mode is a separate profile so you can safely lend your device to your kid or your friend.
+
+This profile include another space where can be saved :
+Saves
+States
+Video filter and scaling options.
+Core options
+Custom button remapping layouts.
+RetroArch history (The Onion Launcher list will be different to reflect this.)
+RetroArch playlists and favorites.
+Timers for your games (Play activity app)
+RGUI config (RetroArch Graphic User Interface)
+
+
+## Your personal files are now gathered in one place.
+Your saves and most of your preferences are now in SDCARD / Saves. (Example: D:/Saves/)
+This also includes your secondary profile, your config files, RetroArch lists and play activity database.
+Simply copy this folder when you want to backup your data.
+
+## Miyoo audio server adoption
+<img src="https://user-images.githubusercontent.com/16885275/168315341-d07bdf2f-b424-44d2-a845-e56ca67b04f1.png" width="80">
+The "pop" sound that appears each time a binary is launched is now gone.   
+
+The audio sever lag has been removed. (Credit: Eggs)
+
+## Main UI improvments
+<img src="https://user-images.githubusercontent.com/16885275/168306907-0fa1266e-244c-454d-9ac9-b4f5c9019bc7.png" width="350">
+
+### Battery percentage is now visible on the main menu. 
+You can configure the battery percentage visibility and color in the theme configuration file. 
+It is also possible to make a theme that only shows the percentage text.
+
+No more audio lag (Credit: Eggs) 
+New default theme inspired by the Lilla theme by Evolve. (Credit: DiMo) 
+Onionos icon by Evolve.
+Textures are compression for faster results (Credit: DiMo)
+Box art size fix on the included themes (Credit: DiMo)
+For more information check the [FAQ](https://github.com/jimgraygit/Onion/wiki/3.-FAQ-(Frequently-asked-questions))
+
+
 ### Others
 - Many additional systems supported.
 - Experimental Arduboy support (credit: JMARoeder).
