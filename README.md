@@ -85,6 +85,16 @@ It also allows you to quickly change games and many other features:
 ### RetroArch Rebuilt From Scratch
 <img src="https://user-images.githubusercontent.com/16885275/154791260-d1a4d0b2-5582-45cc-a291-bead843a5171.png" width="350">
 
+1. Rotation support for arcade games.
+2. Custom video filters. You can now modify, or create your own.
+
+Some examples made for this RetroArch release :  
+Normal_3X
+<img src="https://user-images.githubusercontent.com/16885275/166151805-fa2315c6-f783-4c7d-ba59-fd1996352fef.png" width="500"> 
+
+LCD filters, click to magnify : (Integer + scaling)
+![image](https://user-images.githubusercontent.com/16885275/166161312-9d2bc6ea-d9ee-4767-b141-fd216f8a042f.png)
+
 - Compiled and partially rebuilt by Eggs (Discord user no 968407509364772924) for precision and performance.
     Custom audio driver.
     Custom scalers.
