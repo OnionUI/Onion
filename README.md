@@ -29,6 +29,7 @@ Update instructions : [Here](https://user-images.githubusercontent.com/16885275/
 - Your Mini will turn off once installation is complete.
  (Don't delete the .tmp_update folder, it is now part of the Onion installation.)
 - Copy your Bios files into the `BIOS` folder.
+- Refresh your rom list from the console page, but pressing the menu button.
 
 #### Installation (Upgrade):
 - (If coming from <= V3.09, backup your saves (retroarch / .retroarch / saves | states), you will have to copy them afterwards in the `Saves` folder of your SD)
