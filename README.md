@@ -92,7 +92,7 @@ It also allows you to quickly change games and many other features:
 
 Some examples made for this RetroArch port :  
 Normal_3X
-<img src="https://user-images.githubusercontent.com/16885275/166151805-fa2315c6-f783-4c7d-ba59-fd1996352fef.png" width="500"> 
+<img src="[https://user-images.githubusercontent.com/16885275/166151805-fa2315c6-f783-4c7d-ba59-fd1996352fef.png](https://user-images.githubusercontent.com/16885275/173250164-028d4478-e5f9-4215-9055-5fe313efc34c.png)" width="500"> 
 
 LCD filters, click to magnify : (Integer + scaling)
 ![image](https://user-images.githubusercontent.com/16885275/166161312-9d2bc6ea-d9ee-4767-b141-fd216f8a042f.png)
