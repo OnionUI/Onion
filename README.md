@@ -91,11 +91,11 @@ It also allows you to quickly change games and many other features:
 2. Custom video filters. You can now modify, or create your own.
 
 Some examples made for this RetroArch port :  
-Normal_3X
-<img src="[https://user-images.githubusercontent.com/16885275/166151805-fa2315c6-f783-4c7d-ba59-fd1996352fef.png](https://user-images.githubusercontent.com/16885275/173250164-028d4478-e5f9-4215-9055-5fe313efc34c.png)" width="500"> 
+Normal_3X    
+<img src="https://user-images.githubusercontent.com/16885275/166151805-fa2315c6-f783-4c7d-ba59-fd1996352fef.png" width="500"> 
 
 LCD filters, click to magnify : (Integer + scaling)
-![image](https://user-images.githubusercontent.com/16885275/166161312-9d2bc6ea-d9ee-4767-b141-fd216f8a042f.png)
+![unknown](https://user-images.githubusercontent.com/16885275/173250366-dbaed067-640e-485d-8244-c62b9a7bd722.png)
 
 - Compiled and partially rebuilt by Eggs (Discord user no 968407509364772924) for precision and performance.
     Custom audio driver.
