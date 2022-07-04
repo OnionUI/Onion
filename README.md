@@ -1,6 +1,6 @@
 # Onion (and Eggs)
 #### A performant and straightforward multi language retro gaming museum in your pocket.
-### [Download newest release here](https://github.com/jimgraygit/Onion/releases)
+### [Download newest release here](https://github.com/Sichroteph/Onion/releases)
 
 <img src="https://user-images.githubusercontent.com/16885275/166160523-67b6d683-5360-4786-ba87-c612eea32acd.png" width="600">
 
