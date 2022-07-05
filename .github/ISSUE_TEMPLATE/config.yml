@@ -3,3 +3,7 @@ contact_links:
   - name: Get help from the Miyoo Mini community on Discord
     url: https://discord.com/channels/529983248114122762/891336865540620338/
     about: Join the Discord for community-powered support!
+contact_links:
+  - name: Get help from the Miyoo Mini community on Reddit
+    url: https://www.reddit.com/r/MiyooMini/
+    about: Join the SubReddit for community-powered support!
