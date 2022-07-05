@@ -1,0 +1,52 @@
+name: "Wiki Update Request"
+description: Report something incorrect or missing from the Onion Wiki
+title: "Wiki Update Title"
+labels: ["documentation"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this Wiki update Request!
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      description: Please confirm the following in order to prevent misuse of issues
+      options:
+        - label: I have reviewed the Onion Wiki and something is incorrect or missing ([Wiki](https://github.com/Sichroteph/Onion/wiki))
+          required: true
+  - type: input
+    id: os
+    attributes:
+      label: Wiki Section
+      description: Section to be Updated  
+      placeholder: Provide the section name, page name or a URL
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Provide a clear and concise description of what is incorrect and why
+      placeholder: 
+    validations:
+      required: true
+  - type: textarea
+    id: correction
+    attributes:
+      label: Correction
+      description: Please tell us what it should say instead
+      placeholder: Provide details of the correction
+      value: 
+    validations:
+      required: true
+  - type: textarea
+    id: Context
+    attributes:
+      label: Provide any additional context or information that may help us with this update
+      description: You may attach any pictures or files if applicable  
+      placeholder: 
+    validations:
+      required: false
