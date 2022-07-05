@@ -17,7 +17,7 @@ body:
       options:
         - label: I am reporting a bug in the Onion OS
           required: true
-        - label: I have reviewed the Onion Wiki and did not find the answer ([Wiki](https://github.com/Sichroteph/Onion/wiki))
+        - label: I have reviewed the [Onion Wiki](https://github.com/Sichroteph/Onion/wiki) and did not find the answer
           required: true
         - label: I have searched the existing (open and closed) issues to ensure I do not log a duplicate
           required: true
@@ -58,7 +58,7 @@ body:
     id: Context
     attributes:
       label: Provide any additional context or information that may help us investigate your issue
-      description: You may attach any pictures or files if applicable  
+      description: You may attach any pictures or files if applicable.  
       placeholder: 
     validations:
       required: true
