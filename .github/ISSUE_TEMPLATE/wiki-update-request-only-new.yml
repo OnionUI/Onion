@@ -15,22 +15,22 @@ body:
       label: Checklist
       description: Please confirm the following in order to prevent misuse of issues
       options:
-        - label: I have reviewed the Onion Wiki and something is incorrect or missing ([Wiki](https://github.com/Sichroteph/Onion/wiki))
+        - label: I have reviewed the [Onion Wiki](https://github.com/Sichroteph/Onion/wiki) and something is incorrect or missing
           required: true
   - type: input
     id: os
     attributes:
       label: Wiki Section
       description: Section to be Updated  
-      placeholder: Provide the section name, page name or a URL
+      placeholder: Provide the section name or page name or a URL
     validations:
       required: true
   - type: textarea
     id: description
     attributes:
       label: Description
-      description: Provide a clear and concise description of what is incorrect and why
-      placeholder: 
+      description: Please tell us what is incorrect or missing
+      placeholder: Provide a clear and concise description of what is wrong and why
     validations:
       required: true
   - type: textarea
