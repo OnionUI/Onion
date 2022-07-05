@@ -1,0 +1,64 @@
+name: "Bug Reports Only (Feature Requests and Questions should be submitted in the 'Discussions' tab above)"
+description: File an Onion bug report
+title: "Issue Title"
+labels: ["bug"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report! All fields are mandatory.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      description: Please confirm the following in order to prevent misuse of issues
+      options:
+        - label: I am reporting a bug in the Onion OS
+          required: true
+        - label: I have reviewed the Onion Wiki and did not find the answer ([Wiki](https://github.com/Sichroteph/Onion/wiki))
+          required: true
+        - label: I have searched the existing (open and closed) issues to ensure I do not log a duplicate
+          required: true
+  - type: input
+    id: os
+    attributes:
+      label: Onions OS Version
+      description: Provide the version of Onion which you are using
+      placeholder: Visible on the Onion boot screen
+    validations:
+      required: true
+  - type: input
+    id: fw
+    attributes:
+      label: Miyoo Firmware Version
+      description: Provide the version of Miyoo Firmware which you are using
+      placeholder: Go to Settings->Device Info->Version
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Provide a clear and concise description of the issue
+      description:
+      placeholder: Tell us what happened and also what you expected to happen instead
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description:
+      placeholder: 
+      value: "Please provide detailed steps that will help us replicate and investigate your issue"
+    validations:
+      required: true
+  - type: textarea
+    id: Context
+    attributes:
+      label: Provide any additional context or information that may help us investigate your issue
+      description: You may attach any pictures or files if applicable  
+      placeholder: 
+    validations:
+      required: true
