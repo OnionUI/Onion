@@ -1,4 +1,4 @@
-name: "Bug Reports Only (Feature Requests and Questions should be submitted in the 'Discussions' tab above)"
+name: "Bug Reports Only (Feature Requests and Questions should be raised using one of the community options below)"
 description: File an Onion bug report
 title: "Issue Title"
 labels: ["bug"]
