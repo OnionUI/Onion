@@ -120,7 +120,7 @@ static void checkADC(void) {
         		// user just unplugged his charger
         		
         		percBat =  percBatTemp;
-        	}
+        	} 
         	else {
         		if (percBat>percBatTemp){
   					percBat--;

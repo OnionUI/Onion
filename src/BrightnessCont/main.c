@@ -608,7 +608,7 @@ int main() {
 			// suspend
 			turnScreenOff(); 
 			// Timer registration
-system("cd /mnt/SDCARD/.tmp_update/; ./lastGame; cd /tmp/; value=$(cat romName.txt); cd /mnt/SDCARD/App/PlayActivity; ./playActivity \"$value\"");
+system("cd /mnt/SDCARD/.tmp_update/; ./lastGame; cd /tmp/; value=$(cat romName.txt); cd /mnt/SDCARD/App/PlayActivity; ./playActivity \"$value\" ; rm \"/tmp/cmd_to_run_launcher.sh\" ");
 
 			usleep(200000); 
 			suspend(); 

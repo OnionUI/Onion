@@ -66,7 +66,7 @@ int main(void) {
 	SDL_Event event;
 		
 	
-	for (int i = 1; i < 10; ++i){
+	for (int i = 1; i < 21; ++i){
 		
 		SDL_BlitSurface(image0, NULL, screen, NULL);
 		SDL_BlitSurface(screen, NULL, video, NULL); 

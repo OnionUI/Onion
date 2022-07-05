@@ -13,6 +13,32 @@ bool file_exists (char *filename) {
   return (stat (filename, &buffer) == 0);
 }
 
+void rumble(uint32_t val) {
+	int fd;
+	const char str_export[] = "48";
+	const char str_direction[] = "out";
+	char value[1];
+	value[0] = ((val&1)^1) + 0x30;
+
+	fd = open("/sys/class/gpio/export",O_WRONLY);
+		if (fd > 0) {
+			write(fd, str_export, 2);
+			close(fd);
+		}
+	fd = open("/sys/class/gpio/gpio48/direction",O_WRONLY);
+		if (fd > 0) {
+			write(fd, str_direction, 3);
+			close(fd);
+		}
+	fd = open("/sys/class/gpio/gpio48/value",O_WRONLY);
+		if (fd > 0) {
+			write(fd, value, 1);
+			close(fd);
+		}
+}
+
+
+
 int main(int argc, char *argv[]) {
 	
 	// Boot 
@@ -22,8 +48,11 @@ int main(int argc, char *argv[]) {
 	// End : Ending screen without save
 
     SDL_Init(SDL_INIT_VIDEO);
-
 	TTF_Init();
+	
+	// Current time saved
+	system("cd /mnt/SDCARD/.tmp_update/; ./saveTime.sh; sync");
+	
 	
 	TTF_Font*	font; 
 	SDL_Color	color={255,255,255,0};
@@ -46,6 +75,7 @@ int main(int argc, char *argv[]) {
 		}
 		else if (strcmp(argv[1],"End") == 0) {
 			image = IMG_Load("Screen_Off.png");
+			bShowBat = 1;
 		}
 		
 	}
@@ -53,9 +83,7 @@ int main(int argc, char *argv[]) {
 		image = IMG_Load("bootScreen.png");
 	}
 	
-	
 
-		
 	char *cVersion;
 	long lSize;
 	FILE *fp;
@@ -157,6 +185,7 @@ int main(int argc, char *argv[]) {
 	
 	if (argc > 1){
 		if (strcmp(argv[1],"Boot") != 0) {
+
 				remove(".offOrder");
 				system("sync");
 				system("reboot");
