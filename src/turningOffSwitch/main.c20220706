@@ -70,13 +70,7 @@ int currentGame = 0 ;
 cJSON* request_json = NULL;
 cJSON* items = cJSON_CreateArray();
 	
-// Play activity database
-struct structPlayActivity {                  
-             char name[100]   ;
-             int playTime ;
-            }
-            romList[MAXVALUES];        
-int tailleStructPlayActivity = 0;
+	
 	
 void logMessage(char* Message) {
 	FILE *file = fopen("/mnt/SDCARD/.tmp_update/log_turnMessage.txt", "a");
@@ -275,47 +269,10 @@ char* trimstr(char* str, uint32_t first) {
 }
 
 
-int readRomDB(){
 
-  	// Check to avoid corruption
-  	if (file_exists("/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db") == 1){
-  	
-    	FILE * file= fopen("/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db", "rb");
 
-		if (file != NULL) {
 
-    		fread(romList, sizeof(romList), 1, file);
-    		
-     		tailleStructPlayActivity = 0;
-    		
-    		for (int i=0; i<MAXVALUES; i++){
-    			if (strlen(romList[i].name) == 0){
-    				break;
-    			}
-    			tailleStructPlayActivity++;
-    		}
-    		fclose(file);
-		}
-		else {
-    		// The file exists but could not be opened
-    		// Something went wrong, the program is terminated
-    		return -1;
-		}
-	}
-	return 1;	
-}
 
-int searchRomDB(char* romName){
-	int position = -1;
-	
-	for (int i = 0 ; i < tailleStructPlayActivity ; i++) {
-		if (strcmp(romList[i].name,romName) == 0){
-			position = i;
-			break;
-		}
-	}
-	return position;
-}
 
 
 void readHistory(){
@@ -336,8 +293,7 @@ void readHistory(){
     				path = cJSON_GetObjectItem(subitem, "path");
 					core_path = cJSON_GetObjectItem(subitem, "core_path");
 					char *cPath = cJSON_Print(path) ;
-					char *cCore_path = cJSON_Print(core_path) ;
-	    				
+					char *cCore_path = cJSON_Print(core_path) ; 
    					
 					if ((strlen(cCore_path)>1) && (strlen(cPath)>1)) {
 						// Quote character removal
@@ -369,9 +325,106 @@ void readHistory(){
   							bname = (char *)basename(path2);  
     						
     						bname[MAXHROMNAMESIZE-1] = '\0';
+    						char *bnameWOExt = removeExt(bname);
+    						
+    						
+							// Image path construction
+    						// Core folder name search
+    						char coreInfoPath[MAXSYSPATHSIZE + MAXFILENAMESIZE];
+							sprintf(coreInfoPath, "%s%s",removeExt(cCore_path1),".info");	 	
+
+    						if (file_exists(coreInfoPath)==1){
+								char	key[256] = {0};
+								char	value[256] = {0};
+								int	f = 0; 
+								char	*keyptr, *valptr;
+								char    saveAutoPath[MAXSYSPATHSIZE + MAXFILENAMESIZE];
+								
+								
+								FILE* fp = fopen(coreInfoPath, "r");
+								if (!fp) break;
+								while ((f = fscanf(fp, "%255[^=]=%255[^\n]\n", key, value)) != EOF) {
+									if (!f) { if (fscanf(fp, "%*[^\n]\n") == EOF) break; else continue; }
+									if ((keyptr = trimstr(key, 0))) {
+										if (!strcmp(keyptr, "corename")) {
+											if ((valptr = trimstr(value, 1))) {
+												
+												if (strlen(valptr) >= 2){
+												char coreName[MAXFILENAMESIZE];
+												for (int i = 1 ; i<strlen(valptr)-1;i++)
+													coreName[i-1] = valptr[i];
+												coreName[strlen(valptr)-2]='\0';
+											
+												// game save 
+												sprintf(saveAutoPath, "%s%s%s%s%s","/mnt/SDCARD/Saves/CurrentProfile/states/",coreName,"/",bnameWOExt,".state.auto");
+												
+												char logsFile[MAXSYSPATHSIZE + MAXFILENAMESIZE];
+												
+												
+												sprintf(logsFile, "%s%s%s%s%s","/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/",coreName,"/",bnameWOExt,".lrtl");
+												logMessage(logsFile);
+												strcpy(gameList[taillestructGames].name, bnameWOExt);
+												
+												if (file_exists(logsFile)==1){
+													const char *request_body_time = load_file(logsFile);	
+													cJSON* request_json_time = NULL;
+													if (request_body_time != NULL){
+														request_json_time = cJSON_Parse(request_body_time);	 
+														cJSON * items_time = cJSON_GetObjectItem(request_json_time, "runtime");	
+														char *gameTime = strdup(cJSON_Print(items_time));
+														
+														char trimedTime[MAXFILENAMESIZE];
+														if (strlen(gameTime) >= 5){
+															
+															for (int i = 1 ; i<strlen(gameTime)-4;i++)
+																trimedTime[i-1] = gameTime[i];
+															trimedTime[strlen(gameTime)-5]='\0';	
+														}
+														logMessage(trimedTime);
+														
+													if (strlen(trimedTime) <= 7){														
+														strcpy(gameList[taillestructGames].totalTime, trimedTime);
+													}
+													else
+														remove(logsFile);
+													
+													}
+													
+													
+										
+												
+													
+																							
+    												}
+						
+												
+													
+												}
+														
+											}
+										
+										}
+									}
+								}
+								fclose(fp);
+    						}    						
+    						
+    						
+    						
+    						
+    						
+    						
+    						
+    						
+    						
+    						
+    						
+    						
+    						
+    						/*
     						
     						int nTimePosition = searchRomDB(bname);
-    						//logMessage(bname);
+    						
     						
     						if (nTimePosition >= 0){
     							
@@ -386,9 +439,9 @@ void readHistory(){
 
 								sprintf(gameList[nbGame].totalTime, "%d:%02d", h,m);
 								} 							
-    						}
-	
-    						strcpy(gameList[taillestructGames].name, bname);
+    						}*/
+    						
+    						strcpy(gameList[taillestructGames].name, bnameWOExt);
     						strcpy(gameList[taillestructGames].RACommand, RACommand);
 							gameList[taillestructGames].jsonIndex = nbGame;
     						taillestructGames ++; 				
@@ -402,9 +455,6 @@ void readHistory(){
 			}	
 	}
 }
-
-
-
 
 void rumble(uint32_t val) {
 	int fd;
@@ -488,7 +538,7 @@ int main(void) {
 	uint32_t		select_pressed = 0;	
 	uint32_t		left_pressed = 0;
 	uint32_t		right_pressed = 0;	
-	readRomDB();
+	
 	readHistory();
 	
 	int nExitToMiyoo = 0;
@@ -602,7 +652,7 @@ int main(void) {
 	SDL_Surface* imageFooterHelp = IMG_Load("footerHelp.png");	
 	char currPicture[MAXHROMNAMESIZE+44];
 	
-	sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",removeExt(gameList[currentGame].name),".png");	 
+	sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",gameList[currentGame].name,".png");	 	
 	// Move screenshot to destination
 	rename("screenshotGame.png", currPicture); 
 /*
@@ -624,9 +674,8 @@ int main(void) {
 			if (firstPass > 2)
 			firstPass = 0;
 			
-    		sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",removeExt(gameList[currentGame].name),".png");
-    		
- 
+				
+    		sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",gameList[currentGame].name,".png");
     		if (file_exists(currPicture)==1){
 				imageBackgroundGame = IMG_Load(currPicture);
 			}
@@ -715,8 +764,7 @@ int main(void) {
 				
             		if (currentGame<(taillestructGames-1)){
                 		currentGame ++;
-                		
-                		sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",removeExt(gameList[currentGame].name),".png");
+                		sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",gameList[currentGame].name,".png");
                 		if (file_exists(currPicture)==1){
 							imageBackgroundGame = IMG_Load(currPicture);
 						}
@@ -726,7 +774,7 @@ int main(void) {
 				if (left_pressed) {	
 								if (currentGame>0){
                      				currentGame --;
-                     				sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",removeExt(gameList[currentGame].name),".png");
+                     				sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",gameList[currentGame].name,".png");
                      				if (file_exists(currPicture)==1){
 										imageBackgroundGame = IMG_Load(currPicture);
 									}
@@ -819,7 +867,7 @@ int main(void) {
 	
 		SDL_BlitSurface(imageMenuBar, NULL, screen, &rectMenuBar);
 		if (taillestructGames>0){
-			imageGameName = TTF_RenderUTF8_Blended(font, removeExt(gameList[currentGame].name), color);
+			imageGameName = TTF_RenderUTF8_Blended(font, gameList[currentGame].name, color);
 			SDL_BlitSurface(imageGameName, NULL, screen, &rectGameName);
 		}
 		
@@ -909,7 +957,11 @@ int main(void) {
 						break;
 					}	
 				}
+				
+
+	
 			}
+
 		}
 
 
@@ -922,16 +974,14 @@ int main(void) {
 	screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640,480, 32, 0,0,0,0);
 	
 	remove("/mnt/SDCARD/.tmp_update/cmd_to_run.sh");
-	remove("/mnt/SDCARD/.tmp_update/romName.txt");
 	if (nExitToMiyoo != 1){
 		FILE *file = fopen("/mnt/SDCARD/.tmp_update/cmd_to_run.sh", "w");
+		
 		fputs(gameList[currentGame].RACommand, file);
 		fclose(file); 	
-
-		FILE *file2 = fopen("/mnt/SDCARD/.tmp_update/romName.txt", "w");
-		fputs(gameList[currentGame].name, file2);
-		fclose(file2); 			
-	
+		
+		remove("/tmp/romName.txt");		
+		
 	}
 	 
 	SDL_BlitSurface(screen, NULL, video, NULL); 

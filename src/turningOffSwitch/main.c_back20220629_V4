@@ -1,0 +1,1513 @@
+
+#include <SDL/SDL.h>
+#include <SDL/SDL_image.h>
+#include <SDL/SDL_ttf.h>
+#include "SDL_rotozoom.h"
+#include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h> 
+#include <stdint.h>
+#include <string.h>
+#include <linux/fb.h>
+#include <linux/input.h>
+#include <fcntl.h>
+#include <stdbool.h>   
+#include <sys/stat.h>  
+#include "sys/ioctl.h"
+#include "cJSON.h"
+#include <png.h>
+#include <dirent.h>
+
+#define MAXHISTORY 20
+#define MAXHRACOMMAND 500
+#define MAXFILENAMESIZE 250 
+#define MAXSYSPATHSIZE 80
+#define MAXSAVESTODISPLAY 10
+
+// Max number of records in the DB
+#define MAXVALUES 1000
+
+#define	BUTTON_A		KEY_SPACE
+#define	BUTTON_B		KEY_LEFTCTRL  
+
+#define	BUTTON_X		KEY_LEFTSHIFT
+#define	BUTTON_Y		KEY_LEFTALT  
+
+#define	BUTTON_START	KEY_ENTER
+#define	BUTTON_SELECT	KEY_RIGHTCTRL
+
+#define	BUTTON_MENU		KEY_ESC
+#define	BUTTON_POWER	KEY_POWER
+
+#define	BUTTON_L2		KEY_TAB
+#define	BUTTON_R2		KEY_BACKSPACE
+
+#define	BUTTON_UP		KEY_UP
+#define	BUTTON_DOWN		KEY_DOWN
+
+#define	BUTTON_LEFT		KEY_LEFT
+#define	BUTTON_RIGHT	KEY_RIGHT
+
+
+typedef enum {
+	MONITOR_VOLUME,			// vol
+	MONITOR_BRIGHTNESS,		// brightness
+	MONITOR_KEYMAP,			// keymap (maybe unused)
+	MONITOR_MUTE,			// mute
+	MONITOR_VOLUME_CHANGED,		// volume change (internal use)
+	MONITOR_BGM_VOLUME,		// bgmvol
+	MONITOR_HIBERNATE_DELAY,	// hibernate
+	MONITOR_ADC_VALUE,		// charging state (internal use)
+	MONITOR_LUMINATION,		// lumination
+	MONITOR_HUE,			// hue
+	MONITOR_SATURATION,		// saturation
+	MONITOR_CONTRAST,		// contrast
+	MONITOR_VALUE_MAX,      
+} MonitorValue;  
+
+typedef struct _KeyShmInfo {
+	int id;
+	void *addr;
+} KeyShmInfo;
+ 
+
+int	InitKeyShm(KeyShmInfo *);
+int	SetKeyShm(KeyShmInfo* info, MonitorValue key, int value);
+int	GetKeyShm(KeyShmInfo* info, MonitorValue key);
+int	UninitKeyShm(KeyShmInfo *);
+
+// Current game slot number
+
+int currentSlot = 0;
+char currentGameSaves[MAXSAVESTODISPLAY][MAXFILENAMESIZE+MAXSYSPATHSIZE];
+int taillestructGames = 0;
+int currentGame = 0 ;
+  
+SDL_Color	color = {255,255,255,0};
+TTF_Font*	font; 
+SDL_Surface* screen;
+
+SDL_Surface* imageLowBat = IMG_Load("lowBat.png");
+SDL_Surface* imageNothingDisplay = IMG_Load("nothingDisplay.png");
+
+SDL_Surface* imageRemoveDialog = IMG_Load("removeDialog.png");
+
+SDL_Surface* imageFiltreNoirceur = IMG_Load("filtreBlancheur.png");
+
+SDL_Surface* imageUpBackground = IMG_Load("upBackground.png");
+
+SDL_Surface* imageMenuFond = IMG_Load("menuFond.png");
+
+SDL_Surface* imageItem_sel_1 = IMG_Load("item_sel_1.png");
+SDL_Surface* imageItem_sel_2 = IMG_Load("item_sel_2.png");
+SDL_Surface* imageItem_sel_3 = IMG_Load("item_sel_3.png");
+SDL_Surface* imageItem_sel_4 = IMG_Load("item_sel_4.png");
+SDL_Surface* imageItem_sel_5 = IMG_Load("item_sel_5.png");
+
+SDL_Surface* imageItem_1 = IMG_Load("item_1.png");
+SDL_Surface* imageItem_2 = IMG_Load("item_2.png");
+SDL_Surface* imageItem_3 = IMG_Load("item_3.png");
+SDL_Surface* imageItem_4 = IMG_Load("item_4.png");
+SDL_Surface* imageItem_5 = IMG_Load("item_5.png");
+
+SDL_Surface* imagePreviewFond = IMG_Load("previewFond.png");
+SDL_Surface* imageBrightnessPanel = IMG_Load("brightnessPanel.png");
+SDL_Surface* imageaddPanel = IMG_Load("addPanel.png");
+SDL_Surface* imageUndoPanel = IMG_Load("undoPanel.png");
+SDL_Surface* imageExitPanel = IMG_Load("exitPanel.png");
+SDL_Surface* imageCrossPanel = IMG_Load("crossPanel.png");
+
+SDL_Surface* imageSmallSquare = IMG_Load("smallSquare.png");
+SDL_Surface* imageSmallGreenSquare = IMG_Load("smallSquareGreen.png");
+
+SDL_Surface* imageBigRound = IMG_Load("bigRound.png");
+SDL_Surface* imageBigRoundBright = IMG_Load("bigRoundBright.png");
+
+
+SDL_Surface* imageAdd_Sel = IMG_Load("add_sel.png");
+SDL_Surface* imageAdd = IMG_Load("add.png");
+
+SDL_Surface* imageUndo_Sel = IMG_Load("undo_sel.png");
+SDL_Surface* imageUndo = IMG_Load("undo.png");
+
+SDL_Surface* imageFoot = IMG_Load("foot.png");
+SDL_Surface* imageGamePreview;
+
+SDL_Rect	rectBatt;
+SDL_Rect	rectLum;
+SDL_Surface*	imageBatt;
+SDL_Surface*	imageLum;
+SDL_Surface*	imagePlayTime;
+SDL_Surface*	imageGameName;
+
+int current_Item_Selection = 0 ;
+	
+SDL_Rect	rectItem1 = {2,97,224,60};
+SDL_Rect	rectItem2 = {2,159,224,60};
+SDL_Rect	rectItem3 = {2,221,224,60};
+SDL_Rect	rectItem4 = {2,283,224,60};
+SDL_Rect	rectItem5 = {2,345,224,60};
+
+SDL_Rect	rectGameIcon = {12,6,19,27};
+SDL_Rect	rectLogoBattery = {490,0,150,39};
+
+SDL_Rect	rectMenu = {0,95,226,312};
+SDL_Rect	rectPreviewFond = {226,73,414,334};
+SDL_Rect	rectPreview = {228,97,410,308};
+SDL_Rect	rectTimerFont = {545,440,50,40};
+
+SDL_Rect	rectFoot = {0,441,640,39};
+
+SDL_Rect	rectUndo = {612,76,21,18};
+SDL_Rect	rectAdd = {592,77,16,16};
+
+// Game history list
+struct structGames {                 
+             char name[MAXFILENAMESIZE];
+             char savePath[MAXFILENAMESIZE+MAXSYSPATHSIZE];	
+             char shotPath[MAXFILENAMESIZE+MAXSYSPATHSIZE];	
+             char RACommand[500] ;
+           	 char totalTime[10];
+           	 int jsonIndex;
+           	 }
+            gameList[MAXHISTORY];   
+            
+
+
+// Play activity database
+struct structPlayActivity {                  
+             char name[100]   ;
+             int playTime ;
+            }
+            romList[MAXVALUES];        
+int tailleStructPlayActivity = 0;
+
+cJSON* request_json = NULL;
+cJSON* items = cJSON_CreateArray();
+	
+	
+void logMessage(char* Message) {
+	FILE *file = fopen("/mnt/SDCARD/.tmp_update/log_turnMessage.txt", "a");
+    char valLog[200];
+    sprintf(valLog, "%s %s", Message, "\n");
+    fputs(valLog, file);
+	fclose(file); 
+}
+
+char *removeExt(char* myStr) {
+    char *retStr;
+    char *lastExt;
+    if (myStr == NULL) return NULL;
+    if ((retStr = (char*)malloc (strlen (myStr) + 1)) == NULL) return NULL;
+    strcpy (retStr, myStr);
+    lastExt = strrchr (retStr, '.');
+    if (lastExt != NULL)
+        *lastExt = '\0';
+    return retStr;
+}
+
+void IMG_SavePNG (SDL_Surface *SurfaceImage, char* pathImage){
+	int width = SurfaceImage->w;
+	int height = SurfaceImage->h;
+
+	png_structp	png_ptr;
+	png_infop	info_ptr;
+	FILE		*fp;
+
+	fp = fopen(pathImage, "wb");
+
+	if (fp) {
+		Uint32* linebuffer = (Uint32 *)malloc(SurfaceImage->pitch);
+		Uint32* src = (Uint32 *)SurfaceImage->pixels;
+
+		png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
+		info_ptr = png_create_info_struct(png_ptr);
+		png_init_io(png_ptr, fp);
+		png_set_IHDR(png_ptr, info_ptr, width, height, 8, PNG_COLOR_TYPE_RGBA,
+			PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
+		png_write_info(png_ptr, info_ptr);
+
+		for (int y = 0 ; y < height ; y++){
+			for (int x = 0 ; x < width ; x++){
+				Uint32 pix = *src++;
+				/* Use pix only when alpha is non-zero */
+				linebuffer[x] = (pix & 0xFF000000) ? (pix & 0xFF00FF00) | (pix & 0xFF0000)>>16 | (pix & 0xFF)<<16 : 0;
+				/* Following is also fine, but the above creates a cleaner png
+				linebuffer[x] = (pix & 0xFF00FF00) | (pix & 0xFF0000)>>16 | (pix & 0xFF)<<16;
+				*/
+			}
+			png_write_row(png_ptr, (png_bytep)linebuffer);
+		}
+
+		png_write_end(png_ptr, info_ptr);
+		png_destroy_write_struct(&png_ptr, &info_ptr);
+		fflush(fp);
+		fsync(fileno(fp));
+		fclose(fp);
+
+		free(linebuffer);
+	}
+}
+
+bool file_exists (char *filename) {
+  struct stat   buffer;   
+  return (stat (filename, &buffer) == 0);
+}
+
+
+char* load_file(char const* path)
+{
+    char* buffer = 0;
+    long length;
+    FILE * f = fopen (path, "rb"); 
+
+    if (f)
+    {
+      fseek (f, 0, SEEK_END);
+      length = ftell (f);
+      fseek (f, 0, SEEK_SET);
+      buffer = (char*)malloc ((length+1)*sizeof(char));
+      if (buffer)
+      {
+        fread (buffer, sizeof(char), length, f);
+      }
+      fclose (f);
+    }
+    buffer[length] = '\0';
+
+    return buffer;
+}
+
+int bDisplayBoxArt = 0;
+
+void setMiyooLum(int nLum){
+
+	cJSON* request_json = NULL;
+	cJSON* itemBrightness;
+
+	char sBrightness[20]; 
+	
+	const char *request_body = load_file("/appconfigs/system.json");
+	request_json = cJSON_Parse(request_body);
+	itemBrightness = cJSON_GetObjectItem(request_json, "brightness");
+
+	int dBrightness = cJSON_GetNumberValue(itemBrightness);
+	sprintf(sBrightness, "%d", dBrightness);
+	 
+	
+	cJSON_SetNumberValue(itemBrightness, nLum);
+
+	FILE *file = fopen("/appconfigs/system.json", "w");	
+	char *test = cJSON_Print(request_json);	
+	fputs(test, file);
+	fclose(file); 	
+}
+
+
+void SetRawBrightness(int val) {  // val = 0-100
+    int fd = open("/sys/class/pwm/pwmchip0/pwm0/duty_cycle", O_WRONLY);
+    if (fd>=0) {
+        dprintf(fd,"%d",val);
+        close(fd); 
+    }
+}
+
+
+void SetBrightness(int value) {  // value = 0-10
+    SetRawBrightness(value==0?6:value*10);   
+    setMiyooLum(value); 
+}
+
+int getMiyooLum(void){
+ 
+	cJSON* request_json = NULL;
+	cJSON* itemBrightness;
+
+	char sBrightness[20]; 
+	
+	const char *request_body = load_file("/appconfigs/system.json");
+	request_json = cJSON_Parse(request_body);
+	itemBrightness = cJSON_GetObjectItem(request_json, "brightness");
+
+	int dBrightness = cJSON_GetNumberValue(itemBrightness);
+		
+	return dBrightness;
+}
+
+ 
+
+int readRomDB(){
+
+  	// Check to avoid corruption
+  	if (file_exists("/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db") == 1){
+  	
+    	FILE * file= fopen("/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db", "rb");
+
+		if (file != NULL) {
+
+    		fread(romList, sizeof(romList), 1, file);
+    		
+     		tailleStructPlayActivity = 0;
+    		
+    		for (int i=0; i<MAXVALUES; i++){
+    			if (strlen(romList[i].name) == 0){
+    				break;
+    			}
+    			tailleStructPlayActivity++;
+    		}
+    		fclose(file);
+		}
+		else {
+    		// The file exists but could not be opened
+    		// Something went wrong, the program is terminated
+    		return -1;
+		}
+	}
+	return 1;	
+}
+
+
+	
+int searchRomDB(char* romName){
+	int position = -1;
+	
+	for (int i = 0 ; i < tailleStructPlayActivity ; i++) {
+		if (strcmp(romList[i].name,romName) == 0){
+			position = i;
+			break;
+		}
+	}
+	return position;
+}
+
+//
+//	Trim Strings for reading json (EGGS)
+//
+char* trimstr(char* str, uint32_t first) {
+	char *firstchar, *firstlastchar, *lastfirstchar, *lastchar;
+	uint32_t i;
+
+	firstchar = firstlastchar = lastfirstchar = lastchar = 0;
+
+	for (i=0; i<strlen(str); i++) {
+		if ((str[i]!='\r')&&(str[i]!='\n')&&(str[i]!=' ')&&(str[i]!='\t')&&
+		    (str[i]!='{')&&(str[i]!='}')&&(str[i]!=',')) {
+			if (!firstchar) {
+				firstchar = &str[i];
+				lastfirstchar = &str[i];
+			}
+			if (i) {
+				if ((str[i-1]=='\r')||(str[i-1]=='\n')||(str[i-1]==' ')||(str[i-1]=='\t')||
+				    (str[i-1]=='{')||(str[i-1]=='}')||(str[i-1]==',')) {
+					lastfirstchar = &str[i];
+				}
+			}
+			if (str[i] == '"') {
+				for (i++; i<(strlen(str)-1); i++) {
+					if ((str[i]=='\r')||(str[i]=='\n')||(str[i]=='"')) break;
+				}
+			}
+			lastchar = &str[i];
+		} else {
+			if (!firstlastchar) {
+				firstlastchar = lastchar;
+			}
+		}
+	}
+	if (first) {
+		lastfirstchar = firstchar;
+		lastchar = firstlastchar;
+	}
+	if (lastchar) {
+		lastchar[1] = 0;
+	}
+	if (lastfirstchar) return lastfirstchar;
+	return 0;
+}
+
+
+
+void readHistory(void){
+// History extraction
+	taillestructGames = 0;
+	const char *request_body = load_file("/mnt/SDCARD/Saves/CurrentProfile/lists/content_history.lpl");	
+	if (request_body != NULL){
+			request_json = cJSON_Parse(request_body);	 
+			items = cJSON_GetObjectItem(request_json, "items");	
+									
+			for (int nbGame = 0 ; nbGame < MAXHISTORY ; nbGame ++){
+				cJSON* path = NULL;
+				cJSON* core_path = NULL;
+				
+				cJSON * subitem = cJSON_GetArrayItem(items, nbGame);
+    			
+    			if (subitem != NULL){
+    				path = cJSON_GetObjectItem(subitem, "path");
+					core_path = cJSON_GetObjectItem(subitem, "core_path");
+					char *cPath = cJSON_Print(path) ;
+					char *cCore_path = cJSON_Print(core_path) ;
+	    				
+   					
+					if ((strlen(cCore_path)>1) && (strlen(cPath)>1)) {
+						// Quote character removal
+						
+						char *cCore_path1 = cCore_path+1;
+						char *cPath1 = cPath+1;
+						
+						cCore_path1[strlen(cCore_path1)-1] = '\0';
+						cPath1[strlen(cPath1)-1] = '\0';
+				
+				
+						if ((file_exists(cCore_path1) == 1) && (file_exists(cPath1) == 1)){
+						
+							char RACommand[MAXHRACOMMAND];
+						
+							sprintf(RACommand, "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v -L %s %s", cJSON_Print(core_path), cJSON_Print(path));
+												
+							// Rom name 
+							char *bname;
+    						char *path2 = strdup(cJSON_Print(path));
+       						
+    						// File name
+    						bname = (char *)basename(path2);
+    						
+    						// Cut the last " character
+    						if (strlen( bname ) > 0){
+    							bname[strlen( bname )-1] = '\0';
+    						}
+  							bname = (char *)basename(path2);  
+    						
+    						bname[MAXFILENAMESIZE-1] = '\0';
+    						
+    						int nTimePosition = searchRomDB(bname);
+    						
+    						
+    						if (nTimePosition >= 0){
+    							
+    							int nTime = romList[nTimePosition].playTime;
+    							
+    							if (nTime >=  0) {				
+								int h, m;
+								
+								h = (nTime/3600); 
+								
+								m = (nTime -(3600*h))/60;	
+
+					 			sprintf(gameList[nbGame].totalTime, "%d:%02d", h,m);
+								} 							
+    						}
+
+    						char *bnameWOExt = removeExt(bname);
+    						
+    						// Image path construction
+    						// Core folder name search
+    						char coreInfoPath[MAXSYSPATHSIZE + MAXFILENAMESIZE];
+							sprintf(coreInfoPath, "%s%s",removeExt(cCore_path1),".info");	 	
+
+    						if (file_exists(coreInfoPath)==1){
+								char	key[256] = {0};
+								char	value[256] = {0};
+								int	f = 0; 
+								char	*keyptr, *valptr;
+								char    saveAutoPath[MAXSYSPATHSIZE + MAXFILENAMESIZE];
+								
+								
+								FILE* fp = fopen(coreInfoPath, "r");
+								if (!fp) break;
+								while ((f = fscanf(fp, "%255[^=]=%255[^\n]\n", key, value)) != EOF) {
+									if (!f) { if (fscanf(fp, "%*[^\n]\n") == EOF) break; else continue; }
+									if ((keyptr = trimstr(key, 0))) {
+										if (!strcmp(keyptr, "corename")) {
+											if ((valptr = trimstr(value, 1))) {
+												
+												if (strlen(valptr) >= 2){
+												char coreName[MAXFILENAMESIZE];
+												for (int i = 1 ; i<strlen(valptr)-1;i++)
+													coreName[i-1] = valptr[i];
+												coreName[strlen(valptr)-2]='\0';
+											
+												// game save 
+												sprintf(saveAutoPath, "%s%s%s%s%s","/mnt/SDCARD/Saves/CurrentProfile/states/",coreName,"/",bnameWOExt,".state.auto");
+												
+												char savePath[MAXSYSPATHSIZE + MAXFILENAMESIZE];
+												char shotPath[MAXSYSPATHSIZE + MAXFILENAMESIZE];
+												
+												sprintf(savePath, "%s%s%s","/mnt/SDCARD/Saves/CurrentProfile/states/",coreName,"/");
+												sprintf(shotPath, "%s%s%s","/mnt/SDCARD/Saves/CurrentProfile/shots/",coreName,"/");							
+												
+												if (file_exists(saveAutoPath)==1){
+													strcpy(gameList[taillestructGames].name, bnameWOExt);
+													strcpy(gameList[taillestructGames].savePath, savePath);
+													strcpy(gameList[taillestructGames].shotPath, shotPath);
+													
+    												strcpy(gameList[taillestructGames].RACommand, RACommand);
+													gameList[taillestructGames].jsonIndex = nbGame;
+    												taillestructGames ++; 																								}
+												else
+													// The game does not have the auto save feature
+													// Not supported
+													if (taillestructGames == 0){
+													 	// The current game is not supported, exit
+													 	return;
+													}
+													else {	
+														break;
+													}
+													
+													
+												}
+												else {
+													break;
+												}				
+											}
+											break;
+										}
+									}
+								}
+								fclose(fp);
+    						}
+    							
+    						else
+    							break;
+						}
+					}
+    			}
+    			else {
+    				break;
+    			}
+    			
+			}	
+	}
+}
+
+
+void removeCurrentItem(){
+	
+	cJSON_DeleteItemFromArray(items, gameList[currentGame].jsonIndex);
+	
+	FILE *file = fopen("/mnt/SDCARD/Saves/CurrentProfile/lists/content_history.lpl", "w");
+	
+	char *test = cJSON_Print(request_json);
+	
+	fputs(test, file);
+	fclose(file); 
+
+}
+
+void displayDotsBrightness(){
+	
+	SDL_BlitSurface(imagePreviewFond, NULL, screen, &rectPreviewFond);
+	int currentBrightness =  getMiyooLum();
+	SDL_Rect	rectSquare;
+	int pixels_between_dots = 22;
+	
+	// There are 11 brigtness dots to draw (0-10)
+	int bandSize = pixels_between_dots * 11;
+	int margin = (int)(410 - bandSize)/2;
+	int posX = 237 + margin;
+	
+	for (int i = 0; i<11 ; i++){
+		
+		if (i != currentBrightness){
+			rectSquare = {posX + (i*pixels_between_dots),83,4,4};
+			SDL_BlitSurface(imageSmallSquare, NULL, screen, &rectSquare);
+		}
+		else{
+			rectSquare = {posX + (i*pixels_between_dots)-6,83-6,12,12};
+			SDL_BlitSurface(imageBigRoundBright, NULL, screen, &rectSquare);
+		}	
+	}
+}
+
+void displayDots(int pos, int tot){
+	SDL_BlitSurface(imagePreviewFond, NULL, screen, &rectPreviewFond);	
+	SDL_Rect	rectSquare;
+	int pixels_between_dots = 22;
+	
+	int bandSize = pixels_between_dots * tot;
+	int margin = (int)(410 - bandSize)/2;
+	int posX = 237 + margin;
+	
+	for (int i = 0; i<tot ; i++){
+		
+		if (i != pos){
+			rectSquare = {posX + (i*pixels_between_dots),83,4,4};
+			SDL_BlitSurface(imageSmallSquare, NULL, screen, &rectSquare);
+		}
+		else{
+			rectSquare = {posX + (i*pixels_between_dots)-6,83-6,12,12};
+			SDL_BlitSurface(imageBigRound, NULL, screen, &rectSquare);
+		}	
+	}
+}
+
+
+
+/*
+void loadSaves(void){
+
+
+	nSaves = 0;
+	currentSlot = 0;
+	char saveFolderPath[MAXSYSPATHSIZE];
+	
+	DIR *dp;
+	struct dirent *ep; 
+	dp = opendir (gameList[currentGame].savePath);
+	
+	
+	if (dp != NULL)
+	{
+		char autoSave[MAXSYSPATHSIZE+MAXFILENAMESIZE];				                		
+   		sprintf(autoSave, "%s%s",gameList[currentGame].name, ".state.auto");
+
+    	while ((ep = readdir (dp)) && (nSaves<MAXSAVESTODISPLAY)){
+					
+			char cShort[MAXFILENAMESIZE];
+			strcpy(cShort, ep->d_name);					
+			size_t len = strlen(cShort);
+			
+			if ((len > 2)||(cShort[0]!='.')){
+				if (strcmp(autoSave,cShort) != 0){
+					// The auto saves are excluded from the list
+					
+					char cShortTemp[MAXFILENAMESIZE];			
+					strcpy(cShortTemp, ep->d_name);	
+				
+					if (strlen(gameList[currentGame].name) < len){
+						cShortTemp[strlen(gameList[currentGame].name)] = '\0';
+						if (strcmp(cShortTemp,gameList[currentGame].name) == 0){
+	
+							strcpy(currentGameSaves[], cShort);
+							//logMessage(cShort);
+							nSaves++;
+						} 		
+					}
+							
+
+						
+				}
+			}
+		}
+		
+		if (nSaves > 0){
+			currentSlot = nSaves-1;
+		}
+		
+}
+*/
+
+void displaySlot(void){
+		
+	// 10 slots	
+	displayDots(currentSlot, 10);
+	
+	char sPathSave[MAXSYSPATHSIZE+MAXFILENAMESIZE];
+	char sPathSaveShot[MAXSYSPATHSIZE+MAXFILENAMESIZE];
+	
+	SDL_Rect	rectSquare;
+	
+	int pixels_between_dots = 22;
+	int bandSize = pixels_between_dots * 10;
+	int margin = (int)(410 - bandSize)/2;
+	int posX = 237 + margin;
+	
+	
+	if (currentSlot<10){
+		sprintf(sPathSave, "%s%s%s", gameList[currentGame].savePath, gameList[currentGame].name, ".state");
+		sprintf(sPathSaveShot, "%s%s%s", gameList[currentGame].shotPath, gameList[currentGame].name, ".state");
+	
+		if (currentSlot > 0){
+			sprintf(sPathSave, "%s%d", sPathSave, currentSlot);
+			sprintf(sPathSaveShot, "%s%d%s", sPathSaveShot, currentSlot, ".png");
+		}
+		SDL_BlitSurface(imageUndo, NULL, screen, &rectUndo);
+		if (file_exists(sPathSave)==1){
+			if (file_exists(sPathSaveShot)==1){
+				SDL_Surface* imageTemp = IMG_Load(sPathSaveShot);
+				SDL_BlitSurface(imageTemp, NULL, screen, &rectPreview);
+				SDL_FreeSurface(imageTemp);
+			
+			}
+			else {
+			
+				SDL_BlitSurface(imageNothingDisplay, NULL, screen, &rectPreview);	
+			
+			}
+			
+			
+		}
+		else{
+			if (current_Item_Selection == 1){
+				SDL_BlitSurface(imageaddPanel, NULL, screen, &rectPreview);
+			}
+			else{
+				SDL_BlitSurface(imageCrossPanel, NULL, screen, &rectPreview);
+			}
+			
+		}
+	}
+	else{
+		SDL_BlitSurface(imageUndo_Sel, NULL, screen, &rectUndo);
+		SDL_BlitSurface(imageUndoPanel, NULL, screen, &rectPreview);
+	}
+	
+	
+	for (int i = 0 ; i < 10 ; i++){
+	
+		sprintf(sPathSave, "%s%s%s", gameList[currentGame].savePath, gameList[currentGame].name, ".state");
+		if (i > 0){
+			sprintf(sPathSave, "%s%d", sPathSave, i);
+		}
+		if (file_exists(sPathSave)==1){
+			rectSquare = {posX + (i*pixels_between_dots),83,4,4};
+			SDL_BlitSurface(imageSmallGreenSquare, NULL, screen, &rectSquare);
+		}
+		
+	}
+
+}
+
+
+
+
+
+
+void displayLoad(void){
+		
+	// 10 slots	
+	displayDots(currentSlot, 10);
+	
+	char sPathSave[MAXSYSPATHSIZE+MAXFILENAMESIZE];
+	char sPathSaveShot[MAXSYSPATHSIZE+MAXFILENAMESIZE];
+	
+	SDL_Rect	rectSquare;
+	
+	int pixels_between_dots = 22;
+	int bandSize = pixels_between_dots * 10;
+	int margin = (int)(410 - bandSize)/2;
+	int posX = 237 + margin;
+	
+	
+	if (currentSlot<10){
+		sprintf(sPathSave, "%s%s%s", gameList[currentGame].savePath, gameList[currentGame].name, ".state");
+		sprintf(sPathSaveShot, "%s%s%s", gameList[currentGame].shotPath, gameList[currentGame].name, ".state");
+	
+		if (currentSlot > 0){
+			sprintf(sPathSave, "%s%d", sPathSave, currentSlot);
+			sprintf(sPathSaveShot, "%s%d%s", sPathSaveShot, currentSlot, ".png");
+		}
+		SDL_BlitSurface(imageUndo, NULL, screen, &rectUndo);
+		if (file_exists(sPathSave)==1){
+			if (file_exists(sPathSaveShot)==1){
+				SDL_Surface* imageTemp = IMG_Load(sPathSaveShot);
+				SDL_BlitSurface(imageTemp, NULL, screen, &rectPreview);
+				SDL_FreeSurface(imageTemp);
+			
+			}
+			else {
+				SDL_BlitSurface(imageNothingDisplay, NULL, screen, &rectPreview);	
+			}
+			
+			
+		}
+		else{
+			SDL_BlitSurface(imageaddPanel, NULL, screen, &rectPreview);
+		}
+	}
+	else{
+		SDL_BlitSurface(imageUndo_Sel, NULL, screen, &rectUndo);
+		SDL_BlitSurface(imageUndoPanel, NULL, screen, &rectPreview);
+	}
+	
+	
+	for (int i = 0 ; i < 10 ; i++){
+	
+		sprintf(sPathSave, "%s%s%s", gameList[currentGame].savePath, gameList[currentGame].name, ".state");
+		if (i > 0){
+			sprintf(sPathSave, "%s%d", sPathSave, i);
+		}
+		if (file_exists(sPathSave)==1){
+			rectSquare = {posX + (i*pixels_between_dots),83,4,4};
+			SDL_BlitSurface(imageSmallGreenSquare, NULL, screen, &rectSquare);
+		}
+		
+	}
+}
+
+void displayGame(void){
+
+	SDL_BlitSurface(imageUpBackground, NULL, screen, NULL);
+	
+	if (taillestructGames>0){
+		imageGameName = TTF_RenderUTF8_Blended(font, gameList[currentGame].name, color);
+		SDL_Rect	rectGameName = {45,-3,595,50};
+		
+		SDL_BlitSurface(imageGameName, NULL, screen, &rectGameName);
+	}	
+	
+	char currPicture[MAXSYSPATHSIZE+MAXFILENAMESIZE];				                		
+    sprintf(currPicture, "%s%s%s", gameList[currentGame].shotPath, gameList[currentGame].name, ".state.auto.png");
+		
+    if (file_exists(currPicture)==1){
+		imageGamePreview = IMG_Load(currPicture);
+		SDL_BlitSurface(imageGamePreview, NULL, screen, &rectPreview);
+		SDL_FreeSurface(imageGamePreview);
+	}
+	
+	else{
+		SDL_BlitSurface(imageNothingDisplay, NULL, screen, &rectPreview);
+	}
+
+	SDL_BlitSurface(imageFoot, NULL, screen, &rectFoot);
+	imagePlayTime = TTF_RenderUTF8_Blended(font, gameList[currentGame].totalTime, color);	
+	SDL_BlitSurface(imagePlayTime, NULL, screen, &rectTimerFont);
+	
+	displayDots(currentGame, taillestructGames);
+	
+
+	
+}
+
+
+
+void redrawScreen(void){
+	// Called on the first launch
+	
+	screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640,480, 32, 0,0,0,0);
+
+	SDL_BlitSurface(imageFiltreNoirceur, NULL, screen, NULL);
+		
+	SDL_BlitSurface(imageMenuFond, NULL, screen, &rectMenu);
+	SDL_BlitSurface(imageItem_sel_1, NULL, screen, &rectItem1);
+	SDL_BlitSurface(imageItem_2, NULL, screen, &rectItem2);
+	SDL_BlitSurface(imageItem_3, NULL, screen, &rectItem3);
+	SDL_BlitSurface(imageItem_4, NULL, screen, &rectItem4);
+	SDL_BlitSurface(imageItem_5, NULL, screen, &rectItem5);
+	
+	// Screenshot stored to the .auto save state slot
+	if(file_exists("screenshotGame.bmp")==1){
+		SDL_Surface* imageScreen = IMG_Load("screenshotGame.bmp");		
+
+		
+		// Screenshot path
+		char screenshotPath[MAXFILENAMESIZE + MAXSYSPATHSIZE];
+		sprintf(screenshotPath, "%s%s%s", gameList[currentGame].shotPath, gameList[currentGame].name, ".state.auto.png");
+		
+		
+		SDL_Surface* imageRezized = zoomSurface(imageScreen, 0.64, 0.64, SMOOTHING_OFF);
+		IMG_SavePNG (imageRezized, screenshotPath);
+				 															
+	
+	}
+	
+	displayGame();
+	
+}
+
+void loadBattery(void){
+// Check current battery value
+	char *currBat;
+	int nBat;
+	long lSize;
+	FILE *fp;
+	
+	fp = fopen ( "/tmp/percBat" , "rb" );
+	if( fp > 0 ) {
+		fseek( fp , 0L , SEEK_END);
+		lSize = ftell( fp );
+		rewind( fp );
+		currBat = (char*)calloc( 1, lSize+1 );
+		if( !currBat ) fclose(fp),fputs("memory alloc fails",stderr),exit(1);
+	
+		if( 1!=fread( currBat , lSize, 1 , fp) )
+  		fclose(fp),free(currBat),fputs("entire read fails",stderr),exit(1);
+		fclose(fp);	
+	
+		sscanf(currBat, "%d", &nBat);
+		
+		if (nBat != 500){
+			// If the handheld is not charging
+			char tempBat[] = "%";
+    		strcat(currBat,tempBat);
+		}
+		else{
+		strcpy(currBat, "");
+		}
+	}
+	
+	// Battery icon
+	SDL_Surface* imageBatteryIcon;
+	
+	
+	if (nBat > 100){
+		imageBatteryIcon = IMG_Load("battCharge.png");
+	} else if (nBat >= 80){
+			imageBatteryIcon = IMG_Load("batt100.png");
+		}
+			else if (nBat >= 60){
+				imageBatteryIcon = IMG_Load("batt80.png");	
+			}
+				else if (nBat >= 40){
+					imageBatteryIcon = IMG_Load("batt60.png");	
+				}
+					else if (nBat >= 20){
+						imageBatteryIcon = IMG_Load("batt40.png");	
+					}
+						else if (nBat >= 10){
+							imageBatteryIcon = IMG_Load("batt20.png");	
+						}
+							else if (nBat >= 0){
+								imageBatteryIcon = IMG_Load("batt0.png");	
+							}
+
+	imageBatt = TTF_RenderUTF8_Blended(font, currBat, color);
+	free(currBat);
+}
+
+int main(void) {
+	
+	// ************************************
+	
+	uint32_t		val;
+	uint32_t		l2_pressed = 0;
+	uint32_t		r2_pressed = 0;
+	uint32_t		menu_pressed = 0;
+
+	uint32_t		a_pressed = 0;
+	uint32_t		b_pressed = 0;
+	uint32_t		up_pressed = 0;
+	uint32_t		down_pressed = 0;
+	uint32_t		x_pressed = 0;
+	uint32_t		y_pressed = 0;
+	uint32_t		start_pressed = 0;
+	uint32_t		power_pressed = 0;
+	uint32_t		select_pressed = 0;	
+	uint32_t		left_pressed = 0;
+	uint32_t		right_pressed = 0;	
+
+	readRomDB();
+	readHistory();
+
+	int nExitToMiyoo = 0;	
+	
+	char currLum[20];
+
+	int nLum = getMiyooLum();
+	sprintf(currLum, "%d", nLum);
+	
+	char tempLum[] = "/10";
+    strcat(currLum,tempLum);
+    
+	//loadBattery();
+	
+
+	int			input_fd;
+	input_fd = open("/dev/input/event0", O_RDONLY);
+	struct input_event	ev;
+	
+	
+	bool run = 1;
+	int firstPass = 1;
+	bool comboKey = 0;
+	
+	// The game has no auto save or no game to display
+	if (taillestructGames==0)
+		run=0;
+	
+	SDL_Surface* video = SDL_SetVideoMode(640,480, 32, SDL_HWSURFACE);
+		
+	SDL_Init(SDL_INIT_VIDEO);
+	SDL_ShowCursor(SDL_DISABLE);
+	TTF_Init();
+	
+	font = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 30);
+	imageLum = TTF_RenderUTF8_Blended(font, currLum, color);
+	
+	while(run) { 
+	
+		if (firstPass > 0){
+			// First screen draw
+			firstPass ++ ;
+			// Another refresh 
+			if (firstPass > 2)
+			firstPass = 0;
+		}
+		else {
+			if(read(input_fd, &ev, sizeof(ev)) == sizeof(ev) ){
+
+				val = ev.value;
+				
+				if (( ev.code != BUTTON_MENU )&&(val == 1)) {
+					comboKey = 1;
+				}
+				
+				if (( ev.type != EV_KEY ) || ( val > 1 )) continue;
+				
+				if ( ev.code == BUTTON_UP ) {
+						up_pressed = val;
+				}
+				else				
+				if ( ev.code == BUTTON_DOWN ) {
+						down_pressed = val;
+				}
+				else					
+				if ( ev.code == BUTTON_SELECT ) {
+						select_pressed = val;
+				}
+				else
+				if ( ev.code == BUTTON_A ) {
+						a_pressed = val;
+				}
+				else
+					if ( ev.code == BUTTON_B ) {
+							b_pressed = val;
+				}
+				else
+				if ( ev.code == BUTTON_LEFT ) {
+						left_pressed = val;
+				}
+				else
+					if ( ev.code == BUTTON_RIGHT ) {
+							right_pressed = val;
+				}
+				else
+					if ( ev.code == BUTTON_MENU ) {
+							menu_pressed = val;
+				}
+				else
+					if ( ev.code == BUTTON_X ) {
+							x_pressed = val;
+				}
+				else
+					if ( ev.code == BUTTON_Y ) {
+							y_pressed = val;
+				}
+				else 
+					if ( ev.code == BUTTON_START ) {
+							start_pressed = val;
+				}
+				
+				
+				if (a_pressed || b_pressed) {	
+					switch (current_Item_Selection)
+					{
+    					case 0:
+      						// Select current game
+      						run=0;	
+      						
+      						
+      					break;
+					
+    					case 1:
+      						// Save current game
+      						if (currentSlot != 10){
+      							// Prompt ?
+								char sPathSave[MAXSYSPATHSIZE+MAXFILENAMESIZE];
+								char sPathSaveShot[MAXSYSPATHSIZE+MAXFILENAMESIZE];
+								
+								char sPathAuto[MAXSYSPATHSIZE+MAXFILENAMESIZE];
+								char sPathAutoShot[MAXSYSPATHSIZE+MAXFILENAMESIZE];
+								
+								sprintf(sPathSave, "%s%s%s", gameList[currentGame].savePath, gameList[currentGame].name, ".state");
+								sprintf(sPathSaveShot, "%s%s%s", gameList[currentGame].shotPath, gameList[currentGame].name, ".state");
+								
+								sprintf(sPathAuto, "%s%s%s", gameList[currentGame].savePath, gameList[currentGame].name, ".state.auto");
+								sprintf(sPathAutoShot, "%s%s%s", gameList[currentGame].shotPath, gameList[currentGame].name, ".state.auto.png");
+							
+								if (currentSlot > 0){
+									sprintf(sPathSave, "%s%d", sPathSave, currentSlot);
+									sprintf(sPathSaveShot, "%s%d%s", sPathSaveShot, currentSlot, ".png");
+									
+								}
+								
+								if (file_exists(sPathAuto)==1){
+									if (file_exists(sPathAuto)==1){
+										// Backup
+									}
+								}
+								
+								char sysCommand[MAXSYSPATHSIZE+MAXFILENAMESIZE+MAXSYSPATHSIZE+MAXFILENAMESIZE];
+								sprintf(sysCommand, "%s\"%s\"%s\"%s\"", "cp ", sPathAuto, " ",sPathSave);
+								system(sysCommand);
+								sprintf(sysCommand, "%s\"%s\"%s\"%s\"", "cp ", sPathAutoShot, " ",sPathSaveShot);
+								system(sysCommand);
+								
+      						}
+      						else{
+      							// Undo
+      						
+      						}
+      						
+      						displaySlot();
+      						
+      					break;
+      					
+    					case 2:
+      						// Load game
+      						// Save current game
+      						if (currentSlot != 10){
+      							// Prompt ?
+								char sPathSave[MAXSYSPATHSIZE+MAXFILENAMESIZE];
+								char sPathSaveShot[MAXSYSPATHSIZE+MAXFILENAMESIZE];
+								
+								char sPathAuto[MAXSYSPATHSIZE+MAXFILENAMESIZE];
+								char sPathAutoShot[MAXSYSPATHSIZE+MAXFILENAMESIZE];
+								
+								sprintf(sPathSave, "%s%s%s", gameList[currentGame].savePath, gameList[currentGame].name, ".state");
+								sprintf(sPathSaveShot, "%s%s%s", gameList[currentGame].shotPath, gameList[currentGame].name, ".state");
+								
+								sprintf(sPathAuto, "%s%s%s", gameList[currentGame].savePath, gameList[currentGame].name, ".state.auto");
+								sprintf(sPathAutoShot, "%s%s%s", gameList[currentGame].shotPath, gameList[currentGame].name, ".state.auto.png");
+								
+								if (file_exists(sPathSave)==1){
+									if (currentSlot > 0){
+										sprintf(sPathSave, "%s%d", sPathSave, currentSlot);
+										sprintf(sPathSaveShot, "%s%d%s", sPathSaveShot, currentSlot, ".png");
+										
+									}
+									
+									if (file_exists(sPathAuto)==1){
+										if (file_exists(sPathAuto)==1){
+											// Backup
+										}
+									}
+	
+									char sysCommand[MAXSYSPATHSIZE+MAXFILENAMESIZE+MAXSYSPATHSIZE+MAXFILENAMESIZE];
+									sprintf(sysCommand, "%s\"%s\"%s\"%s\"", "cp ", sPathSave, " ",sPathAuto);
+									system(sysCommand);
+									sprintf(sysCommand, "%s\"%s\"%s\"%s\"", "cp ", sPathSaveShot, " ",sPathAutoShot);
+									system(sysCommand);
+									
+									// Launch game
+									nExitToMiyoo = -1;
+									break;
+								}
+      						}
+      						else{
+      							// Undo
+      						
+      						}
+      					break;
+      					
+    					case 4:
+      						// Exit to menu 
+      					 	nExitToMiyoo = 1;
+      					break;
+     	
+					}
+				}
+				
+				if (nExitToMiyoo != 0){
+					break;	
+				}
+				
+				if (up_pressed) {	
+					current_Item_Selection --;
+					if (current_Item_Selection == -1){
+						current_Item_Selection = 4;
+					}
+				
+					switch (current_Item_Selection)
+					{
+    					case 0:
+    						// Game
+      						SDL_BlitSurface(imageItem_sel_1, NULL, screen, &rectItem1);
+      						SDL_BlitSurface(imageItem_2, NULL, screen, &rectItem2);
+      						displayGame();
+      						
+      					break;
+					
+    					case 1:
+    						// Save
+      						SDL_BlitSurface(imageItem_sel_2, NULL, screen, &rectItem2);
+      						SDL_BlitSurface(imageItem_3, NULL, screen, &rectItem3);
+  
+   							currentSlot = 0;
+      						displaySlot();
+      					break;
+      					
+    					case 2:
+    						// Load
+      						SDL_BlitSurface(imageItem_sel_3, NULL, screen, &rectItem3);
+      						SDL_BlitSurface(imageItem_4, NULL, screen, &rectItem4);
+      						currentSlot = 0;
+      						displaySlot();
+      					break;
+      					
+    					case 3:
+    						// Brightness
+      						SDL_BlitSurface(imageItem_sel_4, NULL, screen, &rectItem4);
+      						SDL_BlitSurface(imageItem_5, NULL, screen, &rectItem5);
+      						displayDotsBrightness();
+      						SDL_BlitSurface(imageBrightnessPanel, NULL, screen, &rectPreview);
+      					break;
+      					
+    					case 4:
+      						SDL_BlitSurface(imageItem_sel_5, NULL, screen, &rectItem5);
+      						SDL_BlitSurface(imageItem_1, NULL, screen, &rectItem1);
+      						SDL_BlitSurface(imagePreviewFond, NULL, screen, &rectPreviewFond);
+      						SDL_BlitSurface(imageExitPanel, NULL, screen, &rectPreview);
+      					break;
+					}				
+				}
+				if (down_pressed) {	
+					current_Item_Selection ++;
+					if (current_Item_Selection == 5){
+						current_Item_Selection = 0;
+					}
+					 
+					switch (current_Item_Selection)
+					{
+    					case 0:
+    					 	// Game
+      						SDL_BlitSurface(imageItem_sel_1, NULL, screen, &rectItem1);
+      						SDL_BlitSurface(imageItem_5, NULL, screen, &rectItem5);
+      						displayGame();
+      					break;
+					
+    					case 1:
+    						// Save
+      						SDL_BlitSurface(imageItem_sel_2, NULL, screen, &rectItem2);
+      						SDL_BlitSurface(imageItem_1, NULL, screen, &rectItem1);
+   							currentSlot = 0;
+      						displaySlot();
+      					break;
+      					
+    					case 2:
+    						// Load
+      						SDL_BlitSurface(imageItem_sel_3, NULL, screen, &rectItem3);
+      						SDL_BlitSurface(imageItem_2, NULL, screen, &rectItem2);
+      						currentSlot = 0;
+      						displaySlot();
+      					break;
+      					
+    					case 3:
+    						// Brightness
+      						SDL_BlitSurface(imageItem_sel_4, NULL, screen, &rectItem4);
+      						SDL_BlitSurface(imageItem_3, NULL, screen, &rectItem3);
+      						displayDotsBrightness();
+      						SDL_BlitSurface(imageBrightnessPanel, NULL, screen, &rectPreview);
+      					break;
+      					
+    					case 4:
+      						SDL_BlitSurface(imageItem_sel_5, NULL, screen, &rectItem5);
+      						SDL_BlitSurface(imageItem_4, NULL, screen, &rectItem4);
+      						SDL_BlitSurface(imagePreviewFond, NULL, screen, &rectPreviewFond);
+      						SDL_BlitSurface(imageExitPanel, NULL, screen, &rectPreview);
+
+      					break;
+    	
+					}
+					
+				}	
+			
+				if (right_pressed) {
+					
+					switch (current_Item_Selection)
+					{
+    					case 0:
+    						// Switch game
+            				if (currentGame<(taillestructGames-1)){
+                				currentGame ++;	
+							}
+							else{
+								currentGame = 0;
+							}
+                			displayGame();	
+                				
+      					break;
+					
+    					case 1:
+    					case 2:
+      						// Save
+      					
+      						if (currentSlot < 10){
+      							currentSlot ++;
+      						}
+      						else {
+      							currentSlot = 0 ;
+      						}
+      						displaySlot();
+      							
+      							
+      						
+
+      					break;
+
+      					
+    					case 3:
+      						// Change brightness
+      						
+      						int brightVal = getMiyooLum();
+      						if (brightVal != 10) {
+      							brightVal++;
+      							SetBrightness(brightVal);
+      						}
+      						displayDotsBrightness();
+      						
+      					break;
+  
+    	
+					}	 
+
+				}
+				
+				if (left_pressed) {
+			
+					switch (current_Item_Selection)
+					{
+    					case 0:
+    						// Switch game
+							if (currentGame > 0){
+                     			currentGame --;
+                    		}
+                    		else{
+								currentGame = taillestructGames-1;
+							}
+                    		displayGame();
+                    	
+      					break;
+					
+    					case 1:
+    					case 2:
+      						// Save
+      					
+      						if (currentSlot > 0){
+      							currentSlot --;
+      						}
+      						else {
+      							currentSlot = 10 ;
+      						}
+      						displaySlot();
+      							
+      					
+      					break;
+      					
+    					case 3:
+      						int brightVal = getMiyooLum();
+      						if (brightVal != 0) {
+      							brightVal--;
+      							SetBrightness(brightVal);
+      						}	
+      						displayDotsBrightness();
+      					break;
+      					
+
+    	
+					}	
+				}
+				
+				if (y_pressed) {
+	
+				}
+	
+			
+				if (start_pressed) {	
+	
+				}
+								
+				if ( ev.code == BUTTON_MENU ) {
+						menu_pressed = val;
+						if (menu_pressed == 1){
+							comboKey = 0 ;
+						}
+						else {
+							if (comboKey == 0){
+								comboKey = 1 ;
+								
+								break;
+
+							}
+						
+						}
+				}				
+				
+			}
+		}
+			
+
+		if (x_pressed) {		
+
+
+	
+			
+
+		}
+		
+
+		if (firstPass > 0) {
+			redrawScreen();
+		}
+	
+
+		SDL_BlitSurface(screen, NULL, video, NULL); 
+		SDL_Flip(video);
+		
+	}
+	
+	
+	screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640,480, 32, 0,0,0,0);
+	
+	remove("/mnt/SDCARD/.tmp_update/cmd_to_run.sh");
+	if (nExitToMiyoo != 1){
+		FILE *file = fopen("/mnt/SDCARD/.tmp_update/cmd_to_run.sh", "w");
+		
+		fputs(gameList[currentGame].RACommand, file);
+		fclose(file); 	
+		
+		remove("/tmp/romName.txt");		
+		
+	}
+	 
+	SDL_BlitSurface(screen, NULL, video, NULL); 
+	SDL_Flip(video);
+	
+   	SDL_FreeSurface(screen);
+   	SDL_FreeSurface(video);
+   		
+  
+    SDL_FreeSurface(imageLowBat);  	
+
+   	SDL_FreeSurface(imageNothingDisplay);
+    SDL_FreeSurface(imageRemoveDialog);
+  	SDL_FreeSurface(imageFiltreNoirceur);
+    
+    SDL_FreeSurface(imageUpBackground);
+    SDL_FreeSurface(imageMenuFond);
+  	SDL_FreeSurface(imageItem_sel_1);
+  	
+  	SDL_FreeSurface(imageItem_sel_2);
+    SDL_FreeSurface(imageItem_sel_3);
+  	SDL_FreeSurface(imageItem_sel_4);
+  	
+  	SDL_FreeSurface(imageItem_sel_5);
+    SDL_FreeSurface(imageItem_1);
+  	SDL_FreeSurface(imageItem_2);	
+    
+  	SDL_FreeSurface(imageItem_3);
+    SDL_FreeSurface(imageItem_4);
+  	SDL_FreeSurface(imageItem_5);
+  	SDL_FreeSurface(imageCrossPanel);
+  	
+  	
+  	SDL_FreeSurface(imagePreviewFond);
+    SDL_FreeSurface(imageBrightnessPanel);
+  	SDL_FreeSurface(imageSmallSquare);
+    SDL_FreeSurface(imageSmallGreenSquare);
+    
+  	SDL_FreeSurface(imageBigRound);
+    SDL_FreeSurface(imageBigRoundBright);
+  	SDL_FreeSurface(imageFoot);    
+  	
+  	SDL_FreeSurface(imageGamePreview);
+    SDL_FreeSurface(imageBatt);
+  	SDL_FreeSurface(imageLum);      	
+  	
+  	SDL_FreeSurface(imagePlayTime);
+    SDL_FreeSurface(imageGameName);    
+    
+    SDL_Quit();
+		
+    return EXIT_SUCCESS;
+}

@@ -89,7 +89,7 @@ char* load_file (char const* path)
 	}
 	buffer[length] = '\0';
 
-	return buffer;
+	return buffer; 
 }
 
 void IMG_SavePNG (SDL_Surface *SurfaceImage, char* pathImage){
