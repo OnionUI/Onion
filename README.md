@@ -33,7 +33,7 @@ Update instructions : [Here](https://user-images.githubusercontent.com/16885275/
 - Go to the console page, and refresh your rom lists by pressing the menu button.
 
 #### Installation from any Onion version:
-- *(<= V3.9, your saves are located here : retroarch / .retroarch / saves | states)*
+- *(Take note thats from V3.9 and below, your saves are located here : retroarch / .retroarch / saves | states)*
 - Delete all folders from your SD except `BIOS`, `Roms`, `Saves` and `Themes` (Save your ports if you used some in `Emu\PORTS`)
 - Note : Save your `Saves` folder to copy it back if you want to keep your custom emulator settings.
 - Unzip the `.tmp_update` folder to the root of your SD.
