@@ -258,6 +258,31 @@ void readJson(void) {
 	}
 }
 
+char* load_file(char const* path)
+{
+    char* buffer = 0;
+    long length;
+    FILE * f = fopen (path, "rb"); 
+
+    if (f)
+    {
+      fseek (f, 0, SEEK_END);
+      length = ftell (f);
+      fseek (f, 0, SEEK_SET);
+      buffer = (char*)malloc ((length+1)*sizeof(char));
+      if (buffer)
+      {
+        fread (buffer, sizeof(char), length, f);
+      }
+      fclose (f);
+    }
+    buffer[length] = '\0';
+
+    return buffer;
+}
+
+
+
 //
 //	Write system.json
 //
@@ -522,14 +547,19 @@ void rumble(uint32_t val) {
 //	Send short vibration pulse
 //
 void short_pulse(void) {
-	rumble(1);
-	usleep(100000);		// 0.1s
-	rumble(0);				
+	if (access("/mnt/SDCARD/.tmp_update/.noVibration", F_OK)!=0){
+		rumble(1);
+		usleep(100000);		// 0.1s
+		rumble(0);		
+	}
+			
 }
 void super_short_pulse(void) {
-	rumble(1);
-	usleep(40000);		// 0.05s
-	rumble(0);				
+	if (access("/mnt/SDCARD/.tmp_update/.noVibration", F_OK)!=0){
+		rumble(1);
+		usleep(40000);		// 0.05s
+		rumble(0);			
+	}	
 }
 //
 //	Terminate retroarch before kill/shotdown processes to save progress
@@ -1414,25 +1444,30 @@ void adjust_lcd(int timeout) {
 	}
 }
 
+
+
+
 //
 //	[onion] suspend/resume PlayActivity timer
-//
+// 
 void onion_pa_suspend(int mode) {
-	if ( ( (!access("/tmp/cmd_to_run.sh", F_OK)) || (!access("/tmp/cmd_to_run_launcher.sh", F_OK)) )
-	  && (searchpid("retroarch")) ) {
-		chdir("/mnt/SDCARD/App/PlayActivity");
-		char sysstr[256];
-		strcpy(sysstr, "./playActivity \"");
+	
 		if (mode) {
-			strcat(sysstr, "init\"");
-			system(sysstr);
+			// The current time is resumed
+		//	logMessage("a");
+			chdir("cd /mnt/SDCARD/.tmp_update/");
+			system("./loadTime.sh; sync");
+			//system("cd /mnt/SDCARD/.tmp_update/; ./loadTime.sh; sync");
+			
 		} else {
-			if (getrecent_onion(sysstr + strlen(sysstr))) {
-				strcat(sysstr, "\"");
-				system(sysstr);
-			}
+		//logMessage("b");
+			// The current time is saved
+			chdir("cd /mnt/SDCARD/.tmp_update/");
+			system("./saveTime.sh; sync");
+			
+			//system("cd /mnt/SDCARD/.tmp_update/; ./saveTime.sh; sync");
 		}
-	}
+	
 }
 
 //
