@@ -167,8 +167,9 @@ Menu button: Exit Game
 Select + R2: Brightness up  
 Select + L2: Brightness down
 
-Power button: Save progress and shutdown  
-Menu + Power: Light sleep
+Power button long press : Save progress and shutdown  
+Power button short press : Sleep mode  
+Menu + Power: Shortcut
 
 Menu + R2: Save state  
 Menu + L2: Load state
@@ -180,10 +181,9 @@ Menu + X: Toggle FPS display
 
 R2/L2: Change palette (Game Boy only)
 
-Start + Select + R2 + L2: Force turn off  
-Menu + Select : Retroarch menu.
-   
-Start + Select + Menu + R2 + L2: Force disable the launcher   
+Power button for 5s : force close the current app
+Power button for 10s : force turn off
+Menu + Select : Retroarch menu.  
 
 <img src="https://user-images.githubusercontent.com/16885275/164891039-665fffcf-b454-4b3c-87c6-13a92cb88a8b.png" width="500">
 <img src="https://user-images.githubusercontent.com/16885275/164891137-2bbdcfb5-e2c2-4658-8049-79b01d57dfed.png" width="500">
