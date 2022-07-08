@@ -160,7 +160,7 @@ For more information check the [FAQ](https://github.com/jimgraygit/Onion/wiki/3.
 
 ### Shortcuts
 
-<img src="https://user-images.githubusercontent.com/16885275/165266775-63e24f1b-d734-4eee-99c5-8bad502cd87e.png" width="500">
+<img src="https://user-images.githubusercontent.com/16885275/178003377-10332587-c44e-46f6-b3cc-315df906a00b.png" width="500">
 
 Menu button: Exit Game
 
