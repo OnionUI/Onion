@@ -1315,6 +1315,7 @@ void adjust_clock(int timeout) {
 			} else {
 				switch (ev.code) {
 					case BUTTON_MENU:
+						short_pulse();
 						// screenshot
 						short_pulse();
 						setCPUsave(1);
@@ -1516,6 +1517,7 @@ void suspend_exec(int timeout) {
 					screenshot();
 					setScreen(0);
 					setCPUsave(0);
+					break;
 					
 				} else if ( ev.code == BUTTON_START )  {
 					// adjust clock
@@ -1523,8 +1525,9 @@ void suspend_exec(int timeout) {
 					setScreen(1);
 					setBrightness(GetKeyShm(&shminfo, MONITOR_BRIGHTNESS));
 					adjust_clock(timeout);
-					*/
 					break;
+					*/
+					
 				} else if ( ev.code == BUTTON_SELECT ) {
 					// adjust LCD
 					/*
@@ -1755,7 +1758,7 @@ int main(void) {
 			
 			
 			if ((ev.code == BUTTON_POWER)&&(val == 1)){
-					super_short_pulse();	
+					super_short_pulse();			
 			}
 			
 			if (val!=REPEAT){
@@ -1776,6 +1779,11 @@ int main(void) {
 	
 				if ((b_BTN_Menu_Pressed == 1)&&(b_BTN_Not_Menu_Pressed == 1)){
 					comboKey = 1;
+				}
+				
+				if ((b_BTN_Menu_Pressed == 1)&&(ev.code == BUTTON_POWER)){
+					// screenshot
+					
 				}
 				
 				if ((ev.code == BUTTON_MENU)&&(val == 0)){	

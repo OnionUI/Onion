@@ -55,11 +55,13 @@
 #define	GPIO_DIR2	"/sys/devices/gpiochip0/gpio/"
 #define concat(ptr,str1,str2)	{ strcpy(ptr, str1); strcat(ptr, str2); }
 
+char sTotalTimePlayed[50];
+
 // Game history list
 struct structGames {                 
              char name[MAXHROMNAMESIZE]   ;
              char RACommand[500] ;
-           	 char totalTime[10];
+           	 char totalTime[30];
            	 int jsonIndex;
            	 }
             gameList[MAXHISTORY];   
@@ -276,7 +278,7 @@ char* trimstr(char* str, uint32_t first) {
 
 
 int readRomDB(){
-
+	int totalTimePlayed = 0 ;
   	// Check to avoid corruption
   	if (file_exists("/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db") == 1){
   	
@@ -292,8 +294,19 @@ int readRomDB(){
     			if (strlen(romList[i].name) == 0){
     				break;
     			}
+    			totalTimePlayed += romList[tailleStructPlayActivity].playTime;
+    			
     			tailleStructPlayActivity++;
     		}
+
+			int h;
+			
+			h = (totalTimePlayed/3600); 
+			
+			//m = (totalTimePlayed -(3600*h))/60;	
+
+			sprintf(sTotalTimePlayed, "%dh", h);
+			
     		fclose(file);
 		}
 		else {
@@ -384,7 +397,8 @@ void readHistory(){
 								
 								m = (nTime -(3600*h))/60;	
 
-								sprintf(gameList[nbGame].totalTime, "%d:%02d", h,m);
+								sprintf(gameList[nbGame].totalTime, "%d:%02d / %s", h,m,sTotalTimePlayed);
+								
 								} 							
     						}
 	
@@ -718,6 +732,9 @@ int main(void) {
                 		
                 		sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",removeExt(gameList[currentGame].name),".png");
                 		if (file_exists(currPicture)==1){
+							if (imageBackgroundGame != NULL){
+								SDL_FreeSurface(imageBackgroundGame); 
+							}
 							imageBackgroundGame = IMG_Load(currPicture);
 						}
 					}
@@ -728,6 +745,9 @@ int main(void) {
                      				currentGame --;
                      				sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",removeExt(gameList[currentGame].name),".png");
                      				if (file_exists(currPicture)==1){
+										if (imageBackgroundGame != NULL){
+											SDL_FreeSurface(imageBackgroundGame); 
+										}
 										imageBackgroundGame = IMG_Load(currPicture);
 									}
                      			}
@@ -790,7 +810,8 @@ int main(void) {
   			if (nBat > LOWBATRUMBLE){
   		
             	if (file_exists(currPicture)==1){
-                		SDL_BlitSurface(imageBackgroundGame, NULL, screen, NULL);                 
+                		SDL_BlitSurface(imageBackgroundGame, NULL, screen, NULL);         
+                	//	SDL_FreeSurface(imageBackgroundGame);         
             	}
             	else{
             	
@@ -802,7 +823,7 @@ int main(void) {
             	SDL_BlitSurface(imageBackgroundLowBat, NULL, screen, NULL); 
         	}
 		}
-		SDL_FreeSurface(imageBackgroundGame); 
+		
 		
 		if (currentGame!=0){
 			SDL_BlitSurface(surfaceArrowLeft, NULL, screen, &rectArrowLeft);
@@ -825,7 +846,7 @@ int main(void) {
 		
 		SDL_BlitSurface(imageFooterHelp, NULL, screen, &rectFooterHelp);
 	
-		rectTime = { 293, -1, 150, 39};
+		rectTime = { 263, -1, 150, 39};
 		rectBatt = { 566, -1, 113, 29};
 		rectLum = { 106, 59, 40, 369};	
 		SDL_BlitSurface(imageBatt, NULL, screen, &rectBatt);
@@ -933,18 +954,20 @@ int main(void) {
 		fclose(file2); 			
 	
 	}
+	
 	 
 	SDL_BlitSurface(screen, NULL, video, NULL); 
 	SDL_Flip(video);
 	
    	SDL_FreeSurface(screen);
    	SDL_FreeSurface(video);
-   		
+   	
+   	
   
    	SDL_FreeSurface(imageBackgroundDefault);  
    	SDL_FreeSurface(imageBackgroundLowBat);  	
-   	SDL_FreeSurface(imageBackgroundGame);  
-   	SDL_FreeSurface(imageBackgroundNoGame); 
+   	//SDL_FreeSurface(imageBackgroundGame);  
+  
    		
    	SDL_FreeSurface(imageMenuBar);
 
