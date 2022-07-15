@@ -128,7 +128,7 @@ Some examples made for this RetroArch port:
 **LCD filters, click to magnify (Integer scaling):**  
 ![](https://user-images.githubusercontent.com/16885275/173250366-dbaed067-640e-485d-8244-c62b9a7bd722.png)
 
-- Compiled and partially rebuilt by [Eggs](https://discordapp.com/users/968407509364772924) for precision and performance.
+- Compiled and partially rebuilt by [Eggs](https://discordapp.com/users/778867980096241715) for precision and performance.
    - Custom audio driver.
    - Custom scalers.
    - New display driver.
