@@ -1,10 +1,13 @@
-![onion_banner](https://user-images.githubusercontent.com/44569252/179326948-606421ec-5586-463e-a8a3-ed1ee1a50e5d.png)
+<p>&nbsp;</p>
+
+# <img alt="Onion" src="https://user-images.githubusercontent.com/44569252/179347793-82f6aa27-cc44-495b-9375-eb8df4c96a2c.png" width="200">
+*A performant and straightforward multi language retro gaming museum in your pocket.*  
+<sub>Made possible by Totofaki, Eggs, JimGray, Pixelshift, Shauninman and many more from the Onion community.</sub>
 
 <p>&nbsp;</p>
 
-# <img alt="Onion" src="https://user-images.githubusercontent.com/44569252/179320844-fbbc89a2-008e-49bb-88e8-ea5a45aa834a.png">
-*A performant and straightforward multi language retro gaming museum in your pocket.*  
-<sub>Made possible by Totofaki, Eggs, JimGray, Pixelshift, Shauninman and many more from the Onion community.</sub>
+<!--![onion_banner_new](https://user-images.githubusercontent.com/44569252/179326948-606421ec-5586-463e-a8a3-ed1ee1a50e5d.png)-->
+![onion_banner_nologo](https://user-images.githubusercontent.com/44569252/179347740-4aee6e33-a133-4d02-8f0d-f13055c0a180.png)
 
 <p>&nbsp;</p>
 
@@ -193,7 +196,7 @@ The audio sever lag has been removed. (Credit: Eggs)
   <sup>Credit: DiMo</sup>
 - Box art size fix in the included themes  
   <sup>Credit: DiMo</sup>
-- For more information check the [FAQ](https://github.com/OnionUI/Onion/wiki/3.-FAQ-(Frequently-asked-questions)).
+- For more information check the [FAQ](https://github.com/OnionUI/Onion/wiki/3.-FAQ-(Frequently-asked-questions))
 
 ### Others
 - Many additional systems supported
