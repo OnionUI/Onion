@@ -11,7 +11,7 @@
 
 <p>&nbsp;</p>
 
-<h3 align="center"><a href="https://github.com/OnionUI/Onion/releases"><img src="https://user-images.githubusercontent.com/44569252/179315622-e29e0971-87c8-4855-85e6-fc8de4ccd940.png" width="74"><br/>Download latest release</a><br><br>⤹ <sup>Read the installation guide below</sup> ⤸</h3>
+<h3 align="center"><a href="https://github.com/OnionUI/Onion/releases"><img src="https://user-images.githubusercontent.com/44569252/179315622-e29e0971-87c8-4855-85e6-fc8de4ccd940.png" width="74"><br/>Download latest release</a><br><br>&nbsp;&nbsp; <sup>Read the installation guide below</sup> ⤸</h3>
 
 <p>&nbsp;</p>
 
