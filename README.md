@@ -1,4 +1,6 @@
-![onion_banner](https://user-images.githubusercontent.com/44569252/179326577-cad28e47-0d1b-4057-a716-e6b96ec148cc.png)
+![onion_banner](https://user-images.githubusercontent.com/44569252/179326948-606421ec-5586-463e-a8a3-ed1ee1a50e5d.png)
+
+<p>&nbsp;</p>
 
 # <img alt="Onion" src="https://user-images.githubusercontent.com/44569252/179320844-fbbc89a2-008e-49bb-88e8-ea5a45aa834a.png">
 *A performant and straightforward multi language retro gaming museum in your pocket.*  
