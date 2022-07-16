@@ -1,3 +1,11 @@
+<img src="https://user-images.githubusercontent.com/16885275/177224061-8deb8c61-b6ff-4867-8758-c39892fd18af.png" width="40">
+This project has been officialy forked here :   
+
+https://github.com/OnionUI/Onion
+
+This repository won't be updated anymore.   
+
+
 # Onion (and Eggs)
 #### A performant and straightforward multi language retro gaming museum in your pocket.
 ### [Download newest release here](https://github.com/Sichroteph/Onion/releases)
