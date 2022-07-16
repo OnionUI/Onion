@@ -1,10 +1,12 @@
+![onion_banner](https://user-images.githubusercontent.com/44569252/179326577-cad28e47-0d1b-4057-a716-e6b96ec148cc.png)
+
 # <img alt="Onion" src="https://user-images.githubusercontent.com/44569252/179320844-fbbc89a2-008e-49bb-88e8-ea5a45aa834a.png">
 *A performant and straightforward multi language retro gaming museum in your pocket.*  
 <sub>Made possible by Totofaki, Eggs, JimGray, Pixelshift, Shauninman and many more from the Onion community.</sub>
 
 <p>&nbsp;</p>
 
-<h3 align="center"><a href="https://github.com/OnionUI/Onion/releases"><img src="https://user-images.githubusercontent.com/44569252/179315622-e29e0971-87c8-4855-85e6-fc8de4ccd940.png" width="74"><br/>Download latest release</a></h3>
+<h3 align="center"><a href="https://github.com/OnionUI/Onion/releases"><img src="https://user-images.githubusercontent.com/44569252/179315622-e29e0971-87c8-4855-85e6-fc8de4ccd940.png" width="74"><br/>Download latest release</a><br><br><sup>⇩ Please read the instructions below, before installing ⇩</sup></h3>
 
 <p>&nbsp;</p>
 
@@ -163,13 +165,13 @@ Simply copy this folder when you want to backup your data.
 
 <p>&nbsp;</p>
 
-## <sup><img align="left" src="https://user-images.githubusercontent.com/16885275/168315341-d07bdf2f-b424-44d2-a845-e56ca67b04f1.png" width="54"></sup>Miyoo audio server adoption
+<!--## <sup><img align="left" src="https://user-images.githubusercontent.com/16885275/168315341-d07bdf2f-b424-44d2-a845-e56ca67b04f1.png" width="54"></sup>Miyoo audio server adoption
 
 The *pop* sound that appears each time a binary is launched is now gone.   
 
 The audio sever lag has been removed. (Credit: Eggs)
 
-<p>&nbsp;</p>
+<p>&nbsp;</p>-->
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179305495-2ae1f522-6918-469f-a2eb-63dd30262e17.png" width="54"></sup>Main UI improvments
 
