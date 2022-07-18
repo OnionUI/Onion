@@ -1,6 +1,7 @@
 <p>&nbsp;</p>
 
-# <img alt="Onion" src="https://user-images.githubusercontent.com/44569252/179347793-82f6aa27-cc44-495b-9375-eb8df4c96a2c.png" width="200">
+# <img alt="Onion" src="https://user-images.githubusercontent.com/44569252/179510333-40793fbc-f2a3-4269-8ab9-569b191d423f.png" width="196px">
+
 *A performant and straightforward multi-language retro gaming museum in your pocket.*  
 <sub>Made possible by Totofaki, Eggs, JimGray, Pixelshift, Shauninman and many more from the Onion community.</sub>
 
