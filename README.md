@@ -82,7 +82,7 @@ You can check your current version in `Settings > Device info > Version`.
 <img src="https://user-images.githubusercontent.com/16885275/172026971-2640251c-b781-4083-8715-e5e076e2cbfe.png" width="32%"> <img src="https://user-images.githubusercontent.com/16885275/172026972-c3602c24-b0df-43c6-942e-c975a2eac71b.png" width="32%"> <img src="https://user-images.githubusercontent.com/16885275/154789504-84253d41-373d-4c84-b194-547c6343f904.png" width="32%">
 
 - Preview and change themes on the fly, no reboot required.
-- Check out the [custom themes](https://github.com/OnionUI/Onion/wiki/4.-Custom-Themes#theme-repository) from our <sup><sub>❤️</sub></sup> community
+- Check out the [custom themes](https://github.com/OnionUI/Themes/blob/main/README.md) from our <sup><sub>❤️</sub></sup> community
 
 <p>&nbsp;</p>
 
