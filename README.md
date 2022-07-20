@@ -35,7 +35,7 @@
 <p>&nbsp;</p>
 
 **Attention:** Firmware version `20220419****` is needed for Onion v3.10 and above.    
-You can check your current version in `Settings > Device info > Version`. 
+You can check your current version in `Settings` ➜ `Device Info` ➜ `Version`. 
 
 > If you can't or don't want to update, there are other solutions like older Onion versions and MiniUI.
 > We can't take responsibility if your device is bricked in the process of upgrading the firmware version.
