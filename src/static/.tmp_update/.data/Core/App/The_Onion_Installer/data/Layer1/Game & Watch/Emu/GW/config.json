@@ -1,0 +1,13 @@
+{
+"label":"GameWtch",
+"icon":"../../Icons/gw.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/GW",
+"imgpath":"../../Roms/GW/Imgs",
+"gamelist":"../../Roms/GW/miyoogamelist.xml",
+"useswap":0,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

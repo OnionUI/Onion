@@ -1,0 +1,7 @@
+{
+"label":"Set Clock",
+"icon":"clock.png",
+"iconsel":"",
+"launch":"launch.sh",
+"description":"Set Clock"
+}

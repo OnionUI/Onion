@@ -1,0 +1,12 @@
+{
+"label":"opera",
+"icon":"opera.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/PANASONIC",
+"imgpath":"../../Roms/PANASONIC/Imgs",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

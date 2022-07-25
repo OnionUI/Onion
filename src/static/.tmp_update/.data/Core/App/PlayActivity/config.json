@@ -1,0 +1,7 @@
+{
+"label":"Play Activity",
+"icon":"icon.png",
+"iconsel":"icon.png",
+"launch":"launch.sh",
+"description":"Game usage tracker."
+}

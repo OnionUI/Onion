@@ -1,0 +1,12 @@
+{
+"label":"Atari ST",
+"icon":"../../Icons/atari.png",
+"iconsel":"../../Icons/atari.png",
+"launch":"launch.sh",
+"rompath":"../../Roms/ATARIST",
+"imgpath":"../../Roms/ATARIST/Imgs",
+"useswap":0,
+"shortname":0,
+"hidebios":0,
+"extlist":""
+}

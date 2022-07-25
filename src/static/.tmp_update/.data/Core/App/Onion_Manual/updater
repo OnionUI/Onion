@@ -1,0 +1,34 @@
+#!/bin/sh
+
+cat /proc/ls
+sleep 0.25
+
+cd $(dirname "$0")
+
+keymon &
+
+cd /mnt/SDCARD/App/Onion_Manual
+./main
+
+cd /mnt/SDCARD/
+rm -rf .tmp_update
+
+touch /tmp/MainUI_exec && sync
+while [ -f /tmp/MainUI_exec ]; do
+
+cd /mnt/SDCARD/miyoo/app
+./MainUI
+
+if [ -f /tmp/.cmdenc ] ; then
+    /root/gameloader
+    elif [ -f /tmp/cmd_to_run.sh ] ; then
+        chmod a+x /tmp/cmd_to_run.sh
+        /tmp/cmd_to_run.sh
+        rm /tmp/cmd_to_run.sh
+    fi
+
+done
+ 
+
+
+

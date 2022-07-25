@@ -1,0 +1,12 @@
+{
+"label":"x1",
+"icon":"x1.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/XONE",
+"imgpath":"../../Roms/XONE/Imgs",
+"useswap":0,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

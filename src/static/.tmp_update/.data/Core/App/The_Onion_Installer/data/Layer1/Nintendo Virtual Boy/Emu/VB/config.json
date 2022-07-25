@@ -1,0 +1,13 @@
+{
+"label":"VirtualBoy",
+"icon":"../../Icons/vb.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/VB",
+"imgpath":"../../Roms/VB/Imgs",
+"gamelist":"../../Roms/VB/miyoogamelist.xml",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

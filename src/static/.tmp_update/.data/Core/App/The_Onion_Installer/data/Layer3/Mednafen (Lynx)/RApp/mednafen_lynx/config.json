@@ -1,0 +1,12 @@
+{
+"label":"mednafen_lynx",
+"icon":"mednafen_lynx.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/LYNX",
+"imgpath":"../../Imgs/LYNX",
+"useswap":0,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

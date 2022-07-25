@@ -1,0 +1,5 @@
+prboom-analog_deadzone = "15"
+prboom-find_recursive_on = "enabled"
+prboom-mouse_on = "disabled"
+prboom-resolution = "640x400"
+prboom-rumble = "enabled"

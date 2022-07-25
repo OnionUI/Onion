@@ -1,0 +1,12 @@
+{
+"label":"gen_plus_gx_gg",
+"icon":"genesis_plus_gx.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/GG",
+"imgpath":"../../Imgs/GG",
+"useswap":0,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

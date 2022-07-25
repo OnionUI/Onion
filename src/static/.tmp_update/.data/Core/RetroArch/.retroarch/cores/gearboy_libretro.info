@@ -1,0 +1,20 @@
+# Software Information
+display_name = "Nintendo - Game Boy / Color (Gearboy)"
+authors = "Ignacio Sanchez"
+supported_extensions = "gb|dmg|gbc|cgb|sgb"
+corename = "Gearboy"
+license = "GPLv3"
+permissions = ""
+display_version = "3.2.0"
+categories = "Emulator"
+
+# Hardware Information
+manufacturer = "Nintendo"
+systemname = "Game Boy/Game Boy Color"
+systemid = "game_boy"
+
+# Libretro Features
+supports_no_game = "false"
+database = "Nintendo - Game Boy|Nintendo - Game Boy Color"
+
+description = "A port of the Gearboy Game Boy emulator to libretro. Gearboy is a new and highly accurate Game Boy emulator from indie/homebrew dev and all-around smart guy, drhelius. It supports both Game Boy and Game Boy Color games and is an excellent choice for playing these games on a modern system."

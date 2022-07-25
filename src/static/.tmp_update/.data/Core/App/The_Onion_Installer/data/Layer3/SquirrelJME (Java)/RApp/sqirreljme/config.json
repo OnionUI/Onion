@@ -1,0 +1,12 @@
+{
+"label":"squirreljme",
+"icon":"squirreljme.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/JAVA",
+"imgpath":"../../Roms/JAVA/Imgs",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

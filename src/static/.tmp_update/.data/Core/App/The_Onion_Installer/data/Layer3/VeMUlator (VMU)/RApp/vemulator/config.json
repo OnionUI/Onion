@@ -1,0 +1,12 @@
+{
+"label":"vemulator",
+"icon":"vemulator.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/VMU",
+"imgpath":"../../Roms/VMU/Imgs",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

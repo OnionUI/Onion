@@ -1,0 +1,169 @@
+#!/bin/sh
+
+# init_lcd
+cat /proc/ls
+sleep 0.25
+ 
+/mnt/SDCARD/miyoo/app/audioserver &
+
+# init charger detection
+if [ ! -f /sys/devices/gpiochip0/gpio/gpio59/direction ]; then
+	echo 59 > /sys/class/gpio/export
+	echo in > /sys/devices/gpiochip0/gpio/gpio59/direction
+fi
+
+# init backlight
+echo 0 > /sys/class/pwm/pwmchip0/export
+echo 800 > /sys/class/pwm/pwmchip0/pwm0/period
+echo 80 > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
+echo 1 > /sys/class/pwm/pwmchip0/pwm0/enable
+ 
+cd /mnt/SDCARD/.tmp_update/
+./checkCharge
+
+if [ -f /tmp/.isCharging ] ; then
+cd /mnt/SDCARD/.tmp_update/
+./chargingState
+fi
+
+#Load current time
+sTime=$(cat /mnt/SDCARD/Saves/CurrentProfile/saves/currentTime.txt)
+#Add 4 hours to the current time
+sTime=$(($sTime + 14400))
+sTime="@${sTime}"
+$(date +%s -s ${sTime})
+
+cd /mnt/SDCARD/.tmp_update/
+./bootScreen "Boot"
+
+cd /mnt/SDCARD/.tmp_update/
+./keymon_onion &
+
+#cd /mnt/SDCARD/App/Screenshot
+#./screenshot &
+
+ 
+# Init
+rm /mnt/SDCARD/.tmp_update/.offOrder
+HOME=/mnt/SDCARD/RetroArch/
+
+
+###
+### Auto launch
+###
+if  [ ! -f /mnt/SDCARD/.tmp_update/.noAutoStart ] ; then
+	if  [ -f /mnt/SDCARD/.tmp_update/cmd_to_run.sh ] ; then
+		# TIMER INIT 
+		if  [ -f /mnt/SDCARD/.tmp_update/romName.txt ] ; then
+			cd /mnt/SDCARD/App/PlayActivity
+			./playActivity "init"
+		fi
+		# GAME LAUNCH
+		cd /mnt/SDCARD/RetroArch/
+		/mnt/SDCARD/.tmp_update/cmd_to_run.sh
+		# TIMER SAVE
+		if  [ -f /mnt/SDCARD/.tmp_update/romName.txt ] ; then
+			cd /mnt/SDCARD/.tmp_update/	
+			value=$(cat romName.txt);
+			cd /mnt/SDCARD/App/PlayActivity
+			./playActivity "$value"	
+		fi
+
+	fi
+fi
+
+
+if  [ -f /mnt/SDCARD/.tmp_update/.offOrder ] ; then
+	cd /mnt/SDCARD/.tmp_update/
+	./bootScreen "End_Save"
+	sleep 10
+fi	
+
+### Menu button tap
+if  [ -f /tmp/.trimUIMenu ] ; then
+		rm /tmp/.trimUIMenu
+		cd /mnt/SDCARD/.tmp_update/
+		LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./onionLauncher > ./log.txt 2>&1
+		sync
+else 
+	# Returning to MainUI
+	rm /mnt/SDCARD/.tmp_update/cmd_to_run.sh
+	sync
+fi	
+
+### Device extinction
+if  [ -f /mnt/SDCARD/.tmp_update/.offOrder ] ; then	
+	cd /mnt/SDCARD/.tmp_update/
+	./bootScreen "End"
+	sleep 10
+fi
+
+while true; do	
+	
+		if [ ! -f /mnt/SDCARD/.tmp_update/cmd_to_run.sh ] ; then
+			### MainUI launch
+			cd /mnt/SDCARD/.tmp_update
+			./mainUiBatPerc
+			cd /mnt/SDCARD/miyoo/app
+			LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./MainUI
+			mv /tmp/cmd_to_run.sh /mnt/SDCARD/.tmp_update/cmd_to_run.sh
+			
+			### Device extinction
+			if  [ -f /mnt/SDCARD/.tmp_update/.offOrder ] ; then
+				cd /mnt/SDCARD/.tmp_update/
+				./bootScreen "End"
+				sleep 10
+			fi		
+		fi
+		
+		### Game launch
+	
+		if  [ -f /mnt/SDCARD/.tmp_update/cmd_to_run.sh ] ; then
+			# TIMER INIT 
+			if  [ -f /mnt/SDCARD/.tmp_update/romName.txt ] ; then
+				cd /mnt/SDCARD/App/PlayActivity
+				./playActivity "init"
+			fi
+			# GAME LAUNCH
+			cd /mnt/SDCARD/RetroArch/
+			/mnt/SDCARD/.tmp_update/cmd_to_run.sh
+			# TIMER SAVE
+			if  [ -f /mnt/SDCARD/.tmp_update/romName.txt ] ; then
+				cd /mnt/SDCARD/.tmp_update/	
+				value=$(cat romName.txt);
+				cd /mnt/SDCARD/App/PlayActivity
+				./playActivity "$value"	
+			fi
+
+		fi
+
+		
+		if  [ -f /mnt/SDCARD/.tmp_update/.offOrder ] ; then
+			cd /mnt/SDCARD/.tmp_update/
+			./bootScreen "End_Save"
+			sleep 10
+		fi	
+		
+		if  [ -f /tmp/.trimUIMenu ] ; then
+				rm /tmp/.trimUIMenu
+				cd /mnt/SDCARD/.tmp_update/
+				LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./onionLauncher > ./log.txt 2>&1
+				sync
+		else 
+			# Returning to MainUI
+			rm /mnt/SDCARD/.tmp_update/cmd_to_run.sh
+			rm /mnt/SDCARD/.tmp_update/romName.txt
+			sync
+		fi	
+		
+		if  [ -f /mnt/SDCARD/.tmp_update/.offOrder ] ; then
+			cd /mnt/SDCARD/.tmp_update/
+			./bootScreen "End"
+			sleep 10
+		fi	
+
+		# Free memory
+		cd /mnt/SDCARD/.tmp_update
+		./freemma
+done
+	

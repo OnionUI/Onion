@@ -1,0 +1,7 @@
+{
+"label":"Theme Switcher",
+"icon":"icon.png",
+"iconsel":"icon.png",
+"launch":"launch.sh",
+"description":"Change and add themes easily."
+}

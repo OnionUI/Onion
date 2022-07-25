@@ -1,0 +1,7 @@
+{
+"label":"Music player (Menu + start to exit)",
+"icon":"logo.png",
+"iconsel":"",
+"launch":"launch.sh",
+"description":"Media player - mp3, ogg, flac, opus & more"
+}

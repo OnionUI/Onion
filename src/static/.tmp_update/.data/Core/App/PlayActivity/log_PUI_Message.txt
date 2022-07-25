@@ -1,0 +1,248 @@
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Gambatte/Super Mario Land 2 DX (Hack v1.8.1 + Sound Improvement).lrtl 
+1:24 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Gambatte/Legend of Zelda, The - Oracle of Ages (Europe) (En,Fr,De,Es,It).lrtl 
+0:17 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Gambatte/Super Mario Land (World).lrtl 
+0:01 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Gambatte/Tetris (World) (Rev 1) (patched).lrtl 
+0:10 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Gambatte/gb-wordyl_1.00_mbc5_fr.lrtl 
+3:11 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Gambatte/Kaeru no Tame ni Kane wa Naru (English v1.0).lrtl 
+0:14 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Gambatte/Legend of Zelda, The - Link's Awakening DX (France) (Rev A) (SGB Enhanced).lrtl 
+0:02 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Gambatte/Legend of Zelda, The - Oracle of Seasons (Europe) (En,Fr,De,Es,It).lrtl 
+34:17 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Gambatte/Mario's Picross (UE) [S][b2].lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Gambatte/Picross 2 (eng).lrtl 
+4:42 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Gambatte/The Machine (U) [C].lrtl 
+0:20 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PCSX-ReARMed/Lunar - Silver Star Story Complete (Un-Worked Designs) (Disc 1).lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PCSX-ReARMed/Worms Armageddon (EU).lrtl 
+4:32 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PCSX-ReARMed/Chrono_Cross_CD1_(NTSC-U)_[SLUS-01041].lrtl 
+4:31 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PCSX-ReARMed/Dance Dance Revolution (USA).lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PCSX-ReARMed/Grand_Theft_Auto_2_(PAL)_[SLES-01404].lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PCSX-ReARMed/Hugo (Europe).lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PCSX-ReARMed/PaRappa the Rapper (USA) (En,Fr,De,Es,It).lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PCSX-ReARMed/Ridge Racer Type 4 (E) [SCES-01706].lrtl 
+0:08 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PCSX-ReARMed/SLES-022ALUND.lrtl 
+0:01 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PCSX-ReARMed/WipEout 3 - Special Edition (Europe) (En,Fr,De,Es,It).lrtl 
+0:11 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PCSX-ReARMed/Worms Armageddon (Europe) (Fr,Nl,Sv,No,Da).lrtl 
+0:02 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PCSX-ReARMed/Worms Armageddon PSX-PAL-Multi.lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PCSX-ReARMed/[PSX] Grand Turismo 2 CD2.lrtl 
+0:03 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Beetle Supafaust/Chrono Trigger (U) [!].lrtl 
+0:13 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Beetle Supafaust/Contra III - The Alien Wars (USA) (Beta).lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Beetle Supafaust/Illusion of Gaia (USA).lrtl 
+0:02 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Beetle Supafaust/Legend_of_Zelda,_The_-_A_Link_to_the_Past_(USA)_(MSU1).lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Beetle Supafaust/Mega Man X (E).lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Beetle Supafaust/New Super Mario Land (J) (V1.5).lrtl 
+0:03 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Beetle Supafaust/Chrono Trigger (USA).lrtl 
+0:01 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Cannonball/epr-10187.lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Dinothawr/dinothawr.lrtl 
+9:34 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/FB Alpha 2012 Neo Geo/sonicwi2.lrtl 
+0:03 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/FCEUmm/Kirby's Adventure (France).lrtl 
+0:18 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Gearboy/Mole Mania (USA, Europe) (SGB Enhanced).lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/gpSP/Final Fantasy Tactics Advance (Europe) (En,Fr,De,Es,It).lrtl 
+2:16 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/gpSP/Game Boy Advance Video - Cartoon Network Collection - Volume 1 (USA, Europe).lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/gpSP/Game Boy Advance Video - Teenage Mutant Ninja Turtles - Le Demenagement (France).lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/gpSP/Game Boy Advance Video - Teenage Mutant Ninja Turtles - Things Change (USA, Europe).lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/gpSP/Guru Logic Champ (Japan).lrtl 
+0:37 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/gpSP/Gyakuten Saiban .lrtl 
+0:01 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/gpSP/Gyakuten Saiban 2.lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/gpSP/Gyakuten Saiban 3.lrtl 
+3:19 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/gpSP/Legend of Zelda, The - The Minish Cap (Europe) (En,Fr,De,Es,It).lrtl 
+0:03 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/gpSP/Rhythm Tengoku (Japan) (English Translation).lrtl 
+2:26 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Handy/Alien vs Predator (USA) (Proto).lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/MAME 2003-Plus/pacman.lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/mGBA/Final Fantasy Tactics Advance (Europe) (En,Fr,De,Es,It).lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/mGBA/Mole Mania (USA, Europe) (SGB Enhanced).lrtl 
+0:01 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Mr.Boom/Mr.Boom.lrtl 
+0:01 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/NXEngine/Doukutsu.lrtl 
+0:01 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PicoDrive/X-Men 2 - Clone Wars (USA, Europe).lrtl 
+0:02 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PrBoom/doom1.lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PrBoom/doom2.lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/REminiscence/level1.lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/ScummVM/ATLANTIS.lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/ScummVM/TENTACLE.lrtl 
+0:01 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Snes9x 2005 Plus/240pSuite.lrtl 
+0:03 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Snes9x 2005 Plus/Super Mario World (E) (V1.1) [!].lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/TyrQuake/id1.lrtl 
+0:08 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/VBA-M/Mole Mania (USA, Europe) (SGB Enhanced).lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Gambatte/Super Mario Land 2 DX (Hack v1.8.1 + Sound Improvement).lrtl 
+1:24 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Gambatte/Legend of Zelda, The - Oracle of Ages (Europe) (En,Fr,De,Es,It).lrtl 
+0:18 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Gambatte/Super Mario Land (World).lrtl 
+0:01 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Gambatte/Tetris (World) (Rev 1) (patched).lrtl 
+0:10 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Gambatte/gb-wordyl_1.00_mbc5_fr.lrtl 
+3:11 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Gambatte/Kaeru no Tame ni Kane wa Naru (English v1.0).lrtl 
+0:14 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Gambatte/Legend of Zelda, The - Link's Awakening DX (France) (Rev A) (SGB Enhanced).lrtl 
+0:02 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Gambatte/Legend of Zelda, The - Oracle of Seasons (Europe) (En,Fr,De,Es,It).lrtl 
+34:17 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Gambatte/Mario's Picross (UE) [S][b2].lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Gambatte/Picross 2 (eng).lrtl 
+4:42 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Gambatte/The Machine (U) [C].lrtl 
+0:20 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PCSX-ReARMed/Lunar - Silver Star Story Complete (Un-Worked Designs) (Disc 1).lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PCSX-ReARMed/Worms Armageddon (EU).lrtl 
+4:32 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PCSX-ReARMed/Chrono_Cross_CD1_(NTSC-U)_[SLUS-01041].lrtl 
+4:31 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PCSX-ReARMed/Dance Dance Revolution (USA).lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PCSX-ReARMed/Grand_Theft_Auto_2_(PAL)_[SLES-01404].lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PCSX-ReARMed/Hugo (Europe).lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PCSX-ReARMed/PaRappa the Rapper (USA) (En,Fr,De,Es,It).lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PCSX-ReARMed/Ridge Racer Type 4 (E) [SCES-01706].lrtl 
+0:08 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PCSX-ReARMed/SLES-022ALUND.lrtl 
+0:01 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PCSX-ReARMed/WipEout 3 - Special Edition (Europe) (En,Fr,De,Es,It).lrtl 
+0:11 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PCSX-ReARMed/Worms Armageddon (Europe) (Fr,Nl,Sv,No,Da).lrtl 
+0:02 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PCSX-ReARMed/Worms Armageddon PSX-PAL-Multi.lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PCSX-ReARMed/[PSX] Grand Turismo 2 CD2.lrtl 
+0:03 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Beetle Supafaust/Chrono Trigger (U) [!].lrtl 
+0:13 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Beetle Supafaust/Contra III - The Alien Wars (USA) (Beta).lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Beetle Supafaust/Illusion of Gaia (USA).lrtl 
+0:02 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Beetle Supafaust/Legend_of_Zelda,_The_-_A_Link_to_the_Past_(USA)_(MSU1).lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Beetle Supafaust/Mega Man X (E).lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Beetle Supafaust/New Super Mario Land (J) (V1.5).lrtl 
+0:03 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Beetle Supafaust/Chrono Trigger (USA).lrtl 
+0:04 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Cannonball/epr-10187.lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Dinothawr/dinothawr.lrtl 
+9:34 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/FB Alpha 2012 Neo Geo/sonicwi2.lrtl 
+0:03 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/FCEUmm/Kirby's Adventure (France).lrtl 
+0:18 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Gearboy/Mole Mania (USA, Europe) (SGB Enhanced).lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/gpSP/Final Fantasy Tactics Advance (Europe) (En,Fr,De,Es,It).lrtl 
+2:16 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/gpSP/Game Boy Advance Video - Cartoon Network Collection - Volume 1 (USA, Europe).lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/gpSP/Game Boy Advance Video - Teenage Mutant Ninja Turtles - Le Demenagement (France).lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/gpSP/Game Boy Advance Video - Teenage Mutant Ninja Turtles - Things Change (USA, Europe).lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/gpSP/Guru Logic Champ (Japan).lrtl 
+0:37 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/gpSP/Gyakuten Saiban .lrtl 
+0:01 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/gpSP/Gyakuten Saiban 2.lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/gpSP/Gyakuten Saiban 3.lrtl 
+3:19 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/gpSP/Legend of Zelda, The - The Minish Cap (Europe) (En,Fr,De,Es,It).lrtl 
+0:03 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/gpSP/Rhythm Tengoku (Japan) (English Translation).lrtl 
+2:26 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Handy/Alien vs Predator (USA) (Proto).lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/MAME 2003-Plus/pacman.lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/mGBA/Final Fantasy Tactics Advance (Europe) (En,Fr,De,Es,It).lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/mGBA/Mole Mania (USA, Europe) (SGB Enhanced).lrtl 
+0:01 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Mr.Boom/Mr.Boom.lrtl 
+0:01 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/NXEngine/Doukutsu.lrtl 
+0:01 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PicoDrive/X-Men 2 - Clone Wars (USA, Europe).lrtl 
+0:02 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PrBoom/doom1.lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/PrBoom/doom2.lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/REminiscence/level1.lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/ScummVM/ATLANTIS.lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/ScummVM/TENTACLE.lrtl 
+0:01 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Snes9x 2005 Plus/240pSuite.lrtl 
+0:03 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/Snes9x 2005 Plus/Super Mario World (E) (V1.1) [!].lrtl 
+0:00 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/TyrQuake/id1.lrtl 
+0:08 
+/mnt/SDCARD/Saves/CurrentProfile/lists/playlists/logs/VBA-M/Mole Mania (USA, Europe) (SGB Enhanced).lrtl 
+0:00 

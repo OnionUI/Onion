@@ -1,0 +1,12 @@
+{
+"label":"SNES 9x 2005p",
+"icon":"../../Icons/sfc.png",
+"iconsel":"../../Icons/sfc.png",
+"launch":"launch.sh",
+"rompath":"../../Roms/SFC",
+"imgpath":"../../Roms/SFC/Imgs",
+"useswap":1,
+"shortname":0,
+"hidebios":0,
+"extlist":"sfc|SFC|smc|SMC|zip|ZIP|7z|7Z"
+}

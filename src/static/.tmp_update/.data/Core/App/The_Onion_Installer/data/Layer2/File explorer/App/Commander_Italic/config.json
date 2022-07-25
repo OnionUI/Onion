@@ -1,0 +1,7 @@
+{
+"label":"File Explorer",
+"icon":"commander.png",
+"iconsel":"commander.png",
+"launch":"launch.sh",
+"description":"DinguxCommander"
+}

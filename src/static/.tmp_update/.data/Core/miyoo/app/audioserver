@@ -1,0 +1,3 @@
+#!/bin/sh
+cd `dirname "$0"`
+LD_PRELOAD="./as_preload.so" ./audioserver.mod

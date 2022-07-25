@@ -1,0 +1,7 @@
+{
+"label":"Expert View - Enabled",
+"icon":"ModeExpert.png",
+"iconsel":"ModeExpert.png",
+"launch":"launch.sh",
+"description":"Turn on the clean view."
+}

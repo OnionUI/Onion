@@ -1,0 +1,20 @@
+# Software Information
+display_name = "Bandai - WonderSwan/Color (Beetle Cygne)"
+authors = "Dox|Mednafen Team"
+supported_extensions = "ws|wsc|pc2"
+corename = "Beetle WonderSwan"
+license = "GPLv2"
+permissions = ""
+display_version = "v0.9.35.1"
+categories = "Emulator"
+
+# Hardware Information
+manufacturer = "Bandai"
+systemname = "WonderSwan/Color"
+systemid = "wonderswan"
+
+# Libretro Features
+supports_no_game = "false"
+database = "Bandai - WonderSwan|Bandai - WonderSwan Color"
+
+description = "A port of Mednafen's WonderSwan Color emulation core to libretro."

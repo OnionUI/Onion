@@ -1,0 +1,4 @@
+- Original image: https://pixabay.com/en/fractal-digital-spiral-1231400/
+  (Licensed under the terms of the Pixabay License: https://pixabay.com/en/service/license/)
+
+- Modified by jdgleaver

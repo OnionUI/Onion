@@ -1,0 +1,7 @@
+{
+"label":"240p Test Suite",
+"icon":"icon.png",
+"iconsel":"icon.png",
+"launch":"launch.sh",
+"description":"Tools for screen calibration."
+}

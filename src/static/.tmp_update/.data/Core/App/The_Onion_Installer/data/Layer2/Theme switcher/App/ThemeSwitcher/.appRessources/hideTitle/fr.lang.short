@@ -1,0 +1,21 @@
+{
+	"88":	"OUVRIR",
+	"89":	"RETOUR",
+	"90":	"NAV",
+	"91":	"MENU",
+	"92":	"Reprendre",
+	"93":	"Sauvegarder",
+	"94":	"Charger",
+	"95":	"Volume",
+	"96":	"Sortir du jeu",
+	"97":	"Enregistré %d/%d",
+	"98":	"Vide",
+	"99":	"Pas de miniatures",
+	"100":	"chargement échoué",
+	"101":	"sauvegarde échoué",
+	"102":	"slot%d sauvegardé",
+	"103":  "Plein écran",
+	"104":  "On",
+	"105":  "Off",
+	"106":  "Menu natif"	
+}

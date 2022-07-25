@@ -1,0 +1,13 @@
+{
+"label":"Atari 7800",
+"icon":"../../Icons/7800.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/SEVENTYEIGHTHUNDRED",
+"imgpath":"../../Roms/SEVENTYEIGHTHUNDRED/Imgs",
+"gamelist":"../../Roms/SEVENTYEIGHTHUNDRED/miyoogamelist.xml",
+"useswap":0,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

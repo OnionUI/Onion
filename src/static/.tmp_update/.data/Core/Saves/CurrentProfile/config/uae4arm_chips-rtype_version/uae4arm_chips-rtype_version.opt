@@ -1,0 +1,5 @@
+uae4arm_fastmem = "None"
+uae4arm_floppy_speed = "100"
+uae4arm_leds_on_screen = "on"
+uae4arm_model = "Auto"
+uae4arm_resolution = "320x240"

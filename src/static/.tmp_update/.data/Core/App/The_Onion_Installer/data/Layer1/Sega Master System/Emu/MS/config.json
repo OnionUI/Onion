@@ -1,0 +1,13 @@
+{
+"label":"Sega MS",
+"icon":"../../Icons/ms.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/MS",
+"imgpath":"../../Roms/MS/Imgs",
+"gamelist":"../../Roms/MS/miyoogamelist.xml",
+"useswap":0,
+"shortname":0,
+"hidebios":0,
+"extlist":""
+}

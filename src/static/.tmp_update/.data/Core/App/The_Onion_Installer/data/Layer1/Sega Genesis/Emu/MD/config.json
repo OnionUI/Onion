@@ -1,0 +1,13 @@
+{
+"label":"Genesis",
+"icon":"../../Icons/md.png",
+"iconsel":"../../Icons/md.png",
+"launch":"launch.sh",
+"rompath":"../../Roms/MD",
+"imgpath":"../../Roms/MD/Imgs",
+"gamelist":"../../Roms/MD/miyoogamelist.xml",
+"useswap":1,
+"shortname":0,
+"hidebios":0,
+"extlist":""
+}

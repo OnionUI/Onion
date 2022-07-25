@@ -1,0 +1,21 @@
+# Software Information
+display_name = "Sony - PlayStation 2 (PCSX2)"
+authors = "PCSX2 Team"
+supported_extensions = "elf|iso|ciso|cso|cue|bin|mdf|nrg|dump|gz|img"
+corename = "PCSX2"
+license = "GPL"
+permissions = ""
+display_version = "Git"
+categories = "Emulator"
+
+# Hardware Information
+manufacturer = "Sony"
+systemname = "Sony PlayStation 2"
+systemid = "playstation2"
+
+# Libretro Features
+database = "Sony - PlayStation 2"
+supports_no_game = "false"
+needs_fullpath = "true"
+
+description = "A port of the mature and highly-compatible PCSX2 Playstation 2 emulator to libretro. This core is a good first choice for most users as compared with the Play! core, which has lower compatibility with the PS2 library."

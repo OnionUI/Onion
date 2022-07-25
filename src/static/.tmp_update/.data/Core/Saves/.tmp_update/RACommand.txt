@@ -1,0 +1,1 @@
+./retroarch -v -L "/mnt/SDCARD/RetroArch/.retroarch/cores/gambatte_libretro.so" "/mnt/SDCARD/Roms/GB/Picross 2 (eng).gb"

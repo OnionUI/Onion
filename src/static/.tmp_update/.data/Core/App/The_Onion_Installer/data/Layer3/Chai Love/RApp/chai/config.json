@@ -1,0 +1,12 @@
+{
+"label":"chailove",
+"icon":"chai.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/CHAI",
+"imgpath":"../../Imgs/CHAI",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

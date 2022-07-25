@@ -1,0 +1,25 @@
+# Software Information  
+display_name = "Palm OS (Mu)"
+authors = "guicrith / meepingsnesroms"
+supported_extensions = "prc|pqa|img"
+corename = "Mu"
+license = "Non-commercial"
+permissions = ""
+display_version = "v1.1.0"
+categories = "Emulator"
+
+# Hardware Information
+manufacturer = "Palm"
+systemname = "Palm OS"
+
+# Libretro Features
+supports_no_game = "true"
+
+# BIOS/Firmware
+firmware_count = 1
+firmware1_desc = "palmos41-en-m515.rom (Palm OS 4.1)"
+firmware1_path = "palmos41-en-m515.rom"
+firmware1_opt = "false"
+notes = "(!) palmos41-en-m515.rom (md5): 83cb1d1c76e568b916dc2e7c0bf669f6"
+
+description = "An emulator for the Palm m515 OS ported to libretro. It is intended to avoid hacks like those used by the POSE emulator, where API calls are intercepted and replaced with those that don't use the actual hardware."

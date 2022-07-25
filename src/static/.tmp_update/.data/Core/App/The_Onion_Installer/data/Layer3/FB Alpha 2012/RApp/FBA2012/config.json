@@ -1,0 +1,12 @@
+{
+"label":"fba2012",
+"icon":"fba2012.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/FBA2012",
+"imgpath":"../../Roms/FBA2012/Imgs",
+"useswap":1,
+"shortname":1,
+"hidebios":1,
+"extlist":""
+}

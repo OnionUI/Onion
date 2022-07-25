@@ -1,0 +1,13 @@
+{
+"label":"TIC-80",
+"icon":"../../Icons/tic.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/TIC",
+"imgpath":"../../Roms/TIC/Imgs",
+"gamelist":"../../Roms/TIC/miyoogamelist.xml",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

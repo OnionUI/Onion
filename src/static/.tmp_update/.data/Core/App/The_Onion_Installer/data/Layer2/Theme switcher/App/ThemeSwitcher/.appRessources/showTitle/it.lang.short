@@ -1,0 +1,21 @@
+{
+	"88":	"APRI",
+	"89":	"INDIETRO",
+	"90":	"NAV",
+	"91":	"MENU",
+	"92":	"Continua",
+	"93":	"Salva",
+	"94":	"Carica",
+	"95":	"Volume",
+	"96":	"Esci dal gioco",
+	"97":	"Record %d/%d",
+	"98":	"Vuoto",
+	"99":	"No antep.",
+	"100":	"caric. fallito",
+	"101":	"salv. fallito",
+	"102":	"slot%d salvato",
+	"103":  "Schermo int.",
+	"104":  "On",
+	"105":  "Off",
+	"106":  "Menu nativo"	
+}

@@ -1,0 +1,7 @@
+wswan_frameskip = "disabled"
+wswan_frameskip_threshold = "33"
+wswan_gfx_colors = "16bit"
+wswan_mono_palette = "default"
+wswan_rotate_display = "manual"
+wswan_rotate_keymap = "auto"
+wswan_sound_sample_rate = "48000"

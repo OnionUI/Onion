@@ -1,0 +1,19 @@
+# Software Information
+display_name = "Commodore - VIC-20 (VICE xvic)"
+categories = "Emulator"
+authors = "VICE Team"
+corename = "VICE xvic"
+supported_extensions = "d64|d71|d80|d81|d82|g64|g41|x64|t64|tap|prg|p00|crt|bin|zip|gz|d6z|d7z|d8z|g6z|g4z|x6z|cmd|m3u|vfl|vsf|nib|nbz|d2m|d4m|20|40|60|a0|b0|rom"
+license = "GPLv2"
+permissions = ""
+display_version = "3.5"
+description = "Versatile Commodore Emulator - VIC-20"
+
+# Hardware Information
+manufacturer = "Commodore"
+systemname = "VIC-20"
+systemid = "commodore_vic20"
+
+# Libretro Features
+database = "Commodore - VIC-20"
+supports_no_game = "true"

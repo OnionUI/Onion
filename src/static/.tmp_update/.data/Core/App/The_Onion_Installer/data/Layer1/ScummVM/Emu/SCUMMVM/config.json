@@ -1,0 +1,13 @@
+{
+"label":"ScummVM",
+"icon":"../../Icons/scummvm.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/SCUMMVM",
+"imgpath":"../../Roms/SCUMMVM/Imgs",
+"gamelist":"../../Roms/SCUMMVM/miyoogamelist.xml",
+"useswap":1,
+"shortname":0,
+"hidebios":0,
+"extlist":""
+}

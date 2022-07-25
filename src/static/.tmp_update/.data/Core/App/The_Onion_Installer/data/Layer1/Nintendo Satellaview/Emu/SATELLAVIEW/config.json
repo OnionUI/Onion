@@ -1,0 +1,13 @@
+{
+"label":"Satlview",
+"icon":"../../Icons/satella.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/SATELLAVIEW",
+"imgpath":"../../Roms/SATELLAVIEW/Imgs",
+"gamelist":"../../Roms/SATELLAVIEW/miyoogamelist.xml",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

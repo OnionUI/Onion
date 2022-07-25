@@ -1,0 +1,12 @@
+{
+"label":"gen_plus_gx_segacd",
+"icon":"genesis_plus_gx.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/SEGACD",
+"imgpath":"../../Imgs/SEGACD",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

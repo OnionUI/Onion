@@ -1,0 +1,13 @@
+{
+"label":"SuperGfx",
+"icon":"../../Icons/sgfx.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/SGFX",
+"imgpath":"../../Roms/SGFX/Imgs",
+"gamelist":"../../Roms/SGFX/miyoogamelist.xml",
+"useswap":0,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

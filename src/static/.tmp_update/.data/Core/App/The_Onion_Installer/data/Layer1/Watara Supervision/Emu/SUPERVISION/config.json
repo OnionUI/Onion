@@ -1,0 +1,13 @@
+{
+"label":"WtSupVis",
+"icon":"../../Icons/supervision.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/SUPERVISION",
+"imgpath":"../../Roms/SUPERVISION/Imgs",
+"gamelist":"../../Roms/SUPERVISION/miyoogamelist.xml",
+"useswap":0,
+"shortname":0,
+"hidebios":0,
+"extlist":""
+}

@@ -1,0 +1,13 @@
+{
+"label":"GameBoy",
+"icon":"../../Icons/gb.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/GB",
+"imgpath":"../../Roms/GB/Imgs",
+"gamelist":"../../Roms/GB/miyoogamelist.xml",
+"useswap":0,
+"shortname":0,
+"hidebios":0,
+"extlist":""
+}

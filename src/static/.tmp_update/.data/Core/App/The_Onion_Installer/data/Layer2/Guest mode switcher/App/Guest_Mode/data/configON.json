@@ -1,0 +1,7 @@
+{
+"label":"Guest mode - enabled",
+"icon":"GuestON.png",
+"iconsel":"GuestON.png",
+"launch":"launch.sh",
+"description":"Select to turn off"
+}

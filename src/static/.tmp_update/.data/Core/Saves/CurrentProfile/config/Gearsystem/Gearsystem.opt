@@ -1,0 +1,8 @@
+gearsystem_bios_gg = "Disabled"
+gearsystem_bios_sms = "Disabled"
+gearsystem_glasses = "Both Eyes / OFF"
+gearsystem_mapper = "Auto"
+gearsystem_region = "Auto"
+gearsystem_system = "Auto"
+gearsystem_timing = "Auto"
+gearsystem_up_down_allowed = "Disabled"

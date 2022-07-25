@@ -1,0 +1,7 @@
+bluemsx_auto_rewind_cas = "ON"
+bluemsx_cartmapper = "Normal"
+bluemsx_msxtype = "Auto"
+bluemsx_nospritelimits = "OFF"
+bluemsx_overscan = "enabled"
+bluemsx_vdp_synctype = "Auto"
+bluemsx_ym2413_enable = "enabled"

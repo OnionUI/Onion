@@ -1,0 +1,16 @@
+{
+	"vol":	20,
+	"keymap":	"L2,L,R2,R,X,A,B,Y",
+	"mute":	1,
+	"bgmvol":	20,
+	"brightness":	7,
+	"language":	"en.lang",
+	"hibernate":	3,
+	"lumination":	7,
+	"hue":	10,
+	"saturation":	10,
+	"contrast":	10,
+	"theme":	"/mnt/SDCARD/Themes/Default_Onion-DiMo/",
+	"fontsize":	25,
+	"audiofix":	1
+}

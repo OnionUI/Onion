@@ -1,0 +1,12 @@
+{
+"label":"theodore",
+"icon":"theodore.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/THOMSON",
+"imgpath":"../../Roms/THOMSON/Imgs",
+"useswap":0,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

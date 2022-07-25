@@ -1,0 +1,13 @@
+{
+"label":"Atari 5200",
+"icon":"../../Icons/atari.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/FIFTYTWOHUNDRED",
+"imgpath":"../../Roms/FIFTYTWOHUNDRED/Imgs",
+"gamelist":"../../Roms/FIFTYTWOHUNDRED/miyoogamelist.xml",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}
