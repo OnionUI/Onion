@@ -1,0 +1,3 @@
+[submodule "third-party/RetroArch"]
+	path = third-party/RetroArch
+	url = https://github.com/OnionUI/RetroArch.git
