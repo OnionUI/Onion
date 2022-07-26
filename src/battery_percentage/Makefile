@@ -1,7 +1,6 @@
 # CROSS_COMPILE=/usr/bin/arm-linux-gnueabihf-
 
 TARGET = mainUiBatPerc
-TOOLCHAIN_DIR = /opt/miyoomini83
 
 CC 		= $(CROSS_COMPILE)gcc
 CXX 	= $(CROSS_COMPILE)g++
@@ -13,25 +12,25 @@ CPPFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.cpp))
 OFILES = $(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
 
 # NOTE: These flags aren't strickly necessary...
-CFLAGS = -marm -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7ve 
+CFLAGS = -I../../include -I../common -marm -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7ve 
 CXXFLAGS = $(CFLAGS)
-LDFLAGS = -lSDL -lSDL_ttf -lSDL_image -pthread -lshmvar -lpng
+LDFLAGS = -L../static/.tmp_update/.data/Core/miyoo/lib -lSDL -lSDL_ttf -lSDL_image -pthread -lshmvar -lpng
 
 
 $(TARGET): $(OFILES)
-	$(CXX) $(OFILES) -o $@ $(LDFLAGS)
-	#$(STRIP) $@
+	@$(CXX) $(OFILES) -o $@ $(LDFLAGS)
+# $(STRIP) $@
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	@echo Building $@
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 # %.o: %.cpp
 # 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(TARGET) $(OFILES)
-
+	@rm -f $(TARGET) $(OFILES)
+	@echo Cleaned
 
 install:
-	echo do nothing for install
-
+	@echo "do nothing for install"
