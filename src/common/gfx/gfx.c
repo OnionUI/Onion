@@ -5,8 +5,8 @@
 #include <linux/fb.h>
 #include <sys/ioctl.h>
 #include <SDL/SDL.h>
-#include </usr/local/include/mi_sys.h>
-#include </usr/local/include/mi_gfx.h>
+#include <mi_sys.h>
+#include <mi_gfx.h>
 
 //#define	DOUBLEBUF
  

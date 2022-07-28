@@ -1,7 +1,3 @@
-#include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
-#include <SDL/SDL_ttf.h>
-#include "SDL_rotozoom.h"
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h> 
@@ -13,8 +9,14 @@
 #include <stdbool.h>   
 #include <sys/stat.h>   
 #include "sys/ioctl.h"
-#include "cJSON.h"
-#include <png.h>
+#include <SDL/SDL.h>
+#include <SDL/SDL_image.h>
+#include <SDL/SDL_ttf.h>
+
+#include "SDL/SDL_rotozoom.h"
+#include "cJSON/cJSON.h"
+#include <png/png.h>
+
 #define MAXHISTORY 50
 #define MAXHROMNAMESIZE 250
 #define MAXHROMPATHSIZE 150

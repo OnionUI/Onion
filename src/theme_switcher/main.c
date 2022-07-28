@@ -1,6 +1,3 @@
-#include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
-#include <SDL/SDL_ttf.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -13,7 +10,11 @@
 #include <sys/stat.h>  
 #include "sys/ioctl.h"
 #include <dirent.h>
-#include "cJSON.h"
+#include <SDL/SDL.h>
+#include <SDL/SDL_image.h>
+#include <SDL/SDL_ttf.h>
+
+#include "cJSON/cJSON.h"
    
 // Max number of records in the DB
 #define NUMBER_OF_THEMES 100

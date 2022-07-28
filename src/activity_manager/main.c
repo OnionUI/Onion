@@ -2,11 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h> 
-#include "cJSON.h"
 #include <stdbool.h>  
 #include <sys/stat.h>  
 #include <fcntl.h>
 #include <time.h>
+
+#include "cJSON/cJSON.h"
 
 // Max number of records in the DB
 #define MAXVALUES 1000

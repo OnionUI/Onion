@@ -6,7 +6,7 @@ CC 		= $(CROSS_COMPILE)gcc
 CXX 	= $(CROSS_COMPILE)g++
 STRIP 	= $(CROSS_COMPILE)strip
 
-SOURCES = . ../../include/cJSON
+SOURCES = .
 CFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.c))
 CPPFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.cpp))
 OFILES = $(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
@@ -14,7 +14,7 @@ OFILES = $(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
 # NOTE: These flags aren't strickly necessary...
 CFLAGS = -I../../include -I../common -marm -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7ve 
 CXXFLAGS = $(CFLAGS)
-LDFLAGS = -L../static/.tmp_update/.data/Core/miyoo/lib -lSDL -lSDL_ttf -lSDL_image -pthread -lshmvar -lpng
+LDFLAGS = -L../static/.tmp_update/.data/Core/miyoo/lib -lSDL -lSDL_ttf -lSDL_image -pthread -lshmvar -lpng -lcjson
 
 
 $(TARGET): $(OFILES)
