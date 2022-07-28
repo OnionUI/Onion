@@ -906,7 +906,7 @@ void updateADC(int mode) {
 	GetADCValue();
 	if (!onion) SetKeyShm(&shminfo, MONITOR_ADC_VALUE, adcvalue);
 	uint32_t warn = checkBatteryWarning();
-	if ((!adcthread_active)&&(warn)) {
+	if ((access("/mnt/SDCARD/.tmp_update/.noBatteryWarning", F_OK)!=0)&&(!adcthread_active)&&(warn)) {
 		pthread_create(&adc_pt, NULL, batteryWarnThread, NULL);
 		adcthread_active = 1;
 	} else if ((adcthread_active)&&(!warn)) {
