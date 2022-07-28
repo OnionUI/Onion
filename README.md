@@ -229,7 +229,12 @@ The audio sever lag has been removed. (Credit: Eggs)
 <tbody>
 <tr>
 <td><kbd>MENU</kbd></td>
-<td>Launch Game Switcher (save and exit)</td>
+<td>Save and exit to Game Switcher</td>
+<td><em>In-game</em></td>
+</tr>
+<tr>
+<td><kbd>MENU</kbd> <sup>hold</sup></td>
+<td>Save and exit to menu</td>
 <td><em>In-game</em></td>
 </tr>
 <tr>
