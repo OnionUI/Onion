@@ -1517,7 +1517,7 @@ void suspend_exec(int timeout) {
 					screenshot();
 					setScreen(0);
 					setCPUsave(0);
-					break;
+					// break;   //  avoid bad screen state after the screen shot
 					
 				} else if ( ev.code == BUTTON_START )  {
 					// adjust clock
@@ -1789,14 +1789,24 @@ int main(void) {
 				if ((ev.code == BUTTON_MENU)&&(val == 0)){	
 					
 					if (comboKey == 0){
-						if (access("/mnt/SDCARD/.tmp_update/.noGameSwitcher", F_OK)==-1) {
+						if (access("/mnt/SDCARD/.tmp_update/.menuInverted", F_OK)==-1) {
 								if (check_autosave()) {
-									if (onion) {
-									//super_short_pulse();
-									close(creat("/tmp/.trimUIMenu", 777));
-									screenshot_onion(); 
-									terminate_retroarch();	
+									if (access("/mnt/SDCARD/.tmp_update/.noGameSwitcher", F_OK)==-1) {  // just in case if someone want to desactivate Game Switcher totally
+										if (onion) {
+										//super_short_pulse();
+										close(creat("/tmp/.trimUIMenu", 777));
+										screenshot_onion(); 
+										terminate_retroarch();	
+										}
 									}
+								}
+						}
+						else  // The file ".menuInverted" exists, we exit retroarch on short press
+						{
+								
+								if (check_autosave()) {
+									remove("/tmp/.trimUIMenu");
+									terminate_retroarch();
 								}
 						}
 					}
@@ -1860,7 +1870,7 @@ int main(void) {
 					switch (button_flag & (SELECT|START)) {
 					case START:
 						// SELECT + L2 : volume down / + R2 : reset
-						//setVolumeRaw(0, (button_flag & R2) ? 0 : -3);
+						setVolumeRaw(0, (button_flag & R2) ? 0 : -3);
 						break;
 					case SELECT:
 						// START + L2 : brightness down
@@ -1889,9 +1899,7 @@ int main(void) {
 					switch (button_flag & (SELECT|START)) {
 					case START:
 						// SELECT + R2 : volume up / + L2 : reset
-						/*
 						setVolumeRaw(0, (button_flag & L2) ? 0 : +3);
-						*/
 						break;
 					case SELECT:
 						// START + R2 : brightness up
@@ -1911,18 +1919,35 @@ int main(void) {
 				if (onion) {
 					if ( val == REPEAT ) {
 						repeat_menu++;
-						if ((repeat_menu == REPEAT_SEC(1))&&(!button_flag)) {
+						if ((repeat_menu == REPEAT_SEC(1))&&(!button_flag)) {    // long press on menu
 							
 								// The file does not exists
-								if (check_autosave()) {
-									remove("/tmp/.trimUIMenu");
-									short_pulse();
-								//	screenshot_onion();
-									terminate_retroarch();
-									
-									
+							if (access("/mnt/SDCARD/.tmp_update/.menuInverted", F_OK)==-1) {
+									if (check_autosave()) {
+										remove("/tmp/.trimUIMenu");
+										short_pulse();
+										terminate_retroarch();
+									}
+							}
+							else  // The file ".menuInverted" exists, we show menu on long press
+							{
+								if (access("/mnt/SDCARD/.tmp_update/.noGameSwitcher", F_OK)==-1) {  // just in case if someone want to desactivate Game Switcher totally
+									if (check_autosave()) {
+										short_pulse();
+										close(creat("/tmp/.trimUIMenu", 777));
+										screenshot_onion();
+										terminate_retroarch();	
+									}
 								}
-						repeat_menu = 0;
+								else   // if .menuInverted and .noGameSwitcher exist then long press does nothing
+								{
+									comboKey = 1;  
+								}
+							}
+						
+							repeat_menu = 0;
+							
+
 						}
 						
 						}
