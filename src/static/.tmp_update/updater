@@ -111,7 +111,13 @@ else
 
 	cd /mnt/SDCARD/Saves
 	mv .tmp_update /mnt/SDCARD
-
+	
+	# Force refresh the rom lists
+	if [ -d /mnt/SDCARD/Roms ] ; then
+		cd /mnt/SDCARD/Roms
+		find . -type f -name "*.db" -exec rm -f {} \;
+	fi
+	
 	sync
 	reboot
 	sleep 10
