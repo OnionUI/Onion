@@ -1,3 +1,6 @@
 [submodule "third-party/RetroArch"]
 	path = third-party/RetroArch
 	url = https://github.com/OnionUI/RetroArch.git
+[submodule "third-party/SearchFilter"]
+	path = third-party/SearchFilter
+	url = https://github.com/OnionUI/SearchFilter.git
