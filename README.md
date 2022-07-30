@@ -45,14 +45,14 @@ You can check your current version in `Settings` ➜ `Device Info` ➜ `Version`
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179306127-e8a2c99c-a078-46b0-9561-47abf5c16208.png" width="54"></sup>Fresh install
 
-- This process will erase everything from the SD card so ensure any Roms, Bios & Saves are backed up to your PC 
-- Format your SD card as FAT32. (Use a fast, trusted brand as the SD card sent with the Miyoo Mini is slow and will fail/corrupt data)
+- This process will erase everything from the SD card so ensure any Roms, Bios & Saves are backed up to your PC.
+- Format your SD card as FAT32. (Use a fast, trusted brand as the SD card sent with the Miyoo Mini is slow and will fail/corrupt data).
 - Unzip the `.tmp_update` folder and its contents to the root of your SD. Nothing else should be on the SD card
 - If on Mac: This OS will add .-* files everywhere in your SD, you need to remove them before continuing.
 - Boot up your Miyoo Mini and follow the on-screen instructions to get started.
 - When installation is complete, press <kbd>A</kbd> and wait for the device to turn off.
 - Keep the .tmp_update folder, it is now part of the Onion installation.
-- Copy your Bios files into the `BIOS` folder and your roms into the applicable 'Roms' subfolders.
+- Copy your Bios files into the `BIOS` folder and your roms into the applicable `Roms` subfolders for each system.
 - Go to the console page, and refresh your rom lists by pressing the menu button.
 
 <p>&nbsp;</p>
@@ -61,7 +61,7 @@ You can check your current version in `Settings` ➜ `Device Info` ➜ `Version`
 
 > *Note: in older versions up to V3.9, your saves and states were located here: `RetroArch/.retroarch/saves` | `states`.*
 
-- Delete all folders from your SD except `BIOS`, `Roms`, `Saves` and `Themes` (Save your ports if you used some in `Emu/PORTS`)
+- Delete all folders from your SD except `BIOS`, `Roms`, `Saves` and `Themes` (Save your ports if you used some in `Emu/PORTS`).
 - *Note:* Save your `Saves` folder to copy it back if you want to keep your custom emulator settings.
 - Unzip the `.tmp_update` folder to the root of your SD.
 - Boot up your Miyoo Mini and follow the on-screen instructions to get started.
