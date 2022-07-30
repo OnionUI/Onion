@@ -11,4 +11,5 @@ jobs:
             - name: Check toolchain
               shell: bash
               run: |
+                pwd
                 ls -lah
