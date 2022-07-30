@@ -19,4 +19,4 @@ jobs:
     - name: Build
       shell: bash
       run: |
-        make with-toolchain CMD=build
+        make with-toolchain CMD="clean setup build"

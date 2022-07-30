@@ -19,6 +19,7 @@ PACKAGE_DIR := $(ROOT_DIR)/package
 RELEASE_DIR := $(ROOT_DIR)/release
 STATIC_BUILD := $(ROOT_DIR)/static/build
 STATIC_PACKAGE := $(ROOT_DIR)/static/package
+TOOLCHAIN := ghcr.io/onionui/miyoomini-toolchain:latest
 
 ###########################################################
 
@@ -77,5 +78,6 @@ clean:
 	@echo :: $(TARGET) - cleaned
 
 with-toolchain:
-	@docker run -v "$(ROOT_DIR)":/root/workspace ghcr.io/onionui/miyoomini-toolchain:latest make $(CMD)
+	docker pull $(TOOLCHAIN)
+	docker run -it -v "$(ROOT_DIR)":/root/workspace $(TOOLCHAIN) /bin/bash -i -c make $(CMD)
 
