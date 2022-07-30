@@ -18,4 +18,5 @@ jobs:
     - name: Build
       shell: bash
       run: |
+        source /root/.bashrc
         echo $CROSS_COMPILE
