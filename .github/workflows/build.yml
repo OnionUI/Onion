@@ -1,0 +1,14 @@
+name: Check build
+on:
+    push
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        container:
+            image: ghcr.io/onionui/miyoomini-toolchain:latest
+        steps:
+            - name: Check toolchain
+              shell: bash
+              run: |
+                ls -lah
