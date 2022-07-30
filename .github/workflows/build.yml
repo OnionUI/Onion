@@ -19,4 +19,4 @@ jobs:
       shell: bash
       run: |
         source /root/.bashrc
-        echo $CROSS_COMPILE
+        make build
