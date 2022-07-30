@@ -7,8 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/onionui/miyoomini-toolchain:latest
-      volumes:
-        - /github/workspace:/root/workspace
       options: --user root
     steps:
     - name: Checkout repository
@@ -17,12 +15,7 @@ jobs:
         submodules: recursive
     - name: Inspect folder
       run: pwd -P; ls -lah
-    - name: Install Docker client
-      run: |
-        export DEBIAN_FRONTEND=noninteractive
-        apt-get update
-        apt-get -y install --no-install-recommends docker.io
     - name: Build
       shell: bash
       run: |
-        docker run ghcr.io/onionui/miyoomini-toolchain:latest /bin/bash -c "source /root/.bashrc; pwd -P; ls -lah; cd /github/workspace; pwd -P; ls -lah; echo \$CROSS_COMPILE"
+        echo $CROSS_COMPILE
