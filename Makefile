@@ -30,8 +30,8 @@ setup:
 	@cp -R $(STATIC_BUILD)/. $(BUILD_DIR)
 	@cp -R $(STATIC_PACKAGE)/. $(PACKAGE_DIR)
 	@cp -R $(ROOT_DIR)/lib/. $(BUILD_DIR)/.tmp_update/lib
-#	@cp -R $(ROOT_DIR)/lib/. $(BUILD_DIR)/miyoo/lib
 	@echo -n " v$(VERSION)" > $(BUILD_DIR)/.tmp_update/onionVersion/version.txt
+	@$(ROOT_DIR)/get_themes.sh
 
 build:
 	@echo :: $(TARGET) - build
