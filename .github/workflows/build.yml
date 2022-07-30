@@ -11,6 +11,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+      with:
+        submodules: recursive
     - name: Install Docker client
       run: |
         export DEBIAN_FRONTEND=noninteractive
@@ -19,4 +21,4 @@ jobs:
     - name: Build
       shell: bash
       run: |
-        make with-toolchain CMD="clean setup build"
+        make with-toolchain CMD=build
