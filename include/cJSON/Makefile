@@ -1,4 +1,4 @@
-TARGET = libcjson.so
+TARGET = ../../lib/libcjson.so
 
 CC = $(CROSS_COMPILE)g++
 

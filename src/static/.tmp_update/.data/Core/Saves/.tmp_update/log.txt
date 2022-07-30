@@ -1,8 +1,0 @@
-vtpath = /dev/vc/2, fd = -1
-vtpath = /dev/tty2, fd = 7
-Current VT: 2
-2358477824.000000 FB_VideoInit shadow_fb is 0
-SDL_GetVideoMode 640x480 32 -> 640x480 32
-SDL_SetVideoMode publicsurface 0x4be0c8, shadowsurface (nil), videosurface 0x4be0c8
-Double buf enabled 0, use SDL_UpdateRect when flip
-Killed

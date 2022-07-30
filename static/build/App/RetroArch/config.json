@@ -1,0 +1,6 @@
+{
+"label":"RetroArch",
+"icon":"retroarch.png",
+"launch":"launch.sh",
+"description":"RetroArch Settings"
+}

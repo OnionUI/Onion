@@ -1,0 +1,13 @@
+#!/bin/sh
+echo $0 $*
+progdir=`cd -- "$(dirname "$0")" >/dev/null 2>&1; pwd -P`
+
+cd $progdir
+mkdir -p /mnt/SDCARD/.tmp_update
+mv -f .installer/ /mnt/SDCARD/.tmp_update/
+mv -f /mnt/SDCARD/.tmp_update/.installer/updater /mnt/SDCARD/.tmp_update/
+
+cd /mnt/SDCARD/.tmp_update/.installer
+./install.sh
+
+reboot

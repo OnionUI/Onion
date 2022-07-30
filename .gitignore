@@ -1,2 +1,6 @@
 .DS_Store
 .vscode/
+*.o
+/build/
+/release/
+/package/
