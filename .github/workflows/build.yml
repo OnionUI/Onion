@@ -7,6 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/onionui/miyoomini-toolchain:latest
+      volumes:
+        - ${GITHUB_WORKSPACE}:/root/workspace
       options: --user root
     steps:
     - name: Checkout repository
@@ -23,4 +25,4 @@ jobs:
     - name: Build
       shell: bash
       run: |
-        make with-toolchain CMD=build
+        docker run ghcr.io/onionui/miyoomini-toolchain:latest /bin/bash -i -c "pwd -P; ls -lah; cd ..; pwd -P; ls -lah; echo \\$CROSS_COMPILE"
