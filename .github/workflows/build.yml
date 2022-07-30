@@ -12,9 +12,9 @@ jobs:
     - name: Check toolchain
       shell: bash
       run: |
-      pwd
-      ls -lah
-      make release
-      ls -lah ./build
-      ls -lah ./package
-      ls -lah ./release
+        pwd
+        ls -lah
+        make release
+        ls -lah ./build
+        ls -lah ./package
+        ls -lah ./release
