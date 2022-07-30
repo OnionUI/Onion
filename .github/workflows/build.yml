@@ -11,6 +11,11 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+    - name: Install Docker client
+      run: |
+        export DEBIAN_FRONTEND=noninteractive
+        apt-get update
+        apt-get -y install --no-install-recommends docker.io
     - name: Build
       shell: bash
       run: |
