@@ -25,4 +25,4 @@ jobs:
     - name: Build
       shell: bash
       run: |
-        docker run -v /github/workspace:/root/workspace ghcr.io/onionui/miyoomini-toolchain:latest /bin/bash -c "source /root/.bashrc; pwd -P; ls -lah; cd ..; pwd -P; ls -lah; echo \$CROSS_COMPILE"
+        docker run ghcr.io/onionui/miyoomini-toolchain:latest /bin/bash -c "source /root/.bashrc; pwd -P; ls -lah; cd /github/workspace; pwd -P; ls -lah; echo \$CROSS_COMPILE"
