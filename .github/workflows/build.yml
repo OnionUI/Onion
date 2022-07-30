@@ -14,7 +14,7 @@ jobs:
       with:
         submodules: recursive
     - name: Inspect folder
-      run: ls -lah
+      run: pwd -P; ls -lah
     - name: Install Docker client
       run: |
         export DEBIAN_FRONTEND=noninteractive
