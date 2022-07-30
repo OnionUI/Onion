@@ -1,4 +1,4 @@
-.PHONY: all setup build build_apps build_external package release clean
+.PHONY: all setup build build_apps build_external package release clean with-toolchain
 
 ###########################################################
 
@@ -75,3 +75,7 @@ clean:
 	@rm -f .build_cached
 	@find include src -type f -name *.o -exec rm -f {} \;
 	@echo :: $(TARGET) - cleaned
+
+with-toolchain:
+	@docker run -v "$(ROOT_DIR)":/root/workspace ghcr.io/onionui/miyoomini-toolchain:latest make $(CMD)
+
