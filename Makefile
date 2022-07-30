@@ -24,6 +24,10 @@ STATIC_PACKAGE := $(ROOT_DIR)/static/package
 
 all: clean setup build build_apps build_external package
 
+.build_cached:
+	@make all
+	@touch .build_cached
+
 setup:
 	@echo :: $(TARGET) - setup
 	@mkdir -p $(BUILD_DIR) $(PACKAGE_DIR) $(RELEASE_DIR)
@@ -60,12 +64,14 @@ package:
 	@cd $(BUILD_DIR) && zip -rq $(PACKAGE_DIR)/miyoo/app/.installer/onion_package.zip .
 	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(PACKAGE_DIR)/miyoo/app/.installer make
 
-release: all
+release: .build_cached
 	@echo :: $(TARGET) - release
 	@cd $(PACKAGE_DIR) && zip -rq $(RELEASE_DIR)/$(RELEASE_NAME).zip .
+	@rm -f .build_cached
 
 clean:
 	@rm -rf $(BUILD_DIR) $(PACKAGE_DIR)
 	@rm -f $(PACKAGE_DIR)/$(RELEASE_NAME).zip
+	@rm -f .build_cached
 	@find include src -type f -name *.o -exec rm -f {} \;
 	@echo :: $(TARGET) - cleaned

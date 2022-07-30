@@ -6,3 +6,4 @@
 /package/
 temp/
 cache/
+/.build_cached
