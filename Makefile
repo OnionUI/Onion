@@ -79,5 +79,5 @@ clean:
 
 with-toolchain:
 	docker pull $(TOOLCHAIN)
-	docker run -it -v "$(ROOT_DIR)":/root/workspace $(TOOLCHAIN) /bin/bash -c "source /root/.bashrc; make $(CMD)"
+	docker run -v "$(ROOT_DIR)":/root/workspace $(TOOLCHAIN) /bin/bash -c "source /root/.bashrc; make $(CMD)"
 
