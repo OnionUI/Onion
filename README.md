@@ -45,8 +45,9 @@ You can check your current version in `Settings` ➜ `Device Info` ➜ `Version`
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179306127-e8a2c99c-a078-46b0-9561-47abf5c16208.png" width="54"></sup>Fresh install
 
+- This process will remove everything from the SD card so ensure any Roms, Bios & Saves are backed up to your PC 
 - Format your SD card as FAT32. (Use a fast, trusted brand. The SD card sent with your Miyoo Mini is slow, and will likely ruin your experience and data.)
-- Unzip the `.tmp_update` folder and its contents to the root of your SD.
+- Unzip the `.tmp_update` folder and its contents to the root of your SD. Nothing else should be on the SD card
 - If on Mac: This OS will add .-* files everywhere in your SD, you need to remove them before continuing.
 - Boot up your Miyoo Mini and follow the on-screen instructions to get started.
 - When installation is complete, press <kbd>A</kbd> and wait for the device to turn off.
