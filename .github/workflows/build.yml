@@ -1,15 +1,20 @@
 name: Check build
 on:
-    push
+  push
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        container:
-            image: ghcr.io/onionui/miyoomini-toolchain:latest
-        steps:
-            - name: Check toolchain
-              shell: bash
-              run: |
-                pwd
-                ls -lah
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/onionui/miyoomini-toolchain:latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Check toolchain
+      shell: bash
+      run: |
+      pwd
+      ls -lah
+      make release
+      ls -lah ./build
+      ls -lah ./package
+      ls -lah ./release
