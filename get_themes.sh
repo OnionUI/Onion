@@ -1,7 +1,7 @@
 #!/bin/bash
 
-mkdir -p .temp
-cd .temp
+mkdir -p cache
+cd cache
 
 wget -O featured.txt https://raw.githubusercontent.com/OnionUI/Themes/main/.github/data/featured.txt > /dev/null 2>&1
 featured=`cat ./featured.txt`
@@ -16,10 +16,13 @@ shopt -u extdebug
 
 for element in "${themes[@]}"
 do
-    echo ":: downloading theme: $element"
-    wget -O "$element.zip" "https://github.com/OnionUI/Themes/blob/main/release/$element.zip?raw=true" > /dev/null 2>&1
-    unzip -oq "$element.zip" -d ../build/Themes
-done
+    zipfile="$element.zip"
 
-cd ..
-rm -rf .temp/
+    if [[ ! -f "$zipfile" ]]
+    then
+        echo "-- downloading theme: $element"
+        wget -O "$zipfile" "https://github.com/OnionUI/Themes/blob/main/release/$element.zip?raw=true" > /dev/null 2>&1
+    fi
+    echo "-- extracting theme: $element"
+    unzip -oq "$zipfile" -d ../build/Themes
+done
