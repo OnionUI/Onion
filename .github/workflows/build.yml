@@ -7,14 +7,13 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/onionui/miyoomini-toolchain:latest
+      options: --user root
     steps:
-    - uses: actions/checkout@v3
-    - name: Check toolchain
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Build
       shell: bash
       run: |
-        pwd
-        ls -lah
-        make release
+        make
         ls -lah ./build
         ls -lah ./package
-        ls -lah ./release
