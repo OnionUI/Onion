@@ -52,7 +52,7 @@ You can check your current version in `Settings` ➜ `Device Info` ➜ `Version`
 - Boot up your Miyoo Mini and follow the on-screen instructions to get started.
 - When installation is complete, press <kbd>A</kbd> and wait for the device to turn off.
 - Keep the .tmp_update folder, it is now part of the Onion installation.
-- Copy your Bios files into the `BIOS` folder.
+- Copy your Bios files into the `BIOS` folder and your roms into the applicable 'Roms' subfolders.
 - Go to the console page, and refresh your rom lists by pressing the menu button.
 
 <p>&nbsp;</p>
