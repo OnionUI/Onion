@@ -2,6 +2,7 @@
 
 TARGET=Onion
 VERSION=3.13.0
+RA_SUBVERSION=0.1
 
 ###########################################################
 
@@ -19,7 +20,7 @@ TOOLCHAIN := ghcr.io/onionui/miyoomini-toolchain:latest
 
 ###########################################################
 
-.PHONY: all version core apps external release clean git-clean with-toolchain
+.PHONY: all version core apps external release clean git-clean with-toolchain patch
 
 all: clean package
 
@@ -34,7 +35,7 @@ $(CACHE)/.setup:
 	@cp -R $(STATIC_PACKAGE)/. $(PACKAGE_DIR)
 	@cp -R $(ROOT_DIR)/lib/. $(BUILD_DIR)/.tmp_update/lib
 	@echo -n " v$(VERSION)" > $(BUILD_DIR)/.tmp_update/onionVersion/version.txt
-	@chmod a+x $(ROOT_DIR)/get_themes.sh && $(ROOT_DIR)/get_themes.sh
+	@chmod a+x $(ROOT_DIR)/.github/get_themes.sh && $(ROOT_DIR)/.github/get_themes.sh
 	@touch $(CACHE)/.setup
 
 build: $(CACHE)/.setup core apps external
@@ -60,19 +61,23 @@ apps: $(CACHE)/.setup
 external: $(CACHE)/.setup
 	@echo :: $(TARGET) - build external
 	@cd $(THIRD_PARTY_DIR)/RetroArch && make && cp retroarch $(BUILD_DIR)/RetroArch/
+	@echo $(RA_SUBVERSION) > $(BUILD_DIR)/RetroArch/onion_ra_version.txt
 	@cd $(THIRD_PARTY_DIR)/SearchFilter && make && cp -a build/. "$(BUILD_DIR)/App/The_Onion_Installer/data/Layer2/Search and Filter/"
 
 package: build
 	@echo :: $(TARGET) - package
+	@cd $(BUILD_DIR) && zip -rq retroarch_package.zip RetroArch
+	@rm -rf $(BUILD_DIR)/RetroArch
+	@echo $(RA_SUBVERSION) > $(BUILD_DIR)/ra_package_version.txt
 	@cd $(BUILD_DIR) && zip -rq $(PACKAGE_DIR)/miyoo/app/.installer/onion_package.zip .
 
 release: package
 	@echo :: $(TARGET) - release
+	@rm -f $(RELEASE_DIR)/$(RELEASE_NAME).zip
 	@cd $(PACKAGE_DIR) && zip -rq $(RELEASE_DIR)/$(RELEASE_NAME).zip .
 
 clean:
 	@rm -rf $(BUILD_DIR) $(PACKAGE_DIR)
-	@rm -f $(PACKAGE_DIR)/$(RELEASE_NAME).zip
 	@rm -f $(CACHE)/.setup
 	@find include src -type f -name *.o -exec rm -f {} \;
 	@echo :: $(TARGET) - cleaned
@@ -82,5 +87,7 @@ git-clean:
 
 with-toolchain:
 	docker pull $(TOOLCHAIN)
-	docker run -v "$(ROOT_DIR)":/root/workspace $(TOOLCHAIN) /bin/bash -c "source /root/.bashrc; make $(CMD)"
+	docker run --rm -v "$(ROOT_DIR)":/root/workspace $(TOOLCHAIN) /bin/bash -c "source /root/.bashrc; make $(CMD)"
 
+patch:
+	@chmod a+x $(ROOT_DIR)/.github/create_patch.sh && $(ROOT_DIR)/.github/create_patch.sh

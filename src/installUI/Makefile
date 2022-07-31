@@ -4,14 +4,14 @@ endif
 
 TARGET = $(BUILD_DIR)/installUI
 
-CC 	= $(CROSS_COMPILE)g++
+CC = $(CROSS_COMPILE)gcc
 
 SOURCES = . 
 CFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.c))
 OFILES = $(CFILES:.c=.o)
 
-CFLAGS = -O3 -marm -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7ve -Wall
-LDFLAGS = -lSDL -lSDL_ttf -lmi_sys -lmi_gfx -s -lSDL -lSDL_image
+CFLAGS = -O3 -Wall
+LDFLAGS = -s -lSDL -lSDL_image -lSDL_ttf
 
 $(TARGET): $(OFILES)
 	$(CC) $(OFILES) -o $@ $(LDFLAGS)

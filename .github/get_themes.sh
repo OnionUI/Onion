@@ -22,7 +22,7 @@ do
     if [[ ! -f "$zipfile" ]]
     then
         echo "-- downloading theme: $element"
-        wget -O "$zipfile" "https://github.com/OnionUI/Themes/blob/main/release/$element.zip?raw=true" > /dev/null 2>&1
+        wget -O "$zipfile" "https://github.com/OnionUI/Themes/blob/main/release/$element.zip?raw=true" -q --show-progress
     fi
     echo "-- extracting theme: $element"
     unzip -oq "$zipfile" -d ../build/Themes
