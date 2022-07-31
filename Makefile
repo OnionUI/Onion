@@ -19,12 +19,16 @@ TOOLCHAIN := ghcr.io/onionui/miyoomini-toolchain:latest
 
 ###########################################################
 
-.PHONY: all core apps external release clean with-toolchain
+.PHONY: all version core apps external release clean git-clean with-toolchain
 
 all: clean package
 
+version:
+	@echo $(VERSION)
+
 $(CACHE)/.setup:
 	@echo :: $(TARGET) - setup
+	@git submodule update --init --recursive
 	@mkdir -p $(BUILD_DIR) $(PACKAGE_DIR) $(RELEASE_DIR)
 	@cp -R $(STATIC_BUILD)/. $(BUILD_DIR)
 	@cp -R $(STATIC_PACKAGE)/. $(PACKAGE_DIR)
@@ -73,7 +77,10 @@ clean:
 	@find include src -type f -name *.o -exec rm -f {} \;
 	@echo :: $(TARGET) - cleaned
 
+git-clean:
+	@git clean -xfd -e .vscode
+
 with-toolchain:
 	docker pull $(TOOLCHAIN)
-	docker run -v "$(ROOT_DIR)":/root/workspace $(TOOLCHAIN) /bin/bash -c "source /root/.bashrc; pwd -P; ls -lah; cd ..; pwd -P; ls -lah"
+	docker run -v "$(ROOT_DIR)":/root/workspace $(TOOLCHAIN) /bin/bash -c "source /root/.bashrc; make $(CMD)"
 

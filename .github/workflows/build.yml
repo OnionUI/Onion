@@ -4,6 +4,7 @@ on:
 
 jobs:
   build:
+    name: Check build
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/onionui/miyoomini-toolchain:latest
