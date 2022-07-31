@@ -45,7 +45,7 @@ You can check your current version in `Settings` ➜ `Device Info` ➜ `Version`
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179306127-e8a2c99c-a078-46b0-9561-47abf5c16208.png" width="54"></sup>Fresh install
 
-- This process erases everything from the SD card. Ensure any Roms, Bios & Saves are backed up to your PC.
+- This process erases everything from the SD card. Please ensure any Roms, Bios & Saves are backed up to your PC.
 - Format your SD card as FAT32. (Use a fast, trusted brand as the SD card sent with the Miyoo Mini is slow and will fail/corrupt data).
 - Unzip the `.tmp_update` folder and its contents to the root of your SD. Nothing else should be on the SD card
 - If on Mac: This OS will add .-* files everywhere in your SD, you need to remove them before continuing.
