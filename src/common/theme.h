@@ -79,14 +79,16 @@ bool getThemePath(char* theme_path)
     bool ret = false;
 	const char *json_str = NULL;
 
-	if (!(json_str = loadFile(SYSTEM_SETTINGS)))
+	if (!(json_str = file_readAll(SYSTEM_SETTINGS))) {
+        sprintf(theme_path, "%s", FALLBACK_PATH);
 		return ret;
+    }
 
 	cJSON* json_root = cJSON_Parse(json_str);
 	cJSON* json_theme = cJSON_GetObjectItem(json_root, "theme");
 
     if (json_theme) {
-	    strncpy(theme_path, cJSON_GetStringValue(json_theme), STR_MAX);
+	    strncpy(theme_path, cJSON_GetStringValue(json_theme), STR_MAX-1);
         ret = true;
     }
 
@@ -98,7 +100,7 @@ bool getStringValue(cJSON* root, const char* key, char* dest)
 {
     cJSON* json_object = cJSON_GetObjectItem(root, key);
     if (json_object) {
-        strncpy(dest, cJSON_GetStringValue(json_object), STR_MAX);
+        strncpy(dest, cJSON_GetStringValue(json_object), STR_MAX-1);
         return true;
     }
     return false;
@@ -147,26 +149,33 @@ void getFontStyle(cJSON* root, FontStyle_s* dest, FontStyle_s* fallback)
 void theme_getImagePath(Theme_s* theme, const char* name, char* image_path)
 {
     char rel_path[STR_MAX];
-    snprintf(rel_path, STR_MAX, "skin/%s.png", name);
-    snprintf(image_path, STR_MAX, "%s%s", theme->path, rel_path);
+    sprintf(rel_path, "skin/%s.png", name);
+    sprintf(image_path, "%s%s", theme->path, rel_path);
     if (!file_exists(image_path))
-        snprintf(image_path, STR_MAX, "%s%s", FALLBACK_PATH, rel_path);
+        sprintf(image_path, "%s%s", FALLBACK_PATH, rel_path);
+}
+
+SDL_Surface* theme_loadImage(Theme_s* theme, const char* name)
+{
+    char image_path[512];
+    theme_getImagePath(theme, name, image_path);
+    return IMG_Load(image_path);
 }
 
 TTF_Font* theme_loadFont(Theme_s* theme, const char* font, int size)
 {
     char font_path[STR_MAX];
     if (font[0] == '/')
-        strncpy(font_path, font, STR_MAX);
+        strncpy(font_path, font, STR_MAX-1);
     else
         snprintf(font_path, STR_MAX, "%s%s", theme->path, font);
     return TTF_OpenFont(file_exists(font_path) ? font_path : FALLBACK_FONT, size);
 }
 
-Theme_s loadTheme(void)
+Theme_s loadThemeFromPath(const char* theme_path)
 {
     Theme_s theme = {
-        .path = "/mnt/SDCARD/miyoo/app/",
+        .path = FALLBACK_PATH,
         .name = "",
         .author = "",
         .description = "",
@@ -213,13 +222,18 @@ Theme_s loadTheme(void)
         }
     };
 
+    strncpy(theme.path, theme_path, STR_MAX-1);
+    int len = strlen(theme.path);
+    if (theme.path[len-1] != '/') {
+        theme.path[len] = '/';
+        theme.path[len+1] = '\0';
+    }
+
 	const char *json_str = NULL;
     char config_path[STR_MAX];
-
-    getThemePath(theme.path);
     snprintf(config_path, STR_MAX, "%s%s", theme.path, "config.json");
 
-	if (!(json_str = loadFile(config_path)))
+	if (!(json_str = file_readAll(config_path)))
 		return theme;
 
     // Get JSON objects
@@ -261,6 +275,13 @@ Theme_s loadTheme(void)
 
 	cJSON_free(json_root);
 	return theme;
+}
+
+Theme_s loadTheme(void)
+{
+    char theme_path[STR_MAX];
+    getThemePath(theme_path);
+    return loadThemeFromPath(theme_path);
 }
 
 #endif // THEME_H__

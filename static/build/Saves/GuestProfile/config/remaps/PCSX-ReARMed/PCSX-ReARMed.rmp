@@ -1,5 +1,0 @@
-input_libretro_device_p1 = "1"
-input_player1_analog_dpad_mode = "0"
-input_player1_btn_l3 = "-1"
-input_player1_btn_r3 = "-1"
-input_remap_port_p1 = "0"

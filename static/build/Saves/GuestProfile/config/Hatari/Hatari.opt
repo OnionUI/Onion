@@ -1,8 +1,0 @@
-hatari_fastfdc = "true"
-hatari_frameskips = "0"
-hatari_nokeys = "false"
-hatari_nomouse = "false"
-hatari_polarized_filter = "false"
-hatari_twojoy = "true"
-hatari_video_crop_overscan = "true"
-hatari_video_hires = "true"

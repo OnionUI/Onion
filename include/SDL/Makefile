@@ -1,3 +1,5 @@
+.PHONY: clean
+
 TARGET = ../../lib/libSDL_rotozoom.so
 
 CC = $(CROSS_COMPILE)gcc
