@@ -12,7 +12,19 @@
 #include "../common/theme.h"
 #include "../common/theme_resources.h"
 #include "../common/menu.h"
-#include "../common/rotate180.h"
+
+#define RESOURCES { \
+	TR_BACKGROUND, \
+	TR_BG_TITLE, \
+	TR_LOGO \
+}
+#define NUM_RESOURCES 3
+
+void renderTopbar(SDL_Surface* screen, Theme_Surfaces_s* surfaces, Theme_Rects_s* rects)
+{
+	SDL_BlitSurface(surfaces->bg_title, NULL, screen, NULL);
+	SDL_BlitSurface(surfaces->logo, NULL, screen, &rects->logo);
+}
 
 int main(void)
 {
@@ -24,26 +36,16 @@ int main(void)
 	SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
 
 	Theme_s theme = loadThemeFromPath("/mnt/SDCARD/Themes/Blueprint by Aemiii91");
-	Resources_s resources = {
-		.surfaces = {
-			.background = rotate180(theme_loadImage(&theme, "background")),
-			.bg_title = theme_loadImage(&theme, "bg-title"),
-			.logo = theme_loadImage(&theme, "miyoo-topbar")
-		},
-		.rects = {}
-	};
+
+	int res_requests[NUM_RESOURCES] = RESOURCES;
+	Resources_s resources = theme_loadResources(&theme, res_requests, NUM_RESOURCES);
 	Theme_Surfaces_s* surfaces = &resources.surfaces;
 	Theme_Rects_s* rects = &resources.rects;
-	
-	rects->logo.x = 20;
-	rects->logo.y = (60 - surfaces->logo->h) / 2;
 
 	TTF_Font* font = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 36);
 	SDL_Color color_white = {255, 255, 255, 0};
-	Uint32 progress_color = SDL_MapRGB(video->format, 114, 71, 194);
 
 	SDL_Rect message_rect = {10, 424, 603, 48};
-	SDL_Rect progress_rect = {0, 420, 0, 60};
 	SDL_Surface* message;
 
 	bool exit = false;
@@ -58,8 +60,7 @@ int main(void)
 		}
 
 		SDL_BlitSurface(surfaces->background, NULL, screen, NULL);
-		SDL_BlitSurface(surfaces->bg_title, NULL, screen, NULL);
-		SDL_BlitSurface(surfaces->logo, NULL, screen, &rects->logo);
+		renderTopbar(screen, surfaces, rects);
 		
 		message = TTF_RenderUTF8_Blended(font, "", color_white);		
 		SDL_BlitSurface(message, NULL, screen, &message_rect);
