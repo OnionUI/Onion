@@ -3,7 +3,7 @@
 
 #include <string.h>
 #include <SDL/SDL.h>
-#include "cJSON/cJSON.h"
+#include "cjson/cJSON.h"
 
 #include "utils.h"
 
@@ -19,7 +19,8 @@ typedef struct Theme_BatteryPercentage
     char font[STR_MAX];
     int size;
     SDL_Color color;
-    int offset;
+    int offsetX;
+    int offsetY;
     bool onleft;
 } BatteryPercentage_s;
 
@@ -173,7 +174,8 @@ Theme_s loadThemeFromPath(const char* theme_path)
             .font = FALLBACK_FONT,
             .size = 24,
             .color = {255, 255, 255},
-            .offset = 0,
+            .offsetX = 0,
+            .offsetY = 0,
             .onleft = true
         },
         .title = {
@@ -187,13 +189,9 @@ Theme_s loadThemeFromPath(const char* theme_path)
             .color = {255, 255, 255}
         },
         .currentpage = {
-            .font = FALLBACK_FONT,
-            .size = 40,
             .color = {255, 255, 255}
         },
         .total = {
-            .font = FALLBACK_FONT,
-            .size = 40,
             .color = {255, 255, 255}
         },
         .grid = {
@@ -258,7 +256,8 @@ Theme_s loadThemeFromPath(const char* theme_path)
     getNumberValue(json_batteryPercentage, "size", &theme.batteryPercentage.size);
     if (!getColorValue(json_batteryPercentage, "color", &theme.batteryPercentage.color))
         theme.batteryPercentage.color = theme.hint.color;
-    getNumberValue(json_batteryPercentage, "offset", &theme.batteryPercentage.offset);
+    getNumberValue(json_batteryPercentage, "offsetX", &theme.batteryPercentage.offsetX);
+    getNumberValue(json_batteryPercentage, "offsetY", &theme.batteryPercentage.offsetY);
     getBoolValue(json_batteryPercentage, "onleft", &theme.batteryPercentage.onleft);
 
 	cJSON_free(json_root);

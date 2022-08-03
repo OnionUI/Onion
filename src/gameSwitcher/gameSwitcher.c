@@ -14,7 +14,7 @@
 #include <SDL/SDL_ttf.h>
 
 // #include "SDL/SDL_rotozoom.h"
-#include "cJSON/cJSON.h"
+#include "cjson/cJSON.h"
 #include <png/png.h>
 
 #define MAXHISTORY 50
@@ -470,8 +470,8 @@ int main(void) {
 	SDL_Surface*	imageBatt;
 	SDL_Surface*	imagePlay;
 	SDL_Surface*	imageGameName;
-	SDL_Surface* 	surfaceArrowLeft = IMG_Load("arrowLeft.png");
-	SDL_Surface* 	surfaceArrowRight = IMG_Load("arrowRight.png");
+	SDL_Surface* 	surfaceArrowLeft = IMG_Load("res/arrowLeft.png");
+	SDL_Surface* 	surfaceArrowRight = IMG_Load("res/arrowRight.png");
 
 	SDL_Rect	rectBatt = { 566, -1, 113, 29};
 	SDL_Rect	rectLum = { 106, 59, 40, 369};
@@ -544,21 +544,21 @@ int main(void) {
 	// Battery icon
 	SDL_Surface* imageBatteryIcon;
 	if (nBat > 100)
-		imageBatteryIcon = IMG_Load("battCharge.png");
+		imageBatteryIcon = IMG_Load("res/battCharge.png");
 	else if (nBat >= 80)
-		imageBatteryIcon = IMG_Load("batt100.png");
+		imageBatteryIcon = IMG_Load("res/batt100.png");
 	else if (nBat >= 60)
-		imageBatteryIcon = IMG_Load("batt80.png");
+		imageBatteryIcon = IMG_Load("res/batt80.png");
 	else if (nBat >= 40)
-		imageBatteryIcon = IMG_Load("batt60.png");
+		imageBatteryIcon = IMG_Load("res/batt60.png");
 	else if (nBat >= 20)
-		imageBatteryIcon = IMG_Load("batt40.png");
+		imageBatteryIcon = IMG_Load("res/batt40.png");
 	else if (nBat >= 10)
-		imageBatteryIcon = IMG_Load("batt20.png");
+		imageBatteryIcon = IMG_Load("res/batt20.png");
 	else if (nBat >= 0)
-		imageBatteryIcon = IMG_Load("batt0.png");
+		imageBatteryIcon = IMG_Load("res/batt0.png");
 	
-	SDL_Surface* imageMenuBar = IMG_Load("menuBar.png");
+	SDL_Surface* imageMenuBar = IMG_Load("res/menuBar.png");
 	
 	SDL_Surface* imageTuto;
 	
@@ -593,12 +593,12 @@ int main(void) {
 	free(currBat);
 	
 	
-	SDL_Surface* imageBackgroundDefault = IMG_Load("bootScreen.png");
-	SDL_Surface* imageBackgroundLowBat = IMG_Load("lowBat.png");
-	SDL_Surface* imageBackgroundNoGame= IMG_Load("noGame.png");
-	SDL_Surface* imageRemoveDialog= IMG_Load("removeDialog.png");
+	SDL_Surface* imageBackgroundDefault = IMG_Load("res/bootScreen.png");
+	SDL_Surface* imageBackgroundLowBat = IMG_Load("res/lowBat.png");
+	SDL_Surface* imageBackgroundNoGame= IMG_Load("res/noGame.png");
+	SDL_Surface* imageRemoveDialog= IMG_Load("res/removeDialog.png");
 	SDL_Surface* imageBackgroundGame;
-	SDL_Surface* imageFooterHelp = IMG_Load("footerHelp.png");	
+	SDL_Surface* imageFooterHelp = IMG_Load("res/footerHelp.png");	
 	char currPicture[MAXHROMNAMESIZE+44];
 	
 	sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",removeExt(gameList[currentGame].name),".png");	 
@@ -606,7 +606,7 @@ int main(void) {
 	rename("screenshotGame.png", currPicture); 
 /*
 	if(file_exists("screenshotGame.bmp")==1){
-		SDL_Surface* imageScreen = IMG_Load("screenshotGame.bmp");		
+		SDL_Surface* imageScreen = IMG_Load("res/screenshotGame.bmp");		
 		IMG_SavePNG (imageScreen, currPicture);
 
 	}	

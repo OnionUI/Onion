@@ -136,11 +136,11 @@ int main(int argc, char *argv[])
 					repeating = true;
 				keystate[key] = 1;
 				switch (key) {
-					case BUTTON_UP:
+					case SW_BTN_UP:
 						menu_moveUp(&menu, repeating);
 						changed = true;
 						break;
-					case BUTTON_DOWN:
+					case SW_BTN_DOWN:
 						menu_moveDown(&menu, repeating);
 						changed = true;
 						break;
@@ -149,12 +149,16 @@ int main(int argc, char *argv[])
 			}
 			else if (event.type == SDL_KEYUP) {
 				switch (key) {
-					case BUTTON_A:
+					case SW_BTN_A:
 						return_code = menu_applyAction(&menu);
 						quit = true;
-					case BUTTON_B:
+					case SW_BTN_B:
 						if (!required)
 							quit = true;
+						break;
+					case SW_BTN_POWER:
+					// case SDLK_FIRST:
+						quit = true;
 						break;
 					default: break;
 				}

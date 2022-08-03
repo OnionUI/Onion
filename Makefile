@@ -7,17 +7,27 @@ RA_SUBVERSION=0.1
 ###########################################################
 
 RELEASE_NAME := $(TARGET)-v$(VERSION)
-ROOT_DIR := $(shell pwd -P)
-SRC_DIR := $(ROOT_DIR)/src
-THIRD_PARTY_DIR := $(ROOT_DIR)/third-party
-BUILD_DIR := $(ROOT_DIR)/build
-PACKAGE_DIR := $(ROOT_DIR)/package
-RELEASE_DIR := $(ROOT_DIR)/release
-STATIC_BUILD := $(ROOT_DIR)/static/build
-STATIC_PACKAGE := $(ROOT_DIR)/static/package
-STATIC_CONFIGS := $(ROOT_DIR)/static/configs
-CACHE := $(ROOT_DIR)/cache
+
+# Directories
+ROOT_DIR            := $(shell pwd -P)
+SRC_DIR             := $(ROOT_DIR)/src
+THIRD_PARTY_DIR     := $(ROOT_DIR)/third-party
+BUILD_DIR           := $(ROOT_DIR)/build
+BIN_DIR             := $(ROOT_DIR)/build/.tmp_update/bin
+PACKAGE_DIR         := $(ROOT_DIR)/package/full
+PACKAGE_CORE_DIR    := $(ROOT_DIR)/package/core
+RELEASE_DIR         := $(ROOT_DIR)/release
+STATIC_BUILD        := $(ROOT_DIR)/static/build
+STATIC_PACKAGE      := $(ROOT_DIR)/static/package
+STATIC_CONFIGS      := $(ROOT_DIR)/static/configs
+CACHE               := $(ROOT_DIR)/cache
+
 TOOLCHAIN := ghcr.io/onionui/miyoomini-toolchain:latest
+
+PLATFORM ?= $(UNION_PLATFORM)
+ifeq (,$(PLATFORM))
+PLATFORM=linux
+endif
 
 ###########################################################
 
@@ -25,17 +35,19 @@ TOOLCHAIN := ghcr.io/onionui/miyoomini-toolchain:latest
 
 all: clean package
 
-version:
+version: # used by workflow
 	@echo $(VERSION)
+print-version:
+	@echo Onion v$(VERSION)
+	@echo RetroArch sub-v$(RA_SUBVERSION)
 
 $(CACHE)/.setup:
 	@echo :: $(TARGET) - setup
-	@git submodule update --init --recursive
-	@mkdir -p $(BUILD_DIR) $(PACKAGE_DIR) $(RELEASE_DIR)
+	@mkdir -p $(BUILD_DIR) $(PACKAGE_DIR) $(PACKAGE_CORE_DIR) $(RELEASE_DIR)
 	@cp -R $(STATIC_BUILD)/. $(BUILD_DIR)
 	@cp -R $(STATIC_PACKAGE)/. $(PACKAGE_DIR)
-	@cp -R $(ROOT_DIR)/lib/. $(BUILD_DIR)/.tmp_update/lib
 	@cp -R $(ROOT_DIR)/lib/. $(PACKAGE_DIR)/miyoo/app/.tmp_update/lib
+	@mkdir -p $(BUILD_DIR)/.tmp_update/onionVersion
 	@echo -n "$(VERSION)" > $(BUILD_DIR)/.tmp_update/onionVersion/version.txt
 	@chmod a+x $(ROOT_DIR)/.github/get_themes.sh && $(ROOT_DIR)/.github/get_themes.sh
 	@touch $(CACHE)/.setup
@@ -45,17 +57,17 @@ build: core apps external
 core: $(CACHE)/.setup
 	@echo :: $(TARGET) - build core
 # Build Onion binaries
-	@cd $(SRC_DIR)/bootScreen && BUILD_DIR=$(BUILD_DIR)/.tmp_update make
-	@cd $(SRC_DIR)/chargingState && BUILD_DIR=$(BUILD_DIR)/.tmp_update make
-	@cd $(SRC_DIR)/checkCharge && BUILD_DIR=$(BUILD_DIR)/.tmp_update make
-	@cd $(SRC_DIR)/gameSwitcher && BUILD_DIR=$(BUILD_DIR)/.tmp_update make
-	@cd $(SRC_DIR)/lastGame && BUILD_DIR=$(BUILD_DIR)/.tmp_update make
-	@cd $(SRC_DIR)/mainUiBatPerc && BUILD_DIR=$(BUILD_DIR)/.tmp_update make
-	@cd $(SRC_DIR)/onionKeymon && BUILD_DIR=$(BUILD_DIR)/.tmp_update make
-	@cd $(SRC_DIR)/prompt && BUILD_DIR=$(BUILD_DIR)/.tmp_update make
-# Build install binaries
-	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(PACKAGE_DIR)/miyoo/app/.tmp_update make
-	@cp $(BUILD_DIR)/.tmp_update/prompt $(PACKAGE_DIR)/miyoo/app/.tmp_update
+	@cd $(SRC_DIR)/bootScreen && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/chargingState && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/checkCharge && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/gameSwitcher && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/lastGame && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/mainUiBatPerc && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/onionKeymon && BUILD_DIR=$(BIN_DIR) make
+# Build installer binaries
+	@mkdir -p $(PACKAGE_DIR)/miyoo/app/.tmp_update/bin
+	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(PACKAGE_DIR)/miyoo/app/.tmp_update/bin make
+	@cd $(SRC_DIR)/prompt && BUILD_DIR=$(PACKAGE_DIR)/miyoo/app/.tmp_update/bin make
 
 apps: $(CACHE)/.setup
 	@echo :: $(TARGET) - build apps
@@ -68,36 +80,48 @@ external: $(CACHE)/.setup
 	@echo :: $(TARGET) - build external
 	@cd $(THIRD_PARTY_DIR)/RetroArch && make && cp retroarch $(BUILD_DIR)/RetroArch/
 	@echo $(RA_SUBVERSION) > $(BUILD_DIR)/RetroArch/onion_ra_version.txt
-	@cd $(THIRD_PARTY_DIR)/SearchFilter && make && cp -a build/. "$(BUILD_DIR)/App/The_Onion_Installer/data/Layer2/Search and Filter/"
+	@cd $(THIRD_PARTY_DIR)/SearchFilter && make build && cp -a build/. "$(BUILD_DIR)/App/The_Onion_Installer/data/Layer2/Search and Filter/"
 
 package: build
 	@echo :: $(TARGET) - package
 # Package RetroArch separately
-	@cd $(BUILD_DIR) && zip -rq retroarch_package.zip RetroArch
+	@cd $(BUILD_DIR) && zip -rq retroarch.pak RetroArch
 	@rm -rf $(BUILD_DIR)/RetroArch
 	@mkdir -p $(PACKAGE_DIR)/RetroArch
-	@mv $(BUILD_DIR)/retroarch_package.zip $(PACKAGE_DIR)/RetroArch/
+	@mv $(BUILD_DIR)/retroarch.pak $(PACKAGE_DIR)/RetroArch/
 	@echo $(RA_SUBVERSION) > $(PACKAGE_DIR)/RetroArch/ra_package_version.txt
+# Package themes separately
+	@mkdir -p $(PACKAGE_DIR)/Themes
+	@mv $(BUILD_DIR)/Themes/* $(PACKAGE_DIR)/Themes/
 # Package core
-	@cd $(BUILD_DIR) && zip -rq $(PACKAGE_DIR)/miyoo/app/.tmp_update/onion_package.zip .
+	@cd $(BUILD_DIR) && zip -rq $(PACKAGE_DIR)/miyoo/app/.tmp_update/onion.pak .
 # Package configs
+	@mkdir -p $(PACKAGE_DIR)/miyoo/app/.tmp_update/config
 	@cp -R $(STATIC_CONFIGS)/Saves/CurrentProfile $(STATIC_CONFIGS)/Saves/GuestProfile
-	@cd $(STATIC_CONFIGS) && zip -rq $(PACKAGE_DIR)/miyoo/app/.tmp_update/configs.zip .
+	@cd $(STATIC_CONFIGS) && zip -rq $(PACKAGE_DIR)/miyoo/app/.tmp_update/config/configs.pak .
 	@rm -rf $(STATIC_CONFIGS)/Saves/GuestProfile
+# Create core-only package
+	@cp -R $(PACKAGE_DIR)/.tmp_update $(PACKAGE_CORE_DIR)/.tmp_update
+	@cp -R $(PACKAGE_DIR)/miyoo $(PACKAGE_CORE_DIR)/miyoo
 
 release: package
 	@echo :: $(TARGET) - release
-	@rm -f $(RELEASE_DIR)/$(RELEASE_NAME).zip
-	@cd $(PACKAGE_DIR) && zip -rq $(RELEASE_DIR)/$(RELEASE_NAME).zip .
+	@rm -f $(RELEASE_DIR)/$(RELEASE_NAME)-full.zip
+	@rm -f $(RELEASE_DIR)/$(RELEASE_NAME)-core.zip
+	@cd $(PACKAGE_DIR) && zip -rq $(RELEASE_DIR)/$(RELEASE_NAME)-full.zip .
+	@cd $(PACKAGE_CORE_DIR) && zip -rq $(RELEASE_DIR)/$(RELEASE_NAME)-core.zip .
 
 clean:
-	@rm -rf $(BUILD_DIR) $(PACKAGE_DIR)
+	@rm -rf $(BUILD_DIR) $(ROOT_DIR)/package
 	@rm -f $(CACHE)/.setup
 	@find include src -type f -name *.o -exec rm -f {} \;
 	@echo :: $(TARGET) - cleaned
 
 git-clean:
 	@git clean -xfd -e .vscode
+
+git-submodules:
+	@git submodule update --init --recursive
 
 with-toolchain:
 	docker pull $(TOOLCHAIN)

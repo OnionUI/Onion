@@ -6,12 +6,12 @@ TARGET = $(BUILD_DIR)/gameSwitcher
 
 CC 	= $(CROSS_COMPILE)gcc
 
-SOURCES = .
+SOURCES = . ../../include/cjson
 CFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.c))
 OFILES = $(CFILES:.c=.o)
 
 CFLAGS = -I../../include -O3 -Wall
-LDFLAGS = -L../../lib -s -lSDL -lSDL_ttf -lSDL_image -lpng -lcjson
+LDFLAGS = -L../../lib -s -lSDL -lSDL_ttf -lSDL_image -lpng
 
 $(TARGET): $(OFILES)
 	$(CC) $(OFILES) -o $@ $(LDFLAGS)

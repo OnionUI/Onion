@@ -60,7 +60,7 @@ then
 else
     # new build system
     echo "-- extracting latest build"
-    unzip_progress "$root/miyoo/app/.installer/onion_package.zip" ./old_build
+    unzip_progress "$root/miyoo/app/.installer/onion.pak" ./old_build
 fi
 
 rm -rf extracted

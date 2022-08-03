@@ -1,6 +1,8 @@
 .DS_Store
 .vscode/
 *.o
+/src/**/res
+/src/**/test.sh
 /build/
 /release/
 /package/

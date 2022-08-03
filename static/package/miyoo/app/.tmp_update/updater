@@ -1,7 +1,8 @@
 #!/bin/sh
-progdir=`cd -- "$(dirname "$0")" >/dev/null 2>&1; pwd -P`
-cd $progdir
+sysdir=`cd -- "$(dirname "$0")" >/dev/null 2>&1; pwd -P`
 
-./install.sh
+cd $sysdir
+LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$sysdir/lib" ./install.sh
 
+# Turn off after update
 reboot

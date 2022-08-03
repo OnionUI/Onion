@@ -8,21 +8,24 @@
 #include <fcntl.h>
 #include <string.h>
 #include <sys/ioctl.h>
+
+#ifdef PLATFORM_MIYOOMINI
 #include "shmvar/shmvar.h"
+#endif
 
 #include "utils.h"
 
-//    for read battery
-#define SARADC_IOC_MAGIC                     'a'
-#define IOCTL_SAR_INIT                       _IO(SARADC_IOC_MAGIC, 0)
-#define IOCTL_SAR_SET_CHANNEL_READ_VALUE     _IO(SARADC_IOC_MAGIC, 1)
+// for reading battery
+#define SARADC_IOC_MAGIC 'a'
+#define IOCTL_SAR_INIT _IO(SARADC_IOC_MAGIC, 0)
+#define IOCTL_SAR_SET_CHANNEL_READ_VALUE _IO(SARADC_IOC_MAGIC, 1)
 typedef struct {
     int channel_value;
     int adc_value;
 } SAR_ADC_CONFIG_READ;
 
-#define    GPIO_DIR1 "/sys/class/gpio/"
-#define    GPIO_DIR2 "/sys/devices/gpiochip0/gpio/"
+#define GPIO_DIR1 "/sys/class/gpio/"
+#define GPIO_DIR2 "/sys/devices/gpiochip0/gpio/"
 
 static SAR_ADC_CONFIG_READ adcCfg = {0,0};
 static int sar_fd = 0;
@@ -75,18 +78,22 @@ void adc_monitorOn(void)
     
     ioctl(sar_fd, IOCTL_SAR_SET_CHANNEL_READ_VALUE, &adcCfg);
 
+    #ifdef PLATFORM_MIYOOMINI
     KeyShmInfo info;
     InitKeyShm(&info);
     SetKeyShm(&info, MONITOR_ADC_VALUE, adcCfg.adc_value);
     UninitKeyShm(&info);
+    #endif
 }
 
 void adc_monitorOff(void)
 {
+    #ifdef PLATFORM_MIYOOMINI
     KeyShmInfo info;
     InitKeyShm(&info);
     SetKeyShm(&info, MONITOR_ADC_VALUE, 640);
     UninitKeyShm(&info);
+    #endif
 }
 
 int adc_batteryPercentage(int adc_value) {
@@ -107,11 +114,14 @@ int getBatteryPercentage()
         const char *cPercBat = file_readAll("/tmp/percBat");
         strcpy(val, cPercBat);
         percentage = atoi(val);
+        free(cPercBat);
     }
+    #ifdef PLATFORM_MIYOOMINI
     else {
         int adcvalue = adc_getValue();
         percentage = adc_batteryPercentage(adcvalue);
     }
+    #endif
 
     return percentage;
 }

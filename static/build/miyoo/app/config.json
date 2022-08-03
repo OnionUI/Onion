@@ -1,54 +1,32 @@
 {
-    "name":"Default Onion - Silky - DiMo",
-   "hideIconTitle":false,
-	"batteryPercentage":{
-		"visible":true,
-        "red":255,
-        "green":255,
-        "blue":255
+    "name": "Default Onion",
+    "author": "Silky - DiMo",
+    "hideIconTitle": false,
+    "batteryPercentage": {
+        "visible": true,
+        "color": "#FFFFFF"
     },
-    "title":{
-        "font":"Exo-2-Bold-Italic_Universal.ttf",
-        "fontascii":"Exo-2-Bold-Italic_Universal.ttf",
-        "size":36,
-        "color":"#FFFFFF"
+    "title": {
+        "font": "Exo-2-Bold-Italic_Universal.ttf",
+        "size": 36,
+        "color": "#FFFFFF"
     },
-    "path":{
-        "font":"wqy-microhei.ttc",
-        "fontascii":"Exo-2-Bold-Italic_Universal.ttf",
-        "size":24,
-        "color":"#FFFFFF"
+    "currentpage": {
+        "color": "#FFFFFF"
     },
-    "hint":{
-        "font":"Exo-2-Bold-Italic_Universal.ttf",
-        "fontascii":"Exo-2-Bold-Italic_Universal.ttf",
-        "size":40,
-        "color":"#FFFFFF"
+    "total": {
+        "color": "#FFFFFF"
     },
-    "currentpage":{
-        "font":"Exo-2-Bold-Italic_Universal.ttf",
-        "fontascii":"Exo-2-Bold-Italic_Universal.ttf",
-        "size":40,
-        "color":"#FFFFFF"
+    "grid": {
+        "font": "Exo-2-Bold-Italic_Universal.ttf",
+        "grid1x4": 25,
+        "grid3x4": 18,
+        "color": "#686868",
+        "selectedcolor": "#FFFFFF"
     },
-    "total":{
-        "font":"wqy-microhei.ttc",
-        "fontascii":"Exo-2-Bold-Italic_Universal.ttf",
-        "size":40,
-        "color":"#FFFFFF"
-    },
-    "grid":{
-        "font":"Exo-2-Bold-Italic_Universal.ttf",
-        "fontascii":"Exo-2-Bold-Italic_Universal.ttf",
-        "grid1x4":25,
-        "grid3x4":18,
-        "color":"#686868",
-        "selectedcolor":"#FFFFFF"
-    },
-    "list":{
-        "font":"wqy-microhei.ttc",
-        "size":25,
-        "color":"#FFFFFF",
-        "selectedcolor":"#FFFFFF"
+    "list": {
+        "font": "wqy-microhei.ttc",
+        "size": 25,
+        "color": "#FFFFFF"
     }
 }

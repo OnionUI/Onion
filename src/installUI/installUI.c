@@ -24,7 +24,7 @@ int main(void)
 	SDL_Surface* video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
 	SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
 	
-	SDL_Surface* waiting_bg = IMG_Load("waitingBG.png");
+	SDL_Surface* waiting_bg = IMG_Load("res/waitingBG.png");
 
 	TTF_Font* font = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 36);
 	SDL_Color color_white = {255, 255, 255, 0};
@@ -62,8 +62,8 @@ int main(void)
 			progress = 0.0;
 			exit = true;
 		}
-		else if (file_exists(".update_msg")) {
-			file_readLastLine(".update_msg", msg);
+		else if (file_exists("/tmp/.update_msg")) {
+			file_readLastLine("/tmp/.update_msg", msg);
 			long n = 0;
 			if (str_getLastNumber(msg, &n))
 				progress = (double)n / 100;

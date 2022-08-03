@@ -1,10 +1,4 @@
 #!/bin/sh
-echo $0 $*
-
-# init_lcd
-cat /proc/ls
-sleep 1
-
 cd /mnt/SDCARD/miyoo/app
 ./MainUI
 

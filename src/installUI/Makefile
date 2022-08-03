@@ -4,14 +4,14 @@ endif
 
 TARGET = $(BUILD_DIR)/installUI
 
-CC = $(CROSS_COMPILE)gcc
+CC 	= $(CROSS_COMPILE)gcc
 
-SOURCES = . 
+SOURCES = . ../../include/cjson
 CFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.c))
 OFILES = $(CFILES:.c=.o)
 
-CFLAGS = -I../common -O3 -Wall
-LDFLAGS = -s -lSDL -lSDL_image -lSDL_ttf
+CFLAGS = -I../../include -O3 -Wall
+LDFLAGS = -s -lSDL -lSDL_ttf -lSDL_image
 
 $(TARGET): $(OFILES)
 	$(CC) $(OFILES) -o $@ $(LDFLAGS)

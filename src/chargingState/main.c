@@ -53,12 +53,12 @@ int main(void) {
 	SDL_Surface* video = SDL_SetVideoMode(640,480, 32, SDL_HWSURFACE);
 	SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640,480, 32, 0,0,0,0);
 	
-	SDL_Surface* image0 = IMG_Load("chargingState0.png");
-	SDL_Surface* image1 = IMG_Load("chargingState1.png");
-	SDL_Surface* image2 = IMG_Load("chargingState2.png");
-	SDL_Surface* image3 = IMG_Load("chargingState3.png");
-	SDL_Surface* image4 = IMG_Load("chargingState4.png");
-	SDL_Surface* image5 = IMG_Load("chargingState5.png");
+	SDL_Surface* image0 = IMG_Load("res/chargingState0.png");
+	SDL_Surface* image1 = IMG_Load("res/chargingState1.png");
+	SDL_Surface* image2 = IMG_Load("res/chargingState2.png");
+	SDL_Surface* image3 = IMG_Load("res/chargingState3.png");
+	SDL_Surface* image4 = IMG_Load("res/chargingState4.png");
+	SDL_Surface* image5 = IMG_Load("res/chargingState5.png");
 	
 	SetBrightness(8);
 	int run = 1;

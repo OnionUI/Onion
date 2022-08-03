@@ -1,33 +1,21 @@
-ifeq (,$(BUILD_DIR))
-BUILD_DIR=.
-endif
+INCLUDE_SHMVAR=1
+INCLUDE_CJSON=1
+include ../common/common.mk
 
-TARGET = $(BUILD_DIR)/prompt
-
-CC 		= $(CROSS_COMPILE)gcc
-CXX 	= $(CROSS_COMPILE)g++
-STRIP 	= $(CROSS_COMPILE)strip
-
-SOURCES = .
-CFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.c))
-CPPFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.cpp))
-OFILES = $(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
-
-CFLAGS = -I../../include -I../common
-CXXFLAGS = $(CFLAGS)
-LDFLAGS = -L../../lib -lSDL -lSDL_ttf -lSDL_image -lSDL_rotozoom -lshmvar -lcjson
-
+TARGET := $(BUILD_DIR)/prompt
+LDFLAGS := $(LDFLAGS) -lSDL -lSDL_ttf -lSDL_image -lSDL_rotozoom
 
 $(TARGET): $(OFILES)
 	@$(CXX) $(OFILES) -o $@ $(LDFLAGS)
-# $(STRIP) $@
+	@$(STRIP) $@
 
 %.o: %.c
-	@echo Building $@
+	@echo gcc $@
 	@$(CC) $(CFLAGS) -c $< -o $@
 
-# %.o: %.cpp
-# 	$(CXX) $(CXXFLAGS) -c $< -o $@
+%.o: %.cpp
+	@echo g++ $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
 	@rm -f $(TARGET) $(OFILES)

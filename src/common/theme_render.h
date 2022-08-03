@@ -35,7 +35,7 @@ SDL_Surface* theme_batterySurface(Theme_s* theme, Resources_s* res, int percenta
 
     // Correct Exo 2 font offset
     if (strncmp(TTF_FontFaceFamilyName(font), "Exo 2", 5) == 0)
-        style->offset -= 0.075 * TTF_FontHeight(font);
+        style->offsetY -= 0.075 * TTF_FontHeight(font);
 
     // Battery percentage text
     char buffer[5];
@@ -60,7 +60,7 @@ SDL_Surface* theme_batterySurface(Theme_s* theme, Resources_s* res, int percenta
         0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000); /* important */
 
     SDL_Rect rect_icon = {0, (img_height - icon->h) / 2};
-    SDL_Rect rect_text = {icon->w + SPACER, (img_height - text->h) / 2 + style->offset};
+    SDL_Rect rect_text = {icon->w + SPACER + style->offsetX, (img_height - text->h) / 2 + style->offsetY};
 
     if (visible && style->onleft) {
         rect_text.x = 0;

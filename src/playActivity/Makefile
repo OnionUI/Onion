@@ -8,7 +8,7 @@ CC 		= $(CROSS_COMPILE)gcc
 CXX 	= $(CROSS_COMPILE)g++
 STRIP 	= $(CROSS_COMPILE)strip
 
-SOURCES = .
+SOURCES = . ../../include/cjson
 CFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.c))
 CPPFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.cpp))
 OFILES = $(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
@@ -16,7 +16,7 @@ OFILES = $(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
 # NOTE: These flags aren't strickly necessary...
 CFLAGS = -I../../include -marm -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7ve 
 CXXFLAGS = $(CFLAGS)
-LDFLAGS = -L../../lib -lSDL -lSDL_image -lcjson
+LDFLAGS = -lSDL -lSDL_image
 
 $(TARGET): $(OFILES)
 	$(CXX) $(OFILES) -o $@ $(LDFLAGS)

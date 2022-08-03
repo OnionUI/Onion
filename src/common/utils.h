@@ -22,7 +22,7 @@ bool file_exists(const char *filename) {
 
 bool dotfile(const char *key) {
     char filename[MAX_LEN];
-    concat(filename, "/mnt/SDCARD/.tmp_update/.", key);
+    concat(filename, "/mnt/SDCARD/.tmp_update/config/.", key);
     return file_exists(filename);
 }
 

@@ -14,7 +14,7 @@
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
 
-#include "cJSON/cJSON.h"
+#include "cjson/cJSON.h"
    
 // Max number of records in the DB
 #define NUMBER_OF_THEMES 100

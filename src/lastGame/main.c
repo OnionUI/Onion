@@ -6,7 +6,7 @@
 #include <sys/stat.h>  
 #include <fcntl.h>
 
-#include "cJSON/cJSON.h"
+#include "cjson/cJSON.h"
 
 
 void logMessage(char* Message) {

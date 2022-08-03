@@ -1,18 +1,24 @@
 #!/bin/sh
 echo $0 $*
-progdir=`cd -- "$(dirname "$0")" >/dev/null 2>&1; pwd -P`
+appdir=`cd -- "$(dirname "$0")" >/dev/null 2>&1; pwd -P`
+sysdir=/mnt/SDCARD/.tmp_update
 
-if [ -d /mnt/SDCARD/.tmp_update ]; then
-    cd /mnt/SDCARD/.tmp_update
-    # Remove everything except dotfiles and onionVersion
+if [ -d $sysdir ]; then
+    cd $sysdir
+    # Remove old system files, except dotfiles and onionVersion
     find * -maxdepth 0 -not -name "onionVersion" -exec rm -rf {} \;
+
+    # Move dotfiles to new location
+    mkdir -p config
+    mv .* config/
 fi
 
-cd $progdir
-mkdir -p /mnt/SDCARD/.tmp_update
-mv .tmp_update/* /mnt/SDCARD/.tmp_update
+# Move installation files
+cd $appdir
+mkdir -p $sysdir
+mv .tmp_update/* $sysdir
 
-cd /mnt/SDCARD/.tmp_update
-LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/mnt/SDCARD/.tmp_update/lib" ./install.sh
+cd $sysdir
+./updater
 
 reboot

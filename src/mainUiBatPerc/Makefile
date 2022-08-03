@@ -1,22 +1,9 @@
-ifeq (,$(BUILD_DIR))
-BUILD_DIR=.
-endif
+INCLUDE_SHMVAR=1
+INCLUDE_CJSON=1
+include ../common/common.mk
 
-TARGET = $(BUILD_DIR)/mainUiBatPerc
-
-CC 		= $(CROSS_COMPILE)gcc
-CXX 	= $(CROSS_COMPILE)g++
-STRIP 	= $(CROSS_COMPILE)strip
-
-SOURCES = .
-CFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.c))
-CPPFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.cpp))
-OFILES = $(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
-
-CFLAGS = -I../../include -I../common
-CXXFLAGS = $(CFLAGS)
-LDFLAGS = -L../../lib -lSDL -lSDL_ttf -lSDL_image -lSDL_rotozoom -pthread -lshmvar -lpng -lcjson
-
+TARGET := $(BUILD_DIR)/mainUiBatPerc
+LDFLAGS := $(LDFLAGS) -lSDL -lSDL_ttf -lSDL_image -lSDL_rotozoom -lpng
 
 $(TARGET): $(OFILES)
 	@$(CXX) $(OFILES) -o $@ $(LDFLAGS)

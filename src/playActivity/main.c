@@ -7,7 +7,7 @@
 #include <fcntl.h>
 #include <time.h>
 
-#include "cJSON/cJSON.h"
+#include "cjson/cJSON.h"
 
 // Max number of records in the DB
 #define MAXVALUES 1000
