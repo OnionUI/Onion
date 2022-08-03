@@ -45,7 +45,7 @@ You can check your current version in `Settings` ➜ `Device Info` ➜ `Version`
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179306127-e8a2c99c-a078-46b0-9561-47abf5c16208.png" width="54"></sup>Fresh install
 
-> Note: Use a fast, trusted brand SD Card as the one included with the Miyoo Mini is slow and will fail/corrupt data.
+> *Note: Use a fast, trusted brand SD Card as the one included with the Miyoo Mini is slow and will fail/corrupt data.
 > The following process will erase everything on your SD card. Please ensure any Roms, Bios & Saves are backed up to your PC.
 
 - Format your SD card as FAT32. (You will need to use a third party application to do this on Windows).
