@@ -149,7 +149,7 @@ update_only() {
 	install_core "Updating core..."	
 	install_retroarch "Updating RetroArch..."
 	restore_ra_config
-	echo "Update complete!" >> /tmp/.update_msg
+	echo "Update complete! Turning off..." >> /tmp/.update_msg
 
 	touch $installdir/.installed
 	sleep 1
