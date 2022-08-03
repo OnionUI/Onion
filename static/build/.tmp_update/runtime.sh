@@ -30,7 +30,7 @@ main() {
     HOME=/mnt/SDCARD/RetroArch/
 
     # Auto launch
-    if [ ! -f $sysdir/.noAutoStart ]; then
+    if [ ! -f $sysdir/config/.noAutoStart ]; then
         check_launch_game
     fi
 
