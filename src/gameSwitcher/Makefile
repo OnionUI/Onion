@@ -4,13 +4,13 @@ endif
 
 TARGET = $(BUILD_DIR)/gameSwitcher
 
-CC 	= $(CROSS_COMPILE)g++
+CC 	= $(CROSS_COMPILE)gcc
 
 SOURCES = .
 CFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.c))
 OFILES = $(CFILES:.c=.o)
 
-CFLAGS = -I../../include -O3 -marm -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7ve -Wall
+CFLAGS = -I../../include -O3 -Wall
 LDFLAGS = -L../../lib -s -lSDL -lSDL_ttf -lSDL_image -lpng -lcjson
 
 $(TARGET): $(OFILES)

@@ -19,8 +19,8 @@ infoPanel
 !infoPanel/
 installUI
 !installUI/
-installPrompt
-!installPrompt/
+prompt
+!prompt/
 lastGame
 !lastGame/
 mainUiBatPerc

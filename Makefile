@@ -35,7 +35,8 @@ $(CACHE)/.setup:
 	@cp -R $(STATIC_BUILD)/. $(BUILD_DIR)
 	@cp -R $(STATIC_PACKAGE)/. $(PACKAGE_DIR)
 	@cp -R $(ROOT_DIR)/lib/. $(BUILD_DIR)/.tmp_update/lib
-	@echo -n " v$(VERSION)" > $(BUILD_DIR)/.tmp_update/onionVersion/version.txt
+	@cp -R $(ROOT_DIR)/lib/. $(PACKAGE_DIR)/miyoo/app/.tmp_update/lib
+	@echo -n "$(VERSION)" > $(BUILD_DIR)/.tmp_update/onionVersion/version.txt
 	@chmod a+x $(ROOT_DIR)/.github/get_themes.sh && $(ROOT_DIR)/.github/get_themes.sh
 	@touch $(CACHE)/.setup
 
@@ -51,9 +52,10 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/lastGame && BUILD_DIR=$(BUILD_DIR)/.tmp_update make
 	@cd $(SRC_DIR)/mainUiBatPerc && BUILD_DIR=$(BUILD_DIR)/.tmp_update make
 	@cd $(SRC_DIR)/onionKeymon && BUILD_DIR=$(BUILD_DIR)/.tmp_update make
+	@cd $(SRC_DIR)/prompt && BUILD_DIR=$(BUILD_DIR)/.tmp_update make
 # Build install binaries
-	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(PACKAGE_DIR)/miyoo/app/.installer make
-	@cd $(SRC_DIR)/installPrompt && BUILD_DIR=$(PACKAGE_DIR)/miyoo/app/.installer make
+	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(PACKAGE_DIR)/miyoo/app/.tmp_update make
+	@cp $(BUILD_DIR)/.tmp_update/prompt $(PACKAGE_DIR)/miyoo/app/.tmp_update
 
 apps: $(CACHE)/.setup
 	@echo :: $(TARGET) - build apps
@@ -77,10 +79,10 @@ package: build
 	@mv $(BUILD_DIR)/retroarch_package.zip $(PACKAGE_DIR)/RetroArch/
 	@echo $(RA_SUBVERSION) > $(PACKAGE_DIR)/RetroArch/ra_package_version.txt
 # Package core
-	@cd $(BUILD_DIR) && zip -rq $(PACKAGE_DIR)/miyoo/app/.installer/onion_package.zip .
+	@cd $(BUILD_DIR) && zip -rq $(PACKAGE_DIR)/miyoo/app/.tmp_update/onion_package.zip .
 # Package configs
 	@cp -R $(STATIC_CONFIGS)/Saves/CurrentProfile $(STATIC_CONFIGS)/Saves/GuestProfile
-	@cd $(STATIC_CONFIGS) && zip -rq $(PACKAGE_DIR)/miyoo/app/.installer/configs.zip .
+	@cd $(STATIC_CONFIGS) && zip -rq $(PACKAGE_DIR)/miyoo/app/.tmp_update/configs.zip .
 	@rm -rf $(STATIC_CONFIGS)/Saves/GuestProfile
 
 release: package

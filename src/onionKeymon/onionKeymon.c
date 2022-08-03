@@ -18,24 +18,10 @@
 #include <linux/rtc.h>
 #include <png.h>
 
-   
-//	Button Defines
-#define BUTTON_UP	KEY_UP
-#define BUTTON_DOWN	KEY_DOWN
-#define BUTTON_LEFT	KEY_LEFT
-#define BUTTON_RIGHT	KEY_RIGHT
-#define BUTTON_A	KEY_SPACE
-#define BUTTON_B	KEY_LEFTCTRL
-#define BUTTON_X	KEY_LEFTSHIFT
-#define BUTTON_Y	KEY_LEFTALT
-#define BUTTON_L1	KEY_E
-#define BUTTON_R1	KEY_T
-#define	BUTTON_L2	KEY_TAB
-#define	BUTTON_R2	KEY_BACKSPACE
-#define	BUTTON_SELECT	KEY_RIGHTCTRL
-#define	BUTTON_START	KEY_ENTER
-#define	BUTTON_POWER	KEY_POWER
-#define	BUTTON_MENU	KEY_ESC
+//	Button definitions
+#include "../common/keymap.h"
+
+#include "../common/utils.h"
 
 //	for ev.value
 #define RELEASED	0
@@ -102,33 +88,7 @@ typedef struct {
 #define concat(ptr,str1,str2)	{ strcpy(ptr, str1); strcat(ptr, str2); }
 
 //	libshmvar header
-typedef enum {
-	MONITOR_VOLUME,		// vol
-	MONITOR_BRIGHTNESS,	// brightness
-	MONITOR_KEYMAP,		// keymap (unused)
-	MONITOR_MUTE,		// mute
-	MONITOR_VOLUME_CHANGED,	// volume change (internal use)
-	MONITOR_BGM_VOLUME,	// bgmvol
-	MONITOR_HIBERNATE_DELAY,// hibernate
-	MONITOR_ADC_VALUE,	// charging state (internal use)
-	MONITOR_LUMINATION,	// lumination
-	MONITOR_HUE,		// hue
-	MONITOR_SATURATION,	// saturation
-	MONITOR_CONTRAST,	// contrast
-	MONITOR_UNUSED,		// (unused)
-	MONITOR_AUDIOFIX,	// audiofix
-	MONITOR_VALUE_MAX,
-} MonitorValue;
-
-typedef struct _KeyShmInfo {
-	int id;
-	void *addr;
-} KeyShmInfo;
-
-int	InitKeyShm(KeyShmInfo *);
-int	SetKeyShm(KeyShmInfo* info, MonitorValue key, int value);
-int	GetKeyShm(KeyShmInfo* info, MonitorValue key);
-int	UninitKeyShm(KeyShmInfo *);
+#include "shmvar/shmvar.h"
 
 //	for clock / LCD
 #define	CHR_WIDTH	(3 * 4 + 4)
@@ -389,7 +349,7 @@ void initJson(void) {
 	readJson();
 
 	// audiofix fix for older FW
-	if (access("/customer/app/audioserver", F_OK)) {
+	if (file_exists("/customer/app/audioserver")) {
 		strcpy(jsonvalue[JSON_AUDIOFIX], "0");
 	}
 
@@ -547,19 +507,17 @@ void rumble(uint32_t val) {
 //	Send short vibration pulse
 //
 void short_pulse(void) {
-	if (access("/mnt/SDCARD/.tmp_update/.noVibration", F_OK)!=0){
-		rumble(1);
-		usleep(100000);		// 0.1s
-		rumble(0);		
-	}
-			
+	if (dotfile("noVibration")) return;
+	rumble(1);
+	usleep(100000); // 0.1s
+	rumble(0);
 }
+
 void super_short_pulse(void) {
-	if (access("/mnt/SDCARD/.tmp_update/.noVibration", F_OK)!=0){
-		rumble(1);
-		usleep(40000);		// 0.05s
-		rumble(0);			
-	}	
+	if (dotfile("noVibration")) return;
+	rumble(1);
+	usleep(40000); // 0.05s
+	rumble(0);
 }
 //
 //	Terminate retroarch before kill/shotdown processes to save progress
@@ -570,15 +528,14 @@ int terminate_retroarch(void) {
 	if (!pid) pid = searchpid("ra32");
 
 	if (pid) {
-
 		// send signal
 		kill(pid, SIGCONT); usleep(100000); kill(pid, SIGTERM);
 		// wait for terminate
 		sprintf(fname, "/proc/%d", pid);
-		uint32_t count = 20;		// 4s
-		while ((--count)&&(!access(fname, F_OK))) {
-			usleep(200000);		// 0.2s
-		}
+
+		uint32_t count = 20; // 4s
+		while (--count && file_exists(fname))
+			usleep(200000); // 0.2s
 
 		return 1;
 	}
@@ -712,17 +669,17 @@ char* getrecent_png(char *filename) {
 	uint32_t	i;
 
 	strcpy(filename, "/mnt/SDCARD/Screenshots/");
-	if (access(filename, F_OK)) mkdir(filename, 777);
+	if (!file_exists(filename)) mkdir(filename, 777);
 
 	fnptr = filename + strlen(filename);
 
-	if (!access("/tmp/cmd_to_run.sh", F_OK)) {
+	if (file_exists("/tmp/cmd_to_run.sh")) {
 		// for stock
 		if ((fp = fopen("/mnt/SDCARD/Roms/recentlist.json", "r"))) {
 			fscanf(fp, "%*255[^:]:\"%255[^\"]", fnptr);
 			fclose(fp);
 		}
-	} else if (!access("/tmp/cmd_to_run_launcher.sh", F_OK)) {
+	} else if (file_exists("/tmp/cmd_to_run_launcher.sh")) {
 		// for gameSwitcher
 		if (getrecent_onion(fnptr)) {
 			if ((strptr = strrchr(fnptr, '.'))) *strptr = 0;
@@ -737,8 +694,10 @@ char* getrecent_png(char *filename) {
 	fnptr = filename + strlen(filename);
 	for (i=0; i<1000; i++) {
 		sprintf(fnptr, "_%03d.png", i);
-		if ( access(filename, F_OK) != 0 ) break;
-	} if (i > 999) return NULL;
+		if (!file_exists(filename)) break;
+	}
+	if (i > 999)
+		return NULL;
 	return filename;
 }
 
@@ -893,8 +852,6 @@ static void* batteryWarnThread(void* param) {
 //
 uint32_t checkBatteryWarning(void) {
 	if ((adcvalue < 506)&&(adcvalue != 100)) return 1;
-//	if ( ( (adcvalue < 506) && (adcvalue != 100) /* && (!access("/tmp/cmd_to_run.sh",F_OK)) */ )
-//		|| (!access("/tmp/debug_show_battery_icon",F_OK)) ) return 1;
 	return 0;
 }
 
@@ -906,10 +863,11 @@ void updateADC(int mode) {
 	GetADCValue();
 	if (!onion) SetKeyShm(&shminfo, MONITOR_ADC_VALUE, adcvalue);
 	uint32_t warn = checkBatteryWarning();
-	if ((access("/mnt/SDCARD/.tmp_update/.noBatteryWarning", F_OK)!=0)&&(!adcthread_active)&&(warn)) {
+	if (!dotfile("noBatteryWarning") && !adcthread_active && warn) {
 		pthread_create(&adc_pt, NULL, batteryWarnThread, NULL);
 		adcthread_active = 1;
-	} else if ((adcthread_active)&&(!warn)) {
+	}
+	else if (adcthread_active && !warn) {
 		pthread_cancel(adc_pt); pthread_join(adc_pt, NULL);
 		drawFrame(0); // erase red frame
 		adcthread_active = 0;
@@ -1643,7 +1601,7 @@ void write_percBat(void) {
 	else percBat = 0;
 
 
-	if (percBat <= 4) {
+	if (!dotfile("noLowBatteryOff") && percBat <= 4) {
 		if (check_autosave()) terminate_retroarch();
 	}
 
@@ -1777,41 +1735,26 @@ int main(void) {
 					
 				}
 				
-				if ((ev.code == BUTTON_MENU)&&(val == 0)){	
-					
-					if (comboKey == 0){
-						if (access("/mnt/SDCARD/.tmp_update/.menuInverted", F_OK)==-1) {
-								if (check_autosave()) {
-									if (access("/mnt/SDCARD/.tmp_update/.noGameSwitcher", F_OK)==-1) {  // just in case if someone want to desactivate Game Switcher totally
-										if (onion) {
-										//super_short_pulse();
-										close(creat("/tmp/.trimUIMenu", 777));
-										screenshot_onion(); 
-										terminate_retroarch();	
-										}
-									}
-								}
+				if (ev.code == BUTTON_MENU && val == 0) {
+					if (comboKey == 0) {
+						if (!dotfile("menuInverted")) {
+							if (check_autosave() && !dotfile("noGameSwitcher") && onion) {
+								//super_short_pulse();
+								close(creat("/tmp/.trimUIMenu", 777));
+								screenshot_onion();
+								terminate_retroarch();
+							}
 						}
-						else  // The file ".menuInverted" exists, we exit retroarch on short press
-						{
-								
-								if (check_autosave()) {
-									remove("/tmp/.trimUIMenu");
-									terminate_retroarch();
-								}
+						else if (check_autosave()) {
+							remove("/tmp/.trimUIMenu");
+							terminate_retroarch();
 						}
 					}
-					else{
-						comboKey = 0;
-					} 
-					
+					comboKey = 0;					
 				}	
 				
 			}
 			
-			
-			
-
 			switch (ev.code) {
 			case BUTTON_POWER:
 				if ( val == REPEAT ) {
@@ -1832,7 +1775,7 @@ int main(void) {
 					}
 					break;
 				}
-				if (( val == RELEASED )&&(repeat_power < 7)&&(access("/tmp/stay_awake", F_OK))) {
+				if (val == RELEASED && repeat_power < 7 && !file_exists("/tmp/stay_awake")) {
 					// suspend
 					hibernate_time = GetKeyShm(&shminfo, MONITOR_HIBERNATE_DELAY);
 					suspend_exec( (hibernate_time == 0) ? -1 : (hibernate_time + SHUTDOWN_MIN) * 60000 );
@@ -1840,41 +1783,39 @@ int main(void) {
 				repeat_power = 0;
 				break;
 			case BUTTON_SELECT:
-				if ( val != REPEAT ) {
+				if (val != REPEAT)
 					button_flag = (button_flag & (~SELECT)) | (val<<SELECT_BIT);
-				}
 				break;
 			case BUTTON_START:
-				if ( val != REPEAT ) {
+				if (val != REPEAT)
 					button_flag = (button_flag & (~START)) | (val<<START_BIT);
-				}
 				break;
 			case BUTTON_L2:
-				if ( val == REPEAT ) {
+				if (val == REPEAT) {
 					// Adjust repeat speed to 1/2
 					val = repeat_LR;
 					repeat_LR ^= PRESSED;
-				} else {
+				}
+				else {
 					button_flag = (button_flag & (~L2)) | (val<<L2_BIT);
 					repeat_LR = 0;
 				}
-				if ( val == PRESSED ) {
+				if (val == PRESSED) {
 					switch (button_flag & (SELECT|START)) {
-					case START:
-						// SELECT + L2 : volume down / + R2 : reset
-						setVolumeRaw(0, (button_flag & R2) ? 0 : -3);
-						break;
-					case SELECT:
-						// START + L2 : brightness down
-						readJson();
-						val = getValue(JSON_BRIGHTNESS);
-						if (val>0) {
-							setBrightness(--val);
-							writeJson();
-						}
-						break;
-					default:
-						break;
+						case START:
+							// SELECT + L2 : volume down / + R2 : reset
+							setVolumeRaw(0, (button_flag & R2) ? 0 : -3);
+							break;
+						case SELECT:
+							// START + L2 : brightness down
+							readJson();
+							val = getValue(JSON_BRIGHTNESS);
+							if (val>0) {
+								setBrightness(--val);
+								writeJson();
+							}
+							break;
+						default: break;
 					}
 				}
 				break;
@@ -1908,49 +1849,35 @@ int main(void) {
 				} 
 				break;
 			case BUTTON_MENU:
-				if (onion) {
-					if ( val == REPEAT ) {
-						repeat_menu++;
-						if ((repeat_menu == REPEAT_SEC(1))&&(!button_flag)) {    // long press on menu
-							// The file does not exists
-							if (access("/mnt/SDCARD/.tmp_update/.menuInverted", F_OK)==-1) {
-									if (check_autosave()) {
-										remove("/tmp/.trimUIMenu");
-										short_pulse();
-										terminate_retroarch();
-									}
+				if (onion && val == REPEAT) {
+					repeat_menu++;
+					if (repeat_menu == REPEAT_SEC(1) && !button_flag) {    // long press on menu
+						if (!dotfile("menuInverted")) {
+							if (check_autosave()) {
+								remove("/tmp/.trimUIMenu");
+								short_pulse();
+								terminate_retroarch();
 							}
-							else  // The file ".menuInverted" exists, we show menu on long press
-							{
-								if (access("/mnt/SDCARD/.tmp_update/.noGameSwitcher", F_OK)==-1) {  // just in case if someone want to desactivate Game Switcher totally
-									if (check_autosave()) {
-										short_pulse();
-										close(creat("/tmp/.trimUIMenu", 777));
-										screenshot_onion();
-										terminate_retroarch();	
-									}
-								}
-								else   // if .menuInverted and .noGameSwitcher exist then long press does nothing
-								{
-									comboKey = 1;  
-								}
+						}
+						else if (!dotfile("noGameSwitcher")) {
+							if (check_autosave()) {
+								short_pulse();
+								close(creat("/tmp/.trimUIMenu", 777));
+								screenshot_onion();
+								terminate_retroarch();	
 							}
-						
-							repeat_menu = 0;
-							
-
 						}
-						
+						else {
+							comboKey = 1;  
 						}
-										
+						repeat_menu = 0;
+					}
 				}
 				break;
 			default:
 				break;
 			}
 			
-
-
 			clock_gettime(CLOCK_MONOTONIC_COARSE, &hibernate_start);
 			elapsed_sec = hibernate_start.tv_sec - recent.tv_sec;
 			if ( elapsed_sec < CHECK_SEC ) continue;
@@ -1959,21 +1886,24 @@ int main(void) {
 		// Comes here every CHECK_SEC(def:15) seconds interval
 
 		// Check Hibernate
-		if (!access("/tmp/battery_charging", F_OK)) hibernate_time = 1;
-		else hibernate_time = GetKeyShm(&shminfo, MONITOR_HIBERNATE_DELAY);
-		if ((hibernate_time)&&(access("/tmp/stay_awake", F_OK))) {
+		if (file_exists("/tmp/battery_charging"))
+			hibernate_time = 1;
+		else
+			hibernate_time = GetKeyShm(&shminfo, MONITOR_HIBERNATE_DELAY);
+
+		if (hibernate_time && !file_exists("/tmp/stay_awake")) {
 			clock_gettime(CLOCK_MONOTONIC_COARSE, &recent);
-			if ( (recent.tv_sec - hibernate_start.tv_sec) >= (hibernate_time * 60) ) {
+			if (recent.tv_sec - hibernate_start.tv_sec >= hibernate_time * 60) {
 				suspend_exec(SHUTDOWN_MIN * 60000);
 				clock_gettime(CLOCK_MONOTONIC_COARSE, &hibernate_start);
 			}
 		}
+
 		// Update ADC Value
 		updateADC(0);
 		if (onion) write_percBat();
 		// Update recent time
 		clock_gettime(CLOCK_MONOTONIC_COARSE, &recent);
 		elapsed_sec = 0;
-		
 	}
 }

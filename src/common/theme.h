@@ -13,12 +13,6 @@
 #define FALLBACK_FONT "/customer/app/Exo-2-Bold-Italic.ttf"
 #define FALLBACK_PATH "/mnt/SDCARD/miyoo/app/"
 
-#define THEME_POWER_0 "power-0%-icon"
-#define THEME_POWER_20 "power-20%-icon"
-#define THEME_POWER_50 "power-50%-icon"
-#define THEME_POWER_80 "power-80%-icon"
-#define THEME_POWER_100 "power-full-icon"
-
 typedef struct Theme_BatteryPercentage
 {
     bool visible;
@@ -60,19 +54,6 @@ typedef struct Theme
     GridStyle_s grid;
     FontStyle_s list;
 } Theme_s;
-
-SDL_Color hex2sdl(char *input) {
-	char *ptr;
-    if (input[0] == '#')
-        input++;
-    unsigned long value = strtoul(input, &ptr, 16);
-    SDL_Color color = {
-    	(value >> 16) & 0xff,
-    	(value >> 8) & 0xff,
-    	(value >> 0) & 0xff
-	};
-    return color;
-}
 
 bool getThemePath(char* theme_path)
 {
@@ -146,13 +127,20 @@ void getFontStyle(cJSON* root, FontStyle_s* dest, FontStyle_s* fallback)
         dest->color = fallback->color;
 }
 
-void theme_getImagePath(Theme_s* theme, const char* name, char* image_path)
+bool theme_getImagePath(Theme_s* theme, const char* name, char* out_path)
 {
-    char rel_path[STR_MAX];
+    char rel_path[STR_MAX], image_path[STR_MAX*2];
     sprintf(rel_path, "skin/%s.png", name);
     sprintf(image_path, "%s%s", theme->path, rel_path);
-    if (!file_exists(image_path))
-        sprintf(image_path, "%s%s", FALLBACK_PATH, rel_path);
+    bool exists = file_exists(image_path);
+
+    if (!exists)
+        snprintf(image_path, STR_MAX*2, "%s%s", FALLBACK_PATH, rel_path);
+
+    if (out_path)
+        sprintf(out_path, "%s", image_path);
+    
+    return exists;
 }
 
 SDL_Surface* theme_loadImage(Theme_s* theme, const char* name)
@@ -164,11 +152,11 @@ SDL_Surface* theme_loadImage(Theme_s* theme, const char* name)
 
 TTF_Font* theme_loadFont(Theme_s* theme, const char* font, int size)
 {
-    char font_path[STR_MAX];
+    char font_path[STR_MAX*2];
     if (font[0] == '/')
-        strncpy(font_path, font, STR_MAX-1);
+        strncpy(font_path, font, STR_MAX*2-1);
     else
-        snprintf(font_path, STR_MAX, "%s%s", theme->path, font);
+        snprintf(font_path, STR_MAX*2, "%s%s", theme->path, font);
     return TTF_OpenFont(file_exists(font_path) ? font_path : FALLBACK_FONT, size);
 }
 
@@ -181,12 +169,12 @@ Theme_s loadThemeFromPath(const char* theme_path)
         .description = "",
         .hideIconTitle = false,
         .batteryPercentage = {
-            .visible = true,
+            .visible = false,
             .font = FALLBACK_FONT,
             .size = 24,
             .color = {255, 255, 255},
             .offset = 0,
-            .onleft = false
+            .onleft = true
         },
         .title = {
             .font = FALLBACK_FONT,

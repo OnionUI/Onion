@@ -2,7 +2,7 @@ ifeq (,$(BUILD_DIR))
 BUILD_DIR=.
 endif
 
-TARGET = $(BUILD_DIR)/mainUiBatPerc
+TARGET = $(BUILD_DIR)/prompt
 
 CC 		= $(CROSS_COMPILE)gcc
 CXX 	= $(CROSS_COMPILE)g++
@@ -15,7 +15,7 @@ OFILES = $(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
 
 CFLAGS = -I../../include -I../common
 CXXFLAGS = $(CFLAGS)
-LDFLAGS = -L../../lib -lSDL -lSDL_ttf -lSDL_image -lSDL_rotozoom -pthread -lshmvar -lpng -lcjson
+LDFLAGS = -L../../lib -lSDL -lSDL_ttf -lSDL_image -lSDL_rotozoom -lshmvar -lcjson
 
 
 $(TARGET): $(OFILES)

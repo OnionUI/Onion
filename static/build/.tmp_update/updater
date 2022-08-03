@@ -102,16 +102,12 @@ if  [ -f /mnt/SDCARD/.tmp_update/.offOrder ] ; then
 	sleep 10
 fi
 
-# Clean log
-rm -f /mnt/SDCARD/.tmp_update/log_mainUiBatPerc.txt
-touch /mnt/SDCARD/.tmp_update/log_mainUiBatPerc.txt
-
 while true; do	
 	
 		if [ ! -f /mnt/SDCARD/.tmp_update/cmd_to_run.sh ] ; then
 			### MainUI launch
 			cd /mnt/SDCARD/.tmp_update
-			./mainUiBatPerc 2>&1 >> ./log_mainUiBatPerc.txt
+			./mainUiBatPerc
 			cd /mnt/SDCARD/miyoo/app
 			LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./MainUI
 			mv /tmp/cmd_to_run.sh /mnt/SDCARD/.tmp_update/cmd_to_run.sh
@@ -153,10 +149,10 @@ while true; do
 		fi	
 		
 		if  [ -f /tmp/.trimUIMenu ] ; then
-				rm /tmp/.trimUIMenu
-				cd /mnt/SDCARD/.tmp_update/
-				LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./gameSwitcher > ./log.txt 2>&1
-				sync
+			rm /tmp/.trimUIMenu
+			cd /mnt/SDCARD/.tmp_update/
+			LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./gameSwitcher > ./log.txt 2>&1
+			sync
 		else 
 			# Returning to MainUI
 			rm /mnt/SDCARD/.tmp_update/cmd_to_run.sh

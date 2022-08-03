@@ -5,10 +5,7 @@ echo $0 $*
 cat /proc/ls
 sleep 1
 
-mv -f /mnt/SDCARD/miyoo/app/.installer/ /mnt/SDCARD/.tmp_update/
-mv -f /mnt/SDCARD/.tmp_update/.installer/updater /mnt/SDCARD/.tmp_update/
-
-cd /mnt/SDCARD/.tmp_update/.installer
-./install.sh
+cd /mnt/SDCARD/miyoo/app
+./MainUI
 
 reboot

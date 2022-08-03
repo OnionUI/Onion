@@ -708,11 +708,11 @@ int main(void) {
 					}
 				}
 				
-				if (y_pressed) {	
-					int fd = creat(".menuActivity", 777);
-					close(fd); 
-					break;
-				}
+				// if (y_pressed) {	
+				// 	int fd = creat(".menuActivity", 777);
+				// 	close(fd); 
+				// 	break;
+				// }
 		
 				if (start_pressed) {	
 					nExitToMiyoo = 1;

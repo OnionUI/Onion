@@ -10,7 +10,7 @@ SOURCES = .
 CFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.c))
 OFILES = $(CFILES:.c=.o)
 
-CFLAGS = -I../../include -Os -marm -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7ve+simd
+CFLAGS = -I../../include -I../common -Os
 CFLAGS += -ffunction-sections -fdata-sections -Wall
 LDFLAGS = -L../../lib -lshmvar -lpthread -lpng -Wl,--gc-sections -s
 

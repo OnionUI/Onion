@@ -4,12 +4,27 @@ installdir=`cd -- "$(dirname "$0")" >/dev/null 2>&1; pwd -P`
 
 main() {
 	if [ ! -d /mnt/SDCARD/.tmp_update/onionVersion ]; then
-		fresh_install
+		fresh_install 1
 		return
 	fi
 
 	# Prompt for update or fresh install
-	update_only
+	$installdir/prompt -r -m "Welcome to the Onion installer!\nPlease choose an action:" \
+		"Update" \
+		"Repair (keep settings)" \
+		"Fresh install"
+	retcode=$?
+
+	if [ $retcode -eq 0 ]; then
+		# Update
+		update_only
+	elif [ $retcode -eq 1 ]; then
+		# Repair (keep settings)
+		fresh_install 0
+	elif [ $retcode -eq 2 ]; then
+		# Fresh install
+		fresh_install 1
+	fi
 }
 
 remove_configs() {
@@ -20,16 +35,16 @@ remove_configs() {
 }
 
 fresh_install() {
+	reset_configs=$1
+
+	rm -f $installdir/.update_msg
+
 	# Show installation progress
-	./installUI &
-	sleep 1
+	$installdir/installUI &
+	sleep 10 # TODO: Remove this after debug
 
 	# Backup important stock files
 	backup_retroarch
-
-	# Remove previous Onion files
-	cd /mnt/SDCARD/.tmp_update
-	remove_everything_except ".installer"
 
 	# Debloat the apps folder
 	debloat_apps
@@ -43,8 +58,14 @@ fresh_install() {
 
 	install_core "Installing core..."	
 	install_retroarch "Installing RetroArch..."
-	install_configs "Copying configuration files..."
-	echo "Installation complete" > $installdir/.update_msg
+
+	echo "Completing installation..." >> $installdir/.update_msg
+	if [ $reset_configs -eq 0 ]; then
+		restore_ra_config
+	fi
+	install_configs $reset_configs
+	
+	echo "Installation complete!" >> $installdir/.update_msg
 
 	touch $installdir/.installed
 	sleep 1
@@ -76,7 +97,7 @@ update_only() {
 	install_core "Updating core..."	
 	install_retroarch "Updating RetroArch..."
 	restore_ra_config
-	echo "Update complete" > $installdir/.update_msg
+	echo "Update complete!" >> $installdir/.update_msg
 
 	touch $installdir/.installed
 	sleep 1
@@ -90,7 +111,7 @@ install_core() {
 		return
 	fi
 
-	echo "$msg 0%" > $installdir/.update_msg
+	echo "$msg 0%" >> $installdir/.update_msg
 
 	# Onion Core installation / update
 	cd /mnt/SDCARD
@@ -131,21 +152,21 @@ install_retroarch() {
 
 	# Install RetroArch only if necessary
 	if [ $install_ra -eq 1 ] && [ -f $ra_zipfile ]; then
-		echo "$msg 0%" > $installdir/.update_msg
+		echo "$msg 0%" >> $installdir/.update_msg
 
-		# TODO: Backup config and patch it
 		cd /mnt/SDCARD/RetroArch
 		remove_everything_except `basename $ra_zipfile`
+		
 		unzip_progress $ra_zipfile $msg /mnt/SDCARD
+		
+		if [ $? -ne 0 ]; then
+			touch $installdir/.installFailed
+			echo RetroArch - installation failed
+			exit 0
+		fi
 	fi
 
-	if [ $? -ne 0 ]; then
-		touch $installdir/.installFailed
-		echo RetroArch - installation failed
-		exit 0
-	fi
-
-	rm -f $ra_zipfile
+	rm -f $ra_zipfile $ra_package_version_file
 }
 
 restore_ra_config() {
@@ -160,18 +181,21 @@ version() {
 }
 
 install_configs() {
-	msg="$1"
+	reset_configs=$1
 	zipfile=$installdir/configs.zip
 
 	if [ ! -f $zipfile ]; then
 		return
 	fi
 
-	echo "$msg" > $installdir/.update_msg
-
-	# Extract config files without overwriting any existing files
 	cd /mnt/SDCARD
-	unzip -n $zipfile
+	if [ $reset_configs -eq 1 ]; then
+		# Overwrite all default configs
+		unzip -o $zipfile
+	else
+		# Extract config files without overwriting any existing files
+		unzip -n $zipfile
+	fi
 }
 
 check_firmware() {
