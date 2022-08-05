@@ -1,5 +1,5 @@
 {
-	"88":	"OPEN",
+	"88":	"SELECT",
 	"89":	"BACK",
 	"90":	"NAV",
 	"91":	"MENU",
@@ -15,7 +15,7 @@
 	"101":	"Save failed",
 	"102":	"Slot %d saved",
 	"103":  "Fullscreen",
-	"104":  "On",
-	"105":  "Off",
+	"104":  "ON",
+	"105":  "OFF",
 	"106":  "Advanced"
 }
