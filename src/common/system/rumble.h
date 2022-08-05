@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "../utils/file.h"
+#include "utils/file.h"
 #include "settings.h"
 
 

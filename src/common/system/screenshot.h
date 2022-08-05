@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <png/png.h>
 
-#include "../utils/utils.h"
+#include "utils/utils.h"
 #include "system.h"
 #include "display.h"
 

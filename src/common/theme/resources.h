@@ -5,8 +5,8 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_ttf.h>
 
-#include "theme_config.h"
-#include "../utils/rotate180.h"
+#include "config.h"
+#include "utils/rotate180.h"
 
 enum theme_Images
 {

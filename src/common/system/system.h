@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 #include "clock.h"
-#include "../utils/flags.h"
+#include "utils/flags.h"
 
 #ifndef DT_DIR
 #define DT_DIR 4

@@ -21,8 +21,8 @@ void log_debug(const char *filename, int line, const char *format_str,...) {
     va_end(valist);
 }
 #else
-#define log_debug(message)
-#define logf_debug(format_str, ...)
+#define print_debug(message)
+#define printf_debug(format_str, ...)
 #endif
 
 #endif // LOG_H__

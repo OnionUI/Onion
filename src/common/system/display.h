@@ -7,7 +7,7 @@
 
 #include "system.h"
 #include "settings.h"
-#include "../utils/file.h"
+#include "utils/file.h"
 
 #define DISPLAY_WIDTH 640
 #define DISPLAY_HEIGHT 480

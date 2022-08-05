@@ -4,9 +4,9 @@
 #include <string.h>
 #include <SDL/SDL.h>
 
-#include "../utils/utils.h"
-#include "../utils/json.h"
-#include "../system/settings.h"
+#include "utils/utils.h"
+#include "utils/json.h"
+#include "system/settings.h"
 #include "color.h"
 
 #define STR_MAX 256

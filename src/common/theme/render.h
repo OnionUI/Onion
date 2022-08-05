@@ -3,9 +3,9 @@
 
 #include <SDL/SDL.h>
 
-#include "theme_config.h"
-#include "theme_resources.h"
-#include "../components/menu.h"
+#include "config.h"
+#include "resources.h"
+#include "components/menu.h"
 
 
 SDL_Surface* _getBatterySurface(Theme_Surfaces_s* s, int percentage)

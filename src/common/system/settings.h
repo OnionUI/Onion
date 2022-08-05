@@ -8,9 +8,9 @@
 static KeyShmInfo shminfo;
 #endif
 
-#include "../utils/file.h"
-#include "../utils/json.h"
-#include "../utils/flags.h"
+#include "utils/file.h"
+#include "utils/json.h"
+#include "utils/flags.h"
 
 #define MAX_BRIGHTNESS 10
 
