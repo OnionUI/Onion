@@ -1,8 +1,3 @@
-
-//
-//    Stock compatible custom keymon for miyoomini
-//
-
 #include <stdlib.h>
 #include <stdint.h>
 #include <dirent.h>
@@ -16,18 +11,14 @@
 #include <linux/fb.h> 
 #include <linux/input.h>
 #include <linux/rtc.h>
-#include <png.h>
 
-#include "../common/settings.h"
-#include "../common/keymap_hw.h"
-#include "../common/utils.h"
-#include "../common/rumble.h"
-#include "../common/battery.h"
-#include "../common/system.h"
-
-#ifndef DT_DIR
-#define DT_DIR 4
-#endif
+#include "utils/utils.h"
+#include "system/settings.h"
+#include "system/keymap_hw.h"
+#include "system/rumble.h"
+#include "system/battery.h"
+#include "system/system.h"
+#include "system/screenshot.h"
 
 #ifndef CLOCK_MONOTONIC_COARSE
 #define CLOCK_MONOTONIC_COARSE 6
@@ -90,44 +81,15 @@ int setVolumeRaw(int volume, int add) {
     return recent_volume;
 }
 
-//
-//    Search pid of running executable (forward match)
-//
-pid_t searchpid(const char *commname) {
-    DIR *procdp;
-    struct dirent *dir;
-    char fname[24];
-    char comm[128];
-    pid_t pid;
-    pid_t ret = 0;
-    size_t commlen = strlen(commname);
 
-    procdp = opendir("/proc");
-    while ((dir = readdir(procdp))) {
-        if (dir->d_type == DT_DIR) {
-            pid = atoi(dir->d_name);
-            if ( pid > 2 ) {
-                sprintf(fname, "/proc/%d/comm", pid);
-                FILE *fp = fopen(fname, "r");
-                if (fp) {
-                    fscanf(fp, "%127s", comm);
-                    fclose(fp);
-                    if (!strncmp(comm, commname, commlen)) { ret = pid; break; }
-                }
-            }
-        }
-    }
-    closedir(procdp);
-    return ret;
-}
 
 //
 //    Terminate retroarch before kill/shotdown processes to save progress
 //
 int terminate_retroarch(void) {
     char fname[16];
-    pid_t pid = searchpid("retroarch");
-    if (!pid) pid = searchpid("ra32");
+    pid_t pid = system_searchpid("retroarch");
+    if (!pid) pid = system_searchpid("ra32");
 
     if (pid) {
         // send signal
@@ -203,13 +165,9 @@ int suspend(uint32_t mode) {
     }
     closedir(procdp);
 
-    // reset FB when anything killed
-    if ((mode == 2)&&(ret)) {
-        ioctl(fb_fd, FBIOGET_VSCREENINFO, &vinfo);
-        vinfo.yoffset = 0;
-        memset(fb_addr, 0, finfo.smem_len);
-        ioctl(fb_fd, FBIOPUT_VSCREENINFO, &vinfo);
-    }
+    // reset display when anything killed
+    if (mode == 2 && ret)
+        display_reset();
 
     return ret;
 }
@@ -229,195 +187,6 @@ void resume(void) {
 }
 
 //
-//    [onion] get recent filename from content_history.lpl
-//
-char* getrecent_onion(char *filename) {
-    FILE    *fp;
-    char    key[256], val[256];
-    char    *keyptr, *valptr, *strptr;
-    int    f;
-
-    *filename = 0;
-    if ( (fp = fopen("/mnt/SDCARD/Saves/CurrentProfile/lists/content_history.lpl", "r")) ) {
-        key[0] = 0; val[0] = 0;
-        while ((f = fscanf(fp, "%255[^:]:%255[^\n]\n", key, val)) != EOF) {
-            if (!f) { if (fscanf(fp, "%*[^\n]\n") == EOF) break; else continue; }
-            if ( ((keyptr = trimstr(key, 0))) && ((valptr = trimstr(val, 1))) ) {
-                if ( (!strcmp(keyptr, "\"path\"")) && ((valptr = strrchr(valptr, '/'))) ) {
-                    valptr++;
-                    if ((strptr = strrchr(valptr, '"'))) *strptr = 0;
-                    strcpy(filename, valptr);
-                    break;
-                }
-            }
-            key[0] = 0; val[0] = 0;
-        }
-        fclose(fp);
-    }
-    if (*filename == 0) return NULL;
-    return filename;
-}
-
-//
-//    Get most recent file name for screenshot
-//
-char* getrecent_png(char *filename) {
-    FILE        *fp;
-    char        *fnptr,    *strptr;
-    uint32_t    i;
-
-    strcpy(filename, "/mnt/SDCARD/Screenshots/");
-    if (!file_exists(filename)) mkdir(filename, 777);
-
-    fnptr = filename + strlen(filename);
-
-    if (file_exists("/tmp/cmd_to_run.sh")) {
-        // for stock
-        if ((fp = fopen("/mnt/SDCARD/Roms/recentlist.json", "r"))) {
-            fscanf(fp, "%*255[^:]:\"%255[^\"]", fnptr);
-            fclose(fp);
-        }
-    } else if (file_exists("/tmp/cmd_to_run_launcher.sh")) {
-        // for gameSwitcher
-        if (getrecent_onion(fnptr)) {
-            if ((strptr = strrchr(fnptr, '.'))) *strptr = 0;
-        }
-    }
-
-    if (!(*fnptr)) {
-        if (searchpid("gameSwitcher")) strcat(filename, "gameSwitcher");
-        else strcat(filename, "MainUI");
-    }
-
-    fnptr = filename + strlen(filename);
-    for (i=0; i<1000; i++) {
-        sprintf(fnptr, "_%03d.png", i);
-        if (!file_exists(filename)) break;
-    }
-    if (i > 999)
-        return NULL;
-    return filename;
-}
-
-//
-//    Screenshot (640x480x32bpp only, rotate180, png)
-//
-void screenshot(void) {
-    char        screenshotname[512];
-    uint32_t    *buffer;
-    uint32_t    *src;
-    uint32_t    linebuffer[640], x, y, pix;
-    FILE        *fp;
-    png_structp    png_ptr;
-    png_infop    info_ptr;
-
-    if (getrecent_png(screenshotname) == NULL) return;
-
-    ioctl(fb_fd, FBIOGET_VSCREENINFO, &vinfo);
-    buffer = fb_addr + 640*vinfo.yoffset;
-
-    if ((fp = fopen(screenshotname, "wb"))) {
-        png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
-        info_ptr = png_create_info_struct(png_ptr);
-        png_init_io(png_ptr, fp);
-        png_set_IHDR(png_ptr, info_ptr, 640, 480, 8, PNG_COLOR_TYPE_RGBA,
-            PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
-        png_write_info(png_ptr, info_ptr);
-        src = buffer + 640*480;
-        for (y=0; y<480; y++) {
-            for (x=0; x<640; x++){
-                pix = *--src;
-                linebuffer[x] = 0xFF000000 | (pix & 0x0000FF00) | (pix & 0x00FF0000)>>16 | (pix & 0x000000FF)<<16;
-            }
-            png_write_row(png_ptr, (png_bytep)linebuffer);
-            
-        }
-        png_write_end(png_ptr, info_ptr);
-        png_destroy_write_struct(&png_ptr, &info_ptr);
-        fflush(fp);
-        fsync(fileno(fp));
-        fclose(fp);
-    }
-}
-
-
-//
-//    Screenshot (640x480x32bpp only, rotate180, png)
-//
-void screenshot_onion(void) {
-    char        screenshotname[512]="/mnt/SDCARD/.tmp_update/screenshotGame.png";
-    uint32_t    *buffer;
-    uint32_t    *src;
-    uint32_t    linebuffer[640], x, y, pix;
-    FILE        *fp;
-    png_structp    png_ptr;
-    png_infop    info_ptr;
-
-    ioctl(fb_fd, FBIOGET_VSCREENINFO, &vinfo);
-    buffer = fb_addr + 640*vinfo.yoffset;
-
-    if ((fp = fopen(screenshotname, "wb"))) {
-        png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
-        info_ptr = png_create_info_struct(png_ptr);
-        png_init_io(png_ptr, fp);
-        png_set_IHDR(png_ptr, info_ptr, 640, 480, 8, PNG_COLOR_TYPE_RGBA,
-            PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
-        png_write_info(png_ptr, info_ptr);
-        src = buffer + 640*480;
-        for (y=0; y<480; y++) {
-            for (x=0; x<640; x++){
-                pix = *--src;
-                linebuffer[x] = 0xFF000000 | (pix & 0x0000FF00) | (pix & 0x00FF0000)>>16 | (pix & 0x000000FF)<<16;
-            }
-            png_write_row(png_ptr, (png_bytep)linebuffer);
-            
-        }
-        png_write_end(png_ptr, info_ptr);
-        png_destroy_write_struct(&png_ptr, &info_ptr);
-        fflush(fp);
-        fsync(fileno(fp));
-        fclose(fp);
-    }
-}
-
-//
-//    set CPU governor
-//        mode: 0: save 1: restore
-//
-void setCPUsave(uint32_t mode) {
-    static uint32_t minfreq;
-    static char gov[16];
-    char fn_min_freq[128];
-    char fn_governor[128];
-    const char powersave[] = "powersave";
-    FILE* fp;
-    concat(fn_min_freq, CPU_DIR, "scaling_min_freq");
-    concat(fn_governor, CPU_DIR, "scaling_governor");
-
-    if (!mode) {
-        /* save min_freq */
-        fp = fopen(fn_min_freq, "r");
-        if (fp) { fscanf(fp, "%u", &minfreq); fclose(fp); }
-        /* set min_freq to lowest */
-        fp = fopen(fn_min_freq, "w");
-        if (fp) { fprintf(fp, "%u", 0); fclose(fp); }
-        /* save governor */
-        fp = fopen(fn_governor, "r");
-        if (fp) { fscanf(fp, "%15s", gov); fclose(fp); }
-        /* set governor to powersave */
-        fp = fopen(fn_governor, "w");
-        if (fp) { fprintf(fp, "%s", powersave); fclose(fp); }
-    } else {
-        /* restore min_freq */
-        fp = fopen(fn_min_freq, "w");
-        if (fp) { fprintf(fp, "%u", minfreq); fclose(fp); }
-        /* restore governor */
-        fp = fopen(fn_governor, "w");
-        if (fp) { fprintf(fp, "%s", gov); fclose(fp); }
-    }
-}
-
-//
 //    Quit
 //
 void quit(int exitcode) {
@@ -425,9 +194,9 @@ void quit(int exitcode) {
     display_free();
     if (input_fd > 0) close(input_fd);
     battery_free();
-    read_clock();
-    write_clock_rtc();
-    write_clockfile();
+    system_clock_get();
+    system_rtc_set();
+    system_clock_save();
     exit(exitcode);
 }
 
@@ -437,28 +206,12 @@ void quit(int exitcode) {
 void shutdown(void) {
     system_shutdown();
     terminate_retroarch();
-    read_clock();
-    write_clockfile();
+    system_clock_get();
+    system_clock_save();
     sync();
     reboot(RB_AUTOBOOT);
     while(1) pause();
     exit(0);
-}
-
-//
-//    [onion] suspend/resume PlayActivity timer
-// 
-void onion_pa_suspend(int mode) {
-    if (mode) {
-        // The current time is resumed
-        chdir("cd /mnt/SDCARD/.tmp_update/");
-        system("./loadTime.sh; sync");
-    }
-    else {
-        // The current time is saved
-        chdir("cd /mnt/SDCARD/.tmp_update/");
-        system("./saveTime.sh; sync");
-    }
 }
 
 //
@@ -470,13 +223,13 @@ void suspend_exec(int timeout) {
 
     // suspend
     battery_hideWarning();
-    onion_pa_suspend(0);
+    system_clock_pause(true);
     suspend(0);
     rumble(0);
     int recent_volume = setVolumeRaw(-60,0);
-    _setBrightnessRaw(0);
-    display_setScreen(0);
-    setCPUsave(0);
+    display_setBrightnessRaw(0);
+    display_off();
+    system_powersave_on();
 
     uint32_t repeat_power = 0;
     uint32_t killexit = 0;
@@ -500,30 +253,30 @@ void suspend_exec(int timeout) {
                 if ( ev.code == HW_BTN_MENU ) {
                     // screenshot
                     super_short_pulse();
-                    setCPUsave(1);
-                    display_setScreen(1);
-                    screenshot();
-                    // display_setScreen(0);
-                    // setCPUsave(0);
+                    system_powersave_off();
+                    display_on();
+                    screenshot_recent();
+                    // display_off();
+                    // system_powersave_on();
                     break;   //  avoid bad screen state after the screen shot
                 }
             }
         }
         else if ((!ready)&&(battery_readADC() != 100)) {
             // shutdown
-            setCPUsave(1); resume(); usleep(100000); shutdown();
+            system_powersave_off(); resume(); usleep(100000); shutdown();
         }
     }
 
     // resume
-    setCPUsave(1);
+    system_powersave_off();
     if (killexit) { resume(); usleep(100000); suspend(2); usleep(400000); }
-    display_setScreen(1);
-    display_setBrightness(settings.brightness);
+    display_on();
+    display_setBrightnessRaw(settings.brightness);
     setVolumeRaw(recent_volume, 0);
     if (!killexit) {
         resume();
-        onion_pa_suspend(1);
+        system_clock_pause(false);
     }
     battery_updateADC(true);
 
@@ -544,7 +297,7 @@ int check_autosave(void) {
     const char cfg_ext[] = ".cfg";
 
     char ra_name[12] = "retroarch";
-    if ( (ra_pid = searchpid(ra_name)) ) {
+    if ( (ra_pid = system_searchpid(ra_name)) ) {
         strptr = cfgpath + sprintf(cfgpath, "/proc/%d/cwd/", ra_pid);
         // standard retroarch ( ./.retroarch/retroarch.cfg )
         sprintf(strptr, ".retroarch/%s%s", ra_name, cfg_ext);
@@ -555,7 +308,7 @@ int check_autosave(void) {
         }
     } else {
         strcpy(ra_name, "ra32");
-        if ( (ra_pid = searchpid(ra_name)) ) {
+        if ( (ra_pid = system_searchpid(ra_name)) ) {
             // stock ra32.ss ( ./ra32.cfg )
             sprintf(cfgpath, "/proc/%d/cwd/%s%s", ra_pid, ra_name, cfg_ext);
             if (access(cfgpath, R_OK)) return 0;
@@ -566,9 +319,9 @@ int check_autosave(void) {
     if (!fp) return 0;
     while ((f = fscanf(fp, "%255[^=]=%255[^\n]\n", key, value)) != EOF) {
         if (!f) { if (fscanf(fp, "%*[^\n]\n") == EOF) break; else continue; }
-        if ((keyptr = trimstr(key, 0))) {
+        if ((keyptr = str_trim(key, 0))) {
             if (!strcmp(keyptr, "savestate_auto_save")) {
-                if (valptr = trimstr(value, 1) && !strcmp(valptr, "\"true\""))
+                if (valptr = str_trim(value, 1) && !strcmp(valptr, "\"true\""))
                     ret = 1;
                 break;
             }
@@ -604,17 +357,17 @@ void write_percBat(void) {
 void deepsleep(void) {
 
     pid_t pid;
-    if ((pid = searchpid("MainUI"))) {
+    if ((pid = system_searchpid("MainUI"))) {
         short_pulse();
         system_shutdown(); kill(pid, SIGKILL); 
         
     }
-    else if ((pid = searchpid("gameSwitcher"))) {
+    else if ((pid = system_searchpid("gameSwitcher"))) {
         short_pulse();
         system_shutdown();
         kill(pid, SIGKILL);
     }
-    else if ((pid = searchpid("retroarch"))) {
+    else if ((pid = system_searchpid("retroarch"))) {
          if (check_autosave()){
             short_pulse();
             system_shutdown(); 
@@ -704,7 +457,7 @@ int main(void) {
                     if (comboKey == 0 && check_autosave()) {
                         if (settings.launcher && !settings.menu_inverted) {
                             temp_flag_set(".trimUIMenu", true);
-                            screenshot_onion();
+                            screenshot_system();
                             terminate_retroarch();
                         }
                         else {
@@ -821,7 +574,7 @@ int main(void) {
                             if (check_autosave()) {
                                 short_pulse();
                                 close(creat("/tmp/.trimUIMenu", 777));
-                                screenshot_onion();
+                                screenshot_system();
                                 terminate_retroarch();    
                             }
                         }

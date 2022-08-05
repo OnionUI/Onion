@@ -33,6 +33,8 @@ ifeq (,$(PLATFORM))
 PLATFORM=linux
 endif
 
+DEBUG=1
+
 ###########################################################
 
 .PHONY: all version core apps external release clean git-clean with-toolchain patch lib
@@ -48,8 +50,8 @@ print-version:
 $(CACHE)/.setup:
 	@echo :: $(TARGET) - setup
 	@mkdir -p $(BUILD_DIR) $(DIST_FULL) $(DIST_CORE) $(RELEASE_DIR)
-	@cp -R $(STATIC_BUILD)/. $(BUILD_DIR)
-	@cp -R $(STATIC_DIST)/. $(DIST_FULL)
+	@rsync -a --exclude='.gitkeep' $(STATIC_BUILD)/ $(BUILD_DIR)
+	@rsync -a --exclude='.gitkeep' $(STATIC_DIST)/ $(DIST_FULL)
 	@cp -R $(ROOT_DIR)/lib/. $(DIST_FULL)/miyoo/app/.tmp_update/lib
 	@mkdir -p $(BUILD_DIR)/.tmp_update/onionVersion
 	@echo -n "$(VERSION)" > $(BUILD_DIR)/.tmp_update/onionVersion/version.txt
@@ -57,31 +59,31 @@ $(CACHE)/.setup:
 	@touch $(CACHE)/.
 # Copy static packages
 	@mkdir -p $(PACKAGES_APP_DEST) $(PACKAGES_EMU_DEST) $(PACKAGES_RAPP_DEST)
-	@cp -R $(STATIC_PACKAGES)/App/. $(PACKAGES_APP_DEST)
-	@cp -R $(STATIC_PACKAGES)/Emu/. $(PACKAGES_EMU_DEST)
-	@cp -R $(STATIC_PACKAGES)/RApp/. $(PACKAGES_RAPP_DEST)
+	@rsync -a --exclude='.gitkeep' $(STATIC_PACKAGES)/App/ $(PACKAGES_APP_DEST)
+	@rsync -a --exclude='.gitkeep' $(STATIC_PACKAGES)/Emu/ $(PACKAGES_EMU_DEST)
+	@rsync -a --exclude='.gitkeep' $(STATIC_PACKAGES)/RApp/ $(PACKAGES_RAPP_DEST)
 
 build: core apps external
 
 core: $(CACHE)/.setup
 	@echo :: $(TARGET) - build core
 # Build Onion binaries
-	@cd $(SRC_DIR)/bootScreen && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/chargingState && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/gameSwitcher && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/lastGame && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/mainUiBatPerc && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/keymon && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/playActivity && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/bootScreen && BUILD_DIR=$(BIN_DIR) DEBUG=$(DEBUG) make
+	@cd $(SRC_DIR)/chargingState && BUILD_DIR=$(BIN_DIR) DEBUG=$(DEBUG) make
+	@cd $(SRC_DIR)/gameSwitcher && BUILD_DIR=$(BIN_DIR) DEBUG=$(DEBUG) make
+	@cd $(SRC_DIR)/lastGame && BUILD_DIR=$(BIN_DIR) DEBUG=$(DEBUG) make
+	@cd $(SRC_DIR)/mainUiBatPerc && BUILD_DIR=$(BIN_DIR) DEBUG=$(DEBUG) make
+	@cd $(SRC_DIR)/keymon && BUILD_DIR=$(BIN_DIR) DEBUG=$(DEBUG) make
+	@cd $(SRC_DIR)/playActivity && BUILD_DIR=$(BIN_DIR) DEBUG=$(DEBUG) make
 # Build installer binaries
 	@mkdir -p $(DIST_FULL)/miyoo/app/.tmp_update/bin
-	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(DIST_FULL)/miyoo/app/.tmp_update/bin make
-	@cd $(SRC_DIR)/prompt && BUILD_DIR=$(DIST_FULL)/miyoo/app/.tmp_update/bin make
+	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(DIST_FULL)/miyoo/app/.tmp_update/bin DEBUG=$(DEBUG) make
+	@cd $(SRC_DIR)/prompt && BUILD_DIR=$(DIST_FULL)/miyoo/app/.tmp_update/bin DEBUG=$(DEBUG) make
 
 apps: $(CACHE)/.setup
 	@echo :: $(TARGET) - build apps
-	@cd $(SRC_DIR)/playActivityUI && BUILD_DIR=$(BUILD_DIR)/App/PlayActivity make
-	@cd $(SRC_DIR)/packageManager && BUILD_DIR=$(BUILD_DIR)/App/The_Onion_Installer make
+	@cd $(SRC_DIR)/playActivityUI && BUILD_DIR=$(BUILD_DIR)/App/PlayActivity DEBUG=$(DEBUG) make
+	@cd $(SRC_DIR)/packageManager && BUILD_DIR=$(BUILD_DIR)/App/The_Onion_Installer DEBUG=$(DEBUG) make
 	@cd $(SRC_DIR)/themeSwitcher && BUILD_DIR="$(PACKAGES_APP_DEST)/Theme Switcher/App/ThemeSwitcher" make
 
 external: $(CACHE)/.setup
@@ -104,10 +106,10 @@ dist: build
 # Package core
 	@cd $(BUILD_DIR) && zip -rq $(DIST_FULL)/miyoo/app/.tmp_update/onion.pak .
 # Package configs
-	@mkdir -p $(DIST_FULL)/miyoo/app/.tmp_update/config
-	@cp -R $(STATIC_CONFIGS)/Saves/CurrentProfile $(STATIC_CONFIGS)/Saves/GuestProfile
-	@cd $(STATIC_CONFIGS) && zip -rq $(DIST_FULL)/miyoo/app/.tmp_update/config/configs.pak .
-	@rm -rf $(STATIC_CONFIGS)/Saves/GuestProfile
+	@mkdir -p $(ROOT_DIR)/temp/configs $(DIST_FULL)/miyoo/app/.tmp_update/config
+	@rsync -a --exclude='.gitkeep' $(STATIC_CONFIGS)/ $(ROOT_DIR)/temp/configs
+	@cp -R $(ROOT_DIR)/temp/configs/Saves/CurrentProfile/ $(ROOT_DIR)/temp/configs/Saves/GuestProfile
+	@cd $(ROOT_DIR)/temp/configs && zip -rq $(DIST_FULL)/miyoo/app/.tmp_update/config/configs.pak .
 # Create core-only dist
 	@cp -R $(DIST_FULL)/.tmp_update $(DIST_CORE)/.tmp_update
 	@cp -R $(DIST_FULL)/miyoo $(DIST_CORE)/miyoo
@@ -119,7 +121,7 @@ release: dist
 	@cd $(DIST_CORE) && zip -rq $(RELEASE_DIR)/$(RELEASE_NAME)-core.zip .
 
 clean:
-	@rm -rf $(BUILD_DIR) $(ROOT_DIR)/dist
+	@rm -rf $(BUILD_DIR) $(ROOT_DIR)/dist $(ROOT_DIR)/temp
 	@rm -f $(CACHE)/.setup
 	@find include src -type f -name *.o -exec rm -f {} \;
 	@echo :: $(TARGET) - cleaned

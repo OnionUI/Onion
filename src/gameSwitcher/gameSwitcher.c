@@ -17,8 +17,8 @@
 #include "cjson/cJSON.h"
 #include <png/png.h>
 
-#include "../common/utils.h"
-#include "../common/keymap_hw.h"
+#include "utils/utils.h"
+#include "system/keymap_hw.h"
 
 #define MAXHISTORY 50
 #define MAXHROMNAMESIZE 250

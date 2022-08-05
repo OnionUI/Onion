@@ -8,7 +8,7 @@
 #include <time.h>
 
 #include "cjson/cJSON.h"
-#include "../common/utils.h"
+#include "utils/utils.h"
 
 // Max number of records in the DB
 #define MAXVALUES 1000

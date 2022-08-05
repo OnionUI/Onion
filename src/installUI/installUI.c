@@ -9,8 +9,8 @@
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
 
-#include "../common/msleep.h"
-#include "../common/utils.h"
+#include "utils/msleep.h"
+#include "utils/utils.h"
 
 #define TIMEOUT_S 60
 
@@ -28,9 +28,10 @@ int main(void)
 
 	TTF_Font* font = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 36);
 	SDL_Color color_white = {255, 255, 255, 0};
+	Uint32 progress_bg = SDL_MapRGB(video->format, 29, 30, 37);
 	Uint32 progress_color = SDL_MapRGB(video->format, 114, 71, 194);
-	SDL_Rect rectMessage = {10, 424, 603, 48};
-	SDL_Rect rectProgress = {0, 420, 0, 60};
+	SDL_Rect rectMessage = {10, 414};
+	SDL_Rect rectProgress = {0, 470, 0, 10};
 	SDL_Surface* surfaceMessage;
 
 	bool exit = false;
@@ -77,6 +78,9 @@ int main(void)
 
 		if (exit)
 			seconds = 2;
+
+		rectProgress.w = 640;
+		SDL_FillRect(screen, &rectProgress, progress_bg);
 
 		if (progress > 0.0) {
 			rectProgress.w = 640 * progress;

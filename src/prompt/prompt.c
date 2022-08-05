@@ -9,13 +9,12 @@
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
 
-#include "../common/settings.h"
-#include "../common/theme.h"
-#include "../common/theme_resources.h"
-#include "../common/theme_render.h"
-#include "../common/menu.h"
-#include "../common/keymap_sw.h"
-#include "../common/battery.h"
+#include "utils/log.h"
+#include "system/settings.h"
+#include "system/keymap_sw.h"
+#include "system/battery.h"
+#include "theme/theme.h"
+#include "components/menu.h"
 
 #define RESOURCES { \
 	TR_BACKGROUND, \
@@ -39,6 +38,8 @@
 
 int main(int argc, char *argv[])
 {
+	print_debug("Debug logging enabled");
+
 	int pargc = 0;
 	char **pargs = NULL;
 	char title_str[STR_MAX] = "";
@@ -69,13 +70,11 @@ int main(int argc, char *argv[])
 	}
 
 	if (pargc == 0) {
-		pargs[pargc] = malloc(4 * sizeof(char));
-		strcpy(pargs[pargc], "YES");
-		pargc++;
-		pargs[pargc] = malloc(3 * sizeof(char));
-		strcpy(pargs[pargc], "NO");
-		pargc++;
+		pargs[pargc++] = "OK";
+		pargs[pargc++] = "CANCEL";
 	}
+
+	printf_debug(LOG_SUCCESS, "parsed command line arguments");
 
 	SDL_Init(SDL_INIT_VIDEO);
 	SDL_ShowCursor(SDL_DISABLE);
@@ -85,17 +84,23 @@ int main(int argc, char *argv[])
 	SDL_Surface* video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
 	SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
 
+	print_debug("Loading settings...");
 	settings_init();
+	printf_debug(LOG_SUCCESS, "loaded settings");
 
+	print_debug("Loading theme config...");
 	Theme_s theme = loadTheme();
 	// Theme_s theme = loadThemeFromPath("/mnt/SDCARD/Themes/Blueprint by Aemiii91");
 	// Theme_s theme = loadThemeFromPath("/mnt/SDCARD/Themes/Analogue by Aemiii91");
 	// Theme_s theme = loadThemeFromPath("/customer/app");
+	printf_debug(LOG_SUCCESS, "loaded theme config");
 
 	enum theme_Images res_requests[NUM_RESOURCES] = RESOURCES;
 	Resources_s res = theme_loadResources(&theme, res_requests, NUM_RESOURCES);
 
+	print_debug("Reading battery percentage...");
     int battery_percentage = battery_getPercentage();
+	printf_debug(LOG_SUCCESS, "read battery percentage");
     SDL_Surface* battery = theme_batterySurface(&theme, &res, battery_percentage);
 
 	Menu_s menu = menu_create(pargc);
@@ -194,15 +199,17 @@ int main(int argc, char *argv[])
 		changed = false;
 	}
 	
-	free(pargs);
-	menu_free(&menu);
-	theme_freeResources(&res);
 	if (has_message)
 		SDL_FreeSurface(message);
 	SDL_FreeSurface(battery);
    	SDL_FreeSurface(screen);
    	SDL_FreeSurface(video);
     SDL_Quit();
+
+	free(pargs);
+	menu_free(&menu);
+	theme_freeResources(&res);
+	battery_free();
 	
     return return_code;
 }

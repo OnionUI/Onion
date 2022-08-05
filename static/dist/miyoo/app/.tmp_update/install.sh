@@ -37,10 +37,9 @@ main() {
         "Reinstall (reset settings)"
     retcode=$?
 
-    if [ $retcode -eq 255 ]; then
-        # Exit (POWER was pressed)
-        return
-    elif [ $retcode -eq 0 ]; then
+    echo "prompt returned:" $retcode
+
+    if [ $retcode -eq 0 ]; then
         # Update
         update_only
     elif [ $retcode -eq 1 ]; then
@@ -49,6 +48,9 @@ main() {
     elif [ $retcode -eq 2 ]; then
         # Reinstall (reset settings)
         fresh_install 1
+    else
+        # Cancel (can be reached if pressing POWER)
+        return
     fi
 
     cleanup
@@ -105,7 +107,8 @@ fresh_install() {
     cd /mnt/SDCARD
     rm -rf Emu/* RApp/* Imgs miyoo
 
-    install_core "Installing core..."    
+    install_core "Installing core..."
+    reset_installUI # frees memory
     install_retroarch "Installing RetroArch..."
 
     echo "Completing installation..." >> /tmp/.update_msg
@@ -135,7 +138,9 @@ fresh_install() {
     cd $installdir
     ./boot_mod.sh 
 
-    mv -f $installdir/system.json /appconfigs/system.json
+    if [ $reset_configs -eq 1 ]; then
+        mv -f $installdir/system.json /appconfigs/system.json
+    fi
 }
 
 update_only() {
@@ -146,12 +151,28 @@ update_only() {
     ./bin/installUI &
     sleep 1
 
-    install_core "Updating core..."    
+    install_core "Updating core..."
+    reset_installUI # frees memory
     install_retroarch "Updating RetroArch..."
     restore_ra_config
     echo "Update complete! Turning off..." >> /tmp/.update_msg
 
     touch $installdir/.installed
+    sleep 1
+}
+
+reset_installUI() {
+    touch $installdir/.installed
+    sleep 1
+
+    # Free memory
+    free_mma
+
+    rm -f $installdir/.installed
+
+    # Show installation progress for RetroArch
+    cd $installdir
+    ./bin/installUI &
     sleep 1
 }
 

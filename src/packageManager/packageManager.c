@@ -15,7 +15,7 @@
 #include <dirent.h>
 #include <stdlib.h>
 
-#include "../common/keymap_hw.h"
+#include "system/keymap_hw.h"
 
 // Max number of records in the DB
 #define NUMBER_OF_LAYERS 200

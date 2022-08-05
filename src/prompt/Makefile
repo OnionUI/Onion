@@ -3,7 +3,7 @@ INCLUDE_CJSON=1
 include ../common/common.mk
 
 TARGET := $(BUILD_DIR)/prompt
-LDFLAGS := $(LDFLAGS) -lSDL -lSDL_ttf -lSDL_image -lSDL_rotozoom
+LDFLAGS := $(LDFLAGS) -lSDL -lSDL_ttf -lSDL_image -lSDL_rotozoom -pthread
 
 $(TARGET): $(OFILES)
 	@$(CXX) $(OFILES) -o $@ $(LDFLAGS)

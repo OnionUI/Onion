@@ -4,8 +4,8 @@
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
 
-#include "../common/utils.h"
-#include "../common/flags.h"
+#include "utils/file.h"
+#include "utils/flags.h"
 
 int main(int argc, char *argv[])
 {
@@ -94,12 +94,8 @@ int main(int argc, char *argv[])
     SDL_BlitSurface(screen, NULL, video, NULL); 
     SDL_Flip(video);
 
-    if (argc > 1 && strcmp(argv[1], "Boot") != 0) {
+    if (argc > 1 && strcmp(argv[1], "Boot") != 0)
         settings_flag_set(".offOrder", false);
-        system("sync");
-        system("reboot");
-        system("sleep 10");
-    }
 
     SDL_FreeSurface(screen);
     SDL_FreeSurface(video);

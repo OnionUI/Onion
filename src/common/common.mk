@@ -21,7 +21,10 @@ CFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.c))
 CPPFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.cpp))
 OFILES = $(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
 
-CFLAGS := -I../../include -I../common -DPLATFORM_$(shell echo $(PLATFORM) | tr a-z A-Z)
+CFLAGS := -I../../include -I../common -DPLATFORM_$(shell echo $(PLATFORM) | tr a-z A-Z) -Wall
+ifeq ($(DEBUG),1)
+CFLAGS := $(CFLAGS) -DLOG_DEBUG
+endif
 CXXFLAGS := $(CFLAGS)
 LDFLAGS := -L../../lib
 ifeq ($(PLATFORM),miyoomini)

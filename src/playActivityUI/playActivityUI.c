@@ -14,9 +14,9 @@
 #include "sys/ioctl.h"
 
 
-#include "../common/system.h"
-#include "../common/keymap_hw.h"
-#include "../common/utils.h"
+#include "system/system.h"
+#include "system/keymap_hw.h"
+#include "utils/utils.h"
 
 
 // Max number of records in the DB

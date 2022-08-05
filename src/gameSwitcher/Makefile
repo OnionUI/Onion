@@ -1,23 +1,23 @@
-ifeq (,$(BUILD_DIR))
-BUILD_DIR=.
-endif
+INCLUDE_CJSON=1
+include ../common/common.mk
 
-TARGET = $(BUILD_DIR)/gameSwitcher
-
-CC 	= $(CROSS_COMPILE)gcc
-
-SOURCES = . ../../include/cjson
-CFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.c))
-OFILES = $(CFILES:.c=.o)
-
-CFLAGS = -I../../include -O3 -Wall
-LDFLAGS = -L../../lib -s -lSDL -lSDL_ttf -lSDL_image -lpng
+TARGET := $(BUILD_DIR)/gameSwitcher
+LDFLAGS := $(LDFLAGS) -lSDL -lSDL_ttf -lSDL_image -lpng
 
 $(TARGET): $(OFILES)
-	$(CC) $(OFILES) -o $@ $(LDFLAGS)
+	@$(CXX) $(OFILES) -o $@ $(LDFLAGS)
+# $(STRIP) $@
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	@echo Building $@
+	@$(CC) $(CFLAGS) -c $< -o $@
+
+# %.o: %.cpp
+# 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(TARGET) $(OFILES)
+	@rm -f $(TARGET) $(OFILES)
+	@echo Cleaned
+
+install:
+	@echo "do nothing for install"

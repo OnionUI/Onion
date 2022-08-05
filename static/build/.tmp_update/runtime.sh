@@ -33,23 +33,23 @@ main() {
 
     # Auto launch
     if [ ! -f $sysdir/config/.noAutoStart ]; then
-        check_launch_game
+        check_game
     fi
 
-    check_launch_game_switcher
+    check_switcher
 
     # Main runtime loop
     while true; do
-        check_launch_main_ui
-        check_launch_game    
-        check_launch_game_switcher
+        check_main_ui
+        check_game    
+        check_switcher
         
         # Free memory
         $sysdir/bin/freemma
     done
 }
 
-check_launch_main_ui() {
+check_main_ui() {
     if [ ! -f $sysdir/cmd_to_run.sh ] ; then
         launch_main_ui
         check_off_order "End"
@@ -68,7 +68,7 @@ launch_main_ui() {
     mv /tmp/cmd_to_run.sh $sysdir/cmd_to_run.sh
 }
 
-check_launch_game() {
+check_game() {
     # Game launch
     if  [ -f $sysdir/cmd_to_run.sh ] ; then
         launch_game
@@ -96,9 +96,9 @@ launch_game() {
     fi
 }
 
-check_launch_game_switcher() {
+check_switcher() {
     if  [ -f /tmp/.trimUIMenu ] ; then
-        launch_game_switcher
+        launch_switcher
     else 
         # Return to MainUI
         rm $sysdir/cmd_to_run.sh
@@ -109,7 +109,7 @@ check_launch_game_switcher() {
     check_off_order "End"
 }
 
-launch_game_switcher() {
+launch_switcher() {
     rm /tmp/.trimUIMenu
     cd $sysdir
     LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./bin/gameSwitcher 2>&1 >> ./logs/gameSwitcher.log
@@ -120,6 +120,9 @@ check_off_order() {
     if  [ -f $sysdir/.offOrder ] ; then
         cd $sysdir
         ./bin/bootScreen "$1"
+        
+        sync
+        reboot
         sleep 10
     fi
 }

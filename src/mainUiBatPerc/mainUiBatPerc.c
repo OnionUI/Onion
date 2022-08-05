@@ -12,12 +12,9 @@
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
 
-#include "../common/battery.h"
-#include "../common/utils.h"
-#include "../common/IMG_Save.h"
-#include "../common/theme.h"
-#include "../common/theme_resources.h"
-#include "../common/theme_render.h"
+#include "utils/utils.h"
+#include "utils/IMG_Save.h"
+#include "theme/theme.h"
 
 #define RESOURCES { \
 	TR_BATTERY_0, \
@@ -51,8 +48,6 @@ void restoreRegularDisplay(Theme_s* theme)
         system(systemCommand);
         remove(icon_backup);
     }
-
-    battery_monitorADC_on();
 }
 
 void drawBatteryPercentage(Theme_s *theme)
@@ -73,7 +68,7 @@ void drawBatteryPercentage(Theme_s *theme)
     enum theme_Images res_requests[NUM_RESOURCES] = RESOURCES;
 	Resources_s res = theme_loadResources(theme, res_requests, NUM_RESOURCES);
 
-    int percentage = battery_getPercentage();
+    int percentage = getBatteryPercentage();
     SDL_Surface* image = theme_batterySurface(theme, &res, percentage);
 
     // Save custom battery icon
@@ -82,13 +77,14 @@ void drawBatteryPercentage(Theme_s *theme)
     SDL_FreeSurface(image);
 	theme_freeResources(&res);
     TTF_Quit();
-
-    battery_monitorADC_off();
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
     Theme_s theme = loadTheme();
-    drawBatteryPercentage(&theme);
+    if (argc > 1 && strcmp(argv[1], "--restore") == 0)
+        restoreRegularDisplay(&theme);
+    else
+        drawBatteryPercentage(&theme);
     return 0;
 }
