@@ -3,13 +3,14 @@
 
 #include <string.h>
 #include <SDL/SDL.h>
-#include "cjson/cJSON.h"
 
 #include "utils.h"
+#include "color.h"
+#include "json.h"
+#include "settings.h"
 
 #define STR_MAX 256
 
-#define SYSTEM_SETTINGS "/appconfigs/system.json"
 #define FALLBACK_FONT "/customer/app/Exo-2-Bold-Italic.ttf"
 #define FALLBACK_PATH "/mnt/SDCARD/miyoo/app/"
 
@@ -56,59 +57,9 @@ typedef struct Theme
     FontStyle_s list;
 } Theme_s;
 
-bool getThemePath(char* theme_path)
-{
-    bool ret = false;
-	const char *json_str = NULL;
+// Extend json getters
 
-	if (!(json_str = file_readAll(SYSTEM_SETTINGS))) {
-        sprintf(theme_path, "%s", FALLBACK_PATH);
-		return ret;
-    }
-
-	cJSON* json_root = cJSON_Parse(json_str);
-	cJSON* json_theme = cJSON_GetObjectItem(json_root, "theme");
-
-    if (json_theme) {
-	    strncpy(theme_path, cJSON_GetStringValue(json_theme), STR_MAX-1);
-        ret = true;
-    }
-
-	cJSON_free(json_root);
-	return ret;
-}
-
-bool getStringValue(cJSON* root, const char* key, char* dest)
-{
-    cJSON* json_object = cJSON_GetObjectItem(root, key);
-    if (json_object) {
-        strncpy(dest, cJSON_GetStringValue(json_object), STR_MAX-1);
-        return true;
-    }
-    return false;
-}
-
-bool getBoolValue(cJSON* root, const char* key, bool* dest)
-{
-    cJSON* json_object = cJSON_GetObjectItem(root, key);
-    if (json_object) {
-        *dest = cJSON_IsTrue(json_object);
-        return true;
-    }
-    return false;
-}
-
-bool getNumberValue(cJSON* root, const char* key, int* dest)
-{
-    cJSON* json_object = cJSON_GetObjectItem(root, key);
-    if (json_object) {
-        *dest = cJSON_GetNumberValue(json_object);
-        return true;
-    }
-    return false;
-}
-
-bool getColorValue(cJSON* root, const char* key, SDL_Color* dest)
+bool json_getColorValue(cJSON* root, const char* key, SDL_Color* dest)
 {
     cJSON* json_object = cJSON_GetObjectItem(root, key);
     if (json_object) {
@@ -118,13 +69,13 @@ bool getColorValue(cJSON* root, const char* key, SDL_Color* dest)
     return false;
 }
 
-void getFontStyle(cJSON* root, FontStyle_s* dest, FontStyle_s* fallback)
+void json_getFontStyle(cJSON* root, FontStyle_s* dest, FontStyle_s* fallback)
 {
-    if (!getStringValue(root, "font", dest->font) && fallback)
+    if (!json_getStringValue(root, "font", dest->font) && fallback)
         strcpy(dest->font, fallback->font);
-    if (!getNumberValue(root, "size", &dest->size) && fallback)
+    if (!json_getNumberValue(root, "size", &dest->size) && fallback)
         dest->size = fallback->size;
-    if (!getColorValue(root, "color", &dest->color) && fallback)
+    if (!json_getColorValue(root, "color", &dest->color) && fallback)
         dest->color = fallback->color;
 }
 
@@ -232,33 +183,33 @@ Theme_s loadThemeFromPath(const char* theme_path)
 	cJSON* json_grid = cJSON_GetObjectItem(json_root, "grid");
 	cJSON* json_list = cJSON_GetObjectItem(json_root, "list");
 
-    getStringValue(json_root, "name", theme.name);
-    getStringValue(json_root, "author", theme.author);
-    getStringValue(json_root, "description", theme.description);
-    getBoolValue(json_root, "hideIconTitle", &theme.hideIconTitle);
+    json_getStringValue(json_root, "name", theme.name);
+    json_getStringValue(json_root, "author", theme.author);
+    json_getStringValue(json_root, "description", theme.description);
+    json_getBoolValue(json_root, "hideIconTitle", &theme.hideIconTitle);
 
-    getFontStyle(json_title, &theme.title, NULL);
-    getFontStyle(json_hint, &theme.hint, NULL);
-    getFontStyle(json_currentpage, &theme.currentpage, &theme.hint);
-    getFontStyle(json_total, &theme.total, &theme.hint);
+    json_getFontStyle(json_title, &theme.title, NULL);
+    json_getFontStyle(json_hint, &theme.hint, NULL);
+    json_getFontStyle(json_currentpage, &theme.currentpage, &theme.hint);
+    json_getFontStyle(json_total, &theme.total, &theme.hint);
 
-    getStringValue(json_grid, "font", theme.grid.font);
-    getNumberValue(json_grid, "grid1x4", &theme.grid.grid1x4);
-    getNumberValue(json_grid, "grid3x4", &theme.grid.grid3x4);
-    getColorValue(json_grid, "color", &theme.grid.color);
-    getColorValue(json_grid, "selectedcolor", &theme.grid.selectedcolor);
+    json_getStringValue(json_grid, "font", theme.grid.font);
+    json_getNumberValue(json_grid, "grid1x4", &theme.grid.grid1x4);
+    json_getNumberValue(json_grid, "grid3x4", &theme.grid.grid3x4);
+    json_getColorValue(json_grid, "color", &theme.grid.color);
+    json_getColorValue(json_grid, "selectedcolor", &theme.grid.selectedcolor);
 
-    getFontStyle(json_list, &theme.list, NULL);
+    json_getFontStyle(json_list, &theme.list, NULL);
 
-    getBoolValue(json_batteryPercentage, "visible", &theme.batteryPercentage.visible);
-    if (!getStringValue(json_batteryPercentage, "font", theme.batteryPercentage.font))
+    json_getBoolValue(json_batteryPercentage, "visible", &theme.batteryPercentage.visible);
+    if (!json_getStringValue(json_batteryPercentage, "font", theme.batteryPercentage.font))
         strcpy(theme.batteryPercentage.font, theme.hint.font);
-    getNumberValue(json_batteryPercentage, "size", &theme.batteryPercentage.size);
-    if (!getColorValue(json_batteryPercentage, "color", &theme.batteryPercentage.color))
+    json_getNumberValue(json_batteryPercentage, "size", &theme.batteryPercentage.size);
+    if (!json_getColorValue(json_batteryPercentage, "color", &theme.batteryPercentage.color))
         theme.batteryPercentage.color = theme.hint.color;
-    getNumberValue(json_batteryPercentage, "offsetX", &theme.batteryPercentage.offsetX);
-    getNumberValue(json_batteryPercentage, "offsetY", &theme.batteryPercentage.offsetY);
-    getBoolValue(json_batteryPercentage, "onleft", &theme.batteryPercentage.onleft);
+    json_getNumberValue(json_batteryPercentage, "offsetX", &theme.batteryPercentage.offsetX);
+    json_getNumberValue(json_batteryPercentage, "offsetY", &theme.batteryPercentage.offsetY);
+    json_getBoolValue(json_batteryPercentage, "onleft", &theme.batteryPercentage.onleft);
 
 	cJSON_free(json_root);
 	return theme;
@@ -266,9 +217,7 @@ Theme_s loadThemeFromPath(const char* theme_path)
 
 Theme_s loadTheme(void)
 {
-    char theme_path[STR_MAX];
-    getThemePath(theme_path);
-    return loadThemeFromPath(theme_path);
+    return loadThemeFromPath(settings.theme);
 }
 
 #endif // THEME_H__

@@ -106,7 +106,7 @@
 	"103":	"Pantalla completa",
 	"104":	"Encender",
 	"105":	"Apagar",
-	"106":  "Menú Nativo"
+	"106":  "Menú Nativo",
 	"107":  "Aplicación",
 	"108":  "Apagar el dispositivo?",
     "109":  "Prueba IO",
@@ -132,4 +132,3 @@
 	"129":  "Reparación de audio",
 	"130":  "Reparación"
 }
-

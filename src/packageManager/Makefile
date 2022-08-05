@@ -1,8 +1,7 @@
-INCLUDE_CJSON=1
 include ../common/common.mk
 
-TARGET := $(BUILD_DIR)/lastGame
-LDFLAGS := $(LDFLAGS) -s -lSDL -lSDL_image
+TARGET := $(BUILD_DIR)/packageManager
+LDFLAGS := $(LDFLAGS) -s -lSDL -lSDL_image -lSDL_ttf
 
 $(TARGET): $(OFILES)
 	$(CC) $(OFILES) -o $@ $(LDFLAGS)

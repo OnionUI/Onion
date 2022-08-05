@@ -5,7 +5,7 @@
 #include <SDL/SDL_ttf.h>
 
 #include "../common/utils.h"
-#include "../common/adc.h"
+#include "../common/flags.h"
 
 int main(int argc, char *argv[])
 {
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
     SDL_Flip(video);
 
     if (argc > 1 && strcmp(argv[1], "Boot") != 0) {
-        remove(".offOrder");
+        settings_flag_set(".offOrder", false);
         system("sync");
         system("reboot");
         system("sleep 10");

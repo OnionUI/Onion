@@ -14,13 +14,17 @@ SRC_DIR             := $(ROOT_DIR)/src
 THIRD_PARTY_DIR     := $(ROOT_DIR)/third-party
 BUILD_DIR           := $(ROOT_DIR)/build
 BIN_DIR             := $(ROOT_DIR)/build/.tmp_update/bin
-PACKAGE_DIR         := $(ROOT_DIR)/package/full
-PACKAGE_CORE_DIR    := $(ROOT_DIR)/package/core
+DIST_FULL           := $(ROOT_DIR)/dist/full
+DIST_CORE           := $(ROOT_DIR)/dist/core
 RELEASE_DIR         := $(ROOT_DIR)/release
 STATIC_BUILD        := $(ROOT_DIR)/static/build
-STATIC_PACKAGE      := $(ROOT_DIR)/static/package
+STATIC_DIST         := $(ROOT_DIR)/static/dist
 STATIC_CONFIGS      := $(ROOT_DIR)/static/configs
 CACHE               := $(ROOT_DIR)/cache
+STATIC_PACKAGES     := $(ROOT_DIR)/static/packages
+PACKAGES_EMU_DEST   := $(BUILD_DIR)/App/The_Onion_Installer/data/Layer1
+PACKAGES_APP_DEST   := $(BUILD_DIR)/App/The_Onion_Installer/data/Layer2
+PACKAGES_RAPP_DEST  := $(BUILD_DIR)/App/The_Onion_Installer/data/Layer3
 
 TOOLCHAIN := ghcr.io/onionui/miyoomini-toolchain:latest
 
@@ -33,7 +37,7 @@ endif
 
 .PHONY: all version core apps external release clean git-clean with-toolchain patch lib
 
-all: clean package
+all: clean dist
 
 version: # used by workflow
 	@echo $(VERSION)
@@ -43,14 +47,18 @@ print-version:
 
 $(CACHE)/.setup:
 	@echo :: $(TARGET) - setup
-	@mkdir -p $(BUILD_DIR) $(PACKAGE_DIR) $(PACKAGE_CORE_DIR) $(RELEASE_DIR)
+	@mkdir -p $(BUILD_DIR) $(DIST_FULL) $(DIST_CORE) $(RELEASE_DIR)
 	@cp -R $(STATIC_BUILD)/. $(BUILD_DIR)
-	@cp -R $(STATIC_PACKAGE)/. $(PACKAGE_DIR)
-	@cp -R $(ROOT_DIR)/lib/. $(PACKAGE_DIR)/miyoo/app/.tmp_update/lib
+	@cp -R $(STATIC_DIST)/. $(DIST_FULL)
+	@cp -R $(ROOT_DIR)/lib/. $(DIST_FULL)/miyoo/app/.tmp_update/lib
 	@mkdir -p $(BUILD_DIR)/.tmp_update/onionVersion
 	@echo -n "$(VERSION)" > $(BUILD_DIR)/.tmp_update/onionVersion/version.txt
 	@chmod a+x $(ROOT_DIR)/.github/get_themes.sh && $(ROOT_DIR)/.github/get_themes.sh
-	@touch $(CACHE)/.setup
+	@touch $(CACHE)/.
+# Copy static packages
+	@cp -R $(STATIC_PACKAGES)/App/. $(PACKAGES_APP_DEST)
+	@cp -R $(STATIC_PACKAGES)/Emu/. $(PACKAGES_EMU_DEST)
+	@cp -R $(STATIC_PACKAGES)/RApp/. $(PACKAGES_RAPP_DEST)
 
 build: core apps external
 
@@ -59,60 +67,58 @@ core: $(CACHE)/.setup
 # Build Onion binaries
 	@cd $(SRC_DIR)/bootScreen && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/chargingState && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/checkCharge && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/gameSwitcher && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/lastGame && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/mainUiBatPerc && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/onionKeymon && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/keymon && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/playActivity && BUILD_DIR=$(BIN_DIR) make
 # Build installer binaries
-	@mkdir -p $(PACKAGE_DIR)/miyoo/app/.tmp_update/bin
-	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(PACKAGE_DIR)/miyoo/app/.tmp_update/bin make
-	@cd $(SRC_DIR)/prompt && BUILD_DIR=$(PACKAGE_DIR)/miyoo/app/.tmp_update/bin make
+	@mkdir -p $(DIST_FULL)/miyoo/app/.tmp_update/bin
+	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(DIST_FULL)/miyoo/app/.tmp_update/bin make
+	@cd $(SRC_DIR)/prompt && BUILD_DIR=$(DIST_FULL)/miyoo/app/.tmp_update/bin make
 
 apps: $(CACHE)/.setup
 	@echo :: $(TARGET) - build apps
-	@cd $(SRC_DIR)/playActivity && BUILD_DIR=$(BUILD_DIR)/App/PlayActivity make
 	@cd $(SRC_DIR)/playActivityUI && BUILD_DIR=$(BUILD_DIR)/App/PlayActivity make
-	@cd $(SRC_DIR)/onionInstaller && BUILD_DIR=$(BUILD_DIR)/App/The_Onion_Installer make
-	@cd $(SRC_DIR)/themeSwitcher && BUILD_DIR=$(BUILD_DIR)/App/The_Onion_Installer/data/Layer2/ThemeSwitcher/App/ThemeSwitcher make
+	@cd $(SRC_DIR)/packageManager && BUILD_DIR=$(BUILD_DIR)/App/The_Onion_Installer make
+	@cd $(SRC_DIR)/themeSwitcher && BUILD_DIR="$(PACKAGES_APP_DEST)/Theme Switcher/App/ThemeSwitcher" make
 
 external: $(CACHE)/.setup
 	@echo :: $(TARGET) - build external
 	@cd $(THIRD_PARTY_DIR)/RetroArch && make && cp retroarch $(BUILD_DIR)/RetroArch/
 	@echo $(RA_SUBVERSION) > $(BUILD_DIR)/RetroArch/onion_ra_version.txt
-	@cd $(THIRD_PARTY_DIR)/SearchFilter && make build && cp -a build/. "$(BUILD_DIR)/App/The_Onion_Installer/data/Layer2/Search and Filter/"
+	@cd $(THIRD_PARTY_DIR)/SearchFilter && make build && cp -a build/. "$(PACKAGES_APP_DEST)/Search and Filter/"
 
-package: build
-	@echo :: $(TARGET) - package
+dist: build
+	@echo :: $(TARGET) - dist
 # Package RetroArch separately
 	@cd $(BUILD_DIR) && zip -rq retroarch.pak RetroArch
 	@rm -rf $(BUILD_DIR)/RetroArch
-	@mkdir -p $(PACKAGE_DIR)/RetroArch
-	@mv $(BUILD_DIR)/retroarch.pak $(PACKAGE_DIR)/RetroArch/
-	@echo $(RA_SUBVERSION) > $(PACKAGE_DIR)/RetroArch/ra_package_version.txt
+	@mkdir -p $(DIST_FULL)/RetroArch
+	@mv $(BUILD_DIR)/retroarch.pak $(DIST_FULL)/RetroArch/
+	@echo $(RA_SUBVERSION) > $(DIST_FULL)/RetroArch/ra_package_version.txt
 # Package themes separately
-	@mkdir -p $(PACKAGE_DIR)/Themes
-	@mv $(BUILD_DIR)/Themes/* $(PACKAGE_DIR)/Themes/
+	@mkdir -p $(DIST_FULL)/Themes
+	@mv $(BUILD_DIR)/Themes/* $(DIST_FULL)/Themes/
 # Package core
-	@cd $(BUILD_DIR) && zip -rq $(PACKAGE_DIR)/miyoo/app/.tmp_update/onion.pak .
+	@cd $(BUILD_DIR) && zip -rq $(DIST_FULL)/miyoo/app/.tmp_update/onion.pak .
 # Package configs
-	@mkdir -p $(PACKAGE_DIR)/miyoo/app/.tmp_update/config
+	@mkdir -p $(DIST_FULL)/miyoo/app/.tmp_update/config
 	@cp -R $(STATIC_CONFIGS)/Saves/CurrentProfile $(STATIC_CONFIGS)/Saves/GuestProfile
-	@cd $(STATIC_CONFIGS) && zip -rq $(PACKAGE_DIR)/miyoo/app/.tmp_update/config/configs.pak .
+	@cd $(STATIC_CONFIGS) && zip -rq $(DIST_FULL)/miyoo/app/.tmp_update/config/configs.pak .
 	@rm -rf $(STATIC_CONFIGS)/Saves/GuestProfile
-# Create core-only package
-	@cp -R $(PACKAGE_DIR)/.tmp_update $(PACKAGE_CORE_DIR)/.tmp_update
-	@cp -R $(PACKAGE_DIR)/miyoo $(PACKAGE_CORE_DIR)/miyoo
+# Create core-only dist
+	@cp -R $(DIST_FULL)/.tmp_update $(DIST_CORE)/.tmp_update
+	@cp -R $(DIST_FULL)/miyoo $(DIST_CORE)/miyoo
 
-release: package
+release: dist
 	@echo :: $(TARGET) - release
-	@rm -f $(RELEASE_DIR)/$(RELEASE_NAME)-full.zip
-	@rm -f $(RELEASE_DIR)/$(RELEASE_NAME)-core.zip
-	@cd $(PACKAGE_DIR) && zip -rq $(RELEASE_DIR)/$(RELEASE_NAME)-full.zip .
-	@cd $(PACKAGE_CORE_DIR) && zip -rq $(RELEASE_DIR)/$(RELEASE_NAME)-core.zip .
+	@rm -f $(RELEASE_DIR)/$(RELEASE_NAME)-full.zip $(RELEASE_DIR)/$(RELEASE_NAME)-core.zip
+	@cd $(DIST_FULL) && zip -rq $(RELEASE_DIR)/$(RELEASE_NAME)-full.zip .
+	@cd $(DIST_CORE) && zip -rq $(RELEASE_DIR)/$(RELEASE_NAME)-core.zip .
 
 clean:
-	@rm -rf $(BUILD_DIR) $(ROOT_DIR)/package
+	@rm -rf $(BUILD_DIR) $(ROOT_DIR)/dist
 	@rm -f $(CACHE)/.setup
 	@find include src -type f -name *.o -exec rm -f {} \;
 	@echo :: $(TARGET) - cleaned

@@ -10,20 +10,22 @@ main() {
     rm -rf $sysdir/logs
     rm -f /mnt/SDCARD/update.log
     mkdir -p $sysdir/logs
+    
+    is_charging=`cat /sys/devices/gpiochip0/gpio/gpio59/value`
 
-    cd $sysdir
-    ./bin/checkCharge
-
-    if [ -f /tmp/.isCharging ]; then
+    if [ $is_charging -eq 1 ]; then
         cd $sysdir
         ./bin/chargingState
     fi
+
+    # Make sure MainUI doesn't show charging animation
+    touch /tmp/no_charging_ui
 
     cd $sysdir
     ./bin/bootScreen "Boot"
 
     cd $sysdir
-    ./bin/onionKeymon 2>&1 >> ./logs/onionKeymon.log &
+    ./bin/keymon 2>&1 >> ./logs/keymon.log &
 
     # Init
     rm $sysdir/.offOrder
@@ -90,7 +92,7 @@ launch_game() {
         cd $sysdir
         value=$(cat romName.txt);
         cd /mnt/SDCARD/App/PlayActivity
-        ./playActivity "$value"	
+        ./playActivity "$value"    
     fi
 }
 
@@ -109,9 +111,9 @@ check_launch_game_switcher() {
 
 launch_game_switcher() {
     rm /tmp/.trimUIMenu
-	cd $sysdir
-	LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./bin/gameSwitcher 2>&1 >> ./logs/gameSwitcher.log
-	sync
+    cd $sysdir
+    LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./bin/gameSwitcher 2>&1 >> ./logs/gameSwitcher.log
+    sync
 }
 
 check_off_order() {

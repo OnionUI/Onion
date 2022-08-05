@@ -4,26 +4,43 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdint.h>
+#include <stdbool.h>
 
-void rumble(uint32_t val) {
-    int fd;
-    const char str_export[] = "48";
-    const char str_direction[] = "out";
-    char value[1];
-    value[0] = ((val&1)^1) + 0x30;
+#include "utils.h"
+#include "settings.h"
 
-    if ((fd = open("/sys/class/gpio/export", O_WRONLY)) > 0) {
-        write(fd, str_export, 2);
-        close(fd);
-    }
-    if ((fd = open("/sys/class/gpio/gpio48/direction", O_WRONLY)) > 0) {
-        write(fd, str_direction, 3);
-        close(fd);
-    }
-    if ((fd = open("/sys/class/gpio/gpio48/value", O_WRONLY)) > 0) {
-        write(fd, value, 1);
-        close(fd);
-    }
+
+#define rumbleOn() rumble(true)
+#define rumbleOff() rumble(false)
+
+
+void rumble(bool enabled)
+{
+    file_write("/sys/class/gpio/export", "48", 2);
+    file_write("/sys/class/gpio/gpio48/direction", "out", 3);
+    file_write("/sys/class/gpio/gpio48/value", enabled ? "0" : "1", 1);
+}
+
+/**
+ * @brief Turns on vibration for 100ms
+ * 
+ */
+void short_pulse(void) {
+    if (settings.vibration) return;
+    rumbleOn();
+    usleep(100000); // 0.1s
+    rumbleOff();
+}
+
+/**
+ * @brief Turns on vibration for 50ms
+ * 
+ */
+void super_short_pulse(void) {
+    if (settings.vibration) return;
+    rumbleOn();
+    usleep(40000); // 0.05s
+    rumbleOff();
 }
 
 #endif // RUMBLE_H__

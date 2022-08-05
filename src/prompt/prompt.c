@@ -9,12 +9,13 @@
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
 
+#include "../common/settings.h"
 #include "../common/theme.h"
 #include "../common/theme_resources.h"
 #include "../common/theme_render.h"
 #include "../common/menu.h"
-#include "../common/keymap.h"
-#include "../common/adc.h"
+#include "../common/keymap_sw.h"
+#include "../common/battery.h"
 
 #define RESOURCES { \
 	TR_BACKGROUND, \
@@ -84,6 +85,8 @@ int main(int argc, char *argv[])
 	SDL_Surface* video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
 	SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
 
+	settings_init();
+
 	Theme_s theme = loadTheme();
 	// Theme_s theme = loadThemeFromPath("/mnt/SDCARD/Themes/Blueprint by Aemiii91");
 	// Theme_s theme = loadThemeFromPath("/mnt/SDCARD/Themes/Analogue by Aemiii91");
@@ -92,7 +95,7 @@ int main(int argc, char *argv[])
 	enum theme_Images res_requests[NUM_RESOURCES] = RESOURCES;
 	Resources_s res = theme_loadResources(&theme, res_requests, NUM_RESOURCES);
 
-    int battery_percentage = getBatteryPercentage();
+    int battery_percentage = battery_getPercentage();
     SDL_Surface* battery = theme_batterySurface(&theme, &res, battery_percentage);
 
 	Menu_s menu = menu_create(pargc);
@@ -169,7 +172,7 @@ int main(int argc, char *argv[])
 		if (!changed)
 			continue;
 
-		int new_batt_perc = getBatteryPercentage();
+		int new_batt_perc = battery_getPercentage();
 		if (new_batt_perc != battery_percentage) {
 			battery_percentage = new_batt_perc;
 			SDL_FreeSurface(battery);

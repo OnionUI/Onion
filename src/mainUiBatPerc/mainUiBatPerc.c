@@ -12,7 +12,7 @@
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
 
-#include "../common/adc.h"
+#include "../common/battery.h"
 #include "../common/utils.h"
 #include "../common/IMG_Save.h"
 #include "../common/theme.h"
@@ -52,7 +52,7 @@ void restoreRegularDisplay(Theme_s* theme)
         remove(icon_backup);
     }
 
-    adc_monitorOn();
+    battery_monitorADC_on();
 }
 
 void drawBatteryPercentage(Theme_s *theme)
@@ -73,7 +73,7 @@ void drawBatteryPercentage(Theme_s *theme)
     enum theme_Images res_requests[NUM_RESOURCES] = RESOURCES;
 	Resources_s res = theme_loadResources(theme, res_requests, NUM_RESOURCES);
 
-    int percentage = getBatteryPercentage();
+    int percentage = battery_getPercentage();
     SDL_Surface* image = theme_batterySurface(theme, &res, percentage);
 
     // Save custom battery icon
@@ -83,7 +83,7 @@ void drawBatteryPercentage(Theme_s *theme)
 	theme_freeResources(&res);
     TTF_Quit();
 
-    adc_monitorOff();
+    battery_monitorADC_off();
 }
 
 int main(void)

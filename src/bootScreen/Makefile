@@ -1,8 +1,7 @@
-INCLUDE_SHMVAR=1
 include ../common/common.mk
 
 TARGET := $(BUILD_DIR)/bootScreen
-LDFLAGS := $(LDFLAGS) -s -lSDL -lSDL_image -lSDL_ttf -lmi_sys -lmi_gfx
+LDFLAGS := $(LDFLAGS) -s -lSDL -lSDL_image -lSDL_ttf
 
 $(TARGET): $(OFILES)
 	$(CC) $(OFILES) -o $@ $(LDFLAGS)

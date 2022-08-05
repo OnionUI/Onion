@@ -1,7 +1,7 @@
 {
-"label":"The Onion Installer",
+"label":"Onion Pac-Man",
 "icon":"icon.png",
 "iconsel":"",
 "launch":"launch.sh",
-"description":"Add features to your system.."
+"description":"Add features to your system"
 }

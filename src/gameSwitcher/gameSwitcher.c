@@ -17,6 +17,9 @@
 #include "cjson/cJSON.h"
 #include <png/png.h>
 
+#include "../common/utils.h"
+#include "../common/keymap_hw.h"
+
 #define MAXHISTORY 50
 #define MAXHROMNAMESIZE 250
 #define MAXHROMPATHSIZE 150
@@ -31,28 +34,6 @@
 // Max number of records in the DB
 #define MAXVALUES 1000
 
-
-#define	BUTTON_A	KEY_SPACE
-#define	BUTTON_B	KEY_LEFTCTRL  
-
-#define	BUTTON_X	KEY_LEFTSHIFT
-#define	BUTTON_Y	KEY_LEFTALT  
-
-#define	BUTTON_START	KEY_ENTER
-#define	BUTTON_SELECT	KEY_RIGHTCTRL
-
-#define	BUTTON_MENU	KEY_ESC
-#define	BUTTON_POWER	KEY_POWER
-
-#define	BUTTON_L2	KEY_TAB
-#define	BUTTON_R2	KEY_BACKSPACE
-
-#define	BUTTON_UP	KEY_UP
-#define	BUTTON_DOWN	KEY_DOWN
-
-#define	BUTTON_LEFT		KEY_LEFT
-#define	BUTTON_RIGHT	KEY_RIGHT
-
 #define	GPIO_DIR1	"/sys/class/gpio/"
 #define	GPIO_DIR2	"/sys/devices/gpiochip0/gpio/"
 #define concat(ptr,str1,str2)	{ strcpy(ptr, str1); strcat(ptr, str2); }
@@ -60,19 +41,19 @@
 char sTotalTimePlayed[50];
 
 // Game history list
-struct structGames {                 
-             char name[MAXHROMNAMESIZE]   ;
-             char RACommand[500] ;
-           	 char totalTime[30];
-           	 int jsonIndex;
-           	 }
-            gameList[MAXHISTORY];   
+static struct game_s {                 
+	char name[MAXHROMNAMESIZE];
+	char RACommand[500] ;
+	char totalTime[30];
+	int jsonIndex;
+}
+game_list[MAXHISTORY];   
             
-int taillestructGames = 0;
-int currentGame = 0 ;
+static int game_list_len = 0;
+static int current_game = 0;
 
-cJSON* request_json = NULL;
-cJSON* items = NULL;
+static cJSON* request_json = NULL;
+static cJSON* items = NULL;
 	
 // Play activity database
 struct structPlayActivity {                  
@@ -81,26 +62,6 @@ struct structPlayActivity {
             }
             romList[MAXVALUES];        
 int tailleStructPlayActivity = 0;
-	
-void logMessage(char* Message) {
-	FILE *file = fopen("/mnt/SDCARD/.tmp_update/log_turnMessage.txt", "a");
-    char valLog[200];
-    sprintf(valLog, "%s %s", Message, "\n");
-    fputs(valLog, file);
-	fclose(file); 
-}
-
-char *removeExt(char* myStr) {
-    char *retStr;
-    char *lastExt;
-    if (myStr == NULL) return NULL;
-    if ((retStr = (char*)malloc (strlen (myStr) + 1)) == NULL) return NULL;
-    strcpy (retStr, myStr);
-    lastExt = strrchr (retStr, '.');
-    if (lastExt != NULL)
-        *lastExt = '\0';
-    return retStr;
-}
 
 
 void IMG_SavePNG (SDL_Surface *SurfaceImage, char* pathImage){
@@ -146,36 +107,6 @@ void IMG_SavePNG (SDL_Surface *SurfaceImage, char* pathImage){
 	}
 }
 
-
-bool file_exists (char *filename) {
-  struct stat   buffer;   
-  return (stat (filename, &buffer) == 0);
-}
-
-
-char* load_file(char const* path)
-{
-    char* buffer = 0;
-    long length;
-    FILE * f = fopen (path, "rb"); 
-
-    if (f)
-    {
-      fseek (f, 0, SEEK_END);
-      length = ftell (f);
-      fseek (f, 0, SEEK_SET);
-      buffer = (char*)malloc ((length+1)*sizeof(char));
-      if (buffer)
-      {
-        fread (buffer, sizeof(char), length, f);
-      }
-      fclose (f);
-    }
-    buffer[length] = '\0';
-
-    return buffer;
-}
-
 int bDisplayBoxArt = 0;
 
 void setMiyooLum(int nLum){
@@ -183,9 +114,9 @@ void setMiyooLum(int nLum){
 	cJSON* request_json = NULL;
 	cJSON* itemBrightness;
 
-	char sBrightness[20]; 
+	char sBrightness[20];
 	
-	const char *request_body = load_file("/appconfigs/system.json");
+	const char *request_body = file_readAll("/appconfigs/system.json");
 	request_json = cJSON_Parse(request_body);
 	itemBrightness = cJSON_GetObjectItem(request_json, "brightness");
 
@@ -223,59 +154,13 @@ int getMiyooLum(void){
 
 	char sBrightness[20]; 
 	
-	const char *request_body = load_file("/appconfigs/system.json");
+	const char *request_body = file_readAll("/appconfigs/system.json");
 	request_json = cJSON_Parse(request_body);
 	itemBrightness = cJSON_GetObjectItem(request_json, "brightness");
 
 	int dBrightness = cJSON_GetNumberValue(itemBrightness);
 		
 	return dBrightness;
-}
-
-
-//
-//	Trim Strings for reading json (EGGS)
-//
-char* trimstr(char* str, uint32_t first) {
-	char *firstchar, *firstlastchar, *lastfirstchar, *lastchar;
-	uint32_t i;
-
-	firstchar = firstlastchar = lastfirstchar = lastchar = 0;
-
-	for (i=0; i<strlen(str); i++) {
-		if ((str[i]!='\r')&&(str[i]!='\n')&&(str[i]!=' ')&&(str[i]!='\t')&&
-		    (str[i]!='{')&&(str[i]!='}')&&(str[i]!=',')) {
-			if (!firstchar) {
-				firstchar = &str[i];
-				lastfirstchar = &str[i];
-			}
-			if (i) {
-				if ((str[i-1]=='\r')||(str[i-1]=='\n')||(str[i-1]==' ')||(str[i-1]=='\t')||
-				    (str[i-1]=='{')||(str[i-1]=='}')||(str[i-1]==',')) {
-					lastfirstchar = &str[i];
-				}
-			}
-			if (str[i] == '"') {
-				for (i++; i<(strlen(str)-1); i++) {
-					if ((str[i]=='\r')||(str[i]=='\n')||(str[i]=='"')) break;
-				}
-			}
-			lastchar = &str[i];
-		} else {
-			if (!firstlastchar) {
-				firstlastchar = lastchar;
-			}
-		}
-	}
-	if (first) {
-		lastfirstchar = firstchar;
-		lastchar = firstlastchar;
-	}
-	if (lastchar) {
-		lastchar[1] = 0;
-	}
-	if (lastfirstchar) return lastfirstchar;
-	return 0;
 }
 
 
@@ -333,10 +218,11 @@ int searchRomDB(char* romName){
 }
 
 
-void readHistory(){
-// History extraction
-	taillestructGames = 0;
-	const char *request_body = load_file("/mnt/SDCARD/Saves/CurrentProfile/lists/content_history.lpl");	
+void readHistory()
+{
+	// History extraction
+	game_list_len = 0;
+	const char *request_body = file_readAll("/mnt/SDCARD/Saves/CurrentProfile/lists/content_history.lpl");	
 	if (request_body != NULL){
 			request_json = cJSON_Parse(request_body);	 
 			items = cJSON_GetObjectItem(request_json, "items");	
@@ -386,7 +272,6 @@ void readHistory(){
     						bname[MAXHROMNAMESIZE-1] = '\0';
     						
     						int nTimePosition = searchRomDB(bname);
-    						//logMessage(bname);
     						
     						if (nTimePosition >= 0){
     							
@@ -399,15 +284,15 @@ void readHistory(){
 								
 								m = (nTime -(3600*h))/60;	
 
-								sprintf(gameList[nbGame].totalTime, "%d:%02d / %s", h,m,sTotalTimePlayed);
+								sprintf(game_list[nbGame].totalTime, "%d:%02d / %s", h,m,sTotalTimePlayed);
 								
 								} 							
     						}
 	
-    						strcpy(gameList[taillestructGames].name, bname);
-    						strcpy(gameList[taillestructGames].RACommand, RACommand);
-							gameList[taillestructGames].jsonIndex = nbGame;
-    						taillestructGames ++; 				
+    						strcpy(game_list[game_list_len].name, bname);
+    						strcpy(game_list[game_list_len].RACommand, RACommand);
+							game_list[game_list_len].jsonIndex = nbGame;
+    						game_list_len ++; 				
 						}
 					}
     			}
@@ -452,7 +337,7 @@ void super_short_pulse(void) {
 
 void removeCurrentItem(){
 	if (items != NULL)
-		cJSON_DeleteItemFromArray(items, gameList[currentGame].jsonIndex);
+		cJSON_DeleteItemFromArray(items, game_list[current_game].jsonIndex);
 	
 	FILE *file = fopen("/mnt/SDCARD/Saves/CurrentProfile/lists/content_history.lpl", "w");
 	
@@ -601,7 +486,7 @@ int main(void) {
 	SDL_Surface* imageFooterHelp = IMG_Load("res/footerHelp.png");	
 	char currPicture[MAXHROMNAMESIZE+44];
 	
-	sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",removeExt(gameList[currentGame].name),".png");	 
+	sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",file_removeExtension(game_list[current_game].name),".png");	 
 	// Move screenshot to destination
 	rename("screenshotGame.png", currPicture); 
 /*
@@ -623,14 +508,14 @@ int main(void) {
 			if (firstPass > 2)
 			firstPass = 0;
 			
-    		sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",removeExt(gameList[currentGame].name),".png");
+    		sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",file_removeExtension(game_list[current_game].name),".png");
     		
  
     		if (file_exists(currPicture)==1){
 				imageBackgroundGame = IMG_Load(currPicture);
 			}
 			
-			if (taillestructGames > 1){
+			if (game_list_len > 1){
 				SDL_BlitSurface(surfaceArrowRight, NULL, screen, &rectArrowRight);
 			}
 		}
@@ -639,11 +524,11 @@ int main(void) {
 
 				val = ev.value;
 				
-				if (( ev.code != BUTTON_MENU )&&(val == 1)) {
+				if (( ev.code != HW_BTN_MENU )&&(val == 1)) {
 					comboKey = 1;
 				}
 				
-				if ( ev.code == BUTTON_MENU ) {
+				if ( ev.code == HW_BTN_MENU ) {
 						menu_pressed = val;
 						if (menu_pressed == 1){
 							comboKey = 0 ;
@@ -664,17 +549,17 @@ int main(void) {
 				
 				switch (ev.code)
 				{
-				case BUTTON_SELECT: select_pressed = val; break;
-				case BUTTON_A: 		a_pressed = val; break;
-				case BUTTON_B: 		b_pressed = val; break;
-				case BUTTON_LEFT: 	left_pressed = val; break;
-				case BUTTON_RIGHT: 	right_pressed = val; break;
-				case BUTTON_MENU: 	menu_pressed = val; break;
-				case BUTTON_X: 		x_pressed = val; break;
-				case BUTTON_Y: 		y_pressed = val; break;
-				case BUTTON_START: 	start_pressed = val; break;
-				case BUTTON_UP: 	up_pressed = val; break;
-				case BUTTON_DOWN: 	down_pressed = val; break;
+				case HW_BTN_SELECT: select_pressed = val; break;
+				case HW_BTN_A: 		a_pressed = val; break;
+				case HW_BTN_B: 		b_pressed = val; break;
+				case HW_BTN_LEFT: 	left_pressed = val; break;
+				case HW_BTN_RIGHT: 	right_pressed = val; break;
+				case HW_BTN_MENU: 	menu_pressed = val; break;
+				case HW_BTN_X: 		x_pressed = val; break;
+				case HW_BTN_Y: 		y_pressed = val; break;
+				case HW_BTN_START: 	start_pressed = val; break;
+				case HW_BTN_UP: 	up_pressed = val; break;
+				case HW_BTN_DOWN: 	down_pressed = val; break;
 				default: break;
 				}
 				
@@ -682,10 +567,10 @@ int main(void) {
 				if ( val == 0 ) continue;
 				
 				if (right_pressed) {
-            		if (currentGame<(taillestructGames-1)){
-                		currentGame ++;
+            		if (current_game<(game_list_len-1)){
+                		current_game ++;
                 		
-                		sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",removeExt(gameList[currentGame].name),".png");
+                		sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",file_removeExtension(game_list[current_game].name),".png");
                 		if (file_exists(currPicture)==1){
 							if (imageBackgroundGame != NULL){
 								SDL_FreeSurface(imageBackgroundGame); 
@@ -696,9 +581,9 @@ int main(void) {
 				}
 				
 				if (left_pressed) {	
-					if (currentGame>0){
-						currentGame --;
-						sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",removeExt(gameList[currentGame].name),".png");
+					if (current_game>0){
+						current_game --;
+						sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",file_removeExtension(game_list[current_game].name),".png");
 						if (file_exists(currPicture)==1){
 							if (imageBackgroundGame != NULL){
 								SDL_FreeSurface(imageBackgroundGame); 
@@ -756,7 +641,7 @@ int main(void) {
 		FILE *fp;
 		
 
-		if (taillestructGames==0){
+		if (game_list_len==0){
 			SDL_BlitSurface(imageBackgroundNoGame, NULL, screen, NULL);
 		}
 		else{
@@ -778,20 +663,20 @@ int main(void) {
 		}
 		
 		
-		if (currentGame!=0){
+		if (current_game!=0){
 			SDL_BlitSurface(surfaceArrowLeft, NULL, screen, &rectArrowLeft);
 		}
 	
-		if (taillestructGames!=0){
-			if (currentGame!=taillestructGames-1){
+		if (game_list_len!=0){
+			if (current_game!=game_list_len-1){
 				SDL_BlitSurface(surfaceArrowRight, NULL, screen, &rectArrowRight);
 			}
 		
 		}
 
 		SDL_BlitSurface(imageMenuBar, NULL, screen, &rectMenuBar);
-		if (taillestructGames>0){
-			imageGameName = TTF_RenderUTF8_Blended(font, removeExt(gameList[currentGame].name), color);
+		if (game_list_len>0){
+			imageGameName = TTF_RenderUTF8_Blended(font, file_removeExtension(game_list[current_game].name), color);
 			SDL_BlitSurface(imageGameName, NULL, screen, &rectGameName);
 		}
 		
@@ -810,12 +695,12 @@ int main(void) {
 			SDL_FreeSurface(imageLum); 
 		}
 		
-		imagePlay = TTF_RenderUTF8_Blended(font, gameList[currentGame].totalTime, color);	
+		imagePlay = TTF_RenderUTF8_Blended(font, game_list[current_game].totalTime, color);	
 		SDL_BlitSurface(imagePlay, NULL, screen, &rectTime);
 		SDL_BlitSurface(imageBatteryIcon, NULL, screen, &rectBatteryIcon);
 
 		if (x_pressed) {		
-			if (taillestructGames != 0){
+			if (game_list_len != 0){
 				x_pressed = 0;
 				SDL_BlitSurface(imageRemoveDialog, NULL, screen, NULL);
 				SDL_BlitSurface(screen, NULL, video, NULL); 
@@ -824,14 +709,14 @@ int main(void) {
 				while(read(input_fd, &ev, sizeof(ev)) == sizeof(ev) ){
 					val = ev.value;
 				
-					if (( ev.code == BUTTON_A)&&(val == 1)) {
+					if (( ev.code == HW_BTN_A)&&(val == 1)) {
 						removeCurrentItem();
 						readHistory();
-						currentGame = 0;
+						current_game = 0;
 						firstPass = 1;
 						break;
 					}
-					if (( ev.code == BUTTON_B)&&(val == 1)) {
+					if (( ev.code == HW_BTN_B)&&(val == 1)) {
 						
 						firstPass = 1;
 						break;
@@ -853,11 +738,11 @@ int main(void) {
 	remove("/mnt/SDCARD/.tmp_update/romName.txt");
 	if (nExitToMiyoo != 1){
 		FILE *file = fopen("/mnt/SDCARD/.tmp_update/cmd_to_run.sh", "w");
-		fputs(gameList[currentGame].RACommand, file);
+		fputs(game_list[current_game].RACommand, file);
 		fclose(file); 	
 
 		FILE *file2 = fopen("/mnt/SDCARD/.tmp_update/romName.txt", "w");
-		fputs(gameList[currentGame].name, file2);
+		fputs(game_list[current_game].name, file2);
 		fclose(file2); 			
 	
 	}

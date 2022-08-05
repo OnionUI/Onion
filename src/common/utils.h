@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 #include <time.h>
 #include <errno.h>
 #include <SDL/SDL.h>
@@ -18,12 +19,6 @@
 bool file_exists(const char *filename) {
 	struct stat buffer;
 	return (stat(filename, &buffer) == 0);
-}
-
-bool dotfile(const char *key) {
-    char filename[MAX_LEN];
-    concat(filename, "/mnt/SDCARD/.tmp_update/config/.", key);
-    return file_exists(filename);
 }
 
 bool file_isModified(const char *path, time_t* old_mtime) {
@@ -97,6 +92,44 @@ const char* file_readAll(const char *path)
     return buffer;
 }
 
+bool file_write(const char *path, const char *str, uint32_t len)
+{
+    uint32_t fd;
+    if ((fd = open(path, O_WRONLY)) == 0)
+        return false;
+    if (write(fd, str, len) == -1)
+        return false;
+    close(fd);
+    return true;
+}
+
+char *file_removeExtension(char* myStr)
+{
+    char *retStr;
+    char *lastExt;
+    if (myStr == NULL) return NULL;
+    if ((retStr = malloc(strlen(myStr) + 1)) == NULL)
+		return NULL;
+    strcpy(retStr, myStr);
+    if ((lastExt = strrchr(retStr, '.')) != NULL)
+        *lastExt = '\0';
+    return retStr;
+}
+
+int getBatteryPercentage()
+{
+    int percentage = 0;
+
+    if (file_exists("/tmp/percBat")) {
+        char val[5];
+        const char *cPercBat = file_readAll("/tmp/percBat");
+        strcpy(val, cPercBat);
+        percentage = atoi(val);
+    }
+
+    return percentage;
+}
+
 bool str_getLastNumber(char* str, long* out_val)
 {
 	char *p = str;
@@ -112,34 +145,6 @@ bool str_getLastNumber(char* str, long* out_val)
 		*out_val = val;
 
 	return val != -1;
-}
-
-SDL_Color hex2sdl(char *input) {
-	char *ptr;
-    if (input[0] == '#')
-        input++;
-    unsigned long value = strtoul(input, &ptr, 16);
-    SDL_Color color = {
-    	(value >> 16) & 0xff,
-    	(value >> 8) & 0xff,
-    	(value >> 0) & 0xff
-	};
-    return color;
-}
-
-Uint32 colorToUint(SDL_Color color)
-{
-	return (Uint32)((color.r << 16) + (color.g << 8) + (color.b << 0));
-}
-
-SDL_Color uintToColor(Uint32 color)
-{
-	SDL_Color sdl_color;
-	sdl_color.unused = 255;
-	sdl_color.r = (color >> 16) & 0xFF;
-	sdl_color.g = (color >> 8) & 0xFF;
-	sdl_color.b = color & 0xFF;
-	return sdl_color;
 }
 
 char* str_split(char *str, const char *delim)
@@ -193,6 +198,51 @@ char* str_replace(char *orig, char *rep, char *with) {
     }
     strcpy(tmp, orig);
     return result;
+}
+
+//
+//	Trim Strings for reading json (EGGS)
+//
+char* trimstr(char* str, uint32_t first) {
+	char *firstchar, *firstlastchar, *lastfirstchar, *lastchar;
+	uint32_t i;
+
+	firstchar = firstlastchar = lastfirstchar = lastchar = 0;
+
+	for (i=0; i<strlen(str); i++) {
+		if ((str[i]!='\r')&&(str[i]!='\n')&&(str[i]!=' ')&&(str[i]!='\t')&&
+		    (str[i]!='{')&&(str[i]!='}')&&(str[i]!=',')) {
+			if (!firstchar) {
+				firstchar = &str[i];
+				lastfirstchar = &str[i];
+			}
+			if (i) {
+				if ((str[i-1]=='\r')||(str[i-1]=='\n')||(str[i-1]==' ')||(str[i-1]=='\t')||
+				    (str[i-1]=='{')||(str[i-1]=='}')||(str[i-1]==',')) {
+					lastfirstchar = &str[i];
+				}
+			}
+			if (str[i] == '"') {
+				for (i++; i<(strlen(str)-1); i++) {
+					if ((str[i]=='\r')||(str[i]=='\n')||(str[i]=='"')) break;
+				}
+			}
+			lastchar = &str[i];
+		} else {
+			if (!firstlastchar) {
+				firstlastchar = lastchar;
+			}
+		}
+	}
+	if (first) {
+		lastfirstchar = firstchar;
+		lastchar = firstlastchar;
+	}
+	if (lastchar) {
+		lastchar[1] = 0;
+	}
+	if (lastfirstchar) return lastfirstchar;
+	return 0;
 }
 
 
