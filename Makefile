@@ -56,6 +56,7 @@ $(CACHE)/.setup:
 	@chmod a+x $(ROOT_DIR)/.github/get_themes.sh && $(ROOT_DIR)/.github/get_themes.sh
 	@touch $(CACHE)/.
 # Copy static packages
+	@mkdir -p $(PACKAGES_APP_DEST) $(PACKAGES_EMU_DEST) $(PACKAGES_RAPP_DEST)
 	@cp -R $(STATIC_PACKAGES)/App/. $(PACKAGES_APP_DEST)
 	@cp -R $(STATIC_PACKAGES)/Emu/. $(PACKAGES_EMU_DEST)
 	@cp -R $(STATIC_PACKAGES)/RApp/. $(PACKAGES_RAPP_DEST)
