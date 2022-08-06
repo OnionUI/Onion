@@ -6,6 +6,7 @@
 
 #include "utils/file.h"
 #include "utils/flags.h"
+#include "utils/battery.h"
 
 int main(int argc, char *argv[])
 {
@@ -49,7 +50,7 @@ int main(int argc, char *argv[])
     SDL_FreeSurface(background);
 
     char version_str[12];
-    char *current_version = file_readAll("/mnt/SDCARD/.tmp_update/onionVersion/version.txt");
+    char *current_version = file_read("/mnt/SDCARD/.tmp_update/onionVersion/version.txt");
     sprintf(version_str, "v%s", current_version);
         
     SDL_Surface* imageVer = TTF_RenderUTF8_Blended(font, version_str, color);
@@ -63,7 +64,7 @@ int main(int argc, char *argv[])
         
         // Check current battery value
         char currBat[5];
-        int nBat = getBatteryPercentage();
+        int nBat = battery_getPercentage();
         sprintf(currBat, "%d%%", nBat);
         SDL_Surface* battery_text = TTF_RenderUTF8_Blended(font, currBat, color);
         
@@ -95,7 +96,7 @@ int main(int argc, char *argv[])
     SDL_Flip(video);
 
     if (argc > 1 && strcmp(argv[1], "Boot") != 0)
-        settings_flag_set(".offOrder", false);
+        temp_flag_set(".offOrder", false);
 
     SDL_FreeSurface(screen);
     SDL_FreeSurface(video);

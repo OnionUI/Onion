@@ -1,23 +1,8 @@
 INCLUDE_CJSON=1
-include ../common/common.mk
+include ../common/config.mk
 
 TARGET := $(BUILD_DIR)/gameSwitcher
 LDFLAGS := $(LDFLAGS) -lSDL -lSDL_ttf -lSDL_image -lpng
 
-$(TARGET): $(OFILES)
-	@$(CXX) $(OFILES) -o $@ $(LDFLAGS)
-# $(STRIP) $@
-
-%.o: %.c
-	@echo Building $@
-	@$(CC) $(CFLAGS) -c $< -o $@
-
-# %.o: %.cpp
-# 	$(CXX) $(CXXFLAGS) -c $< -o $@
-
-clean:
-	@rm -f $(TARGET) $(OFILES)
-	@echo Cleaned
-
-install:
-	@echo "do nothing for install"
+include ../common/commands.mk
+include ../common/recipes.mk

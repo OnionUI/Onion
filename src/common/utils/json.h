@@ -11,7 +11,7 @@
 #define JSON_FORMAT_STRING    "    \"%s\": \"%s\",\n"
 #define JSON_FORMAT_STRING_NC "    \"%s\": \"%s\"\n"
 
-bool json_getStringValue(cJSON* root, const char* key, char* dest)
+bool json_string(cJSON* root, const char* key, char* dest)
 {
     cJSON* json_object = cJSON_GetObjectItem(root, key);
     if (json_object) {
@@ -21,7 +21,7 @@ bool json_getStringValue(cJSON* root, const char* key, char* dest)
     return false;
 }
 
-bool json_getBoolValue(cJSON* root, const char* key, bool* dest)
+bool json_bool(cJSON* root, const char* key, bool* dest)
 {
     cJSON* json_object = cJSON_GetObjectItem(root, key);
     if (json_object) {
@@ -31,7 +31,7 @@ bool json_getBoolValue(cJSON* root, const char* key, bool* dest)
     return false;
 }
 
-bool json_getNumberValue(cJSON* root, const char* key, int* dest)
+bool json_number(cJSON* root, const char* key, int* dest)
 {
     cJSON* json_object = cJSON_GetObjectItem(root, key);
     if (json_object) {

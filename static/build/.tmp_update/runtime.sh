@@ -28,7 +28,7 @@ main() {
     ./bin/keymon 2>&1 >> ./logs/keymon.log &
 
     # Init
-    rm $sysdir/.offOrder
+    rm /tmp/.offOrder
     HOME=/mnt/SDCARD/RetroArch/
 
     # Auto launch
@@ -117,7 +117,7 @@ launch_switcher() {
 }
 
 check_off_order() {
-    if  [ -f $sysdir/.offOrder ] ; then
+    if  [ -f /tmp/.offOrder ] ; then
         cd $sysdir
         ./bin/bootScreen "$1"
         

@@ -13,10 +13,13 @@
 #include <linux/rtc.h>
 
 #include "utils/utils.h"
+#include "utils/process.h"
+#include "utils/flags.h"
+#include "utils/config.h"
+#include "utils/battery.h"
 #include "system/settings.h"
 #include "system/keymap_hw.h"
 #include "system/rumble.h"
-#include "system/battery.h"
 #include "system/system.h"
 #include "system/screenshot.h"
 
@@ -88,8 +91,8 @@ int setVolumeRaw(int volume, int add) {
 //
 int terminate_retroarch(void) {
     char fname[16];
-    pid_t pid = system_searchpid("retroarch");
-    if (!pid) pid = system_searchpid("ra32");
+    pid_t pid = process_searchpid("retroarch");
+    if (!pid) pid = process_searchpid("ra32");
 
     if (pid) {
         // send signal
@@ -190,10 +193,9 @@ void resume(void) {
 //    Quit
 //
 void quit(int exitcode) {
-    battery_hideWarning();
+    process_kill("percBat");
     display_free();
     if (input_fd > 0) close(input_fd);
-    battery_free();
     system_clock_get();
     system_rtc_set();
     system_clock_save();
@@ -222,7 +224,6 @@ void suspend_exec(int timeout) {
     while (ioctl(input_fd, EVIOCGRAB, 1) < 0) { usleep(100000); }
 
     // suspend
-    battery_hideWarning();
     system_clock_pause(true);
     suspend(0);
     rumble(0);
@@ -236,6 +237,7 @@ void suspend_exec(int timeout) {
 
     while(1) {
         int ready = poll(fds, 1, timeout);
+
         if (ready > 0) {
             read(input_fd, &ev, sizeof(ev));
             if (( ev.type != EV_KEY ) || ( ev.value > REPEAT )) continue;
@@ -262,7 +264,7 @@ void suspend_exec(int timeout) {
                 }
             }
         }
-        else if ((!ready)&&(battery_readADC() != 100)) {
+        else if (!ready && !battery_isCharging()) {
             // shutdown
             system_powersave_off(); resume(); usleep(100000); shutdown();
         }
@@ -278,7 +280,6 @@ void suspend_exec(int timeout) {
         resume();
         system_clock_pause(false);
     }
-    battery_updateADC(true);
 
     // restart input event for other processes
     while (ioctl(input_fd, EVIOCGRAB, 0) < 0) { usleep(100000); }
@@ -297,7 +298,7 @@ int check_autosave(void) {
     const char cfg_ext[] = ".cfg";
 
     char ra_name[12] = "retroarch";
-    if ( (ra_pid = system_searchpid(ra_name)) ) {
+    if ( (ra_pid = process_searchpid(ra_name)) ) {
         strptr = cfgpath + sprintf(cfgpath, "/proc/%d/cwd/", ra_pid);
         // standard retroarch ( ./.retroarch/retroarch.cfg )
         sprintf(strptr, ".retroarch/%s%s", ra_name, cfg_ext);
@@ -308,7 +309,7 @@ int check_autosave(void) {
         }
     } else {
         strcpy(ra_name, "ra32");
-        if ( (ra_pid = system_searchpid(ra_name)) ) {
+        if ( (ra_pid = process_searchpid(ra_name)) ) {
             // stock ra32.ss ( ./ra32.cfg )
             sprintf(cfgpath, "/proc/%d/cwd/%s%s", ra_pid, ra_name, cfg_ext);
             if (access(cfgpath, R_OK)) return 0;
@@ -331,24 +332,6 @@ int check_autosave(void) {
     return ret;
 }
 
-//
-//    [onion] Write percBat to /tmp/percBat
-//
-void write_percBat(void) {
-    FILE*    fp;
-    int percBat = battery_readPercentage();
-
-    if (settings.low_battery_shutdown && percBat <= 4) {
-        if (check_autosave())
-            terminate_retroarch();
-    }
-
-    if ((fp = fopen("/tmp/percBat", "w"))) {
-        fprintf(fp, "%d", percBat);
-        fclose(fp);
-    }
-}
-
 
 
 //
@@ -357,17 +340,17 @@ void write_percBat(void) {
 void deepsleep(void) {
 
     pid_t pid;
-    if ((pid = system_searchpid("MainUI"))) {
+    if ((pid = process_searchpid("MainUI"))) {
         short_pulse();
         system_shutdown(); kill(pid, SIGKILL); 
         
     }
-    else if ((pid = system_searchpid("gameSwitcher"))) {
+    else if ((pid = process_searchpid("gameSwitcher"))) {
         short_pulse();
         system_shutdown();
         kill(pid, SIGKILL);
     }
-    else if ((pid = system_searchpid("retroarch"))) {
+    else if ((pid = process_searchpid("retroarch"))) {
          if (check_autosave()){
             short_pulse();
             system_shutdown(); 
@@ -415,14 +398,9 @@ int main(void) {
     int hibernate_time;
     int elapsed_sec = 0;
 
-    // The next calls are in 15s
-    // Update ADC Value
-    battery_updateADC(false);
-    write_percBat();
     // Update recent time
     clock_gettime(CLOCK_MONOTONIC_COARSE, &recent);
     
-
     while(1) {
         if (poll(fds, 1, (CHECK_SEC - elapsed_sec) * 1000) > 0) {
 
@@ -523,7 +501,7 @@ int main(void) {
                             // START + L2 : brightness down
                             settings_load();
                             if (settings.brightness > 0) {
-                                display_setBrightness(--settings.brightness);
+                                settings_setBrightness(settings.brightness - 1, true);
                                 settings_save();
                             }
                             break;
@@ -550,7 +528,7 @@ int main(void) {
                         // START + R2 : brightness up
                         settings_load();
                         if (settings.brightness < MAX_BRIGHTNESS) {
-                            display_setBrightness(++settings.brightness);
+                            settings_setBrightness(settings.brightness + 1, true);
                             settings_save();
                         }
                         break;
@@ -610,9 +588,6 @@ int main(void) {
             }
         }
 
-        // Update ADC Value
-        battery_updateADC(false);
-        write_percBat();
         // Update recent time
         clock_gettime(CLOCK_MONOTONIC_COARSE, &recent);
         elapsed_sec = 0;

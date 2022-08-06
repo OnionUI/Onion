@@ -116,7 +116,7 @@ void setMiyooLum(int nLum){
 
 	char sBrightness[20];
 	
-	const char *request_body = file_readAll("/appconfigs/system.json");
+	const char *request_body = file_read("/appconfigs/system.json");
 	request_json = cJSON_Parse(request_body);
 	itemBrightness = cJSON_GetObjectItem(request_json, "brightness");
 
@@ -154,7 +154,7 @@ int getMiyooLum(void){
 
 	char sBrightness[20]; 
 	
-	const char *request_body = file_readAll("/appconfigs/system.json");
+	const char *request_body = file_read("/appconfigs/system.json");
 	request_json = cJSON_Parse(request_body);
 	itemBrightness = cJSON_GetObjectItem(request_json, "brightness");
 
@@ -222,7 +222,7 @@ void readHistory()
 {
 	// History extraction
 	game_list_len = 0;
-	const char *request_body = file_readAll("/mnt/SDCARD/Saves/CurrentProfile/lists/content_history.lpl");	
+	const char *request_body = file_read("/mnt/SDCARD/Saves/CurrentProfile/lists/content_history.lpl");	
 	if (request_body != NULL){
 			request_json = cJSON_Parse(request_body);	 
 			items = cJSON_GetObjectItem(request_json, "items");	

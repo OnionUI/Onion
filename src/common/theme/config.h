@@ -3,10 +3,11 @@
 
 #include <string.h>
 #include <SDL/SDL.h>
+#include <SDL/SDL_image.h>
+#include <SDL/SDL_ttf.h>
 
 #include "utils/utils.h"
 #include "utils/json.h"
-#include "system/settings.h"
 #include "color.h"
 
 #define STR_MAX 256
@@ -59,7 +60,7 @@ typedef struct Theme
 
 // Extend json getters
 
-bool json_getColorValue(cJSON* root, const char* key, SDL_Color* dest)
+bool json_color(cJSON* root, const char* key, SDL_Color* dest)
 {
     cJSON* json_object = cJSON_GetObjectItem(root, key);
     if (json_object) {
@@ -69,13 +70,13 @@ bool json_getColorValue(cJSON* root, const char* key, SDL_Color* dest)
     return false;
 }
 
-void json_getFontStyle(cJSON* root, FontStyle_s* dest, FontStyle_s* fallback)
+void json_fontStyle(cJSON* root, FontStyle_s* dest, FontStyle_s* fallback)
 {
-    if (!json_getStringValue(root, "font", dest->font) && fallback)
+    if (!json_string(root, "font", dest->font) && fallback)
         strcpy(dest->font, fallback->font);
-    if (!json_getNumberValue(root, "size", &dest->size) && fallback)
+    if (!json_number(root, "size", &dest->size) && fallback)
         dest->size = fallback->size;
-    if (!json_getColorValue(root, "color", &dest->color) && fallback)
+    if (!json_color(root, "color", &dest->color) && fallback)
         dest->color = fallback->color;
 }
 
@@ -167,10 +168,10 @@ Theme_s loadThemeFromPath(const char* theme_path)
     }
 
 	const char *json_str = NULL;
-    char config_path[STR_MAX];
-    snprintf(config_path, STR_MAX, "%s%s", theme.path, "config.json");
+    char config_path[STR_MAX * 2];
+    snprintf(config_path, STR_MAX * 2 - 1, "%s%s", theme.path, "config.json");
 
-	if (!(json_str = file_readAll(config_path)))
+	if (!(json_str = file_read(config_path)))
 		return theme;
 
     // Get JSON objects
@@ -183,41 +184,36 @@ Theme_s loadThemeFromPath(const char* theme_path)
 	cJSON* json_grid = cJSON_GetObjectItem(json_root, "grid");
 	cJSON* json_list = cJSON_GetObjectItem(json_root, "list");
 
-    json_getStringValue(json_root, "name", theme.name);
-    json_getStringValue(json_root, "author", theme.author);
-    json_getStringValue(json_root, "description", theme.description);
-    json_getBoolValue(json_root, "hideIconTitle", &theme.hideIconTitle);
+    json_string(json_root, "name", theme.name);
+    json_string(json_root, "author", theme.author);
+    json_string(json_root, "description", theme.description);
+    json_bool(json_root, "hideIconTitle", &theme.hideIconTitle);
 
-    json_getFontStyle(json_title, &theme.title, NULL);
-    json_getFontStyle(json_hint, &theme.hint, NULL);
-    json_getFontStyle(json_currentpage, &theme.currentpage, &theme.hint);
-    json_getFontStyle(json_total, &theme.total, &theme.hint);
+    json_fontStyle(json_title, &theme.title, NULL);
+    json_fontStyle(json_hint, &theme.hint, NULL);
+    json_fontStyle(json_currentpage, &theme.currentpage, &theme.hint);
+    json_fontStyle(json_total, &theme.total, &theme.hint);
 
-    json_getStringValue(json_grid, "font", theme.grid.font);
-    json_getNumberValue(json_grid, "grid1x4", &theme.grid.grid1x4);
-    json_getNumberValue(json_grid, "grid3x4", &theme.grid.grid3x4);
-    json_getColorValue(json_grid, "color", &theme.grid.color);
-    json_getColorValue(json_grid, "selectedcolor", &theme.grid.selectedcolor);
+    json_string(json_grid, "font", theme.grid.font);
+    json_number(json_grid, "grid1x4", &theme.grid.grid1x4);
+    json_number(json_grid, "grid3x4", &theme.grid.grid3x4);
+    json_color(json_grid, "color", &theme.grid.color);
+    json_color(json_grid, "selectedcolor", &theme.grid.selectedcolor);
 
-    json_getFontStyle(json_list, &theme.list, NULL);
+    json_fontStyle(json_list, &theme.list, NULL);
 
-    json_getBoolValue(json_batteryPercentage, "visible", &theme.batteryPercentage.visible);
-    if (!json_getStringValue(json_batteryPercentage, "font", theme.batteryPercentage.font))
+    json_bool(json_batteryPercentage, "visible", &theme.batteryPercentage.visible);
+    if (!json_string(json_batteryPercentage, "font", theme.batteryPercentage.font))
         strcpy(theme.batteryPercentage.font, theme.hint.font);
-    json_getNumberValue(json_batteryPercentage, "size", &theme.batteryPercentage.size);
-    if (!json_getColorValue(json_batteryPercentage, "color", &theme.batteryPercentage.color))
+    json_number(json_batteryPercentage, "size", &theme.batteryPercentage.size);
+    if (!json_color(json_batteryPercentage, "color", &theme.batteryPercentage.color))
         theme.batteryPercentage.color = theme.hint.color;
-    json_getNumberValue(json_batteryPercentage, "offsetX", &theme.batteryPercentage.offsetX);
-    json_getNumberValue(json_batteryPercentage, "offsetY", &theme.batteryPercentage.offsetY);
-    json_getBoolValue(json_batteryPercentage, "onleft", &theme.batteryPercentage.onleft);
+    json_number(json_batteryPercentage, "offsetX", &theme.batteryPercentage.offsetX);
+    json_number(json_batteryPercentage, "offsetY", &theme.batteryPercentage.offsetY);
+    json_bool(json_batteryPercentage, "onleft", &theme.batteryPercentage.onleft);
 
 	cJSON_free(json_root);
 	return theme;
-}
-
-Theme_s loadTheme(void)
-{
-    return loadThemeFromPath(settings.theme);
 }
 
 #endif // THEME_CONFIG_H__

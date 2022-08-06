@@ -1,5 +1,5 @@
 ifeq (,$(BUILD_DIR))
-BUILD_DIR=.
+BUILD_DIR=$(shell pwd -P)
 endif
 
 PLATFORM ?= $(UNION_PLATFORM)
@@ -22,14 +22,19 @@ CPPFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.cpp))
 OFILES = $(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
 
 CFLAGS := -I../../include -I../common -DPLATFORM_$(shell echo $(PLATFORM) | tr a-z A-Z) -Wall
+
 ifeq ($(DEBUG),1)
 CFLAGS := $(CFLAGS) -DLOG_DEBUG
 endif
+
 CXXFLAGS := $(CFLAGS)
 LDFLAGS := -L../../lib
+
 ifeq ($(PLATFORM),miyoomini)
 CFLAGS := $(CFLAGS) -marm -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7ve -Wl,-rpath=$(LIB)
+
 ifdef INCLUDE_SHMVAR
 LDFLAGS := $(LDFLAGS) -lshmvar
 endif
+
 endif

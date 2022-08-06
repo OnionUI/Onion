@@ -13,7 +13,9 @@
 #include <SDL/SDL_ttf.h>
 
 #include "utils/utils.h"
+#include "utils/battery.h"
 #include "utils/IMG_Save.h"
+#include "system/settings.h"
 #include "theme/theme.h"
 
 #define RESOURCES { \
@@ -68,7 +70,7 @@ void drawBatteryPercentage(Theme_s *theme)
     enum theme_Images res_requests[NUM_RESOURCES] = RESOURCES;
 	Resources_s res = theme_loadResources(theme, res_requests, NUM_RESOURCES);
 
-    int percentage = getBatteryPercentage();
+    int percentage = battery_getPercentage();
     SDL_Surface* image = theme_batterySurface(theme, &res, percentage);
 
     // Save custom battery icon
@@ -81,7 +83,8 @@ void drawBatteryPercentage(Theme_s *theme)
 
 int main(int argc, char *argv[])
 {
-    Theme_s theme = loadTheme();
+    settings_load();
+    Theme_s theme = loadThemeFromPath(settings.theme);
     if (argc > 1 && strcmp(argv[1], "--restore") == 0)
         restoreRegularDisplay(&theme);
     else

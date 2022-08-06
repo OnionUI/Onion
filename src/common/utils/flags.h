@@ -6,10 +6,6 @@
 #include "file.h"
 #include "str.h"
 
-#define DOTFILE_PATH "/mnt/SDCARD/.tmp_update/config/"
-
-#define settings_flag_get(key) flag_get(DOTFILE_PATH, key)
-#define settings_flag_set(key, value) flag_set(DOTFILE_PATH, key, value)
 #define temp_flag_get(key) flag_get("/tmp/", key)
 #define temp_flag_set(key, value) flag_set("/tmp/", key, value)
 

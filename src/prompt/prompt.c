@@ -10,11 +10,14 @@
 #include <SDL/SDL_ttf.h>
 
 #include "utils/log.h"
+#include "utils/battery.h"
 #include "system/settings.h"
 #include "system/keymap_sw.h"
-#include "system/battery.h"
 #include "theme/theme.h"
 #include "components/menu.h"
+
+#define FRAMES_PER_SECOND 30
+#define CHECK_BATTERY_TIMEOUT 30000 //ms
 
 #define RESOURCES { \
 	TR_BACKGROUND, \
@@ -84,12 +87,12 @@ int main(int argc, char *argv[])
 	SDL_Surface* video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
 	SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
 
-	print_debug("Loading settings...");
-	settings_init();
-	printf_debug(LOG_SUCCESS, "loaded settings");
+	// print_debug("Loading settings...");
+	// settings_init();
+	// printf_debug(LOG_SUCCESS, "loaded settings");
 
 	print_debug("Loading theme config...");
-	Theme_s theme = loadTheme();
+	Theme_s theme = loadThemeFromPath(settings.theme);
 	// Theme_s theme = loadThemeFromPath("/mnt/SDCARD/Themes/Blueprint by Aemiii91");
 	// Theme_s theme = loadThemeFromPath("/mnt/SDCARD/Themes/Analogue by Aemiii91");
 	// Theme_s theme = loadThemeFromPath("/customer/app");
@@ -99,9 +102,10 @@ int main(int argc, char *argv[])
 	Resources_s res = theme_loadResources(&theme, res_requests, NUM_RESOURCES);
 
 	print_debug("Reading battery percentage...");
-    int battery_percentage = battery_getPercentage();
+    int current_percentage = battery_getPercentage();
+	int old_percentage = current_percentage;
 	printf_debug(LOG_SUCCESS, "read battery percentage");
-    SDL_Surface* battery = theme_batterySurface(&theme, &res, battery_percentage);
+    SDL_Surface* battery = theme_batterySurface(&theme, &res, current_percentage);
 
 	Menu_s menu = menu_create(pargc);
 	for (i = 0; i < pargc; i++) {
@@ -128,6 +132,11 @@ int main(int argc, char *argv[])
 	SDL_Event event;
 	Uint8 keystate[320];
 	int return_code = -1;
+
+	uint32_t batt_timer = 0,
+			 acc_ticks = 0,
+			 last_ticks = SDL_GetTicks(),
+			 time_step = 1000 / FRAMES_PER_SECOND;
 
 	while (!quit) {
 		while (SDL_PollEvent(&event)) {
@@ -174,29 +183,43 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		if (!changed)
-			continue;
+		uint32_t ticks = SDL_GetTicks(),
+				 delta = ticks - last_ticks;
+		batt_timer += delta;
+		acc_ticks += delta;
+		last_ticks = ticks;
 
-		int new_batt_perc = battery_getPercentage();
-		if (new_batt_perc != battery_percentage) {
-			battery_percentage = new_batt_perc;
-			SDL_FreeSurface(battery);
-			battery = theme_batterySurface(&theme, &res, battery_percentage);
+		if (batt_timer >= CHECK_BATTERY_TIMEOUT) {
+			current_percentage = battery_getPercentage();
+			batt_timer = 0;
+
+			if (current_percentage != old_percentage) {
+				SDL_FreeSurface(battery);
+				battery = theme_batterySurface(&theme, &res, current_percentage);
+				old_percentage = current_percentage;
+				changed = true;
+			}
 		}
 
-		theme_renderBackground(&theme, &res, screen);
-		theme_renderHeader(&theme, &res, screen, battery, has_title ? title_str : NULL, !has_title);
+		if (acc_ticks >= time_step) {
+			if (changed) {
+				theme_renderBackground(&theme, &res, screen);
+				theme_renderHeader(&theme, &res, screen, battery, has_title ? title_str : NULL, !has_title);
 
-		if (has_message)
-			SDL_BlitSurface(message, NULL, screen, &message_rect);
+				if (has_message)
+					SDL_BlitSurface(message, NULL, screen, &message_rect);
 
-		theme_renderMenu(&theme, &res, screen, &menu);
-		theme_renderListFooter(&theme, &res, screen, &menu, "SELECT", required ? NULL : "BACK");
-	
-		SDL_BlitSurface(screen, NULL, video, NULL); 
-		SDL_Flip(video);
+				theme_renderMenu(&theme, &res, screen, &menu);
+				theme_renderListFooter(&theme, &res, screen, &menu, "SELECT", required ? NULL : "BACK");
+			
+				SDL_BlitSurface(screen, NULL, video, NULL); 
+				SDL_Flip(video);
 
-		changed = false;
+				changed = false;
+			}
+
+			acc_ticks -= time_step;
+		}
 	}
 	
 	if (has_message)
@@ -209,7 +232,6 @@ int main(int argc, char *argv[])
 	free(pargs);
 	menu_free(&menu);
 	theme_freeResources(&res);
-	battery_free();
 	
     return return_code;
 }

@@ -1,25 +1,17 @@
 INCLUDE_SHMVAR=1
 INCLUDE_CJSON=1
-include ../common/common.mk
+include ../common/config.mk
 
-TARGET := $(BUILD_DIR)/prompt
+TARGET = $(BUILD_DIR)/prompt
 LDFLAGS := $(LDFLAGS) -lSDL -lSDL_ttf -lSDL_image -lSDL_rotozoom -pthread
 
-$(TARGET): $(OFILES)
-	@$(CXX) $(OFILES) -o $@ $(LDFLAGS)
-	@$(STRIP) $@
+include ../common/commands.mk
+include ../common/recipes.mk
 
-%.o: %.c
-	@echo gcc $@
-	@$(CC) $(CFLAGS) -c $< -o $@
+clean-all:
+	@make clean
+	@rm -f ./bin/percBat
 
-%.o: %.cpp
-	@echo g++ $@
-	$(CXX) $(CXXFLAGS) -c $< -o $@
-
-clean:
-	@rm -f $(TARGET) $(OFILES)
-	@echo Cleaned
-
-install:
-	@echo "do nothing for install"
+dev-all: dev
+	@mkdir -p $(BUILD_DIR)/bin
+	@cd ../percBat && make clean && BUILD_DIR=$(BUILD_DIR)/bin make dev

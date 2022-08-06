@@ -6,7 +6,6 @@
 #include <sys/mman.h>
 
 #include "system.h"
-#include "settings.h"
 #include "utils/file.h"
 
 #define DISPLAY_WIDTH 640
@@ -72,7 +71,6 @@ void display_setBrightnessRaw(uint32_t brightness) {
 //    Set Brightness
 //
 void display_setBrightness(uint32_t value) {
-    settings_setBrightness(value);
     display_setBrightnessRaw((value == 0) ? 6 : (value * 10));
 }
 

@@ -13,9 +13,12 @@
 #include <time.h>
 #include <errno.h>
 
-#define file_get(fp, path, format, dest) { fp = fopen(path, "r"); if (fp) { fscanf(fp, format, dest); fclose(fp); } }
-#define file_put(fp, path, format, value) { fp = fopen(path, "w"); if (fp) { fprintf(fp, format, value); fclose(fp); } }
-#define file_put_sync(fp, path, format, value) { fp = fopen(path, "w"); if (fp) { fprintf(fp, format, value); fflush(fp); fsync(fileno(fp)); fclose(fp); } }
+#include "log.h"
+#include "msleep.h"
+
+#define file_get(fp, path, format, dest) { if ((fp = fopen(path, "r"))) { fscanf(fp, format, dest); fclose(fp); } }
+#define file_put(fp, path, format, value) { if ((fp = fopen(path, "w+"))) { fprintf(fp, format, value); fclose(fp); } }
+#define file_put_sync(fp, path, format, value) { if ((fp = fopen(path, "w+"))) { fprintf(fp, format, value); fflush(fp); fsync(fileno(fp)); fclose(fp); } }
 
 bool file_exists(const char *filename) {
 	struct stat buffer;
@@ -70,7 +73,7 @@ void file_readLastLine(const char* filename, char* out_str)
 	}
 }
 
-const char* file_readAll(const char *path)
+const char* file_read(const char *path)
 {
     FILE *f = NULL;
     char *buffer = NULL;
@@ -114,20 +117,6 @@ char *file_removeExtension(char* myStr)
     if ((lastExt = strrchr(retStr, '.')) != NULL)
         *lastExt = '\0';
     return retStr;
-}
-
-int getBatteryPercentage()
-{
-    int percentage = 0;
-
-    if (file_exists("/tmp/percBat")) {
-        char val[5];
-        const char *cPercBat = file_readAll("/tmp/percBat");
-        strcpy(val, cPercBat);
-        percentage = atoi(val);
-    }
-
-    return percentage;
 }
 
 #endif // UTILS_FILE_H__

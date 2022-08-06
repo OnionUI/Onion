@@ -28,18 +28,13 @@ PACKAGES_RAPP_DEST  := $(BUILD_DIR)/App/The_Onion_Installer/data/Layer3
 
 TOOLCHAIN := ghcr.io/onionui/miyoomini-toolchain:latest
 
-PLATFORM ?= $(UNION_PLATFORM)
-ifeq (,$(PLATFORM))
-PLATFORM=linux
-endif
-
-DEBUG=1
+include ./src/common/commands.mk
 
 ###########################################################
 
 .PHONY: all version core apps external release clean git-clean with-toolchain patch lib
 
-all: clean dist
+all: dist
 
 version: # used by workflow
 	@echo $(VERSION)
@@ -48,7 +43,7 @@ print-version:
 	@echo RetroArch sub-v$(RA_SUBVERSION)
 
 $(CACHE)/.setup:
-	@echo :: $(TARGET) - setup
+	@$(ECHO) $(PRINT_RECIPE)
 	@mkdir -p $(BUILD_DIR) $(DIST_FULL) $(DIST_CORE) $(RELEASE_DIR)
 	@rsync -a --exclude='.gitkeep' $(STATIC_BUILD)/ $(BUILD_DIR)
 	@rsync -a --exclude='.gitkeep' $(STATIC_DIST)/ $(DIST_FULL)
@@ -66,34 +61,34 @@ $(CACHE)/.setup:
 build: core apps external
 
 core: $(CACHE)/.setup
-	@echo :: $(TARGET) - build core
+	@$(ECHO) $(PRINT_RECIPE)
 # Build Onion binaries
-	@cd $(SRC_DIR)/bootScreen && BUILD_DIR=$(BIN_DIR) DEBUG=$(DEBUG) make
-	@cd $(SRC_DIR)/chargingState && BUILD_DIR=$(BIN_DIR) DEBUG=$(DEBUG) make
-	@cd $(SRC_DIR)/gameSwitcher && BUILD_DIR=$(BIN_DIR) DEBUG=$(DEBUG) make
-	@cd $(SRC_DIR)/lastGame && BUILD_DIR=$(BIN_DIR) DEBUG=$(DEBUG) make
-	@cd $(SRC_DIR)/mainUiBatPerc && BUILD_DIR=$(BIN_DIR) DEBUG=$(DEBUG) make
-	@cd $(SRC_DIR)/keymon && BUILD_DIR=$(BIN_DIR) DEBUG=$(DEBUG) make
-	@cd $(SRC_DIR)/playActivity && BUILD_DIR=$(BIN_DIR) DEBUG=$(DEBUG) make
+	@cd $(SRC_DIR)/bootScreen && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/chargingState && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/gameSwitcher && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/lastGame && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/mainUiBatPerc && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/keymon && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/playActivity && BUILD_DIR=$(BIN_DIR) make
 # Build installer binaries
 	@mkdir -p $(DIST_FULL)/miyoo/app/.tmp_update/bin
-	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(DIST_FULL)/miyoo/app/.tmp_update/bin DEBUG=$(DEBUG) make
-	@cd $(SRC_DIR)/prompt && BUILD_DIR=$(DIST_FULL)/miyoo/app/.tmp_update/bin DEBUG=$(DEBUG) make
+	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(DIST_FULL)/miyoo/app/.tmp_update/bin make
+	@cd $(SRC_DIR)/prompt && BUILD_DIR=$(DIST_FULL)/miyoo/app/.tmp_update/bin make
 
 apps: $(CACHE)/.setup
-	@echo :: $(TARGET) - build apps
-	@cd $(SRC_DIR)/playActivityUI && BUILD_DIR=$(BUILD_DIR)/App/PlayActivity DEBUG=$(DEBUG) make
-	@cd $(SRC_DIR)/packageManager && BUILD_DIR=$(BUILD_DIR)/App/The_Onion_Installer DEBUG=$(DEBUG) make
+	@$(ECHO) $(PRINT_RECIPE)
+	@cd $(SRC_DIR)/playActivityUI && BUILD_DIR=$(BUILD_DIR)/App/PlayActivity make
+	@cd $(SRC_DIR)/packageManager && BUILD_DIR=$(BUILD_DIR)/App/The_Onion_Installer make
 	@cd $(SRC_DIR)/themeSwitcher && BUILD_DIR="$(PACKAGES_APP_DEST)/Theme Switcher/App/ThemeSwitcher" make
 
 external: $(CACHE)/.setup
-	@echo :: $(TARGET) - build external
+	@$(ECHO) $(PRINT_RECIPE)
 	@cd $(THIRD_PARTY_DIR)/RetroArch && make && cp retroarch $(BUILD_DIR)/RetroArch/
 	@echo $(RA_SUBVERSION) > $(BUILD_DIR)/RetroArch/onion_ra_version.txt
 	@cd $(THIRD_PARTY_DIR)/SearchFilter && make build && cp -a build/. "$(PACKAGES_APP_DEST)/Search and Filter/"
 
 dist: build
-	@echo :: $(TARGET) - dist
+	@$(ECHO) $(PRINT_RECIPE)
 # Package RetroArch separately
 	@cd $(BUILD_DIR) && zip -rq retroarch.pak RetroArch
 	@rm -rf $(BUILD_DIR)/RetroArch
@@ -115,16 +110,19 @@ dist: build
 	@cp -R $(DIST_FULL)/miyoo $(DIST_CORE)/miyoo
 
 release: dist
-	@echo :: $(TARGET) - release
+	@$(ECHO) $(PRINT_RECIPE)
 	@rm -f $(RELEASE_DIR)/$(RELEASE_NAME)-full.zip $(RELEASE_DIR)/$(RELEASE_NAME)-core.zip
 	@cd $(DIST_FULL) && zip -rq $(RELEASE_DIR)/$(RELEASE_NAME)-full.zip .
 	@cd $(DIST_CORE) && zip -rq $(RELEASE_DIR)/$(RELEASE_NAME)-core.zip .
 
 clean:
-	@rm -rf $(BUILD_DIR) $(ROOT_DIR)/dist $(ROOT_DIR)/temp
+	@$(ECHO) $(PRINT_RECIPE)
+	@rm -rf $(BUILD_DIR) $(ROOT_DIR)/dist $(ROOT_DIR)/temp/configs
 	@rm -f $(CACHE)/.setup
 	@find include src -type f -name *.o -exec rm -f {} \;
-	@echo :: $(TARGET) - cleaned
+
+dev: clean
+	@$(MAKE_DEV)
 
 git-clean:
 	@git clean -xfd -e .vscode

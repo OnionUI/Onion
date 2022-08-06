@@ -1,14 +1,8 @@
 INCLUDE_CJSON=1
-include ../common/common.mk
+include ../common/config.mk
 
 TARGET := $(BUILD_DIR)/themeSwitcher
 LDFLAGS := $(LDFLAGS) -s -lSDL -lSDL_image -lSDL_ttf
 
-$(TARGET): $(OFILES)
-	$(CC) $(OFILES) -o "$@" $(LDFLAGS)
-
-%.o: %.c
-	$(CC) $(CFLAGS) -c "$<" -o "$@"
-
-clean:
-	rm -f "$(TARGET)" $(OFILES)
+include ../common/commands.mk
+include ../common/recipes.mk

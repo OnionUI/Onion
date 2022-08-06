@@ -5,7 +5,7 @@
 #include <png/png.h>
 
 #include "utils/utils.h"
-#include "system.h"
+#include "utils/process.h"
 #include "display.h"
 
 //
@@ -65,7 +65,7 @@ char* getrecent_png(char *filename) {
     }
 
     if (!(*fnptr)) {
-        if (system_searchpid("gameSwitcher")) strcat(filename, "gameSwitcher");
+        if (process_searchpid("gameSwitcher")) strcat(filename, "gameSwitcher");
         else strcat(filename, "MainUI");
     }
 

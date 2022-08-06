@@ -4,14 +4,15 @@
 #include <time.h>
 #include <errno.h>
 
+static int msleep_interrupt = 0;
+
 /* msleep(): Sleep for the requested number of milliseconds. */
 int msleep(long msec)
 {
     struct timespec ts;
     int res;
 
-    if (msec < 0)
-    {
+    if (msec < 0) {
         errno = EINVAL;
         return -1;
     }
@@ -21,7 +22,9 @@ int msleep(long msec)
 
     do {
         res = nanosleep(&ts, &ts);
-    } while (res && errno == EINTR);
+    } while (res && errno == EINTR && msleep_interrupt == 0);
+
+    msleep_interrupt = 0;
 
     return res;
 }
