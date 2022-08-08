@@ -557,6 +557,10 @@ int main(void) {
             }
         }
 
+        // Quit RetroArch / auto-save when battery too low
+        if (battery_getPercentage() <= 4 && settings.low_battery_autosave && check_autosave())
+            terminate_retroarch();
+
         // Update recent time
         clock_gettime(CLOCK_MONOTONIC_COARSE, &recent);
         elapsed_sec = 0;

@@ -20,7 +20,7 @@ int battery_getPercentage(void)
             file_get(fp, "/tmp/percBat", "%d", &percentage);
             break;
         }
-        else if (!process_searchpid("batmon")) {
+        else if (!process_isRunning("batmon")) {
             printf_debug("/tmp/percBat not found (%d)\n", retry);
             process_start("batmon", NULL, NULL, false);
         }

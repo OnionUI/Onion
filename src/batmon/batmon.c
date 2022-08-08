@@ -10,8 +10,8 @@ int main(int argc, char *argv[])
     atexit(cleanup);
     signal(SIGINT, sigHandler);
     signal(SIGTERM, sigHandler);
-
-    // TODO: implement SUSPEND/RESUME handlers - show/hide warning - reset adc_value on resume
+    signal(SIGSTOP, sigHandler);
+    signal(SIGCONT, sigHandler);
 
     sar_fd = open("/dev/sar", O_WRONLY);
     ioctl(sar_fd, IOCTL_SAR_INIT, NULL);
@@ -26,34 +26,49 @@ int main(int argc, char *argv[])
         current_percentage = batteryPercentage(adc_value);
 
         if (current_percentage != old_percentage) {
-            file_put_sync(fp, "/tmp/percBat", "%d", current_percentage);
-
-            #ifdef PLATFORM_MIYOOMINI
-            if (current_percentage <= warn_at && !config_flag_get(".noBatteryWarning"))
-                batteryWarning_show();
-            else
-                batteryWarning_hide();
-            #endif
-
             old_percentage = current_percentage;
+            file_put_sync(fp, "/tmp/percBat", "%d", current_percentage);
         }
+
+        #ifdef PLATFORM_MIYOOMINI
+        if (is_suspended)
+            batteryWarning_hide();
+        if (current_percentage <= warn_at && !config_flag_get(".noBatteryWarning"))
+            batteryWarning_show();
+        else
+            batteryWarning_hide();
+        #endif
 
         msleep(CHECK_BATTERY_TIMEOUT);
     }
 
-    close(sar_fd);
+    return EXIT_SUCCESS;
 }
 
 static void sigHandler(int sig)
 {
-    quit = true;
-    msleep_interrupt = 1;
+    switch (sig) {
+        case SIGINT:
+        case SIGTERM:
+            quit = true;
+            msleep_interrupt = 1;
+            break;
+        case SIGSTOP:
+            is_suspended = true;
+            break;
+        case SIGCONT:
+            is_suspended = false;
+            adc_value = 0; // reset
+            break;
+        default: break;
+    }
 }
 
 void cleanup(void)
 {
     remove("/tmp/percBat");
     display_free();
+    close(sar_fd);
 }
 
 bool isCharging(void)

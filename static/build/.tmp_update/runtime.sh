@@ -5,7 +5,6 @@ export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$sysdir/lib"
 main() {
     init_system
     update_time
-
     clear_logs
     
     is_charging=`cat /sys/devices/gpiochip0/gpio/gpio59/value`
@@ -165,6 +164,9 @@ init_system() {
     echo 800 > /sys/class/pwm/pwmchip0/pwm0/period
     echo 80 > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
     echo 1 > /sys/class/pwm/pwmchip0/pwm0/enable
+
+    # Start the battery monitor
+    ./bin/batmon
 }
 
 update_time() {

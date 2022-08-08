@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <sys/ioctl.h>
+#include <sys/file.h>
 #include <pthread.h>
 #include <signal.h>
 
@@ -21,8 +22,9 @@
 #include "utils/flags.h"
 #include "utils/config.h"
 #include "utils/file.h"
+#include "utils/log.h"
 
-#define CHECK_BATTERY_TIMEOUT 10000 //ms
+#define CHECK_BATTERY_TIMEOUT 10000 //ms - check battery percentage every 10s
 
 // for reading battery
 #define SARADC_IOC_MAGIC 'a'
@@ -38,6 +40,7 @@ static bool adcthread_active;
 static pthread_t adc_pt;
 static bool quit = false;
 static int sar_fd, adc_value;
+static bool is_suspended = false;
 
 static void sigHandler(int sig);
 void cleanup(void);

@@ -36,7 +36,7 @@ static struct settings_s
     bool launcher;
     bool menu_inverted;
     bool low_battery_warning;
-    bool low_battery_shutdown;
+    bool low_battery_autosave;
 }
 settings = {
     // MainUI settings
@@ -59,7 +59,7 @@ settings = {
     .launcher = true,
     .menu_inverted = false,
     .low_battery_warning = true,
-    .low_battery_shutdown = true
+    .low_battery_autosave = true
 };
 
 void settings_load(void)
@@ -70,7 +70,7 @@ void settings_load(void)
     settings.menu_inverted = config_flag_get(".menuInverted");
     settings.launcher = !config_flag_get(".noGameSwitcher");
     settings.low_battery_warning = !config_flag_get(".noBatteryWarning");
-    settings.low_battery_shutdown = !config_flag_get(".noLowBatteryOff");
+    settings.low_battery_autosave = !config_flag_get(".noLowBatteryAutoSave");
 
 	if (!(json_str = file_read(MAIN_UI_SETTINGS)))
 		return;
@@ -104,7 +104,7 @@ void settings_save(void)
     config_flag_set(".menuInverted", settings.menu_inverted);
     config_flag_set(".noGameSwitcher", !settings.launcher);
     config_flag_set(".noBatteryWarning", !settings.low_battery_warning);
-    config_flag_set(".noLowBatteryOff", !settings.low_battery_shutdown);
+    config_flag_set(".noLowBatteryAutoSave", !settings.low_battery_autosave);
 
     if ((fp = fopen(MAIN_UI_SETTINGS, "w+")) == 0)
         return;
