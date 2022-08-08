@@ -22,10 +22,10 @@ main() {
     touch /tmp/no_charging_ui
 
     cd $sysdir
-    ./bin/keymon 2>&1 >> ./logs/keymon.log &
+    ./bin/bootScreen "Boot"
 
     cd $sysdir
-    ./bin/bootScreen "Boot"
+    ./bin/keymon 2>&1 >> ./logs/keymon.log &
 
     # Init
     rm /tmp/.offOrder

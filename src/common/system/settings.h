@@ -14,26 +14,24 @@ static KeyShmInfo shminfo;
 #include "display.h"
 
 #define MAX_BRIGHTNESS 10
-
 #define MAIN_UI_SETTINGS "/appconfigs/system.json"
-
 
 static struct settings_s
 {
-    uint32_t volume;
-    char keymap[56];
-    uint32_t mute;
-    uint32_t bgm_volume;
-    uint32_t brightness;
-    char language[56];
-    uint32_t sleep_timer;
-    uint32_t lumination;
-    uint32_t hue;
-    uint32_t saturation;
-    uint32_t contrast;
-    char theme[256];
-    uint32_t fontsize;
-    uint32_t audiofix;
+    int volume;
+    char keymap[JSON_STRING_LEN];
+    int mute;
+    int bgm_volume;
+    int brightness;
+    char language[JSON_STRING_LEN];
+    int sleep_timer;
+    int lumination;
+    int hue;
+    int saturation;
+    int contrast;
+    char theme[JSON_STRING_LEN];
+    int fontsize;
+    int audiofix;
     bool vibration;
     bool launcher;
     bool menu_inverted;
@@ -79,17 +77,17 @@ void settings_load(void)
 
 	cJSON* json_root = cJSON_Parse(json_str);
 
-    json_number(json_root, "vol", (int*)&settings.volume);
-    json_number(json_root, "mute", (int*)&settings.mute);
-    json_number(json_root, "bgmvol", (int*)&settings.bgm_volume);
-    json_number(json_root, "brightness",(int*)&settings.brightness);
-    json_number(json_root, "hibernate", (int*)&settings.sleep_timer);
-    json_number(json_root, "lumination", (int*)&settings.lumination);
-    json_number(json_root, "hue", (int*)&settings.hue);
-    json_number(json_root, "saturation", (int*)&settings.saturation);
-    json_number(json_root, "contrast", (int*)&settings.contrast);
-    json_number(json_root, "fontsize", (int*)&settings.fontsize);
-    json_number(json_root, "audiofix", (int*)&settings.audiofix);
+    json_int(json_root, "vol", &settings.volume);
+    json_int(json_root, "mute", &settings.mute);
+    json_int(json_root, "bgmvol", &settings.bgm_volume);
+    json_int(json_root, "brightness",&settings.brightness);
+    json_int(json_root, "hibernate", &settings.sleep_timer);
+    json_int(json_root, "lumination", &settings.lumination);
+    json_int(json_root, "hue", &settings.hue);
+    json_int(json_root, "saturation", &settings.saturation);
+    json_int(json_root, "contrast", &settings.contrast);
+    json_int(json_root, "fontsize", &settings.fontsize);
+    json_int(json_root, "audiofix", &settings.audiofix);
 
     json_string(json_root, "keymap", settings.keymap);
     json_string(json_root, "language", settings.language);
@@ -169,7 +167,9 @@ void settings_setBrightness(uint32_t value, bool apply)
     #ifdef PLATFORM_MIYOOMINI
     SetKeyShm(&shminfo, MONITOR_BRIGHTNESS, value);
     #endif
+    
     settings.brightness = value;
+
     if (apply)
         display_setBrightness(value);
 }

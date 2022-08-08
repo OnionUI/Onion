@@ -8,6 +8,7 @@
 
 #include "system.h"
 #include "utils/file.h"
+#include "utils/log.h"
 
 #define DISPLAY_WIDTH 640
 #define DISPLAY_HEIGHT 480
@@ -67,17 +68,12 @@ void display_toggle(void)
 //
 //    Set Brightness (Raw)
 //
-void display_setBrightnessRaw(uint32_t brightness) {
+void display_setBrightnessRaw(uint32_t value) {
     FILE *fp;
-    if ((fp = fopen(PWM_DIR "pwm0/duty_cycle", "w")) != 0) {
-        fprintf(fp, "%u", brightness);
-        fclose(fp);
-    }
+    file_put_sync(fp, PWM_DIR "pwm0/duty_cycle", "%u", value);
+    printf_debug("Raw brightness: %d\n", value);
 }
 
-//
-//    Set Brightness
-//
 void display_setBrightness(uint32_t value) {
     display_setBrightnessRaw((value == 0) ? 6 : (value * 10));
 }

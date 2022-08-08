@@ -45,6 +45,11 @@ pid_t process_searchpid(const char *commname)
     return ret;
 }
 
+bool process_isRunning(const char *commname)
+{
+    return process_searchpid(commname) != 0;
+}
+
 void process_kill(const char *commname)
 {
     pid_t pid;

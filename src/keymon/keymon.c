@@ -260,7 +260,7 @@ void suspend_exec(int timeout) {
                     screenshot_recent();
                     // display_off();
                     // system_powersave_on();
-                    break;   //  avoid bad screen state after the screen shot
+                    break;
                 }
             }
         }
@@ -274,7 +274,7 @@ void suspend_exec(int timeout) {
     system_powersave_off();
     if (killexit) { resume(); usleep(100000); suspend(2); usleep(400000); }
     display_on();
-    display_setBrightnessRaw(settings.brightness);
+    display_setBrightness(settings.brightness);
     setVolumeRaw(recent_volume, 0);
     if (!killexit) {
         resume();
@@ -315,8 +315,8 @@ int check_autosave(void)
 //
 //    [onion] deepsleep if MainUI/gameSwitcher/retroarch is running
 //
-void deepsleep(void) {
-
+void deepsleep(void)
+{
     pid_t pid;
     if ((pid = process_searchpid("MainUI"))) {
         short_pulse();
@@ -328,12 +328,11 @@ void deepsleep(void) {
         kill(pid, SIGKILL);
     }
     else if ((pid = process_searchpid("retroarch"))) {
-         if (check_autosave()){
+        if (check_autosave()){
             short_pulse();
             system_shutdown();
             terminate_retroarch();
-
-         }
+        }
     }
 }
 
@@ -346,6 +345,7 @@ int main(void) {
     signal(SIGSEGV, quit);
 
     settings_init();
+    printf_debug("Settings loaded. Brightness set to: %d\n", settings.brightness);
 
     // Set Initial Volume / Brightness
     setVolumeRaw(0,0);
@@ -386,11 +386,9 @@ int main(void) {
             read(input_fd, &ev, sizeof(ev));
             val = ev.value;
 
-            if (( ev.type != EV_KEY ) || ( val > REPEAT )) continue;
+            if (ev.type != EV_KEY || val > REPEAT) continue;
 
-            printf_debug("Key input: %hu (value: %d)\n", ev.code, val);
-
-            if (val!=REPEAT) {
+            if (val != REPEAT) {
                 if (ev.code == HW_BTN_MENU)
                     b_BTN_Menu_Pressed = val;
                 else
@@ -401,10 +399,12 @@ int main(void) {
 
                 if (b_BTN_Menu_Pressed == 1 && ev.code == HW_BTN_POWER){
                     // screenshot
+                    screenshot_recent();
+                    continue;
                 }
 
                 if (ev.code == HW_BTN_MENU && val == 0) {
-                    if (comboKey == 0 && check_autosave()) {
+                    if (comboKey == 0 && process_isRunning("retroarch") && check_autosave()) {
                         if (settings.launcher && !settings.menu_inverted) {
                             temp_flag_set(".trimUIMenu", true);
                             screenshot_system();
@@ -425,12 +425,10 @@ int main(void) {
                         repeat_power++;
                         if (repeat_power == 7)
                             deepsleep(); // 0.5sec deepsleep
-
                         else if (repeat_power == REPEAT_SEC(5)) {
                             short_pulse();
                             remove("/mnt/SDCARD/.tmp_update/cmd_to_run.sh");
                             suspend(2); // 5sec kill processes
-
                         }
                         else if (repeat_power >= REPEAT_SEC(10)) {
                             short_pulse();
@@ -513,16 +511,16 @@ int main(void) {
                         repeat_menu++;
                         if (repeat_menu == REPEAT_SEC(1) && !button_flag) {    // long press on menu
                             if (!settings.menu_inverted) {
-                                if (check_autosave()) {
-                                    remove("/tmp/.trimUIMenu");
+                                if (process_isRunning("retroarch")) {
+                                    temp_flag_set(".trimUIMenu", false);
                                     short_pulse();
                                     terminate_retroarch();
                                 }
                             }
                             else if (settings.launcher) {
-                                if (check_autosave()) {
+                                if (process_isRunning("retroarch")) {
                                     short_pulse();
-                                    close(creat("/tmp/.trimUIMenu", 777));
+                                    temp_flag_set(".trimUIMenu", true);
                                     screenshot_system();
                                     terminate_retroarch();
                                 }

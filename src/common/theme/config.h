@@ -74,7 +74,7 @@ void json_fontStyle(cJSON* root, FontStyle_s* dest, FontStyle_s* fallback)
 {
     if (!json_string(root, "font", dest->font) && fallback)
         strcpy(dest->font, fallback->font);
-    if (!json_number(root, "size", &dest->size) && fallback)
+    if (!json_int(root, "size", &dest->size) && fallback)
         dest->size = fallback->size;
     if (!json_color(root, "color", &dest->color) && fallback)
         dest->color = fallback->color;
@@ -196,20 +196,20 @@ Theme_s loadThemeFromPath(const char* theme_path)
     json_fontStyle(json_list, &theme.list, &theme.title);
 
     json_string(json_grid, "font", theme.grid.font);
-    json_number(json_grid, "grid1x4", &theme.grid.grid1x4);
-    json_number(json_grid, "grid3x4", &theme.grid.grid3x4);
+    json_int(json_grid, "grid1x4", &theme.grid.grid1x4);
+    json_int(json_grid, "grid3x4", &theme.grid.grid3x4);
     json_color(json_grid, "color", &theme.grid.color);
     json_color(json_grid, "selectedcolor", &theme.grid.selectedcolor);
 
     json_bool(json_batteryPercentage, "visible", &theme.batteryPercentage.visible);
     if (!json_string(json_batteryPercentage, "font", theme.batteryPercentage.font))
         strcpy(theme.batteryPercentage.font, theme.hint.font);
-    if (!json_number(json_batteryPercentage, "size", &theme.batteryPercentage.size))
+    if (!json_int(json_batteryPercentage, "size", &theme.batteryPercentage.size))
         theme.batteryPercentage.size = theme.hint.size;
     if (!json_color(json_batteryPercentage, "color", &theme.batteryPercentage.color))
         theme.batteryPercentage.color = theme.hint.color;
-    json_number(json_batteryPercentage, "offsetX", &theme.batteryPercentage.offsetX);
-    json_number(json_batteryPercentage, "offsetY", &theme.batteryPercentage.offsetY);
+    json_int(json_batteryPercentage, "offsetX", &theme.batteryPercentage.offsetX);
+    json_int(json_batteryPercentage, "offsetY", &theme.batteryPercentage.offsetY);
     json_bool(json_batteryPercentage, "onleft", &theme.batteryPercentage.onleft);
 
 	cJSON_free(json_root);
