@@ -50,7 +50,7 @@ You can check your current version in `Settings` ➜ `Device Info` ➜ `Version`
 
 - Format your SD card as FAT32. (You will need to use a third party application to do this on Windows).
 - Unzip the `.tmp_update` folder and its contents to the root of your SD. Nothing else should be on the SD card.
-- If on Mac: This OS will add .-* files everywhere in your SD, you need to remove them before continuing.
+- If on Mac: This OS will add .\_* files everywhere in your SD, you need to remove them before continuing. You can go to your SD root in the **Terminal** and input `find . -name "._*" -depth -exec rm {} \;` to delete all the .\_* files 
 - Boot up your Miyoo Mini and follow the on-screen instructions to get started.
 - When installation is complete, press <kbd>A</kbd> and wait for the device to turn off.
 - Keep the .tmp_update folder, it is now part of the Onion installation.
