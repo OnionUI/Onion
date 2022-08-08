@@ -6,10 +6,7 @@ main() {
     init_system
     update_time
 
-    # Clear logs
-    rm -rf $sysdir/logs
-    rm -f /mnt/SDCARD/update.log
-    mkdir -p $sysdir/logs
+    clear_logs
     
     is_charging=`cat /sys/devices/gpiochip0/gpio/gpio59/value`
 
@@ -25,7 +22,7 @@ main() {
     ./bin/bootScreen "Boot"
 
     cd $sysdir
-    ./bin/keymon 2>&1 >> ./logs/keymon.log &
+    ./bin/keymon 2>&1 > ./logs/keymon.log &
 
     # Init
     rm /tmp/.offOrder
@@ -47,6 +44,15 @@ main() {
         # Free memory
         $sysdir/bin/freemma
     done
+}
+
+clear_logs() {
+    mkdir -p $sysdir/logs
+    
+    cd $sysdir
+    rm -f \
+        ./logs/mainUiBatPerc.log \
+        ./logs/gameSwitcher.log
 }
 
 check_main_ui() {
