@@ -114,11 +114,6 @@ SDL_Surface* theme_textboxSurface(Theme_s* theme, Resources_s* res, char *messag
     return textbox;
 }
 
-void theme_renderBackground(Theme_s* theme, Resources_s* res, SDL_Surface* screen)
-{
-	SDL_BlitSurface(res->surfaces.background, NULL, screen, NULL);
-}
-
 void theme_renderHeader(Theme_s* theme, Resources_s* res, SDL_Surface* screen, SDL_Surface* battery, const char *title_str, bool show_logo)
 {
 	Theme_Surfaces_s* s = &res->surfaces;

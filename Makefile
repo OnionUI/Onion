@@ -93,7 +93,7 @@ dist: build
 	@$(ECHO) $(PRINT_RECIPE)
 # Package RetroArch separately
 	@cd $(BUILD_DIR) && zip -rq retroarch.pak RetroArch
-	@rm -rf $(BUILD_DIR)/RetroArch
+	@mv -f $(BUILD_DIR)/RetroArch $(ROOT_DIR)/cache/RetroArch
 	@mkdir -p $(DIST_FULL)/RetroArch
 	@mv $(BUILD_DIR)/retroarch.pak $(DIST_FULL)/RetroArch/
 	@echo $(RA_SUBVERSION) > $(DIST_FULL)/RetroArch/ra_package_version.txt
@@ -107,6 +107,8 @@ dist: build
 # Create core-only dist
 	@cp -R $(DIST_FULL)/.tmp_update $(DIST_CORE)/.tmp_update
 	@cp -R $(DIST_FULL)/miyoo $(DIST_CORE)/miyoo
+# Restore RetroArch in build dir
+	@mv -f $(ROOT_DIR)/cache/RetroArch $(BUILD_DIR)/RetroArch
 
 release: dist
 	@$(ECHO) $(PRINT_RECIPE)

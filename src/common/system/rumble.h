@@ -26,7 +26,7 @@ void rumble(bool enabled)
  * 
  */
 void short_pulse(void) {
-    if (settings.vibration) return;
+    if (!settings.vibration) return;
     rumbleOn();
     usleep(100000); // 0.1s
     rumbleOff();
@@ -37,7 +37,7 @@ void short_pulse(void) {
  * 
  */
 void super_short_pulse(void) {
-    if (settings.vibration) return;
+    if (!settings.vibration) return;
     rumbleOn();
     usleep(40000); // 0.05s
     rumbleOff();

@@ -6,11 +6,9 @@
 #include <SDL/SDL_ttf.h>
 
 #include "config.h"
-#include "utils/rotate180.h"
 
 enum theme_Images
 {
-    TR_BACKGROUND,
     TR_BG_TITLE,
     TR_LOGO,
     TR_BATTERY_0,
@@ -30,7 +28,6 @@ enum theme_Images
 
 typedef struct Theme_Surfaces
 {
-    SDL_Surface* background;
     SDL_Surface* bg_title;
     SDL_Surface* logo;
     SDL_Surface* battery_0;
@@ -82,7 +79,6 @@ Resources_s theme_loadResources(Theme_s* t, enum theme_Images requests[], int nu
 
     for (i = 0; i < num_requests; i++) {
         switch (requests[i]) {
-            case TR_BACKGROUND: s->background = rotate180(theme_loadImage(t, "background")); break;
             case TR_BG_TITLE: s->bg_title = theme_loadImage(t, "bg-title"); break;
             case TR_LOGO: s->logo = theme_loadImage(t, "miyoo-topbar"); break;
             case TR_BATTERY_0: s->battery_0 = theme_loadImage(t, "power-0%-icon"); break;
@@ -113,7 +109,6 @@ void theme_freeResources(Resources_s* res)
     Theme_Surfaces_s* s = &res->surfaces;
     Theme_Fonts_s* f = &res->fonts;
 
-    SDL_FreeSurface(s->background);
     SDL_FreeSurface(s->bg_title);
     SDL_FreeSurface(s->logo);
     SDL_FreeSurface(s->battery_0);

@@ -17,6 +17,7 @@
 #include "system/keymap_hw.h"
 #include "system/keymap_sw.h"
 #include "theme/theme.h"
+#include "theme/background.h"
 #include "components/menu.h"
 
 #define FRAMES_PER_SECOND 30
@@ -24,7 +25,6 @@
 #define SHUTDOWN_TIMEOUT 500
 
 #define RESOURCES { \
-	TR_BACKGROUND, \
 	TR_BG_TITLE, \
 	TR_LOGO, \
 	TR_BATTERY_0, \
@@ -41,7 +41,7 @@
 	TR_BUTTON_A, \
 	TR_BUTTON_B \
 }
-#define NUM_RESOURCES 16
+#define NUM_RESOURCES 15
 
 int main(int argc, char *argv[])
 {
@@ -97,10 +97,12 @@ int main(int argc, char *argv[])
 
 	print_debug("Loading theme config...");
 	Theme_s theme = loadThemeFromPath(settings.theme);
-	// Theme_s theme = loadThemeFromPath("/mnt/SDCARD/Themes/Blueprint by Aemiii91");
-	// Theme_s theme = loadThemeFromPath("/mnt/SDCARD/Themes/Analogue by Aemiii91");
-	// Theme_s theme = loadThemeFromPath("/customer/app");
 	printf_debug(LOG_SUCCESS, "loaded theme config");
+
+	theme_backgroundLoad(&theme);
+	SDL_BlitSurface(theme_background, NULL, screen, NULL);
+	SDL_BlitSurface(screen, NULL, video, NULL); 
+	SDL_Flip(video);
 
 	enum theme_Images res_requests[NUM_RESOURCES] = RESOURCES;
 	Resources_s res = theme_loadResources(&theme, res_requests, NUM_RESOURCES);
@@ -224,7 +226,7 @@ int main(int argc, char *argv[])
 
 		if (acc_ticks >= time_step) {
 			if (changed) {
-				theme_renderBackground(&theme, &res, screen);
+				SDL_BlitSurface(theme_background, NULL, screen, NULL);
 				theme_renderHeader(&theme, &res, screen, battery, has_title ? title_str : NULL, !has_title);
 
 				if (has_message)
@@ -248,16 +250,16 @@ int main(int argc, char *argv[])
 	SDL_FillRect(video, NULL, 0);
 	SDL_Flip(video);
 	
+	free(pargs);
+	menu_free(&menu);
+	theme_freeResources(&res);
 	if (has_message)
 		SDL_FreeSurface(message);
+	theme_backgroundFree();
 	SDL_FreeSurface(battery);
    	SDL_FreeSurface(screen);
    	SDL_FreeSurface(video);
     SDL_Quit();
-
-	free(pargs);
-	menu_free(&menu);
-	theme_freeResources(&res);
 	
     return return_code;
 }
