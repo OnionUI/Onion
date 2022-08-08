@@ -5,7 +5,7 @@
 #include "utils/process.h"
 
 /**
- * @brief Retrieve the current battery percentage as reported by percBat
+ * @brief Retrieve the current battery percentage as reported by batmon
  * 
  * @return int : Battery percentage (0-100) or 500 if charging
  */
@@ -20,12 +20,12 @@ int battery_getPercentage(void)
             file_get(fp, "/tmp/percBat", "%d", &percentage);
             break;
         }
-        else if (!process_searchpid("percBat")) {
-            printf_debug("percBat not found (%d)\n", retry);
-            process_start("percBat", NULL, NULL, false);
+        else if (!process_searchpid("batmon")) {
+            printf_debug("/tmp/percBat not found (%d)\n", retry);
+            process_start("batmon", NULL, NULL, false);
         }
         else {
-            printf_debug("bin/percBat not found (%d)\n", retry);
+            printf_debug("bin/batmon not found (%d)\n", retry);
         }
 
         retry--;
@@ -33,7 +33,7 @@ int battery_getPercentage(void)
     }
 
     if (percentage == -1)
-        percentage = 500;
+        percentage = 0;
 
     return percentage;
 }

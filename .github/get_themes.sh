@@ -15,6 +15,8 @@ shopt -s extdebug
 f "${themes[@]}"
 shopt -u extdebug
 
+mkdir -p ../dist/full/Themes
+
 for element in "${themes[@]}"
 do
     zipfile="$element.zip"
@@ -25,5 +27,5 @@ do
         wget -O "$zipfile" "https://github.com/OnionUI/Themes/blob/main/release/$element.zip?raw=true" -q --show-progress
     fi
     echo "-- extracting theme: $element"
-    unzip -oq "$zipfile" -d ../build/Themes
+    unzip -oq "$zipfile" -d ../dist/full/Themes
 done

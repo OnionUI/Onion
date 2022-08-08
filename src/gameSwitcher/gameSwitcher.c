@@ -6,16 +6,17 @@
 #include <linux/fb.h>
 #include <linux/input.h>
 #include <fcntl.h>
-#include <stdbool.h>   
+#include <stdbool.h>
+#include <libgen.h>
 #include <sys/stat.h>   
-#include "sys/ioctl.h"
+#include <sys/ioctl.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
 
 // #include "SDL/SDL_rotozoom.h"
 #include "cjson/cJSON.h"
-#include <png/png.h>
+#include "png/png.h"
 
 #include "utils/utils.h"
 #include "system/keymap_hw.h"
@@ -34,9 +35,8 @@
 // Max number of records in the DB
 #define MAXVALUES 1000
 
-#define	GPIO_DIR1	"/sys/class/gpio/"
-#define	GPIO_DIR2	"/sys/devices/gpiochip0/gpio/"
-#define concat(ptr,str1,str2)	{ strcpy(ptr, str1); strcat(ptr, str2); }
+#define	GPIO_DIR1 "/sys/class/gpio/"
+#define	GPIO_DIR2 "/sys/devices/gpiochip0/gpio/"
 
 char sTotalTimePlayed[50];
 
@@ -511,7 +511,7 @@ int main(void) {
     		sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",file_removeExtension(game_list[current_game].name),".png");
     		
  
-    		if (file_exists(currPicture)==1){
+    		if (file_exists(currPicture)){
 				imageBackgroundGame = IMG_Load(currPicture);
 			}
 			

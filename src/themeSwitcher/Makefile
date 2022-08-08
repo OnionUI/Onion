@@ -1,7 +1,7 @@
 INCLUDE_CJSON=1
 include ../common/config.mk
 
-TARGET := $(BUILD_DIR)/themeSwitcher
+TARGET = themeSwitcher
 LDFLAGS := $(LDFLAGS) -s -lSDL -lSDL_image -lSDL_ttf
 
 include ../common/commands.mk

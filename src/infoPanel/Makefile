@@ -1,6 +1,6 @@
 include ../common/config.mk
 
-TARGET := $(BUILD_DIR)/infoPanel
+TARGET = infoPanel
 LDFLAGS := $(LDFLAGS) -lSDL -lSDL_ttf -lSDL_image
 
 include ../common/commands.mk

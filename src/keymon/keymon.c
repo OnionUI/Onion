@@ -8,11 +8,12 @@
 #include <sys/mman.h>
 #include <sys/reboot.h>
 #include <sys/stat.h>
-#include <linux/fb.h> 
+#include <linux/fb.h>
 #include <linux/input.h>
 #include <linux/rtc.h>
 
 #include "utils/utils.h"
+#include "utils/log.h"
 #include "utils/process.h"
 #include "utils/flags.h"
 #include "utils/config.h"
@@ -63,8 +64,9 @@ pthread_mutex_t     clock_mx;
 //
 //    Set Volume (Raw)
 //
-#define MI_AO_SETVOLUME    0x4008690b
-#define MI_AO_GETVOLUME    0xc008690c
+#define MI_AO_SETVOLUME 0x4008690b
+#define MI_AO_GETVOLUME 0xc008690c
+
 int setVolumeRaw(int volume, int add) {
     int recent_volume = 0;
     int fd = open("/dev/mi_ao", O_RDWR);
@@ -181,11 +183,9 @@ int suspend(uint32_t mode) {
 void resume(void) {
     // Send SIGCONT to suspended processes
     if (suspendpid[0]) {
-        for (uint32_t i=1; i <= suspendpid[0]; i++) {
+        for (uint32_t i=1; i <= suspendpid[0]; i++)
             kill(suspendpid[i], SIGCONT);
-        }
         suspendpid[0] = 0;
-        // super_short_pulse();
     }
 }
 
@@ -193,7 +193,7 @@ void resume(void) {
 //    Quit
 //
 void quit(int exitcode) {
-    process_kill("percBat");
+    process_kill("batmon");
     display_free();
     if (input_fd > 0) close(input_fd);
     system_clock_get();
@@ -288,41 +288,19 @@ void suspend_exec(int timeout) {
 //
 //    [onion] Check retroarch running & savestate_auto_save in retroarch.cfg is true
 //
-int check_autosave(void) {
-    int    f, ret = 0;
-    pid_t    ra_pid;
-    char    key[256] = {0};
-    char    value[256] = {0};
-    char    *keyptr, *valptr, *strptr;
-    char    cfgpath[64];
-    const char cfg_ext[] = ".cfg";
+int check_autosave(void)
+{
+    int f, ret = 0;
+    char key[256] = {0};
+    char value[256] = {0};
 
-    char ra_name[12] = "retroarch";
-    if ( (ra_pid = process_searchpid(ra_name)) ) {
-        strptr = cfgpath + sprintf(cfgpath, "/proc/%d/cwd/", ra_pid);
-        // standard retroarch ( ./.retroarch/retroarch.cfg )
-        sprintf(strptr, ".retroarch/%s%s", ra_name, cfg_ext);
-        if (access(cfgpath, R_OK)) {
-            // stock retroarch ( ./retroarch.cfg )
-            sprintf(strptr, "%s%s", ra_name, cfg_ext);
-            if (access(cfgpath, R_OK)) return 0;
-        }
-    } else {
-        strcpy(ra_name, "ra32");
-        if ( (ra_pid = process_searchpid(ra_name)) ) {
-            // stock ra32.ss ( ./ra32.cfg )
-            sprintf(cfgpath, "/proc/%d/cwd/%s%s", ra_pid, ra_name, cfg_ext);
-            if (access(cfgpath, R_OK)) return 0;
-        } else return 0;
-    }
-
-    FILE* fp = fopen(cfgpath, "r");
+    FILE* fp = fopen("/mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg", "r");
     if (!fp) return 0;
     while ((f = fscanf(fp, "%255[^=]=%255[^\n]\n", key, value)) != EOF) {
         if (!f) { if (fscanf(fp, "%*[^\n]\n") == EOF) break; else continue; }
-        if ((keyptr = str_trim(key, 0))) {
-            if (!strcmp(keyptr, "savestate_auto_save")) {
-                if (valptr = str_trim(value, 1) && !strcmp(valptr, "\"true\""))
+        if (str_trim(key, 256, key, true)) {
+            if (!strcmp(key, "savestate_auto_save")) {
+                if (str_trim(value, 256, value, true) && !strcmp(value, "\"true\""))
                     ret = 1;
                 break;
             }
@@ -342,8 +320,7 @@ void deepsleep(void) {
     pid_t pid;
     if ((pid = process_searchpid("MainUI"))) {
         short_pulse();
-        system_shutdown(); kill(pid, SIGKILL); 
-        
+        system_shutdown(); kill(pid, SIGKILL);
     }
     else if ((pid = process_searchpid("gameSwitcher"))) {
         short_pulse();
@@ -353,9 +330,9 @@ void deepsleep(void) {
     else if ((pid = process_searchpid("retroarch"))) {
          if (check_autosave()){
             short_pulse();
-            system_shutdown(); 
-            terminate_retroarch(); 
-            
+            system_shutdown();
+            terminate_retroarch();
+
          }
     }
 }
@@ -391,7 +368,7 @@ int main(void) {
     uint32_t b_BTN_Not_Menu_Pressed = 0;
     uint32_t b_BTN_Menu_Pressed = 0;
     uint32_t comboKey = 0;
-    
+
     struct timespec recent;
     clock_gettime(CLOCK_MONOTONIC_COARSE, &recent);
     struct timespec hibernate_start = recent;
@@ -400,37 +377,32 @@ int main(void) {
 
     // Update recent time
     clock_gettime(CLOCK_MONOTONIC_COARSE, &recent);
-    
+
     while(1) {
         if (poll(fds, 1, (CHECK_SEC - elapsed_sec) * 1000) > 0) {
 
             settings_load();
-            
+
             read(input_fd, &ev, sizeof(ev));
             val = ev.value;
-            
+
             if (( ev.type != EV_KEY ) || ( val > REPEAT )) continue;
-            
-            if (val!=REPEAT){
 
-                if (ev.code == HW_BTN_MENU){
+            printf_debug("Key input: %hu (value: %d)\n", ev.code, val);
+
+            if (val!=REPEAT) {
+                if (ev.code == HW_BTN_MENU)
                     b_BTN_Menu_Pressed = val;
+                else
+                    b_BTN_Not_Menu_Pressed = val;
+
+                if (b_BTN_Menu_Pressed == 1 && b_BTN_Not_Menu_Pressed == 1)
+                    comboKey = 1;
+
+                if (b_BTN_Menu_Pressed == 1 && ev.code == HW_BTN_POWER){
+                    // screenshot
                 }
 
-                else {
-                    b_BTN_Not_Menu_Pressed = val;
-                }
-                    
-    
-                if ((b_BTN_Menu_Pressed == 1)&&(b_BTN_Not_Menu_Pressed == 1)){
-                    comboKey = 1;
-                }
-                
-                if ((b_BTN_Menu_Pressed == 1)&&(ev.code == HW_BTN_POWER)){
-                    // screenshot
-                    
-                }
-                
                 if (ev.code == HW_BTN_MENU && val == 0) {
                     if (comboKey == 0 && check_autosave()) {
                         if (settings.launcher && !settings.menu_inverted) {
@@ -443,133 +415,132 @@ int main(void) {
                             terminate_retroarch();
                         }
                     }
-                    comboKey = 0;                    
-                }    
-                
+                    comboKey = 0;
+                }
             }
-            
+
             switch (ev.code) {
-            case HW_BTN_POWER:
-                if ( val == REPEAT ) {
-                    repeat_power++;
-                    if (repeat_power == 7)
-                        deepsleep(); // 0.5sec deepsleep
-                     
-                    else if (repeat_power == REPEAT_SEC(5)) {
-                        short_pulse();
-                        remove("/mnt/SDCARD/.tmp_update/cmd_to_run.sh");
-                        suspend(2); // 5sec kill processes
-                        
+                case HW_BTN_POWER:
+                    if ( val == REPEAT ) {
+                        repeat_power++;
+                        if (repeat_power == 7)
+                            deepsleep(); // 0.5sec deepsleep
+
+                        else if (repeat_power == REPEAT_SEC(5)) {
+                            short_pulse();
+                            remove("/mnt/SDCARD/.tmp_update/cmd_to_run.sh");
+                            suspend(2); // 5sec kill processes
+
+                        }
+                        else if (repeat_power >= REPEAT_SEC(10)) {
+                            short_pulse();
+                            shutdown(); // 10sec force shutdown
+                        }
+                        break;
                     }
-                    else if (repeat_power >= REPEAT_SEC(10)) {
-                        short_pulse();
-                        shutdown(); // 10sec force shutdown
+                    if (val == RELEASED && repeat_power < 7 && !file_exists("/tmp/stay_awake")) {
+                        // suspend
+                        suspend_exec(settings.sleep_timer == 0 ? -1 : (settings.sleep_timer + SHUTDOWN_MIN) * 60000);
+                    }
+                    repeat_power = 0;
+                    break;
+                case HW_BTN_SELECT:
+                    if (val != REPEAT)
+                        button_flag = (button_flag & (~SELECT)) | (val<<SELECT_BIT);
+                    break;
+                case HW_BTN_START:
+                    if (val != REPEAT)
+                        button_flag = (button_flag & (~START)) | (val<<START_BIT);
+                    break;
+                case HW_BTN_L2:
+                    if (val == REPEAT) {
+                        // Adjust repeat speed to 1/2
+                        val = repeat_LR;
+                        repeat_LR ^= PRESSED;
+                    }
+                    else {
+                        button_flag = (button_flag & (~L2)) | (val<<L2_BIT);
+                        repeat_LR = 0;
+                    }
+                    if (val == PRESSED) {
+                        switch (button_flag & (SELECT|START)) {
+                            case START:
+                                // SELECT + L2 : volume down / + R2 : reset
+                                setVolumeRaw(0, (button_flag & R2) ? 0 : -3);
+                                break;
+                            case SELECT:
+                                // START + L2 : brightness down
+                                settings_load();
+                                if (settings.brightness > 0) {
+                                    settings_setBrightness(settings.brightness - 1, true);
+                                    settings_save();
+                                }
+                                break;
+                            default: break;
+                        }
                     }
                     break;
-                }
-                if (val == RELEASED && repeat_power < 7 && !file_exists("/tmp/stay_awake")) {
-                    // suspend
-                    suspend_exec(settings.sleep_timer == 0 ? -1 : (settings.sleep_timer + SHUTDOWN_MIN) * 60000);
-                }
-                repeat_power = 0;
-                break;
-            case HW_BTN_SELECT:
-                if (val != REPEAT)
-                    button_flag = (button_flag & (~SELECT)) | (val<<SELECT_BIT);
-                break;
-            case HW_BTN_START:
-                if (val != REPEAT)
-                    button_flag = (button_flag & (~START)) | (val<<START_BIT);
-                break;
-            case HW_BTN_L2:
-                if (val == REPEAT) {
-                    // Adjust repeat speed to 1/2
-                    val = repeat_LR;
-                    repeat_LR ^= PRESSED;
-                }
-                else {
-                    button_flag = (button_flag & (~L2)) | (val<<L2_BIT);
-                    repeat_LR = 0;
-                }
-                if (val == PRESSED) {
-                    switch (button_flag & (SELECT|START)) {
+                case HW_BTN_R2:
+                    if ( val == REPEAT ) {
+                        // Adjust repeat speed to 1/2
+                        val = repeat_LR;
+                        repeat_LR ^= PRESSED;
+                    } else {
+                        button_flag = (button_flag & (~R2)) | (val<<R2_BIT);
+                        repeat_LR = 0;
+                    }
+                    if ( val == PRESSED ) {
+                        switch (button_flag & (SELECT|START)) {
                         case START:
-                            // SELECT + L2 : volume down / + R2 : reset
-                            setVolumeRaw(0, (button_flag & R2) ? 0 : -3);
+                            // SELECT + R2 : volume up / + L2 : reset
+                            setVolumeRaw(0, (button_flag & L2) ? 0 : +3);
                             break;
                         case SELECT:
-                            // START + L2 : brightness down
+                            // START + R2 : brightness up
                             settings_load();
-                            if (settings.brightness > 0) {
-                                settings_setBrightness(settings.brightness - 1, true);
+                            if (settings.brightness < MAX_BRIGHTNESS) {
+                                settings_setBrightness(settings.brightness + 1, true);
                                 settings_save();
                             }
                             break;
-                        default: break;
-                    }
-                }
-                break;
-            case HW_BTN_R2:
-                if ( val == REPEAT ) {
-                    // Adjust repeat speed to 1/2
-                    val = repeat_LR;
-                    repeat_LR ^= PRESSED;
-                } else {
-                    button_flag = (button_flag & (~R2)) | (val<<R2_BIT);
-                    repeat_LR = 0;
-                }
-                if ( val == PRESSED ) {
-                    switch (button_flag & (SELECT|START)) {
-                    case START:
-                        // SELECT + R2 : volume up / + L2 : reset
-                        setVolumeRaw(0, (button_flag & L2) ? 0 : +3);
-                        break;
-                    case SELECT:
-                        // START + R2 : brightness up
-                        settings_load();
-                        if (settings.brightness < MAX_BRIGHTNESS) {
-                            settings_setBrightness(settings.brightness + 1, true);
-                            settings_save();
+                        default:
+                            break;
                         }
-                        break;
-                    default:
-                        break;
                     }
-                } 
-                break;
-            case HW_BTN_MENU:
-                if (val == REPEAT) {
-                    repeat_menu++;
-                    if (repeat_menu == REPEAT_SEC(1) && !button_flag) {    // long press on menu
-                        if (!settings.menu_inverted) {
-                            if (check_autosave()) {
-                                remove("/tmp/.trimUIMenu");
-                                short_pulse();
-                                terminate_retroarch();
+                    break;
+                case HW_BTN_MENU:
+                    if (val == REPEAT) {
+                        repeat_menu++;
+                        if (repeat_menu == REPEAT_SEC(1) && !button_flag) {    // long press on menu
+                            if (!settings.menu_inverted) {
+                                if (check_autosave()) {
+                                    remove("/tmp/.trimUIMenu");
+                                    short_pulse();
+                                    terminate_retroarch();
+                                }
                             }
-                        }
-                        else if (settings.launcher) {
-                            if (check_autosave()) {
-                                short_pulse();
-                                close(creat("/tmp/.trimUIMenu", 777));
-                                screenshot_system();
-                                terminate_retroarch();    
+                            else if (settings.launcher) {
+                                if (check_autosave()) {
+                                    short_pulse();
+                                    close(creat("/tmp/.trimUIMenu", 777));
+                                    screenshot_system();
+                                    terminate_retroarch();
+                                }
                             }
+                            else {
+                                comboKey = 1;
+                            }
+                            repeat_menu = 0;
                         }
-                        else {
-                            comboKey = 1;  
-                        }
-                        repeat_menu = 0;
                     }
-                }
-                break;
-            default:
-                break;
+                    break;
+                default:
+                    break;
             }
-            
+
             clock_gettime(CLOCK_MONOTONIC_COARSE, &hibernate_start);
             elapsed_sec = hibernate_start.tv_sec - recent.tv_sec;
-            if ( elapsed_sec < CHECK_SEC ) continue;
+            if (elapsed_sec < CHECK_SEC) continue;
         }
 
         // Comes here every CHECK_SEC(def:15) seconds interval

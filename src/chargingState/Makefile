@@ -1,6 +1,6 @@
 include ../common/config.mk
 
-TARGET := $(BUILD_DIR)/chargingState
+TARGET = chargingState
 LDFLAGS := $(LDFLAGS) -s -lSDL -lSDL_image
 
 include ../common/commands.mk

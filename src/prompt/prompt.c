@@ -5,6 +5,7 @@
 #include <stdbool.h>  
 #include <sys/stat.h>
 #include <dirent.h>
+#include <linux/input.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
@@ -12,12 +13,15 @@
 #include "utils/log.h"
 #include "utils/battery.h"
 #include "system/settings.h"
+#include "system/display.h"
+#include "system/keymap_hw.h"
 #include "system/keymap_sw.h"
 #include "theme/theme.h"
 #include "components/menu.h"
 
 #define FRAMES_PER_SECOND 30
 #define CHECK_BATTERY_TIMEOUT 30000 //ms
+#define SHUTDOWN_TIMEOUT 500
 
 #define RESOURCES { \
 	TR_BACKGROUND, \
@@ -87,9 +91,9 @@ int main(int argc, char *argv[])
 	SDL_Surface* video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
 	SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
 
-	// print_debug("Loading settings...");
-	// settings_init();
-	// printf_debug(LOG_SUCCESS, "loaded settings");
+	print_debug("Loading settings...");
+	settings_load();
+	printf_debug(LOG_SUCCESS, "loaded settings");
 
 	print_debug("Loading theme config...");
 	Theme_s theme = loadThemeFromPath(settings.theme);
@@ -129,21 +133,44 @@ int main(int argc, char *argv[])
 
 	bool quit = false;
 	bool changed = true;
+	bool first_draw = true;
+
 	SDL_Event event;
-	Uint8 keystate[320];
+	Uint8 keystate[320] = {0};
+	int	input_fd;
+	input_fd = open("/dev/input/event0", O_RDONLY);
+	struct input_event ev;
+	
 	int return_code = -1;
 
 	uint32_t batt_timer = 0,
+			 shutdown_timer = 0,
 			 acc_ticks = 0,
 			 last_ticks = SDL_GetTicks(),
 			 time_step = 1000 / FRAMES_PER_SECOND;
 
 	while (!quit) {
-		while (SDL_PollEvent(&event)) {
-			if (event.type == SDL_QUIT) {
-				quit = true;
-				break;
+		uint32_t ticks = SDL_GetTicks(),
+				 delta = ticks - last_ticks;
+		batt_timer += delta;
+		acc_ticks += delta;
+		last_ticks = ticks;
+
+		if (!first_draw) {
+			read(input_fd, &ev, sizeof(ev));
+			int val = ev.value;
+
+			if (ev.type == EV_KEY && val <= 2 && ev.code == HW_BTN_POWER) {
+				if (val == 2 && (ticks - shutdown_timer) > SHUTDOWN_TIMEOUT)
+					quit = true;
+				else if (val == 1)
+					shutdown_timer = ticks;
 			}
+		}
+
+		while (SDL_PollEvent(&event)) {
+			if (event.type == SDL_QUIT)
+				quit = true;
 
 			SDLKey key = event.key.keysym.sym;
 			bool repeating = false;
@@ -169,13 +196,10 @@ int main(int argc, char *argv[])
 					case SW_BTN_A:
 						return_code = menu_applyAction(&menu);
 						quit = true;
+						break;
 					case SW_BTN_B:
 						if (!required)
 							quit = true;
-						break;
-					case SW_BTN_POWER:
-					// case SDLK_FIRST:
-						quit = true;
 						break;
 					default: break;
 				}
@@ -183,11 +207,8 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		uint32_t ticks = SDL_GetTicks(),
-				 delta = ticks - last_ticks;
-		batt_timer += delta;
-		acc_ticks += delta;
-		last_ticks = ticks;
+		if (quit)
+			break;
 
 		if (batt_timer >= CHECK_BATTERY_TIMEOUT) {
 			current_percentage = battery_getPercentage();
@@ -216,11 +237,16 @@ int main(int argc, char *argv[])
 				SDL_Flip(video);
 
 				changed = false;
+				first_draw = false;
 			}
 
 			acc_ticks -= time_step;
 		}
 	}
+
+	// Clear the screen when exiting
+	SDL_FillRect(video, NULL, 0);
+	SDL_Flip(video);
 	
 	if (has_message)
 		SDL_FreeSurface(message);

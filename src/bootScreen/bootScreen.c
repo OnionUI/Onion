@@ -14,17 +14,14 @@ int main(int argc, char *argv[])
     // End_Save : Ending screen with save
     // End : Ending screen without save
 
-    // Save current time
-    system("cd /mnt/SDCARD/.tmp_update/; ./saveTime.sh; sync");
-
     SDL_Init(SDL_INIT_VIDEO);
     TTF_Init();
     
     TTF_Font* font = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 30); 
     SDL_Color color = {255, 255, 255};
 
-    SDL_Surface* video = SDL_SetVideoMode(640,480, 32, SDL_HWSURFACE|SDL_DOUBLEBUF);
-    SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640,480, 32, 0,0,0,0);
+    SDL_Surface* video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE | SDL_DOUBLEBUF);
+    SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
 
     SDL_Surface* background;    
     int bShowBat = 0;
@@ -50,7 +47,7 @@ int main(int argc, char *argv[])
     SDL_FreeSurface(background);
 
     char version_str[12];
-    char *current_version = file_read("/mnt/SDCARD/.tmp_update/onionVersion/version.txt");
+    const char *current_version = file_read("/mnt/SDCARD/.tmp_update/onionVersion/version.txt");
     sprintf(version_str, "v%s", current_version);
         
     SDL_Surface* imageVer = TTF_RenderUTF8_Blended(font, version_str, color);

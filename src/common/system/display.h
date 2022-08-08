@@ -2,6 +2,7 @@
 #define DISPLAY_H__
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <linux/fb.h>
 #include <sys/mman.h>
 
@@ -21,6 +22,7 @@ static struct fb_fix_screeninfo finfo;
 static struct fb_var_screeninfo vinfo;
 static uint32_t stride, bpp;
 static uint8_t *savebuf;
+static bool display_enabled = true;
 
 
 void display_init(void)
@@ -53,8 +55,14 @@ void display_setScreen(bool enabled)
         file_write(PWM_DIR "pwm0/enable", "0", 1);
         file_write(PWM_DIR "pwm0/enable", "1", 1);
     }
+
+    display_enabled = enabled;
 }
 
+void display_toggle(void)
+{
+    display_setScreen(!display_enabled);
+}
 
 //
 //    Set Brightness (Raw)

@@ -19,6 +19,6 @@
 #define SW_BTN_SELECT   SDLK_RCTRL
 #define SW_BTN_START    SDLK_RETURN
 #define SW_BTN_MENU     SDLK_ESCAPE
-#define SW_BTN_POWER    SDLK_POWER
+#define SW_BTN_POWER    SDLK_FIRST
 
 #endif // KEYMAP_SW_H__

@@ -22,10 +22,10 @@ main() {
     touch /tmp/no_charging_ui
 
     cd $sysdir
-    ./bin/bootScreen "Boot"
+    ./bin/keymon 2>&1 >> ./logs/keymon.log &
 
     cd $sysdir
-    ./bin/keymon 2>&1 >> ./logs/keymon.log &
+    ./bin/bootScreen "Boot"
 
     # Init
     rm /tmp/.offOrder
@@ -79,8 +79,8 @@ check_game() {
 launch_game() {
     # TIMER INIT 
     if  [ -f $sysdir/romName.txt ] ; then
-        cd /mnt/SDCARD/App/PlayActivity
-        ./playActivity "init"
+        cd $sysdir
+        ./bin/playActivity "init"
     fi
 
     # GAME LAUNCH
@@ -91,8 +91,7 @@ launch_game() {
     if  [ -f $sysdir/romName.txt ] ; then
         cd $sysdir
         value=$(cat romName.txt);
-        cd /mnt/SDCARD/App/PlayActivity
-        ./playActivity "$value"    
+        ./bin/playActivity "$value"    
     fi
 }
 
@@ -128,14 +127,17 @@ check_off_order() {
 }
 
 recentlist=/mnt/SDCARD/Roms/recentlist.json
+recentlist_hidden=/mnt/SDCARD/Roms/recentlist-hidden.json
 
 check_hide_recents() {
     # Hide the recents tab by removing the json file
-    if [ ! -f $sysdir/config/.hideRecents ]; then
-        if [ -f $recentlist ]; then
-            cat $recentlist >> /mnt/SDCARD/Roms/recentlist-hidden.json
-            rm -f $recentlist
-        fi
+    if [ -f $recentlist ]; then
+        cat $recentlist $recentlist_hidden > temp && mv temp $recentlist_hidden
+        rm -f $recentlist
+    fi
+    # Restore recentlist 
+    if [ -f $recentlist_hidden ] && [ ! -f $sysdir/config/.hideRecents ]; then
+        mv -f $recentlist_hidden $recentlist
     fi
 }
 
@@ -168,8 +170,8 @@ update_time() {
     fi
     #Add 4 hours to the current time
     hours=4
-    if [ -f $sysdir/config/startupAddHours ]; then
-        hours=`cat $sysdir/config/startupAddHours`
+    if [ -f $sysdir/config/startup/addHours ]; then
+        hours=`cat $sysdir/config/startup/addHours`
     fi
     addTime=$(($hours * 3600))
     currentTime=$(($currentTime + $addTime))

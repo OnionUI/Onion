@@ -16,6 +16,7 @@ BUILD_DIR           := $(ROOT_DIR)/build
 BIN_DIR             := $(ROOT_DIR)/build/.tmp_update/bin
 DIST_FULL           := $(ROOT_DIR)/dist/full
 DIST_CORE           := $(ROOT_DIR)/dist/core
+INSTALL_BIN_DIR     := $(DIST_FULL)/miyoo/app/.tmp_update/bin
 RELEASE_DIR         := $(ROOT_DIR)/release
 STATIC_BUILD        := $(ROOT_DIR)/static/build
 STATIC_DIST         := $(ROOT_DIR)/static/dist
@@ -72,8 +73,9 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/playActivity && BUILD_DIR=$(BIN_DIR) make
 # Build installer binaries
 	@mkdir -p $(DIST_FULL)/miyoo/app/.tmp_update/bin
-	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(DIST_FULL)/miyoo/app/.tmp_update/bin make
-	@cd $(SRC_DIR)/prompt && BUILD_DIR=$(DIST_FULL)/miyoo/app/.tmp_update/bin make
+	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(INSTALL_BIN_DIR) make
+	@cd $(SRC_DIR)/prompt && BUILD_DIR=$(INSTALL_BIN_DIR) make
+	@cd $(SRC_DIR)/batmon && BUILD_DIR=$(INSTALL_BIN_DIR) make
 
 apps: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
@@ -95,9 +97,6 @@ dist: build
 	@mkdir -p $(DIST_FULL)/RetroArch
 	@mv $(BUILD_DIR)/retroarch.pak $(DIST_FULL)/RetroArch/
 	@echo $(RA_SUBVERSION) > $(DIST_FULL)/RetroArch/ra_package_version.txt
-# Package themes separately
-	@mkdir -p $(DIST_FULL)/Themes
-	@mv $(BUILD_DIR)/Themes/* $(DIST_FULL)/Themes/
 # Package core
 	@cd $(BUILD_DIR) && zip -rq $(DIST_FULL)/miyoo/app/.tmp_update/onion.pak .
 # Package configs

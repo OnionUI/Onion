@@ -1,3 +1,3 @@
 #!/bin/sh	
 
-packageManager
+./packageManager

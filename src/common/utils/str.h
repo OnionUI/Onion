@@ -81,47 +81,48 @@ char* str_replace(char *orig, char *rep, char *with) {
     return result;
 }
 
-//
-//	Trim Strings for reading json (EGGS)
-//
-char* str_trim(char* str, uint32_t first) {
-	char *firstchar, *firstlastchar, *lastfirstchar, *lastchar;
-	uint32_t i, len = strlen(str), len_str;
+// Stores the trimmed input string into the given output buffer, which must be
+// large enough to store the result.  If it is too small, the output is
+// truncated.
+size_t str_trim(char *out, size_t len, const char *str, bool first)
+{
+    if(len == 0)
+        return 0;
 
-	firstchar = firstlastchar = lastfirstchar = lastchar = 0;
+    const char *end;
+    size_t out_size;
 
-	for (i = 0; i < len; i++) {
-        // check if char shouldn't be trimmed
-		if (strchr("\r\n\t {},", str[i]) == NULL) {
-            if (!firstlastchar)
-                firstlastchar = lastchar;
-            continue;
-        }
+    // Trim leading space
+    while(strchr("\r\n\t {},", (unsigned char)*str) != NULL) str++;
+    
+    end = str + 1;
+    
+    if ((unsigned char)*str == '"')
+        while(strchr("\r\n\"", (unsigned char)*end) == NULL) end++;
 
-        if (!firstchar)
-            firstchar = lastfirstchar = &str[i];
+    if(*str == 0)  // All spaces?
+    {
+        *out = 0;
+        return 1;
+    }
 
-        if (i > 0 && strchr("\r\n\t {},", str[i - 1]) != NULL)
-            lastfirstchar = &str[i];
+    // Trim trailing space
+    if (first)
+        while(strchr("\r\n\t {},", (unsigned char)*end) == NULL) end++;
+    else {
+        end = str + strlen(str) - 1;
+        while(end > str && strchr("\r\n\t {},", (unsigned char)*end) != NULL) end--;
+        end++;
+    }
 
-        if (str[i] == '"') {
-            len_str = strlen(&str[i]) - 1;
-            for (i++; i < len_str; i++) {
-                if (strchr("\r\n\"", str[i]) != NULL)
-                    break;
-            }
-        }
+    // Set output size to minimum of trimmed string length and buffer size minus 1
+    out_size = (end - str) < len-1 ? (end - str) : len-1;
 
-        lastchar = &str[i];
-	}
+    // Copy trimmed string and add null terminator
+    memcpy(out, str, out_size);
+    out[out_size] = 0;
 
-	if (first)
-		lastfirstchar = firstchar;
-
-	if (lastfirstchar)
-        return lastfirstchar;
-
-	return 0;
+    return out_size;
 }
 
 

@@ -1,6 +1,7 @@
 $(TARGET): $(OFILES)
 	@$(CXX) $(OFILES) -o "$@" $(LDFLAGS)
 	@$(STRIP) "$@"
+	@-mv -f $(TARGET) "$(BUILD_DIR)/$(TARGET)"
 
 %.o: %.c
 	@$(ECHO) $(PRINT_BUILD)

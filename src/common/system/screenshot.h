@@ -12,18 +12,18 @@
 //    [onion] get recent filename from content_history.lpl
 //
 char* getrecent_onion(char *filename) {
-    FILE    *fp;
-    char    key[256], val[256];
-    char    *keyptr, *valptr, *strptr;
-    int    f;
+    FILE *fp;
+    char key[256], val[256];
+    char *valptr, *strptr;
+    int f;
 
     *filename = 0;
     if ( (fp = fopen("/mnt/SDCARD/Saves/CurrentProfile/lists/content_history.lpl", "r")) ) {
         key[0] = 0; val[0] = 0;
         while ((f = fscanf(fp, "%255[^:]:%255[^\n]\n", key, val)) != EOF) {
             if (!f) { if (fscanf(fp, "%*[^\n]\n") == EOF) break; else continue; }
-            if ( ((keyptr = str_trim(key, 0))) && ((valptr = str_trim(val, 1))) ) {
-                if ( (!strcmp(keyptr, "\"path\"")) && ((valptr = strrchr(valptr, '/'))) ) {
+            if (str_trim(key, 256, key, false) && str_trim(val, 256, val, true)) {
+                if (!strcmp(key, "\"path\"") && (valptr = strrchr(val, '/'))) {
                     valptr++;
                     if ((strptr = strrchr(valptr, '"'))) *strptr = 0;
                     strcpy(filename, valptr);

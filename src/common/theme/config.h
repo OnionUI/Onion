@@ -128,7 +128,7 @@ Theme_s loadThemeFromPath(const char* theme_path)
             .color = {255, 255, 255},
             .offsetX = 0,
             .offsetY = 0,
-            .onleft = true
+            .onleft = false
         },
         .title = {
             .font = FALLBACK_FONT,
@@ -190,9 +190,10 @@ Theme_s loadThemeFromPath(const char* theme_path)
     json_bool(json_root, "hideIconTitle", &theme.hideIconTitle);
 
     json_fontStyle(json_title, &theme.title, NULL);
-    json_fontStyle(json_hint, &theme.hint, NULL);
+    json_fontStyle(json_hint, &theme.hint, &theme.title);
     json_fontStyle(json_currentpage, &theme.currentpage, &theme.hint);
     json_fontStyle(json_total, &theme.total, &theme.hint);
+    json_fontStyle(json_list, &theme.list, &theme.title);
 
     json_string(json_grid, "font", theme.grid.font);
     json_number(json_grid, "grid1x4", &theme.grid.grid1x4);
@@ -200,12 +201,11 @@ Theme_s loadThemeFromPath(const char* theme_path)
     json_color(json_grid, "color", &theme.grid.color);
     json_color(json_grid, "selectedcolor", &theme.grid.selectedcolor);
 
-    json_fontStyle(json_list, &theme.list, NULL);
-
     json_bool(json_batteryPercentage, "visible", &theme.batteryPercentage.visible);
     if (!json_string(json_batteryPercentage, "font", theme.batteryPercentage.font))
         strcpy(theme.batteryPercentage.font, theme.hint.font);
-    json_number(json_batteryPercentage, "size", &theme.batteryPercentage.size);
+    if (!json_number(json_batteryPercentage, "size", &theme.batteryPercentage.size))
+        theme.batteryPercentage.size = theme.hint.size;
     if (!json_color(json_batteryPercentage, "color", &theme.batteryPercentage.color))
         theme.batteryPercentage.color = theme.hint.color;
     json_number(json_batteryPercentage, "offsetX", &theme.batteryPercentage.offsetX);

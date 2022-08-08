@@ -1,8 +1,20 @@
 #!/bin/sh
 installdir=`cd -- "$(dirname "$0")" >/dev/null 2>&1; pwd -P`
+core_zipfile="$installdir/onion.pak"
 ra_zipfile="/mnt/SDCARD/RetroArch/retroarch.pak"
 ra_version_file="/mnt/SDCARD/RetroArch/onion_ra_version.txt"
 ra_package_version_file="/mnt/SDCARD/RetroArch/ra_package_version.txt"
+
+# globals
+install_ra=0
+total_core=0
+total_ra=0
+total_all=0
+install_core_begin=0
+install_core_offset=50
+install_ra_begin=50
+install_ra_offset=50
+
 
 main() {
     # init_lcd
@@ -37,8 +49,6 @@ main() {
         "Reinstall (reset settings)"
     retcode=$?
 
-    echo "prompt returned:" $retcode
-
     if [ $retcode -eq 0 ]; then
         # Update
         update_only
@@ -64,9 +74,24 @@ cleanup() {
         .installed \
         removed.png \
         removed \
-        boot_mod.sh \
-        install.sh \
-        res/waitingBG.png
+        install.sh
+}
+
+get_install_stats() {
+    install_ra=$(check_install_retroarch)
+    total_core=$(zip_total "$core_zipfile")
+    total_ra=0
+
+    if [ $install_ra -eq 1 ] && [ -f "$ra_zipfile" ]; then
+        total_ra=$(zip_total "$ra_zipfile")
+    fi
+
+    total_all=$(($total_core + $total_ra))
+
+    install_core_begin=0
+    install_core_offset=$(($total_core / $total_all * 100))
+    install_ra_begin=$install_core_offset
+    install_ra_offset=$((100 - $install_core_offset))
 }
 
 remove_configs() {
@@ -81,11 +106,13 @@ fresh_install() {
     reset_configs=$1
     echo ":: Fresh install (reset: $reset_configs)"
 
+    get_install_stats
+
     rm -f /tmp/.update_msg
 
     # Show installation progress
     cd $installdir
-    ./bin/installUI &
+    ./bin/installUI -b $install_core_begin -t $install_core_offset &
     sleep 1
 
     # Backup important stock files
@@ -108,8 +135,11 @@ fresh_install() {
     rm -rf Emu/* RApp/* Imgs miyoo
 
     install_core "Installing core..."
-    reset_installUI # frees memory
-    install_retroarch "Installing RetroArch..."
+
+    if [ $install_ra -eq 1 ]; then
+        free_ui_switch_to_ra # frees memory
+        install_retroarch "Installing RetroArch..."
+    fi
 
     echo "Completing installation..." >> /tmp/.update_msg
     if [ $reset_configs -eq 0 ]; then
@@ -120,7 +150,7 @@ fresh_install() {
     echo "Installation complete!" >> /tmp/.update_msg
 
     touch $installdir/.installed
-    sleep 1
+    sync
 
     cd /mnt/SDCARD/App/Onion_Manual/
     ./launch.sh
@@ -136,52 +166,60 @@ fresh_install() {
     ./removed
 
     cd $installdir
-    ./boot_mod.sh 
+    ./config/boot_mod.sh 
 
     if [ $reset_configs -eq 1 ]; then
-        mv -f $installdir/system.json /appconfigs/system.json
+        cp -f $installdir/config/system.json /appconfigs/system.json
     fi
 }
 
 update_only() {
     echo ":: Update only"
 
+    get_install_stats
+
     # Show installation progress
     cd $installdir
-    ./bin/installUI &
+    ./bin/installUI -b $install_core_begin -t $install_core_offset &
     sleep 1
 
     install_core "Updating core..."
-    reset_installUI # frees memory
-    install_retroarch "Updating RetroArch..."
-    restore_ra_config
+
+    if [ $install_ra -eq 1 ]; then
+        free_ui_switch_to_ra # frees memory
+        install_retroarch "Updating RetroArch..."
+        restore_ra_config
+    fi
+
+    install_configs 0
+
     echo "Update complete! Turning off..." >> /tmp/.update_msg
 
     touch $installdir/.installed
-    sleep 1
+    sync
 }
 
-reset_installUI() {
+free_ui_switch_to_ra() {
     touch $installdir/.installed
-    sleep 1
+    sync
 
     # Free memory
     free_mma
 
     rm -f $installdir/.installed
+    rm -f /tmp/.update_msg
 
     # Show installation progress for RetroArch
     cd $installdir
-    ./bin/installUI &
+    ./bin/installUI -b $install_ra_begin -t $install_ra_offset &
     sleep 1
 }
 
 install_core() {
     echo ":: Install core"
     msg="$1"
-    zipfile=$installdir/onion.pak
 
-    if [ ! -f $zipfile ]; then
+    if [ ! -f "$core_zipfile" ]; then
         return
     fi
 
@@ -190,7 +228,7 @@ install_core() {
     echo "$msg 0%" >> /tmp/.update_msg
 
     # Onion core installation / update
-    unzip_progress "$zipfile" "$msg" /mnt/SDCARD
+    unzip_progress "$core_zipfile" "$msg" /mnt/SDCARD $total_core
 
     if [ $? -ne 0 ]; then
         touch $installdir/.installFailed
@@ -198,13 +236,10 @@ install_core() {
         exit 0
     fi
 
-    rm -f $zipfile
+    rm -f $core_zipfile
 }
 
-install_retroarch() {
-    echo ":: Install RetroArch"
-
-    msg="$1"
+check_install_retroarch() {
     install_ra=1
 
     # An existing version of Onion's RetroArch exist
@@ -214,32 +249,38 @@ install_retroarch() {
 
         # Skip installation if current version is up-to-date
         if [ $(version $current_ra_version) -ge $(version $package_ra_version) ]; then
-            echo "   - Skip installing RetroArch"
             install_ra=0
-        fi
-
-        if [ $install_ra -eq 1 ] && [ -f $ra_zipfile ]; then
-            # Backup old RA configuration
-            cd /mnt/SDCARD/RetroArch
-            mv .retroarch/retroarch.cfg /mnt/SDCARD/Backup/
         fi
     fi
 
-    # Install RetroArch only if necessary
-    if [ $install_ra -eq 1 ] && [ -f $ra_zipfile ]; then
-        echo "$msg 0%" >> /tmp/.update_msg
+    return "$install_ra"
+}
 
-        # Remove old RetroArch before unzipping
-        maybe_remove_retroarch
-        
-        # Install RetroArch
-        unzip_progress "$ra_zipfile" "$msg" /mnt/SDCARD
-        
-        if [ $? -ne 0 ]; then
-            touch $installdir/.installFailed
-            echo RetroArch - installation failed
-            exit 0
-        fi
+install_retroarch() {
+    echo ":: Install RetroArch"
+    msg="$1"
+
+    # Check if RetroArch zip also exists
+    if [ ! -f "$ra_zipfile" ]; then
+        return
+    fi
+
+    echo "$msg 0%" >> /tmp/.update_msg
+
+    # Backup old RA configuration
+    cd /mnt/SDCARD/RetroArch
+    mv .retroarch/retroarch.cfg /mnt/SDCARD/Backup/
+
+    # Remove old RetroArch before unzipping
+    maybe_remove_retroarch
+    
+    # Install RetroArch
+    unzip_progress "$ra_zipfile" "$msg" /mnt/SDCARD $total_ra
+    
+    if [ $? -ne 0 ]; then
+        touch $installdir/.installFailed
+        echo RetroArch - installation failed
+        exit 0
     fi
 
     rm -f $ra_zipfile $ra_package_version_file
@@ -336,7 +377,11 @@ debloat_apps() {
         Onion_Manual \
         PlayActivity \
         Retroarch \
-        The_Onion_Installer
+        The_Onion_Installer \
+        Clean_View_Toggle \
+        StartGameSwitcher \
+        Guest_Mode \
+        ThemeSwitcher
 }
 
 refresh_roms() {
@@ -356,11 +401,17 @@ remove_everything_except() {
     find * .* -maxdepth 0 -not -name "$1" -exec rm -rf {} \;
 }
 
+zip_total() {
+    zipfile="$1"
+    total=`unzip -l "$zipfile" | tail -1 | grep -Eo "([0-9]+) files" | sed "s/[^0-9]*//g"`
+    echo $total
+}
+
 unzip_progress() {
     zipfile="$1"
     msg="$2"
     dest="$3"
-    total=`unzip -l "$zipfile" | tail -1 | grep -Eo "([0-9]+) files" | sed "s/[^0-9]*//g"`
+    total=$4
 
     echo "   - Extract '$zipfile' ($total files) into $dest"
 
