@@ -31,4 +31,5 @@ jobs:
         prerelease: true
         title: "Onion (Pre-release)"
         files: |
-          release/Onion-v${{ env.BUILD_VERSION }}.zip
+          release/Onion-v${{ env.BUILD_VERSION }}-full.zip
+          release/Onion-v${{ env.BUILD_VERSION }}-core.zip

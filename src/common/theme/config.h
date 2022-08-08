@@ -14,6 +14,7 @@
 
 #define FALLBACK_FONT "/customer/app/Exo-2-Bold-Italic.ttf"
 #define FALLBACK_PATH "/mnt/SDCARD/miyoo/app/"
+#define SYSTEM_RESOURCES "/mnt/SDCARD/.tmp_update/res/"
 
 typedef struct Theme_BatteryPercentage
 {
@@ -87,8 +88,15 @@ bool theme_getImagePath(Theme_s* theme, const char* name, char* out_path)
     sprintf(image_path, "%s%s", theme->path, rel_path);
     bool exists = file_exists(image_path);
 
-    if (!exists)
-        snprintf(image_path, STR_MAX*2, "%s%s", FALLBACK_PATH, rel_path);
+    if (!exists) {
+        if (strncmp(name, "extra/", 6) == 0) {
+            sprintf(rel_path, "%s.png", name + 6);
+            sprintf(image_path, "%s%s", SYSTEM_RESOURCES, rel_path);
+        }
+        else {
+            sprintf(image_path, "%s%s", FALLBACK_PATH, rel_path);
+        }
+    }
 
     if (out_path)
         sprintf(out_path, "%s", image_path);
