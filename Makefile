@@ -74,6 +74,7 @@ core: $(CACHE)/.setup
 # Build installer binaries
 	@mkdir -p $(DIST_FULL)/miyoo/app/.tmp_update/bin
 	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(INSTALL_BIN_DIR) make
+	@cd $(SRC_DIR)/infoPanel && BUILD_DIR=$(INSTALL_BIN_DIR) make
 	@cd $(SRC_DIR)/prompt && BUILD_DIR=$(INSTALL_BIN_DIR) make
 	@cd $(SRC_DIR)/batmon && BUILD_DIR=$(INSTALL_BIN_DIR) make
 

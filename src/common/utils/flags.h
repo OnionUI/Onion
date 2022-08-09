@@ -10,13 +10,13 @@
 #define temp_flag_set(key, value) flag_set("/tmp/", key, value)
 
 bool flag_get(const char *path, const char *key) {
-    char filename[MAX_LEN];
+    char filename[STR_MAX];
     concat(filename, path, key);
     return file_exists(filename);
 }
 
 void flag_set(const char *path, const char *key, bool value) {
-    char filename[MAX_LEN];
+    char filename[STR_MAX];
     concat(filename, path, key);
     
     if (value)

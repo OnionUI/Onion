@@ -126,9 +126,9 @@ int main(int argc, char *argv[])
 
 	if (has_message) {
 		char *str = str_replace(message_str, "\\n", "\n");
-		message = theme_textboxSurface(&theme, &res, str, res.fonts.title, theme.grid.color);
+		message = theme_textboxSurface(&theme, str, res.fonts.title, theme.grid.color, ALIGN_CENTER);
 		menu.scroll_height = 3;
-		message_rect.x = 20;
+		message_rect.x = 320 - message->w / 2;
 		message_rect.y = 60 + (6 - menu.scroll_height) * 30 - message->h / 2;
 		free(str);
 	}
