@@ -1,80 +1,131 @@
+#include <stdbool.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
 
-void append(char subject[], const char insert[], int pos) {
-    char buf[300] = {}; // 100 so that it's big enough. fill with 0
-    // or you could use malloc() to allocate sufficient space
+#include "utils/utils.h"
+#include "utils/msleep.h"
+#include "utils/battery.h"
+#include "system/settings.h"
+#include "theme/theme.h"
+#include "theme/background.h"
 
-    strncpy(buf, subject, pos); // copy at most first pos characters
-    int len = strlen(buf);
-    strcpy(buf+len, insert); // copy all of insert[] at the end
-    len += strlen(insert);  // increase the length by length of insert[]
-    strcpy(buf+len, subject+pos); // copy the rest
+#define RESOURCES { \
+	TR_BG_TITLE, \
+	TR_LOGO, \
+	TR_BATTERY_0, \
+	TR_BATTERY_20, \
+	TR_BATTERY_50, \
+	TR_BATTERY_80, \
+	TR_BATTERY_100, \
+	TR_BATTERY_CHARGING, \
+	TR_BG_LIST_S, \
+	TR_HORIZONTAL_DIVIDER, \
+	TR_TOGGLE_ON, \
+	TR_TOGGLE_OFF, \
+	TR_BG_FOOTER, \
+	TR_BUTTON_A, \
+	TR_BUTTON_B \
+}
+#define NUM_RESOURCES 15
 
-    strcpy(subject, buf);   // copy it back to subject
-    // deallocate buf[] here, if used malloc()
+void drawInfoPanel(SDL_Surface *screen, SDL_Surface *video, const char *title_str, const char *message_str)
+{
+	settings_load();
+	Theme_s theme = loadThemeFromPath(settings.theme);
+
+	theme_backgroundLoad(&theme);
+	SDL_BlitSurface(theme_background, NULL, screen, NULL);
+	SDL_BlitSurface(screen, NULL, video, NULL); 
+	SDL_Flip(video);
+
+	enum theme_Images res_requests[NUM_RESOURCES] = RESOURCES;
+	Resources_s res = theme_loadResources(&theme, res_requests, NUM_RESOURCES);
+
+	bool has_title = strlen(title_str) > 0;
+	bool has_message = strlen(message_str) > 0;
+
+	SDL_Surface *message = NULL;
+	SDL_Rect message_rect = {320, 240};
+
+	int current_percentage = battery_getPercentage();
+	SDL_Surface *battery = theme_batterySurface(&theme, &res, current_percentage);
+
+	theme_renderHeader(&theme, &res, screen, battery, has_title ? title_str : NULL, !has_title);
+	theme_renderFooter(&theme, &res, screen);
+
+	if (has_message) {
+		char *str = str_replace(message_str, "\\n", "\n");
+		message = theme_textboxSurface(&theme, str, res.fonts.title, theme.grid.color, ALIGN_CENTER);
+		message_rect.x -= message->w / 2;
+		message_rect.y -= message->h / 2;
+		SDL_BlitSurface(message, NULL, screen, &message_rect);
+		SDL_FreeSurface(message);
+	}
+
+	theme_freeResources(&res);
+	theme_backgroundFree();	
 }
 
-int main(void) {
-	SDL_Init(SDL_INIT_VIDEO);
-	TTF_Init();
+int main(int argc, char *argv[])
+{
+	char title_str[STR_MAX] = "";
+	char message_str[STR_MAX] = "";
+	char image_path[STR_MAX] = "";
+	bool wait_confirm = true;
 
-	SDL_Rect rectInstructions = { 21, 76, 600, 450};;
-	
-	SDL_Color color_white={255,255,255,0};
-	TTF_Font* fontRomName25 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 25);
-
-	SDL_ShowCursor(SDL_DISABLE);
-	   
-	// 640x480, HW to HW blit, 1:1 crisp pixels, rightside up
-	
-	SDL_Surface* video = SDL_SetVideoMode(640,480, 32, SDL_HWSURFACE);
-	SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640,480, 32, 0,0,0,0);
-	SDL_Surface* image = IMG_Load("infoPanel.png");
-	
-	SDL_BlitSurface(image, NULL, screen, NULL);
-	char test[200];
-	strcpy(test,"ceci est un texte vraiment trètrès long afin de tester le retour à la ligne. A mon avis il ne va rien n'y avoir du tuot en effet liil faut tout lui dire  !!!");
-	int len = strlen(test);
-	
-	for (int i=1; i<len ; i++){
-		if ((i%10) == 0){
-			append(test, "\r\n", i);
-			
-		} 
-	
-	}
-	SDL_Surface* imageInstructions = TTF_RenderUTF8_Blended(fontRomName25, test , color_white);
-	SDL_BlitSurface(imageInstructions, NULL, screen, &rectInstructions);
-
-	// 320x240, HW to HW blit, blurry upscaling, rightside up
-	// SDL_Surface* video = SDL_SetVideoMode(320,240, 32, SDL_HWSURFACE);
-	// SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 320,240, 32, 0,0,0,0);
-	// SDL_Surface* image = IMG_Load("320x240.png");
-	// SDL_BlitSurface(image, NULL, screen, NULL);
-	
-	// DO NOT USE
-	// 320x240, SW to HW blit, blurry upscaling, upside down
-	// SDL_Surface* video = SDL_SetVideoMode(320,240, 32, SDL_HWSURFACE);
-	// SDL_Surface* image = IMG_Load("320x240.png");
-	// SDL_BlitSurface(image, NULL, video, NULL);
-	
-	int run = 1;
-	while (run) {
-		// HW to HW rotates automatically on stock
-		SDL_BlitSurface(screen, NULL, video, NULL); 
-		SDL_Flip(video);
-
-		SDL_Event event;
-		while (SDL_PollEvent(&event)) {
-			if (event.type==SDL_KEYDOWN) {
-				run = 0;
-				break;
-			}
+	for (int i = 1; i < argc; i++) {
+		if (argv[i][0] == '-') {
+			if (strcmp(argv[i], "-t") == 0 || strcmp(argv[i], "--title") == 0)
+				strncpy(title_str, argv[++i], STR_MAX-1);
+			else if (strcmp(argv[i], "-m") == 0 || strcmp(argv[i], "--message") == 0)
+				strncpy(message_str, argv[++i], STR_MAX-1);
+			else if (strcmp(argv[i], "-i") == 0 || strcmp(argv[i], "--image") == 0)
+				strncpy(image_path, argv[++i], STR_MAX-1);
+			else if (strcmp(argv[i], "-a") == 0 || strcmp(argv[i], "--auto") == 0)
+				wait_confirm = false;
 		}
 	}
+
+	SDL_Init(SDL_INIT_VIDEO);
+	SDL_ShowCursor(SDL_DISABLE);
+	TTF_Init();
 	
+	SDL_Surface *video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
+	SDL_Surface *screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
+
+	if (file_exists(image_path)) {
+		SDL_Surface *image = IMG_Load(image_path);
+		SDL_Rect image_rect = {320 - image->w / 2, 240 - image->h / 2};
+		SDL_BlitSurface(image, NULL, screen, &image_rect);
+		SDL_FreeSurface(image);
+	}
+	else {
+		drawInfoPanel(screen, video, title_str, message_str);
+	}
+
+	SDL_BlitSurface(screen, NULL, video, NULL);
+	SDL_Flip(video);
+	
+	bool quit = false;
+	SDL_Event event;
+
+	while (!quit && wait_confirm) {
+		while (SDL_PollEvent(&event)) {
+			if (event.type == SDL_KEYDOWN)
+				quit = true;
+		}
+	}
+
+	if (!wait_confirm)
+		msleep(2000);
+
+	SDL_FillRect(screen, NULL, 0);
+	SDL_BlitSurface(screen, NULL, video, NULL);
+	SDL_Flip(video);
+
+	msleep(100);
+
    	SDL_FreeSurface(screen);
    	SDL_FreeSurface(video);
     SDL_Quit();

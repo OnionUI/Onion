@@ -71,11 +71,13 @@ int main(int argc, char *argv[])
         enum theme_Images res_requests[NUM_RESOURCES] = RESOURCES;
         Resources_s res = theme_loadResources(&theme, res_requests, NUM_RESOURCES);
 
-        SDL_Surface* battery = theme_batterySurface(&theme, &res, battery_getPercentage());
-        SDL_Rect battery_rect = {596 - battery->w / 2, 450 - battery->h / 2};
-	    SDL_BlitSurface(battery, NULL, screen, &battery_rect);
+        if (file_exists("/tmp/percBat")) {
+            SDL_Surface* battery = theme_batterySurface(&theme, &res, battery_getPercentage());
+            SDL_Rect battery_rect = {596 - battery->w / 2, 450 - battery->h / 2};
+            SDL_BlitSurface(battery, NULL, screen, &battery_rect);
+            SDL_FreeSurface(battery);
+        }
 
-        SDL_FreeSurface(battery);
         theme_freeResources(&res);
     }
 

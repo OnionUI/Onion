@@ -10,8 +10,6 @@
 #include "utils/json.h"
 #include "color.h"
 
-#define STR_MAX 256
-
 #define FALLBACK_FONT "/customer/app/Exo-2-Bold-Italic.ttf"
 #define FALLBACK_PATH "/mnt/SDCARD/miyoo/app/"
 #define SYSTEM_RESOURCES "/mnt/SDCARD/.tmp_update/res/"
@@ -212,8 +210,7 @@ Theme_s loadThemeFromPath(const char* theme_path)
     json_bool(json_batteryPercentage, "visible", &theme.batteryPercentage.visible);
     if (!json_string(json_batteryPercentage, "font", theme.batteryPercentage.font))
         strcpy(theme.batteryPercentage.font, theme.hint.font);
-    if (!json_int(json_batteryPercentage, "size", &theme.batteryPercentage.size))
-        theme.batteryPercentage.size = theme.hint.size;
+    json_int(json_batteryPercentage, "size", &theme.batteryPercentage.size);
     if (!json_color(json_batteryPercentage, "color", &theme.batteryPercentage.color))
         theme.batteryPercentage.color = theme.hint.color;
     json_int(json_batteryPercentage, "offsetX", &theme.batteryPercentage.offsetX);
