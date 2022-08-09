@@ -404,18 +404,28 @@ int main(void) {
                     continue;
                 }
 
-                if (ev.code == HW_BTN_MENU && val == 0) {
-                    if (comboKey == 0 && process_isRunning("retroarch") && check_autosave()) {
-                        if (settings.launcher && !settings.menu_inverted) {
+                if (ev.code == HW_BTN_MENU && val == 0) {   // short press on menu
+                
+                if (comboKey == 0){
+                        pid_t pid;
+                        if (pid = process_searchpid("MainUI")) {
+                            kill(pid, SIGKILL); 
                             temp_flag_set(".trimUIMenu", true);
-                            screenshot_system();
-                            terminate_retroarch();
+                            super_short_pulse();
+                        } 
+                
+                        if (process_isRunning("retroarch") && check_autosave()) {
+                            if (settings.launcher && !settings.menu_inverted) {
+                                temp_flag_set(".trimUIMenu", true);
+                                screenshot_system();
+                                terminate_retroarch();
+                            }
+                            else {
+                                temp_flag_set(".trimUIMenu", false);
+                                terminate_retroarch();
+                            }
                         }
-                        else {
-                            temp_flag_set(".trimUIMenu", false);
-                            terminate_retroarch();
                         }
-                    }
                     comboKey = 0;
                 }
             }
@@ -513,6 +523,7 @@ int main(void) {
                     if (val == REPEAT) {
                         repeat_menu++;
                         if (repeat_menu == REPEAT_SEC(1) && !button_flag) {    // long press on menu
+                            comboKey = 1;  // this will avoid to trigger short press action
                             if (!settings.menu_inverted) {
                                 if (process_isRunning("retroarch")) {
                                     temp_flag_set(".trimUIMenu", false);
@@ -569,3 +580,4 @@ int main(void) {
         elapsed_sec = 0;
     }
 }
+
