@@ -125,6 +125,13 @@ bool file_write(const char *path, const char *str, uint32_t len)
     return true;
 }
 
+void file_copy(const char *src_path, const char *dest_path)
+{
+    char system_cmd[512];
+    snprintf(system_cmd, 511, "cp -f \"%s\" \"%s\"", src_path, dest_path);
+    system(system_cmd);
+}
+
 char *file_removeExtension(char* myStr)
 {
     if (myStr == NULL) return NULL;
@@ -135,6 +142,12 @@ char *file_removeExtension(char* myStr)
     if ((lastExt = strrchr(retStr, '.')) != NULL)
         *lastExt = '\0';
     return retStr;
+}
+
+const char *file_getExtension(const char *filename) {
+    const char *dot = strrchr(filename, '.');
+    if (!dot || dot == filename) return "";
+    return dot + 1;
 }
 
 #endif // UTILS_FILE_H__

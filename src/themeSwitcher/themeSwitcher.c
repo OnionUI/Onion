@@ -3,434 +3,367 @@
 #include <fcntl.h>
 #include <stdint.h>
 #include <string.h>
-#include <linux/fb.h>
-#include <linux/input.h>
 #include <fcntl.h>
-#include <stdbool.h>  
-#include <sys/stat.h>  
+#include <stdbool.h>
+#include <sys/stat.h>
 #include "sys/ioctl.h"
 #include <dirent.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
 
-#include "cjson/cJSON.h"
-   
+#include "utils/file.h"
+#include "utils/json.h"
+#include "utils/msleep.h"
+#include "utils/log.h"
+#include "system/settings.h"
+#include "system/keymap_sw.h"
+
+#ifndef DT_REG
+#define DT_REG 8
+#endif
+#ifndef DT_DIR
+#define DT_DIR 4
+#endif
+
 // Max number of records in the DB
 #define NUMBER_OF_THEMES 100
 #define MAX_THEME_NAME_SIZE 256
 
+#define SYSTEM_LANG_DIR "/mnt/SDCARD/miyoo/app/lang"
+#define SYSTEM_LANG_BACKUP_DIR "/mnt/SDCARD/miyoo/app/lang_backup"
+#define SYSTEM_SKIN_DIR "/mnt/SDCARD/miyoo/app/skin"
 
-#define	BUTTON_A	KEY_SPACE
-#define	BUTTON_B	KEY_LEFTCTRL  
+static bool quit = false;
 
-#define	BUTTON_X	KEY_LEFTSHIFT
-#define	BUTTON_Y	KEY_LEFTALT  
-
-#define	BUTTON_START	KEY_ENTER
-#define	BUTTON_SELECT	KEY_RIGHTCTRL
-
-#define	BUTTON_MENU	KEY_ESC
-#define	BUTTON_POWER	KEY_POWER
-
-#define	BUTTON_L2	KEY_TAB
-#define	BUTTON_R2	KEY_BACKSPACE
-
-
- 
-
-int tailleStructure = 0;
-
-void logMessage(char* Message) {
-	FILE *file = fopen("log_TS_Message.txt", "a");
-
-    char valLog[200];
-    sprintf(valLog, "%s%s", Message, "\n");
-    fputs(valLog, file);
-	fclose(file); 
-}
-
-char* load_file(char const* path)
+void removeIconTitles(void)
 {
-    char* buffer = 0;
-    long length;
-    FILE * f = fopen (path, "rb"); 
+    DIR *dp;
+    struct dirent *ep;
+    FILE *fp;
 
-    if (f)
-    {
-      fseek (f, 0, SEEK_END);
-      length = ftell (f);
-      fseek (f, 0, SEEK_SET);
-      buffer = (char*)malloc ((length+1)*sizeof(char));
-      if (buffer)
-      {
-        fread (buffer, sizeof(char), length, f);
-      }
-      fclose (f);
+	if ((dp = opendir(SYSTEM_LANG_DIR)) == NULL)
+        return;
+
+    while ((ep = readdir(dp))) {
+        if (ep->d_type != DT_REG)
+            continue; // skip non-regular files and folders
+        if (strcmp("lang", file_getExtension(ep->d_name)) != 0)
+            continue; // skip files not having the `.lang` extension
+
+        const char file_path[256];
+        sprintf(file_path, SYSTEM_LANG_DIR "/%s", ep->d_name);
+
+        const char *json_data = file_read(file_path);
+        cJSON *root = cJSON_Parse(json_data);
+
+        if (!root)
+            continue;
+
+        printf_debug("Lang: %s (%s)\n", cJSON_GetStringValue(cJSON_GetObjectItem(root, "lang")), ep->d_name);
+
+        // Remove icon titles
+        json_setString(root, "0", " "); // Expert
+        json_setString(root, "1", " "); // Favorites
+        json_setString(root, "2", " "); // Games
+        json_setString(root, "15", " "); // Settings
+        json_setString(root, "18", " "); // Recents
+        json_setString(root, "107", " "); // Apps
+
+        // Remove hints
+        json_setString(root, "88", " "); // SELECT
+        json_setString(root, "89", " "); // BACK
+        json_setString(root, "111", " "); // EXIT
+        json_setString(root, "112", " "); // SAVE AND EXIT
+
+        json_save(root, file_path);
+        cJSON_free(root);
     }
-    buffer[length] = '\0';
-
-    return buffer;
+    closedir(dp);
 }
 
+void installFaultyImage(const char *theme_path, const char *image_name)
+{
+    char theme_image_path[256],
+         system_image_path[256],
+         system_image_backup[256];
 
-bool file_exists (char *filename) {
-  struct stat   buffer;   
-  return (stat (filename, &buffer) == 0);
+    sprintf(theme_image_path, "%sskin/%s.png", theme_path, image_name);
+    sprintf(system_image_path, SYSTEM_SKIN_DIR "/%s.png", image_name);
+    sprintf(system_image_backup, SYSTEM_SKIN_DIR "/%s_back.png", image_name);
+
+    if (file_exists(theme_image_path)) {
+        if (!file_exists(system_image_backup))
+            // backup system skin
+            file_copy(system_image_path, system_image_backup);
+        // apply theme image
+        file_copy(theme_image_path, system_image_path);
+    }
+    else if (file_exists(system_image_backup)) {
+        // restore system skin
+        file_copy(system_image_backup, system_image_path);
+        remove(system_image_backup);
+    }
 }
 
+void installTheme(const char *theme_name, bool hideIconTitle)
+{
+    char theme_path[200];
+    sprintf(theme_path, "/mnt/SDCARD/Themes/%s/", theme_name);
 
-int main(void) {
-	
-	uint32_t		val;
-	uint32_t		l2_pressed = 0;
-	uint32_t		r2_pressed = 0;
-	uint32_t		menu_pressed = 0;
+    // change theme setting
+    cJSON *settings = json_load("/appconfigs/system.json");
+    json_setString(settings, "theme", theme_path);
+    json_save(settings, "/appconfigs/system.json");
+    cJSON_free(settings);
 
-	uint32_t		a_pressed = 0;
-	uint32_t		b_pressed = 0;
-//	uint32_t		x_pressed = 0;
-//	uint32_t		y_pressed = 0;
-	uint32_t		start_pressed = 0;
-	uint32_t		select_pressed = 0;	
-
-	uint32_t		left_pressed = 0;
-	uint32_t		right_pressed = 0;		
-	
-	
-  	DIR *dp;
-  	struct dirent *ep;  
-  	
-  	int nb_themes = 0;
-  	char themes[NUMBER_OF_THEMES][MAX_THEME_NAME_SIZE];
-	char cThemePath[250]; 
-  	dp = opendir ("/mnt/SDCARD/Themes");
-	
-  	if (dp != NULL)
-  	{
-    	while (ep = readdir (dp)){
-    		
-			sprintf(cThemePath, "/mnt/SDCARD/Themes/%s/config.json", ep->d_name);
-    		if (file_exists(cThemePath) == 1){
-    	    	
-    	    	strcpy(themes[nb_themes], ep->d_name);		
-    	    	nb_themes ++;    		
-    		}
-    	}      	
-    	(void) closedir (dp);
-  	}
-  	else{
-  		perror ("Couldn't open the directory");
-  	}
-    	
-
-	int current_page = 0;
-	int hideIconTitle = 0;
-    	int useThemeLang = 0;
-	
-	SDL_Init(SDL_INIT_VIDEO);
-	SDL_ShowCursor(SDL_DISABLE);
-	TTF_Init();
-	
-	SDL_Surface* video = SDL_SetVideoMode(640,480, 32, SDL_HWSURFACE);
-	SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640,480, 32, 0,0,0,0);
-	TTF_Font* font40 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 40);
-	TTF_Font* font21 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 21);
-	TTF_Font* font30 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 30);
-	
-
-	SDL_Color color_white={255,255,255,0};
-	// Prepare for Poll button input
-	int			input_fd;
-	input_fd = open("/dev/input/event0", O_RDONLY);
-	struct input_event	ev;
-	
-	int nCurrentPage = 0;
-
-
-	SDL_Surface* surfaceThemeBackground;
-
-	SDL_Surface* imagePages;	
-	SDL_Surface* imageThemeNom;	
-	
-	SDL_Surface* surfaceBackGround = IMG_Load(".appRessources/background.png");
-	SDL_Surface* surfaceArrowLeft = IMG_Load(".appRessources/arrowLeft.png");
-	SDL_Surface* surfaceArrowRight = IMG_Load(".appRessources/arrowRight.png");
-	
-	SDL_Rect rectArrowLeft = { 24, 210, 28, 32};
-	SDL_Rect rectArrowRight = { 588, 210, 28, 32};
-	SDL_Rect rectPages = { 559, 440, 85, 54};
-	SDL_Rect rectThemeDescription = { 10, 175, 600, 44};
-	SDL_Rect rectThemeBackground = { 80, 46, 480, 360};
-	SDL_Rect rectImageThemeNom = { 77, 7, 557, 54};	
-	int levelPage = 0; 
-	FILE *fp;
-	long lSize;	
-	
-	//char* tempt = "BirdShot";
-	sprintf(cThemePath, "/mnt/SDCARD/Themes/%s/preview.png", themes[nCurrentPage]);
-	
-	if (file_exists(cThemePath) == 1){
-		surfaceThemeBackground = IMG_Load(cThemePath);
-	}
-	
-	else{
-		surfaceThemeBackground = IMG_Load(".appRessources/noThemePreview.png");
-	}
-	
-	char cPages[10];
-	sprintf(cPages,"%d/%d",(nCurrentPage+1),nb_themes);
-	imagePages = TTF_RenderUTF8_Blended(font30, cPages, color_white);
-
-	SDL_BlitSurface(surfaceThemeBackground, NULL, screen, &rectThemeBackground);
-	
-	SDL_BlitSurface(surfaceBackGround, NULL, screen, NULL);
-	//SDL_BlitSurface(surfaceArrowLeft, NULL, screen, &rectArrowLeft);
-	SDL_BlitSurface(surfaceArrowRight, NULL, screen, &rectArrowRight);
-	
-	SDL_BlitSurface(imagePages, NULL, screen, &rectPages);
-	
-	sprintf(cThemePath, "/mnt/SDCARD/Themes/%s/config.json", themes[0]);
-
-
-	if (file_exists(cThemePath) == 1){
-		const char *request_body = load_file(cThemePath);	
-		
-		cJSON* request_json = NULL;
-		cJSON* themeName;
-		
-		if (request_body != NULL){
-			request_json = cJSON_Parse(request_body);	
-			
-			themeName = cJSON_GetObjectItem(request_json, "name");
-			
-			imageThemeNom = TTF_RenderUTF8_Blended(font21, cJSON_GetStringValue(themeName), color_white);
-			SDL_BlitSurface(imageThemeNom, NULL, screen, &rectImageThemeNom);
-		}
-
+    if (hideIconTitle) {
+        if (!file_exists(SYSTEM_LANG_BACKUP_DIR)) {
+            // backup lang files
+            system("cp -R " SYSTEM_LANG_DIR " " SYSTEM_LANG_BACKUP_DIR "");
+            // remove icon titles in current lang files
+            removeIconTitles();
+        }
+    }
+    else if (file_exists(SYSTEM_LANG_BACKUP_DIR)) {
+        // restore original lang files
+        system("mv -f " SYSTEM_LANG_BACKUP_DIR "/* " SYSTEM_LANG_DIR "");
+        remove(SYSTEM_LANG_BACKUP_DIR);
     }
 
-		
-	SDL_BlitSurface(screen, NULL, video, NULL); 
-	SDL_Flip(video);
-	
-	SDL_FreeSurface(surfaceThemeBackground);
+    installFaultyImage(theme_path, "bg-io-testing");
+    installFaultyImage(theme_path, "ic-MENU+A");
+}
 
+int main(void)
+{
+	DIR *dp;
+	struct dirent *ep;
 
-	while( read(input_fd, &ev, sizeof(ev)) == sizeof(ev) ) {
-		
-		val = ev.value	; 
-		 
-		if (( ev.type != EV_KEY ) || ( val > 1 )) continue;
-		if ( ev.code == BUTTON_L2 ) {
-				l2_pressed = val;
-		}
-		else
-			if ( ev.code == BUTTON_R2 ) {
-					r2_pressed = val;
-			}
-			else
-				if ( ev.code == BUTTON_START ) {
-						start_pressed = val;
-				}
-				else
-					if ( ev.code == BUTTON_SELECT ) {
-							select_pressed = val;
-					}
-					else	
-						if ( ev.code == BUTTON_MENU ) {
-								menu_pressed = val;
-						}
-						else
-							if ( ev.code == BUTTON_A ) {
-									a_pressed = val;
-							}
-							else
-								if ( ev.code == BUTTON_B ) {
-										b_pressed = val;
-								}
-								else
-									if ( ev.code == KEY_LEFT ) {
-											left_pressed = val;
-									}
-									else
-										if ( ev.code == KEY_RIGHT ) {
-												right_pressed = val;
-										}								
-										
-		if (b_pressed) {			
-			if (levelPage==0){
-				//exit program
-				break;
-			}
-			else{
-				levelPage = 0;
-			}
-		}
-				
-		if (a_pressed) {			
-			if (levelPage==1){
-				
-				
-				cJSON* request_json = NULL;
-				cJSON* itemTheme;
-			
-				char sBrightness[20]; 
-				
-				const char *request_body = load_file("/appconfigs/system.json");
-				request_json = cJSON_Parse(request_body);
-				itemTheme = cJSON_GetObjectItem(request_json, "theme");
+	int themes_count = 0;
+	char themes[NUMBER_OF_THEMES][MAX_THEME_NAME_SIZE];
+    char theme_path[250];
+    int current_page = 0;
+    int hideIconTitle = 0;
 
-				logMessage("cJSON_GetStringValue(itemTheme)");
-				logMessage(cJSON_GetStringValue(itemTheme));
+	settings_load();
+	char *installed_theme = basename(settings.theme);
+    int installed_page = 0;
 
-				char cThemePath[200];
-				sprintf(cThemePath, "/mnt/SDCARD/Themes/%s/", themes[nCurrentPage]);
-				logMessage(cThemePath);
-				logMessage("  ");
-			
-				cJSON_SetValuestring(itemTheme, cThemePath);
-				
+	if ((dp = opendir("/mnt/SDCARD/Themes")) != NULL) {
+        while ((ep = readdir(dp))) {
+            if (ep->d_type != DT_DIR) continue;
 
-				FILE *file = fopen("/appconfigs/system.json", "w");	
-				
-				char *test = cJSON_Print(request_json);	
-				fputs(test, file);
-				fclose(file); 					
-				char themeLangInstall[] = "./themeLangInstall.sh ";
-				logMessage("installing language");
-				if (useThemeLang) {
-				    strcat(themeLangInstall, cThemePath);
-				    strcat(themeLangInstall, "lang");
-				} else if (hideIconTitle == 1){
-				    strcat(themeLangInstall, "/mnt/SDCARD/APP/ThemeSwitcher/.appRessources/hideTitle");
-				} else {
-				    strcat(themeLangInstall, "/mnt/SDCARD/APP/ThemeSwitcher/.appRessources/showTitle");
-				}
-				logMessage(themeLangInstall);
-				system(themeLangInstall);
-				
-					
-					
-					
-				break;
-			}
-				else{
-					levelPage = 1;
-				}
-			}		
-		
-		if (right_pressed) {			
-			if (nCurrentPage < (nb_themes-1)){
-				nCurrentPage ++;
-			}
-		}
-		if (left_pressed) {			
-			if (nCurrentPage > 0){
-				nCurrentPage --;
-			}
-		}
-
-		if (levelPage==0){
-		
-			sprintf(cThemePath, "/mnt/SDCARD/Themes/%s/preview.png", themes[nCurrentPage]);
-			
-			if (file_exists(cThemePath) == 1){
-				surfaceThemeBackground = IMG_Load(cThemePath);
-			}
-			
-			else{
-				surfaceThemeBackground = IMG_Load(".appRessources/noThemePreview.png");
-			}
-				
-			SDL_BlitSurface(surfaceThemeBackground, NULL, screen, &rectThemeBackground);
-			
-		
-			SDL_BlitSurface(surfaceBackGround, NULL, screen, NULL);
-			
-			if (nCurrentPage != 0){
-				SDL_BlitSurface(surfaceArrowLeft, NULL, screen, &rectArrowLeft);
-			}
-			if (nCurrentPage != (nb_themes-1)){
-				SDL_BlitSurface(surfaceArrowRight, NULL, screen, &rectArrowRight);
-			}
-			
-			sprintf(cPages,"%d/%d",(nCurrentPage+1),nb_themes);
-			imagePages = TTF_RenderUTF8_Blended(font30, cPages, color_white);			
-			SDL_BlitSurface(imagePages, NULL, screen, &rectPages);
-			
-			sprintf(cThemePath, "/mnt/SDCARD/Themes/%s/config.json", themes[nCurrentPage]);
-		
-			if (file_exists(cThemePath) == 1){
-				const char *request_body = load_file(cThemePath);	
-				
-				cJSON* request_json = NULL;
-				cJSON* themeName;
-				
-				if (request_body != NULL){
-					request_json = cJSON_Parse(request_body);	
-					
-					themeName = cJSON_GetObjectItem(request_json, "name");
-					
-					imageThemeNom = TTF_RenderUTF8_Blended(font21, cJSON_GetStringValue(themeName), color_white);
-					SDL_BlitSurface(imageThemeNom, NULL, screen, &rectImageThemeNom);
-				}
-		
-    		}
-
-			SDL_FreeSurface(surfaceThemeBackground);	
-		}
-		else {
-			surfaceThemeBackground = IMG_Load(".appRessources/themeDetail.png");
-			SDL_BlitSurface(surfaceThemeBackground, NULL, screen, NULL);
-
-			sprintf(cThemePath, "/mnt/SDCARD/Themes/%s/config.json", themes[nCurrentPage]);
-		
-			if (file_exists(cThemePath) == 1){
-				const char *request_body = load_file(cThemePath);	
-				
-				cJSON* request_json = NULL;
-				cJSON* themeName;
-				cJSON* themeIconTitle;
-				cJSON* themeLang;
-				
-				if (request_body != NULL){
-					request_json = cJSON_Parse(request_body);	
-					
-					themeName = cJSON_GetObjectItem(request_json, "name");
-					themeIconTitle = cJSON_GetObjectItem(request_json, "hideIconTitle");
-                    themeLang = cJSON_GetObjectItem(request_json, "useThemeLang");
-					
-					
-					if (cJSON_IsTrue(themeLang)){
-                        useThemeLang = 1;
-                    }
-                    else if (cJSON_IsTrue(themeIconTitle)){
-                            hideIconTitle = 1;
-                    }
-									
-					imagePages = TTF_RenderUTF8_Blended(font40, cJSON_GetStringValue(themeName), color_white);
-					SDL_BlitSurface(imagePages, NULL, screen, &rectThemeDescription);
-				}
-		
-    		}
-			
-			
-		
-		}
-		
-		
-
-		SDL_BlitSurface(screen, NULL, video, NULL); 
-		SDL_Flip(video);
-		
-
+            sprintf(theme_path, "/mnt/SDCARD/Themes/%s/config.json", ep->d_name);
+            
+            if (file_exists(theme_path)) {
+                strcpy(themes[themes_count], ep->d_name);
+				if (strcmp(ep->d_name, installed_theme) == 0)
+					current_page = installed_page = themes_count;
+                themes_count++;
+            }
+        }
+        closedir(dp);
 	}
-		SDL_FreeSurface(imagePages);
-		SDL_FreeSurface(surfaceThemeBackground);
-		SDL_FreeSurface(surfaceBackGround);	
-		SDL_FreeSurface(surfaceArrowLeft);	
-		SDL_FreeSurface(surfaceArrowRight);	
-	
+	else {
+		perror("Couldn't open the Themes directory");
+	}
+
+    SDL_Init(SDL_INIT_VIDEO);
+    SDL_ShowCursor(SDL_DISABLE);
+	SDL_EnableKeyRepeat(300, 50);
+    TTF_Init();
+
+    SDL_Surface* video = SDL_SetVideoMode(640,480, 32, SDL_HWSURFACE);
+    SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640,480, 32, 0,0,0,0);
+    TTF_Font* font40 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 40);
+    TTF_Font* font21 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 21);
+    TTF_Font* font30 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 30);
+
+    SDL_Color color_white = {255, 255, 255};
+
+    SDL_Surface* surfaceThemeBackground;
+
+    SDL_Surface* imagePages;
+    SDL_Surface* imageThemeNom;
+
+    SDL_Surface* surfaceArrowLeft = IMG_Load(".appRessources/arrowLeft.png");
+    SDL_Surface* surfaceArrowRight = IMG_Load(".appRessources/arrowRight.png");
+
+    SDL_Rect rectArrowLeft = {24, 210, 28, 32};
+    SDL_Rect rectArrowRight = {588, 210, 28, 32};
+    SDL_Rect rectPages = {559, 450};
+    SDL_Rect rectThemeDescription = {10, 175, 600, 44};
+    SDL_Rect rectThemePreview = {80, 46, 480, 360};
+    SDL_Rect rectImageThemeNom = {77, 7, 557, 54};
+    int levelPage = 0;
+    FILE *fp;
+    long lSize;
+
+    SDL_FillRect(screen, NULL, 0);
+
+    SDL_Surface *loading = TTF_RenderUTF8_Blended(font30, "Loading previews...", color_white);
+    SDL_Rect loadingRect = {320 - loading->w / 2, 240 - loading->h / 2};
+    SDL_BlitSurface(loading, NULL, screen, &loadingRect);
+    SDL_FreeSurface(loading);
+
+    SDL_Surface *previews[themes_count];
+    int i;
+    for (i = 0; i < themes_count; i++) {
+        sprintf(theme_path, "/mnt/SDCARD/Themes/%s/preview.png", themes[i]);
+        previews[i] = IMG_Load(file_exists(theme_path) ? theme_path : ".appRessources/noThemePreview.png");
+    }
+
+    char cPages[10];
+
+    SDL_Event event;
+    Uint8 keystate[320] = {0};
+    bool changed = true;
+
+    while (!quit) {
+		while (SDL_PollEvent(&event)) {
+            SDLKey key = event.key.keysym.sym;
+			switch (event.type) {
+                case SDL_QUIT: quit = true; break;
+                case SDL_KEYDOWN:
+                    keystate[key] = keystate[key] != 0 ? 2 : 1;
+                    changed = true;
+                    break;
+                case SDL_KEYUP:
+                    keystate[key] = 0;
+                    changed = true;
+                    break;
+                default: break;
+			}
+		}
+
+        if (!changed)
+            continue;
+
+        if (keystate[SW_BTN_B]) {
+            if (levelPage == 0) quit = true; // exit program
+            else levelPage = 0;
+        }
+
+        if (keystate[SW_BTN_A]) {
+            if (levelPage == 1) {
+                // Install theme
+                installTheme(themes[current_page], hideIconTitle);
+                printf_debug("Theme installed: %s\n", themes[current_page]);
+                quit = true;
+            }
+            else {
+                // Go to theme details/confirmation page
+                levelPage = 1;
+            }
+        }
+
+        if (keystate[SW_BTN_RIGHT]) {
+            if (current_page < (themes_count-1)){
+                current_page ++;
+            }
+        }
+        if (keystate[SW_BTN_LEFT]) {
+            if (current_page > 0){
+                current_page --;
+            }
+        }
+
+        if (quit)
+            break;
+
+        if (levelPage == 0) {
+            SDL_FillRect(screen, NULL, 0);
+            SDL_BlitSurface(previews[current_page], NULL, screen, &rectThemePreview);
+
+            if (current_page != 0) {
+                SDL_BlitSurface(surfaceArrowLeft, NULL, screen, &rectArrowLeft);
+            }
+            if (current_page != themes_count - 1) {
+                SDL_BlitSurface(surfaceArrowRight, NULL, screen, &rectArrowRight);
+            }
+
+            sprintf(cPages,"%d/%d",(current_page+1),themes_count);
+            imagePages = TTF_RenderUTF8_Blended(font30, cPages, color_white);
+            rectPages.x = 620 - imagePages->w;
+            rectPages.y = 450 - imagePages->h / 2;
+            SDL_BlitSurface(imagePages, NULL, screen, &rectPages);
+	        SDL_FreeSurface(imagePages);
+
+            sprintf(theme_path, "/mnt/SDCARD/Themes/%s/config.json", themes[current_page]);
+
+            if (file_exists(theme_path)) {
+                const char *json_data = file_read(theme_path);
+
+                cJSON* request_json = NULL;
+                cJSON* themeName;
+
+                if (json_data != NULL) {
+                    request_json = cJSON_Parse(json_data);
+                    themeName = cJSON_GetObjectItem(request_json, "name");
+                    char title[256];
+                    if (current_page == installed_page)
+                        sprintf(title, "%s - Installed", cJSON_GetStringValue(themeName));
+                    else
+                        sprintf(title, "%s", cJSON_GetStringValue(themeName));
+                    imageThemeNom = TTF_RenderUTF8_Blended(font21, title, color_white);
+                    SDL_BlitSurface(imageThemeNom, NULL, screen, &rectImageThemeNom);
+                }
+            }
+        }
+        else {
+            surfaceThemeBackground = IMG_Load(".appRessources/themeDetail.png");
+            SDL_FillRect(screen, NULL, 0);
+            SDL_BlitSurface(surfaceThemeBackground, NULL, screen, NULL);
+            SDL_FreeSurface(surfaceThemeBackground);
+
+            sprintf(theme_path, "/mnt/SDCARD/Themes/%s/config.json", themes[current_page]);
+
+            if (file_exists(theme_path)) {
+                const char *json_data = file_read(theme_path);
+
+                cJSON* request_json = NULL;
+                cJSON* themeName;
+                cJSON* themeAuthor;
+                cJSON* themeIconTitle;
+                cJSON* themeLang;
+
+                if (json_data != NULL){
+                    request_json = cJSON_Parse(json_data);
+
+                    themeName = cJSON_GetObjectItem(request_json, "name");
+                    themeAuthor = cJSON_GetObjectItem(request_json, "author");
+                    themeIconTitle = cJSON_GetObjectItem(request_json, "hideIconTitle");
+
+                    if (cJSON_IsTrue(themeIconTitle))
+						hideIconTitle = 1;
+
+                    char title[256];
+                    if (themeAuthor)
+                        sprintf(title, "%s by %s", cJSON_GetStringValue(themeName), cJSON_GetStringValue(themeAuthor));
+                    else
+                        sprintf(title, "%s", cJSON_GetStringValue(themeName));
+
+                    imagePages = TTF_RenderUTF8_Blended(font40, title, color_white);
+                    SDL_BlitSurface(imagePages, NULL, screen, &rectThemeDescription);
+	                SDL_FreeSurface(imagePages);
+                }
+            }
+        }
+
+        SDL_BlitSurface(screen, NULL, video, NULL);
+        SDL_Flip(video);
+
+        changed = false;
+    }
+
+    msleep(100);
+
+    for (i = 0; i < themes_count; i++)
+        SDL_FreeSurface(previews[i]);
+	SDL_FreeSurface(surfaceArrowLeft);
+	SDL_FreeSurface(surfaceArrowRight);
+    SDL_Quit();
+
     return EXIT_SUCCESS;
 }

@@ -12,9 +12,9 @@
 #define JSON_FORMAT_STRING    "    \"%s\": \"%s\",\n"
 #define JSON_FORMAT_STRING_NC "    \"%s\": \"%s\"\n"
 
-bool json_string(cJSON* root, const char* key, char* dest)
+bool json_string(cJSON* object, const char* key, char* dest)
 {
-    cJSON* json_object = cJSON_GetObjectItem(root, key);
+    cJSON* json_object = cJSON_GetObjectItem(object, key);
     if (json_object) {
         strncpy(dest, cJSON_GetStringValue(json_object), JSON_STRING_LEN - 1);
         return true;
@@ -22,9 +22,9 @@ bool json_string(cJSON* root, const char* key, char* dest)
     return false;
 }
 
-bool json_bool(cJSON* root, const char* key, bool* dest)
+bool json_bool(cJSON* object, const char* key, bool* dest)
 {
-    cJSON* json_object = cJSON_GetObjectItem(root, key);
+    cJSON* json_object = cJSON_GetObjectItem(object, key);
     if (json_object) {
         *dest = cJSON_IsTrue(json_object);
         return true;
@@ -32,9 +32,9 @@ bool json_bool(cJSON* root, const char* key, bool* dest)
     return false;
 }
 
-bool json_int(cJSON* root, const char* key, int* dest)
+bool json_int(cJSON* object, const char* key, int* dest)
 {
-    cJSON* json_object = cJSON_GetObjectItem(root, key);
+    cJSON* json_object = cJSON_GetObjectItem(object, key);
     if (json_object) {
         *dest = (int)cJSON_GetNumberValue(json_object);
         return true;
@@ -42,14 +42,51 @@ bool json_int(cJSON* root, const char* key, int* dest)
     return false;
 }
 
-bool json_double(cJSON* root, const char* key, double* dest)
+bool json_double(cJSON* object, const char* key, double* dest)
 {
-    cJSON* json_object = cJSON_GetObjectItem(root, key);
+    cJSON* json_object = cJSON_GetObjectItem(object, key);
     if (json_object) {
         *dest = cJSON_GetNumberValue(json_object);
         return true;
     }
     return false;
+}
+
+void json_setString(cJSON *object, const char *key, const char *value)
+{
+    cJSON* json_object = cJSON_GetObjectItem(object, key);
+    if (json_object) {
+        cJSON_SetValuestring(json_object, value);
+        return true;
+    }
+    return false;
+}
+
+/**
+ * @brief Loads and parses a json file.
+ * 
+ * @param file_path 
+ * @return cJSON* Root json object. Remember to cJSON_free the result.
+ */
+cJSON* json_load(char *file_path)
+{
+    return cJSON_Parse(file_read(file_path));
+}
+
+void json_save(cJSON *object, char *file_path) {
+    if (object == NULL || file_path == NULL)
+        return;
+
+    char *output = cJSON_Print(object);
+
+    FILE *fp = NULL;
+    if ((fp = fopen(file_path, "w+")) != NULL) {
+        fwrite(output, strlen(output), 1, fp);
+        fclose(fp);
+	}
+
+    if (output != NULL)
+        cJSON_free(output);
 }
 
 #endif // JSON_H__
