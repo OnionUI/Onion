@@ -74,7 +74,9 @@ int main(int argc, char *argv[])
         SDL_Surface* battery = theme_batterySurface(&theme, &res, battery_getPercentage());
         SDL_Rect battery_rect = {596 - battery->w / 2, 450 - battery->h / 2};
 	    SDL_BlitSurface(battery, NULL, screen, &battery_rect);
+
         SDL_FreeSurface(battery);
+        theme_freeResources(&res);
     }
 
     // Blit twice, to clear the video buffer
@@ -82,8 +84,6 @@ int main(int argc, char *argv[])
     SDL_Flip(video);
     SDL_BlitSurface(screen, NULL, video, NULL);
     SDL_Flip(video);
-
-    sleep(10);
 
     if (argc > 1 && strcmp(argv[1], "Boot") != 0)
         temp_flag_set(".offOrder", false);

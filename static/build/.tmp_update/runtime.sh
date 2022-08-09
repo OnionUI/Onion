@@ -20,7 +20,10 @@ main() {
     cd $sysdir
     ./bin/bootScreen "Boot"
 
-    cd $sysdir
+    # Start the battery monitor
+    ./bin/batmon 2>&1 > ./logs/batmon.log &
+
+    # Start the key monitor
     ./bin/keymon 2>&1 > ./logs/keymon.log &
 
     # Init
@@ -164,9 +167,6 @@ init_system() {
     echo 800 > /sys/class/pwm/pwmchip0/pwm0/period
     echo 80 > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
     echo 1 > /sys/class/pwm/pwmchip0/pwm0/enable
-
-    # Start the battery monitor
-    ./bin/batmon
 }
 
 update_time() {

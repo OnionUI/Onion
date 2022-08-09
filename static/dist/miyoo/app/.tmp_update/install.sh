@@ -44,7 +44,7 @@ main() {
     cd $installdir
 
     # Start the battery monitor
-    ./bin/batmon
+    ./bin/batmon 2>&1 > ./logs/batmon.log &
 
     # Prompt for update or fresh install
     ./bin/prompt -r -m "Welcome to the Onion installer!\nPlease choose an action:" \
