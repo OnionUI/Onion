@@ -19,6 +19,7 @@
 #include "utils/config.h"
 #include "utils/battery.h"
 #include "system/settings.h"
+#include "system/settings_sync.h"
 #include "system/keymap_hw.h"
 #include "system/rumble.h"
 #include "system/system.h"
@@ -471,6 +472,7 @@ int main(void) {
                                 settings_load();
                                 if (settings.brightness > 0) {
                                     settings_setBrightness(settings.brightness - 1, true);
+                                    settings_sync();
                                     settings_save();
                                 }
                                 break;
@@ -498,6 +500,7 @@ int main(void) {
                             settings_load();
                             if (settings.brightness < MAX_BRIGHTNESS) {
                                 settings_setBrightness(settings.brightness + 1, true);
+                                settings_sync();
                                 settings_save();
                             }
                             break;
