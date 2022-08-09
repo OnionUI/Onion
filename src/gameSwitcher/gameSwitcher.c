@@ -24,7 +24,8 @@
 #define MAXHISTORY 50
 #define MAXHROMNAMESIZE 250
 #define MAXHROMPATHSIZE 150
- 
+
+#define ROM_SCREENS_DIR "/mnt/SDCARD/.tmp_update/romScreens"
 
 #define MAXFILENAMESIZE 250
 #define MAXSYSPATHSIZE 80
@@ -484,10 +485,11 @@ int main(void) {
 	SDL_Surface* imageRemoveDialog= IMG_Load("res/removeDialog.png");
 	SDL_Surface* imageBackgroundGame;
 	SDL_Surface* imageFooterHelp = IMG_Load("res/footerHelp.png");	
-	char currPicture[MAXHROMNAMESIZE+44];
 	
-	sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",file_removeExtension(game_list[current_game].name),".png");	 
+	char currPicture[MAXHROMNAMESIZE+44];
+	sprintf(currPicture, ROM_SCREENS_DIR "/%s%s", file_removeExtension(game_list[current_game].name), ".png");	 
 	// Move screenshot to destination
+	mkdirs(ROM_SCREENS_DIR);
 	rename("screenshotGame.png", currPicture); 
 /*
 	if(file_exists("screenshotGame.bmp")==1){
@@ -508,7 +510,7 @@ int main(void) {
 			if (firstPass > 2)
 			firstPass = 0;
 			
-    		sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",file_removeExtension(game_list[current_game].name),".png");
+    		sprintf(currPicture, ROM_SCREENS_DIR "/%s%s", file_removeExtension(game_list[current_game].name), ".png");
     		
  
     		if (file_exists(currPicture)){
@@ -570,7 +572,7 @@ int main(void) {
             		if (current_game<(game_list_len-1)){
                 		current_game ++;
                 		
-                		sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",file_removeExtension(game_list[current_game].name),".png");
+                		sprintf(currPicture, ROM_SCREENS_DIR "/%s%s", file_removeExtension(game_list[current_game].name), ".png");
                 		if (file_exists(currPicture)==1){
 							if (imageBackgroundGame != NULL){
 								SDL_FreeSurface(imageBackgroundGame); 
@@ -583,7 +585,7 @@ int main(void) {
 				if (left_pressed) {	
 					if (current_game>0){
 						current_game --;
-						sprintf(currPicture,"/mnt/SDCARD/.tmp_update/romScreens/%s%s",file_removeExtension(game_list[current_game].name),".png");
+						sprintf(currPicture, ROM_SCREENS_DIR "/%s%s", file_removeExtension(game_list[current_game].name), ".png");
 						if (file_exists(currPicture)==1){
 							if (imageBackgroundGame != NULL){
 								SDL_FreeSurface(imageBackgroundGame); 

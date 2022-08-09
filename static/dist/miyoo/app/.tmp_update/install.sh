@@ -138,7 +138,7 @@ fresh_install() {
     cd /mnt/SDCARD
     rm -rf Emu/* RApp/* Imgs miyoo
 
-    install_core "Installing core..."
+    install_core "Installing Onion..."
 
     if [ $install_ra -eq 1 ]; then
         free_ui_switch_to_ra # frees memory
@@ -184,10 +184,10 @@ update_only() {
 
     # Show installation progress
     cd $installdir
-    ./bin/installUI -b $install_core_begin -t $install_core_offset &
+    ./bin/installUI -b $install_core_begin -t $install_core_offset -m "Preparing update..." &
     sleep 1
 
-    install_core "Updating core..."
+    install_core "Updating Onion..."
 
     if [ $install_ra -eq 1 ]; then
         free_ui_switch_to_ra # frees memory
@@ -220,7 +220,7 @@ free_ui_switch_to_ra() {
 }
 
 install_core() {
-    echo ":: Install core"
+    echo ":: Install Onion"
     msg="$1"
 
     if [ ! -f "$core_zipfile" ]; then

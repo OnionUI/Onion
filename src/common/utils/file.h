@@ -39,6 +39,24 @@ bool file_isModified(const char *path, time_t* old_mtime) {
 	return false;
 }
 
+/**
+ * @brief Create directories in dir_path using `mkdir -p` command.
+ * 
+ * @param dir_path The full directory path.
+ * @return true If the path didn't exist (dirs were created).
+ * @return false If the path exists (no dirs were created).
+ */
+bool mkdirs(const char *dir_path)
+{
+    if (!file_exists(dir_path)) {
+        char dir_cmd[512];
+        sprintf(dir_cmd, "mkdir -p \"%s\"", dir_path);
+        system(dir_cmd);
+        return true;
+    }
+    return false;
+}
+
 void file_readLastLine(const char* filename, char* out_str)
 {
 	FILE *fd;
