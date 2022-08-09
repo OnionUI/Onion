@@ -108,14 +108,9 @@ void installFaultyImage(const char *theme_path, const char *image_name)
 
 void installTheme(const char *theme_name, bool hideIconTitle)
 {
-    char theme_path[200];
-    sprintf(theme_path, "/mnt/SDCARD/Themes/%s/", theme_name);
-
     // change theme setting
-    cJSON *settings = json_load("/appconfigs/system.json");
-    json_setString(settings, "theme", theme_path);
-    json_save(settings, "/appconfigs/system.json");
-    cJSON_free(settings);
+    sprintf(settings.theme, "/mnt/SDCARD/Themes/%s/", theme_name);
+    settings_save();
 
     if (hideIconTitle) {
         if (!file_exists(SYSTEM_LANG_BACKUP_DIR)) {
@@ -131,8 +126,8 @@ void installTheme(const char *theme_name, bool hideIconTitle)
         remove(SYSTEM_LANG_BACKUP_DIR);
     }
 
-    installFaultyImage(theme_path, "bg-io-testing");
-    installFaultyImage(theme_path, "ic-MENU+A");
+    installFaultyImage(settings.theme, "bg-io-testing");
+    installFaultyImage(settings.theme, "ic-MENU+A");
 }
 
 int main(void)
@@ -182,7 +177,8 @@ int main(void)
 
     SDL_Color color_white = {255, 255, 255};
 
-    SDL_Surface* surfaceThemeBackground;
+    SDL_Surface* background_page0 = IMG_Load(".appRessources/background.png");
+    SDL_Surface* background_page1 = IMG_Load(".appRessources/themeDetail.png");
 
     SDL_Surface* imagePages;
     SDL_Surface* imageThemeNom;
@@ -190,6 +186,7 @@ int main(void)
     SDL_Surface* surfaceArrowLeft = IMG_Load(".appRessources/arrowLeft.png");
     SDL_Surface* surfaceArrowRight = IMG_Load(".appRessources/arrowRight.png");
 
+    SDL_Rect previewSrcRect = {0, 0, 480, 320};
     SDL_Rect rectArrowLeft = {24, 210, 28, 32};
     SDL_Rect rectArrowRight = {588, 210, 28, 32};
     SDL_Rect rectPages = {559, 450};
@@ -273,8 +270,8 @@ int main(void)
             break;
 
         if (levelPage == 0) {
-            SDL_FillRect(screen, NULL, 0);
-            SDL_BlitSurface(previews[current_page], NULL, screen, &rectThemePreview);
+            SDL_BlitSurface(previews[current_page], &previewSrcRect, screen, &rectThemePreview);
+            SDL_BlitSurface(background_page0, NULL, screen, NULL);
 
             if (current_page != 0) {
                 SDL_BlitSurface(surfaceArrowLeft, NULL, screen, &rectArrowLeft);
@@ -312,10 +309,7 @@ int main(void)
             }
         }
         else {
-            surfaceThemeBackground = IMG_Load(".appRessources/themeDetail.png");
-            SDL_FillRect(screen, NULL, 0);
-            SDL_BlitSurface(surfaceThemeBackground, NULL, screen, NULL);
-            SDL_FreeSurface(surfaceThemeBackground);
+            SDL_BlitSurface(background_page1, NULL, screen, NULL);
 
             sprintf(theme_path, "/mnt/SDCARD/Themes/%s/config.json", themes[current_page]);
 
@@ -363,6 +357,8 @@ int main(void)
         SDL_FreeSurface(previews[i]);
 	SDL_FreeSurface(surfaceArrowLeft);
 	SDL_FreeSurface(surfaceArrowRight);
+	SDL_FreeSurface(background_page0);
+	SDL_FreeSurface(background_page1);
     SDL_Quit();
 
     return EXIT_SUCCESS;
