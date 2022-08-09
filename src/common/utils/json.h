@@ -2,6 +2,7 @@
 #define JSON_H__
 
 #include <stdbool.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "cjson/cJSON.h"
@@ -52,7 +53,7 @@ bool json_double(cJSON* object, const char* key, double* dest)
     return false;
 }
 
-void json_setString(cJSON *object, const char *key, const char *value)
+bool json_setString(cJSON *object, const char *key, const char *value)
 {
     cJSON* json_object = cJSON_GetObjectItem(object, key);
     if (json_object) {

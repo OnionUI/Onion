@@ -137,7 +137,7 @@ int main(void)
 
 	int themes_count = 0;
 	char themes[NUMBER_OF_THEMES][MAX_THEME_NAME_SIZE];
-    char theme_path[250];
+    char theme_path[512];
     int current_page = 0;
     int hideIconTitle = 0;
 
@@ -186,7 +186,7 @@ int main(void)
     SDL_Surface* surfaceArrowLeft = IMG_Load(".appRessources/arrowLeft.png");
     SDL_Surface* surfaceArrowRight = IMG_Load(".appRessources/arrowRight.png");
 
-    SDL_Rect previewSrcRect = {0, 0, 480, 320};
+    SDL_Rect preview_src_rect = {0, 0, 480, 360};
     SDL_Rect rectArrowLeft = {24, 210, 28, 32};
     SDL_Rect rectArrowRight = {588, 210, 28, 32};
     SDL_Rect rectPages = {559, 450};
@@ -270,7 +270,7 @@ int main(void)
             break;
 
         if (levelPage == 0) {
-            SDL_BlitSurface(previews[current_page], &previewSrcRect, screen, &rectThemePreview);
+            SDL_BlitSurface(previews[current_page], &preview_src_rect, screen, &rectThemePreview);
             SDL_BlitSurface(background_page0, NULL, screen, NULL);
 
             if (current_page != 0) {

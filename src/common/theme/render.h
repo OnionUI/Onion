@@ -8,6 +8,9 @@
 #include "components/menu.h"
 
 
+typedef enum { ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT } text_alignment_e;
+
+
 SDL_Surface* _getBatterySurface(Theme_Surfaces_s* s, int percentage)
 {
     if (percentage == 500)
@@ -78,7 +81,7 @@ SDL_Surface* theme_batterySurface(Theme_s* theme, Resources_s* res, int percenta
     return image;
 }
 
-SDL_Surface* theme_textboxSurface(Theme_s* theme, Resources_s* res, char *message, TTF_Font *font, SDL_Color fg)
+SDL_Surface* theme_textboxSurface(Theme_s* theme, char *message, TTF_Font *font, SDL_Color fg, text_alignment_e align)
 {
     SDL_Surface **lines = malloc(6 * sizeof(SDL_Surface*));
     int line_count = 0;
@@ -106,7 +109,13 @@ SDL_Surface* theme_textboxSurface(Theme_s* theme, Resources_s* res, char *messag
     
     int i;
     for (i = 0; i < line_count; i++) {
+        if (align == ALIGN_CENTER)
+            line_rect.x = (line_width - lines[i]->w) / 2;
+        else if (align == ALIGN_RIGHT)
+            line_rect.x = line_width - lines[i]->w;
+
         line_rect.y = line_height * i + (line_height - lines[i]->h) / 2;
+
         SDL_BlitSurface(lines[i], NULL, textbox, &line_rect);
         SDL_FreeSurface(lines[i]);
     }
@@ -220,13 +229,19 @@ void theme_renderStandardHint(Theme_s* theme, Resources_s* res, SDL_Surface* scr
         SDL_FreeSurface(label_open);
 }
 
-void theme_renderListFooter(Theme_s* theme, Resources_s* res, SDL_Surface* screen, Menu_s* menu, char *label_open_str, char *label_back_str)
+void theme_renderFooter(Theme_s* theme, Resources_s* res, SDL_Surface* screen)
 {
 	Theme_Surfaces_s* s = &res->surfaces;
     
     SDL_Rect footer_rect = {0, 420};
 	SDL_BlitSurface(s->bg_footer, NULL, screen, &footer_rect);
+}
 
+void theme_renderListFooter(Theme_s* theme, Resources_s* res, SDL_Surface* screen, Menu_s* menu, char *label_open_str, char *label_back_str)
+{
+	Theme_Surfaces_s* s = &res->surfaces;
+    
+    theme_renderFooter(theme, res, screen);
     theme_renderStandardHint(theme, res, screen, label_open_str, label_back_str);
 
     char current_str[16];
