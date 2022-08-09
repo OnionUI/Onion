@@ -366,6 +366,12 @@ backup_system() {
     if [ -d /mnt/SDCARD/Imgs ]; then
         mv -f /mnt/SDCARD/Imgs/* /mnt/SDCARD/Backup/Imgs
     fi
+
+    # Romscreens
+    if [ -d $sysdir/romScreens ]; then
+        mkdir -p /mnt/SDCARD/Saves/CurrentProfile/states/romScreens
+        mv -f $sysdir/romScreens/* /mnt/SDCARD/Saves/CurrentProfile/states/romScreens
+    fi
 }
 
 debloat_apps() {
