@@ -12,9 +12,9 @@
 
 #define CONFIG_PATH "/mnt/SDCARD/.tmp_update/config/"
 
-void config_flag_get(const char *key)
+bool config_flag_get(const char *key)
 {
-    flag_get(CONFIG_PATH, key);
+    return flag_get(CONFIG_PATH, key);
 }
 
 void config_flag_set(const char *key, bool value)
