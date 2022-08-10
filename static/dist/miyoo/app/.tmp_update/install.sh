@@ -375,8 +375,8 @@ backup_system() {
 
     # Romscreens
     if [ -d $sysdir/romScreens ]; then
-        mkdir -p /mnt/SDCARD/Saves/CurrentProfile/states/romScreens
-        mv -f $sysdir/romScreens/* /mnt/SDCARD/Saves/CurrentProfile/states/romScreens
+        mkdir -p /mnt/SDCARD/Saves/CurrentProfile/romScreens
+        mv -f $sysdir/romScreens/* /mnt/SDCARD/Saves/CurrentProfile/romScreens
     fi
 }
 

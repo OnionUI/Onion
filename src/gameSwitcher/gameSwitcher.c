@@ -25,7 +25,7 @@
 #define MAXHROMNAMESIZE 250
 #define MAXHROMPATHSIZE 150
 
-#define ROM_SCREENS_DIR "/mnt/SDCARD/Saves/CurrentProfile/states/romScreens"
+#define ROM_SCREENS_DIR "/mnt/SDCARD/Saves/CurrentProfile/romScreens"
 
 #define MAXFILENAMESIZE 250
 #define MAXSYSPATHSIZE 80
