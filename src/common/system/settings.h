@@ -28,6 +28,7 @@ static struct settings_s
     int fontsize;
     int audiofix;
     bool vibration;
+    bool menu_haptics;
     bool launcher;
     bool menu_inverted;
     bool low_battery_warning;
@@ -51,6 +52,7 @@ settings = {
     .audiofix = 1,
     // Onion settings
     .vibration = true,
+    .menu_haptics = false,
     .launcher = true,
     .menu_inverted = false,
     .low_battery_warning = true,
@@ -62,6 +64,7 @@ void settings_load(void)
     const char *json_str = NULL;
 
     settings.vibration = !config_flag_get(".noVibration");
+    settings.menu_haptics = config_flag_get(".menuHaptics");
     settings.menu_inverted = config_flag_get(".menuInverted");
     settings.launcher = !config_flag_get(".noGameSwitcher");
     settings.low_battery_warning = !config_flag_get(".noBatteryWarning");
@@ -96,6 +99,7 @@ void settings_save(void)
     FILE *fp;
 
     config_flag_set(".noVibration", !settings.vibration);
+    config_flag_set(".menuHaptics", settings.menu_haptics);
     config_flag_set(".menuInverted", settings.menu_inverted);
     config_flag_set(".noGameSwitcher", !settings.launcher);
     config_flag_set(".noBatteryWarning", !settings.low_battery_warning);

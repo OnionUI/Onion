@@ -217,12 +217,29 @@ void shutdown(void) {
     exit(0);
 }
 
+/**
+ * @brief stop input event for other processes
+ * 
+ */
+void keyinput_disable(void)
+{
+    while (ioctl(input_fd, EVIOCGRAB, 1) < 0) { usleep(100000); }
+}
+
+/**
+ * @brief restart input event for other processes
+ * 
+ */
+void keyinput_enable(void)
+{
+    while (ioctl(input_fd, EVIOCGRAB, 0) < 0) { usleep(100000); }
+}
+
 //
 //    Suspend interface
 //
 void suspend_exec(int timeout) {
-    // stop input event for other processes
-    while (ioctl(input_fd, EVIOCGRAB, 1) < 0) { usleep(100000); }
+    keyinput_disable();
 
     // suspend
     system_clock_pause(true);
@@ -282,8 +299,7 @@ void suspend_exec(int timeout) {
         system_clock_pause(false);
     }
 
-    // restart input event for other processes
-    while (ioctl(input_fd, EVIOCGRAB, 0) < 0) { usleep(100000); }
+    keyinput_enable();
 }
 
 //
@@ -371,7 +387,6 @@ int main(void) {
     uint32_t comboKey = 0;
 
     struct timespec recent;
-    clock_gettime(CLOCK_MONOTONIC_COARSE, &recent);
     struct timespec hibernate_start = recent;
     int hibernate_time;
     int elapsed_sec = 0;
@@ -397,27 +412,6 @@ int main(void) {
 
                 if (b_BTN_Menu_Pressed == 1 && b_BTN_Not_Menu_Pressed == 1)
                     comboKey = 1;
-
-                if (b_BTN_Menu_Pressed == 1 && ev.code == HW_BTN_POWER){
-                    // screenshot
-                    screenshot_recent();
-                    continue;
-                }
-
-                if (ev.code == HW_BTN_MENU && val == 0) {
-                    if (comboKey == 0 && process_isRunning("retroarch") && check_autosave()) {
-                        if (settings.launcher && !settings.menu_inverted) {
-                            temp_flag_set(".trimUIMenu", true);
-                            screenshot_system();
-                            terminate_retroarch();
-                        }
-                        else {
-                            temp_flag_set(".trimUIMenu", false);
-                            terminate_retroarch();
-                        }
-                    }
-                    comboKey = 0;
-                }
             }
 
             switch (ev.code) {
@@ -510,28 +504,45 @@ int main(void) {
                     }
                     break;
                 case HW_BTN_MENU:
-                    if (val == REPEAT) {
-                        repeat_menu++;
-                        if (repeat_menu == REPEAT_SEC(1) && !button_flag) {    // long press on menu
-                            if (!settings.menu_inverted) {
-                                if (process_isRunning("retroarch")) {
-                                    temp_flag_set(".trimUIMenu", false);
-                                    short_pulse();
-                                    terminate_retroarch();
-                                }
-                            }
-                            else if (settings.launcher) {
-                                if (process_isRunning("retroarch")) {
-                                    short_pulse();
+                    if (val == RELEASED) {
+                        if (comboKey == 0) { // short press on menu
+                            if (process_isRunning("retroarch") && check_autosave()) {
+                                menu_super_short_pulse();
+                                if (settings.launcher && !settings.menu_inverted) {
                                     temp_flag_set(".trimUIMenu", true);
                                     screenshot_system();
                                     terminate_retroarch();
                                 }
+                                else {
+                                    temp_flag_set(".trimUIMenu", false);
+                                    terminate_retroarch();
+                                }
                             }
-                            else {
-                                comboKey = 1;
+                        }
+                        comboKey = 0;
+                    }
+                    if (val == REPEAT) {
+                        repeat_menu++;
+                        if (repeat_menu == REPEAT_SEC(1) && !button_flag) { // long press on menu
+                            pid_t pid;
+                            if (pid = process_searchpid("MainUI")) {
+                                super_short_pulse();
+                                temp_flag_set(".trimUIMenu", true);
+                                kill(pid, SIGKILL);
+                            }
+                            else if (process_isRunning("retroarch")) {
+                                short_pulse();
+                                if (!settings.menu_inverted) {
+                                    temp_flag_set(".trimUIMenu", false);
+                                }
+                                else if (settings.launcher) {
+                                    temp_flag_set(".trimUIMenu", true);
+                                    screenshot_system();
+                                }
+                                terminate_retroarch();
                             }
                             repeat_menu = 0;
+                            comboKey = 1;  // this will avoid to trigger short press action
                         }
                     }
                     break;
@@ -546,6 +557,9 @@ int main(void) {
 
         // Comes here every CHECK_SEC(def:15) seconds interval
 
+        // Update recent time
+        clock_gettime(CLOCK_MONOTONIC_COARSE, &recent);
+
         // Check Hibernate
         if (temp_flag_get("battery_charging"))
             hibernate_time = 1;
@@ -553,7 +567,6 @@ int main(void) {
             hibernate_time = settings.sleep_timer;
 
         if (hibernate_time && !temp_flag_get("stay_awake")) {
-            clock_gettime(CLOCK_MONOTONIC_COARSE, &recent);
             if (recent.tv_sec - hibernate_start.tv_sec >= hibernate_time * 60) {
                 suspend_exec(SHUTDOWN_MIN * 60000);
                 clock_gettime(CLOCK_MONOTONIC_COARSE, &hibernate_start);
@@ -564,8 +577,6 @@ int main(void) {
         if (battery_getPercentage() <= 4 && settings.low_battery_autosave && check_autosave())
             terminate_retroarch();
 
-        // Update recent time
-        clock_gettime(CLOCK_MONOTONIC_COARSE, &recent);
         elapsed_sec = 0;
     }
 }

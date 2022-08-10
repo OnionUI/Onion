@@ -12,8 +12,18 @@
 
 #define CONFIG_PATH "/mnt/SDCARD/.tmp_update/config/"
 
-#define config_flag_get(key) flag_get(CONFIG_PATH, key)
-#define config_flag_set(key, value) flag_set(CONFIG_PATH, key, value)
+void config_flag_get(const char *key)
+{
+    flag_get(CONFIG_PATH, key);
+}
+
+void config_flag_set(const char *key, bool value)
+{
+    char hidden_flag[STR_MAX];
+    concat(hidden_flag, key, "_");
+    flag_set(CONFIG_PATH, key, value);
+    flag_set(CONFIG_PATH, hidden_flag, !value);
+}
 
 bool config_get(const char *key, const char *format, void *dest) {
     FILE *fp;
