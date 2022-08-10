@@ -19,6 +19,7 @@
 
 #include "system/system.h"
 #include "system/display.h"
+#include "system/battery.h"
 #include "utils/flags.h"
 #include "utils/config.h"
 #include "utils/file.h"
