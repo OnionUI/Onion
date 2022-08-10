@@ -459,7 +459,6 @@ int main(void) {
 	
 	int run = 1;
 	int firstPass = 1;
-	int comboKey = 0;
 	
 	// SDL_Surface* video = SDL_SetVideoMode(640,480, 32, SDL_HWSURFACE);
 	SDL_Surface* video = SDL_SetVideoMode(640,480, 32, SDL_HWSURFACE|SDL_DOUBLEBUF);     // activate double buffering to display the UI after MainUI
@@ -475,10 +474,7 @@ int main(void) {
 	
 	imageBatt = TTF_RenderUTF8_Blended(font, currBat, color);
 
-	
-
 	free(currBat);
-	
 	
 	SDL_Surface* imageBackgroundDefault = IMG_Load("res/bootScreen.png");
 	SDL_Surface* imageBackgroundLowBat = IMG_Load("res/lowBat.png");
@@ -499,7 +495,6 @@ int main(void) {
 
 	}	
 	*/
-	
 
 	while(run) { 
 		int bBrightChange = 0;	
@@ -524,31 +519,14 @@ int main(void) {
 		}
 		else {
 			if(read(input_fd, &ev, sizeof(ev)) == sizeof(ev) ){
-
 				val = ev.value;
-				
-				if (( ev.code != HW_BTN_MENU )&&(val == 1)) {
-					comboKey = 1;
-				}
-				
-				if ( ev.code == HW_BTN_MENU ) {
-						menu_pressed = val;
-						if (menu_pressed == 1){
-							comboKey = 0 ;
-						}
-						else {
-							if (comboKey == 0){
-								comboKey = 1 ;
-								//super_short_pulse();
-								break;
 
-							}
-						
-						}
-				}	
-				
-				
 				if (ev.type != EV_KEY || val > 1) continue;
+				
+				if (ev.code == HW_BTN_MENU && val == 1) {
+					run = 0;
+					break;
+				}
 				
 				switch (ev.code)
 				{
@@ -638,29 +616,24 @@ int main(void) {
 				
 			}
 		}
-			
-		
+
 		long lSize;
 		FILE *fp;
-		
 
-		if (game_list_len==0){
+		if (game_list_len==0) {
 			SDL_BlitSurface(imageBackgroundNoGame, NULL, screen, NULL);
 		}
 		else{
   			if (nBat > LOWBATRUMBLE){
-  		
             	if (file_exists(currPicture)==1){
-                		SDL_BlitSurface(imageBackgroundGame, NULL, screen, NULL);         
+					SDL_BlitSurface(imageBackgroundGame, NULL, screen, NULL);         
                 	//	SDL_FreeSurface(imageBackgroundGame);         
             	}
             	else{
-            	
                 	SDL_BlitSurface(imageBackgroundDefault, NULL, screen, NULL);
             	}
         	}
-        	else {	
-        	
+        	else {
             	SDL_BlitSurface(imageBackgroundLowBat, NULL, screen, NULL); 
         	}
 		}
