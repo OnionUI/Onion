@@ -136,17 +136,27 @@ check_off_order() {
 
 recentlist=/mnt/SDCARD/Roms/recentlist.json
 recentlist_hidden=/mnt/SDCARD/Roms/recentlist-hidden.json
+recentlist_temp=/tmp/recentlist-temp.json
 
 check_hide_recents() {
-    # Hide the recents tab by removing the json file
-    if [ -f $recentlist ]; then
-        cat $recentlist $recentlist_hidden > temp && mv temp $recentlist_hidden
-        rm -f $recentlist
+    # Hide recents on
+    if [ -f $sysdir/config/.hideRecents ]; then
+        # Hide recents by removing the json file
+        if [ -f $recentlist ]; then
+            cat $recentlist $recentlist_hidden > $recentlist_temp
+            mv -f $recentlist_temp $recentlist_hidden
+            rm -f $recentlist
+        fi
+    # Hide recents off
+    else
+        # Restore recentlist 
+        if [ -f $recentlist_hidden ]; then
+            cat $recentlist $recentlist_hidden > $recentlist_temp
+            mv -f $recentlist_temp $recentlist
+            rm -f $recentlist_hidden
+        fi
     fi
-    # Restore recentlist 
-    if [ -f $recentlist_hidden ] && [ ! -f $sysdir/config/.hideRecents ]; then
-        mv -f $recentlist_hidden $recentlist
-    fi
+    sync
 }
 
 init_system() {
