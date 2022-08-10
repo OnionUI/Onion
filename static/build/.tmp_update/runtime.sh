@@ -6,10 +6,11 @@ main() {
     init_system
     update_time
     clear_logs
-    
-    is_charging=`cat /sys/devices/gpiochip0/gpio/gpio59/value`
 
-    if [ $is_charging -eq 1 ]; then
+    # Start the battery monitor
+    ./bin/batmon 2>&1 > ./logs/batmon.log &
+    
+    if [ `cat /sys/devices/gpiochip0/gpio/gpio59/value` -eq 1 ]; then
         cd $sysdir
         ./bin/chargingState
     fi
@@ -19,9 +20,6 @@ main() {
 
     cd $sysdir
     ./bin/bootScreen "Boot"
-
-    # Start the battery monitor
-    ./bin/batmon 2>&1 > ./logs/batmon.log &
 
     # Start the key monitor
     ./bin/keymon 2>&1 > ./logs/keymon.log &

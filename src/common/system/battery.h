@@ -3,6 +3,7 @@
 
 #include "utils/file.h"
 #include "utils/process.h"
+#include "system/system.h"
 
 /**
  * @brief Retrieve the current battery percentage as reported by batmon
@@ -42,10 +43,22 @@ int battery_getPercentage(void)
 bool battery_isCharging(void)
 {
     #ifdef PLATFORM_MIYOOMINI
-    int value = 0;
-    FILE *fp;
-    file_get(fp, "/sys/devices/gpiochip0/gpio/gpio59/value", "%d", &value);
-    return value == 1;
+    char charging = 0;
+    int fd = open(GPIO_DIR2 "gpio59/value", O_RDONLY);
+
+    if (fd < 0) {
+        // export gpio59, direction: in
+        file_write(GPIO_DIR1 "export", "59", 2);
+        file_write(GPIO_DIR2 "gpio59/direction", "in", 2);
+        fd = open(GPIO_DIR2 "gpio59/value", O_RDONLY);
+    }
+
+    if (fd >= 0) {
+        read(fd, &charging, 1);
+        close(fd);        
+    }
+
+    return charging == '1';
     #else
     return true;
     #endif

@@ -11,7 +11,6 @@
 #include <sys/ioctl.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
-#include <SDL/SDL_ttf.h>
 
 #include "utils/msleep.h"
 #include "utils/keystate.h"
@@ -71,7 +70,6 @@ int main(void)
     SDL_Init(SDL_INIT_VIDEO);
     SDL_ShowCursor(SDL_DISABLE);
     SDL_EnableKeyRepeat(300, 50);
-    TTF_Init();
 
     SDL_Surface* video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
     SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);

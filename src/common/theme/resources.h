@@ -75,7 +75,7 @@ Resources_s theme_loadResources(Theme_s* t, enum theme_Images requests[], int nu
         }
     };
     Theme_Surfaces_s* s = &res.surfaces;
-    bool backup_exists;
+    int real_location, backup_location;
 
     for (i = 0; i < num_requests; i++) {
         switch (requests[i]) {
@@ -86,8 +86,9 @@ Resources_s theme_loadResources(Theme_s* t, enum theme_Images requests[], int nu
             case TR_BATTERY_50: s->battery_50 = theme_loadImage(t, "power-50%-icon"); break;
             case TR_BATTERY_80: s->battery_80 = theme_loadImage(t, "power-80%-icon"); break;
             case TR_BATTERY_100:
-                backup_exists = theme_getImagePath(t, "power-full-icon_back", NULL) != 0;
-                s->battery_100 = theme_loadImage(t, backup_exists ? "power-full-icon_back" : "power-full-icon");
+                real_location = theme_getImagePath(t, "power-full-icon", NULL);
+                backup_location = theme_getImagePath(t, "power-full-icon_back", NULL);
+                s->battery_100 = theme_loadImage(t, real_location == backup_location ? "power-full-icon_back" : "power-full-icon");
                 break;
             case TR_BATTERY_CHARGING: s->battery_charging = theme_loadImage(t, "ic-power-charge-100%"); break;
             case TR_BG_LIST_S: s->bg_list_small = theme_loadImage(t, "bg-list-s"); break;

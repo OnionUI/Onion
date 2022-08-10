@@ -39,15 +39,14 @@ void restoreRegularDisplay(Theme_s* theme)
 {
     char icon_path[STR_MAX],
          icon_backup[STR_MAX];
-    bool icon_exists = theme_getImagePath(theme, "power-full-icon", icon_path) != 0;
-    bool backup_exists = theme_getImagePath(theme, "power-full-icon_back", icon_backup) != 0;
+    bool icon_exists = theme_getImagePath(theme, "power-full-icon", icon_path) == 1;
+    bool backup_exists = theme_getImagePath(theme, "power-full-icon_back", icon_backup) == 1;
 
     // Restore regular battery display
     if (icon_exists && backup_exists) {
         char systemCommand[256*2+32*2+8];
         remove(icon_path);
-        sprintf(systemCommand, "cp \"%s\" \"%s\"", icon_backup, icon_path);
-        system(systemCommand);
+        file_copy(icon_backup, icon_path);
         remove(icon_backup);
     }
 }
@@ -56,14 +55,13 @@ void drawBatteryPercentage(Theme_s *theme)
 {
     char icon_path[STR_MAX],
          icon_backup[STR_MAX];
-    bool icon_exists = theme_getImagePath(theme, "power-full-icon", icon_path) != 0;
-    bool backup_exists = theme_getImagePath(theme, "power-full-icon_back", icon_backup) != 0;
+    bool icon_location = theme_getImagePath(theme, "power-full-icon", icon_path);
+    bool backup_location = theme_getImagePath(theme, "power-full-icon_back", icon_backup);
 
     // Backup old battery icon
-    if (icon_exists && !backup_exists || !icon_exists && !file_exists(icon_backup)) {
-        char systemCommand[256*2+32*2+8];
-        sprintf(systemCommand, "cp \"%s\" \"%s\"", icon_path, icon_backup);
-        system(systemCommand);
+    if (icon_location != backup_location) {
+        sprintf(icon_backup, "%s_back.png", file_removeExtension(icon_path));
+        file_copy(icon_path, icon_backup);
     }
 
     TTF_Init();
@@ -87,7 +85,7 @@ int main(int argc, char *argv[])
     Theme_s theme = loadThemeFromPath(settings.theme);
     if (argc > 1 && strcmp(argv[1], "--restore") == 0)
         restoreRegularDisplay(&theme);
-    else
+    else if (!battery_isCharging())
         drawBatteryPercentage(&theme);
     return 0;
 }

@@ -116,6 +116,8 @@ void installFaultyImage(const char *theme_path, const char *image_name)
 
 void installTheme(const char *theme_name, bool hideIconTitle)
 {
+    system("./bin/mainUiBatPerc --restore");
+
     // change theme setting
     sprintf(settings.theme, "/mnt/SDCARD/Themes/%s/", theme_name);
     settings_save();

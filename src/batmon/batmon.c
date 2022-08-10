@@ -71,29 +71,9 @@ void cleanup(void)
     close(sar_fd);
 }
 
-bool isCharging(void)
-{
-    char charging = 0;
-    int fd = open(GPIO_DIR2 "gpio59/value", O_RDONLY);
-
-    if (fd < 0) {
-        // export gpio59, direction: in
-        file_write(GPIO_DIR1 "export", "59", 2);
-        file_write(GPIO_DIR2 "gpio59/direction", "in", 2);
-        fd = open(GPIO_DIR2 "gpio59/value", O_RDONLY);
-    }
-
-    if (fd >= 0) {
-        read(fd, &charging, 1);
-        close(fd);        
-    }
-
-    return charging == '1';
-}
-
 int updateADCValue(int adc_value)
 {    
-    if (isCharging())
+    if (battery_isCharging())
         return 100;
 
     if (adc_value <= 100)
