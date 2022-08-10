@@ -17,7 +17,7 @@
 #include "utils/process.h"
 #include "utils/flags.h"
 #include "utils/config.h"
-#include "utils/battery.h"
+#include "system/battery.h"
 #include "system/settings.h"
 #include "system/settings_sync.h"
 #include "system/keymap_hw.h"
@@ -92,12 +92,14 @@ int setVolumeRaw(int volume, int add) {
 //
 //    Terminate retroarch before kill/shotdown processes to save progress
 //
-int terminate_retroarch(void) {
+bool terminate_retroarch(void) {
     char fname[16];
     pid_t pid = process_searchpid("retroarch");
     if (!pid) pid = process_searchpid("ra32");
 
     if (pid) {
+        screenshot_system();
+        
         // send signal
         kill(pid, SIGCONT); usleep(100000); kill(pid, SIGTERM);
         // wait for terminate
@@ -107,9 +109,10 @@ int terminate_retroarch(void) {
         while (--count && file_exists(fname))
             usleep(200000); // 0.2s
 
-        return 1;
+        return true;
     }
-    return 0;
+
+    return false;
 }
 
 //
@@ -506,17 +509,16 @@ int main(void) {
                 case HW_BTN_MENU:
                     if (val == RELEASED) {
                         if (comboKey == 0) { // short press on menu
+                            pid_t pid;
                             if (process_isRunning("retroarch") && check_autosave()) {
                                 menu_super_short_pulse();
-                                if (settings.launcher && !settings.menu_inverted) {
-                                    temp_flag_set(".trimUIMenu", true);
-                                    screenshot_system();
-                                    terminate_retroarch();
-                                }
-                                else {
-                                    temp_flag_set(".trimUIMenu", false);
-                                    terminate_retroarch();
-                                }
+                                temp_flag_set(".runGameSwitcher", settings.switcher_enabled && !settings.menu_inverted);
+                                terminate_retroarch();
+                            }
+                            else if (settings.switcher_enabled && !settings.menu_inverted && (pid = process_searchpid("MainUI"))) {
+                                menu_super_short_pulse();
+                                temp_flag_set(".runGameSwitcher", true);
+                                kill(pid, SIGKILL);
                             }
                         }
                         comboKey = 0;
@@ -525,21 +527,15 @@ int main(void) {
                         repeat_menu++;
                         if (repeat_menu == REPEAT_SEC(1) && !button_flag) { // long press on menu
                             pid_t pid;
-                            if (pid = process_searchpid("MainUI")) {
-                                super_short_pulse();
-                                temp_flag_set(".trimUIMenu", true);
-                                kill(pid, SIGKILL);
-                            }
-                            else if (process_isRunning("retroarch")) {
+                            if (process_isRunning("retroarch")) {
                                 short_pulse();
-                                if (!settings.menu_inverted) {
-                                    temp_flag_set(".trimUIMenu", false);
-                                }
-                                else if (settings.launcher) {
-                                    temp_flag_set(".trimUIMenu", true);
-                                    screenshot_system();
-                                }
+                                temp_flag_set(".runGameSwitcher", settings.switcher_enabled && settings.menu_inverted);
                                 terminate_retroarch();
+                            }
+                            else if (settings.switcher_enabled && settings.menu_inverted && (pid = process_searchpid("MainUI"))) {
+                                super_short_pulse();
+                                temp_flag_set(".runGameSwitcher", true);
+                                kill(pid, SIGKILL);
                             }
                             repeat_menu = 0;
                             comboKey = 1;  // this will avoid to trigger short press action

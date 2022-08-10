@@ -86,7 +86,7 @@ Resources_s theme_loadResources(Theme_s* t, enum theme_Images requests[], int nu
             case TR_BATTERY_50: s->battery_50 = theme_loadImage(t, "power-50%-icon"); break;
             case TR_BATTERY_80: s->battery_80 = theme_loadImage(t, "power-80%-icon"); break;
             case TR_BATTERY_100:
-                backup_exists = theme_getImagePath(t, "power-full-icon_back", NULL);
+                backup_exists = theme_getImagePath(t, "power-full-icon_back", NULL) != 0;
                 s->battery_100 = theme_loadImage(t, backup_exists ? "power-full-icon_back" : "power-full-icon");
                 break;
             case TR_BATTERY_CHARGING: s->battery_charging = theme_loadImage(t, "ic-power-charge-100%"); break;

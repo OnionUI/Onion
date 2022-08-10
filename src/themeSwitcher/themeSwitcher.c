@@ -18,6 +18,7 @@
 #include "utils/log.h"
 #include "system/settings.h"
 #include "system/keymap_sw.h"
+#include "theme/config.h"
 
 #ifndef DT_REG
 #define DT_REG 8
@@ -84,22 +85,29 @@ void removeIconTitles(void)
 
 void installFaultyImage(const char *theme_path, const char *image_name)
 {
-    char theme_image_path[256],
+    char override_image_path[256],
+         theme_image_path[256],
          system_image_path[256],
          system_image_backup[256];
 
+    sprintf(override_image_path, "%sskin/%s.png", THEME_OVERRIDES, image_name);
     sprintf(theme_image_path, "%sskin/%s.png", theme_path, image_name);
     sprintf(system_image_path, SYSTEM_SKIN_DIR "/%s.png", image_name);
     sprintf(system_image_backup, SYSTEM_SKIN_DIR "/%s_back.png", image_name);
 
-    if (file_exists(theme_image_path)) {
-        if (!file_exists(system_image_backup))
-            // backup system skin
-            file_copy(system_image_path, system_image_backup);
+    // backup system skin
+    if (!file_exists(system_image_backup))
+        file_copy(system_image_path, system_image_backup);
+
+    if (file_exists(override_image_path)) {
+        // apply override image
+        file_copy(override_image_path, system_image_path);
+    }
+    else if (file_exists(theme_image_path)) {
         // apply theme image
         file_copy(theme_image_path, system_image_path);
     }
-    else if (file_exists(system_image_backup)) {
+    else {
         // restore system skin
         file_copy(system_image_backup, system_image_path);
         remove(system_image_backup);
@@ -177,14 +185,14 @@ int main(void)
 
     SDL_Color color_white = {255, 255, 255};
 
-    SDL_Surface* background_page0 = IMG_Load(".appRessources/background.png");
-    SDL_Surface* background_page1 = IMG_Load(".appRessources/themeDetail.png");
+    SDL_Surface* background_page0 = IMG_Load("res/background.png");
+    SDL_Surface* background_page1 = IMG_Load("res/themeDetail.png");
 
     SDL_Surface* imagePages;
     SDL_Surface* imageThemeNom;
 
-    SDL_Surface* surfaceArrowLeft = IMG_Load(".appRessources/arrowLeft.png");
-    SDL_Surface* surfaceArrowRight = IMG_Load(".appRessources/arrowRight.png");
+    SDL_Surface* surfaceArrowLeft = IMG_Load("res/arrowLeft.png");
+    SDL_Surface* surfaceArrowRight = IMG_Load("res/arrowRight.png");
 
     SDL_Rect preview_src_rect = {0, 0, 480, 360};
     SDL_Rect rectArrowLeft = {24, 210, 28, 32};
@@ -208,7 +216,7 @@ int main(void)
     int i;
     for (i = 0; i < themes_count; i++) {
         sprintf(theme_path, "/mnt/SDCARD/Themes/%s/preview.png", themes[i]);
-        previews[i] = IMG_Load(file_exists(theme_path) ? theme_path : ".appRessources/noThemePreview.png");
+        previews[i] = IMG_Load(file_exists(theme_path) ? theme_path : "res/noThemePreview.png");
     }
 
     char cPages[10];

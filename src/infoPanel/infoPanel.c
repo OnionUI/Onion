@@ -5,7 +5,7 @@
 
 #include "utils/utils.h"
 #include "utils/msleep.h"
-#include "utils/battery.h"
+#include "system/battery.h"
 #include "system/settings.h"
 #include "theme/theme.h"
 #include "theme/background.h"

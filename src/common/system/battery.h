@@ -41,7 +41,14 @@ int battery_getPercentage(void)
 
 bool battery_isCharging(void)
 {
-    return battery_getPercentage() == 500;
+    #ifdef PLATFORM_MIYOOMINI
+    int value = 0;
+    FILE *fp;
+    file_get(fp, "/sys/devices/gpiochip0/gpio/gpio59/value", "%d", &value);
+    return value == 1;
+    #else
+    return true;
+    #endif
 }
 
 #endif // BATTERY_H__

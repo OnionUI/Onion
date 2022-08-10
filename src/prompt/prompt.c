@@ -11,7 +11,7 @@
 #include <SDL/SDL_ttf.h>
 
 #include "utils/log.h"
-#include "utils/battery.h"
+#include "system/battery.h"
 #include "system/settings.h"
 #include "system/display.h"
 #include "system/keymap_hw.h"
@@ -144,9 +144,9 @@ int main(int argc, char *argv[])
 	struct input_event ev;
 	
 	int return_code = -1;
+	int battery_last_modified = 0;
 
-	uint32_t batt_timer = 0,
-			 shutdown_timer = 0,
+	uint32_t shutdown_timer = 0,
 			 acc_ticks = 0,
 			 last_ticks = SDL_GetTicks(),
 			 time_step = 1000 / FRAMES_PER_SECOND;
@@ -154,7 +154,6 @@ int main(int argc, char *argv[])
 	while (!quit) {
 		uint32_t ticks = SDL_GetTicks(),
 				 delta = ticks - last_ticks;
-		batt_timer += delta;
 		acc_ticks += delta;
 		last_ticks = ticks;
 
@@ -212,9 +211,8 @@ int main(int argc, char *argv[])
 		if (quit)
 			break;
 
-		if (batt_timer >= CHECK_BATTERY_TIMEOUT) {
+		if (file_isModified("/tmp/percBat", &battery_last_modified)) {
 			current_percentage = battery_getPercentage();
-			batt_timer = 0;
 
 			if (current_percentage != old_percentage) {
 				SDL_FreeSurface(battery);

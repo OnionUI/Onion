@@ -24,8 +24,6 @@ src/**/installUI
 !installUI/
 src/**/prompt
 !prompt/
-src/**/lastGame
-!lastGame/
 src/**/mainUiBatPerc
 !mainUiBatPerc/
 src/**/packageManager

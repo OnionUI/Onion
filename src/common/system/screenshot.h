@@ -6,6 +6,7 @@
 
 #include "utils/utils.h"
 #include "utils/process.h"
+#include "utils/log.h"
 #include "display.h"
 
 //
@@ -34,6 +35,9 @@ char* getrecent_onion(char *filename) {
         }
         fclose(fp);
     }
+
+    printf_debug("Last game: %s\n", filename);
+
     if (*filename == 0) return NULL;
     return filename;
 }
@@ -51,18 +55,8 @@ char* getrecent_png(char *filename) {
 
     fnptr = filename + strlen(filename);
 
-    if (file_exists("/tmp/cmd_to_run.sh")) {
-        // for stock
-        if ((fp = fopen("/mnt/SDCARD/Roms/recentlist.json", "r"))) {
-            fscanf(fp, "%*255[^:]:\"%255[^\"]", fnptr);
-            fclose(fp);
-        }
-    } else if (file_exists("/tmp/cmd_to_run_launcher.sh")) {
-        // for gameSwitcher
-        if (getrecent_onion(fnptr)) {
-            if ((strptr = strrchr(fnptr, '.'))) *strptr = 0;
-        }
-    }
+    if (file_exists("/mnt/SDCARD/.tmp_update/cmd_to_run.sh"))
+        getrecent_onion(fnptr);
 
     if (!(*fnptr)) {
         if (process_searchpid("gameSwitcher")) strcat(filename, "gameSwitcher");
@@ -126,7 +120,11 @@ void screenshot_recent(void) {
 }
 
 void screenshot_system(void) {
-    screenshot("/mnt/SDCARD/.tmp_update/screenshotGame.png");
+    char screenshot_path[512],
+         screenshot_name[256];
+    getrecent_onion(screenshot_name);
+    sprintf(screenshot_path, "/mnt/SDCARD/Saves/CurrentProfile/romScreens/%s.png", file_removeExtension(screenshot_name));
+    screenshot(screenshot_path);
 }
 
 #endif // SCREENSHOT_H__

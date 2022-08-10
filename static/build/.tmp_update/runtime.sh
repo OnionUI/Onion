@@ -85,31 +85,17 @@ check_game() {
 }
 
 launch_game() {
-    # TIMER INIT 
-    if  [ -f $sysdir/romName.txt ] ; then
-        cd $sysdir
-        ./bin/playActivity "init"
-    fi
-
     # GAME LAUNCH
     cd /mnt/SDCARD/RetroArch/
     $sysdir/cmd_to_run.sh
-
-    # TIMER SAVE
-    if  [ -f $sysdir/romName.txt ] ; then
-        cd $sysdir
-        value=$(cat romName.txt);
-        ./bin/playActivity "$value"    
-    fi
 }
 
 check_switcher() {
-    if  [ -f /tmp/.trimUIMenu ] ; then
+    if  [ -f /tmp/.runGameSwitcher ] ; then
         launch_switcher
     else 
         # Return to MainUI
         rm $sysdir/cmd_to_run.sh
-        rm $sysdir/romName.txt
         sync
     fi
     
@@ -117,7 +103,7 @@ check_switcher() {
 }
 
 launch_switcher() {
-    rm /tmp/.trimUIMenu
+    rm /tmp/.runGameSwitcher
     cd $sysdir
     LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./bin/gameSwitcher 2>&1 >> ./logs/gameSwitcher.log
     sync

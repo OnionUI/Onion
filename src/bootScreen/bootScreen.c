@@ -6,7 +6,7 @@
 
 #include "utils/file.h"
 #include "utils/flags.h"
-#include "utils/battery.h"
+#include "system/battery.h"
 #include "utils/log.h"
 #include "system/settings.h"
 #include "theme/theme.h"
@@ -51,8 +51,6 @@ int main(int argc, char *argv[])
         bShowBat = 1;
     }
     else {
-        char path[256];
-        printf_debug("Background: (%d) %s\n", theme_getImagePath(&theme, "extra/bootScreen", path) ? 1 : 0, path);
         background = theme_loadImage(&theme, "extra/bootScreen");
     }
 

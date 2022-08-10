@@ -29,7 +29,7 @@ static struct settings_s
     int audiofix;
     bool vibration;
     bool menu_haptics;
-    bool launcher;
+    bool switcher_enabled;
     bool menu_inverted;
     bool low_battery_warning;
     bool low_battery_autosave;
@@ -53,7 +53,7 @@ settings = {
     // Onion settings
     .vibration = true,
     .menu_haptics = false,
-    .launcher = true,
+    .switcher_enabled = true,
     .menu_inverted = false,
     .low_battery_warning = true,
     .low_battery_autosave = true
@@ -66,7 +66,7 @@ void settings_load(void)
     settings.vibration = !config_flag_get(".noVibration");
     settings.menu_haptics = config_flag_get(".menuHaptics");
     settings.menu_inverted = config_flag_get(".menuInverted");
-    settings.launcher = !config_flag_get(".noGameSwitcher");
+    settings.switcher_enabled = !config_flag_get(".noGameSwitcher");
     settings.low_battery_warning = !config_flag_get(".noBatteryWarning");
     settings.low_battery_autosave = !config_flag_get(".noLowBatteryAutoSave");
 
@@ -101,7 +101,7 @@ void settings_save(void)
     config_flag_set(".noVibration", !settings.vibration);
     config_flag_set(".menuHaptics", settings.menu_haptics);
     config_flag_set(".menuInverted", settings.menu_inverted);
-    config_flag_set(".noGameSwitcher", !settings.launcher);
+    config_flag_set(".noGameSwitcher", !settings.switcher_enabled);
     config_flag_set(".noBatteryWarning", !settings.low_battery_warning);
     config_flag_set(".noLowBatteryAutoSave", !settings.low_battery_autosave);
 

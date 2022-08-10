@@ -48,16 +48,22 @@ $(CACHE)/.setup:
 	@mkdir -p $(BUILD_DIR) $(DIST_FULL) $(DIST_CORE) $(RELEASE_DIR)
 	@rsync -a --exclude='.gitkeep' $(STATIC_BUILD)/ $(BUILD_DIR)
 	@rsync -a --exclude='.gitkeep' $(STATIC_DIST)/ $(DIST_FULL)
+# Copy shared libraries
 	@cp -R $(ROOT_DIR)/lib/. $(DIST_FULL)/miyoo/app/.tmp_update/lib
+# Set version number
 	@mkdir -p $(BUILD_DIR)/.tmp_update/onionVersion
 	@echo -n "$(VERSION)" > $(BUILD_DIR)/.tmp_update/onionVersion/version.txt
+# Copy all resources from src folder
+	@find $(SRC_DIR) -depth -type d -name res -exec cp -r {}/. $(BUILD_DIR)/.tmp_update/res/ \;
+# Download themes from theme repo
 	@chmod a+x $(ROOT_DIR)/.github/get_themes.sh && $(ROOT_DIR)/.github/get_themes.sh
-	@touch $(CACHE)/.
 # Copy static packages
 	@mkdir -p $(PACKAGES_APP_DEST) $(PACKAGES_EMU_DEST) $(PACKAGES_RAPP_DEST)
 	@rsync -a --exclude='.gitkeep' $(STATIC_PACKAGES)/App/ $(PACKAGES_APP_DEST)
 	@rsync -a --exclude='.gitkeep' $(STATIC_PACKAGES)/Emu/ $(PACKAGES_EMU_DEST)
 	@rsync -a --exclude='.gitkeep' $(STATIC_PACKAGES)/RApp/ $(PACKAGES_RAPP_DEST)
+# Set flag: finished setup
+	@touch $(CACHE)/.setup
 
 build: core apps external
 
@@ -67,11 +73,11 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/bootScreen && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/chargingState && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/gameSwitcher && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/lastGame && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/mainUiBatPerc && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/keymon && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/playActivity && BUILD_DIR=$(BIN_DIR) make
-# Build installer binaries
+	@cd $(SRC_DIR)/themeSwitcher && BUILD_DIR=$(BIN_DIR) make
+# Build dependencies for installer
 	@mkdir -p $(DIST_FULL)/miyoo/app/.tmp_update/bin
 	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(INSTALL_BIN_DIR) make
 	@cd $(SRC_DIR)/infoPanel && BUILD_DIR=$(INSTALL_BIN_DIR) make
@@ -82,7 +88,6 @@ apps: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
 	@cd $(SRC_DIR)/playActivityUI && BUILD_DIR=$(BUILD_DIR)/App/PlayActivity make
 	@cd $(SRC_DIR)/packageManager && BUILD_DIR=$(BUILD_DIR)/App/The_Onion_Installer make
-	@cd $(SRC_DIR)/themeSwitcher && BUILD_DIR="$(PACKAGES_APP_DEST)/Theme Switcher/App/ThemeSwitcher" make
 
 external: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)

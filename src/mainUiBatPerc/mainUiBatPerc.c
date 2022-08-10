@@ -13,7 +13,7 @@
 #include <SDL/SDL_ttf.h>
 
 #include "utils/utils.h"
-#include "utils/battery.h"
+#include "system/battery.h"
 #include "utils/IMG_Save.h"
 #include "system/settings.h"
 #include "theme/theme.h"
@@ -39,8 +39,8 @@ void restoreRegularDisplay(Theme_s* theme)
 {
     char icon_path[STR_MAX],
          icon_backup[STR_MAX];
-    bool icon_exists = theme_getImagePath(theme, "power-full-icon", icon_path);
-    bool backup_exists = theme_getImagePath(theme, "power-full-icon_back", icon_backup);
+    bool icon_exists = theme_getImagePath(theme, "power-full-icon", icon_path) != 0;
+    bool backup_exists = theme_getImagePath(theme, "power-full-icon_back", icon_backup) != 0;
 
     // Restore regular battery display
     if (icon_exists && backup_exists) {
@@ -56,8 +56,8 @@ void drawBatteryPercentage(Theme_s *theme)
 {
     char icon_path[STR_MAX],
          icon_backup[STR_MAX];
-    bool icon_exists = theme_getImagePath(theme, "power-full-icon", icon_path);
-    bool backup_exists = theme_getImagePath(theme, "power-full-icon_back", icon_backup);
+    bool icon_exists = theme_getImagePath(theme, "power-full-icon", icon_path) != 0;
+    bool backup_exists = theme_getImagePath(theme, "power-full-icon_back", icon_backup) != 0;
 
     // Backup old battery icon
     if (icon_exists && !backup_exists || !icon_exists && !file_exists(icon_backup)) {

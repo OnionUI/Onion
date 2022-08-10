@@ -13,6 +13,7 @@
 #define FALLBACK_FONT "/customer/app/Exo-2-Bold-Italic.ttf"
 #define FALLBACK_PATH "/mnt/SDCARD/miyoo/app/"
 #define SYSTEM_RESOURCES "/mnt/SDCARD/.tmp_update/res/"
+#define THEME_OVERRIDES "/mnt/SDCARD/Saves/CurrentProfile/theme"
 
 typedef struct Theme_BatteryPercentage
 {
@@ -79,27 +80,37 @@ void json_fontStyle(cJSON* root, FontStyle_s* dest, FontStyle_s* fallback)
         dest->color = fallback->color;
 }
 
-bool theme_getImagePath(Theme_s* theme, const char* name, char* out_path)
+int theme_getImagePath(Theme_s* theme, const char* name, char* out_path)
 {
-    char rel_path[STR_MAX], image_path[STR_MAX*2];
+    int load_mode = 2;
+    char rel_path[STR_MAX],
+         image_path[STR_MAX*2];
     sprintf(rel_path, "skin/%s.png", name);
-    sprintf(image_path, "%s%s", theme->path, rel_path);
-    bool exists = file_exists(image_path);
 
-    if (!exists) {
-        if (strncmp(name, "extra/", 6) == 0) {
-            sprintf(rel_path, "%s.png", name + 6);
-            sprintf(image_path, "%s%s", SYSTEM_RESOURCES, rel_path);
-        }
-        else {
-            sprintf(image_path, "%s%s", FALLBACK_PATH, rel_path);
+    sprintf(image_path, THEME_OVERRIDES "/%s", rel_path);
+    bool override_exists = file_exists(image_path);
+
+    if (!override_exists) {
+        load_mode = 1;
+        sprintf(image_path, "%s%s", theme->path, rel_path);
+        bool theme_exists = file_exists(image_path);
+
+        if (!theme_exists) {
+            load_mode = 0;
+            if (strncmp(name, "extra/", 6) == 0) {
+                sprintf(rel_path, "%s.png", name + 6);
+                sprintf(image_path, "%s%s", SYSTEM_RESOURCES, rel_path);
+            }
+            else {
+                sprintf(image_path, "%s%s", FALLBACK_PATH, rel_path);
+            }
         }
     }
 
     if (out_path)
         sprintf(out_path, "%s", image_path);
     
-    return exists;
+    return load_mode;
 }
 
 SDL_Surface* theme_loadImage(Theme_s* theme, const char* name)
@@ -117,6 +128,55 @@ TTF_Font* theme_loadFont(Theme_s* theme, const char* font, int size)
     else
         snprintf(font_path, STR_MAX*2, "%s%s", theme->path, font);
     return TTF_OpenFont(file_exists(font_path) ? font_path : FALLBACK_FONT, size);
+}
+
+bool theme_applyConfig(Theme_s* theme, const char* config_path)
+{
+	const char *json_str = NULL;
+
+    if (!(json_str = file_read(config_path)))
+		return false;
+
+    // Get JSON objects
+	cJSON* json_root = cJSON_Parse(json_str);
+	cJSON* json_batteryPercentage = cJSON_GetObjectItem(json_root, "batteryPercentage");
+	cJSON* json_title = cJSON_GetObjectItem(json_root, "title");
+	cJSON* json_hint = cJSON_GetObjectItem(json_root, "hint");
+	cJSON* json_currentpage = cJSON_GetObjectItem(json_root, "currentpage");
+	cJSON* json_total = cJSON_GetObjectItem(json_root, "total");
+	cJSON* json_grid = cJSON_GetObjectItem(json_root, "grid");
+	cJSON* json_list = cJSON_GetObjectItem(json_root, "list");
+
+    json_string(json_root, "name", theme->name);
+    json_string(json_root, "author", theme->author);
+    json_string(json_root, "description", theme->description);
+    json_bool(json_root, "hideIconTitle", &theme->hideIconTitle);
+
+    json_fontStyle(json_title, &theme->title, NULL);
+    json_fontStyle(json_hint, &theme->hint, &theme->title);
+    json_fontStyle(json_currentpage, &theme->currentpage, &theme->hint);
+    json_fontStyle(json_total, &theme->total, &theme->hint);
+    json_fontStyle(json_list, &theme->list, &theme->title);
+
+    json_string(json_grid, "font", theme->grid.font);
+    json_int(json_grid, "grid1x4", &theme->grid.grid1x4);
+    json_int(json_grid, "grid3x4", &theme->grid.grid3x4);
+    json_color(json_grid, "color", &theme->grid.color);
+    json_color(json_grid, "selectedcolor", &theme->grid.selectedcolor);
+
+    json_bool(json_batteryPercentage, "visible", &theme->batteryPercentage.visible);
+    if (!json_string(json_batteryPercentage, "font", theme->batteryPercentage.font))
+        strcpy(theme->batteryPercentage.font, theme->hint.font);
+    json_int(json_batteryPercentage, "size", &theme->batteryPercentage.size);
+    if (!json_color(json_batteryPercentage, "color", &theme->batteryPercentage.color))
+        theme->batteryPercentage.color = theme->hint.color;
+    json_int(json_batteryPercentage, "offsetX", &theme->batteryPercentage.offsetX);
+    json_int(json_batteryPercentage, "offsetY", &theme->batteryPercentage.offsetY);
+    json_bool(json_batteryPercentage, "onleft", &theme->batteryPercentage.onleft);
+
+	cJSON_free(json_root);
+
+    return true;
 }
 
 Theme_s loadThemeFromPath(const char* theme_path)
@@ -173,51 +233,19 @@ Theme_s loadThemeFromPath(const char* theme_path)
         theme.path[len+1] = '\0';
     }
 
-	const char *json_str = NULL;
     char config_path[STR_MAX * 2];
-    snprintf(config_path, STR_MAX * 2 - 1, "%s%s", theme.path, "config.json");
+    snprintf(config_path, STR_MAX * 2 - 1, "%sconfig.json", theme.path);
 
-	if (!(json_str = file_read(config_path)))
-		return theme;
+	if (!file_exists(config_path))
+		sprintf(config_path, "%sconfig.json", FALLBACK_PATH);
+	
+    theme_applyConfig(&theme, config_path);
 
-    // Get JSON objects
-	cJSON* json_root = cJSON_Parse(json_str);
-	cJSON* json_batteryPercentage = cJSON_GetObjectItem(json_root, "batteryPercentage");
-	cJSON* json_title = cJSON_GetObjectItem(json_root, "title");
-	cJSON* json_hint = cJSON_GetObjectItem(json_root, "hint");
-	cJSON* json_currentpage = cJSON_GetObjectItem(json_root, "currentpage");
-	cJSON* json_total = cJSON_GetObjectItem(json_root, "total");
-	cJSON* json_grid = cJSON_GetObjectItem(json_root, "grid");
-	cJSON* json_list = cJSON_GetObjectItem(json_root, "list");
+    // apply overrides
+    sprintf(config_path, "%s/config.json", THEME_OVERRIDES);
+	if (file_exists(config_path))
+		theme_applyConfig(&theme, config_path);
 
-    json_string(json_root, "name", theme.name);
-    json_string(json_root, "author", theme.author);
-    json_string(json_root, "description", theme.description);
-    json_bool(json_root, "hideIconTitle", &theme.hideIconTitle);
-
-    json_fontStyle(json_title, &theme.title, NULL);
-    json_fontStyle(json_hint, &theme.hint, &theme.title);
-    json_fontStyle(json_currentpage, &theme.currentpage, &theme.hint);
-    json_fontStyle(json_total, &theme.total, &theme.hint);
-    json_fontStyle(json_list, &theme.list, &theme.title);
-
-    json_string(json_grid, "font", theme.grid.font);
-    json_int(json_grid, "grid1x4", &theme.grid.grid1x4);
-    json_int(json_grid, "grid3x4", &theme.grid.grid3x4);
-    json_color(json_grid, "color", &theme.grid.color);
-    json_color(json_grid, "selectedcolor", &theme.grid.selectedcolor);
-
-    json_bool(json_batteryPercentage, "visible", &theme.batteryPercentage.visible);
-    if (!json_string(json_batteryPercentage, "font", theme.batteryPercentage.font))
-        strcpy(theme.batteryPercentage.font, theme.hint.font);
-    json_int(json_batteryPercentage, "size", &theme.batteryPercentage.size);
-    if (!json_color(json_batteryPercentage, "color", &theme.batteryPercentage.color))
-        theme.batteryPercentage.color = theme.hint.color;
-    json_int(json_batteryPercentage, "offsetX", &theme.batteryPercentage.offsetX);
-    json_int(json_batteryPercentage, "offsetY", &theme.batteryPercentage.offsetY);
-    json_bool(json_batteryPercentage, "onleft", &theme.batteryPercentage.onleft);
-
-	cJSON_free(json_root);
 	return theme;
 }
 

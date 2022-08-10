@@ -397,6 +397,7 @@ debloat_apps() {
         Clean_View_Toggle \
         StartGameSwitcher \
         Guest_Mode \
+        SearchFilter \
         ThemeSwitcher
 }
 
