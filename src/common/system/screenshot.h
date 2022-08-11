@@ -76,7 +76,7 @@ char* getrecent_png(char *filename) {
 //
 //    Screenshot (640x480x32bpp only, rotate180, png)
 //
-void screenshot(const char *screenshot_name) {
+void screenshot(const char *screenshot_path) {
     uint32_t    *buffer;
     uint32_t    *src;
     uint32_t    linebuffer[DISPLAY_WIDTH], x, y, pix;
@@ -87,7 +87,9 @@ void screenshot(const char *screenshot_name) {
     ioctl(fb_fd, FBIOGET_VSCREENINFO, &vinfo);
     buffer = fb_addr + DISPLAY_WIDTH*vinfo.yoffset;
 
-    if ((fp = fopen(screenshot_name, "wb"))) {
+    mkdirs(dirname(screenshot_path));
+
+    if ((fp = fopen(screenshot_path, "wb"))) {
         png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
         info_ptr = png_create_info_struct(png_ptr);
         png_init_io(png_ptr, fp);
