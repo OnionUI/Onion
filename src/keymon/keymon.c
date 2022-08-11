@@ -387,6 +387,7 @@ int main(void) {
     uint32_t val;
     uint32_t b_BTN_Not_Menu_Pressed = 0;
     uint32_t b_BTN_Menu_Pressed = 0;
+    uint32_t power_pressed = 0;
     uint32_t comboKey = 0;
 
     struct timespec recent;
@@ -419,7 +420,9 @@ int main(void) {
 
             switch (ev.code) {
                 case HW_BTN_POWER:
-                    if ( val == REPEAT ) {
+                    if (val == PRESSED)
+                        power_pressed = 1;
+                    if (val == REPEAT) {
                         repeat_power++;
                         if (repeat_power == 7)
                             deepsleep(); // 0.5sec deepsleep
@@ -434,9 +437,11 @@ int main(void) {
                         }
                         break;
                     }
-                    if (val == RELEASED && repeat_power < 7 && !file_exists("/tmp/stay_awake")) {
+                    if (val == RELEASED) {
                         // suspend
-                        suspend_exec(settings.sleep_timer == 0 ? -1 : (settings.sleep_timer + SHUTDOWN_MIN) * 60000);
+                        if (power_pressed && repeat_power < 7 && !file_exists("/tmp/stay_awake"))
+                            suspend_exec(settings.sleep_timer == 0 ? -1 : (settings.sleep_timer + SHUTDOWN_MIN) * 60000);
+                        power_pressed = 0;
                     }
                     repeat_power = 0;
                     break;
