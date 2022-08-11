@@ -16,6 +16,7 @@
 #include "utils/keystate.h"
 #include "utils/log.h"
 #include "system/battery.h"
+#include "system/system.h"
 #include "system/display.h"
 #include "system/settings.h"
 #include "system/keymap_sw.h"
@@ -53,6 +54,7 @@ void suspend(bool enabled, SDL_Surface *video)
         SDL_FillRect(video, NULL, 0);
         SDL_Flip(video);
     }
+    // system_powersave(suspended);
     display_setScreen(!suspended);
 }
 
@@ -99,6 +101,9 @@ int main(void)
              time_step = 1000 / fps;
 
     int current_frame = 0;
+
+    // Set the CPU to powersave (charges faster?)
+    system_powersave_on();
 
     while (!quit) {
         uint32_t ticks = SDL_GetTicks(),
@@ -170,8 +175,13 @@ int main(void)
         display_setScreen(false);
         system("sync; reboot; sleep 10");
     }
-    else display_setScreen(true);
+    else {
+        display_setScreen(true);
+    }
     #endif
+
+    // restore CPU performance mode
+    system_powersave_off();
 
     return EXIT_SUCCESS;
 }
