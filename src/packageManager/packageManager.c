@@ -404,8 +404,8 @@ void refreshScreen(){
 int main(void)
 {    
     uint32_t val;
-    uint32_t l2_pressed = 0;
-    uint32_t r2_pressed = 0;
+    uint32_t l1_pressed = 0;
+    uint32_t r1_pressed = 0;
     uint32_t menu_pressed = 0;
 
     uint32_t a_pressed = 0;
@@ -455,12 +455,12 @@ int main(void)
         val = ev.value    ; 
          
         if (( ev.type != EV_KEY ) || ( val > 1 )) continue;
-        if ( ev.code == HW_BTN_L2 ) {
-                l2_pressed = val;
+        if ( ev.code == HW_BTN_L1 ) {
+                l1_pressed = val;
         }
         else
-            if ( ev.code == HW_BTN_R2 ) {
-                    r2_pressed = val;
+            if ( ev.code == HW_BTN_R1 ) {
+                    r1_pressed = val;
             }
             else
                 if ( ev.code == HW_BTN_START ) {
@@ -541,7 +541,7 @@ int main(void)
         }    
         
         
-        if ((r2_pressed)&&(nb_Layers[nTab] > 0)) {            
+        if ((r1_pressed)&&(nb_Layers[nTab] > 0)) {            
             if ((nListPostion + 14) <nb_Layers[nTab]){
                 nListPostion += 7;
             }
@@ -552,7 +552,7 @@ int main(void)
             refreshScreen();
         }     
         
-        if ((l2_pressed)&&(nb_Layers[nTab] > 0)) {            
+        if ((l1_pressed)&&(nb_Layers[nTab] > 0)) {            
             if ((nListPostion - 7) > 0) {
                 nListPostion -= 7;
             }
