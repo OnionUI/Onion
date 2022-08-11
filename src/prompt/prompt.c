@@ -16,9 +16,10 @@
 #include "system/display.h"
 #include "system/keymap_hw.h"
 #include "system/keymap_sw.h"
+#include "system/lang.h"
 #include "theme/theme.h"
 #include "theme/background.h"
-#include "components/menu.h"
+#include "components/listSmall.h"
 
 #define FRAMES_PER_SECOND 30
 #define CHECK_BATTERY_TIMEOUT 30000 //ms
@@ -76,11 +77,6 @@ int main(int argc, char *argv[])
 		pargc++;
 	}
 
-	if (pargc == 0) {
-		pargs[pargc++] = "OK";
-		pargs[pargc++] = "CANCEL";
-	}
-
 	printf_debug(LOG_SUCCESS, "parsed command line arguments");
 
 	SDL_Init(SDL_INIT_VIDEO);
@@ -94,6 +90,10 @@ int main(int argc, char *argv[])
 	print_debug("Loading settings...");
 	settings_load();
 	printf_debug(LOG_SUCCESS, "loaded settings");
+
+	print_debug("Loading language file...");
+	lang_load();
+	printf_debug(LOG_SUCCESS, "loaded language file");
 
 	print_debug("Loading theme config...");
 	Theme_s theme = loadThemeFromPath(settings.theme);
@@ -113,10 +113,15 @@ int main(int argc, char *argv[])
 	printf_debug(LOG_SUCCESS, "read battery percentage");
     SDL_Surface* battery = theme_batterySurface(&theme, &res, current_percentage);
 
-	Menu_s menu = menu_create(pargc);
-	for (i = 0; i < pargc; i++) {
-		menu_addItem(&menu, pargs[i], i);
+	if (pargc == 0) {
+		pargs[pargc++] = lang_get(LANG_OK);
+		pargs[pargc++] = lang_get(LANG_CANCEL);
 	}
+
+	ListSmall list = listSmall_create(pargc);
+
+	for (i = 0; i < pargc; i++)
+		listSmall_addItem(&list, pargs[i], i);
 
 	bool has_title = strlen(title_str) > 0;
 
@@ -127,9 +132,9 @@ int main(int argc, char *argv[])
 	if (has_message) {
 		char *str = str_replace(message_str, "\\n", "\n");
 		message = theme_textboxSurface(&theme, str, res.fonts.title, theme.grid.color, ALIGN_CENTER);
-		menu.scroll_height = 3;
+		list.scroll_height = 3;
 		message_rect.x = 320 - message->w / 2;
-		message_rect.y = 60 + (6 - menu.scroll_height) * 30 - message->h / 2;
+		message_rect.y = 60 + (6 - list.scroll_height) * 30 - message->h / 2;
 		free(str);
 	}
 
@@ -182,11 +187,11 @@ int main(int argc, char *argv[])
 				keystate[key] = 1;
 				switch (key) {
 					case SW_BTN_UP:
-						menu_moveUp(&menu, repeating);
+						listSmall_moveUp(&list, repeating);
 						changed = true;
 						break;
 					case SW_BTN_DOWN:
-						menu_moveDown(&menu, repeating);
+						listSmall_moveDown(&list, repeating);
 						changed = true;
 						break;
 					default: break;
@@ -195,7 +200,7 @@ int main(int argc, char *argv[])
 			else if (event.type == SDL_KEYUP) {
 				switch (key) {
 					case SW_BTN_A:
-						return_code = menu_applyAction(&menu);
+						return_code = listSmall_applyAction(&list);
 						quit = true;
 						break;
 					case SW_BTN_B:
@@ -230,8 +235,8 @@ int main(int argc, char *argv[])
 				if (has_message)
 					SDL_BlitSurface(message, NULL, screen, &message_rect);
 
-				theme_renderMenu(&theme, &res, screen, &menu);
-				theme_renderListFooter(&theme, &res, screen, &menu, "SELECT", required ? NULL : "BACK");
+				theme_renderListSmall(&theme, &res, screen, &list);
+				theme_renderListFooter(&theme, &res, screen, list.active_pos + 1, list.item_count, lang_get(LANG_SELECT), required ? NULL : lang_get(LANG_BACK));
 			
 				SDL_BlitSurface(screen, NULL, video, NULL); 
 				SDL_Flip(video);
@@ -248,8 +253,9 @@ int main(int argc, char *argv[])
 	SDL_FillRect(video, NULL, 0);
 	SDL_Flip(video);
 	
+	lang_free();
 	free(pargs);
-	menu_free(&menu);
+	listSmall_free(&list);
 	theme_freeResources(&res);
 	if (has_message)
 		SDL_FreeSurface(message);

@@ -59,6 +59,8 @@ settings = {
     .low_battery_autosave = true
 };
 
+static bool settings_loaded = false;
+
 void settings_load(void)
 {
     const char *json_str = NULL;
@@ -75,23 +77,25 @@ void settings_load(void)
 
 	cJSON* json_root = cJSON_Parse(json_str);
 
-    json_int(json_root, "vol", &settings.volume);
-    json_int(json_root, "mute", &settings.mute);
-    json_int(json_root, "bgmvol", &settings.bgm_volume);
-    json_int(json_root, "brightness",&settings.brightness);
-    json_int(json_root, "hibernate", &settings.sleep_timer);
-    json_int(json_root, "lumination", &settings.lumination);
-    json_int(json_root, "hue", &settings.hue);
-    json_int(json_root, "saturation", &settings.saturation);
-    json_int(json_root, "contrast", &settings.contrast);
-    json_int(json_root, "fontsize", &settings.fontsize);
-    json_int(json_root, "audiofix", &settings.audiofix);
+    json_getInt(json_root, "vol", &settings.volume);
+    json_getInt(json_root, "mute", &settings.mute);
+    json_getInt(json_root, "bgmvol", &settings.bgm_volume);
+    json_getInt(json_root, "brightness",&settings.brightness);
+    json_getInt(json_root, "hibernate", &settings.sleep_timer);
+    json_getInt(json_root, "lumination", &settings.lumination);
+    json_getInt(json_root, "hue", &settings.hue);
+    json_getInt(json_root, "saturation", &settings.saturation);
+    json_getInt(json_root, "contrast", &settings.contrast);
+    json_getInt(json_root, "fontsize", &settings.fontsize);
+    json_getInt(json_root, "audiofix", &settings.audiofix);
 
-    json_string(json_root, "keymap", settings.keymap);
-    json_string(json_root, "language", settings.language);
-    json_string(json_root, "theme", settings.theme);
+    json_getString(json_root, "keymap", settings.keymap);
+    json_getString(json_root, "language", settings.language);
+    json_getString(json_root, "theme", settings.theme);
 
     cJSON_free(json_root);
+
+    settings_loaded = true;
 }
 
 void settings_save(void)

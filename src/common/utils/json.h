@@ -13,9 +13,9 @@
 #define JSON_FORMAT_STRING    "    \"%s\": \"%s\",\n"
 #define JSON_FORMAT_STRING_NC "    \"%s\": \"%s\"\n"
 
-bool json_string(cJSON* object, const char* key, char* dest)
+bool json_getString(cJSON *object, const char *key, char *dest)
 {
-    cJSON* json_object = cJSON_GetObjectItem(object, key);
+    cJSON *json_object = cJSON_GetObjectItem(object, key);
     if (json_object) {
         strncpy(dest, cJSON_GetStringValue(json_object), JSON_STRING_LEN - 1);
         return true;
@@ -23,9 +23,9 @@ bool json_string(cJSON* object, const char* key, char* dest)
     return false;
 }
 
-bool json_bool(cJSON* object, const char* key, bool* dest)
+bool json_getBool(cJSON *object, const char *key, bool *dest)
 {
-    cJSON* json_object = cJSON_GetObjectItem(object, key);
+    cJSON *json_object = cJSON_GetObjectItem(object, key);
     if (json_object) {
         *dest = cJSON_IsTrue(json_object);
         return true;
@@ -33,9 +33,9 @@ bool json_bool(cJSON* object, const char* key, bool* dest)
     return false;
 }
 
-bool json_int(cJSON* object, const char* key, int* dest)
+bool json_getInt(cJSON *object, const char *key, int *dest)
 {
-    cJSON* json_object = cJSON_GetObjectItem(object, key);
+    cJSON *json_object = cJSON_GetObjectItem(object, key);
     if (json_object) {
         *dest = (int)cJSON_GetNumberValue(json_object);
         return true;
@@ -43,9 +43,9 @@ bool json_int(cJSON* object, const char* key, int* dest)
     return false;
 }
 
-bool json_double(cJSON* object, const char* key, double* dest)
+bool json_getDouble(cJSON *object, const char *key, double *dest)
 {
-    cJSON* json_object = cJSON_GetObjectItem(object, key);
+    cJSON *json_object = cJSON_GetObjectItem(object, key);
     if (json_object) {
         *dest = cJSON_GetNumberValue(json_object);
         return true;
@@ -55,7 +55,7 @@ bool json_double(cJSON* object, const char* key, double* dest)
 
 bool json_setString(cJSON *object, const char *key, const char *value)
 {
-    cJSON* json_object = cJSON_GetObjectItem(object, key);
+    cJSON *json_object = cJSON_GetObjectItem(object, key);
     if (json_object) {
         cJSON_SetValuestring(json_object, value);
         return true;
