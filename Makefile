@@ -16,7 +16,7 @@ BUILD_DIR           := $(ROOT_DIR)/build
 BIN_DIR             := $(ROOT_DIR)/build/.tmp_update/bin
 DIST_FULL           := $(ROOT_DIR)/dist/full
 DIST_CORE           := $(ROOT_DIR)/dist/core
-INSTALL_BIN_DIR     := $(DIST_FULL)/miyoo/app/.tmp_update/bin
+INSTALLER_DIR       := $(DIST_FULL)/miyoo/app/.tmp_update
 RELEASE_DIR         := $(ROOT_DIR)/release
 STATIC_BUILD        := $(ROOT_DIR)/static/build
 STATIC_DIST         := $(ROOT_DIR)/static/dist
@@ -55,6 +55,7 @@ $(CACHE)/.setup:
 	@echo -n "$(VERSION)" > $(BUILD_DIR)/.tmp_update/onionVersion/version.txt
 # Copy all resources from src folder
 	@find $(SRC_DIR) -depth -type d -name res -exec cp -r {}/. $(BUILD_DIR)/.tmp_update/res/ \;
+	@find $(SRC_DIR)/installUI -depth -type d -name res -exec cp -r {}/. $(INSTALLER_DIR)/res/ \;
 # Download themes from theme repo
 	@chmod a+x $(ROOT_DIR)/.github/get_themes.sh && $(ROOT_DIR)/.github/get_themes.sh
 # Copy static packages
@@ -79,10 +80,10 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/themeSwitcher && BUILD_DIR=$(BIN_DIR) make
 # Build dependencies for installer
 	@mkdir -p $(DIST_FULL)/miyoo/app/.tmp_update/bin
-	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(INSTALL_BIN_DIR) make
-	@cd $(SRC_DIR)/infoPanel && BUILD_DIR=$(INSTALL_BIN_DIR) make
-	@cd $(SRC_DIR)/prompt && BUILD_DIR=$(INSTALL_BIN_DIR) make
-	@cd $(SRC_DIR)/batmon && BUILD_DIR=$(INSTALL_BIN_DIR) make
+	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(INSTALLER_DIR)/bin make
+	@cd $(SRC_DIR)/infoPanel && BUILD_DIR=$(INSTALLER_DIR)/bin make
+	@cd $(SRC_DIR)/prompt && BUILD_DIR=$(INSTALLER_DIR)/bin make
+	@cd $(SRC_DIR)/batmon && BUILD_DIR=$(INSTALLER_DIR)/bin make
 
 apps: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)

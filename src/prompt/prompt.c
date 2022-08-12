@@ -159,9 +159,8 @@ int main(int argc, char *argv[])
 			 time_step = 1000 / FRAMES_PER_SECOND;
 
 	while (!quit) {
-		uint32_t ticks = SDL_GetTicks(),
-				 delta = ticks - last_ticks;
-		acc_ticks += delta;
+		uint32_t ticks = SDL_GetTicks();
+		acc_ticks += ticks - last_ticks;
 		last_ticks = ticks;
 
 		if (!first_draw) {

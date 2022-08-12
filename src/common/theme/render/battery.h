@@ -8,13 +8,13 @@ SDL_Surface* _getBatterySurface(Theme_Surfaces_s* s, int percentage)
 {
     if (percentage == 500)
         return s->battery_charging;
-    if (percentage <= 10)
+    if (percentage < 5)
         return s->battery_0;
-    if (percentage <= 25)
+    if (percentage < 25)
         return s->battery_20;
-    if (percentage <= 60)
+    if (percentage < 60)
         return s->battery_50;
-    if (percentage <= 90)
+    if (percentage < 90)
         return s->battery_80;
     return s->battery_100;
 }
