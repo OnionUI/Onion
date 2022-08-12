@@ -109,7 +109,7 @@ bool terminate_retroarch(void) {
         sprintf(fname, "/proc/%d", pid);
 
         uint32_t count = 20; // 4s
-        while (--count && file_exists(fname))
+        while (--count && exists(fname))
             usleep(200000); // 0.2s
 
         return true;
@@ -320,7 +320,7 @@ int check_autosave(void)
 
 bool check_gameActive(void)
 {
-    if (!file_exists(CMD_TO_RUN_PATH))
+    if (!exists(CMD_TO_RUN_PATH))
         return false;
 
     const char *cmd = file_read(CMD_TO_RUN_PATH);
@@ -331,12 +331,12 @@ bool check_gameActive(void)
 
 bool check_isMainUI(void)
 {
-    return !file_exists(CMD_TO_RUN_PATH) && process_isRunning("MainUI");
+    return !exists(CMD_TO_RUN_PATH) && process_isRunning("MainUI");
 }
 
 bool check_isGameSwitcher(void)
 {
-    return file_exists("/mnt/SDCARD/.tmp_update/.runGameSwitcher") && process_isRunning("gameSwitcher");
+    return exists("/mnt/SDCARD/.tmp_update/.runGameSwitcher") && process_isRunning("gameSwitcher");
 }
 
 void run_gameSwitcher(bool enabled)
@@ -478,7 +478,7 @@ int main(void) {
                     }
                     if (val == RELEASED) {
                         // suspend
-                        if (power_pressed && repeat_power < 7 && !file_exists("/tmp/stay_awake"))
+                        if (power_pressed && repeat_power < 7 && !exists("/tmp/stay_awake"))
                             suspend_exec(settings.sleep_timer == 0 ? -1 : (settings.sleep_timer + SHUTDOWN_MIN) * 60000);
                         power_pressed = 0;
                     }

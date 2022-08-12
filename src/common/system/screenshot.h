@@ -31,7 +31,7 @@ char* getrecent_png(char *filename) {
     strcpy(filename, "/mnt/SDCARD/Screenshots/");
     fnptr = filename + strlen(filename);
 
-    if (file_exists("/mnt/SDCARD/.tmp_update/cmd_to_run.sh"))
+    if (exists("/mnt/SDCARD/.tmp_update/cmd_to_run.sh"))
         strcat(filename, getrecent_onion(fnptr));
 
     if (!(*fnptr)) {
@@ -42,7 +42,7 @@ char* getrecent_png(char *filename) {
     fnptr = filename + strlen(filename);
     for (i=0; i<1000; i++) {
         sprintf(fnptr, "_%03d.png", i);
-        if (!file_exists(filename)) break;
+        if (!exists(filename)) break;
     }
     if (i > 999)
         return NULL;

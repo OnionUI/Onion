@@ -30,7 +30,7 @@ static int rom_list_len = 0;
 int readRomDB(void)
 {
 	// Check to avoid corruption
-	if (!file_exists(PLAY_ACTIVITY_DB_PATH))
+	if (!exists(PLAY_ACTIVITY_DB_PATH))
         return 1;
 
     FILE * file = fopen(PLAY_ACTIVITY_DB_PATH, "rb");

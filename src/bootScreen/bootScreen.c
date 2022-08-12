@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
     SDL_Rect rectVersion = {20, 450 - version->h / 2};
     SDL_BlitSurface(version, NULL, screen, &rectVersion);
 
-    if (bShowBat == 1 && file_exists("/tmp/percBat")) {
+    if (bShowBat == 1 && exists("/tmp/percBat")) {
         ThemeImages res_requests[RES_MAX_REQUESTS] = {
             TR_BATTERY_0,
             TR_BATTERY_20,

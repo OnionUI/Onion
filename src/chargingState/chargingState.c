@@ -33,13 +33,13 @@ void getImageDir(const char *theme_path, char *image_dir)
     char image0_path[STR_MAX * 2];
 
     sprintf(image0_path, "%s/skin/extra/chargingState0.png", THEME_OVERRIDES);
-    if (file_exists(image0_path)) {
+    if (exists(image0_path)) {
         sprintf(image_dir, "%s/skin/extra", THEME_OVERRIDES);
         return;
     }
 
     sprintf(image0_path, "%sskin/extra/chargingState0.png", theme_path);
-    if (file_exists(image0_path)) {
+    if (exists(image0_path)) {
         sprintf(image_dir, "%sskin/extra", theme_path);
         return;
     }

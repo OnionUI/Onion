@@ -27,6 +27,7 @@ src/**/prompt
 src/**/mainUiBatPerc
 !mainUiBatPerc/
 src/**/packageManager
+src/packageManager/data/
 !packageManager/
 src/**/keymon
 !keymon/

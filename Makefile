@@ -53,8 +53,13 @@ $(CACHE)/.setup:
 # Set version number
 	@mkdir -p $(BUILD_DIR)/.tmp_update/onionVersion
 	@echo -n "$(VERSION)" > $(BUILD_DIR)/.tmp_update/onionVersion/version.txt
-# Copy all resources from src folder
-	@find $(SRC_DIR) -depth -type d -name res -exec cp -r {}/. $(BUILD_DIR)/.tmp_update/res/ \;
+# Copy all resources from src folders
+	@find \
+		$(SRC_DIR)/gameSwitcher \
+		$(SRC_DIR)/chargingState \
+		$(SRC_DIR)/bootScreen \
+		$(SRC_DIR)/themeSwitcher \
+	-depth -type d -name res -exec cp -r {}/. $(BUILD_DIR)/.tmp_update/res/ \;
 	@find $(SRC_DIR)/installUI -depth -type d -name res -exec cp -r {}/. $(INSTALLER_DIR)/res/ \;
 # Download themes from theme repo
 	@chmod a+x $(ROOT_DIR)/.github/get_themes.sh && $(ROOT_DIR)/.github/get_themes.sh
@@ -89,6 +94,7 @@ apps: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
 	@cd $(SRC_DIR)/playActivityUI && BUILD_DIR=$(BUILD_DIR)/App/PlayActivity make
 	@cd $(SRC_DIR)/packageManager && BUILD_DIR=$(BUILD_DIR)/App/The_Onion_Installer make
+	@find $(SRC_DIR)/packageManager -depth -type d -name res -exec cp -r {}/. $(BUILD_DIR)/App/The_Onion_Installer/res/ \;
 
 external: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)

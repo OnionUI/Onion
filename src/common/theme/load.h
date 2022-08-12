@@ -22,12 +22,12 @@ int theme_getImagePath(const char *theme_path, const char* name, char* out_path)
     sprintf(rel_path, "skin/%s.png", name);
 
     sprintf(image_path, THEME_OVERRIDES "/%s", rel_path);
-    bool override_exists = file_exists(image_path);
+    bool override_exists = exists(image_path);
 
     if (!override_exists) {
         load_mode = 1;
         sprintf(image_path, "%s%s", theme_path, rel_path);
-        bool theme_exists = file_exists(image_path);
+        bool theme_exists = exists(image_path);
 
         if (!theme_exists) {
             load_mode = 0;
@@ -61,7 +61,7 @@ TTF_Font* theme_loadFont(const char *theme_path, const char* font, int size)
         strncpy(font_path, font, STR_MAX*2-1);
     else
         snprintf(font_path, STR_MAX*2, "%s%s", theme_path, font);
-    return TTF_OpenFont(file_exists(font_path) ? font_path : FALLBACK_FONT, size);
+    return TTF_OpenFont(exists(font_path) ? font_path : FALLBACK_FONT, size);
 }
 
 char* theme_getPath(char *theme_path)

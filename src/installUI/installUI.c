@@ -90,19 +90,19 @@ int main(int argc, char *argv[])
 
         SDL_BlitSurface(waiting_bg, NULL, screen, NULL);
         
-        if (file_exists(".installed")) {
+        if (exists(".installed")) {
             progress = 100;
             quit = true;
         }
         
-        if (file_exists(".installFailed")) {
+        if (exists(".installFailed")) {
             sprintf(message_str, "Installation failed");
             progress = 100;
             failed = true;
             quit = true;
         }
         if (ticks - check_timer > CHECK_TIMEOUT) {
-            if (file_exists("/tmp/.update_msg")) {
+            if (exists("/tmp/.update_msg")) {
                 file_readLastLine("/tmp/.update_msg", message_str);
                 long n = 0;
                 if (str_getLastNumber(message_str, &n))
@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (file_exists(".installed") && file_exists(".waitConfirm")) {
+    if (exists(".installed") && exists(".waitConfirm")) {
         quit = false;
 
         while (!quit) {

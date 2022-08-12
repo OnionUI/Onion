@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
 	SDL_Surface *video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
 	SDL_Surface *screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
 
-	if (file_exists(image_path)) {
+	if (exists(image_path)) {
 		SDL_Surface *image = IMG_Load(image_path);
 		SDL_Rect image_rect = {320 - image->w / 2, 240 - image->h / 2};
 		SDL_BlitSurface(image, NULL, screen, &image_rect);

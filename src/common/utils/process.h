@@ -68,11 +68,11 @@ void process_killall(const char *commname)
 bool process_start(const char *pname, const char *args, const char *home, bool await)
 {
     char filename[256]; sprintf(filename, "%s/bin/%s", home != NULL ? home : ".", pname);
-    if (!file_exists(filename)) sprintf(filename, "%s/%s", home != NULL ? home : ".", pname);
-    if (!file_exists(filename)) sprintf(filename, "/mnt/SDCARD/.tmp_update/bin/%s", pname);
-    if (!file_exists(filename)) sprintf(filename, "/mnt/SDCARD/.tmp_update/%s", pname);
-    if (!file_exists(filename)) sprintf(filename, "/mnt/SDCARD/miyoo/app/%s", pname);
-    if (!file_exists(filename)) return false;
+    if (!exists(filename)) sprintf(filename, "%s/%s", home != NULL ? home : ".", pname);
+    if (!exists(filename)) sprintf(filename, "/mnt/SDCARD/.tmp_update/bin/%s", pname);
+    if (!exists(filename)) sprintf(filename, "/mnt/SDCARD/.tmp_update/%s", pname);
+    if (!exists(filename)) sprintf(filename, "/mnt/SDCARD/miyoo/app/%s", pname);
+    if (!exists(filename)) return false;
 
     char cmd[512];
     sprintf(cmd, "cd \"%s\"; %s %s %s",

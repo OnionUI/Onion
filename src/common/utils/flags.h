@@ -12,7 +12,7 @@
 bool flag_get(const char *path, const char *key) {
     char filename[STR_MAX];
     concat(filename, path, key);
-    return file_exists(filename);
+    return exists(filename);
 }
 
 void flag_set(const char *path, const char *key, bool value) {

@@ -123,7 +123,7 @@ int readRomDB()
     FILE *fp;
     int totalTimePlayed = 0 ;
     // Check to avoid corruption
-    if (file_exists(ROM_DB_PATH)) {
+    if (exists(ROM_DB_PATH)) {
         FILE * file = fopen(ROM_DB_PATH, "rb");
         fread(rom_list, sizeof(rom_list), 1, file);
         rom_list_len = 0;
@@ -160,7 +160,7 @@ void readHistory()
     // History extraction
     game_list_len = 0;
 
-    if (!file_exists(HISTORY_PATH))
+    if (!exists(HISTORY_PATH))
         return;
 
     char path[STR_MAX], core_path[STR_MAX];
@@ -177,7 +177,7 @@ void readHistory()
         if (!json_getString(subitem, "path", path) || !json_getString(subitem, "core_path", core_path))
             continue;
 
-        if (!file_exists(core_path) || !file_exists(path))
+        if (!exists(core_path) || !exists(path))
             continue;
 
         Game_s *game = &game_list[game_list_len];
@@ -212,9 +212,9 @@ SDL_Surface* loadRomscreen(Game_s *game)
 {
     char currPicture[STR_MAX];
     sprintf(currPicture, ROM_SCREENS_DIR "/%"PRIu32".png", game->hash);
-    if (!file_exists(currPicture))
+    if (!exists(currPicture))
         sprintf(currPicture, ROM_SCREENS_DIR "/%s.png", file_removeExtension(game->name));
-    if (file_exists(currPicture))
+    if (exists(currPicture))
         return IMG_Load(currPicture);
     return NULL;
 }

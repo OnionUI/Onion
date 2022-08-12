@@ -182,14 +182,14 @@ Theme_s theme_loadFromPath(const char* theme_path)
     char config_path[STR_MAX * 2];
     snprintf(config_path, STR_MAX * 2 - 1, "%sconfig.json", theme.path);
 
-	if (!file_exists(config_path))
+	if (!exists(config_path))
 		sprintf(config_path, "%sconfig.json", FALLBACK_PATH);
 	
     theme_applyConfig(&theme, config_path);
 
     // apply overrides
     sprintf(config_path, "%s/config.json", THEME_OVERRIDES);
-	if (file_exists(config_path))
+	if (exists(config_path))
 		theme_applyConfig(&theme, config_path);
 
 	return theme;

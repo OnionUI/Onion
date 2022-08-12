@@ -34,7 +34,7 @@ int readRomDB()
     FILE *fp;
 
       // Check to avoid corruption
-      if (file_exists(PLAY_ACTIVITY_DB_PATH)) {
+      if (exists(PLAY_ACTIVITY_DB_PATH)) {
         if ((fp = fopen(PLAY_ACTIVITY_DB_PATH, "rb")) != NULL) {
             fread(rom_list, sizeof(rom_list), 1, fp);
              rom_list_len = 0;

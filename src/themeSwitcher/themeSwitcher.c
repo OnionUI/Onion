@@ -96,14 +96,14 @@ void installFaultyImage(const char *theme_path, const char *image_name)
     sprintf(system_image_backup, SYSTEM_SKIN_DIR "/%s_back.png", image_name);
 
     // backup system skin
-    if (!file_exists(system_image_backup))
+    if (!exists(system_image_backup))
         file_copy(system_image_path, system_image_backup);
 
-    if (file_exists(override_image_path)) {
+    if (exists(override_image_path)) {
         // apply override image
         file_copy(override_image_path, system_image_path);
     }
-    else if (file_exists(theme_image_path)) {
+    else if (exists(theme_image_path)) {
         // apply theme image
         file_copy(theme_image_path, system_image_path);
     }
@@ -123,14 +123,14 @@ void installTheme(const char *theme_name, bool hideIconTitle)
     settings_save();
 
     if (hideIconTitle) {
-        if (!file_exists(SYSTEM_LANG_BACKUP_DIR)) {
+        if (!exists(SYSTEM_LANG_BACKUP_DIR)) {
             // backup lang files
             system("cp -R " SYSTEM_LANG_DIR " " SYSTEM_LANG_BACKUP_DIR "");
             // remove icon titles in current lang files
             removeIconTitles();
         }
     }
-    else if (file_exists(SYSTEM_LANG_BACKUP_DIR)) {
+    else if (exists(SYSTEM_LANG_BACKUP_DIR)) {
         // restore original lang files
         system("mv -f " SYSTEM_LANG_BACKUP_DIR "/* " SYSTEM_LANG_DIR "");
         remove(SYSTEM_LANG_BACKUP_DIR);
@@ -161,7 +161,7 @@ int main(void)
 
             sprintf(theme_path, "/mnt/SDCARD/Themes/%s/config.json", ep->d_name);
             
-            if (file_exists(theme_path)) {
+            if (exists(theme_path)) {
                 strcpy(themes[themes_count], ep->d_name);
 				if (strcmp(ep->d_name, installed_theme) == 0)
 					current_page = installed_page = themes_count;
@@ -218,7 +218,7 @@ int main(void)
     int i;
     for (i = 0; i < themes_count; i++) {
         sprintf(theme_path, "/mnt/SDCARD/Themes/%s/preview.png", themes[i]);
-        previews[i] = IMG_Load(file_exists(theme_path) ? theme_path : "res/noThemePreview.png");
+        previews[i] = IMG_Load(exists(theme_path) ? theme_path : "res/noThemePreview.png");
     }
 
     char cPages[10];
@@ -299,7 +299,7 @@ int main(void)
 
             sprintf(theme_path, "/mnt/SDCARD/Themes/%s/config.json", themes[current_page]);
 
-            if (file_exists(theme_path)) {
+            if (exists(theme_path)) {
                 const char *json_data = file_read(theme_path);
 
                 cJSON* request_json = NULL;
@@ -323,7 +323,7 @@ int main(void)
 
             sprintf(theme_path, "/mnt/SDCARD/Themes/%s/config.json", themes[current_page]);
 
-            if (file_exists(theme_path)) {
+            if (exists(theme_path)) {
                 const char *json_data = file_read(theme_path);
 
                 cJSON* request_json = NULL;

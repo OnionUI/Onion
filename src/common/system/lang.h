@@ -38,10 +38,10 @@ typedef enum
 bool lang_getFilePath(const char *lang_name, char *lang_path)
 {
     sprintf(lang_path, LANG_DIR "/%s", lang_name);
-    if (file_exists(lang_path))
+    if (exists(lang_path))
         return true;
     sprintf(lang_path, LANG_DIR_FALLBACK "/%s", lang_name);
-    return file_exists(lang_path);
+    return exists(lang_path);
 }
 
 bool lang_load(void)

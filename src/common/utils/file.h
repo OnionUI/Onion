@@ -20,9 +20,19 @@
 #define file_put(fp, path, format, value) { if ((fp = fopen(path, "w+"))) { fprintf(fp, format, value); fclose(fp); } }
 #define file_put_sync(fp, path, format, value) { if ((fp = fopen(path, "w+"))) { fprintf(fp, format, value); fflush(fp); fsync(fileno(fp)); fclose(fp); } }
 
-bool file_exists(const char *filename) {
+bool exists(const char *file_path) {
 	struct stat buffer;
-	return stat(filename, &buffer) == 0;
+	return stat(file_path, &buffer) == 0;
+}
+
+bool is_file(const char *file_path) {
+    struct stat buffer;
+    return stat(file_path, &buffer) == 0 && S_ISREG(buffer.st_mode);
+}
+
+bool is_dir(const char *file_path) {
+    struct stat buffer;
+    return stat(file_path, &buffer) == 0 && S_ISDIR(buffer.st_mode);
 }
 
 bool file_isModified(const char *path, time_t* old_mtime) {
@@ -43,7 +53,7 @@ bool file_isModified(const char *path, time_t* old_mtime) {
  */
 bool mkdirs(const char *dir_path)
 {
-    if (!file_exists(dir_path)) {
+    if (!exists(dir_path)) {
         char dir_cmd[512];
         sprintf(dir_cmd, "mkdir -p \"%s\"", dir_path);
         system(dir_cmd);
@@ -92,7 +102,7 @@ const char* file_read(const char *path)
     char *buffer = NULL;
     long length = 0;
 
-	if (!file_exists(path))
+	if (!exists(path))
 		return NULL;
 
     if ((f = fopen(path, "rb"))) {

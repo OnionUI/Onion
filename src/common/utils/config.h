@@ -31,7 +31,7 @@ bool config_get(const char *key, const char *format, void *dest) {
     char filename[STR_MAX];
     concat(filename, CONFIG_PATH, key);
     
-    if (file_exists(filename)) {
+    if (exists(filename)) {
         file_get(fp, filename, format, dest);
         return true;
     }
@@ -47,7 +47,7 @@ void config_prepare(const char *key, char *filename)
     strcpy(dir_path, filename);
     dirname(dir_path);
 
-    if (!file_exists(dir_path)) {
+    if (!exists(dir_path)) {
         char dir_cmd[512];
         sprintf(dir_cmd, "mkdir -p \"%s\"", dir_path);
         system(dir_cmd);

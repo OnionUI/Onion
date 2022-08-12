@@ -17,7 +17,7 @@ int battery_getPercentage(void)
     int retry = 3;
 
     while (percentage == -1 && retry > 0) {
-        if (file_exists("/tmp/percBat")) {
+        if (exists("/tmp/percBat")) {
             file_get(fp, "/tmp/percBat", "%d", &percentage);
             break;
         }
