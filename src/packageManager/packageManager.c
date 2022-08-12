@@ -401,7 +401,7 @@ int main(int argc, char *argv[])
                             if (bInstallChange[i][j] == 1)
                                 changes_total++;
 
-                    if (changes_total == 0 && confirmDoNothing(&keystate)) {
+                    if (changes_total > 0 || confirmDoNothing(&keystate)) {
                         quit = true;
                     }
                 }
