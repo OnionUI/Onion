@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 			else if (keystate[SW_BTN_DOWN] != RELEASED)
 				list_moveDown(&list, keystate[SW_BTN_DOWN] == REPEATING);
 			else if (keystate[SW_BTN_A] == PRESSED)
-				list_applyAction(&list);
+				list_getActiveItem(&list);
 			else if (keystate[SW_BTN_B] == PRESSED)
 				quit = true;
 		}

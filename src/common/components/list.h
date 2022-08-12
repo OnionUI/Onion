@@ -86,7 +86,7 @@ void list_moveDown(List* list, bool key_repeat)
 	list_scroll(list);
 }
 
-ListItem* list_applyAction(List* list)
+ListItem* list_getActiveItem(List* list)
 {
 	ListItem *item = &list->items[list->active_pos];
 
