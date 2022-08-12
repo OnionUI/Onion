@@ -41,10 +41,6 @@ int main(int argc, char *argv[])
     }
 
     SDL_BlitSurface(background, NULL, screen, NULL);
-    SDL_BlitSurface(screen, NULL, video, NULL);
-    SDL_Flip(video);
-    SDL_BlitSurface(screen, NULL, video, NULL);
-    SDL_Flip(video);
 
     TTF_Init();
 
@@ -71,7 +67,7 @@ int main(int argc, char *argv[])
         Resources_s res = theme_loadResources(&theme, res_requests);
 
         SDL_Surface* battery = theme_batterySurface(&theme, &res, battery_getPercentage());
-        SDL_Rect battery_rect = {596 - battery->w / 2, 450 - battery->h / 2};
+        SDL_Rect battery_rect = {596 - battery->w / 2, 30 - battery->h / 2};
         SDL_BlitSurface(battery, NULL, screen, &battery_rect);
         SDL_FreeSurface(battery);
 

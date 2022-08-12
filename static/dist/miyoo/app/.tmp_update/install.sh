@@ -151,20 +151,18 @@ fresh_install() {
     echo "Backing up files..." >> /tmp/.update_msg
     backup_system
 
-    echo "Uninstalling old system..." >> /tmp/.update_msg
+    echo "Removing redundant files..." >> /tmp/.update_msg
 
     if [ $reset_configs -eq 1 ]; then
         remove_configs
         maybe_remove_retroarch
+
+        # Remove stock folders
+        cd /mnt/SDCARD
+        rm -rf Emu/* App/* RApp/* miyoo
     fi
 
-    # Debloat the apps folder
-    debloat_apps
     refresh_roms
-
-    # Remove stock folders
-    cd /mnt/SDCARD
-    rm -rf Emu/* RApp/* Imgs miyoo
 
     if [ $install_ra -eq 1 ]; then
         install_core "(1 of 2) Installing Onion..."
@@ -196,7 +194,7 @@ fresh_install() {
 
     # Launch layer manager
     cd /mnt/SDCARD/App/The_Onion_Installer/ 
-    ./packageManager --confirm
+    ./packageManager --confirm --reapply
     free_mma
 
     cd $sysdir
