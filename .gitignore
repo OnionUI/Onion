@@ -37,3 +37,5 @@ src/**/playActivityUI
 !playActivityUI/
 src/**/themeSwitcher
 !themeSwitcher/
+src/**/tweaks
+!tweaks/

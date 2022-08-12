@@ -25,24 +25,6 @@
 #define CHECK_BATTERY_TIMEOUT 30000 //ms
 #define SHUTDOWN_TIMEOUT 500
 
-#define RESOURCES { \
-	TR_BG_TITLE, \
-	TR_LOGO, \
-	TR_BATTERY_0, \
-	TR_BATTERY_20, \
-	TR_BATTERY_50, \
-	TR_BATTERY_80, \
-	TR_BATTERY_100, \
-	TR_BATTERY_CHARGING, \
-	TR_BG_LIST_S, \
-	TR_HORIZONTAL_DIVIDER, \
-	TR_TOGGLE_ON, \
-	TR_TOGGLE_OFF, \
-	TR_BG_FOOTER, \
-	TR_BUTTON_A, \
-	TR_BUTTON_B \
-}
-
 int main(int argc, char *argv[])
 {
 	print_debug("Debug logging enabled");
@@ -103,14 +85,13 @@ int main(int argc, char *argv[])
 	SDL_BlitSurface(screen, NULL, video, NULL); 
 	SDL_Flip(video);
 
-	ThemeImages res_requests[RES_MAX_REQUESTS] = RESOURCES;
-	Resources_s res = theme_loadResources(&theme, res_requests);
+	Resources_s res = { .theme = &theme };
 
 	print_debug("Reading battery percentage...");
     int current_percentage = battery_getPercentage();
 	int old_percentage = current_percentage;
 	printf_debug(LOG_SUCCESS, "read battery percentage");
-    SDL_Surface* battery = theme_batterySurface(&theme, &res, current_percentage);
+    SDL_Surface* battery = theme_batterySurface(&res, current_percentage);
 
 	if (pargc == 0) {
 		pargs[pargc++] = lang_get(LANG_OK);
@@ -133,7 +114,7 @@ int main(int argc, char *argv[])
 
 	if (has_message) {
 		char *str = str_replace(message_str, "\\n", "\n");
-		message = theme_textboxSurface(&theme, str, res.fonts.title, theme.grid.color, ALIGN_CENTER);
+		message = theme_textboxSurface(str, resource_getFont(&res, TITLE), theme.grid.color, ALIGN_CENTER);
 		list.scroll_height = 3;
 		message_rect.x = 320 - message->w / 2;
 		message_rect.y = 60 + (6 - list.scroll_height) * 30 - message->h / 2;
@@ -222,7 +203,7 @@ int main(int argc, char *argv[])
 
 			if (current_percentage != old_percentage) {
 				SDL_FreeSurface(battery);
-				battery = theme_batterySurface(&theme, &res, current_percentage);
+				battery = theme_batterySurface(&res, current_percentage);
 				old_percentage = current_percentage;
 				changed = true;
 			}
@@ -231,13 +212,13 @@ int main(int argc, char *argv[])
 		if (acc_ticks >= time_step) {
 			if (changed) {
 				SDL_BlitSurface(theme_background, NULL, screen, NULL);
-				theme_renderHeader(&theme, &res, screen, battery, has_title ? title_str : NULL, !has_title);
+				theme_renderHeader(&res, screen, battery, has_title ? title_str : NULL, !has_title);
 
 				if (has_message)
 					SDL_BlitSurface(message, NULL, screen, &message_rect);
 
-				theme_renderList(&theme, &res, screen, &list);
-				theme_renderListFooter(&theme, &res, screen, list.active_pos + 1, list.item_count, lang_get(LANG_SELECT), required ? NULL : lang_get(LANG_BACK));
+				theme_renderList(&res, screen, &list);
+				theme_renderListFooter(&res, screen, list.active_pos + 1, list.item_count, lang_get(LANG_SELECT), required ? NULL : lang_get(LANG_BACK));
 			
 				SDL_BlitSurface(screen, NULL, video, NULL); 
 				SDL_Flip(video);

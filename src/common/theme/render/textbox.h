@@ -11,7 +11,7 @@ typedef enum
     ALIGN_RIGHT
 } text_alignment_e;
 
-SDL_Surface* theme_textboxSurface(Theme_s* theme, char *message, TTF_Font *font, SDL_Color fg, text_alignment_e align)
+SDL_Surface* theme_textboxSurface(char *message, TTF_Font *font, SDL_Color fg, text_alignment_e align)
 {
     SDL_Surface *lines[6];
     int line_count = 0;

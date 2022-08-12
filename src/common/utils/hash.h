@@ -6,7 +6,7 @@
 #include <inttypes.h>
 #define _PADr_KAZE(x, n) ( ((x) << (n))>>(n) )
 uint32_t FNV1A_Pippip_Yurii(const char *str, size_t wrdlen) {
-	const uint32_t PRIME = 591798841; uint32_t hash32; uint64_t hash64 = 14695981039346656037;
+	const uint32_t PRIME = 591798841; uint32_t hash32; uint64_t hash64 = 14695981039346656037ULL;
 	size_t Cycles, NDhead;
 if (wrdlen > 8) {
 	Cycles = ((wrdlen - 1)>>4) + 1; NDhead = wrdlen - (Cycles<<3);

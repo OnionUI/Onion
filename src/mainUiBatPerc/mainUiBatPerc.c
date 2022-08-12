@@ -53,18 +53,10 @@ void drawBatteryPercentage(void)
     }
 
     TTF_Init();
-    ThemeImages res_requests[RES_MAX_REQUESTS] = {
-        TR_BATTERY_0,
-        TR_BATTERY_20,
-        TR_BATTERY_50,
-        TR_BATTERY_80,
-        TR_BATTERY_100,
-        TR_BATTERY_CHARGING
-    };
-	Resources_s res = theme_loadResources(&theme, res_requests);
+	Resources_s res = { .theme = &theme };
 
     int percentage = battery_getPercentage();
-    SDL_Surface* image = theme_batterySurface(&theme, &res, percentage);
+    SDL_Surface* image = theme_batterySurface(&res, percentage);
 
     // Save custom battery icon
     IMG_Save(image, icon_path);

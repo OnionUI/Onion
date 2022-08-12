@@ -55,22 +55,12 @@ int main(int argc, char *argv[])
     SDL_Rect rectVersion = {20, 450 - version->h / 2};
     SDL_BlitSurface(version, NULL, screen, &rectVersion);
 
-    if (bShowBat == 1 && exists("/tmp/percBat")) {
-        ThemeImages res_requests[RES_MAX_REQUESTS] = {
-            TR_BATTERY_0,
-            TR_BATTERY_20,
-            TR_BATTERY_50,
-            TR_BATTERY_80,
-            TR_BATTERY_100,
-            TR_BATTERY_CHARGING
-        };
-        Resources_s res = theme_loadResources(&theme, res_requests);
-
-        SDL_Surface* battery = theme_batterySurface(&theme, &res, battery_getPercentage());
+    if (bShowBat == 1) {
+        Resources_s res = { .theme = &theme };
+        SDL_Surface* battery = theme_batterySurface(&res, battery_getPercentage());
         SDL_Rect battery_rect = {596 - battery->w / 2, 30 - battery->h / 2};
         SDL_BlitSurface(battery, NULL, screen, &battery_rect);
         SDL_FreeSurface(battery);
-
         theme_freeResources(&res);
     }
 
@@ -83,11 +73,16 @@ int main(int argc, char *argv[])
     if (argc > 1 && strcmp(argv[1], "Boot") != 0)
         temp_flag_set(".offOrder", false);
 
+    #ifndef PLATFORM_MIYOOMINI
+    sleep(4); // for debugging purposes
+    #endif
+
     SDL_FreeSurface(background);
     SDL_FreeSurface(version);
     SDL_FreeSurface(screen);
     SDL_FreeSurface(video);
     SDL_Quit();
+
 
     return EXIT_SUCCESS;
 }

@@ -1,0 +1,6 @@
+{
+    "label": "Onion Tweaks",
+    "icon": "icon.png",
+    "launch": "launch.sh",
+    "description": "System tweaks and tools"
+}

@@ -18,31 +18,11 @@
 #include "system/display.h"
 #include "system/keymap_sw.h"
 #include "system/lang.h"
-#include "system/screenshot.h"
 #include "theme/theme.h"
 #include "theme/background.h"
 #include "components/list.h"
 
 #define FRAMES_PER_SECOND 60
-
-#define RESOURCES { \
-	TR_BG_TITLE, \
-	TR_LOGO, \
-	TR_BATTERY_0, \
-	TR_BATTERY_20, \
-	TR_BATTERY_50, \
-	TR_BATTERY_80, \
-	TR_BATTERY_100, \
-	TR_BATTERY_CHARGING, \
-	TR_BG_LIST_S, \
-	TR_BG_LIST_L, \
-	TR_HORIZONTAL_DIVIDER, \
-	TR_TOGGLE_ON, \
-	TR_TOGGLE_OFF, \
-	TR_BG_FOOTER, \
-	TR_BUTTON_A, \
-	TR_BUTTON_B \
-}
 
 int main(int argc, char *argv[])
 {
@@ -69,13 +49,12 @@ int main(int argc, char *argv[])
 	theme_backgroundBlit(video);
 	SDL_Flip(video);
 
-	ThemeImages res_requests[RES_MAX_REQUESTS] = RESOURCES;
-	Resources_s res = theme_loadResources(&theme, res_requests);
+	Resources_s res = { .theme = &theme };
 
 	time_t battery_last_modified = 0;
     int current_percentage = battery_getPercentage();
 	int old_percentage = current_percentage;
-    SDL_Surface* battery = theme_batterySurface(&theme, &res, current_percentage);
+    SDL_Surface* battery = theme_batterySurface(&res, current_percentage);
 
 	print_debug("Creating list...");
 	List list = list_create(10, LIST_LARGE);
@@ -124,7 +103,7 @@ int main(int argc, char *argv[])
 
 			if (current_percentage != old_percentage) {
 				SDL_FreeSurface(battery);
-				battery = theme_batterySurface(&theme, &res, current_percentage);
+				battery = theme_batterySurface(&res, current_percentage);
 				old_percentage = current_percentage;
 				changed = true;
 			}
@@ -133,10 +112,10 @@ int main(int argc, char *argv[])
 		if (acc_ticks >= time_step) {
 			if (changed) {
 				theme_backgroundBlit(screen);
-				theme_renderHeader(&theme, &res, screen, battery, "Tweaks", false);
+				theme_renderHeader(&res, screen, battery, "Tweaks", false);
 
-				theme_renderList(&theme, &res, screen, &list);
-				theme_renderListFooter(&theme, &res, screen, list.active_pos + 1, list.item_count, lang_get(LANG_SELECT), lang_get(LANG_BACK));
+				theme_renderList(&res, screen, &list);
+				theme_renderListFooter(&res, screen, list.active_pos + 1, list.item_count, lang_get(LANG_SELECT), lang_get(LANG_BACK));
 			
 				SDL_BlitSurface(screen, NULL, video, NULL); 
 				SDL_Flip(video);
