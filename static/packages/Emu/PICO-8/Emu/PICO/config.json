@@ -4,7 +4,7 @@
 "iconsel":"",
 "launch":"launch.sh",
 "rompath":"../../Roms/PICO",
-"imgpath":"../../Roms/PICO/Imgs",
+"imgpath":"../../Roms/PICO",
 "gamelist":"../../Roms/PICO/miyoogamelist.xml",
 "useswap":1,
 "shortname":0,
