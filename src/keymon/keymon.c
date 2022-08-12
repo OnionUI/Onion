@@ -331,12 +331,12 @@ bool check_gameActive(void)
 
 bool check_isMainUI(void)
 {
-    return !file_exists(CMD_TO_RUN_PATH);
+    return !file_exists(CMD_TO_RUN_PATH) && process_isRunning("MainUI");
 }
 
 bool check_isGameSwitcher(void)
 {
-    return file_exists("/mnt/SDCARD/.tmp_update/.runGameSwitcher");
+    return file_exists("/mnt/SDCARD/.tmp_update/.runGameSwitcher") && process_isRunning("gameSwitcher");
 }
 
 void run_gameSwitcher(bool enabled)
@@ -384,12 +384,12 @@ typedef enum { MODE_UNKNOWN, MODE_MAIN_UI, MODE_SWITCHER, MODE_GAME, MODE_APPS }
 
 MenuMode checkMenuMode(void)
 {
+    if (check_gameActive())
+        return MODE_GAME;
     if (check_isMainUI())
         return MODE_MAIN_UI;
-    else if (check_isGameSwitcher())
+    if (check_isGameSwitcher())
         return MODE_SWITCHER;
-    else if (check_gameActive())
-        return MODE_GAME;
     return MODE_APPS;
 }
 
@@ -592,9 +592,15 @@ int main(void) {
                                     terminate_retroarch();
                                     break;
                                 case MODE_MAIN_UI:
-                                    if (settings.switcher_enabled && settings.menu_inverted) {
+                                    if (settings.menu_inverted) {
+                                        if (settings.switcher_enabled) {
+                                            super_short_pulse();
+                                            force_gameSwitcher();
+                                        }
+                                    }
+                                    else {
+                                        // rumble when holding for popup menu (refresh roms)
                                         super_short_pulse();
-                                        force_gameSwitcher();
                                     }
                                     break;
                                 default: break;
