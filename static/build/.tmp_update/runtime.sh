@@ -52,6 +52,7 @@ clear_logs() {
     cd $sysdir
     rm -f \
         ./logs/mainUiBatPerc.log \
+        ./logs/MainUI.log \
         ./logs/gameSwitcher.log
 }
 
@@ -70,7 +71,7 @@ launch_main_ui() {
 
     # MainUI launch
     cd /mnt/SDCARD/miyoo/app
-    LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./MainUI
+    LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./MainUI 2>&1 >> $sysdir/logs/MainUI.log
     mv /tmp/cmd_to_run.sh $sysdir/cmd_to_run.sh
 }
 
@@ -83,13 +84,33 @@ check_game() {
 }
 
 launch_game() {
+    romfile=`cat $sysdir/cmd_to_run.sh`
+    is_game=0
+
+    if echo "$romfile" | grep -q "retroarch" || echo "$romfile" | grep -q "/mnt/SDCARD/Emu/" || echo "$romfile" | grep -q "/mnt/SDCARD/RApp/"; then
+        echo "Game found:" $(basename "$romfile")
+        is_game=1
+    fi
+
+    # TIMER BEGIN
+    if [ $is_game -eq 1 ]; then
+        cd $sysdir
+        ./bin/playActivity "init" 2>&1 >> ./logs/playActivity.log
+    fi
+
     # GAME LAUNCH
     cd /mnt/SDCARD/RetroArch/
     $sysdir/cmd_to_run.sh
+
+    # TIMER END
+    if [ $is_game -eq 1 ]; then
+        cd $sysdir
+        ./bin/playActivity "$(basename "$romfile")" 2>&1 >> ./logs/playActivity.log
+    fi
 }
 
 check_switcher() {
-    if  [ -f /tmp/.runGameSwitcher ] ; then
+    if  [ -f /mnt/SDCARD/.tmp_update/.runGameSwitcher ] ; then
         launch_switcher
     else 
         # Return to MainUI
@@ -101,9 +122,9 @@ check_switcher() {
 }
 
 launch_switcher() {
-    rm /tmp/.runGameSwitcher
     cd $sysdir
     LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./bin/gameSwitcher 2>&1 >> ./logs/gameSwitcher.log
+    rm /mnt/SDCARD/.tmp_update/.runGameSwitcher
     sync
 }
 

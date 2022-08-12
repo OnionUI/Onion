@@ -22,17 +22,12 @@
 
 bool file_exists(const char *filename) {
 	struct stat buffer;
-	return (stat(filename, &buffer) == 0);
+	return stat(filename, &buffer) == 0;
 }
 
 bool file_isModified(const char *path, time_t* old_mtime) {
     struct stat file_stat;
-    int err = stat(path, &file_stat);
-    if (err != 0) {
-        perror(" [file_isModified] stat");
-        exit(errno);
-    }
-    if (file_stat.st_mtime > *old_mtime) {
+    if (stat(path, &file_stat) == 0 && file_stat.st_mtime > *old_mtime) {
 		*old_mtime = file_stat.st_mtime;
 		return true;
 	}
@@ -148,6 +143,34 @@ const char *file_getExtension(const char *filename) {
     const char *dot = strrchr(filename, '.');
     if (!dot || dot == filename) return "";
     return dot + 1;
+}
+
+char* file_parseKeyValue(const char *file_path, const char *key_in, char *value_out, char divider) {
+    FILE *fp;
+    int f;
+    char key[256], val[256];
+    char key_search[STR_MAX];
+    char search_str[STR_MAX];
+    sprintf(search_str, "%%255[^%c]%c%%255[^\n]\n", divider, divider);
+
+    *value_out = 0;
+    if ( (fp = fopen(file_path, "r")) ) {
+        key[0] = 0; val[0] = 0;
+        while ((f = fscanf(fp, search_str, key, val)) != EOF) {
+            if (!f) { if (fscanf(fp, "%*[^\n]\n") == EOF) break; else continue; }
+            if (str_trim(key_search, 256, key, true)) {
+                if (strcmp(key_search, key_in) == 0) {
+                    str_trim(value_out, 256, val, false);
+                    break;
+                }
+            }
+            key[0] = 0; val[0] = 0;
+        }
+        fclose(fp);
+    }
+
+    if (*value_out == 0) return NULL;
+    return value_out;
 }
 
 #endif // UTILS_FILE_H__

@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "cjson/cJSON.h"
+#include "./file.h"
 
 #define JSON_STRING_LEN 256
 #define JSON_FORMAT_NUMBER    "    \"%s\": %d,\n"
@@ -69,7 +70,7 @@ bool json_setString(cJSON *object, const char *key, const char *value)
  * @param file_path 
  * @return cJSON* Root json object. Remember to cJSON_free the result.
  */
-cJSON* json_load(char *file_path)
+cJSON* json_load(const char *file_path)
 {
     return cJSON_Parse(file_read(file_path));
 }

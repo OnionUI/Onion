@@ -1,3 +1,3 @@
 #!/bin/sh
 
-touch /tmp/.runGameSwitcher
+touch /mnt/SDCARD/.tmp_update/.runGameSwitcher

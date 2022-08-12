@@ -212,6 +212,8 @@ void registerTimerEnd(const char *gameName)
 		close(totalTime_fd);        
 		system("sync");
 	}
+
+	printf("Timer ended (%s): session = %d, total = %s\n", gameName, iTempsDeJeuSession, cTotalTimePlayed);
 	
 	// DB Backup
 	backupDB();
@@ -242,11 +244,16 @@ int main(int argc, char *argv[]) {
 			system("sync");
 		}
 
+		printf("Timer initiated: %d\n", epochTime);
+
 		return EXIT_SUCCESS;
 	}
 	
 	char *gameName = (char *)basename(argv[1]);
 	gameName[99] = '\0';
+	char *lastc = gameName + strlen(gameName) - 1;
+	if ((unsigned char)*lastc == '"')
+		*lastc = 0;
 	registerTimerEnd(gameName);
     
     return EXIT_SUCCESS;

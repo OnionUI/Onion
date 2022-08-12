@@ -25,6 +25,9 @@
 #include "system/system.h"
 #include "system/screenshot.h"
 
+#define CMD_TO_RUN_PATH "/mnt/SDCARD/.tmp_update/cmd_to_run.sh"
+#define RETROARCH_CONFIG "/mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg"
+
 #ifndef CLOCK_MONOTONIC_COARSE
 #define CLOCK_MONOTONIC_COARSE 6
 #endif
@@ -310,27 +313,46 @@ void suspend_exec(int timeout) {
 //
 int check_autosave(void)
 {
-    int f, ret = 0;
-    char key[256] = {0};
-    char value[256] = {0};
-
-    FILE* fp = fopen("/mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg", "r");
-    if (!fp) return 0;
-    while ((f = fscanf(fp, "%255[^=]=%255[^\n]\n", key, value)) != EOF) {
-        if (!f) { if (fscanf(fp, "%*[^\n]\n") == EOF) break; else continue; }
-        if (str_trim(key, 256, key, true)) {
-            if (!strcmp(key, "savestate_auto_save")) {
-                if (str_trim(value, 256, value, true) && !strcmp(value, "\"true\""))
-                    ret = 1;
-                break;
-            }
-        }
-    }
-    fclose(fp);
-    return ret;
+    char value[STR_MAX];
+    file_parseKeyValue(RETROARCH_CONFIG, "savestate_auto_save", value, '=');
+    return strcmp(value, "true") == 0;
 }
 
+bool check_gameActive(void)
+{
+    if (!file_exists(CMD_TO_RUN_PATH))
+        return false;
 
+    const char *cmd = file_read(CMD_TO_RUN_PATH);
+	printf_debug("cmd: '%s'\n", cmd);
+
+    return strstr(cmd, "retroarch") != NULL || strstr(cmd, "/mnt/SDCARD/Emu/") != NULL || strstr(cmd, "/mnt/SDCARD/RApp/") != NULL;
+}
+
+bool check_isMainUI(void)
+{
+    return !file_exists(CMD_TO_RUN_PATH);
+}
+
+bool check_isGameSwitcher(void)
+{
+    return file_exists("/mnt/SDCARD/.tmp_update/.runGameSwitcher");
+}
+
+void run_gameSwitcher(bool enabled)
+{
+    flag_set("/mnt/SDCARD/.tmp_update/", ".runGameSwitcher", enabled);
+}
+
+void force_gameSwitcher(void)
+{
+    pid_t pid;
+    if ((pid = process_searchpid("MainUI"))) {
+        run_gameSwitcher(true);
+        kill(pid, SIGKILL);
+        system("./bin/freemma");
+    }
+}
 
 //
 //    [onion] deepsleep if MainUI/gameSwitcher/retroarch is running
@@ -338,22 +360,37 @@ int check_autosave(void)
 void deepsleep(void)
 {
     pid_t pid;
-    if ((pid = process_searchpid("MainUI"))) {
-        short_pulse();
-        system_shutdown(); kill(pid, SIGKILL);
-    }
-    else if ((pid = process_searchpid("gameSwitcher"))) {
+    if (check_isMainUI() && (pid = process_searchpid("MainUI"))) {
         short_pulse();
         system_shutdown();
         kill(pid, SIGKILL);
     }
-    else if ((pid = process_searchpid("retroarch"))) {
-        if (check_autosave()){
+    else if (check_isGameSwitcher() && (pid = process_searchpid("gameSwitcher"))) {
+        short_pulse();
+        system_shutdown();
+        kill(pid, SIGTERM);
+    }
+    else if (check_gameActive()) {
+        if (check_autosave()) {
             short_pulse();
             system_shutdown();
             terminate_retroarch();
         }
     }
+}
+
+
+typedef enum { MODE_UNKNOWN, MODE_MAIN_UI, MODE_SWITCHER, MODE_GAME, MODE_APPS } MenuMode;
+
+MenuMode checkMenuMode(void)
+{
+    if (check_isMainUI())
+        return MODE_MAIN_UI;
+    else if (check_isGameSwitcher())
+        return MODE_SWITCHER;
+    else if (check_gameActive())
+        return MODE_GAME;
+    return MODE_APPS;
 }
 
 //
@@ -395,6 +432,8 @@ int main(void) {
     int hibernate_time;
     int elapsed_sec = 0;
 
+    MenuMode menu_mode = MODE_UNKNOWN;
+
     // Update recent time
     clock_gettime(CLOCK_MONOTONIC_COARSE, &recent);
 
@@ -428,7 +467,7 @@ int main(void) {
                             deepsleep(); // 0.5sec deepsleep
                         else if (repeat_power == REPEAT_SEC(5)) {
                             short_pulse();
-                            remove("/mnt/SDCARD/.tmp_update/cmd_to_run.sh");
+                            remove(CMD_TO_RUN_PATH);
                             suspend(2); // 5sec kill processes
                         }
                         else if (repeat_power >= REPEAT_SEC(10)) {
@@ -512,18 +551,33 @@ int main(void) {
                     }
                     break;
                 case HW_BTN_MENU:
+                    if (val == PRESSED) {
+                        menu_mode = checkMenuMode();
+                        switch (menu_mode) {
+                            case MODE_MAIN_UI: print_debug("Mode is: Main UI"); break;
+                            case MODE_SWITCHER: print_debug("Mode is: Game Switcher"); break;
+                            case MODE_GAME: print_debug("Mode is: RetroArch"); break;
+                            case MODE_APPS: print_debug("Mode is: Apps"); break;
+                            default: print_debug("Mode is: Unknown"); break;
+                        }
+                    }
                     if (val == RELEASED) {
                         if (comboKey == 0) { // short press on menu
-                            pid_t pid;
-                            if (process_isRunning("retroarch") && check_autosave()) {
-                                menu_super_short_pulse();
-                                temp_flag_set(".runGameSwitcher", settings.switcher_enabled && !settings.menu_inverted);
-                                terminate_retroarch();
-                            }
-                            else if (settings.switcher_enabled && !settings.menu_inverted && (pid = process_searchpid("MainUI"))) {
-                                menu_super_short_pulse();
-                                temp_flag_set(".runGameSwitcher", true);
-                                kill(pid, SIGKILL);
+                            switch (menu_mode) {
+                                case MODE_GAME:
+                                    if (check_autosave()) {
+                                        menu_super_short_pulse();
+                                        run_gameSwitcher(settings.switcher_enabled && !settings.menu_inverted);
+                                        terminate_retroarch();
+                                    }
+                                    break;
+                                case MODE_MAIN_UI:
+                                    if (settings.switcher_enabled && !settings.menu_inverted) {
+                                        menu_super_short_pulse();
+                                        force_gameSwitcher();
+                                    }
+                                    break;
+                                default: break;
                             }
                         }
                         comboKey = 0;
@@ -531,16 +585,19 @@ int main(void) {
                     if (val == REPEAT) {
                         repeat_menu++;
                         if (repeat_menu == REPEAT_SEC(1) && !button_flag) { // long press on menu
-                            pid_t pid;
-                            if (process_isRunning("retroarch")) {
-                                short_pulse();
-                                temp_flag_set(".runGameSwitcher", settings.switcher_enabled && settings.menu_inverted);
-                                terminate_retroarch();
-                            }
-                            else if (settings.switcher_enabled && settings.menu_inverted && (pid = process_searchpid("MainUI"))) {
-                                super_short_pulse();
-                                temp_flag_set(".runGameSwitcher", true);
-                                kill(pid, SIGKILL);
+                            switch (menu_mode) {
+                                case MODE_GAME:
+                                    short_pulse();
+                                    run_gameSwitcher(settings.switcher_enabled && settings.menu_inverted);
+                                    terminate_retroarch();
+                                    break;
+                                case MODE_MAIN_UI:
+                                    if (settings.switcher_enabled && settings.menu_inverted) {
+                                        super_short_pulse();
+                                        force_gameSwitcher();
+                                    }
+                                    break;
+                                default: break;
                             }
                             repeat_menu = 0;
                             comboKey = 1;  // this will avoid to trigger short press action

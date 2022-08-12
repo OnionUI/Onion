@@ -19,7 +19,7 @@
 #include "system/lang.h"
 #include "theme/theme.h"
 #include "theme/background.h"
-#include "components/listSmall.h"
+#include "components/list.h"
 
 #define FRAMES_PER_SECOND 30
 #define CHECK_BATTERY_TIMEOUT 30000 //ms
@@ -42,7 +42,6 @@
 	TR_BUTTON_A, \
 	TR_BUTTON_B \
 }
-#define NUM_RESOURCES 15
 
 int main(int argc, char *argv[])
 {
@@ -96,7 +95,7 @@ int main(int argc, char *argv[])
 	printf_debug(LOG_SUCCESS, "loaded language file");
 
 	print_debug("Loading theme config...");
-	Theme_s theme = loadThemeFromPath(settings.theme);
+	Theme_s theme = theme_loadFromPath(settings.theme);
 	printf_debug(LOG_SUCCESS, "loaded theme config");
 
 	theme_backgroundLoad(&theme);
@@ -104,8 +103,8 @@ int main(int argc, char *argv[])
 	SDL_BlitSurface(screen, NULL, video, NULL); 
 	SDL_Flip(video);
 
-	enum theme_Images res_requests[NUM_RESOURCES] = RESOURCES;
-	Resources_s res = theme_loadResources(&theme, res_requests, NUM_RESOURCES);
+	ThemeImages res_requests[RES_MAX_REQUESTS] = RESOURCES;
+	Resources_s res = theme_loadResources(&theme, res_requests);
 
 	print_debug("Reading battery percentage...");
     int current_percentage = battery_getPercentage();
@@ -118,10 +117,13 @@ int main(int argc, char *argv[])
 		pargs[pargc++] = lang_get(LANG_CANCEL);
 	}
 
-	ListSmall list = listSmall_create(pargc);
+	List list = list_create(pargc, LIST_SMALL);
 
-	for (i = 0; i < pargc; i++)
-		listSmall_addItem(&list, pargs[i], i);
+	for (i = 0; i < pargc; i++) {
+		ListItem item = { .action = i };
+		strcpy(item.label, pargs[i]);
+		list_addItem(&list, item);
+	}
 
 	bool has_title = strlen(title_str) > 0;
 
@@ -149,7 +151,7 @@ int main(int argc, char *argv[])
 	struct input_event ev;
 	
 	int return_code = -1;
-	int battery_last_modified = 0;
+	time_t battery_last_modified = 0;
 
 	uint32_t shutdown_timer = 0,
 			 acc_ticks = 0,
@@ -187,11 +189,11 @@ int main(int argc, char *argv[])
 				keystate[key] = 1;
 				switch (key) {
 					case SW_BTN_UP:
-						listSmall_moveUp(&list, repeating);
+						list_moveUp(&list, repeating);
 						changed = true;
 						break;
 					case SW_BTN_DOWN:
-						listSmall_moveDown(&list, repeating);
+						list_moveDown(&list, repeating);
 						changed = true;
 						break;
 					default: break;
@@ -200,7 +202,7 @@ int main(int argc, char *argv[])
 			else if (event.type == SDL_KEYUP) {
 				switch (key) {
 					case SW_BTN_A:
-						return_code = listSmall_applyAction(&list);
+						return_code = list_applyAction(&list);
 						quit = true;
 						break;
 					case SW_BTN_B:
@@ -235,7 +237,7 @@ int main(int argc, char *argv[])
 				if (has_message)
 					SDL_BlitSurface(message, NULL, screen, &message_rect);
 
-				theme_renderListSmall(&theme, &res, screen, &list);
+				theme_renderList(&theme, &res, screen, &list);
 				theme_renderListFooter(&theme, &res, screen, list.active_pos + 1, list.item_count, lang_get(LANG_SELECT), required ? NULL : lang_get(LANG_BACK));
 			
 				SDL_BlitSurface(screen, NULL, video, NULL); 
@@ -255,7 +257,7 @@ int main(int argc, char *argv[])
 	
 	lang_free();
 	free(pargs);
-	listSmall_free(&list);
+	list_free(&list);
 	theme_freeResources(&res);
 	if (has_message)
 		SDL_FreeSurface(message);

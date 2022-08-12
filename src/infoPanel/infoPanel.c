@@ -27,20 +27,21 @@
 	TR_BUTTON_A, \
 	TR_BUTTON_B \
 }
-#define NUM_RESOURCES 15
 
 void drawInfoPanel(SDL_Surface *screen, SDL_Surface *video, const char *title_str, const char *message_str)
 {
-	settings_load();
-	Theme_s theme = loadThemeFromPath(settings.theme);
+	char theme_path[STR_MAX];
+	theme_getPath(theme_path);
 
-	theme_backgroundLoad(&theme);
+	theme_backgroundLoad(theme_path);
 	SDL_BlitSurface(theme_background, NULL, screen, NULL);
 	SDL_BlitSurface(screen, NULL, video, NULL); 
 	SDL_Flip(video);
 
-	enum theme_Images res_requests[NUM_RESOURCES] = RESOURCES;
-	Resources_s res = theme_loadResources(&theme, res_requests, NUM_RESOURCES);
+	Theme_s theme = theme_loadFromPath(theme_path);
+
+	ThemeImages res_requests[RES_MAX_REQUESTS] = RESOURCES;
+	Resources_s res = theme_loadResources(&theme, res_requests);
 
 	bool has_title = strlen(title_str) > 0;
 	bool has_message = strlen(message_str) > 0;

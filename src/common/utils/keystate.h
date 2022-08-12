@@ -8,11 +8,11 @@ typedef enum
     RELEASED,
     PRESSED,
     REPEATING
-} keyState;
+} KeyState;
 
 static SDL_Event keystate_event;
 
-bool updateKeystate(keyState keystate[320], bool *quit_flag)
+bool updateKeystate(KeyState keystate[320], bool *quit_flag)
 {
     while (SDL_PollEvent(&keystate_event)) {
         SDLKey key = keystate_event.key.keysym.sym;

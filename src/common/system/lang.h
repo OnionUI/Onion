@@ -59,9 +59,7 @@ bool lang_load(void)
     printf_debug("Loading lang file: %s\n", lang_path);
 
     cJSON *lang_file = json_load(lang_path);
-
     cJSON *lang_name = cJSON_GetObjectItem(lang_file, "0");
-    printf_debug("lang: %s\n", cJSON_GetStringValue(lang_name));
 
     char key[32];
     char value[STR_MAX];

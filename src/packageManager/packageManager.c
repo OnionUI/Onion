@@ -402,7 +402,7 @@ void refreshScreen(){
 
 
 int main(void)
-{    
+{
     uint32_t val;
     uint32_t l1_pressed = 0;
     uint32_t r1_pressed = 0;
@@ -422,6 +422,7 @@ int main(void)
 
     SDL_Init(SDL_INIT_VIDEO);
     SDL_ShowCursor(SDL_DISABLE);
+    SDL_EnableKeyRepeat(300, 50);
     TTF_Init();
 
 	video = SDL_SetVideoMode(640,480, 32, SDL_HWSURFACE);

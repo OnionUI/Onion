@@ -35,7 +35,7 @@ int battery_getPercentage(void)
     }
 
     if (percentage == -1)
-        percentage = 0;
+        percentage = 500;
 
     return percentage;
 }

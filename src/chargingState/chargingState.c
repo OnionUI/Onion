@@ -30,7 +30,7 @@ static bool suspended = false;
 
 void getImageDir(const char *theme_path, char *image_dir)
 {
-    char image0_path[STR_MAX];
+    char image0_path[STR_MAX * 2];
 
     sprintf(image0_path, "%s/skin/extra/chargingState0.png", THEME_OVERRIDES);
     if (file_exists(image0_path)) {
@@ -65,7 +65,7 @@ int main(void)
     settings_load();
     display_setBrightness(settings.brightness);
 
-    Theme_s theme = loadThemeFromPath(settings.theme);
+    Theme_s theme = theme_loadFromPath(settings.theme);
     char image_dir[STR_MAX];
     getImageDir(theme.path, image_dir);
 
@@ -90,7 +90,7 @@ int main(void)
     int fps = frame_count > 1 ? 12 : 1;
     printf_debug("Frame count: %d\n", frame_count);
 
-    keyState keystate[320] = {RELEASED};
+    KeyState keystate[320] = {RELEASED};
     bool keychange = false;
     bool power_pressed = false;
 

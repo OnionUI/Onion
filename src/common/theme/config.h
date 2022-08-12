@@ -9,11 +9,7 @@
 #include "utils/utils.h"
 #include "utils/json.h"
 #include "color.h"
-
-#define FALLBACK_FONT "/customer/app/Exo-2-Bold-Italic.ttf"
-#define FALLBACK_PATH "/mnt/SDCARD/miyoo/app/"
-#define SYSTEM_RESOURCES "/mnt/SDCARD/.tmp_update/res/"
-#define THEME_OVERRIDES "/mnt/SDCARD/Saves/CurrentProfile/theme"
+#include "load.h"
 
 typedef struct Theme_BatteryPercentage
 {
@@ -80,56 +76,6 @@ void json_fontStyle(cJSON* root, FontStyle_s* dest, FontStyle_s* fallback)
         dest->color = fallback->color;
 }
 
-int theme_getImagePath(Theme_s* theme, const char* name, char* out_path)
-{
-    int load_mode = 2;
-    char rel_path[STR_MAX],
-         image_path[STR_MAX*2];
-    sprintf(rel_path, "skin/%s.png", name);
-
-    sprintf(image_path, THEME_OVERRIDES "/%s", rel_path);
-    bool override_exists = file_exists(image_path);
-
-    if (!override_exists) {
-        load_mode = 1;
-        sprintf(image_path, "%s%s", theme->path, rel_path);
-        bool theme_exists = file_exists(image_path);
-
-        if (!theme_exists) {
-            load_mode = 0;
-            if (strncmp(name, "extra/", 6) == 0) {
-                sprintf(rel_path, "%s.png", name + 6);
-                sprintf(image_path, "%s%s", SYSTEM_RESOURCES, rel_path);
-            }
-            else {
-                sprintf(image_path, "%s%s", FALLBACK_PATH, rel_path);
-            }
-        }
-    }
-
-    if (out_path)
-        sprintf(out_path, "%s", image_path);
-    
-    return load_mode;
-}
-
-SDL_Surface* theme_loadImage(Theme_s* theme, const char* name)
-{
-    char image_path[512];
-    theme_getImagePath(theme, name, image_path);
-    return IMG_Load(image_path);
-}
-
-TTF_Font* theme_loadFont(Theme_s* theme, const char* font, int size)
-{
-    char font_path[STR_MAX*2];
-    if (font[0] == '/')
-        strncpy(font_path, font, STR_MAX*2-1);
-    else
-        snprintf(font_path, STR_MAX*2, "%s%s", theme->path, font);
-    return TTF_OpenFont(file_exists(font_path) ? font_path : FALLBACK_FONT, size);
-}
-
 bool theme_applyConfig(Theme_s* theme, const char* config_path)
 {
 	const char *json_str = NULL;
@@ -179,7 +125,7 @@ bool theme_applyConfig(Theme_s* theme, const char* config_path)
     return true;
 }
 
-Theme_s loadThemeFromPath(const char* theme_path)
+Theme_s theme_loadFromPath(const char* theme_path)
 {
     Theme_s theme = {
         .path = FALLBACK_PATH,
@@ -247,6 +193,13 @@ Theme_s loadThemeFromPath(const char* theme_path)
 		theme_applyConfig(&theme, config_path);
 
 	return theme;
+}
+
+Theme_s theme_load(void)
+{
+    char theme_path[STR_MAX];
+	theme_getPath(theme_path);
+	return theme_loadFromPath(theme_path);
 }
 
 #endif // THEME_CONFIG_H__

@@ -1,3 +1,4 @@
 #!/bin/sh
 
-/mnt/SDCARD/.tmp_update/bin/playActivity "$1"
+echo "[Deprecated] Play Activity registration is now done by the Onion runtime."
+exit 0

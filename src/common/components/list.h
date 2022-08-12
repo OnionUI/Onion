@@ -4,49 +4,44 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define LABEL_SIZE 128
+typedef enum {LIST_SMALL, LIST_LARGE} list_type_e;
 
-typedef struct ListSmallItem
+typedef struct ListItem
 {
-	char label[LABEL_SIZE];
+	char label[STR_MAX];
+	char description[STR_MAX];
+	char payload[STR_MAX];
 	int action;
 	bool is_toggle;
 	bool state;
-} ListSmallItem;
+} ListItem;
 
-typedef struct ListSmall
+typedef struct List
 {
 	int item_count;
 	int active_pos;
 	int scroll_pos;
 	int scroll_height;
-	ListSmallItem* items;
-} ListSmall;
+	list_type_e list_type;
+	ListItem* items;
+} List;
 
-ListSmall listSmall_create(int max_items)
+List list_create(int max_items, list_type_e list_type)
 {
-	ListSmall menu = {
-		.items = (ListSmallItem*)malloc(sizeof(ListSmallItem) * max_items),
-		.scroll_height = 6
+	List menu = {
+		.scroll_height = list_type == LIST_SMALL ? 6 : 4,
+		.list_type = list_type,
+		.items = (ListItem*)malloc(sizeof(ListItem) * max_items)
 	};
 	return menu;
 }
 
-void listSmall_addItem(ListSmall* list, char* label, int action)
+void list_addItem(List* list, ListItem item)
 {
-	ListSmallItem item = {.action = action};
-	strncpy(item.label, label, LABEL_SIZE-1);
 	list->items[list->item_count++] = item;
 }
 
-void listSmall_addToggle(ListSmall* list, char* label, int action, bool state)
-{
-	ListSmallItem item = {.action = action, .is_toggle = true, .state = state};
-	strncpy(item.label, label, LABEL_SIZE-1);
-	list->items[list->item_count++] = item;
-}
-
-void listSmall_scroll(ListSmall* list)
+void list_scroll(List* list)
 {
 	// Scroll up
 	if (list->active_pos < list->scroll_pos)
@@ -63,7 +58,7 @@ void listSmall_scroll(ListSmall* list)
 		list->scroll_pos = list->item_count - list->scroll_height;
 }
 
-void listSmall_moveUp(ListSmall* list, bool key_repeat)
+void list_moveUp(List* list, bool key_repeat)
 {
 	// Wrap-around (move to bottom)
 	if (list->active_pos == 0) {
@@ -74,10 +69,10 @@ void listSmall_moveUp(ListSmall* list, bool key_repeat)
 	// Descrease selection (move up)
 	else
 		list->active_pos -= 1;
-	listSmall_scroll(list);
+	list_scroll(list);
 }
 
-void listSmall_moveDown(ListSmall* list, bool key_repeat)
+void list_moveDown(List* list, bool key_repeat)
 {
 	// Wrap-around (move to top)
 	if (list->active_pos == list->item_count - 1) {
@@ -88,23 +83,23 @@ void listSmall_moveDown(ListSmall* list, bool key_repeat)
 	// Increase selection (move down)
 	else
 		list->active_pos += 1;
-	listSmall_scroll(list);
+	list_scroll(list);
 }
 
-int listSmall_applyAction(ListSmall* list)
+ListItem* list_applyAction(List* list)
 {
-	ListSmallItem* item = &list->items[list->active_pos];
+	ListItem *item = &list->items[list->active_pos];
 
 	if (item->is_toggle)
 		item->state = !item->state;
 
-	return item->action;
+	return item;
 }
 
-bool listSmall_getToggle(ListSmall* list, int action)
+bool list_getToggle(List* list, int action)
 {
 	int i;
-	ListSmallItem* item;
+	ListItem* item;
 
 	for (i = 0; i < list->item_count; i++) {
 		item = &list->items[i];
@@ -115,7 +110,7 @@ bool listSmall_getToggle(ListSmall* list, int action)
 	return false;
 }
 
-void listSmall_free(ListSmall* list)
+void list_free(List* list)
 {
 	free(list->items);
 }

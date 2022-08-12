@@ -91,14 +91,17 @@ size_t str_trim(char *out, size_t len, const char *str, bool first)
 
     const char *end;
     size_t out_size;
+    bool is_string = false;
 
     // Trim leading space
     while(strchr("\r\n\t {},", (unsigned char)*str) != NULL) str++;
     
     end = str + 1;
     
-    if ((unsigned char)*str == '"')
+    if ((unsigned char)*str == '"') {
+        is_string = true; str++;
         while(strchr("\r\n\"", (unsigned char)*end) == NULL) end++;
+    }
 
     if(*str == 0)  // All spaces?
     {
@@ -114,6 +117,9 @@ size_t str_trim(char *out, size_t len, const char *str, bool first)
         while(end > str && strchr("\r\n\t {},", (unsigned char)*end) != NULL) end--;
         end++;
     }
+
+    if (is_string && (unsigned char)*(end-1) == '"')
+        end--;
 
     // Set output size to minimum of trimmed string length and buffer size minus 1
     out_size = (end - str) < len-1 ? (end - str) : len-1;
