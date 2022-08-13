@@ -56,10 +56,7 @@ bool lang_load(void)
 
     lang_list = malloc(LANG_MAX * sizeof(char*));
 
-    printf_debug("Loading lang file: %s\n", lang_path);
-
     cJSON *lang_file = json_load(lang_path);
-    cJSON *lang_name = cJSON_GetObjectItem(lang_file, "0");
 
     char key[32];
     char value[STR_MAX];

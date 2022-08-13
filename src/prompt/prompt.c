@@ -76,22 +76,16 @@ int main(int argc, char *argv[])
 	lang_load();
 	printf_debug(LOG_SUCCESS, "loaded language file");
 
-	print_debug("Loading theme config...");
-	Theme_s theme = theme_loadFromPath(settings.theme);
-	printf_debug(LOG_SUCCESS, "loaded theme config");
-
-	theme_backgroundLoad(&theme);
+	theme_backgroundLoad();
 	SDL_BlitSurface(theme_background, NULL, screen, NULL);
 	SDL_BlitSurface(screen, NULL, video, NULL); 
 	SDL_Flip(video);
-
-	Resources_s res = { .theme = &theme };
 
 	print_debug("Reading battery percentage...");
     int current_percentage = battery_getPercentage();
 	int old_percentage = current_percentage;
 	printf_debug(LOG_SUCCESS, "read battery percentage");
-    SDL_Surface* battery = theme_batterySurface(&res, current_percentage);
+    SDL_Surface* battery = theme_batterySurface(current_percentage);
 
 	if (pargc == 0) {
 		pargs[pargc++] = lang_get(LANG_OK);
@@ -101,7 +95,7 @@ int main(int argc, char *argv[])
 	List list = list_create(pargc, LIST_SMALL);
 
 	for (i = 0; i < pargc; i++) {
-		ListItem item = { .action = i };
+		ListItem item = { .id = i };
 		strcpy(item.label, pargs[i]);
 		list_addItem(&list, item);
 	}
@@ -114,7 +108,7 @@ int main(int argc, char *argv[])
 
 	if (has_message) {
 		char *str = str_replace(message_str, "\\n", "\n");
-		message = theme_textboxSurface(str, resource_getFont(&res, TITLE), theme.grid.color, ALIGN_CENTER);
+		message = theme_textboxSurface(str, resource_getFont(TITLE), theme()->grid.color, ALIGN_CENTER);
 		list.scroll_height = 3;
 		message_rect.x = 320 - message->w / 2;
 		message_rect.y = 60 + (6 - list.scroll_height) * 30 - message->h / 2;
@@ -169,11 +163,11 @@ int main(int argc, char *argv[])
 				keystate[key] = 1;
 				switch (key) {
 					case SW_BTN_UP:
-						list_moveUp(&list, repeating);
+						list_keyUp(&list, repeating);
 						changed = true;
 						break;
 					case SW_BTN_DOWN:
-						list_moveDown(&list, repeating);
+						list_keyDown(&list, repeating);
 						changed = true;
 						break;
 					default: break;
@@ -182,7 +176,7 @@ int main(int argc, char *argv[])
 			else if (event.type == SDL_KEYUP) {
 				switch (key) {
 					case SW_BTN_A:
-						return_code = list_getActiveItem(&list)->action;
+						return_code = list_activateItem(&list)->id;
 						quit = true;
 						break;
 					case SW_BTN_B:
@@ -203,7 +197,7 @@ int main(int argc, char *argv[])
 
 			if (current_percentage != old_percentage) {
 				SDL_FreeSurface(battery);
-				battery = theme_batterySurface(&res, current_percentage);
+				battery = theme_batterySurface(current_percentage);
 				old_percentage = current_percentage;
 				changed = true;
 			}
@@ -212,13 +206,13 @@ int main(int argc, char *argv[])
 		if (acc_ticks >= time_step) {
 			if (changed) {
 				SDL_BlitSurface(theme_background, NULL, screen, NULL);
-				theme_renderHeader(&res, screen, battery, has_title ? title_str : NULL, !has_title);
+				theme_renderHeader(screen, battery, has_title ? title_str : NULL, !has_title);
 
 				if (has_message)
 					SDL_BlitSurface(message, NULL, screen, &message_rect);
 
-				theme_renderList(&res, screen, &list);
-				theme_renderListFooter(&res, screen, list.active_pos + 1, list.item_count, lang_get(LANG_SELECT), required ? NULL : lang_get(LANG_BACK));
+				theme_renderList(screen, &list);
+				theme_renderListFooter(screen, list.active_pos + 1, list.item_count, lang_get(LANG_SELECT), required ? NULL : lang_get(LANG_BACK));
 			
 				SDL_BlitSurface(screen, NULL, video, NULL); 
 				SDL_Flip(video);
@@ -238,7 +232,7 @@ int main(int argc, char *argv[])
 	lang_free();
 	free(pargs);
 	list_free(&list);
-	theme_freeResources(&res);
+	resources_free();
 	if (has_message)
 		SDL_FreeSurface(message);
 	theme_backgroundFree();

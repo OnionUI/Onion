@@ -4,7 +4,7 @@
 #include "theme/config.h"
 #include "theme/resources.h"
 
-ThemeImages _getBatteryRequest(Resources_s *res, int percentage)
+ThemeImages _getBatteryRequest(int percentage)
 {
     if (percentage == 500)
         return BATTERY_CHARGING;
@@ -19,16 +19,16 @@ ThemeImages _getBatteryRequest(Resources_s *res, int percentage)
     return BATTERY_100;
 }
 
-SDL_Surface* theme_batterySurface(Resources_s* res, int percentage)
+SDL_Surface* theme_batterySurface(int percentage)
 {
-    BatteryPercentage_s* style = &res->theme->batteryPercentage;
+    BatteryPercentage_s* style = &theme()->batteryPercentage;
     bool visible = style->visible;
 
     // Currently charging, hide text
     if (percentage == 500)
         visible = false;
 
-    TTF_Font* font = resource_getFont(res, BATTERY);
+    TTF_Font* font = resource_getFont(BATTERY);
 
     // Correct Exo 2 font offset
     if (strncmp(TTF_FontFaceFamilyName(font), "Exo 2", 5) == 0)
@@ -41,8 +41,8 @@ SDL_Surface* theme_batterySurface(Resources_s* res, int percentage)
     SDL_SetAlpha(text, 0, 0); /* important */
 
     // Battery icon
-    ThemeImages icon_request = _getBatteryRequest(res, percentage);
-    SDL_Surface *icon = resource_getSurface(res, icon_request);
+    ThemeImages icon_request = _getBatteryRequest(percentage);
+    SDL_Surface *icon = resource_getSurface(icon_request);
     SDL_SetAlpha(icon, 0, 0); /* important */
 
     const int SPACER = 5;

@@ -4,18 +4,18 @@
 #include "theme/config.h"
 #include "theme/resources.h"
 
-void theme_renderHeader(Resources_s* res, SDL_Surface* screen, SDL_Surface* battery, const char *title_str, bool show_logo)
+void theme_renderHeader(SDL_Surface* screen, SDL_Surface* battery, const char *title_str, bool show_logo)
 {    
-	SDL_BlitSurface(resource_getSurface(res, BG_TITLE), NULL, screen, NULL);
+	SDL_BlitSurface(resource_getSurface(BG_TITLE), NULL, screen, NULL);
 
     if (show_logo) {
-        SDL_Surface *logo = resource_getSurface(res, LOGO);
+        SDL_Surface *logo = resource_getSurface(LOGO);
         SDL_Rect logo_rect = {20, 30 - logo->h / 2};
         SDL_BlitSurface(logo, NULL, screen, &logo_rect);
     }
 
     if (title_str) {
-        SDL_Surface *title = TTF_RenderUTF8_Blended(resource_getFont(res, TITLE), title_str, res->theme->title.color);
+        SDL_Surface *title = TTF_RenderUTF8_Blended(resource_getFont(TITLE), title_str, theme()->title.color);
         SDL_Rect title_rect = {320 - title->w / 2, 29 - title->h / 2};
         SDL_BlitSurface(title, NULL, screen, &title_rect);
         SDL_FreeSurface(title);

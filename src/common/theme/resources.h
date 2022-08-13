@@ -29,6 +29,8 @@ typedef enum theme_images
     BG_FOOTER,
     BUTTON_A,
     BUTTON_B,
+    LEFT_ARROW,
+    RIGHT_ARROW,
     images_count
 } ThemeImages;
 
@@ -46,13 +48,26 @@ typedef enum theme_fonts
 
 typedef struct Theme_Resources
 {
-    Theme_s *theme;
+    Theme_s theme;
+    bool _theme_loaded;
     SDL_Surface* surfaces[(int)images_count];
     TTF_Font* fonts[(int)fonts_count];
 } Resources_s;
 
-SDL_Surface* _loadImage(Theme_s* t, ThemeImages request)
+static Resources_s resources = { ._theme_loaded = false };
+
+Theme_s* theme(void)
 {
+    if (!resources._theme_loaded) {
+        resources.theme = theme_load();
+        resources._theme_loaded = true;
+    }
+    return &resources.theme;
+}
+
+SDL_Surface* _loadImage(ThemeImages request)
+{
+    Theme_s *t = theme();
     int real_location, backup_location;
 
     switch (request) {
@@ -75,48 +90,57 @@ SDL_Surface* _loadImage(Theme_s* t, ThemeImages request)
         case BG_FOOTER: return theme_loadImage(t->path, "tips-bar-bg");
         case BUTTON_A: return theme_loadImage(t->path, "icon-A-54");
         case BUTTON_B: return theme_loadImage(t->path, "icon-B-54");
+        case LEFT_ARROW: return theme_loadImage(t->path, "icon-left-arrow-24");
+        case RIGHT_ARROW: return theme_loadImage(t->path, "icon-right-arrow-24");
         default: break;
     }
     return NULL;
 }
 
-TTF_Font* _loadFont(Theme_s* t, ThemeFonts request)
+TTF_Font* _loadFont(ThemeFonts request)
 {
+    Theme_s *t = theme();
+    TTF_Font *font = NULL;
+
     switch (request) {
         case TITLE: return theme_loadFont(t->path, t->title.font, t->title.size);
         case HINT: return theme_loadFont(t->path, t->hint.font, t->hint.size);
         case GRID1x4: return theme_loadFont(t->path, t->grid.font, t->grid.grid1x4);
         case GRID3x4: return theme_loadFont(t->path, t->grid.font, t->grid.grid3x4);
-        case LIST: return theme_loadFont(t->path, t->list.font, t->list.size);
+        case LIST:
+            font = theme_loadFont(t->path, t->list.font, t->list.size);
+            TTF_SetFontStyle(font, TTF_STYLE_BOLD);
+            return font;
         case BATTERY: return theme_loadFont(t->path, t->batteryPercentage.font, t->batteryPercentage.size);
         default: break;
     }
+
     return NULL;
 }
 
-SDL_Surface* resource_getSurface(Resources_s *res, ThemeImages request)
+SDL_Surface* resource_getSurface(ThemeImages request)
 {
-    if (res->surfaces[request] == NULL)
-        res->surfaces[request] = _loadImage(res->theme, request);
-    return res->surfaces[request];
+    if (resources.surfaces[request] == NULL)
+        resources.surfaces[request] = _loadImage(request);
+    return resources.surfaces[request];
 }
 
-TTF_Font* resource_getFont(Resources_s *res, ThemeFonts request)
+TTF_Font* resource_getFont(ThemeFonts request)
 {
-    if (res->fonts[request] == NULL)
-        res->fonts[request] = _loadFont(res->theme, request);
-    return res->fonts[request];
+    if (resources.fonts[request] == NULL)
+        resources.fonts[request] = _loadFont(request);
+    return resources.fonts[request];
 }
 
-void theme_freeResources(Resources_s* res)
+void resources_free()
 {
     for (int i = 0; i < images_count; i++)
-        if (res->surfaces[i] != NULL)
-            SDL_FreeSurface(res->surfaces[i]);
+        if (resources.surfaces[i] != NULL)
+            SDL_FreeSurface(resources.surfaces[i]);
     
     for (int i = 0; i < fonts_count; i++)
-        if (res->fonts[i] != NULL)
-            TTF_CloseFont(res->fonts[i]);
+        if (resources.fonts[i] != NULL)
+            TTF_CloseFont(resources.fonts[i]);
 }
 
 #endif // THEME_RESOURCES_H__

@@ -1,6 +1,7 @@
 {
-    "name": "Default Onion",
-    "author": "Silky - DiMo",
+    "name": "Silky",
+    "author": "DiMo",
+    "description": "[Onion default theme]",
     "hideIconTitle": false,
     "batteryPercentage": {
         "visible": true,

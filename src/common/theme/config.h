@@ -76,7 +76,7 @@ void json_fontStyle(cJSON* root, FontStyle_s* dest, FontStyle_s* fallback)
         dest->color = fallback->color;
 }
 
-bool theme_applyConfig(Theme_s* theme, const char* config_path)
+bool theme_applyConfig(Theme_s* config, const char* config_path, bool use_fallbacks)
 {
 	const char *json_str = NULL;
 
@@ -93,32 +93,32 @@ bool theme_applyConfig(Theme_s* theme, const char* config_path)
 	cJSON* json_grid = cJSON_GetObjectItem(json_root, "grid");
 	cJSON* json_list = cJSON_GetObjectItem(json_root, "list");
 
-    json_getString(json_root, "name", theme->name);
-    json_getString(json_root, "author", theme->author);
-    json_getString(json_root, "description", theme->description);
-    json_getBool(json_root, "hideIconTitle", &theme->hideIconTitle);
+    json_getString(json_root, "name", config->name);
+    json_getString(json_root, "author", config->author);
+    json_getString(json_root, "description", config->description);
+    json_getBool(json_root, "hideIconTitle", &config->hideIconTitle);
 
-    json_fontStyle(json_title, &theme->title, NULL);
-    json_fontStyle(json_hint, &theme->hint, &theme->title);
-    json_fontStyle(json_currentpage, &theme->currentpage, &theme->hint);
-    json_fontStyle(json_total, &theme->total, &theme->hint);
-    json_fontStyle(json_list, &theme->list, &theme->title);
+    json_fontStyle(json_title, &config->title, NULL);
+    json_fontStyle(json_hint, &config->hint, use_fallbacks ? &config->title : NULL);
+    json_fontStyle(json_currentpage, &config->currentpage, use_fallbacks ? &config->hint : NULL);
+    json_fontStyle(json_total, &config->total, use_fallbacks ? &config->hint : NULL);
+    json_fontStyle(json_list, &config->list, use_fallbacks ? &config->title : NULL);
 
-    json_getString(json_grid, "font", theme->grid.font);
-    json_getInt(json_grid, "grid1x4", &theme->grid.grid1x4);
-    json_getInt(json_grid, "grid3x4", &theme->grid.grid3x4);
-    json_color(json_grid, "color", &theme->grid.color);
-    json_color(json_grid, "selectedcolor", &theme->grid.selectedcolor);
+    json_getString(json_grid, "font", config->grid.font);
+    json_getInt(json_grid, "grid1x4", &config->grid.grid1x4);
+    json_getInt(json_grid, "grid3x4", &config->grid.grid3x4);
+    json_color(json_grid, "color", &config->grid.color);
+    json_color(json_grid, "selectedcolor", &config->grid.selectedcolor);
 
-    json_getBool(json_batteryPercentage, "visible", &theme->batteryPercentage.visible);
-    if (!json_getString(json_batteryPercentage, "font", theme->batteryPercentage.font))
-        strcpy(theme->batteryPercentage.font, theme->hint.font);
-    json_getInt(json_batteryPercentage, "size", &theme->batteryPercentage.size);
-    if (!json_color(json_batteryPercentage, "color", &theme->batteryPercentage.color))
-        theme->batteryPercentage.color = theme->hint.color;
-    json_getInt(json_batteryPercentage, "offsetX", &theme->batteryPercentage.offsetX);
-    json_getInt(json_batteryPercentage, "offsetY", &theme->batteryPercentage.offsetY);
-    json_getBool(json_batteryPercentage, "onleft", &theme->batteryPercentage.onleft);
+    json_getBool(json_batteryPercentage, "visible", &config->batteryPercentage.visible);
+    if (!json_getString(json_batteryPercentage, "font", config->batteryPercentage.font) && use_fallbacks)
+        strcpy(config->batteryPercentage.font, config->hint.font);
+    json_getInt(json_batteryPercentage, "size", &config->batteryPercentage.size);
+    if (!json_color(json_batteryPercentage, "color", &config->batteryPercentage.color) && use_fallbacks)
+        config->batteryPercentage.color = config->hint.color;
+    json_getInt(json_batteryPercentage, "offsetX", &config->batteryPercentage.offsetX);
+    json_getInt(json_batteryPercentage, "offsetY", &config->batteryPercentage.offsetY);
+    json_getBool(json_batteryPercentage, "onleft", &config->batteryPercentage.onleft);
 
 	cJSON_free(json_root);
 
@@ -127,7 +127,7 @@ bool theme_applyConfig(Theme_s* theme, const char* config_path)
 
 Theme_s theme_loadFromPath(const char* theme_path)
 {
-    Theme_s theme = {
+    Theme_s config = {
         .path = FALLBACK_PATH,
         .name = "",
         .author = "",
@@ -172,27 +172,27 @@ Theme_s theme_loadFromPath(const char* theme_path)
         }
     };
 
-    strncpy(theme.path, theme_path, STR_MAX-1);
-    int len = strlen(theme.path);
-    if (theme.path[len-1] != '/') {
-        theme.path[len] = '/';
-        theme.path[len+1] = '\0';
+    strncpy(config.path, theme_path, STR_MAX-1);
+    int len = strlen(config.path);
+    if (config.path[len-1] != '/') {
+        config.path[len] = '/';
+        config.path[len+1] = '\0';
     }
 
     char config_path[STR_MAX * 2];
-    snprintf(config_path, STR_MAX * 2 - 1, "%sconfig.json", theme.path);
+    snprintf(config_path, STR_MAX * 2 - 1, "%sconfig.json", config.path);
 
 	if (!exists(config_path))
 		sprintf(config_path, "%sconfig.json", FALLBACK_PATH);
 	
-    theme_applyConfig(&theme, config_path);
+    theme_applyConfig(&config, config_path, true);
 
     // apply overrides
     sprintf(config_path, "%s/config.json", THEME_OVERRIDES);
 	if (exists(config_path))
-		theme_applyConfig(&theme, config_path);
+		theme_applyConfig(&config, config_path, false);
 
-	return theme;
+	return config;
 }
 
 Theme_s theme_load(void)

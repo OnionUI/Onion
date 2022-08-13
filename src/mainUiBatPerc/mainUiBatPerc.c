@@ -39,12 +39,13 @@ void restoreRegularDisplay(void)
 
 void drawBatteryPercentage(void)
 {
-    Theme_s theme = theme_load();
+    char theme_path[STR_MAX];
+    theme_getPath(theme_path);
 
     char icon_path[STR_MAX],
          icon_backup[STR_MAX];
-    bool icon_location = theme_getImagePath(theme.path, "power-full-icon", icon_path);
-    bool backup_location = theme_getImagePath(theme.path, "power-full-icon_back", icon_backup);
+    bool icon_location = theme_getImagePath(theme_path, "power-full-icon", icon_path);
+    bool backup_location = theme_getImagePath(theme_path, "power-full-icon_back", icon_backup);
 
     // Backup old battery icon
     if (icon_location != backup_location) {
@@ -53,16 +54,15 @@ void drawBatteryPercentage(void)
     }
 
     TTF_Init();
-	Resources_s res = { .theme = &theme };
 
     int percentage = battery_getPercentage();
-    SDL_Surface* image = theme_batterySurface(&res, percentage);
+    SDL_Surface* image = theme_batterySurface(percentage);
 
     // Save custom battery icon
     IMG_Save(image, icon_path);
 
     SDL_FreeSurface(image);
-	theme_freeResources(&res);
+	resources_free();
     TTF_Quit();
 }
 

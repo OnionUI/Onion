@@ -11,9 +11,10 @@
 static SDL_Surface *theme_background;
 static bool theme_background_loaded = false;
 
-void theme_backgroundLoad(const char *theme_path)
+void theme_backgroundLoad(void)
 {
-    theme_background = rotate180(theme_loadImage(theme_path, "background"));
+    char theme_path[STR_MAX];
+    theme_background = rotate180(theme_loadImage(theme_getPath(theme_path), "background"));
     theme_background_loaded = true;
 }
 
