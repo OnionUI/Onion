@@ -8,7 +8,8 @@
 #include "utils/process.h"
 #include "utils/hash.h"
 #include "utils/log.h"
-#include "display.h"
+#include "./display.h"
+#include "./state.h"
 
 //
 //    [onion] get recent filename from content_history.lpl
@@ -31,13 +32,23 @@ char* getrecent_png(char *filename) {
     strcpy(filename, "/mnt/SDCARD/Screenshots/");
     fnptr = filename + strlen(filename);
 
-    if (exists("/mnt/SDCARD/.tmp_update/cmd_to_run.sh"))
-        strcat(filename, getrecent_onion(fnptr));
+    MenuMode mode = state_getMenuMode();
 
-    if (!(*fnptr)) {
-        if (process_searchpid("gameSwitcher")) strcat(filename, "gameSwitcher");
-        else strcat(filename, "MainUI");
+    if (mode == MODE_GAME)
+        strcat(filename, getrecent_onion(fnptr));
+    else if (mode == MODE_SWITCHER)
+        strcat(filename, "GameSwitcher");
+    else if (mode == MODE_MAIN_UI)
+        strcat(filename, "MainUI");
+    else if (mode == MODE_APPS && exists(CMD_TO_RUN_PATH)) {
+        const char *cmd = file_read(CMD_TO_RUN_PATH);
+        char app_name[STR_MAX];
+        state_getAppName(app_name, cmd);
+        strcat(filename, app_name);
     }
+
+    if (!(*fnptr))
+        strcat(filename, "Screenshot");
 
     fnptr = filename + strlen(filename);
     for (i=0; i<1000; i++) {
