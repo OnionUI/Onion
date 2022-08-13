@@ -13,7 +13,7 @@ CC 		= $(CROSS_COMPILE)gcc
 CXX 	= $(CROSS_COMPILE)g++
 STRIP 	= $(CROSS_COMPILE)strip
 
-SOURCES = .
+SOURCES := $(SOURCES) .
 ifdef INCLUDE_CJSON
 SOURCES := $(SOURCES) ../../include/cjson
 endif
