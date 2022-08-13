@@ -29,12 +29,23 @@ SOFTWARE.
 #include "gfx.h"
 #include "system/keymap_sw.h"
 
+#define MAX_YEAR 2100
+#define MIN_YEAR 1970
+#define MAX_DAY 31
+#define MIN_DAY 1
+#define MAX_MONTH 12
+#define MIN_MONTH 1
+#define MAX_SECOND 59
+#define MAX_MINUTE MAX_SECOND
+#define MAX_HOUR 23
+
 SDL_Surface* sdl_screen, *screen;
 
 char tmp_str[64];
 int buttons;
 
-uint32_t date_selected = 1, month_selected = 1, year_selected = 1970, hour_selected = 0, minute_selected = 0, seconds_selected = 0;
+uint32_t date_selected = MIN_DAY, month_selected = MIN_DAY, year_selected = MIN_YEAR;
+uint32_t hour_selected = 0, minute_selected = 0, seconds_selected = 0;
 uint32_t february_days = 28;
 uint32_t update_clock = 0;
 
@@ -47,44 +58,34 @@ int select_cursor = 0;
 /* I could probably make this smaller */
 static void Dont_go_over_days()
 {
-	if (date_selected < 1)
+	if (month_selected > MAX_MONTH)
 	{
-		date_selected = 1;
+		month_selected = MIN_MONTH;
 	}
 	
-	if (month_selected > 12)
+	if (year_selected > MAX_YEAR)
 	{
-		month_selected = 12;
+		year_selected = MIN_YEAR;
 	}
 	
-	if (month_selected < 1)
+	if (year_selected < MIN_YEAR)
 	{
-		month_selected = 1;
-	}
-	
-	if (year_selected > 2100)
-	{
-		year_selected = 2100;
-	}
-	
-	if (year_selected < 1970)
-	{
-		year_selected = 1970;
+		year_selected = MIN_YEAR;
 	}
 	
 	switch(month_selected)
 	{
 		case 2:
-			if (date_selected > february_days) date_selected = february_days;
+			if (date_selected > february_days) date_selected = MIN_DAY;
 			break;
 		case 4:
 		case 6:
 		case 9:
 		case 11:
-			if (date_selected > 30) date_selected = 30;
+			if (date_selected > 30) date_selected = MIN_DAY;
 			break;
 		default:
-			if (date_selected > 31) date_selected = 31;
+			if (date_selected > MAX_DAY) date_selected = MIN_DAY;
 			break;
 	}
 }
@@ -97,19 +98,70 @@ static void Check_leap_year()
 
 static void Dont_go_over_hour()
 {
-	if (hour_selected > 23)
+	if (hour_selected > MAX_HOUR)
 	{
 		hour_selected = 0;
 	}
 	
-	if (minute_selected > 59)
+	if (minute_selected > MAX_MINUTE)
 	{
 		minute_selected = 0;
 	}
 	
-	if (seconds_selected > 59)
+	if (seconds_selected > MAX_SECOND)
 	{
 		seconds_selected = 0;
+	}
+}
+
+static void DecreaseMonthElement(uint32_t *month_element, int max)
+{
+	if (*month_element == MIN_DAY)
+	{
+		*month_element = max;
+	}
+	else
+	{
+		(*month_element)--;
+	}
+}
+
+static void DecreaseDateElement(uint32_t month_element, uint32_t *date_element, int max)
+{
+	int max_days = MAX_DAY;
+	switch (month_element)
+	{
+	case 2:
+		max_days = february_days;
+		break;
+	case 4:
+	case 6:
+	case 9:
+	case 11:
+		max_days = 30;
+		break;
+	default:
+		break;
+	}
+	if (*date_element == MIN_DAY)
+	{
+		*date_element = max_days;
+	}
+	else
+	{
+		(*date_element)--;
+	}
+}
+
+static void DecreaseTimeElement(uint32_t *time_element, int max)
+{
+	if (*time_element == 0)
+	{
+		*time_element = max;
+	}
+	else
+	{
+		(*time_element)--;
 	}
 }
 
@@ -195,23 +247,23 @@ int main (int argc, char *argv[])
 						switch(select_cursor)
 						{
 							case 0:
-								date_selected--;
-							break;
+								DecreaseDateElement(month_selected, &date_selected, MAX_DAY);
+								break;
 							case 1:
-								month_selected--;
-							break;
+								DecreaseMonthElement(&month_selected, MAX_MONTH);
+								break;
 							case 2:
-								year_selected--;
-							break;
+								DecreaseTimeElement(&year_selected, MAX_YEAR);
+								break;
 							case 3:
-								hour_selected--;
-							break;
+								DecreaseTimeElement(&hour_selected, MAX_HOUR);
+								break;
 							case 4:
-								minute_selected--;
-							break;
+								DecreaseTimeElement(&minute_selected, MAX_MINUTE);
+								break;
 							case 5:
-								seconds_selected--;
-							break;
+								DecreaseTimeElement(&seconds_selected, MAX_SECOND);
+								break;
 						}
 						break;
 						case SDLK_LEFT:
