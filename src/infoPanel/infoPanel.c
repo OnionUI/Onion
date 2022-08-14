@@ -5,12 +5,44 @@
 
 #include "utils/utils.h"
 #include "utils/msleep.h"
+#include "utils/json.h"
+#include "utils/file.h"
 #include "system/battery.h"
 #include "system/settings.h"
 #include "theme/theme.h"
 #include "theme/background.h"
 
-void drawInfoPanel(SDL_Surface *screen, SDL_Surface *video, const char *title_str, const char *message_str)
+bool loadImagesPaths(const char* config_path, char ***images_paths, int *images_paths_count)
+{
+	const char *json_str = NULL;
+
+    if (!(json_str = file_read(config_path)))
+	{
+		return false;
+	}
+
+    // Get JSON objects
+	cJSON* json_root = cJSON_Parse(json_str);
+	cJSON* json_images_array = cJSON_GetObjectItem(json_root, "images");
+	*images_paths_count = cJSON_GetArraySize(json_images_array);
+	*images_paths = (char**)malloc(*images_paths_count * sizeof(char*));
+
+	for (int i = 0; i < *images_paths_count; i++)
+	{
+		(*images_paths)[i] = (char*)malloc(STR_MAX * sizeof(char));
+
+		cJSON* json_image_path_item = cJSON_GetArrayItem(json_images_array, i);
+		cJSON* json_image_path = cJSON_GetObjectItem(json_image_path_item, "path");
+		char* image_path = cJSON_GetStringValue(json_image_path);
+		strcpy((*images_paths)[i], image_path);
+	}
+
+	cJSON_free(json_root);
+
+    return true;
+}
+
+void drawInfoPanel(SDL_Surface *screen, SDL_Surface *video, const char *title_str, char *message_str)
 {
 	theme_backgroundLoad();
 	SDL_BlitSurface(theme_background, NULL, screen, NULL);
@@ -42,11 +74,25 @@ void drawInfoPanel(SDL_Surface *screen, SDL_Surface *video, const char *title_st
 	theme_backgroundFree();	
 }
 
+static void drawImage(const char *image_path, SDL_Surface *screen)
+{
+	SDL_Surface *image = IMG_Load(image_path);
+	if (image) {
+		SDL_Rect image_rect = {320 - image->w / 2, 240 - image->h / 2};
+		SDL_BlitSurface(image, NULL, screen, &image_rect);
+		SDL_FreeSurface(image);
+	}
+}
+
 int main(int argc, char *argv[])
 {
 	char title_str[STR_MAX] = "";
 	char message_str[STR_MAX] = "";
 	char image_path[STR_MAX] = "";
+	char images_json_path[STR_MAX] = "";
+	char **images_paths;
+	int images_count = 0;
+	int image_index = 0;
 	bool wait_confirm = true;
 
 	for (int i = 1; i < argc; i++) {
@@ -57,6 +103,8 @@ int main(int argc, char *argv[])
 				strncpy(message_str, argv[++i], STR_MAX-1);
 			else if (strcmp(argv[i], "-i") == 0 || strcmp(argv[i], "--image") == 0)
 				strncpy(image_path, argv[++i], STR_MAX-1);
+			else if (strcmp(argv[i], "-j") == 0 || strcmp(argv[i], "--images-json") == 0)
+				strncpy(images_json_path, argv[++i], STR_MAX-1);
 			else if (strcmp(argv[i], "-a") == 0 || strcmp(argv[i], "--auto") == 0)
 				wait_confirm = false;
 		}
@@ -70,10 +118,22 @@ int main(int argc, char *argv[])
 	SDL_Surface *screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
 
 	if (exists(image_path)) {
-		SDL_Surface *image = IMG_Load(image_path);
-		SDL_Rect image_rect = {320 - image->w / 2, 240 - image->h / 2};
-		SDL_BlitSurface(image, NULL, screen, &image_rect);
-		SDL_FreeSurface(image);
+		drawImage(image_path, screen);
+	}
+	else if(exists(images_json_path))
+	{
+		if (loadImagesPaths(images_json_path, &images_paths, &images_count))
+		{
+			if (images_count > 0)
+			{
+				drawImage(images_paths[0], screen);
+				image_index++;
+			}
+		}
+		else
+		{
+			//
+		}
 	}
 	else {
 		drawInfoPanel(screen, video, title_str, message_str);
@@ -88,8 +148,28 @@ int main(int argc, char *argv[])
 	while (!quit && wait_confirm) {
 		while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_KEYDOWN)
-				quit = true;
+			{
+				if (image_index == images_count)
+				{
+					quit = true;
+				}
+				else
+				{
+					drawImage(images_paths[image_index], screen);
+					image_index++;
+
+					SDL_BlitSurface(screen, NULL, video, NULL);
+					SDL_Flip(video);
+				}
+			}
 		}
+	}
+
+	if (images_paths != NULL)
+	{
+		for (int i = 0; i < images_count; i++)
+        	free(images_paths[i]);
+    	free(images_paths);
 	}
 
 	if (!wait_confirm)
