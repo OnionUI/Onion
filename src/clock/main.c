@@ -25,12 +25,13 @@ SOFTWARE.
 #include <time.h>
 #include <unistd.h>
 #include <SDL/SDL.h>
-#include "font_drawing.h"
 #include "gfx.h"
 #include "system/keymap_sw.h"
+#include "stringPrinting.h"
 
 #define MAX_YEAR 2100
 #define MIN_YEAR 1970
+#define DEFAULT_YEAR 2022
 #define MAX_DAY 31
 #define MIN_DAY 1
 #define MAX_MONTH 12
@@ -165,18 +166,33 @@ static void DecreaseTimeElement(uint32_t *time_element, int max)
 	}
 }
 
+static void FallbackToDefaultTime(uint32_t *date_selected, uint32_t *month_selected, uint32_t *year_selected,
+	uint32_t *hour_selected, uint32_t *minute_selected, uint32_t *seconds_selected)
+{
+	if (*year_selected == 1970)
+	{
+		*date_selected = MIN_DAY;
+		*month_selected = MIN_MONTH;
+		*year_selected = DEFAULT_YEAR;
+		*hour_selected = 0;
+		*minute_selected = 0;
+		*seconds_selected = 0;
+	}
+	
+}
+
 int main (int argc, char *argv[]) 
 {
 	SDL_Event event;
 	int quit = 0;
-	SDL_Rect rectS = {0,0,213,100};
-	SDL_Rect rectD = {0,120,639,240};
+	SDL_Rect rectS = {0, 0, 213, 100};
+	SDL_Rect rectD = {0, 120, 639, 240};
 	
 	SDL_Init(SDL_INIT_VIDEO);
 	GFX_Init();
 	SDL_ShowCursor(0);
-	screen = GFX_CreateRGBSurface(0, 640, 480, 16, 0,0,0,0);
-	sdl_screen = GFX_CreateRGBSurface(0, 213, 100, 16, 0,0,0,0);
+	screen = GFX_CreateRGBSurface(0, 640, 480, 16, 0, 0, 0, 0);
+	sdl_screen = GFX_CreateRGBSurface(0, 213, 100, 16, 0, 0, 0, 0);
 	if ((!sdl_screen)||(!screen))
 	{
 		printf("Can't set video mode\n");
@@ -197,6 +213,9 @@ int main (int argc, char *argv[])
 	hour_selected = tm.tm_hour;
 	minute_selected = tm.tm_min;
 	seconds_selected = tm.tm_sec;
+
+	FallbackToDefaultTime(&date_selected, &month_selected, &year_selected, &hour_selected,
+		&minute_selected, &seconds_selected);
 	
 	SDL_EnableKeyRepeat(500, 50);
 	
@@ -294,22 +313,26 @@ int main (int argc, char *argv[])
 		Check_leap_year();
 		Dont_go_over_days();
 		Dont_go_over_hour();
+		FallbackToDefaultTime(&date_selected, &month_selected, &year_selected, &hour_selected,
+			&minute_selected, &seconds_selected);
 		
 		GFX_FillRect(sdl_screen, NULL, 0);
 		
-		print_string("Please set the Clock", SDL_MapRGB(sdl_screen->format,255,255,255), 0, 10, 5, sdl_screen->pixels);
+		PrintWhiteString("Please set the Clock", sdl_screen, 10, 5);
 		
-		snprintf(tmp_str, sizeof(tmp_str), "%02d/%02d/%04d %02d:%02d:%02d", date_selected, month_selected, year_selected, hour_selected, minute_selected, seconds_selected);
-		print_string(tmp_str, SDL_MapRGB(sdl_screen->format,255,255,255), 0, 26, 30, sdl_screen->pixels);
+		PrintString("dd/mm/yyyy hh:mm:ss", sdl_screen, DARK_GRAY_COLOR, 26, 20);
+		snprintf(tmp_str, sizeof(tmp_str), "%02d/%02d/%04d %02d:%02d:%02d", date_selected, month_selected, year_selected,
+			hour_selected, minute_selected, seconds_selected);
+		PrintWhiteString(tmp_str, sdl_screen, 26, 30);
 		
 		if (select_cursor == 2) {
-			print_string("^^^^", SDL_MapRGB(sdl_screen->format,255,255,255), 0, 26+(select_cursor * 24), 50, sdl_screen->pixels);
+			PrintWhiteString("^^^^", sdl_screen, 26+(select_cursor * 24), 50);
 		} else {
-			print_string("^^", SDL_MapRGB(sdl_screen->format,255,255,255), 0, 26+(select_cursor*24)+(select_cursor>2?16:0), 50, sdl_screen->pixels);
+			PrintWhiteString("^^", sdl_screen, 26+(select_cursor*24)+(select_cursor>2?16:0), 50);
 		}
 		
-		print_string("Start: Update time/Quit", SDL_MapRGB(sdl_screen->format,255,255,255), 0, 10, 70, sdl_screen->pixels);
-		print_string("B: Quit", SDL_MapRGB(sdl_screen->format,255,255,255), 0, 10, 90, sdl_screen->pixels);
+		PrintWhiteString("Start: Update time/Quit", sdl_screen, 10, 70);
+		PrintWhiteString("B: Quit", sdl_screen, 10, 90);
 		
 		/* Print back buffer to the final screen */
 		SDL_SoftStretch(sdl_screen, &rectS, screen, &rectD);
@@ -337,7 +360,8 @@ int main (int argc, char *argv[])
 	
 	if (update_clock == 1)
 	{
-		snprintf(final_long_string, sizeof(final_long_string), "date -s '%d-%d-%d %d:%d:%d';hwclock --utc -w", year_selected, month_selected, date_selected, hour_selected, minute_selected, seconds_selected);
+		snprintf(final_long_string, sizeof(final_long_string), "date -s '%d-%d-%d %d:%d:%d';hwclock --utc -w", year_selected,
+			month_selected, date_selected, hour_selected, minute_selected, seconds_selected);
 		execlp("/bin/sh","/bin/sh", "-c", final_long_string, (char *)NULL);
 	}
 	
