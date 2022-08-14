@@ -1,8 +1,8 @@
 {
   "images": [
-    { "path": "/mnt/SDCARD/App/Onion_Manual/page1.png" },
-    { "path": "/mnt/SDCARD/App/Onion_Manual/page2.png" },
-    { "path": "/mnt/SDCARD/App/Onion_Manual/page3.png" },
-    { "path": "/mnt/SDCARD/App/Onion_Manual/page4.png" }
+    { "path": "./page1.png" },
+    { "path": "./page2.png" },
+    { "path": "./page3.png" },
+    { "path": "./page4.png" }
   ]
 }

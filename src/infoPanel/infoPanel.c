@@ -8,6 +8,7 @@
 #include "utils/json.h"
 #include "utils/file.h"
 #include "system/battery.h"
+#include "system/keymap_sw.h"
 #include "system/settings.h"
 #include "theme/theme.h"
 #include "theme/background.h"
@@ -127,7 +128,6 @@ int main(int argc, char *argv[])
 			if (images_count > 0)
 			{
 				drawImage(images_paths[0], screen);
-				image_index++;
 			}
 		}
 		else
@@ -149,14 +149,40 @@ int main(int argc, char *argv[])
 		while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_KEYDOWN)
 			{
-				if (image_index == images_count)
+				bool navigation_pressed = false;
+				bool navigating_forward = true;
+				switch(event.key.keysym.sym) {
+				case SW_BTN_A:
+					navigation_pressed = true;
+					navigating_forward = true;
+					break;
+				case SW_BTN_B:
+					navigation_pressed = true;
+					navigating_forward = false;
+					break;
+				default:
+					break;
+				}
+				if (!navigation_pressed) 
+				{
+					continue;
+				}
+				if ((navigating_forward && image_index == images_count-1) // exit after last image
+					|| (!navigating_forward && image_index == 0)) // or when navigating backwards from the first image
 				{
 					quit = true;
 				}
 				else
 				{
+					if (navigating_forward)
+					{
+						image_index++;
+					}
+					else
+					{
+						image_index--;
+					}
 					drawImage(images_paths[image_index], screen);
-					image_index++;
 
 					SDL_BlitSurface(screen, NULL, video, NULL);
 					SDL_Flip(video);
