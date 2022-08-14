@@ -9,7 +9,9 @@
 #include "utils/log.h"
 #include "system/battery.h"
 #include "system/settings.h"
-#include "theme/theme.h"
+#include "theme/config.h"
+#include "theme/resources.h"
+#include "theme/render/battery.h"
 
 int main(int argc, char *argv[])
 {

@@ -3,10 +3,13 @@
 
 #include "theme/config.h"
 #include "theme/resources.h"
+#include "theme/background.h"
 
 void theme_renderHeader(SDL_Surface* screen, SDL_Surface* battery, const char *title_str, bool show_logo)
-{    
-	SDL_BlitSurface(resource_getSurface(BG_TITLE), NULL, screen, NULL);
+{
+    SDL_Rect header_size = {0, 0, 640, 60};
+    SDL_BlitSurface(theme_background(), &header_size, screen, &header_size);
+	SDL_BlitSurface(resource_getSurface(BG_TITLE), &header_size, screen, &header_size);
 
     if (show_logo) {
         SDL_Surface *logo = resource_getSurface(LOGO);

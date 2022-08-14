@@ -3,6 +3,7 @@
 
 #include "theme/config.h"
 #include "theme/resources.h"
+#include "theme/background.h"
 
 void theme_renderStandardHint(SDL_Surface *screen, const char *label_open_str, const char *label_back_str)
 {
@@ -42,10 +43,6 @@ void theme_renderFooter(SDL_Surface *screen)
 
 void theme_renderFooterStatus(SDL_Surface *screen, int current_num, int total_num)
 {
-    SDL_Rect status_area = {400, 0, 240, 60};
-    SDL_Rect status_pos = {400, 420, 240, 60};
-    SDL_BlitSurface(resource_getSurface(BG_FOOTER), &status_area, screen, &status_pos);
-
     TTF_Font *font_hint = resource_getFont(HINT);
 
     if (total_num == 0)
@@ -60,9 +57,15 @@ void theme_renderFooterStatus(SDL_Surface *screen, int current_num, int total_nu
     SDL_Surface *total = TTF_RenderUTF8_Blended(font_hint, total_str, theme()->total.color);
 
     SDL_Rect total_rect = {620 - total->w, 449 - total->h / 2};
-    SDL_BlitSurface(total, NULL, screen, &total_rect);
-
     SDL_Rect current_rect = {total_rect.x - current->w, 449 - current->h / 2};
+    
+    SDL_Rect status_size = {current_rect.x, 0, total->w + current->w, current->h};
+    SDL_Rect status_pos = {current_rect.x, current_rect.y, total->w + current->w, current->h};
+
+    SDL_BlitSurface(theme_background(), &status_pos, screen, &status_pos);
+    SDL_BlitSurface(resource_getSurface(BG_FOOTER), &status_size, screen, &status_pos);
+    
+    SDL_BlitSurface(total, NULL, screen, &total_rect);
     SDL_BlitSurface(current, NULL, screen, &current_rect);
 
     SDL_FreeSurface(current);

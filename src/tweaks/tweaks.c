@@ -38,12 +38,9 @@ int main(int argc, char *argv[])
 	SDL_Surface* video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
 	SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
 	
-	theme_backgroundLoad();
-	theme_backgroundBlit(video);
+	theme_backgroundBlit(screen);
+	SDL_BlitSurface(screen, NULL, video, NULL);
 	SDL_Flip(video);
-
-	SDL_Rect bg_crop_header = {0, 0, 640, 60};
-	SDL_Rect bg_crop = {0, 60, 640, 360};
 
 	settings_load();
 	lang_load();
@@ -125,14 +122,10 @@ int main(int argc, char *argv[])
 		}
 
 		if (acc_ticks >= time_step) {
-			if (title_changed) {
-				SDL_BlitSurface(theme_background, &bg_crop_header, screen, &bg_crop_header);
+			if (title_changed)
 				theme_renderHeader(screen, battery, menu_stack[level]->title, false);
-			}
 
 			if (changed) {
-				SDL_BlitSurface(theme_background, &bg_crop, screen, &bg_crop);
-
 				theme_renderList(screen, menu_stack[level]);
 				theme_renderFooterStatus(screen, menu_stack[level]->active_pos + 1, menu_stack[level]->item_count);
 			
@@ -153,7 +146,6 @@ int main(int argc, char *argv[])
 	lang_free();
 	list_free(&menu_main);
 	resources_free();
-	theme_backgroundFree();
 	SDL_FreeSurface(battery);
    	SDL_FreeSurface(screen);
    	SDL_FreeSurface(video);

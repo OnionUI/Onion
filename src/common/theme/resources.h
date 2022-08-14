@@ -50,8 +50,10 @@ typedef struct Theme_Resources
 {
     Theme_s theme;
     bool _theme_loaded;
-    SDL_Surface* surfaces[(int)images_count];
-    TTF_Font* fonts[(int)fonts_count];
+    SDL_Surface *surfaces[(int)images_count];
+    TTF_Font *fonts[(int)fonts_count];
+    SDL_Surface *background;
+    bool _background_loaded;
 } Resources_s;
 
 static Resources_s resources = { ._theme_loaded = false };
@@ -141,6 +143,9 @@ void resources_free()
     for (int i = 0; i < fonts_count; i++)
         if (resources.fonts[i] != NULL)
             TTF_CloseFont(resources.fonts[i]);
+
+    if (resources._background_loaded)
+        SDL_FreeSurface(resources.background);
 }
 
 #endif // THEME_RESOURCES_H__

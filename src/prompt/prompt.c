@@ -76,8 +76,7 @@ int main(int argc, char *argv[])
 	lang_load();
 	printf_debug(LOG_SUCCESS, "loaded language file");
 
-	theme_backgroundLoad();
-	SDL_BlitSurface(theme_background, NULL, screen, NULL);
+	SDL_BlitSurface(theme_background(), NULL, screen, NULL);
 	SDL_BlitSurface(screen, NULL, video, NULL); 
 	SDL_Flip(video);
 
@@ -205,7 +204,7 @@ int main(int argc, char *argv[])
 
 		if (acc_ticks >= time_step) {
 			if (changed) {
-				SDL_BlitSurface(theme_background, NULL, screen, NULL);
+				SDL_BlitSurface(theme_background(), NULL, screen, NULL);
 				theme_renderHeader(screen, battery, has_title ? title_str : NULL, !has_title);
 
 				if (has_message)
@@ -235,7 +234,6 @@ int main(int argc, char *argv[])
 	resources_free();
 	if (has_message)
 		SDL_FreeSurface(message);
-	theme_backgroundFree();
 	SDL_FreeSurface(battery);
    	SDL_FreeSurface(screen);
    	SDL_FreeSurface(video);

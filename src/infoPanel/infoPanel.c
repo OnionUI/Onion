@@ -12,8 +12,7 @@
 
 void drawInfoPanel(SDL_Surface *screen, SDL_Surface *video, const char *title_str, const char *message_str)
 {
-	theme_backgroundLoad();
-	SDL_BlitSurface(theme_background, NULL, screen, NULL);
+	SDL_BlitSurface(theme_background(), NULL, screen, NULL);
 	SDL_BlitSurface(screen, NULL, video, NULL); 
 	SDL_Flip(video);
 
@@ -39,7 +38,6 @@ void drawInfoPanel(SDL_Surface *screen, SDL_Surface *video, const char *title_st
 	}
 
 	resources_free();
-	theme_backgroundFree();	
 }
 
 int main(int argc, char *argv[])
