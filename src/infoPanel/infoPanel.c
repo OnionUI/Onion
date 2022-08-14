@@ -22,10 +22,7 @@ void drawInfoPanel(SDL_Surface *screen, SDL_Surface *video, const char *title_st
 	SDL_Surface *message = NULL;
 	SDL_Rect message_rect = {320, 240};
 
-	int current_percentage = battery_getPercentage();
-	SDL_Surface *battery = theme_batterySurface(current_percentage);
-
-	theme_renderHeader(screen, battery, has_title ? title_str : NULL, !has_title);
+	theme_renderHeader(screen, battery_getPercentage(), has_title ? title_str : NULL, !has_title);
 	theme_renderFooter(screen);
 
 	if (has_message) {

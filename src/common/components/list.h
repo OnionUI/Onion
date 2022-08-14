@@ -106,44 +106,64 @@ void list_keyDown(List *list, bool key_repeat)
 
 ListItem* list_keyLeft(List *list, bool key_repeat)
 {
+	bool apply_action = false;
 	ListItem *item = list_currentItem(list);
 
 	if (item == NULL)
 		return NULL;
 
 	switch (item->item_type) {
-		case TOGGLE: item->value = 0; break;
+		case TOGGLE:
+			if (item->value != 0) {
+				item->value = 0;
+				apply_action = true;
+			}
+			break;
 		case MULTIVALUE:
 			if (item->value == 0) {
 				if (!key_repeat)
 					item->value = item->value_max;
 			}
 			else item->value--;
+			apply_action = true;
 			break;
 		default: break;
 	}
+
+	if (apply_action && item->action != NULL)
+		item->action((void*)item);
 
 	return item;
 }
 
 ListItem* list_keyRight(List *list, bool key_repeat)
 {
+	bool apply_action = false;
 	ListItem *item = list_currentItem(list);
 
 	if (item == NULL)
 		return NULL;
 
 	switch (item->item_type) {
-		case TOGGLE: item->value = 1; break;
+		case TOGGLE:
+			if (item->value != 1) {
+				item->value = 1;
+				apply_action = true;
+			}
+			break;
 		case MULTIVALUE:
 			if (item->value == item->value_max) {
 				if (!key_repeat)
 					item->value = 0;
 			}
 			else item->value++;
+			apply_action = true;
 			break;
 		default: break;
 	}
+
+	if (apply_action && item->action != NULL)
+		item->action((void*)item);
 
 	return item;
 }
@@ -179,6 +199,9 @@ ListItem* list_resetCurrentItem(List *list)
 		return NULL;
 
 	item->value = item->_reset_value;
+
+	if (item->action != NULL)
+		item->action((void*)item);
 
 	return item;
 }

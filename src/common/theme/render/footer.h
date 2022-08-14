@@ -41,8 +41,16 @@ void theme_renderFooter(SDL_Surface *screen)
 	SDL_BlitSurface(resource_getSurface(BG_FOOTER), NULL, screen, &footer_rect);
 }
 
+static int old_status_width = 200;
+
 void theme_renderFooterStatus(SDL_Surface *screen, int current_num, int total_num)
 {
+    SDL_Rect status_pos = {620 - old_status_width, 420, old_status_width, 60};
+    SDL_Rect status_size = {status_size.x, 0, old_status_width, 60};
+
+    SDL_BlitSurface(theme_background(), &status_pos, screen, &status_pos);
+    SDL_BlitSurface(resource_getSurface(BG_FOOTER), &status_size, screen, &status_pos);
+
     TTF_Font *font_hint = resource_getFont(HINT);
 
     if (total_num == 0)
@@ -58,12 +66,7 @@ void theme_renderFooterStatus(SDL_Surface *screen, int current_num, int total_nu
 
     SDL_Rect total_rect = {620 - total->w, 449 - total->h / 2};
     SDL_Rect current_rect = {total_rect.x - current->w, 449 - current->h / 2};
-    
-    SDL_Rect status_size = {current_rect.x, 0, total->w + current->w, current->h};
-    SDL_Rect status_pos = {current_rect.x, current_rect.y, total->w + current->w, current->h};
-
-    SDL_BlitSurface(theme_background(), &status_pos, screen, &status_pos);
-    SDL_BlitSurface(resource_getSurface(BG_FOOTER), &status_size, screen, &status_pos);
+    old_status_width = total->w + current->w;
     
     SDL_BlitSurface(total, NULL, screen, &total_rect);
     SDL_BlitSurface(current, NULL, screen, &current_rect);

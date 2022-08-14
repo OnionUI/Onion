@@ -22,6 +22,7 @@
 #include "theme/background.h"
 #include "components/list.h"
 
+#include "./appstate.h"
 #include "./menus.h"
 
 #define FRAMES_PER_SECOND 60
@@ -45,20 +46,12 @@ int main(int argc, char *argv[])
 	settings_load();
 	lang_load();
 
-	time_t battery_last_modified = 0;
-    int current_percentage = battery_getPercentage();
-	int old_percentage = current_percentage;
-    SDL_Surface* battery = theme_batterySurface(current_percentage);
+    int battery_percentage = battery_getPercentage();
 
 	menuMain();
-	bool title_changed = true;
 
 	theme_renderFooter(screen);
     theme_renderStandardHint(screen, lang_get(LANG_SELECT), lang_get(LANG_BACK));
-
-	bool quit = false;
-	bool changed = true;
-	KeyState keystate[320] = {0};
 
 	uint32_t acc_ticks = 0,
 			 last_ticks = SDL_GetTicks(),
@@ -72,28 +65,27 @@ int main(int argc, char *argv[])
 		if (updateKeystate(keystate, &quit)) {
 			if (keystate[SW_BTN_UP] >= PRESSED) {
 				list_keyUp(menu_stack[level], keystate[SW_BTN_UP] == REPEATING);
-				changed = true;
+				list_changed = true;
 			}
 			else if (keystate[SW_BTN_DOWN] >= PRESSED) {
 				list_keyDown(menu_stack[level], keystate[SW_BTN_DOWN] == REPEATING);
-				changed = true;
+				list_changed = true;
 			}
 			else if (keystate[SW_BTN_LEFT] >= PRESSED) {
 				list_keyLeft(menu_stack[level], keystate[SW_BTN_LEFT] == REPEATING);
-				changed = true;
+				list_changed = true;
 			}
 			else if (keystate[SW_BTN_RIGHT] >= PRESSED) {
 				list_keyRight(menu_stack[level], keystate[SW_BTN_RIGHT] == REPEATING);
-				changed = true;
+				list_changed = true;
 			}
 			else if (keystate[SW_BTN_Y] == PRESSED) {
 				list_resetCurrentItem(menu_stack[level]);
-				changed = true;
+				list_changed = true;
 			}
 			else if (keystate[SW_BTN_A] == PRESSED) {
 				list_activateItem(menu_stack[level]);
-				title_changed = true;
-				changed = true;
+				list_changed = true;
 			}
 			else if (keystate[SW_BTN_B] == PRESSED) {
 				if (level == 0)
@@ -101,8 +93,8 @@ int main(int argc, char *argv[])
 				else {
 					menu_stack[level] = NULL;
 					level--;
-					title_changed = true;
-					changed = true;
+					header_changed = true;
+					list_changed = true;
 				}
 			}
 		}
@@ -110,29 +102,23 @@ int main(int argc, char *argv[])
 		if (quit)
 			break;
 
-		if (file_isModified("/tmp/percBat", &battery_last_modified)) {
-			current_percentage = battery_getPercentage();
-
-			if (current_percentage != old_percentage) {
-				SDL_FreeSurface(battery);
-				battery = theme_batterySurface(current_percentage);
-				old_percentage = current_percentage;
-				title_changed = true;
-			}
-		}
+		if (battery_hasChanged(ticks, &battery_percentage))
+			header_changed = true;
 
 		if (acc_ticks >= time_step) {
-			if (title_changed)
-				theme_renderHeader(screen, battery, menu_stack[level]->title, false);
+			if (header_changed) {
+				theme_renderHeader(screen, battery_percentage, menu_stack[level]->title, false);
+				header_changed = false;
+			}
 
-			if (changed) {
+			if (list_changed) {
 				theme_renderList(screen, menu_stack[level]);
 				theme_renderFooterStatus(screen, menu_stack[level]->active_pos + 1, menu_stack[level]->item_count);
 			
 				SDL_BlitSurface(screen, NULL, video, NULL); 
 				SDL_Flip(video);
 
-				changed = false;
+				list_changed = false;
 			}
 
 			acc_ticks -= time_step;
@@ -146,7 +132,6 @@ int main(int argc, char *argv[])
 	lang_free();
 	list_free(&menu_main);
 	resources_free();
-	SDL_FreeSurface(battery);
    	SDL_FreeSurface(screen);
    	SDL_FreeSurface(video);
     SDL_Quit();

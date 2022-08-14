@@ -4,6 +4,7 @@
 #include "utils/utils.h"
 #include "utils/flags.h"
 #include "utils/process.h"
+#include "./display.h"
 
 #define CMD_TO_RUN_PATH "/mnt/SDCARD/.tmp_update/cmd_to_run.sh"
 #define RETROARCH_CONFIG "/mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg"
@@ -49,7 +50,7 @@ void force_gameSwitcher(void)
     if ((pid = process_searchpid("MainUI"))) {
         run_gameSwitcher(true);
         kill(pid, SIGKILL);
-        system("./bin/freemma");
+        display_reset();
     }
 }
 

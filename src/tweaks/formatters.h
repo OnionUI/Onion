@@ -7,9 +7,9 @@
 #include "components/list.h"
 
 #define BUTTON_MAINUI_LABELS {"Context menu", "GameSwitcher", "Resume game"}
-#define BUTTON_INGAME_LABELS {"GameSwitcher", "Exit to menu", "Quick switch", "Off"}
+#define BUTTON_INGAME_LABELS {"Off", "GameSwitcher", "Exit to menu", "Quick switch"}
 
-#define THEME_TOGGLE_LABELS {"-", "On", "Off"}
+#define THEME_TOGGLE_LABELS {"-", "Off", "On"}
 
 void battWarnLabels(void *pt, char *out_label)
 {

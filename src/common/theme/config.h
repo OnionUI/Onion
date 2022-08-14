@@ -202,4 +202,43 @@ Theme_s theme_load(void)
 	return theme_loadFromPath(theme_path);
 }
 
+bool theme_changeOverride(cJSON* root, const char *group_key, const char *key, void *value, int value_type)
+{
+    cJSON *group = cJSON_GetObjectItem(root, group_key);
+
+    if (!group)
+        cJSON_AddItemToObject(root, group_key, group = cJSON_CreateObject());
+
+    cJSON_DeleteItemFromObject(group, key);
+
+    switch (value_type) {
+        case cJSON_NULL: break;
+        case cJSON_String: cJSON_AddStringToObject(group, key, (char*)value); break;
+        case cJSON_Number: cJSON_AddNumberToObject(group, key, (double)(*(int*)value)); break;
+        case cJSON_True: cJSON_AddTrueToObject(group, key); break;
+        case cJSON_False: cJSON_AddFalseToObject(group, key); break;
+        default: return false;
+    }
+
+    return true;
+}
+
+void theme_changeOverrideFile(const char *group_key, const char *key, void *value, int value_type, bool reload, Theme_s *config)
+{
+    cJSON* root = json_load(THEME_OVERRIDES "/config.json");
+
+    if (!root)
+        root = cJSON_CreateObject();
+
+    bool success = theme_changeOverride(root, group_key, key, value, value_type);
+
+    if (success)
+        json_save(root, THEME_OVERRIDES "/config.json");
+
+    if (reload)
+        *config = theme_loadFromPath(config->path);
+
+	cJSON_free(root);
+}
+
 #endif // THEME_CONFIG_H__

@@ -8,10 +8,10 @@
 #include <stdbool.h>
 
 #include "components/list.h"
-#include "./formatters.h"
 
-static int level = 0;
-static List *menu_stack[5];
+#include "./appstate.h"
+#include "./formatters.h"
+#include "./actions.h"
 
 static List menu_main;
 static List menu_system;
@@ -41,6 +41,7 @@ void menuSystem(void *_)
 		});
 	}
 	menu_stack[++level] = &menu_system;
+	header_changed = true;
 }
 
 void menuButtonAction(void *_)
@@ -61,16 +62,17 @@ void menuButtonAction(void *_)
 			.label = "[MainUI] Double press", .item_type = MULTIVALUE, .value_max = 2, .value_labels = BUTTON_MAINUI_LABELS, .value = 2
 		});
 		list_addItem(&menu_button_action, (ListItem){
-			.label = "[In-game] Single press", .item_type = MULTIVALUE, .value_max = 3, .value_labels = BUTTON_INGAME_LABELS, .value = 0
+			.label = "[In-game] Single press", .item_type = MULTIVALUE, .value_max = 3, .value_labels = BUTTON_INGAME_LABELS, .value = 1
 		});
 		list_addItem(&menu_button_action, (ListItem){
-			.label = "[In-game] Long press", .item_type = MULTIVALUE, .value_max = 3, .value_labels = BUTTON_INGAME_LABELS, .value = 1
+			.label = "[In-game] Long press", .item_type = MULTIVALUE, .value_max = 3, .value_labels = BUTTON_INGAME_LABELS, .value = 2
 		});
 		list_addItem(&menu_button_action, (ListItem){
-			.label = "[In-game] Double press", .item_type = MULTIVALUE, .value_max = 3, .value_labels = BUTTON_INGAME_LABELS, .value = 2
+			.label = "[In-game] Double press", .item_type = MULTIVALUE, .value_max = 3, .value_labels = BUTTON_INGAME_LABELS, .value = 3
 		});
 	}
 	menu_stack[++level] = &menu_button_action;
+	header_changed = true;
 }
 
 void menuThemeOverrides(void *_)
@@ -79,7 +81,7 @@ void menuThemeOverrides(void *_)
 		menu_theme_overrides = list_create(7, LIST_SMALL);
 		strcpy(menu_theme_overrides.title, "Theme overrides");
 		list_addItem(&menu_theme_overrides, (ListItem){
-			.label = "Battery percentage", .item_type = MULTIVALUE, .value_max = 2, .value_labels = THEME_TOGGLE_LABELS
+			.label = "Battery percentage", .item_type = MULTIVALUE, .value_max = 2, .value_labels = THEME_TOGGLE_LABELS, .action = applyBatteryPercentage
 		});
 		list_addItem(&menu_theme_overrides, (ListItem){
 			.label = "Hide icon labels", .item_type = MULTIVALUE, .value_max = 2, .value_labels = THEME_TOGGLE_LABELS
@@ -101,6 +103,7 @@ void menuThemeOverrides(void *_)
 		});
 	}
 	menu_stack[++level] = &menu_theme_overrides;
+	header_changed = true;
 }
 
 void menuUserInterface(void *_)
@@ -122,6 +125,7 @@ void menuUserInterface(void *_)
 		});
 	}
 	menu_stack[++level] = &menu_user_interface;
+	header_changed = true;
 }
 
 void menuResetSettings(void *_)
@@ -146,6 +150,7 @@ void menuResetSettings(void *_)
 		});
 	}
 	menu_stack[++level] = &menu_reset_settings;
+	header_changed = true;
 }
 
 void menuAdvanced(void *_)
@@ -164,6 +169,7 @@ void menuAdvanced(void *_)
 		});
 	}
 	menu_stack[++level] = &menu_advanced;
+	header_changed = true;
 }
 
 void menuTools(void *_)
@@ -185,6 +191,7 @@ void menuTools(void *_)
 		});
 	}
 	menu_stack[++level] = &menu_tools;
+	header_changed = true;
 }
 
 void menuMain(void)
@@ -199,6 +206,7 @@ void menuMain(void)
 		list_addItem(&menu_main, (ListItem){ .label = "Tools", .description = "Favorites, clean files", .action = menuTools });
 	}
 	menu_stack[0] = &menu_main;
+	header_changed = true;
 }
 
 #endif
