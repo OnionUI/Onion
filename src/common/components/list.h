@@ -21,6 +21,7 @@ typedef struct ListItem
 	char value_labels[MAX_NUM_VALUES][STR_MAX];
 	void (*value_formatter)(void *self, char *out_label);
 	void (*action)(void *self);
+	int action_id;
 	int _reset_value;
 } ListItem;
 

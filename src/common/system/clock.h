@@ -99,4 +99,12 @@ void system_clock_pause(bool enabled)
     clock_paused = enabled;
 }
 
+int getTicks(void)
+{
+    struct timeval te;
+    gettimeofday(&te, NULL);
+    int ms = (int)(te.tv_sec * 1000.0 + te.tv_usec / 1000);
+    return ms;
+}
+
 #endif // CLOCK_H__

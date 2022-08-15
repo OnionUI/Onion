@@ -155,13 +155,14 @@ const char *file_getExtension(const char *filename) {
     return dot + 1;
 }
 
-char* file_parseKeyValue(const char *file_path, const char *key_in, char *value_out, char divider) {
+char* file_parseKeyValue(const char *file_path, const char *key_in, char *value_out, char divider, int select_index) {
     FILE *fp;
     int f;
     char key[256], val[256];
     char key_search[STR_MAX];
     char search_str[STR_MAX];
     sprintf(search_str, "%%255[^%c]%c%%255[^\n]\n", divider, divider);
+    int match_index = 0;
 
     *value_out = 0;
     if ( (fp = fopen(file_path, "r")) ) {
@@ -171,7 +172,8 @@ char* file_parseKeyValue(const char *file_path, const char *key_in, char *value_
             if (str_trim(key_search, 256, key, true)) {
                 if (strcmp(key_search, key_in) == 0) {
                     str_trim(value_out, 256, val, false);
-                    break;
+                    if ((match_index++) == select_index)
+                        break;
                 }
             }
             key[0] = 0; val[0] = 0;

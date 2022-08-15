@@ -30,16 +30,32 @@ void menu_system(void *_)
 		_menu_system = list_create(4, LIST_SMALL);
 		strcpy(_menu_system.title, "System");
 		list_addItem(&_menu_system, (ListItem){
-			.label = "Auto-resume last game", .item_type = TOGGLE, .value = 1
+			.label = "Auto-resume last game",
+			.item_type = TOGGLE,
+			.value = (int)settings.startup_auto_resume,
+			.action = action_setStartupAutoResume
 		});
 		list_addItem(&_menu_system, (ListItem){
-			.label = "Save and exit when battery <4%", .item_type = TOGGLE, .value = 1
+			.label = "Save and exit when battery <4%",
+			.item_type = TOGGLE,
+			.value = (int)settings.low_battery_autosave,
+			.action = action_setLowBatteryAutoSave
 		});
 		list_addItem(&_menu_system, (ListItem){
-			.label = "Start application", .item_type = MULTIVALUE, .value_max = 2, .value_labels = {"MainUI", "GameSwitcher", "RetroArch"}
+			.label = "Start application",
+			.item_type = MULTIVALUE,
+			.value_max = 2,
+			.value_labels = {"MainUI", "GameSwitcher", "RetroArch"},
+			.value = settings.startup_application,
+			.action = action_setStartupApplication
 		});
 		list_addItem(&_menu_system, (ListItem){
-			.label = "Vibration", .item_type = MULTIVALUE, .value_max = 3, .value_labels = {"Off", "Low", "Normal", "High"}, .value = 2
+			.label = "Vibration intensity",
+			.item_type = MULTIVALUE,
+			.value_max = 3,
+			.value_labels = {"Off", "Low", "Normal", "High"},
+			.value = settings.vibration,
+			.action = action_setVibration
 		});
 	}
 	menu_stack[++level] = &_menu_system;
@@ -52,25 +68,64 @@ void menu_buttonAction(void *_)
 		_menu_button_action = list_create(7, LIST_SMALL);
 		strcpy(_menu_button_action.title, "Menu button");
 		list_addItem(&_menu_button_action, (ListItem){
-			.label = "Vibrate on single press", .item_type = TOGGLE, .value = 1
+			.label = "Vibrate on single press",
+			.item_type = TOGGLE,
+			.value = (int)settings.menu_button_haptics,
+			.action = action_setMenuButtonHaptics
 		});
 		list_addItem(&_menu_button_action, (ListItem){
-			.label = "[MainUI] Single press", .item_type = MULTIVALUE, .value_max = 2, .value_labels = BUTTON_MAINUI_LABELS, .value = 0
+			.label = "[MainUI] Single press",
+			.item_type = MULTIVALUE,
+			.value_max = 2,
+			.value_labels = BUTTON_MAINUI_LABELS,
+			.value = settings.mainui_single_press,
+			.action_id = 0,
+			.action = action_setMenuButtonKeymap
 		});
 		list_addItem(&_menu_button_action, (ListItem){
-			.label = "[MainUI] Long press", .item_type = MULTIVALUE, .value_max = 2, .value_labels = BUTTON_MAINUI_LABELS, .value = 1
+			.label = "[MainUI] Long press",
+			.item_type = MULTIVALUE,
+			.value_max = 2,
+			.value_labels = BUTTON_MAINUI_LABELS,
+			.value = settings.mainui_long_press,
+			.action_id = 1,
+			.action = action_setMenuButtonKeymap
 		});
 		list_addItem(&_menu_button_action, (ListItem){
-			.label = "[MainUI] Double press", .item_type = MULTIVALUE, .value_max = 2, .value_labels = BUTTON_MAINUI_LABELS, .value = 2
+			.label = "[MainUI] Double press",
+			.item_type = MULTIVALUE,
+			.value_max = 2,
+			.value_labels = BUTTON_MAINUI_LABELS,
+			.value = settings.mainui_double_press,
+			.action_id = 2,
+			.action = action_setMenuButtonKeymap
 		});
 		list_addItem(&_menu_button_action, (ListItem){
-			.label = "[In-game] Single press", .item_type = MULTIVALUE, .value_max = 3, .value_labels = BUTTON_INGAME_LABELS, .value = 1
+			.label = "[In-game] Single press",
+			.item_type = MULTIVALUE,
+			.value_max = 3,
+			.value_labels = BUTTON_INGAME_LABELS,
+			.value = settings.ingame_single_press,
+			.action_id = 3,
+			.action = action_setMenuButtonKeymap
 		});
 		list_addItem(&_menu_button_action, (ListItem){
-			.label = "[In-game] Long press", .item_type = MULTIVALUE, .value_max = 3, .value_labels = BUTTON_INGAME_LABELS, .value = 2
+			.label = "[In-game] Long press",
+			.item_type = MULTIVALUE,
+			.value_max = 3,
+			.value_labels = BUTTON_INGAME_LABELS,
+			.value = settings.ingame_long_press,
+			.action_id = 4,
+			.action = action_setMenuButtonKeymap
 		});
 		list_addItem(&_menu_button_action, (ListItem){
-			.label = "[In-game] Double press", .item_type = MULTIVALUE, .value_max = 3, .value_labels = BUTTON_INGAME_LABELS, .value = 3
+			.label = "[In-game] Double press",
+			.item_type = MULTIVALUE,
+			.value_max = 3,
+			.value_labels = BUTTON_INGAME_LABELS,
+			.value = settings.ingame_double_press,
+			.action_id = 5,
+			.action = action_setMenuButtonKeymap
 		});
 	}
 	menu_stack[++level] = &_menu_button_action;
@@ -170,16 +225,28 @@ void menu_userInterface(void *_)
 		_menu_user_interface = list_create(4, LIST_SMALL);
 		strcpy(_menu_user_interface.title, "User interface");
 		list_addItem(&_menu_user_interface, (ListItem){
-			.label = "Show recents", .item_type = TOGGLE
+			.label = "Show recents",
+			.item_type = TOGGLE,
+			.value = settings.show_recents,
+			.action = action_setShowRecents
 		});
 		list_addItem(&_menu_user_interface, (ListItem){
-			.label = "Show expert mode", .item_type = TOGGLE
+			.label = "Show expert mode",
+			.item_type = TOGGLE,
+			.value = settings.show_expert,
+			.action = action_setShowExpert
 		});
 		list_addItem(&_menu_user_interface, (ListItem){
-			.label = "Low battery warning", .item_type = MULTIVALUE, .value_max = 5, .value_formatter = formatter_battWarn, .value = 3
+			.label = "Low battery warning",
+			.item_type = MULTIVALUE,
+			.value_max = 5,
+			.value_formatter = formatter_battWarn,
+			.value = settings.low_battery_warn_at / 5,
+			.action = action_setLowBatteryWarnAt
 		});
 		list_addItem(&_menu_user_interface, (ListItem){
-			.label = "Theme overrides...", .action = menu_themeOverrides
+			.label = "Theme overrides...",
+			.action = menu_themeOverrides
 		});
 	}
 	menu_stack[++level] = &_menu_user_interface;
@@ -192,19 +259,19 @@ void menu_resetSettings(void *_)
 		_menu_reset_settings = list_create(5, LIST_SMALL);
 		strcpy(_menu_reset_settings.title, "Reset settings");
 		list_addItem(&_menu_reset_settings, (ListItem){
-			.label = "Reset RetroArch main configuration"
-		});
-		list_addItem(&_menu_reset_settings, (ListItem){
-			.label = "Reset RetroArch core configuration..." // TODO: This needs to lead to a dynamic menu listing the cores
-		});
-		list_addItem(&_menu_reset_settings, (ListItem){
-			.label = "Reset MainUI settings"
+			.label = "Reset all"
 		});
 		list_addItem(&_menu_reset_settings, (ListItem){
 			.label = "Reset tweaks"
 		});
 		list_addItem(&_menu_reset_settings, (ListItem){
-			.label = "Reset all"
+			.label = "Reset MainUI settings"
+		});
+		list_addItem(&_menu_reset_settings, (ListItem){
+			.label = "Reset RetroArch main configuration"
+		});
+		list_addItem(&_menu_reset_settings, (ListItem){
+			.label = "Reset RetroArch core configuration..." // TODO: This needs to lead to a dynamic menu listing the cores
 		});
 	}
 	menu_stack[++level] = &_menu_reset_settings;

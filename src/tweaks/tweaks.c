@@ -30,6 +30,9 @@
 int main(int argc, char *argv[])
 {
 	print_debug("Debug logging enabled");
+	
+    signal(SIGINT, sigHandler);
+    signal(SIGTERM, sigHandler);
 
 	SDL_Init(SDL_INIT_VIDEO);
 	SDL_ShowCursor(SDL_DISABLE);
@@ -94,6 +97,8 @@ int main(int argc, char *argv[])
 					list_changed = true;
 				}
 			}
+			else if (keystate[SW_BTN_MENU] == PRESSED)
+				quit = true;
 		}
 
 		if (quit)
@@ -133,6 +138,8 @@ int main(int argc, char *argv[])
 	// Clear the screen when exiting
 	SDL_FillRect(video, NULL, 0);
 	SDL_Flip(video);
+
+	settings_save();
 	
 	lang_free();
 	list_free(&_menu_main);

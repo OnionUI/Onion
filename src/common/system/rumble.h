@@ -14,6 +14,9 @@
 #define SHORT_PULSE_MS 100
 #define SUPER_SHORT_PULSE_MS 50
 
+static int super_short_timings[] = {0, 25,  50,  75};
+static int short_timings[]       = {0, 50, 100, 150};
+
 
 void rumble(bool enabled)
 {
@@ -27,9 +30,9 @@ void rumble(bool enabled)
  * 
  */
 void short_pulse(void) {
-    if (!settings.vibration) return;
+    if (settings.vibration == 0) return;
     rumble(true);
-    msleep(SHORT_PULSE_MS);
+    msleep(short_timings[settings.vibration]);
     rumble(false);
 }
 
@@ -38,9 +41,9 @@ void short_pulse(void) {
  * 
  */
 void super_short_pulse(void) {
-    if (!settings.vibration) return;
+    if (settings.vibration == 0) return;
     rumble(true);
-    msleep(SUPER_SHORT_PULSE_MS);
+    msleep(super_short_timings[settings.vibration]);
     rumble(false);
 }
 
@@ -49,9 +52,9 @@ void super_short_pulse(void) {
  * 
  */
 void menu_short_pulse(void) {
-    if (!settings.vibration || !settings.menu_haptics) return;
+    if (settings.vibration == 0 || !settings.menu_button_haptics) return;
     rumble(true);
-    msleep(SHORT_PULSE_MS);
+    msleep(short_timings[settings.vibration]);
     rumble(false);
 }
 
@@ -60,9 +63,9 @@ void menu_short_pulse(void) {
  * 
  */
 void menu_super_short_pulse(void) {
-    if (!settings.vibration || !settings.menu_haptics) return;
+    if (settings.vibration == 0 || !settings.menu_button_haptics) return;
     rumble(true);
-    msleep(SUPER_SHORT_PULSE_MS);
+    msleep(super_short_timings[settings.vibration]);
     rumble(false);
 }
 
