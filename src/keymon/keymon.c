@@ -438,13 +438,13 @@ int main(void) {
         settings_load();
 
         // Check Hibernate
-        if (temp_flag_get("battery_charging"))
-            hibernate_time = 1;
+        if (battery_isCharging())
+            hibernate_time = 0;
         else
             hibernate_time = settings.sleep_timer;
 
         if (hibernate_time && !temp_flag_get("stay_awake")) {
-            if (ticks - hibernate_start >= hibernate_time * 60 * 1000) {
+            if (ticks - hibernate_start > hibernate_time * 60 * 1000) {
                 suspend_exec(SHUTDOWN_MIN * 60000);
                 hibernate_start = ticks;
             }
