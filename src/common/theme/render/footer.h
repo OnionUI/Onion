@@ -5,7 +5,7 @@
 #include "theme/resources.h"
 #include "theme/background.h"
 
-void theme_renderStandardHint(SDL_Surface *screen, const char *label_open_str, const char *label_back_str)
+void theme_renderStandardHint(SDL_Surface *screen, const char *btn_a_str, const char *btn_b_str)
 {
     SDL_Surface *label_open, *label_back;
 
@@ -14,18 +14,25 @@ void theme_renderStandardHint(SDL_Surface *screen, const char *label_open_str, c
 
     SDL_BlitSurface(button_a, NULL, screen, &btn_a_rect);
 
+    char label_a_str[STR_MAX] = " ", label_b_str[STR_MAX] = " ";
+
+    if (!theme()->hideLabels.hints) {
+        strcpy(label_a_str, btn_a_str);
+        strcpy(label_b_str, btn_b_str);
+    }
+
     TTF_Font *font_hint = resource_getFont(HINT);
-    label_open = TTF_RenderUTF8_Blended(font_hint, label_open_str, theme()->hint.color);
+    label_open = TTF_RenderUTF8_Blended(font_hint, label_a_str, theme()->hint.color);
 
     SDL_Rect label_open_rect = {btn_a_rect.x + button_a->w + 5, 449 - label_open->h / 2};
     SDL_BlitSurface(label_open, NULL, screen, &label_open_rect);
 
-    if (label_back_str) {
+    if (label_b_str) {
         SDL_Surface *button_b = resource_getSurface(BUTTON_B);
         SDL_Rect btn_b_rect = {label_open_rect.x + label_open->w + 30, 450 - button_b->h / 2};
         SDL_BlitSurface(button_b, NULL, screen, &btn_b_rect);
 
-        label_back = TTF_RenderUTF8_Blended(font_hint, label_back_str, theme()->hint.color);
+        label_back = TTF_RenderUTF8_Blended(font_hint, label_b_str, theme()->hint.color);
         
         SDL_Rect label_back_rect = {btn_b_rect.x + button_b->w + 5, 449 - label_back->h / 2};
         SDL_BlitSurface(label_back, NULL, screen, &label_back_rect);
@@ -46,7 +53,7 @@ static int old_status_width = 200;
 void theme_renderFooterStatus(SDL_Surface *screen, int current_num, int total_num)
 {
     SDL_Rect status_pos = {620 - old_status_width, 420, old_status_width, 60};
-    SDL_Rect status_size = {status_size.x, 0, old_status_width, 60};
+    SDL_Rect status_size = {status_pos.x, 0, old_status_width, 60};
 
     SDL_BlitSurface(theme_background(), &status_pos, screen, &status_pos);
     SDL_BlitSurface(resource_getSurface(BG_FOOTER), &status_size, screen, &status_pos);
@@ -75,10 +82,10 @@ void theme_renderFooterStatus(SDL_Surface *screen, int current_num, int total_nu
     SDL_FreeSurface(total);
 }
 
-void theme_renderListFooter(SDL_Surface *screen, int current_num, int total_num, const char *label_open_str, const char *label_back_str)
+void theme_renderListFooter(SDL_Surface *screen, int current_num, int total_num, const char *label_a_str, const char *label_b_str)
 {    
     theme_renderFooter(screen);
-    theme_renderStandardHint(screen, label_open_str, label_back_str);
+    theme_renderStandardHint(screen, label_a_str, label_b_str);
     theme_renderFooterStatus(screen, current_num, total_num);
 }
 

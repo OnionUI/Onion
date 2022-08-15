@@ -48,10 +48,7 @@ int main(int argc, char *argv[])
 
     int battery_percentage = battery_getPercentage();
 
-	menuMain();
-
-	theme_renderFooter(screen);
-    theme_renderStandardHint(screen, lang_get(LANG_SELECT), lang_get(LANG_BACK));
+	menu_main();
 
 	uint32_t acc_ticks = 0,
 			 last_ticks = SDL_GetTicks(),
@@ -106,20 +103,28 @@ int main(int argc, char *argv[])
 			header_changed = true;
 
 		if (acc_ticks >= time_step) {
-			if (header_changed) {
+			if (header_changed)
 				theme_renderHeader(screen, battery_percentage, menu_stack[level]->title, false);
-				header_changed = false;
+
+			if (list_changed)
+				theme_renderList(screen, menu_stack[level]);
+			
+			if (footer_changed) {
+				theme_renderFooter(screen);
+				theme_renderStandardHint(screen, lang_get(LANG_SELECT), lang_get(LANG_BACK));
 			}
 
-			if (list_changed) {
-				theme_renderList(screen, menu_stack[level]);
+			if (footer_changed || list_changed)
 				theme_renderFooterStatus(screen, menu_stack[level]->active_pos + 1, menu_stack[level]->item_count);
-			
+
+			if (header_changed || list_changed || footer_changed) {
 				SDL_BlitSurface(screen, NULL, video, NULL); 
 				SDL_Flip(video);
-
-				list_changed = false;
 			}
+
+			header_changed = false;
+			footer_changed = false;
+			list_changed = false;
 
 			acc_ticks -= time_step;
 		}
@@ -130,7 +135,7 @@ int main(int argc, char *argv[])
 	SDL_Flip(video);
 	
 	lang_free();
-	list_free(&menu_main);
+	list_free(&_menu_main);
 	resources_free();
    	SDL_FreeSurface(screen);
    	SDL_FreeSurface(video);

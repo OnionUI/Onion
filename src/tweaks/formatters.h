@@ -11,7 +11,7 @@
 
 #define THEME_TOGGLE_LABELS {"-", "Off", "On"}
 
-void battWarnLabels(void *pt, char *out_label)
+void formatter_battWarn(void *pt, char *out_label)
 {
 	ListItem *item = (ListItem*)pt;
 	if (item->value == 0)
@@ -27,7 +27,7 @@ static const char font_families[][STR_MAX] = {
 	"HENB.TTF",
 	"wqy-microhei.ttc"
 };
-void fontFamilyLabels(void *pt, char *out_label)
+void formatter_fontFamily(void *pt, char *out_label)
 {
 	ListItem *item = (ListItem*)pt;
 	if (item->value == 0)
@@ -37,7 +37,7 @@ void fontFamilyLabels(void *pt, char *out_label)
 
 static const int num_font_sizes = 5;
 static const int font_sizes[] = {13, 18, 24, 32, 40};
-void fontSizeLabels(void *pt, char *out_label)
+void formatter_fontSize(void *pt, char *out_label)
 {
 	ListItem *item = (ListItem*)pt;
 	if (item->value == 0)
@@ -45,9 +45,17 @@ void fontSizeLabels(void *pt, char *out_label)
 	else sprintf(out_label, "%d px", font_sizes[item->value - 1]);
 }
 
-void fastForwardLabels(void *pt, char *out_label)
+void formatter_fastForward(void *pt, char *out_label)
 {
 	sprintf(out_label, "%d.0x", ((ListItem*)pt)->value);
+}
+
+void formatter_positionOffset(void *pt, char *out_label)
+{
+	ListItem *item = (ListItem*)pt;
+	if (item->value == 0)
+		strcpy(out_label, "-");
+	else sprintf(out_label, "%d px", item->value - 11);
 }
 
 #endif // TWEAKS_FORMATTERS_H__

@@ -11,7 +11,7 @@ typedef enum item_type {ACTION, TOGGLE, MULTIVALUE} ListItemType;
 
 typedef struct ListItem
 {
-	int id;
+	int _id;
 	ListItemType item_type;
 	char label[STR_MAX];
 	char description[STR_MAX];
@@ -49,7 +49,8 @@ List list_create(int max_items, ListType list_type)
 void list_addItem(List *list, ListItem item)
 {
 	item._reset_value = item.value;
-	list->items[list->item_count++] = item;
+	item._id = list->item_count++;
+	list->items[item._id] = item;
 }
 
 ListItem* list_currentItem(List *list)
@@ -206,7 +207,7 @@ ListItem* list_resetCurrentItem(List *list)
 	return item;
 }
 
-void list_getItemValue(ListItem *item, char *out_label)
+void list_getItemValueLabel(ListItem *item, char *out_label)
 {
 	if (item->value_formatter != NULL)
 		item->value_formatter(item, out_label);

@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
 	List list = list_create(pargc, LIST_SMALL);
 
 	for (i = 0; i < pargc; i++) {
-		ListItem item = { .id = i };
+		ListItem item;
 		strcpy(item.label, pargs[i]);
 		list_addItem(&list, item);
 	}
@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
 			else if (event.type == SDL_KEYUP) {
 				switch (key) {
 					case SW_BTN_A:
-						return_code = list_activateItem(&list)->id;
+						return_code = list_activateItem(&list)->_id;
 						quit = true;
 						break;
 					case SW_BTN_B:

@@ -62,7 +62,7 @@ SDL_Surface* theme_batterySurface(int percentage)
     SDL_Rect rect_text = {icon->w + SPACER + style->offsetX, (img_height - text->h) / 2 + offsetY};
 
     if (visible && style->onleft) {
-        rect_text.x = 0;
+        rect_text.x = style->offsetX;
         rect_icon.x = text->w + SPACER;
     }
 

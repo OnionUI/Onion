@@ -8,7 +8,7 @@
 
 static SDL_Color color_black = {0, 0, 0};
 
-void theme_renderListLabel(SDL_Surface* screen, const char *label, SDL_Color fg, int center_y, bool is_active)
+void theme_renderListLabel(SDL_Surface* screen, const char *label, SDL_Color fg, int center_y, bool is_active, int label_end)
 {
     TTF_Font *list_font = resource_getFont(LIST);
 
@@ -16,13 +16,15 @@ void theme_renderListLabel(SDL_Surface* screen, const char *label, SDL_Color fg,
     SDL_Rect item_label_rect = {20, center_y - item_label->h / 2};
     SDL_Rect item_shadow_rect = {item_label_rect.x + 1, item_label_rect.y + 2};
 
+    SDL_Rect label_crop = {0, 0, label_end - 30, item_label->h};
+
     if (is_active) {
         SDL_Surface *item_shadow = TTF_RenderUTF8_Blended(list_font, label, color_black);
-        SDL_BlitSurface(item_shadow, NULL, screen, &item_shadow_rect);
+        SDL_BlitSurface(item_shadow, &label_crop, screen, &item_shadow_rect);
         SDL_FreeSurface(item_shadow);
     }
 
-    SDL_BlitSurface(item_label, NULL, screen, &item_label_rect);
+    SDL_BlitSurface(item_label, &label_crop, screen, &item_label_rect);
     SDL_FreeSurface(item_label);
 }
 
@@ -61,35 +63,39 @@ void theme_renderList(SDL_Surface *screen, List *list)
         if (i == list->active_pos)
             SDL_BlitSurface(item_bg, &item_bg_size, screen, &item_bg_rect);
 
-        theme_renderListLabel(screen, item->label, theme()->list.color, item_bg_rect.y + label_y, list->active_pos == i);
-
-        if (!list_small && strlen(item->description)) {
-            theme_renderListLabel(screen, item->description, theme()->grid.color, item_bg_rect.y + 62, list->active_pos == i);
-        }
-
         int item_center_y = item_bg_rect.y + item_bg_size.h / 2;
+        static int multivalue_width = 226;
+        int label_end = 640;
 
         if (item->item_type == TOGGLE) {
             SDL_Surface *toggle = resource_getSurface(item->value == 1 ? TOGGLE_ON : TOGGLE_OFF);
-            toggle_rect.x = 606 - toggle->w;
+            toggle_rect.x = 620 - toggle->w;
             toggle_rect.y = item_center_y - toggle->h / 2;
+            label_end = toggle_rect.x;
             SDL_BlitSurface(toggle, NULL, screen, &toggle_rect);
         }
         else if (item->item_type == MULTIVALUE) {
             SDL_Surface *arrow_left = resource_getSurface(LEFT_ARROW);
             SDL_Surface *arrow_right = resource_getSurface(RIGHT_ARROW);
-            SDL_Rect arrow_left_pos = {358 - 12, item_center_y - 12};
-            SDL_Rect arrow_right_pos = {594 - 12, item_center_y - 12};
+            SDL_Rect arrow_left_pos = {640 - 20 - 24 - multivalue_width - 24, item_center_y - 12};
+            SDL_Rect arrow_right_pos = {640 - 20 - 24, item_center_y - 12};
             SDL_BlitSurface(arrow_left, NULL, screen, &arrow_left_pos);
             SDL_BlitSurface(arrow_right, NULL, screen, &arrow_right_pos);
+            label_end = arrow_left_pos.x;
 
             char value_str[STR_MAX];
-            list_getItemValue(item, value_str);
+            list_getItemValueLabel(item, value_str);
             SDL_Surface *value_label = TTF_RenderUTF8_Blended(list_font, value_str, theme()->list.color);
-            SDL_Rect value_size = {0, 0, 212, value_label->h};
+            SDL_Rect value_size = {0, 0, multivalue_width, value_label->h};
             int label_width = value_label->w > value_size.w ? value_size.w : value_label->w;
-            SDL_Rect value_pos = {476 - label_width / 2, item_center_y - value_size.h / 2};
+            SDL_Rect value_pos = {640 - 20 - 24 - multivalue_width / 2 - label_width / 2, item_center_y - value_size.h / 2};
             SDL_BlitSurface(value_label, &value_size, screen, &value_pos);
+        }
+
+        theme_renderListLabel(screen, item->label, theme()->list.color, item_bg_rect.y + label_y, list->active_pos == i, label_end);
+
+        if (!list_small && strlen(item->description)) {
+            theme_renderListLabel(screen, item->description, theme()->grid.color, item_bg_rect.y + 62, list->active_pos == i, label_end);
         }
     }
 }

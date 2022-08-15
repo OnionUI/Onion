@@ -6,6 +6,7 @@
 #include <SDL/SDL_ttf.h>
 
 #include "utils/log.h"
+#include "system/lang.h"
 #include "./config.h"
 
 #define RES_MAX_REQUESTS 200
@@ -49,6 +50,7 @@ typedef enum theme_fonts
 typedef struct Theme_Resources
 {
     Theme_s theme;
+    Theme_s theme_back;
     bool _theme_loaded;
     SDL_Surface *surfaces[(int)images_count];
     TTF_Font *fonts[(int)fonts_count];
@@ -62,6 +64,7 @@ Theme_s* theme(void)
 {
     if (!resources._theme_loaded) {
         resources.theme = theme_load();
+        resources.theme_back = theme_loadFromPath(resources.theme.path, false);
         resources._theme_loaded = true;
     }
     return &resources.theme;
@@ -134,6 +137,13 @@ TTF_Font* resource_getFont(ThemeFonts request)
     return resources.fonts[request];
 }
 
+void resource_reloadFont(ThemeFonts request)
+{
+    if (resources.fonts[request] != NULL)
+        TTF_CloseFont(resources.fonts[request]);
+    resources.fonts[request] = _loadFont(request);
+}
+
 void resources_free()
 {
     for (int i = 0; i < images_count; i++)
@@ -146,6 +156,17 @@ void resources_free()
 
     if (resources._background_loaded)
         SDL_FreeSurface(resources.background);
+
+    if (_theme_overrides_changed) {
+        bool hide_labels_icons = resources.theme_back.hideLabels.icons,
+             hide_labels_hints = resources.theme_back.hideLabels.hints;
+        theme_getOverride("hideLabels", "icons", &hide_labels_icons, cJSON_True);
+        theme_getOverride("hideLabels", "hints", &hide_labels_hints, cJSON_True);
+        lang_removeIconLabels(hide_labels_icons, hide_labels_hints);
+    }
+
+    theme_saveOverrides();
+    theme_freeOverrides();
 }
 
 #endif // THEME_RESOURCES_H__
