@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <stdlib.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
@@ -12,6 +13,13 @@
 #include "system/settings.h"
 #include "theme/theme.h"
 #include "theme/background.h"
+
+static SDL_Surface *g_image_cache_prev = NULL;
+static SDL_Surface *g_image_cache_current = NULL;
+static SDL_Surface *g_image_cache_next = NULL;
+static char **g_images_paths;
+static int g_images_paths_count = 0;
+static int g_image_index = 0;
 
 bool loadImagesPaths(const char* config_path, char ***images_paths, int *images_paths_count)
 {
@@ -85,15 +93,72 @@ static void drawImage(const char *image_path, SDL_Surface *screen)
 	}
 }
 
+static void drawImageByIndex(const int index, SDL_Surface *screen)
+{
+	if (index < 0 || index > g_images_paths_count)
+	{
+		// out of range, draw nothing
+		return;
+	}
+	if (index == g_image_index)
+	{
+		if (g_image_cache_current == NULL)
+		{
+			g_image_cache_prev = index == 0 ? NULL : IMG_Load(g_images_paths[index - 1]);
+			g_image_cache_current = IMG_Load(g_images_paths[index]);
+			g_image_cache_next = index == g_images_paths_count - 1 ? NULL : IMG_Load(g_images_paths[index + 1]);
+			return;
+		}
+		
+		// no movements, draw nothing
+		return;
+	}
+	if (abs(index - g_image_index) > 1)
+	{
+		// random jump, not implemented yet
+		return;
+	}
+
+	bool moving_forward = index > g_image_index;
+
+	if (moving_forward)
+	{
+		if (g_image_cache_prev)
+			SDL_FreeSurface(g_image_cache_prev);
+		g_image_cache_prev = g_image_cache_current;
+		g_image_cache_current = g_image_cache_next;
+		g_image_cache_next = index == g_images_paths_count - 1 ? NULL : IMG_Load(g_images_paths[index+1]);
+	}
+	else
+	{
+		g_image_cache_prev = index == 0 ? NULL : IMG_Load(g_images_paths[index-1]);
+		if (g_image_cache_next)
+			SDL_FreeSurface(g_image_cache_next);
+		g_image_cache_next = g_image_cache_current;
+		g_image_cache_current = g_image_cache_prev;
+	}
+	SDL_Surface *image_to_draw = g_image_cache_current;
+	if (image_to_draw) {
+		SDL_Rect image_rect = {320 - image_to_draw->w / 2, 240 - image_to_draw->h / 2};
+		SDL_BlitSurface(image_to_draw, NULL, screen, &image_rect);
+	}
+	
+	// 0 0 0 0 0 0 0
+	// 1 1 0 0 0 0 0
+	// 1 1 1 0 0 0 0
+	// 0 1 1 1 0 0 0
+	// 0 0 1 1 1 0 0
+	// 0 0 0 1 1 1 0
+	// 0 0 0 0 1 1 1
+	// 0 0 0 0 0 1 1
+}
+
 int main(int argc, char *argv[])
 {
 	char title_str[STR_MAX] = "";
 	char message_str[STR_MAX] = "";
 	char image_path[STR_MAX] = "";
 	char images_json_path[STR_MAX] = "";
-	char **images_paths;
-	int images_count = 0;
-	int image_index = 0;
 	bool wait_confirm = true;
 
 	for (int i = 1; i < argc; i++) {
@@ -123,11 +188,11 @@ int main(int argc, char *argv[])
 	}
 	else if(exists(images_json_path))
 	{
-		if (loadImagesPaths(images_json_path, &images_paths, &images_count))
+		if (loadImagesPaths(images_json_path, &g_images_paths, &g_images_paths_count))
 		{
 			if (images_count > 0)
 			{
-				drawImage(images_paths[0], screen);
+				drawImageByIndex(0, screen);
 			}
 		}
 		else
@@ -167,8 +232,8 @@ int main(int argc, char *argv[])
 				{
 					continue;
 				}
-				if ((navigating_forward && image_index == images_count-1) // exit after last image
-					|| (!navigating_forward && image_index == 0)) // or when navigating backwards from the first image
+				if ((navigating_forward && g_image_index == images_count-1) // exit after last image
+					|| (!navigating_forward && g_image_index == 0)) // or when navigating backwards from the first image
 				{
 					quit = true;
 				}
@@ -176,13 +241,13 @@ int main(int argc, char *argv[])
 				{
 					if (navigating_forward)
 					{
-						image_index++;
+						g_image_index++;
 					}
 					else
 					{
-						image_index--;
+						g_image_index--;
 					}
-					drawImage(images_paths[image_index], screen);
+					drawImageByIndex(g_image_index, screen);
 
 					SDL_BlitSurface(screen, NULL, video, NULL);
 					SDL_Flip(video);
@@ -191,11 +256,11 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if (images_paths != NULL)
+	if (g_images_paths != NULL)
 	{
 		for (int i = 0; i < images_count; i++)
-        	free(images_paths[i]);
-    	free(images_paths);
+        	free(g_images_paths[i]);
+    	free(g_images_paths);
 	}
 
 	if (!wait_confirm)
