@@ -41,10 +41,6 @@ int main(int argc, char *argv[])
 
 	SDL_Surface* video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
 	SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
-	
-	theme_backgroundBlit(screen);
-	SDL_BlitSurface(screen, NULL, video, NULL);
-	SDL_Flip(video);
 
 	settings_load();
 	lang_load();
