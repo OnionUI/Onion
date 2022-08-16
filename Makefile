@@ -146,8 +146,15 @@ git-clean:
 git-submodules:
 	@git submodule update --init --recursive
 
-with-toolchain:
+$(CACHE)/.docker:
 	docker pull $(TOOLCHAIN)
+	mkdir -p cache
+	touch $(CACHE)/.docker
+
+toolchain: $(CACHE)/.docker
+	docker run -it --rm -v "$(ROOT_DIR)":/root/workspace $(TOOLCHAIN) /bin/bash
+
+with-toolchain: $(CACHE)/.docker
 	docker run --rm -v "$(ROOT_DIR)":/root/workspace $(TOOLCHAIN) /bin/bash -c "source /root/.bashrc; make $(CMD)"
 
 patch:
