@@ -39,7 +39,7 @@ main() {
         touch $sysdir/.runGameSwitcher
     elif [ $startup_app -eq 2 ]; then
         cd /mnt/SDCARD/RetroArch/
-        HOME=/mnt/SDCARD/RetroArch/ ./retroarch -v
+        LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v
     fi
 
     check_switcher
