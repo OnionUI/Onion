@@ -114,6 +114,7 @@ int main(int argc, char *argv[])
 	bool quit = false;
 	bool list_changed = true;
 	bool header_changed = true;
+	bool battery_changed = true;
 	bool first_draw = true;
 
 	SDL_Event event;
@@ -189,12 +190,11 @@ int main(int argc, char *argv[])
 			break;
 
 		if (battery_hasChanged(ticks, &battery_percentage))
-			header_changed = true;
+			battery_changed = true;
 
 		if (acc_ticks >= time_step) {
 			if (header_changed) {
-				theme_renderHeader(screen, battery_percentage, has_title ? title_str : NULL, !has_title);
-				header_changed = false;
+				theme_renderHeader(screen, has_title ? title_str : NULL, !has_title);
 			}
 			if (list_changed) {
 				theme_renderList(screen, &list);
@@ -202,13 +202,17 @@ int main(int argc, char *argv[])
 
 				if (has_message)
 					SDL_BlitSurface(message, NULL, screen, &message_rect);
-			
-				SDL_BlitSurface(screen, NULL, video, NULL); 
-				SDL_Flip(video);
-
-				list_changed = false;
-				first_draw = false;
 			}
+
+			if (battery_changed)
+				theme_renderHeaderBattery(screen, battery_getPercentage());
+
+			header_changed = false;
+			list_changed = false;
+			battery_changed = false;
+			first_draw = false;
+			SDL_BlitSurface(screen, NULL, video, NULL); 
+			SDL_Flip(video);
 
 			acc_ticks -= time_step;
 		}
