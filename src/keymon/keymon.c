@@ -24,9 +24,7 @@
 #include "system/rumble.h"
 #include "system/system.h"
 #include "system/screenshot.h"
-
-#define CMD_TO_RUN_PATH "/mnt/SDCARD/.tmp_update/cmd_to_run.sh"
-#define RETROARCH_CONFIG "/mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg"
+#include "system/state.h"
 
 #ifndef CLOCK_MONOTONIC_COARSE
 #define CLOCK_MONOTONIC_COARSE 6
@@ -308,51 +306,7 @@ void suspend_exec(int timeout) {
     keyinput_enable();
 }
 
-//
-//    [onion] Check retroarch running & savestate_auto_save in retroarch.cfg is true
-//
-int check_autosave(void)
-{
-    char value[STR_MAX];
-    file_parseKeyValue(RETROARCH_CONFIG, "savestate_auto_save", value, '=');
-    return strcmp(value, "true") == 0;
-}
 
-bool check_gameActive(void)
-{
-    if (!exists(CMD_TO_RUN_PATH))
-        return false;
-
-    const char *cmd = file_read(CMD_TO_RUN_PATH);
-	printf_debug("cmd: '%s'\n", cmd);
-
-    return strstr(cmd, "retroarch") != NULL || strstr(cmd, "/mnt/SDCARD/Emu/") != NULL || strstr(cmd, "/mnt/SDCARD/RApp/") != NULL;
-}
-
-bool check_isMainUI(void)
-{
-    return !exists(CMD_TO_RUN_PATH) && process_isRunning("MainUI");
-}
-
-bool check_isGameSwitcher(void)
-{
-    return exists("/mnt/SDCARD/.tmp_update/.runGameSwitcher") && process_isRunning("gameSwitcher");
-}
-
-void run_gameSwitcher(bool enabled)
-{
-    flag_set("/mnt/SDCARD/.tmp_update/", ".runGameSwitcher", enabled);
-}
-
-void force_gameSwitcher(void)
-{
-    pid_t pid;
-    if ((pid = process_searchpid("MainUI"))) {
-        run_gameSwitcher(true);
-        kill(pid, SIGKILL);
-        system("./bin/freemma");
-    }
-}
 
 //
 //    [onion] deepsleep if MainUI/gameSwitcher/retroarch is running
@@ -377,20 +331,6 @@ void deepsleep(void)
             terminate_retroarch();
         }
     }
-}
-
-
-typedef enum { MODE_UNKNOWN, MODE_MAIN_UI, MODE_SWITCHER, MODE_GAME, MODE_APPS } MenuMode;
-
-MenuMode checkMenuMode(void)
-{
-    if (check_gameActive())
-        return MODE_GAME;
-    if (check_isMainUI())
-        return MODE_MAIN_UI;
-    if (check_isGameSwitcher())
-        return MODE_SWITCHER;
-    return MODE_APPS;
 }
 
 //
@@ -552,7 +492,7 @@ int main(void) {
                     break;
                 case HW_BTN_MENU:
                     if (val == PRESSED) {
-                        menu_mode = checkMenuMode();
+                        menu_mode = state_getMenuMode();
                         switch (menu_mode) {
                             case MODE_MAIN_UI: print_debug("Mode is: Main UI"); break;
                             case MODE_SWITCHER: print_debug("Mode is: Game Switcher"); break;

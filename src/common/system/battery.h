@@ -5,6 +5,11 @@
 #include "utils/process.h"
 #include "system/system.h"
 
+#define CHECK_BATTERY_TIMEOUT 15000 //ms
+
+static int battery_check_time = 0;
+static time_t battery_last_modified = 0;
+
 /**
  * @brief Retrieve the current battery percentage as reported by batmon
  * 
@@ -34,6 +39,12 @@ int battery_getPercentage(void)
         msleep(100);
     }
 
+#ifndef PLATFORM_MIYOOMINI
+#ifdef LOG_DEBUG
+    return 78;
+#endif
+#endif
+
     if (percentage == -1)
         percentage = 500;
 
@@ -62,6 +73,23 @@ bool battery_isCharging(void)
     #else
     return true;
     #endif
+}
+
+bool battery_hasChanged(int ticks, int *out_percentage)
+{
+    bool changed = false;
+    if (ticks - battery_check_time > CHECK_BATTERY_TIMEOUT) {
+        if (file_isModified("/tmp/percBat", &battery_last_modified)) {
+            int current_percentage = battery_getPercentage();
+
+            if (current_percentage != *out_percentage) {
+                *out_percentage = current_percentage;
+                changed = true;
+            }
+        }
+        battery_check_time = ticks;
+    }
+    return changed;
 }
 
 #endif // BATTERY_H__

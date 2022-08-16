@@ -47,7 +47,7 @@ settings = {
     .hue = 10,
     .saturation = 10,
     .contrast = 10,
-    .theme = "/mnt/SDCARD/Themes/Silky [Onion Default] by DiMo/",
+    .theme = "/mnt/SDCARD/Themes/Silky by DiMo/",
     .fontsize = 24,
     .audiofix = 1,
     // Onion settings

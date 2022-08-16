@@ -6,28 +6,26 @@
 #include <SDL/SDL_ttf.h>
 
 #include "./load.h"
+#include "./resources.h"
 #include "utils/rotate180.h"
 
-static SDL_Surface *theme_background;
-static bool theme_background_loaded = false;
-
-void theme_backgroundLoad(const char *theme_path)
+void theme_backgroundLoad(void)
 {
-    theme_background = rotate180(theme_loadImage(theme_path, "background"));
-    theme_background_loaded = true;
+    char theme_path[STR_MAX];
+    resources.background = rotate180(theme_loadImage(theme_getPath(theme_path), "background"));
+    resources._background_loaded = true;
+}
+
+SDL_Surface* theme_background(void)
+{
+    if (!resources._background_loaded)
+        theme_backgroundLoad();
+    return resources.background;
 }
 
 void theme_backgroundBlit(SDL_Surface *video)
 {
-    if (!theme_background_loaded)
-        return;
-    SDL_BlitSurface(theme_background, NULL, video, NULL);
-}
-
-void theme_backgroundFree(void)
-{
-    if (theme_background_loaded)
-        SDL_FreeSurface(theme_background);
+    SDL_BlitSurface(theme_background(), NULL, video, NULL);
 }
 
 #endif // THEME_BACKGROUND_H__

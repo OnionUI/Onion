@@ -65,9 +65,8 @@ int main(void)
     settings_load();
     display_setBrightness(settings.brightness);
 
-    Theme_s theme = theme_loadFromPath(settings.theme);
     char image_dir[STR_MAX];
-    getImageDir(theme.path, image_dir);
+    getImageDir(settings.theme, image_dir);
 
     SDL_Init(SDL_INIT_VIDEO);
     SDL_ShowCursor(SDL_DISABLE);

@@ -9,7 +9,9 @@
 #include "utils/log.h"
 #include "system/battery.h"
 #include "system/settings.h"
-#include "theme/theme.h"
+#include "theme/config.h"
+#include "theme/resources.h"
+#include "theme/render/battery.h"
 
 int main(int argc, char *argv[])
 {
@@ -44,9 +46,8 @@ int main(int argc, char *argv[])
 
     TTF_Init();
 
-    Theme_s theme = theme_loadFromPath(theme_path);
-    TTF_Font* font = theme_loadFont(theme_path, theme.hint.font, theme.hint.size);
-    SDL_Color color = theme.total.color;
+    TTF_Font* font = theme_loadFont(theme_path, theme()->hint.font, theme()->hint.size);
+    SDL_Color color = theme()->total.color;
 
     char version_str[12];
     sprintf(version_str, "v%s", file_read("/mnt/SDCARD/.tmp_update/onionVersion/version.txt"));
@@ -56,12 +57,11 @@ int main(int argc, char *argv[])
     SDL_BlitSurface(version, NULL, screen, &rectVersion);
 
     if (bShowBat == 1) {
-        Resources_s res = { .theme = &theme };
-        SDL_Surface* battery = theme_batterySurface(&res, battery_getPercentage());
+        SDL_Surface* battery = theme_batterySurface(battery_getPercentage());
         SDL_Rect battery_rect = {596 - battery->w / 2, 30 - battery->h / 2};
         SDL_BlitSurface(battery, NULL, screen, &battery_rect);
         SDL_FreeSurface(battery);
-        theme_freeResources(&res);
+        resources_free();
     }
 
     // Blit twice, to clear the video buffer

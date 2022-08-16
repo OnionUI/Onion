@@ -37,10 +37,10 @@ static char package_names[3][NUMBER_OF_LAYERS][MAX_LAYER_NAME_SIZE];
 static bool package_installed[3][NUMBER_OF_LAYERS];
 static bool package_changes[3][NUMBER_OF_LAYERS];
 static int package_count[3];
+static int package_installed_count[] = {0, 0, 0};
 static int nSelection = 0;
 static int nListPosition = 0;
 static int nTab = 0;
-static int allActivated = 0;
 
 static SDL_Surface *video = NULL,
                    *screen = NULL,
@@ -170,8 +170,10 @@ void loadRessources()
                 // Installation check
                 sprintf(basePath,"%s/%s", data_path, ep->d_name);
 
-                package_installed[nT][package_count[nT]] = checkAppInstalled(basePath, strlen(basePath));
-
+                bool is_installed = checkAppInstalled(basePath, strlen(basePath));
+                package_installed[nT][package_count[nT]] = is_installed;
+                if (is_installed)
+                    package_installed_count[nT]++;
                 strcpy(package_names[nT][package_count[nT]], ep->d_name);
                 package_count[nT]++;
             }
@@ -258,16 +260,22 @@ bool confirmDoNothing(KeyState keystate[320])
     SDL_BlitSurface(screen, NULL, video, NULL);
     SDL_Flip(video);
 
+    bool confirm = false;
+
     while (!quit) {
         if (updateKeystate(keystate, &quit)) {
             if (*(keystate + SW_BTN_A) == PRESSED)
-                return true;
-            if (*(keystate + SW_BTN_B) == PRESSED)
-                return false;
+                confirm = true;
+            else if (*(keystate + SW_BTN_A) == RELEASED && confirm)
+                quit = true;
+            else if (*(keystate + SW_BTN_B) == PRESSED)
+                quit = true;
         }
     }
 
     SDL_FreeSurface(image);
+
+    return confirm;
 }
 
 int main(int argc, char *argv[])
@@ -394,7 +402,7 @@ int main(int argc, char *argv[])
 
                 if (show_confirm) {
                     if (apply_changes) {
-                        if (changes_total > 0 || reapply_all || confirmDoNothing(&keystate))
+                        if (changes_total > 0 || (reapply_all && package_installed_count[0] > 0) || confirmDoNothing(&keystate))
                             quit = true;
                     }
                     else if (confirmDoNothing(&keystate))

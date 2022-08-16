@@ -12,16 +12,9 @@
 
 void drawInfoPanel(SDL_Surface *screen, SDL_Surface *video, const char *title_str, const char *message_str)
 {
-	char theme_path[STR_MAX];
-	theme_getPath(theme_path);
-
-	theme_backgroundLoad(theme_path);
-	SDL_BlitSurface(theme_background, NULL, screen, NULL);
+	SDL_BlitSurface(theme_background(), NULL, screen, NULL);
 	SDL_BlitSurface(screen, NULL, video, NULL); 
 	SDL_Flip(video);
-
-	Theme_s theme = theme_loadFromPath(theme_path);
-	Resources_s res = { .theme = &theme };
 
 	bool has_title = strlen(title_str) > 0;
 	bool has_message = strlen(message_str) > 0;
@@ -29,23 +22,19 @@ void drawInfoPanel(SDL_Surface *screen, SDL_Surface *video, const char *title_st
 	SDL_Surface *message = NULL;
 	SDL_Rect message_rect = {320, 240};
 
-	int current_percentage = battery_getPercentage();
-	SDL_Surface *battery = theme_batterySurface(&res, current_percentage);
-
-	theme_renderHeader(&res, screen, battery, has_title ? title_str : NULL, !has_title);
-	theme_renderFooter(&res, screen);
+	theme_renderHeader(screen, battery_getPercentage(), has_title ? title_str : NULL, !has_title);
+	theme_renderFooter(screen);
 
 	if (has_message) {
 		char *str = str_replace(message_str, "\\n", "\n");
-		message = theme_textboxSurface(str, resource_getFont(&res, TITLE), theme.grid.color, ALIGN_CENTER);
+		message = theme_textboxSurface(str, resource_getFont(TITLE), theme()->grid.color, ALIGN_CENTER);
 		message_rect.x -= message->w / 2;
 		message_rect.y -= message->h / 2;
 		SDL_BlitSurface(message, NULL, screen, &message_rect);
 		SDL_FreeSurface(message);
 	}
 
-	theme_freeResources(&res);
-	theme_backgroundFree();	
+	resources_free();
 }
 
 int main(int argc, char *argv[])

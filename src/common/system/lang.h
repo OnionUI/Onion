@@ -9,10 +9,78 @@
 #include "utils/log.h"
 #include "./settings.h"
 
+#ifndef DT_REG
+#define DT_REG 8
+#endif
+
 #define LANG_MAX 150
 #define LANG_DEFAULT "en.lang"
 #define LANG_DIR "/mnt/SDCARD/miyoo/app/lang"
 #define LANG_DIR_FALLBACK "/customer/app/lang"
+#define LANG_DIR_BACKUP "/mnt/SDCARD/miyoo/app/lang_backup"
+
+void lang_removeIconLabels(bool remove_icon_labels, bool remove_hints)
+{
+    DIR *dp;
+    struct dirent *ep;
+    FILE *fp;
+
+	if ((dp = opendir(LANG_DIR)) == NULL)
+        return;
+
+    if (!remove_icon_labels && !remove_hints) {
+        // restore original lang files
+        if (exists(LANG_DIR_BACKUP)) {
+            system("mv -f " LANG_DIR_BACKUP "/* " LANG_DIR "");
+            remove(LANG_DIR_BACKUP);
+        }
+        return;
+    }
+
+    // backup lang files
+    if (!exists(LANG_DIR_BACKUP))
+        system("cp -R " LANG_DIR " " LANG_DIR_BACKUP "");
+
+    while ((ep = readdir(dp))) {
+        if (ep->d_type != DT_REG)
+            continue; // skip non-regular files and folders
+        if (strcmp("lang", file_getExtension(ep->d_name)) != 0)
+            continue; // skip files not having the `.lang` extension
+
+        const char file_path[256];
+        sprintf(file_path, LANG_DIR "/%s", ep->d_name);
+
+        const char *json_data = file_read(file_path);
+        cJSON *root = cJSON_Parse(json_data);
+
+        if (!root)
+            continue;
+
+        printf_debug("Lang: %s (%s)\n", cJSON_GetStringValue(cJSON_GetObjectItem(root, "lang")), ep->d_name);
+
+        if (remove_icon_labels) {
+            json_setString(root, "0", " "); // Expert
+            json_setString(root, "1", " "); // Favorites
+            json_setString(root, "2", " "); // Games
+            json_setString(root, "15", " "); // Settings
+            json_setString(root, "18", " "); // Recents
+            json_setString(root, "107", " "); // Apps
+        }
+
+        if (remove_hints) {
+            json_setString(root, "45", " "); // CANCEL
+            json_setString(root, "46", " "); // OK
+            json_setString(root, "88", " "); // SELECT
+            json_setString(root, "89", " "); // BACK
+            json_setString(root, "111", " "); // EXIT
+            json_setString(root, "112", " "); // SAVE AND EXIT
+        }
+
+        json_save(root, file_path);
+        cJSON_free(root);
+    }
+    closedir(dp);
+}
 
 static char **lang_list = NULL;
 
@@ -37,6 +105,9 @@ typedef enum
 
 bool lang_getFilePath(const char *lang_name, char *lang_path)
 {
+    sprintf(lang_path, LANG_DIR_BACKUP "/%s", lang_name);
+    if (exists(lang_path))
+        return true;
     sprintf(lang_path, LANG_DIR "/%s", lang_name);
     if (exists(lang_path))
         return true;
@@ -56,10 +127,7 @@ bool lang_load(void)
 
     lang_list = malloc(LANG_MAX * sizeof(char*));
 
-    printf_debug("Loading lang file: %s\n", lang_path);
-
     cJSON *lang_file = json_load(lang_path);
-    cJSON *lang_name = cJSON_GetObjectItem(lang_file, "0");
 
     char key[32];
     char value[STR_MAX];
