@@ -426,12 +426,6 @@ int main(int argc, char *argv[])
                     else
                         changes_removals += package_changed ? 1 : -1;
                     changes_total += package_changed ? 1 : -1;
-
-                    if (nSelection < 6)
-                        nSelection++;
-                    else if (pos < package_count[nTab] - 1)
-                        nListPosition++;
-
                     state_changed = true;
                 }
             }
