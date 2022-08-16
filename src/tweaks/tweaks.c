@@ -112,9 +112,10 @@ int main(int argc, char *argv[])
 			if (list_changed)
 				theme_renderList(screen, menu_stack[level]);
 			
-			if (footer_changed)
+			if (footer_changed) {
 				theme_renderFooter(screen);
 				theme_renderStandardHint(screen, lang_get(LANG_SELECT), lang_get(LANG_BACK));
+			}
 
 			if (footer_changed || list_changed)
 				theme_renderFooterStatus(screen, menu_stack[level]->active_pos + 1, menu_stack[level]->item_count);
@@ -122,7 +123,7 @@ int main(int argc, char *argv[])
 			if (battery_changed)
 				theme_renderHeaderBattery(screen, battery_percentage);
 
-			if (header_changed || list_changed || footer_changed) {
+			if (header_changed || list_changed || footer_changed || battery_changed) {
 				SDL_BlitSurface(screen, NULL, video, NULL); 
 				SDL_Flip(video);
 			}
@@ -147,6 +148,11 @@ int main(int argc, char *argv[])
 	resources_free();
    	SDL_FreeSurface(screen);
    	SDL_FreeSurface(video);
+
+	#ifndef PLATFORM_MIYOOMINI
+	msleep(200); // to clear SDL input on quit
+	#endif
+
     SDL_Quit();
 	
     return EXIT_SUCCESS;

@@ -108,8 +108,6 @@ void action_hideLabelsIcons(void *pt)
 
     static int value_types[] = {cJSON_NULL, cJSON_False, cJSON_True};
     theme_changeOverride("hideLabels", "icons", NULL, value_types[item_value]);
-
-    footer_changed = true;
 }
 
 void action_hideLabelsHints(void *pt)

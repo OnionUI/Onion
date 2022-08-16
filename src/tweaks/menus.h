@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
+#include <SDL/SDL_image.h>
 
 #include "components/list.h"
 
@@ -324,11 +325,36 @@ void menu_main(void)
 	if (!_menu_main._created) {
 		_menu_main = list_create(5, LIST_LARGE);
 		strcpy(_menu_main.title, "Tweaks");
-		list_addItem(&_menu_main, (ListItem){ .label = "System", .description = "Startup, save and exit, vibration", .action = menu_system });
-		list_addItem(&_menu_main, (ListItem){ .label = "Menu button", .description = "Customize menu button actions", .action = menu_buttonAction });
-		list_addItem(&_menu_main, (ListItem){ .label = "User interface", .description = "Extra menus, low batt. warn., theme", .action = menu_userInterface });
-		list_addItem(&_menu_main, (ListItem){ .label = "Advanced", .description = "Emulator tweaks, reset settings", .action = menu_advanced });
-		list_addItem(&_menu_main, (ListItem){ .label = "Tools", .description = "Favorites, clean files", .action = menu_tools });
+		list_addItem(&_menu_main, (ListItem){
+			.label = "System",
+			.description = "Startup, save and exit, vibration",
+			.action = menu_system,
+			.icon_ptr = (void*)IMG_Load("res/tweaks_system.png")
+		});
+		list_addItem(&_menu_main, (ListItem){
+			.label = "Menu button",
+			.description = "Customize menu button actions",
+			.action = menu_buttonAction,
+			.icon_ptr = (void*)IMG_Load("res/tweaks_menu_button.png")
+		});
+		list_addItem(&_menu_main, (ListItem){
+			.label = "User interface",
+			.description = "Extra menus, low batt. warn., theme",
+			.action = menu_userInterface,
+			.icon_ptr = (void*)IMG_Load("res/tweaks_user_interface.png")
+		});
+		list_addItem(&_menu_main, (ListItem){
+			.label = "Advanced",
+			.description = "Emulator tweaks, reset settings",
+			.action = menu_advanced,
+			.icon_ptr = (void*)IMG_Load("res/tweaks_advanced.png")
+		});
+		list_addItem(&_menu_main, (ListItem){
+			.label = "Tools",
+			.description = "Favorites, clean files",
+			.action = menu_tools,
+			.icon_ptr = (void*)IMG_Load("res/tweaks_tools.png")
+		});
 	}
 	menu_stack[0] = &_menu_main;
 	header_changed = true;

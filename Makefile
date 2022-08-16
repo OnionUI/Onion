@@ -59,6 +59,7 @@ $(CACHE)/.setup:
 		$(SRC_DIR)/chargingState \
 		$(SRC_DIR)/bootScreen \
 		$(SRC_DIR)/themeSwitcher \
+		$(SRC_DIR)/tweaks \
 	-depth -type d -name res -exec cp -r {}/. $(BUILD_DIR)/.tmp_update/res/ \;
 	@find $(SRC_DIR)/installUI -depth -type d -name res -exec cp -r {}/. $(INSTALLER_DIR)/res/ \;
 # Download themes from theme repo
