@@ -8,12 +8,12 @@
 
 static SDL_Color color_black = {0, 0, 0};
 
-void theme_renderListLabel(SDL_Surface* screen, const char *label, SDL_Color fg, int center_y, bool is_active, int label_end)
+void theme_renderListLabel(SDL_Surface* screen, const char *label, SDL_Color fg, int offset_x, int center_y, bool is_active, int label_end)
 {
     TTF_Font *list_font = resource_getFont(LIST);
 
     SDL_Surface *item_label = TTF_RenderUTF8_Blended(list_font, label, fg);
-    SDL_Rect item_label_rect = {20, center_y - item_label->h / 2};
+    SDL_Rect item_label_rect = {offset_x, center_y - item_label->h / 2};
     SDL_Rect item_shadow_rect = {item_label_rect.x + 1, item_label_rect.y + 2};
 
     SDL_Rect label_crop = {0, 0, label_end - 30, item_label->h};
@@ -30,7 +30,7 @@ void theme_renderListLabel(SDL_Surface* screen, const char *label, SDL_Color fg,
 
 void theme_renderList(SDL_Surface *screen, List *list)
 {
-    SDL_Rect bg_size = {0, 0, 640, 360}, bg_pos = {0, 60};
+    SDL_Rect bg_size = {0, 60, 640, 360}, bg_pos = {0, 60};
     SDL_BlitSurface(theme_background(), &bg_size, screen, &bg_pos);
 
     bool list_small = list->list_type == LIST_SMALL;
@@ -66,6 +66,16 @@ void theme_renderList(SDL_Surface *screen, List *list)
         int item_center_y = item_bg_rect.y + item_bg_size.h / 2;
         static int multivalue_width = 226;
         int label_end = 640;
+        int offset_x = 20;
+
+        if (item->icon_ptr != NULL) {
+            SDL_Surface *icon = (SDL_Surface*)item->icon_ptr;
+            if (icon->w > 1) {
+                SDL_Rect icon_rect = {offset_x, item_center_y - icon->h / 2};
+                SDL_BlitSurface(icon, NULL, screen, &icon_rect);
+                offset_x += icon->w + 17;
+            }
+        }
 
         if (item->item_type == TOGGLE) {
             SDL_Surface *toggle = resource_getSurface(item->value == 1 ? TOGGLE_ON : TOGGLE_OFF);
@@ -92,10 +102,10 @@ void theme_renderList(SDL_Surface *screen, List *list)
             SDL_BlitSurface(value_label, &value_size, screen, &value_pos);
         }
 
-        theme_renderListLabel(screen, item->label, theme()->list.color, item_bg_rect.y + label_y, list->active_pos == i, label_end);
+        theme_renderListLabel(screen, item->label, theme()->list.color, offset_x, item_bg_rect.y + label_y, list->active_pos == i, label_end);
 
         if (!list_small && strlen(item->description)) {
-            theme_renderListLabel(screen, item->description, theme()->grid.color, item_bg_rect.y + 62, list->active_pos == i, label_end);
+            theme_renderListLabel(screen, item->description, theme()->grid.color, offset_x, item_bg_rect.y + 62, list->active_pos == i, label_end);
         }
     }
 }

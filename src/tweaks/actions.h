@@ -4,8 +4,50 @@
 #include "utils/msleep.h"
 #include "theme/resources.h"
 #include "components/list.h"
+#include "system/settings.h"
+#include "system/rumble.h"
 
 #include "./appstate.h"
+
+void action_setStartupAutoResume(void *pt)
+{
+    settings.startup_auto_resume = ((ListItem*)pt)->value == 1;
+}
+
+void action_setStartupApplication(void *pt)
+{
+    settings.startup_application = ((ListItem*)pt)->value;
+}
+
+void action_setVibration(void *pt)
+{
+    settings.vibration = ((ListItem*)pt)->value;
+    short_pulse();
+}
+
+void action_setLowBatteryAutoSave(void *pt)
+{
+    settings.low_battery_autosave = ((ListItem*)pt)->value == 1;
+}
+
+void action_setMenuButtonHaptics(void *pt)
+{
+    settings.menu_button_haptics = ((ListItem*)pt)->value == 1;
+}
+
+void action_setMenuButtonKeymap(void *pt)
+{
+    ListItem *item = (ListItem*)pt;
+    static int *dests[] = {
+        &settings.mainui_single_press,
+        &settings.mainui_long_press,
+        &settings.mainui_double_press,
+        &settings.ingame_single_press,
+        &settings.ingame_long_press,
+        &settings.ingame_double_press
+    };
+    *(dests[item->action_id]) = item->value;
+}
 
 void action_batteryPercentageVisible(void *pt)
 {
@@ -66,8 +108,6 @@ void action_hideLabelsIcons(void *pt)
 
     static int value_types[] = {cJSON_NULL, cJSON_False, cJSON_True};
     theme_changeOverride("hideLabels", "icons", NULL, value_types[item_value]);
-
-    footer_changed = true;
 }
 
 void action_hideLabelsHints(void *pt)
@@ -81,6 +121,22 @@ void action_hideLabelsHints(void *pt)
     theme_changeOverride("hideLabels", "hints", NULL, value_types[item_value]);
 
     footer_changed = true;
+}
+
+void action_setShowRecents(void *pt)
+{
+    settings.show_recents = ((ListItem*)pt)->value == 1;
+}
+
+void action_setShowExpert(void *pt)
+{
+    settings.show_expert = ((ListItem*)pt)->value == 1;
+}
+
+void action_setLowBatteryWarnAt(void *pt)
+{
+    settings.low_battery_warn_at = ((ListItem*)pt)->value * 5;
+    config_setNumber("battery/warnAt", settings.low_battery_warn_at);
 }
 
 #endif // TWEAKS_ACTIONS_H__

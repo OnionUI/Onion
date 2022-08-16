@@ -21,7 +21,9 @@ typedef struct ListItem
 	char value_labels[MAX_NUM_VALUES][STR_MAX];
 	void (*value_formatter)(void *self, char *out_label);
 	void (*action)(void *self);
+	int action_id;
 	int _reset_value;
+	void *icon_ptr;
 } ListItem;
 
 typedef struct List
@@ -49,8 +51,9 @@ List list_create(int max_items, ListType list_type)
 void list_addItem(List *list, ListItem item)
 {
 	item._reset_value = item.value;
-	item._id = list->item_count++;
+	item._id = list->item_count;
 	list->items[item._id] = item;
+	list->item_count++;
 }
 
 ListItem* list_currentItem(List *list)
@@ -216,6 +219,11 @@ void list_getItemValueLabel(ListItem *item, char *out_label)
 
 void list_free(List *list)
 {
+	for (int i = 0; i < list->item_count; i++) {
+		ListItem *item = &list->items[i];
+		if (item->icon_ptr != NULL)
+			SDL_FreeSurface((SDL_Surface*)item->icon_ptr);
+	}
 	free(list->items);
 }
 

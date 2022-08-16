@@ -30,6 +30,9 @@
 int main(int argc, char *argv[])
 {
 	print_debug("Debug logging enabled");
+	
+    signal(SIGINT, sigHandler);
+    signal(SIGTERM, sigHandler);
 
 	SDL_Init(SDL_INIT_VIDEO);
 	SDL_ShowCursor(SDL_DISABLE);
@@ -38,10 +41,6 @@ int main(int argc, char *argv[])
 
 	SDL_Surface* video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
 	SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
-	
-	theme_backgroundBlit(screen);
-	SDL_BlitSurface(screen, NULL, video, NULL);
-	SDL_Flip(video);
 
 	settings_load();
 	lang_load();
@@ -53,6 +52,8 @@ int main(int argc, char *argv[])
 	uint32_t acc_ticks = 0,
 			 last_ticks = SDL_GetTicks(),
 			 time_step = 1000 / FRAMES_PER_SECOND;
+
+	print_debug("Got to main loop");
 
 	while (!quit) {
 		uint32_t ticks = SDL_GetTicks();
@@ -94,17 +95,19 @@ int main(int argc, char *argv[])
 					list_changed = true;
 				}
 			}
+			else if (keystate[SW_BTN_MENU] == PRESSED)
+				quit = true;
 		}
 
 		if (quit)
 			break;
 
 		if (battery_hasChanged(ticks, &battery_percentage))
-			header_changed = true;
+			battery_changed = true;
 
 		if (acc_ticks >= time_step) {
 			if (header_changed)
-				theme_renderHeader(screen, battery_percentage, menu_stack[level]->title, false);
+				theme_renderHeader(screen, menu_stack[level]->title, false);
 
 			if (list_changed)
 				theme_renderList(screen, menu_stack[level]);
@@ -117,7 +120,10 @@ int main(int argc, char *argv[])
 			if (footer_changed || list_changed)
 				theme_renderFooterStatus(screen, menu_stack[level]->active_pos + 1, menu_stack[level]->item_count);
 
-			if (header_changed || list_changed || footer_changed) {
+			if (header_changed || battery_changed)
+				theme_renderHeaderBattery(screen, battery_percentage);
+
+			if (header_changed || list_changed || footer_changed || battery_changed) {
 				SDL_BlitSurface(screen, NULL, video, NULL); 
 				SDL_Flip(video);
 			}
@@ -125,6 +131,7 @@ int main(int argc, char *argv[])
 			header_changed = false;
 			footer_changed = false;
 			list_changed = false;
+			battery_changed = false;
 
 			acc_ticks -= time_step;
 		}
@@ -133,12 +140,19 @@ int main(int argc, char *argv[])
 	// Clear the screen when exiting
 	SDL_FillRect(video, NULL, 0);
 	SDL_Flip(video);
+
+	settings_save();
 	
 	lang_free();
 	list_free(&_menu_main);
 	resources_free();
    	SDL_FreeSurface(screen);
    	SDL_FreeSurface(video);
+
+	#ifndef PLATFORM_MIYOOMINI
+	msleep(200); // to clear SDL input on quit
+	#endif
+
     SDL_Quit();
 	
     return EXIT_SUCCESS;

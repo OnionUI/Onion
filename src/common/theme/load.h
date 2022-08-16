@@ -66,7 +66,7 @@ TTF_Font* theme_loadFont(const char *theme_path, const char* font, int size)
 
 char* theme_getPath(char *theme_path)
 {
-    return file_parseKeyValue(SYSTEM_CONFIG, "theme", theme_path, ':');
+    return file_parseKeyValue(SYSTEM_CONFIG, "theme", theme_path, ':', 0);
 }
 
 #endif // THEME_LOAD_H__

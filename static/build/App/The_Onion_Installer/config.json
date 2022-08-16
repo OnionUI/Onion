@@ -1,7 +1,7 @@
 {
-"label":"Onion Pac-Man",
+"label":"Package Manager",
 "icon":"icon.png",
 "iconsel":"",
 "launch":"launch.sh",
-"description":"Add features to your system"
+"description":"Add or remove systems and apps"
 }
