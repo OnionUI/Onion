@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
 			if (footer_changed || list_changed)
 				theme_renderFooterStatus(screen, menu_stack[level]->active_pos + 1, menu_stack[level]->item_count);
 
-			if (battery_changed)
+			if (header_changed || battery_changed)
 				theme_renderHeaderBattery(screen, battery_percentage);
 
 			if (header_changed || list_changed || footer_changed || battery_changed) {
