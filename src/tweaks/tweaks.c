@@ -57,6 +57,8 @@ int main(int argc, char *argv[])
 			 last_ticks = SDL_GetTicks(),
 			 time_step = 1000 / FRAMES_PER_SECOND;
 
+	print_debug("Got to main loop");
+
 	while (!quit) {
 		uint32_t ticks = SDL_GetTicks();
 		acc_ticks += ticks - last_ticks;
@@ -105,22 +107,24 @@ int main(int argc, char *argv[])
 			break;
 
 		if (battery_hasChanged(ticks, &battery_percentage))
-			header_changed = true;
+			battery_changed = true;
 
 		if (acc_ticks >= time_step) {
 			if (header_changed)
-				theme_renderHeader(screen, battery_percentage, menu_stack[level]->title, false);
+				theme_renderHeader(screen, menu_stack[level]->title, false);
 
 			if (list_changed)
 				theme_renderList(screen, menu_stack[level]);
 			
-			if (footer_changed) {
+			if (footer_changed)
 				theme_renderFooter(screen);
 				theme_renderStandardHint(screen, lang_get(LANG_SELECT), lang_get(LANG_BACK));
-			}
 
 			if (footer_changed || list_changed)
 				theme_renderFooterStatus(screen, menu_stack[level]->active_pos + 1, menu_stack[level]->item_count);
+
+			if (battery_changed)
+				theme_renderHeaderBattery(screen, battery_percentage);
 
 			if (header_changed || list_changed || footer_changed) {
 				SDL_BlitSurface(screen, NULL, video, NULL); 
@@ -130,6 +134,7 @@ int main(int argc, char *argv[])
 			header_changed = false;
 			footer_changed = false;
 			list_changed = false;
+			battery_changed = false;
 
 			acc_ticks -= time_step;
 		}

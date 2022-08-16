@@ -21,7 +21,7 @@ theme_renderHeaderBattery(SDL_Surface *screen, int battery_percentage)
     SDL_FreeSurface(battery);
 }
 
-void theme_renderHeader(SDL_Surface* screen, int battery_percentage, const char *title_str, bool show_logo)
+void theme_renderHeader(SDL_Surface* screen, const char *title_str, bool show_logo)
 {
     theme_renderHeaderBackground(screen);
 
@@ -37,11 +37,9 @@ void theme_renderHeader(SDL_Surface* screen, int battery_percentage, const char 
         SDL_BlitSurface(title, NULL, screen, &title_rect);
         SDL_FreeSurface(title);
     }
-
-    theme_renderHeaderBattery(screen, battery_percentage);
 }
 
-void theme_renderHeaderExtra(SDL_Surface* screen, int battery_percentage, const char *title_str, const char *prev_title_str)
+void theme_renderHeaderExtra(SDL_Surface* screen, const char *title_str, const char *prev_title_str)
 {
     theme_renderHeaderBackground(screen);
 
@@ -49,8 +47,6 @@ void theme_renderHeaderExtra(SDL_Surface* screen, int battery_percentage, const 
     SDL_Rect title_rect = {320 - title->w / 2, 29 - title->h / 2};
     SDL_BlitSurface(title, NULL, screen, &title_rect);
     SDL_FreeSurface(title);
-
-    theme_renderHeaderBattery(screen, battery_percentage);
 }
 
 #endif // RENDER_HEADER_H__

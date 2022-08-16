@@ -30,7 +30,7 @@ void theme_renderListLabel(SDL_Surface* screen, const char *label, SDL_Color fg,
 
 void theme_renderList(SDL_Surface *screen, List *list)
 {
-    SDL_Rect bg_size = {0, 0, 640, 360}, bg_pos = {0, 60};
+    SDL_Rect bg_size = {0, 60, 640, 360}, bg_pos = {0, 60};
     SDL_BlitSurface(theme_background(), &bg_size, screen, &bg_pos);
 
     bool list_small = list->list_type == LIST_SMALL;

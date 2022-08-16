@@ -11,6 +11,7 @@ static bool quit = false;
 static bool header_changed = true;
 static bool list_changed = true;
 static bool footer_changed = true;
+static bool battery_changed = true;
 static KeyState keystate[320] = {(KeyState)0};
 
 static void sigHandler(int sig)
