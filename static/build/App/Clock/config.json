@@ -3,5 +3,5 @@
   "icon": "clock.png",
   "iconsel": "",
   "launch": "launch.sh",
-  "description": "Clock"
+  "description": "Set the current time"
 }
