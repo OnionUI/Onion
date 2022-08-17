@@ -12,10 +12,15 @@ typedef enum
 
 static SDL_Event keystate_event;
 
-bool updateKeystate(KeyState keystate[320], bool *quit_flag)
+bool updateKeystate(KeyState keystate[320], bool *quit_flag, bool enabled)
 {
+    bool retval = false;
+
     while (SDL_PollEvent(&keystate_event)) {
         SDLKey key = keystate_event.key.keysym.sym;
+
+        if (!enabled)
+            continue;
 
         switch (keystate_event.type) {
             case SDL_QUIT:
@@ -26,15 +31,17 @@ bool updateKeystate(KeyState keystate[320], bool *quit_flag)
                     keystate[key] = REPEATING;
                 else
                     keystate[key] = PRESSED;
-                return true;
+                retval = true;
+                break;
             case SDL_KEYUP:
                 keystate[key] = RELEASED;
-                return true;
+                retval = true;
+                break;
             default: break;
         }
     }
 
-    return false;
+    return retval;
 }
 
 #endif

@@ -7,7 +7,6 @@
 #include <linux/rtc.h>
 #include <stdio.h>
 #include <sys/ioctl.h>
-#include <sys/time.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -69,6 +68,7 @@ void system_clock_save(void)
     FILE* fp;
     if (clock_paused)
         return;
+    system_clock_get();
     file_put_sync(fp, CLOCK_SAVE_FILE, "%ld", mktime(&clk));
 }
 
@@ -97,6 +97,17 @@ void system_clock_pause(bool enabled)
         system_clock_load();
 
     clock_paused = enabled;
+}
+
+int getTicks(void)
+{
+    struct timespec te;
+    clock_gettime(CLOCK_MONOTONIC_RAW, &te);
+    int ms = te.tv_sec * 1000 + te.tv_nsec / 1000000;
+    // struct timeval te;
+    // gettimeofday(&te, NULL);
+    // int ms = (int)(te.tv_sec * 1000.0 + te.tv_usec / 1000);
+    return ms;
 }
 
 #endif // CLOCK_H__

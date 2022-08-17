@@ -30,39 +30,44 @@
 int main(int argc, char *argv[])
 {
 	print_debug("Debug logging enabled");
+	
+    signal(SIGINT, sigHandler);
+    signal(SIGTERM, sigHandler);
 
 	SDL_Init(SDL_INIT_VIDEO);
 	SDL_ShowCursor(SDL_DISABLE);
 	SDL_EnableKeyRepeat(300, 50);
 	TTF_Init();
 
-	SDL_Surface* video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
-	SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
-	
-	theme_backgroundBlit(screen);
-	SDL_BlitSurface(screen, NULL, video, NULL);
-	SDL_Flip(video);
+	video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
+	screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
 
 	settings_load();
 	lang_load();
 
     int battery_percentage = battery_getPercentage();
 
-	menuMain();
-
-	theme_renderFooter(screen);
-    theme_renderStandardHint(screen, lang_get(LANG_SELECT), lang_get(LANG_BACK));
+	menu_main();
 
 	uint32_t acc_ticks = 0,
 			 last_ticks = SDL_GetTicks(),
 			 time_step = 1000 / FRAMES_PER_SECOND;
+
+	print_debug("Got to main loop");
 
 	while (!quit) {
 		uint32_t ticks = SDL_GetTicks();
 		acc_ticks += ticks - last_ticks;
 		last_ticks = ticks;
 
-		if (updateKeystate(keystate, &quit)) {
+		if (all_changed) {
+			header_changed = true;
+			list_changed = true;
+			footer_changed = true;
+			battery_changed = true;
+		}
+
+		if (updateKeystate(keystate, &quit, keys_enabled)) {
 			if (keystate[SW_BTN_UP] >= PRESSED) {
 				list_keyUp(menu_stack[level], keystate[SW_BTN_UP] == REPEATING);
 				list_changed = true;
@@ -97,29 +102,44 @@ int main(int argc, char *argv[])
 					list_changed = true;
 				}
 			}
+			else if (keystate[SW_BTN_MENU] == PRESSED)
+				quit = true;
 		}
 
 		if (quit)
 			break;
 
 		if (battery_hasChanged(ticks, &battery_percentage))
-			header_changed = true;
+			battery_changed = true;
 
 		if (acc_ticks >= time_step) {
-			if (header_changed) {
-				theme_renderHeader(screen, battery_percentage, menu_stack[level]->title, false);
-				header_changed = false;
+			if (header_changed)
+				theme_renderHeader(screen, menu_stack[level]->title, false);
+
+			if (list_changed)
+				theme_renderList(screen, menu_stack[level]);
+			
+			if (footer_changed) {
+				theme_renderFooter(screen);
+				theme_renderStandardHint(screen, lang_get(LANG_SELECT), lang_get(LANG_BACK));
 			}
 
-			if (list_changed) {
-				theme_renderList(screen, menu_stack[level]);
+			if (footer_changed || list_changed)
 				theme_renderFooterStatus(screen, menu_stack[level]->active_pos + 1, menu_stack[level]->item_count);
-			
+
+			if (header_changed || battery_changed)
+				theme_renderHeaderBattery(screen, battery_percentage);
+
+			if (header_changed || list_changed || footer_changed || battery_changed) {
 				SDL_BlitSurface(screen, NULL, video, NULL); 
 				SDL_Flip(video);
-
-				list_changed = false;
 			}
+
+			header_changed = false;
+			footer_changed = false;
+			list_changed = false;
+			battery_changed = false;
+			all_changed = false;
 
 			acc_ticks -= time_step;
 		}
@@ -128,12 +148,19 @@ int main(int argc, char *argv[])
 	// Clear the screen when exiting
 	SDL_FillRect(video, NULL, 0);
 	SDL_Flip(video);
+
+	settings_save();
 	
 	lang_free();
-	list_free(&menu_main);
+	list_free(&_menu_main);
 	resources_free();
    	SDL_FreeSurface(screen);
    	SDL_FreeSurface(video);
+
+	#ifndef PLATFORM_MIYOOMINI
+	msleep(200); // to clear SDL input on quit
+	#endif
+
     SDL_Quit();
 	
     return EXIT_SUCCESS;

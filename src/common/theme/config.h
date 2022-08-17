@@ -8,8 +8,9 @@
 
 #include "utils/utils.h"
 #include "utils/json.h"
-#include "color.h"
-#include "load.h"
+#include "system/lang.h"
+#include "./color.h"
+#include "./load.h"
 
 typedef struct Theme_BatteryPercentage
 {
@@ -21,6 +22,12 @@ typedef struct Theme_BatteryPercentage
     int offsetY;
     bool onleft;
 } BatteryPercentage_s;
+
+typedef struct Theme_HideLabels
+{
+    bool icons;
+    bool hints;
+} HideLabels_s;
 
 typedef struct Theme_FontStyle
 {
@@ -44,7 +51,7 @@ typedef struct Theme
     char name[STR_MAX];
     char author[STR_MAX];
     char description[STR_MAX];
-    bool hideIconTitle;
+    HideLabels_s hideLabels;
     BatteryPercentage_s batteryPercentage;
     FontStyle_s title;
     FontStyle_s hint;
@@ -80,12 +87,13 @@ bool theme_applyConfig(Theme_s* config, const char* config_path, bool use_fallba
 {
 	const char *json_str = NULL;
 
-    if (!(json_str = file_read(config_path)))
+    if (!exists(config_path) || !(json_str = file_read(config_path)))
 		return false;
 
     // Get JSON objects
 	cJSON* json_root = cJSON_Parse(json_str);
 	cJSON* json_batteryPercentage = cJSON_GetObjectItem(json_root, "batteryPercentage");
+	cJSON* json_hideLabels = cJSON_GetObjectItem(json_root, "hideLabels");
 	cJSON* json_title = cJSON_GetObjectItem(json_root, "title");
 	cJSON* json_hint = cJSON_GetObjectItem(json_root, "hint");
 	cJSON* json_currentpage = cJSON_GetObjectItem(json_root, "currentpage");
@@ -96,7 +104,19 @@ bool theme_applyConfig(Theme_s* config, const char* config_path, bool use_fallba
     json_getString(json_root, "name", config->name);
     json_getString(json_root, "author", config->author);
     json_getString(json_root, "description", config->description);
-    json_getBool(json_root, "hideIconTitle", &config->hideIconTitle);
+
+    if (json_hideLabels) {
+        json_getBool(json_hideLabels, "icons", &config->hideLabels.icons);
+        json_getBool(json_hideLabels, "hints", &config->hideLabels.hints);
+    }
+    else {
+        // backwards compatible with `hideIconTitle`
+        bool value = false;
+        if (json_getBool(json_root, "hideIconTitle", &value)) {
+            config->hideLabels.icons = value;
+            config->hideLabels.hints = value;
+        }
+    }
 
     json_fontStyle(json_title, &config->title, NULL);
     json_fontStyle(json_hint, &config->hint, use_fallbacks ? &config->title : NULL);
@@ -125,14 +145,17 @@ bool theme_applyConfig(Theme_s* config, const char* config_path, bool use_fallba
     return true;
 }
 
-Theme_s theme_loadFromPath(const char* theme_path)
+Theme_s theme_loadFromPath(const char* theme_path, bool apply_overrides)
 {
     Theme_s config = {
         .path = FALLBACK_PATH,
         .name = "",
         .author = "",
         .description = "",
-        .hideIconTitle = false,
+        .hideLabels = {
+            .icons = false,
+            .hints = false
+        },
         .batteryPercentage = {
             .visible = false,
             .font = FALLBACK_FONT,
@@ -187,10 +210,8 @@ Theme_s theme_loadFromPath(const char* theme_path)
 	
     theme_applyConfig(&config, config_path, true);
 
-    // apply overrides
-    sprintf(config_path, "%s/config.json", THEME_OVERRIDES);
-	if (exists(config_path))
-		theme_applyConfig(&config, config_path, false);
+    if (apply_overrides)
+        theme_applyConfig(&config, THEME_OVERRIDES "/config.json", false);
 
 	return config;
 }
@@ -199,11 +220,43 @@ Theme_s theme_load(void)
 {
     char theme_path[STR_MAX];
 	theme_getPath(theme_path);
-	return theme_loadFromPath(theme_path);
+	return theme_loadFromPath(theme_path, true);
 }
 
-bool theme_changeOverride(cJSON* root, const char *group_key, const char *key, void *value, int value_type)
+static cJSON *_theme_overrides = NULL;
+static bool _theme_overrides_changed = false;
+
+void theme_freeOverrides(void)
 {
+    if (_theme_overrides != NULL)
+        cJSON_free(_theme_overrides);
+    _theme_overrides = NULL;
+}
+
+void theme_loadOverrides(void)
+{
+    theme_freeOverrides();
+    _theme_overrides = json_load(THEME_OVERRIDES "/config.json");
+    if (!_theme_overrides)
+        _theme_overrides = cJSON_CreateObject();
+}
+
+void theme_saveOverrides()
+{
+    if (_theme_overrides != NULL && _theme_overrides_changed)
+        json_save(_theme_overrides, THEME_OVERRIDES "/config.json");
+}
+
+cJSON* theme_overrides(void)
+{
+    if (_theme_overrides == NULL)
+        theme_loadOverrides();
+    return _theme_overrides;
+}
+
+void theme_changeOverride(const char *group_key, const char *key, void *value, int value_type)
+{
+    cJSON *root = theme_overrides();
     cJSON *group = cJSON_GetObjectItem(root, group_key);
 
     if (!group)
@@ -212,33 +265,40 @@ bool theme_changeOverride(cJSON* root, const char *group_key, const char *key, v
     cJSON_DeleteItemFromObject(group, key);
 
     switch (value_type) {
-        case cJSON_NULL: break;
         case cJSON_String: cJSON_AddStringToObject(group, key, (char*)value); break;
         case cJSON_Number: cJSON_AddNumberToObject(group, key, (double)(*(int*)value)); break;
         case cJSON_True: cJSON_AddTrueToObject(group, key); break;
         case cJSON_False: cJSON_AddFalseToObject(group, key); break;
-        default: return false;
+        default: break;
     }
 
-    return true;
+    _theme_overrides_changed = true;
 }
 
-void theme_changeOverrideFile(const char *group_key, const char *key, void *value, int value_type, bool reload, Theme_s *config)
+void theme_changeOverrideFile(const char *group_key, const char *key, void *value, int value_type)
 {
-    cJSON* root = json_load(THEME_OVERRIDES "/config.json");
+    theme_changeOverride(group_key, key, value, value_type);
+    theme_saveOverrides();
+}
 
-    if (!root)
-        root = cJSON_CreateObject();
+bool theme_getOverride(const char *group_key, const char *key, void *out_value, int value_type)
+{
+    cJSON *group;
 
-    bool success = theme_changeOverride(root, group_key, key, value, value_type);
+    if (!(group = cJSON_GetObjectItem(theme_overrides(), group_key)))
+        return false;
 
-    if (success)
-        json_save(root, THEME_OVERRIDES "/config.json");
+    bool value = false;
 
-    if (reload)
-        *config = theme_loadFromPath(config->path);
+    switch (value_type) {
+        case cJSON_String: value = json_getString(group, key, (char*)out_value); break;
+        case cJSON_Number: value = json_getInt(group, key, (int*)out_value); break;
+        case cJSON_True:
+        case cJSON_False: value = json_getBool(group, key, (bool*)out_value); break;
+        default: break;
+    }
 
-	cJSON_free(root);
+    return value;
 }
 
 #endif // THEME_CONFIG_H__

@@ -1,7 +1,6 @@
 {
-"label":"Music player (Menu + start to exit)",
+"label":"Music Player",
 "icon":"logo.png",
-"iconsel":"",
 "launch":"launch.sh",
-"description":"Media player - mp3, ogg, flac, opus & more"
+"description":"GMU (Menu + start to exit)"
 }
