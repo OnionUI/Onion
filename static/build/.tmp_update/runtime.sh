@@ -44,7 +44,7 @@ main() {
 
     check_switcher
 
-    set_startup_page
+    set_startup_tab
 
     # Main runtime loop
     while true; do
@@ -243,20 +243,20 @@ update_time() {
     date +%s -s @$currentTime
 }
 
-set_startup_page() {
-    startup_page=0
-    if [ -f $sysdir/config/startup/page ]; then
-        startup_page=`cat $sysdir/config/startup/page`
+set_startup_tab() {
+    startup_tab=0
+    if [ -f $sysdir/config/startup/tab ]; then
+        startup_tab=`cat $sysdir/config/startup/tab`
     fi
-    if [ $startup_page -eq 1 ]; then
+    if [ $startup_tab -eq 1 ]; then
         write_state 18 10 5 # recents
-    elif [ $startup_page -eq 2 ]; then
+    elif [ $startup_tab -eq 2 ]; then
         write_state 1 2 5 # favorites
-    elif [ $startup_page -eq 3 ]; then
+    elif [ $startup_tab -eq 3 ]; then
         write_state 2 1 7 # games
-    elif [ $startup_page -eq 4 ]; then
+    elif [ $startup_tab -eq 4 ]; then
         write_state 0 16 5 # expert
-    elif [ $startup_page -eq 5 ]; then
+    elif [ $startup_tab -eq 5 ]; then
         write_state 107 3 5 # apps
     fi
 }
