@@ -102,7 +102,7 @@ external: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
 	@cd $(THIRD_PARTY_DIR)/RetroArch && make && cp retroarch $(BUILD_DIR)/RetroArch/
 	@echo $(RA_SUBVERSION) > $(BUILD_DIR)/RetroArch/onion_ra_version.txt
-	@cd $(THIRD_PARTY_DIR)/SearchFilter && make build && cp -a build/. "$(PACKAGES_APP_DEST)/Search and Filter/"
+	@cd $(THIRD_PARTY_DIR)/SearchFilter && make build && cp -a build/. "$(PACKAGES_APP_DEST)/Search game library/" && cp build/App/SearchFilter/tools $(BIN_DIR)
 
 dist: build
 	@$(ECHO) $(PRINT_RECIPE)

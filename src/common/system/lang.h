@@ -47,8 +47,8 @@ void lang_removeIconLabels(bool remove_icon_labels, bool remove_hints)
         if (strcmp("lang", file_getExtension(ep->d_name)) != 0)
             continue; // skip files not having the `.lang` extension
 
-        const char file_path[256];
-        sprintf(file_path, LANG_DIR "/%s", ep->d_name);
+        const char file_path[STR_MAX];
+        snprintf(file_path, STR_MAX - 1, LANG_DIR "/%s", ep->d_name);
 
         const char *json_data = file_read(file_path);
         cJSON *root = cJSON_Parse(json_data);
@@ -99,6 +99,7 @@ typedef enum
     LANG_SELECT = 88,
     LANG_BACK,
     LANG_MENU = 91,
+    LANG_APPS_TAB = 107,
     LANG_EXIT = 111,
     LANG_SAVE_EXIT
 } lang_hash;

@@ -1,7 +1,7 @@
 #ifndef MENU_BUTTON_ACTION_H__
 #define MENU_BUTTON_ACTION_H__
 
-#include <sys/time.h>
+#include <time.h>
 
 #include "system/state.h"
 #include "system/settings.h"
@@ -112,7 +112,9 @@ bool menuButtonAction(uint32_t val, bool comboKey)
         menu_last_state = system_state;
     }
     else if (val == REPEAT) {
-        if (getTicks() - menu_last_pressed >= menu_long_press_timeout) {
+        int ticks = getTicks();
+        printf_debug("Ticks: %d, last: %d, diff: %d\n", ticks, menu_last_pressed, ticks - menu_last_pressed);
+        if (ticks - menu_last_pressed >= menu_long_press_timeout) {
             print_debug("LONG-PRESS");
             menuButtonEvent_longPress();
             comboKey = true;  // this will avoid to trigger short press action

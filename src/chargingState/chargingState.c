@@ -110,7 +110,7 @@ int main(void)
                  delta = ticks - last_ticks;
         last_ticks = ticks;
 
-        if ((keychange = updateKeystate(keystate, &quit))) {
+        if ((keychange = updateKeystate(keystate, &quit, true))) {
             if (keystate[SW_BTN_POWER] == REPEATING && (ticks - shutdown_timer) > SHUTDOWN_TIMEOUT) {
                 short_pulse();
                 quit = true; // power on

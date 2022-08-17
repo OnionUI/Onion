@@ -39,8 +39,8 @@ int main(int argc, char *argv[])
 	SDL_EnableKeyRepeat(300, 50);
 	TTF_Init();
 
-	SDL_Surface* video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
-	SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
+	video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
+	screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
 
 	settings_load();
 	lang_load();
@@ -60,7 +60,14 @@ int main(int argc, char *argv[])
 		acc_ticks += ticks - last_ticks;
 		last_ticks = ticks;
 
-		if (updateKeystate(keystate, &quit)) {
+		if (all_changed) {
+			header_changed = true;
+			list_changed = true;
+			footer_changed = true;
+			battery_changed = true;
+		}
+
+		if (updateKeystate(keystate, &quit, keys_enabled)) {
 			if (keystate[SW_BTN_UP] >= PRESSED) {
 				list_keyUp(menu_stack[level], keystate[SW_BTN_UP] == REPEATING);
 				list_changed = true;
@@ -132,6 +139,7 @@ int main(int argc, char *argv[])
 			footer_changed = false;
 			list_changed = false;
 			battery_changed = false;
+			all_changed = false;
 
 			acc_ticks -= time_step;
 		}

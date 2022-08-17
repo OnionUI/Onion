@@ -44,6 +44,8 @@ main() {
 
     check_switcher
 
+    set_startup_page
+
     # Main runtime loop
     while true; do
         check_main_ui
@@ -239,6 +241,28 @@ update_time() {
     addTime=$(($hours * 3600))
     currentTime=$(($currentTime + $addTime))
     date +%s -s @$currentTime
+}
+
+set_startup_page() {
+    startup_page=0
+    if [ -f $sysdir/config/startup/page ]; then
+        startup_page=`cat $sysdir/config/startup/page`
+    fi
+    if [ $startup_page -eq 1 ]; then
+        write_state 18 10 5 # recents
+    elif [ $startup_page -eq 2 ]; then
+        write_state 1 2 5 # favorites
+    elif [ $startup_page -eq 3 ]; then
+        write_state 2 1 7 # games
+    elif [ $startup_page -eq 4 ]; then
+        write_state 0 16 5 # expert
+    elif [ $startup_page -eq 5 ]; then
+        write_state 107 3 5 # apps
+    fi
+}
+
+write_state() {
+    echo "{\"list\":[{\"title\":132,\"type\":0,\"currpos\":0,\"pagestart\":0,\"pageend\":3},{\"title\":$1,\"type\":$2,\"currpos\":0,\"pagestart\":0,\"pageend\":$3}]}" > /tmp/state.json
 }
 
 main
