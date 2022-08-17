@@ -67,12 +67,4 @@ char* drawImageByIndex(const int new_image_index, const int image_index, char **
 	}
 	
 	return image_path_to_draw;
-	// 0 0 0 0 0 0 0
-	// 1 1 0 0 0 0 0
-	// 1 1 1 0 0 0 0
-	// 0 1 1 1 0 0 0
-	// 0 0 1 1 1 0 0
-	// 0 0 0 1 1 1 0
-	// 0 0 0 0 1 1 1
-	// 0 0 0 0 0 1 1
 }
