@@ -8,16 +8,17 @@
 
 #include "utils/msleep.h"
 #include "components/list.h"
+// #include "components/JsonGameEntry.h"
 #include "theme/theme.h"
 #include "./appstate.h"
 
-int _runCommand(const char *cmd)
+bool _runCommand(const char *cmd)
 {
     int ret = system(cmd);
-    if (WEXITSTATUS(ret) == 0x10)
-        return 0;
+    if (WEXITSTATUS(ret) == 0)
+        return true;
     else
-        return 1;
+        return false;
 }
 
 void _blackScreenWithText(const char *text_str)
@@ -39,8 +40,8 @@ void _runCommandPopup(const char *cmd)
 {
     keys_enabled = false;
     _blackScreenWithText("Applying tool...");
-    int ec = _runCommand(cmd);
-    _blackScreenWithText(ec == 0 ? "Done" : "Tool failed");
+    bool success = _runCommand(cmd);
+    _blackScreenWithText(success ? "Done" : "Tool failed");
     msleep(300);
     keys_enabled = true;
     all_changed = true;
@@ -58,7 +59,7 @@ void tool_favoritesSortSystem(void *pt)
 
 void tool_favoritesFixThumbnails(void *pt)
 {
-    _runCommandPopup("./bin/tools boxart");
+    _runCommandPopup("./bin/tools favfix");
 }
 
 void tool_recentsRemoveApps(void *pt)
@@ -66,9 +67,12 @@ void tool_recentsRemoveApps(void *pt)
     _runCommandPopup("./bin/tools recents --clean_all");
 }
 
-void tool_removeDotUnderscoreFiles(void *pt)
+void tool_removeMacFiles(void *pt)
 {
-    _runCommandPopup("find /mnt/SDCARD -depth -name \"._*\" -name \".DS_Store\" -exec rm {} \\;");
+    _runCommandPopup(
+        "find /mnt/SDCARD/ -depth -type f \\( -name \"._*\" -o -name \".DS_Store\" \\) -delete; "
+        "find /mnt/SDCARD/ -depth -type d -name \"__MACOSX\" -exec rm -rf {} \\;"
+    );
 }
 
 #endif // TWEAKS_TOOLS_H__

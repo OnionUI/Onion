@@ -329,16 +329,16 @@ void menu_tools(void *_)
 			.action = tool_favoritesSortSystem
 		});
 		list_addItem(&_menu_tools, (ListItem){
-			.label = "Favorites: Fix thumbnails",
+			.label = "Favorites: Fix thumbnails and duplicates",
 			.action = tool_favoritesFixThumbnails
 		});
-		// list_addItem(&_menu_tools, (ListItem){
-		// 	.label = "Remove apps from recents",
-		// 	.action = tool_recentsRemoveApps
-		// }); // TODO: Currently not working! - implement new efficient method
+		list_addItem(&_menu_tools, (ListItem){
+			.label = "Remove apps from recents",
+			.action = tool_recentsRemoveApps
+		});
 		list_addItem(&_menu_tools, (ListItem){
 			.label = "Remove OSX system files",
-			.action = tool_removeDotUnderscoreFiles
+			.action = tool_removeMacFiles
 		});
 	}
 	menu_stack[++level] = &_menu_tools;
