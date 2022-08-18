@@ -8,7 +8,7 @@ cd /mnt/SDCARD/App/PlayActivity
 ./playActivity "init"
 
 cd /mnt/SDCARD/RetroArch/
-HOME=/mnt/SDCARD/RetroArch/ $progdir/../../RetroArch/retroarch -v -L $progdir/../../RetroArch/.retroarch/cores/mu_libretro.so "$1"
+HOME=/mnt/SDCARD/RetroArch/ $progdir/../../RetroArch/retroarch -v -L $progdir/../../RetroArch/.retroarch/cores/bluemsx_libretro.so "$1"
 
 # Timer registration
 cd /mnt/SDCARD/App/PlayActivity
