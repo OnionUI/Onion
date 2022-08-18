@@ -194,7 +194,7 @@ fresh_install() {
 
     # Launch layer manager
     cd /mnt/SDCARD/App/The_Onion_Installer/ 
-    ./packageManager --confirm --reapply
+    $sysdir/bin/packageManager --confirm --reapply
     free_mma
 
     cd $sysdir

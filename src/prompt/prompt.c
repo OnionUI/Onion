@@ -22,7 +22,6 @@
 #include "components/list.h"
 
 #define FRAMES_PER_SECOND 30
-#define CHECK_BATTERY_TIMEOUT 30000 //ms
 #define SHUTDOWN_TIMEOUT 500
 
 int main(int argc, char *argv[])
@@ -76,16 +75,13 @@ int main(int argc, char *argv[])
 	lang_load();
 	printf_debug(LOG_SUCCESS, "loaded language file");
 
-	theme_backgroundLoad();
-	SDL_BlitSurface(theme_background, NULL, screen, NULL);
+	SDL_BlitSurface(theme_background(), NULL, screen, NULL);
 	SDL_BlitSurface(screen, NULL, video, NULL); 
 	SDL_Flip(video);
 
 	print_debug("Reading battery percentage...");
-    int current_percentage = battery_getPercentage();
-	int old_percentage = current_percentage;
+    int battery_percentage = battery_getPercentage();
 	printf_debug(LOG_SUCCESS, "read battery percentage");
-    SDL_Surface* battery = theme_batterySurface(current_percentage);
 
 	if (pargc == 0) {
 		pargs[pargc++] = lang_get(LANG_OK);
@@ -95,7 +91,7 @@ int main(int argc, char *argv[])
 	List list = list_create(pargc, LIST_SMALL);
 
 	for (i = 0; i < pargc; i++) {
-		ListItem item = { .id = i };
+		ListItem item;
 		strcpy(item.label, pargs[i]);
 		list_addItem(&list, item);
 	}
@@ -116,7 +112,9 @@ int main(int argc, char *argv[])
 	}
 
 	bool quit = false;
-	bool changed = true;
+	bool list_changed = true;
+	bool header_changed = true;
+	bool battery_changed = true;
 	bool first_draw = true;
 
 	SDL_Event event;
@@ -126,7 +124,6 @@ int main(int argc, char *argv[])
 	struct input_event ev;
 	
 	int return_code = -1;
-	time_t battery_last_modified = 0;
 
 	uint32_t shutdown_timer = 0,
 			 acc_ticks = 0,
@@ -164,11 +161,11 @@ int main(int argc, char *argv[])
 				switch (key) {
 					case SW_BTN_UP:
 						list_keyUp(&list, repeating);
-						changed = true;
+						list_changed = true;
 						break;
 					case SW_BTN_DOWN:
 						list_keyDown(&list, repeating);
-						changed = true;
+						list_changed = true;
 						break;
 					default: break;
 				}
@@ -176,7 +173,7 @@ int main(int argc, char *argv[])
 			else if (event.type == SDL_KEYUP) {
 				switch (key) {
 					case SW_BTN_A:
-						return_code = list_activateItem(&list)->id;
+						return_code = list_activateItem(&list)->_id;
 						quit = true;
 						break;
 					case SW_BTN_B:
@@ -192,34 +189,30 @@ int main(int argc, char *argv[])
 		if (quit)
 			break;
 
-		if (file_isModified("/tmp/percBat", &battery_last_modified)) {
-			current_percentage = battery_getPercentage();
-
-			if (current_percentage != old_percentage) {
-				SDL_FreeSurface(battery);
-				battery = theme_batterySurface(current_percentage);
-				old_percentage = current_percentage;
-				changed = true;
-			}
-		}
+		if (battery_hasChanged(ticks, &battery_percentage))
+			battery_changed = true;
 
 		if (acc_ticks >= time_step) {
-			if (changed) {
-				SDL_BlitSurface(theme_background, NULL, screen, NULL);
-				theme_renderHeader(screen, battery, has_title ? title_str : NULL, !has_title);
+			if (header_changed) {
+				theme_renderHeader(screen, has_title ? title_str : NULL, !has_title);
+			}
+			if (list_changed) {
+				theme_renderList(screen, &list);
+				theme_renderListFooter(screen, list.active_pos + 1, list.item_count, lang_get(LANG_SELECT), required ? NULL : lang_get(LANG_BACK));
 
 				if (has_message)
 					SDL_BlitSurface(message, NULL, screen, &message_rect);
-
-				theme_renderList(screen, &list);
-				theme_renderListFooter(screen, list.active_pos + 1, list.item_count, lang_get(LANG_SELECT), required ? NULL : lang_get(LANG_BACK));
-			
-				SDL_BlitSurface(screen, NULL, video, NULL); 
-				SDL_Flip(video);
-
-				changed = false;
-				first_draw = false;
 			}
+
+			if (battery_changed)
+				theme_renderHeaderBattery(screen, battery_getPercentage());
+
+			header_changed = false;
+			list_changed = false;
+			battery_changed = false;
+			first_draw = false;
+			SDL_BlitSurface(screen, NULL, video, NULL); 
+			SDL_Flip(video);
 
 			acc_ticks -= time_step;
 		}
@@ -235,8 +228,6 @@ int main(int argc, char *argv[])
 	resources_free();
 	if (has_message)
 		SDL_FreeSurface(message);
-	theme_backgroundFree();
-	SDL_FreeSurface(battery);
    	SDL_FreeSurface(screen);
    	SDL_FreeSurface(video);
     SDL_Quit();

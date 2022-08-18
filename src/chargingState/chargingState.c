@@ -20,6 +20,7 @@
 #include "system/display.h"
 #include "system/settings.h"
 #include "system/keymap_sw.h"
+#include "system/rumble.h"
 #include "theme/config.h"
 
 #define SHUTDOWN_TIMEOUT 500
@@ -109,9 +110,11 @@ int main(void)
                  delta = ticks - last_ticks;
         last_ticks = ticks;
 
-        if ((keychange = updateKeystate(keystate, &quit))) {
-            if (keystate[SW_BTN_POWER] == REPEATING && (ticks - shutdown_timer) > SHUTDOWN_TIMEOUT)
+        if ((keychange = updateKeystate(keystate, &quit, true))) {
+            if (keystate[SW_BTN_POWER] == REPEATING && (ticks - shutdown_timer) > SHUTDOWN_TIMEOUT) {
+                short_pulse();
                 quit = true; // power on
+            }
             else if (keystate[SW_BTN_POWER] == PRESSED) {
                 shutdown_timer = ticks;
                 power_pressed = true;

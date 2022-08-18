@@ -33,7 +33,18 @@ main() {
         check_game
     fi
 
+    startup_app=`cat $sysdir/config/startup/app`
+
+    if [ $startup_app -eq 1 ]; then
+        touch $sysdir/.runGameSwitcher
+    elif [ $startup_app -eq 2 ]; then
+        cd /mnt/SDCARD/RetroArch/
+        LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v
+    fi
+
     check_switcher
+
+    set_startup_tab
 
     # Main runtime loop
     while true; do
@@ -68,6 +79,7 @@ launch_main_ui() {
     ./bin/mainUiBatPerc 2>&1 >> ./logs/mainUiBatPerc.log
 
     check_hide_recents
+    check_hide_expert
 
     # MainUI launch
     cd /mnt/SDCARD/miyoo/app
@@ -79,7 +91,6 @@ check_game() {
     # Game launch
     if  [ -f $sysdir/cmd_to_run.sh ] ; then
         launch_game
-        check_off_order "End_Save"
     fi
 }
 
@@ -88,8 +99,10 @@ launch_game() {
     is_game=0
 
     if echo "$romfile" | grep -q "retroarch" || echo "$romfile" | grep -q "/mnt/SDCARD/Emu/" || echo "$romfile" | grep -q "/mnt/SDCARD/RApp/"; then
-        echo "Game found:" $(basename "$romfile")
-        is_game=1
+        if ! echo "$romfile" | grep -q "/mnt/SDCARD/Emu/SEARCH/../../App/SearchFilter"; then
+            echo "Game found:" $(basename "$romfile")
+            is_game=1
+        fi
     fi
 
     # TIMER BEGIN
@@ -102,17 +115,24 @@ launch_game() {
     cd /mnt/SDCARD/RetroArch/
     $sysdir/cmd_to_run.sh
 
-    # TIMER END
+    # TIMER END + SHUTDOWN CHECK
     if [ $is_game -eq 1 ]; then
         cd $sysdir
         ./bin/playActivity "$(basename "$romfile")" 2>&1 >> ./logs/playActivity.log
+        
+        check_off_order "End_Save"
+    else
+        check_off_order "End"
     fi
 }
 
 check_switcher() {
-    if  [ -f /mnt/SDCARD/.tmp_update/.runGameSwitcher ] ; then
+    if [ -f $sysdir/.runGameSwitcher ] ; then
         launch_switcher
-    else 
+    elif [ -f /tmp/quick_switch ]; then
+        # Quick switch
+        rm -f /tmp/quick_switch
+    else
         # Return to MainUI
         rm $sysdir/cmd_to_run.sh
         sync
@@ -124,7 +144,7 @@ check_switcher() {
 launch_switcher() {
     cd $sysdir
     LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./bin/gameSwitcher 2>&1 >> ./logs/gameSwitcher.log
-    rm /mnt/SDCARD/.tmp_update/.runGameSwitcher
+    rm $sysdir/.runGameSwitcher
     sync
 }
 
@@ -159,6 +179,30 @@ check_hide_recents() {
             cat $recentlist $recentlist_hidden > $recentlist_temp
             mv -f $recentlist_temp $recentlist
             rm -f $recentlist_hidden
+        fi
+    fi
+    sync
+}
+
+clean_flag=/mnt/SDCARD/miyoo/app/.isClean
+expert_flag=/mnt/SDCARD/miyoo/app/.isExpert
+
+check_hide_expert() {
+    if [ -f $sysdir/config/.hideExpert ]; then
+        # Should be clean
+        if [ ! -f $clean_flag ]; then
+            rm /mnt/SDCARD/miyoo/app/MainUI
+            rm -f $expert_flag
+	        cp $sysdir/bin/MainUI-clean /mnt/SDCARD/miyoo/app/MainUI
+            touch $clean_flag
+        fi
+    else
+        # Should be expert
+        if [ ! -f $expert_flag ]; then
+            rm /mnt/SDCARD/miyoo/app/MainUI
+            rm -f $clean_flag
+	        cp $sysdir/bin/MainUI-expert /mnt/SDCARD/miyoo/app/MainUI
+            touch $expert_flag
         fi
     fi
     sync
@@ -199,6 +243,28 @@ update_time() {
     addTime=$(($hours * 3600))
     currentTime=$(($currentTime + $addTime))
     date +%s -s @$currentTime
+}
+
+set_startup_tab() {
+    startup_tab=0
+    if [ -f $sysdir/config/startup/tab ]; then
+        startup_tab=`cat $sysdir/config/startup/tab`
+    fi
+    if [ $startup_tab -eq 1 ]; then
+        write_state 18 10 5 # recents
+    elif [ $startup_tab -eq 2 ]; then
+        write_state 1 2 5 # favorites
+    elif [ $startup_tab -eq 3 ]; then
+        write_state 2 1 7 # games
+    elif [ $startup_tab -eq 4 ]; then
+        write_state 0 16 5 # expert
+    elif [ $startup_tab -eq 5 ]; then
+        write_state 107 3 5 # apps
+    fi
+}
+
+write_state() {
+    echo "{\"list\":[{\"title\":132,\"type\":0,\"currpos\":0,\"pagestart\":0,\"pageend\":3},{\"title\":$1,\"type\":$2,\"currpos\":0,\"pagestart\":0,\"pageend\":$3}]}" > /tmp/state.json
 }
 
 main

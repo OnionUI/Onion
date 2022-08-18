@@ -27,12 +27,23 @@ static struct settings_s
     char theme[JSON_STRING_LEN];
     int fontsize;
     int audiofix;
-    bool vibration;
-    bool menu_haptics;
-    bool switcher_enabled;
-    bool menu_inverted;
-    bool low_battery_warning;
+    bool show_recents;
+    bool show_expert;
+    bool startup_auto_resume;
+    bool menu_button_haptics;
     bool low_battery_autosave;
+    bool low_battery_warning;
+    int low_battery_warn_at;
+    int time_skip;
+    int vibration;
+    int startup_tab;
+    int mainui_single_press;
+    int mainui_long_press;
+    int mainui_double_press;
+    int ingame_single_press;
+    int ingame_long_press;
+    int ingame_double_press;
+    int startup_application;
 }
 settings = {
     // MainUI settings
@@ -51,26 +62,46 @@ settings = {
     .fontsize = 24,
     .audiofix = 1,
     // Onion settings
-    .vibration = true,
-    .menu_haptics = false,
-    .switcher_enabled = true,
-    .menu_inverted = false,
+    .show_recents = false,
+    .show_expert = false,
+    .startup_auto_resume = true,
+    .menu_button_haptics = false,
+    .low_battery_autosave = true,
     .low_battery_warning = true,
-    .low_battery_autosave = true
+    .low_battery_warn_at = 15,
+    .time_skip = 4,
+    .vibration = 2,
+    .startup_tab = 0,
+    // Menu button actions
+    .mainui_single_press = 1,
+    .mainui_long_press = 0,
+    .mainui_double_press = 2,
+    .ingame_single_press = 1,
+    .ingame_long_press = 2,
+    .ingame_double_press = 3,
+    .startup_application = 0
 };
 
 static bool settings_loaded = false;
 
-void settings_load(void)
+void _settings_load_keymap(void)
+{
+    if (!exists(CONFIG_PATH "menu_button_keymap.json"))
+        return;
+
+    cJSON *keymap = json_load(CONFIG_PATH "menu_button_keymap.json");
+    json_getInt(keymap, "mainui_single_press", &settings.mainui_single_press);
+    json_getInt(keymap, "mainui_long_press", &settings.mainui_long_press);
+    json_getInt(keymap, "mainui_double_press", &settings.mainui_double_press);
+    json_getInt(keymap, "ingame_single_press", &settings.ingame_single_press);
+    json_getInt(keymap, "ingame_long_press", &settings.ingame_long_press);
+    json_getInt(keymap, "ingame_double_press", &settings.ingame_double_press);
+    cJSON_free(keymap);
+}
+
+void _settings_load_mainui(void)
 {
     const char *json_str = NULL;
-
-    settings.vibration = !config_flag_get(".noVibration");
-    settings.menu_haptics = config_flag_get(".menuHaptics");
-    settings.menu_inverted = config_flag_get(".menuInverted");
-    settings.switcher_enabled = !config_flag_get(".noGameSwitcher");
-    settings.low_battery_warning = !config_flag_get(".noBatteryWarning");
-    settings.low_battery_autosave = !config_flag_get(".noLowBatteryAutoSave");
 
 	if (!(json_str = file_read(MAIN_UI_SETTINGS)))
 		return;
@@ -94,20 +125,66 @@ void settings_load(void)
     json_getString(json_root, "theme", settings.theme);
 
     cJSON_free(json_root);
+}
+
+void settings_load(void)
+{
+    settings.startup_auto_resume = !config_flag_get(".noAutoStart");
+    settings.menu_button_haptics = config_flag_get(".menuHaptics");
+    settings.show_recents = !config_flag_get(".hideRecents");
+    settings.show_expert = !config_flag_get(".hideExpert");
+    settings.low_battery_autosave = !config_flag_get(".noLowBatteryAutoSave");
+
+    if (config_flag_get(".noBatteryWarning"))
+        settings.low_battery_warn_at = 0;
+
+    config_get("battery/warnAt", "%d", &settings.low_battery_warn_at);
+    config_get("startup/app", "%d", &settings.startup_application);
+    config_get("startup/addHours", "%d", &settings.time_skip);
+    config_get("vibration", "%d", &settings.vibration);
+    config_get("startup/tab", "%d", &settings.startup_tab);
+
+    if (config_flag_get(".menuInverted")) { // flag is deprecated, but keep compatibility
+        settings.ingame_single_press = 2;
+        settings.ingame_long_press = 1;
+    }
+
+    if (config_flag_get(".noGameSwitcher")) { // flag is deprecated, but keep compatibility
+        settings.mainui_single_press = 0;
+        settings.ingame_single_press = 2;
+        settings.ingame_long_press = 0;
+    }
+
+    _settings_load_keymap();
+    _settings_load_mainui();
 
     settings_loaded = true;
 }
 
-void settings_save(void)
+void _settings_save_keymap(void)
 {
     FILE *fp;
 
-    config_flag_set(".noVibration", !settings.vibration);
-    config_flag_set(".menuHaptics", settings.menu_haptics);
-    config_flag_set(".menuInverted", settings.menu_inverted);
-    config_flag_set(".noGameSwitcher", !settings.switcher_enabled);
-    config_flag_set(".noBatteryWarning", !settings.low_battery_warning);
-    config_flag_set(".noLowBatteryAutoSave", !settings.low_battery_autosave);
+    if ((fp = fopen(CONFIG_PATH "menu_button_keymap.json", "w+")) == 0)
+        return;
+
+    fprintf(fp, "{\n");
+    fprintf(fp, JSON_FORMAT_NUMBER, "mainui_single_press", settings.mainui_single_press);
+    fprintf(fp, JSON_FORMAT_NUMBER, "mainui_long_press", settings.mainui_long_press);
+    fprintf(fp, JSON_FORMAT_NUMBER, "mainui_double_press", settings.mainui_double_press);
+    fprintf(fp, JSON_FORMAT_NUMBER, "ingame_single_press", settings.ingame_single_press);
+    fprintf(fp, JSON_FORMAT_NUMBER, "ingame_long_press", settings.ingame_long_press);
+    fprintf(fp, JSON_FORMAT_NUMBER_NC, "ingame_double_press", settings.ingame_double_press);
+    fprintf(fp, "}\n");
+
+    fflush(fp);
+    fsync(fileno(fp));
+    fclose(fp);
+}
+
+void _settings_save_mainui(void)
+{
+    FILE *fp;
 
     if ((fp = fopen(MAIN_UI_SETTINGS, "w+")) == 0)
         return;
@@ -132,6 +209,24 @@ void settings_save(void)
     fflush(fp);
     fsync(fileno(fp));
     fclose(fp);
+}
+
+void settings_save(void)
+{
+    config_flag_set(".noAutoStart", !settings.startup_auto_resume);
+    config_flag_set(".noVibration", !settings.vibration);
+    config_flag_set(".menuHaptics", settings.menu_button_haptics);
+    config_flag_set(".hideRecents", !settings.show_recents);
+    config_flag_set(".hideExpert", !settings.show_expert);
+    config_flag_set(".noLowBatteryAutoSave", !settings.low_battery_autosave);
+    config_setNumber("battery/warnAt", settings.low_battery_warn_at);
+    config_setNumber("startup/app", settings.startup_application);
+    config_setNumber("startup/addHours", settings.time_skip);
+    config_setNumber("vibration", settings.vibration);
+    config_setNumber("startup/tab", settings.startup_tab);
+
+    _settings_save_keymap();
+    _settings_save_mainui();
 }
 
 void settings_setBrightness(uint32_t value, bool apply)

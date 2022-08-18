@@ -1,7 +1,6 @@
 {
-"label":"Onion Manual",
+"label":"Quick Guide",
 "icon":"icon.png",
-"iconsel":"icon.png",
 "launch":"launch.sh",
-"description":"Find help on how to use it"
+"description":"Getting started with Onion"
 }

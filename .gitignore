@@ -39,3 +39,5 @@ src/**/themeSwitcher
 !themeSwitcher/
 src/**/tweaks
 !tweaks/
+src/**/sendkeys
+!sendkeys/

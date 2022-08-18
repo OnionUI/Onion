@@ -1,3 +1,3 @@
 #!/bin/sh	
 
-./packageManager
+/mnt/SDCARD/.tmp_update/bin/packageManager

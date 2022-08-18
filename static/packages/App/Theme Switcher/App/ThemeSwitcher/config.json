@@ -1,7 +1,6 @@
 {
-"label":"Theme Switcher",
+"label":"Themes",
 "icon":"icon.png",
-"iconsel":"icon.png",
 "launch":"launch.sh",
 "description":"Change system theme"
 }

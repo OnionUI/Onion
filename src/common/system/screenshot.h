@@ -15,10 +15,8 @@
 //    [onion] get recent filename from content_history.lpl
 //
 char* getrecent_onion(char *filename) {
-    file_parseKeyValue("/mnt/SDCARD/Saves/CurrentProfile/lists/content_history.lpl", "path", filename, ':');
-    printf_debug("recent path: '%s'\n", filename);
-    if (*filename == 0) return NULL;
-    sprintf(filename, "%"PRIu32, FNV1A_Pippip_Yurii(filename, strlen(filename)));
+    if (history_getRecentPath(filename) != NULL)
+        sprintf(filename, "%"PRIu32, FNV1A_Pippip_Yurii(filename, strlen(filename)));
     return filename;
 }
 
@@ -32,15 +30,18 @@ char* getrecent_png(char *filename) {
     strcpy(filename, "/mnt/SDCARD/Screenshots/");
     fnptr = filename + strlen(filename);
 
-    MenuMode mode = state_getMenuMode();
+    system_state_update();
 
-    if (mode == MODE_GAME)
-        strcat(filename, getrecent_onion(fnptr));
-    else if (mode == MODE_SWITCHER)
+    if (system_state == MODE_GAME) {
+        char file_path[STR_MAX];
+        if (history_getRecentPath(file_path) != NULL)
+            strcat(filename, file_removeExtension(basename(file_path)));
+    }
+    else if (system_state == MODE_SWITCHER)
         strcat(filename, "GameSwitcher");
-    else if (mode == MODE_MAIN_UI)
+    else if (system_state == MODE_MAIN_UI)
         strcat(filename, "MainUI");
-    else if (mode == MODE_APPS && exists(CMD_TO_RUN_PATH)) {
+    else if (system_state == MODE_APPS && exists(CMD_TO_RUN_PATH)) {
         const char *cmd = file_read(CMD_TO_RUN_PATH);
         char app_name[STR_MAX];
         state_getAppName(app_name, cmd);

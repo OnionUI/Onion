@@ -51,8 +51,7 @@ bool loadImagesPaths(const char* config_path, char ***images_paths, int *images_
 
 void drawInfoPanel(SDL_Surface *screen, SDL_Surface *video, const char *title_str, char *message_str)
 {
-	theme_backgroundLoad();
-	SDL_BlitSurface(theme_background, NULL, screen, NULL);
+	SDL_BlitSurface(theme_background(), NULL, screen, NULL);
 	SDL_BlitSurface(screen, NULL, video, NULL); 
 	SDL_Flip(video);
 
@@ -62,11 +61,9 @@ void drawInfoPanel(SDL_Surface *screen, SDL_Surface *video, const char *title_st
 	SDL_Surface *message = NULL;
 	SDL_Rect message_rect = {320, 240};
 
-	int current_percentage = battery_getPercentage();
-	SDL_Surface *battery = theme_batterySurface(current_percentage);
-
-	theme_renderHeader(screen, battery, has_title ? title_str : NULL, !has_title);
+	theme_renderHeader(screen, has_title ? title_str : NULL, !has_title);
 	theme_renderFooter(screen);
+	theme_renderHeaderBattery(screen, battery_getPercentage());
 
 	if (has_message) {
 		char *str = str_replace(message_str, "\\n", "\n");
@@ -78,7 +75,6 @@ void drawInfoPanel(SDL_Surface *screen, SDL_Surface *video, const char *title_st
 	}
 
 	resources_free();
-	theme_backgroundFree();	
 }
 
 static void drawImage(const char *image_path, SDL_Surface *screen)
