@@ -1,6 +1,8 @@
 #ifndef TWEAKS_APPSTATE_H__
 #define TWEAKS_APPSTATE_H__
 
+#include <signal.h>
+
 #include "utils/keystate.h"
 #include "components/list.h"
 
