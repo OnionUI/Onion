@@ -24,7 +24,7 @@ OFILES = $(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
 CFLAGS := -I../../include -I../common -DPLATFORM_$(shell echo $(PLATFORM) | tr a-z A-Z) -Wall
 
 ifeq ($(DEBUG),1)
-CFLAGS := $(CFLAGS) -DLOG_DEBUG
+CFLAGS := $(CFLAGS) -DLOG_DEBUG -g
 endif
 
 CXXFLAGS := $(CFLAGS)

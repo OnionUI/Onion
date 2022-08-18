@@ -91,6 +91,13 @@ static void drawImage(const char *image_path, SDL_Surface *screen)
 	}
 }
 
+static void sdlQuit(SDL_Surface *screen, SDL_Surface *video)
+{
+	SDL_FreeSurface(screen);
+   	SDL_FreeSurface(video);
+    SDL_Quit();
+}
+
 int main(int argc, char *argv[])
 {
 	char title_str[STR_MAX] = "";
@@ -121,6 +128,7 @@ int main(int argc, char *argv[])
 	SDL_Surface *video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
 	SDL_Surface *screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
 
+	bool cache_used = false;
 	if (exists(image_path)) {
 		drawImage(image_path, screen);
 	}
@@ -128,14 +136,15 @@ int main(int argc, char *argv[])
 	{
 		if (loadImagesPaths(images_json_path, &g_images_paths, &g_images_paths_count))
 		{
-			if (images_count > 0)
+			if (g_images_paths_count > 0)
 			{
-				drawImageByIndex(0, g_image_index, g_images_paths, g_images_paths_count, screen, NULL);
+				drawImageByIndex(0, g_image_index, g_images_paths, g_images_paths_count, screen, &cache_used);
 			}
 		}
 		else
 		{
-			//
+			sdlQuit(screen, video);
+			return EXIT_FAILURE;
 		}
 	}
 	else {
@@ -152,25 +161,24 @@ int main(int argc, char *argv[])
 		while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_KEYDOWN)
 			{
-				bool navigation_pressed = false;
+				bool navigation_pressed = true;
 				bool navigating_forward = true;
 				switch(event.key.keysym.sym) {
 				case SW_BTN_A:
-					navigation_pressed = true;
 					navigating_forward = true;
 					break;
 				case SW_BTN_B:
-					navigation_pressed = true;
 					navigating_forward = false;
 					break;
 				default:
+					navigation_pressed = false;
 					break;
 				}
 				if (!navigation_pressed) 
 				{
 					continue;
 				}
-				if ((navigating_forward && g_image_index == images_count-1) // exit after last image
+				if ((navigating_forward && g_image_index == g_images_paths_count - 1) // exit after last image
 					|| (!navigating_forward && g_image_index == 0)) // or when navigating backwards from the first image
 				{
 					quit = true;
@@ -178,15 +186,8 @@ int main(int argc, char *argv[])
 				else
 				{
 					const int current_index = g_image_index;
-					if (navigating_forward)
-					{
-						g_image_index++;
-					}
-					else
-					{
-						g_image_index--;
-					}
-					drawImageByIndex(g_image_index, current_index, g_images_paths, g_images_paths_count, screen, NULL);
+					navigating_forward ? g_image_index++ : g_image_index--;
+					drawImageByIndex(g_image_index, current_index, g_images_paths, g_images_paths_count, screen, &cache_used);
 
 					SDL_BlitSurface(screen, NULL, video, NULL);
 					SDL_Flip(video);
@@ -197,7 +198,7 @@ int main(int argc, char *argv[])
 
 	if (g_images_paths != NULL)
 	{
-		for (int i = 0; i < images_count; i++)
+		for (int i = 0; i < g_images_paths_count; i++)
         	free(g_images_paths[i]);
     	free(g_images_paths);
 	}
@@ -211,9 +212,9 @@ int main(int argc, char *argv[])
 
 	msleep(100);
 
-   	SDL_FreeSurface(screen);
-   	SDL_FreeSurface(video);
-    SDL_Quit();
+	cleanImagesCache();
+
+   	sdlQuit(screen, video);
 	
     return EXIT_SUCCESS;
 }
