@@ -13,18 +13,22 @@ CC 		= $(CROSS_COMPILE)gcc
 CXX 	= $(CROSS_COMPILE)g++
 STRIP 	= $(CROSS_COMPILE)strip
 
-SOURCES = .
+SOURCES := $(SOURCES) .
 ifdef INCLUDE_CJSON
 SOURCES := $(SOURCES) ../../include/cjson
 endif
 CFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.c))
 CPPFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.cpp))
-OFILES = $(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
+OFILES := $(OFILES) $(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
 
-CFLAGS := -I../../include -I../common -DPLATFORM_$(shell echo $(PLATFORM) | tr a-z A-Z) -Wall
+CFLAGS := $(CFLAGS) -I../../include -I../common -DPLATFORM_$(shell echo $(PLATFORM) | tr a-z A-Z) -Wall
 
 ifeq ($(DEBUG),1)
 CFLAGS := $(CFLAGS) -DLOG_DEBUG
+endif
+
+ifeq ($(TEST),1)
+CFLAGS := $(CFLAGS) -std=c++17
 endif
 
 CXXFLAGS := $(CFLAGS)

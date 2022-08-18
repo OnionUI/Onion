@@ -156,3 +156,6 @@ patch:
 lib:
 	@cd $(ROOT_DIR)/include/cJSON && make clean && make
 	@cd $(ROOT_DIR)/include/SDL && make clean && make
+
+test:
+	@mkdir -p $(BUILD_DIR)/test && cd $(SRC_DIR)/test && BUILD_DIR=$(BUILD_DIR)/test make && $(BUILD_DIR)/test/test_infoPanel
