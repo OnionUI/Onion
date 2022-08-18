@@ -15,6 +15,24 @@ static int menu_last_pressed = 0;
 static int menu_long_press_timeout = 1000;
 static bool menu_ignore_next = false;
 
+void quietMainUI(void)
+{
+    if (system_state == MODE_MAIN_UI) {
+        print_debug("Sending L2 to quiet MainUI");
+        keyinput_send(HW_BTN_L2, PRESSED);
+        keyinput_send(HW_BTN_L2, RELEASED);
+        print_debug("Done (quietMainUI)");
+    }
+}
+
+void action_MainUI_contextMenu(void)
+{
+    print_debug("Sending keys (contextMenu)");
+    keyinput_enable();
+    keyinput_send(HW_BTN_MENU, RELEASED);
+    quietMainUI();
+}
+
 void action_MainUI_gameSwitcher(void)
 {
     run_gameSwitcher();
@@ -90,10 +108,37 @@ void menuButtonEvent_doublePress(void)
     }
 }
 
+bool _hapticSinglePress(void)
+{
+    switch (system_state) {
+        case MODE_MAIN_UI:
+            return settings.mainui_single_press != 0;
+        case MODE_GAME:
+            return settings.ingame_single_press != 0;
+        default: break;
+    }
+    return false;
+}
+
+bool _hapticDoublePress(void)
+{
+    if (_hapticSinglePress())
+        return false;
+    switch (system_state) {
+        case MODE_MAIN_UI:
+            return true;
+        case MODE_GAME:
+            return settings.ingame_double_press != 0;
+        default: break;
+    }
+    return false;
+}
+
 bool menuButtonAction(uint32_t val, bool comboKey)
 {
     if (comboKey) {
         keyinput_enable();
+        quietMainUI();
         return val != RELEASED;
     }
 
@@ -112,10 +157,9 @@ bool menuButtonAction(uint32_t val, bool comboKey)
         menu_last_state = system_state;
     }
     else if (val == REPEAT) {
-        int ticks = getTicks();
-        printf_debug("Ticks: %d, last: %d, diff: %d\n", ticks, menu_last_pressed, ticks - menu_last_pressed);
-        if (ticks - menu_last_pressed >= menu_long_press_timeout) {
+        if (getTicks() - menu_last_pressed >= menu_long_press_timeout) {
             print_debug("LONG-PRESS");
+            keyinput_enable();
             menuButtonEvent_longPress();
             comboKey = true;  // this will avoid to trigger short press action
         }
@@ -126,32 +170,29 @@ bool menuButtonAction(uint32_t val, bool comboKey)
             return comboKey;
         }
 
-        if (system_state == MODE_MAIN_UI || (system_state == MODE_GAME && settings.ingame_single_press != 0))
+        if (_hapticSinglePress())
             menu_super_short_pulse();
 
         while(1) {
             if (poll(fds, 1, 300 - (getTicks() - menu_last_pressed)) > 0) {
-                read(input_fd, &ev, sizeof(ev));
+                if (!keyinput_isValid()) continue;
 
-                if (ev.type != EV_KEY || ev.value >= REPEAT)
-                    continue;
-
-                print_debug("DOUBLE-PRESS");
-                if (ev.code == HW_BTN_MENU) {
-                    if (system_state == MODE_GAME && settings.ingame_single_press == 0 && settings.ingame_double_press != 0)
+                if (ev.code == HW_BTN_MENU && ev.value == PRESSED) {
+                    print_debug("DOUBLE-PRESS");
+                    if (_hapticDoublePress())
                         menu_super_short_pulse();
                     menuButtonEvent_doublePress();
                     menu_ignore_next = true;
                 }
-                keyinput_enable();
                 break;
             }
 
             print_debug("SINGLE-PRESS");
             menuButtonEvent_singlePress();
-            keyinput_enable();
             break;
         }
+
+        keyinput_enable();
     }
 
     return comboKey;

@@ -99,8 +99,10 @@ launch_game() {
     is_game=0
 
     if echo "$romfile" | grep -q "retroarch" || echo "$romfile" | grep -q "/mnt/SDCARD/Emu/" || echo "$romfile" | grep -q "/mnt/SDCARD/RApp/"; then
-        echo "Game found:" $(basename "$romfile")
-        is_game=1
+        if ! echo "$romfile" | grep -q "/mnt/SDCARD/Emu/SEARCH/../../App/SearchFilter"; then
+            echo "Game found:" $(basename "$romfile")
+            is_game=1
+        fi
     fi
 
     # TIMER BEGIN

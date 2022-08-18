@@ -24,6 +24,7 @@
 #include "system/screenshot.h"
 #include "system/state.h"
 
+#include "system/settings_sync.h"
 #include "./input_fd.h"
 #include "./menuButtonAction.h"
 
@@ -298,7 +299,8 @@ int main(void) {
     bool b_BTN_Not_Menu_Pressed = false;
     bool b_BTN_Menu_Pressed = false;
     bool power_pressed = false;
-    bool comboKey = false;
+    bool comboKey_menu = false;
+    bool comboKey_select = false;
 
     int ticks = getTicks();
     int hibernate_start = ticks;
@@ -308,10 +310,10 @@ int main(void) {
 
     while(1) {
         if (poll(fds, 1, (CHECK_SEC - elapsed_sec) * 1000) > 0) {
-            read(input_fd, &ev, sizeof(ev));
+            if (!keyinput_isValid()) continue;
             val = ev.value;
 
-            if (ev.type != EV_KEY || val > REPEAT) continue;
+            printf_debug("Keymon input: code=%d, value=%d\n", ev.code, ev.value);
 
             if (val != REPEAT) {
                 if (ev.code == HW_BTN_MENU)
@@ -320,14 +322,14 @@ int main(void) {
                     b_BTN_Not_Menu_Pressed = val == PRESSED;
 
                 if (b_BTN_Menu_Pressed && b_BTN_Not_Menu_Pressed)
-                    comboKey = true;
+                    comboKey_menu = true;
             }
 
             switch (ev.code) {
                 case HW_BTN_POWER:
                     if (val == PRESSED)
                         power_pressed = true;
-                    if (!comboKey && val == REPEAT) {
+                    if (!comboKey_menu && val == REPEAT) {
                         repeat_power++;
                         if (repeat_power == 7)
                             deepsleep(); // 0.5sec deepsleep
@@ -345,16 +347,31 @@ int main(void) {
                     if (val == RELEASED) {
                         // suspend
                         if (power_pressed && repeat_power < 7) {
-                            settings_load();
-                            suspend_exec(settings.sleep_timer == 0 || temp_flag_get("stay_awake") ? -1 : (settings.sleep_timer + SHUTDOWN_MIN) * 60000);
+                            if (comboKey_menu) {
+                                short_pulse();
+                                screenshot_recent();
+                            }
+                            else {
+                                settings_load();
+                                suspend_exec(settings.sleep_timer == 0 || temp_flag_get("stay_awake") ? -1 : (settings.sleep_timer + SHUTDOWN_MIN) * 60000);
+                            }
                         }
                         power_pressed = false;
                     }
                     repeat_power = 0;
                     break;
                 case HW_BTN_SELECT:
+                    if (!comboKey_select && val == RELEASED) {
+                        system_state_update();
+                        if (system_state == MODE_MAIN_UI) {
+                            keyinput_send(HW_BTN_MENU, PRESSED);
+                            keyinput_send(HW_BTN_MENU, RELEASED);
+                        }
+                    }
                     if (val != REPEAT)
                         button_flag = (button_flag & (~SELECT)) | (val<<SELECT_BIT);
+                    if (val == RELEASED)
+                        comboKey_select = false;
                     break;
                 case HW_BTN_START:
                     if (val != REPEAT)
@@ -384,6 +401,7 @@ int main(void) {
                                     settings_sync();
                                     settings_save();
                                 }
+                                comboKey_select = true;
                                 break;
                             default: break;
                         }
@@ -412,6 +430,7 @@ int main(void) {
                                 settings_sync();
                                 settings_save();
                             }
+                            comboKey_select = true;
                             break;
                         default:
                             break;
@@ -419,7 +438,7 @@ int main(void) {
                     }
                     break;
                 case HW_BTN_MENU:
-                    comboKey = menuButtonAction(val, comboKey);
+                    comboKey_menu = menuButtonAction(val, comboKey_menu);
                     break;
                 default:
                     break;
