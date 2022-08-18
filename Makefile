@@ -98,7 +98,7 @@ apps: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
 	@cd $(SRC_DIR)/playActivityUI && BUILD_DIR=$(BUILD_DIR)/App/PlayActivity make
 	@find $(SRC_DIR)/packageManager -depth -type d -name res -exec cp -r {}/. $(BUILD_DIR)/App/The_Onion_Installer/res/ \;
-	@cd $(SRC_DIR)/clock && BUILD_DIR=$(BUILD_DIR)/App/Clock make
+	@cd $(SRC_DIR)/clock && BUILD_DIR=$(PACKAGES_APP_DEST)/Set\ emulated\ time/App/Clock make
 
 external: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)

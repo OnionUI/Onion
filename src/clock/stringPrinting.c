@@ -11,15 +11,8 @@ uint16_t GetSDLColor(SDL_Surface* sdl_screen, uint8_t red, uint8_t green, uint8_
 	return SDL_MapRGB(sdl_screen->format, red, green, blue);
 }
 
-uint16_t GetSDLWhiteColor(SDL_Surface* sdl_screen)
-{
-	return GetSDLColor(sdl_screen, 255, 255, 255);
-}
-
-uint16_t GetSDLDarkGrayColor(SDL_Surface* sdl_screen)
-{
-	return GetSDLColor(sdl_screen, 70, 70, 70);
-}
+static SDL_Color color_white = {255, 255, 255};
+static SDL_Color color_dark_gray = {70, 70, 70};
 
 void PrintString(const char *string, SDL_Surface* sdl_screen, enum Color fg_color, int x, int y)
 {
@@ -27,10 +20,10 @@ void PrintString(const char *string, SDL_Surface* sdl_screen, enum Color fg_colo
 	switch (fg_color)
 	{
 	case WHITE_COLOR:
-		color = GetSDLWhiteColor(sdl_screen);
+		color = GetSDLColor(sdl_screen, color_white.r, color_white.g, color_white.b);
 		break;
 	case DARK_GRAY_COLOR:
-		color = GetSDLDarkGrayColor(sdl_screen);
+		color = GetSDLColor(sdl_screen, color_dark_gray.r, color_dark_gray.g, color_dark_gray.b);
 		break;
 	default:
 		break;
