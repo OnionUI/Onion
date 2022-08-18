@@ -1,7 +1,7 @@
 ###########################################################
 
 TARGET=Onion
-VERSION=3.13.0
+VERSION=4.0.0
 RA_SUBVERSION=0.1
 
 ###########################################################
@@ -53,6 +53,7 @@ $(CACHE)/.setup:
 # Set version number
 	@mkdir -p $(BUILD_DIR)/.tmp_update/onionVersion
 	@echo -n "$(VERSION)" > $(BUILD_DIR)/.tmp_update/onionVersion/version.txt
+	@sed -i "s/{VERSION}/$(VERSION)/g" $(BUILD_DIR)/autorun.inf
 # Copy all resources from src folders
 	@find \
 		$(SRC_DIR)/gameSwitcher \
