@@ -41,3 +41,5 @@ src/**/tweaks
 !tweaks/
 src/**/sendkeys
 !sendkeys/
+src/**/setState
+!setState/

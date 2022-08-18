@@ -9,6 +9,35 @@
 
 #include "./appstate.h"
 
+void action_setAppShortcut(void *pt)
+{
+    ListItem *item = (ListItem*)pt;
+    int value = item->value;
+    char *sett_pt = item->action_id == 0 ? settings.mainui_button_x : settings.mainui_button_y;
+    char ***apps = getInstalledApps();
+
+    memset(sett_pt, 0, JSON_STRING_LEN * sizeof(char));
+    
+    if (value == 0)
+        return;
+
+    value -= 1;
+
+    if (value < installed_apps_count) {
+        strcpy(sett_pt, "app:");
+        strncat(sett_pt, apps[value][0], JSON_STRING_LEN - 5);
+        return;
+    }
+
+    value -= installed_apps_count;
+
+    if (value < NUM_TOOLS) {
+        strcpy(sett_pt, "tool:");
+        strncat(sett_pt, tools_short_names[value], JSON_STRING_LEN - 6);
+        return;
+    }
+}
+
 void action_setStartupAutoResume(void *pt)
 {
     settings.startup_auto_resume = ((ListItem*)pt)->value == 1;

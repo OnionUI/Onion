@@ -4,8 +4,8 @@
 #include <fcntl.h>
 #include <linux/input.h>
 
-//	Press POWER button 3sec after execution
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
 	if (argc != 3) {
         printf("Usage: sendkeys [CODE] [VALUE]\nValues: 0 - released, 1 - pressed, 2 - repeating\n");
         return 1;

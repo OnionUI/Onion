@@ -7,6 +7,7 @@
 #include <linux/rtc.h>
 #include <stdio.h>
 #include <sys/ioctl.h>
+#include <sys/time.h>
 #include <time.h>
 #include <unistd.h>
 

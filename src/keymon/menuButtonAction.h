@@ -10,10 +10,91 @@
 
 #include "./input_fd.h"
 
+#define NUM_TOOLS 5
+
+static char tools_short_names[NUM_TOOLS][STR_MAX] = {
+    "favsort-az",
+    "favsort-sys",
+    "favfix",
+    "recents",
+    "dot_clean"
+};
+static MainUIState tools_states[NUM_TOOLS] = {FAVORITES, FAVORITES, FAVORITES, RECENTS, GAMES};
+
 static SystemState menu_last_state = MODE_UNKNOWN;
 static int menu_last_pressed = 0;
 static int menu_long_press_timeout = 1000;
 static bool menu_ignore_next = false;
+
+void _action_runApp(const char *app_dir_name)
+{
+    int currpos, total;
+    getAppPosition(app_dir_name, &currpos, &total);
+    run_app(app_dir_name);
+    write_mainui_state(APPS, currpos, total);
+    kill_mainUI();
+}
+
+void _action_runTool(const char *tool_name, MainUIState return_state)
+{
+    FILE *fp;
+    char cmd[STR_MAX * 4];
+    sprintf(cmd, "cd /mnt/SDCARD/.tmp_update; ./bin/tweaks --apply_tool \"%s\"", tool_name);
+    file_put_sync(fp, "/tmp/cmd_to_run.sh", "%s", cmd);
+    write_mainui_state(return_state, 0, 10);
+    kill_mainUI();
+}
+
+void applyExtraButtonShortcut(int button)
+{
+    if (system_state != MODE_MAIN_UI)
+        return;
+
+    int i;
+    char *action = button == 0 ? settings.mainui_button_x : settings.mainui_button_y;
+    char ***apps = getInstalledApps();
+
+    if (strncmp(action, "app:", 4) == 0) {
+        for (i = 0; i < installed_apps_count; i++)
+            if (strcmp(action + 4, apps[i][0]) == 0) {
+                _action_runApp(apps[i][0]);
+                return;
+            }
+    }
+    else if (strncmp(action, "tool:", 5) == 0) {
+        for (i = 0; i < NUM_TOOLS; i++)
+            if (strcmp(action + 5, tools_short_names[i]) == 0) {
+                _action_runTool(tools_short_names[i], tools_states[i]);
+                return;
+            }
+    }
+}
+
+//
+//    Terminate retroarch before kill/shotdown processes to save progress
+//
+bool terminate_retroarch(void) {
+    char fname[16];
+    pid_t pid = process_searchpid("retroarch");
+    if (!pid) pid = process_searchpid("ra32");
+
+    if (pid) {
+        screenshot_system();
+        
+        // send signal
+        kill(pid, SIGCONT); usleep(100000); kill(pid, SIGTERM);
+        // wait for terminate
+        sprintf(fname, "/proc/%d", pid);
+
+        uint32_t count = 20; // 4s
+        while (--count && exists(fname))
+            usleep(200000); // 0.2s
+
+        return true;
+    }
+
+    return false;
+}
 
 void quietMainUI(void)
 {
@@ -143,8 +224,6 @@ bool menuButtonAction(uint32_t val, bool comboKey)
     }
 
     if (val == PRESSED) {
-        system_state_update();
-        settings_load();
         if (system_state == MODE_MAIN_UI) {
             if (settings.mainui_single_press != 0)
                 keyinput_disable();
