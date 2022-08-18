@@ -139,4 +139,14 @@ void action_setLowBatteryWarnAt(void *pt)
     config_setNumber("battery/warnAt", settings.low_battery_warn_at);
 }
 
+void action_setStartupTab(void *pt)
+{
+    settings.startup_tab = ((ListItem*)pt)->value;
+}
+
+void action_setTimeSkip(void *pt)
+{
+    settings.time_skip = ((ListItem*)pt)->value;
+}
+
 #endif // TWEAKS_ACTIONS_H__

@@ -34,7 +34,9 @@ static struct settings_s
     bool low_battery_autosave;
     bool low_battery_warning;
     int low_battery_warn_at;
+    int time_skip;
     int vibration;
+    int startup_tab;
     int mainui_single_press;
     int mainui_long_press;
     int mainui_double_press;
@@ -67,7 +69,9 @@ settings = {
     .low_battery_autosave = true,
     .low_battery_warning = true,
     .low_battery_warn_at = 15,
+    .time_skip = 4,
     .vibration = 2,
+    .startup_tab = 0,
     // Menu button actions
     .mainui_single_press = 1,
     .mainui_long_press = 0,
@@ -136,7 +140,9 @@ void settings_load(void)
 
     config_get("battery/warnAt", "%d", &settings.low_battery_warn_at);
     config_get("startup/app", "%d", &settings.startup_application);
+    config_get("startup/addHours", "%d", &settings.time_skip);
     config_get("vibration", "%d", &settings.vibration);
+    config_get("startup/tab", "%d", &settings.startup_tab);
 
     if (config_flag_get(".menuInverted")) { // flag is deprecated, but keep compatibility
         settings.ingame_single_press = 2;
@@ -215,7 +221,9 @@ void settings_save(void)
     config_flag_set(".noLowBatteryAutoSave", !settings.low_battery_autosave);
     config_setNumber("battery/warnAt", settings.low_battery_warn_at);
     config_setNumber("startup/app", settings.startup_application);
+    config_setNumber("startup/addHours", settings.time_skip);
     config_setNumber("vibration", settings.vibration);
+    config_setNumber("startup/tab", settings.startup_tab);
 
     _settings_save_keymap();
     _settings_save_mainui();

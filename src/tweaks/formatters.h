@@ -58,4 +58,26 @@ void formatter_positionOffset(void *pt, char *out_label)
 	else sprintf(out_label, "%d px", item->value - 11);
 }
 
+void formatter_startupTab(void *pt, char *out_label)
+{
+	ListItem *item = (ListItem*)pt;
+	switch (item->value) {
+		case 0: strcpy(out_label, "Main menu"); break;
+		case 1: strncpy(out_label, lang_get(LANG_RECENTS_TAB), STR_MAX - 1); break;
+		case 2: strncpy(out_label, lang_get(LANG_FAVORITES_TAB), STR_MAX - 1); break;
+		case 3: strncpy(out_label, lang_get(LANG_GAMES_TAB), STR_MAX - 1); break;
+		case 4: strncpy(out_label, lang_get(LANG_EXPERT_TAB), STR_MAX - 1); break;
+		case 5: strncpy(out_label, lang_get(LANG_APPS_TAB), STR_MAX - 1); break;
+		default: break;
+	}
+}
+
+void formatter_timeSkip(void *pt, char *out_label)
+{
+	ListItem *item = (ListItem*)pt;
+	if (item->value == 0)
+		strcpy(out_label, "Off");
+	else sprintf(out_label, "+ %dh", item->value);
+}
+
 #endif // TWEAKS_FORMATTERS_H__

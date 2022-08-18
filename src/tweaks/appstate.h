@@ -7,12 +7,17 @@
 static int level = 0;
 static List *menu_stack[5];
 
+static SDL_Surface* video;
+static SDL_Surface* screen;
+
 static bool quit = false;
+static bool all_changed = true;
 static bool header_changed = true;
 static bool list_changed = true;
 static bool footer_changed = true;
 static bool battery_changed = true;
 static KeyState keystate[320] = {(KeyState)0};
+static bool keys_enabled = true;
 
 static void sigHandler(int sig)
 {

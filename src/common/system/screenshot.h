@@ -32,8 +32,11 @@ char* getrecent_png(char *filename) {
 
     system_state_update();
 
-    if (system_state == MODE_GAME)
-        strcat(filename, getrecent_onion(fnptr));
+    if (system_state == MODE_GAME) {
+        char file_path[STR_MAX];
+        if (history_getRecentPath(file_path) != NULL)
+            strcat(filename, file_removeExtension(basename(file_path)));
+    }
     else if (system_state == MODE_SWITCHER)
         strcat(filename, "GameSwitcher");
     else if (system_state == MODE_MAIN_UI)

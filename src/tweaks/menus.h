@@ -14,6 +14,7 @@
 #include "./formatters.h"
 #include "./values.h"
 #include "./actions.h"
+#include "./tools.h"
 
 static List _menu_main;
 static List _menu_system;
@@ -28,7 +29,7 @@ static List _menu_tools;
 void menu_system(void *_)
 {
 	if (!_menu_system._created) {
-		_menu_system = list_create(4, LIST_SMALL);
+		_menu_system = list_create(6, LIST_SMALL);
 		strcpy(_menu_system.title, "System");
 		list_addItem(&_menu_system, (ListItem){
 			.label = "Auto-resume last game",
@@ -49,6 +50,22 @@ void menu_system(void *_)
 			.value_labels = {"MainUI", "GameSwitcher", "RetroArch"},
 			.value = settings.startup_application,
 			.action = action_setStartupApplication
+		});
+		list_addItem(&_menu_system, (ListItem){
+			.label = "MainUI: Start tab",
+			.item_type = MULTIVALUE,
+			.value_max = 5,
+			.value_formatter = formatter_startupTab,
+			.value = settings.startup_tab,
+			.action = action_setStartupTab
+		});
+		list_addItem(&_menu_system, (ListItem){
+			.label = "Emulated time skip",
+			.item_type = MULTIVALUE,
+			.value_max = 24,
+			.value_formatter = formatter_timeSkip,
+			.value = settings.time_skip,
+			.action = action_setTimeSkip
 		});
 		list_addItem(&_menu_system, (ListItem){
 			.label = "Vibration intensity",
@@ -75,7 +92,7 @@ void menu_buttonAction(void *_)
 			.action = action_setMenuButtonHaptics
 		});
 		list_addItem(&_menu_button_action, (ListItem){
-			.label = "[MainUI] Single press",
+			.label = "MainUI: Single press",
 			.item_type = MULTIVALUE,
 			.value_max = 2,
 			.value_labels = BUTTON_MAINUI_LABELS,
@@ -84,7 +101,7 @@ void menu_buttonAction(void *_)
 			.action = action_setMenuButtonKeymap
 		});
 		list_addItem(&_menu_button_action, (ListItem){
-			.label = "[MainUI] Long press",
+			.label = "MainUI: Long press",
 			.item_type = MULTIVALUE,
 			.value_max = 2,
 			.value_labels = BUTTON_MAINUI_LABELS,
@@ -93,7 +110,7 @@ void menu_buttonAction(void *_)
 			.action = action_setMenuButtonKeymap
 		});
 		list_addItem(&_menu_button_action, (ListItem){
-			.label = "[MainUI] Double press",
+			.label = "MainUI: Double press",
 			.item_type = MULTIVALUE,
 			.value_max = 2,
 			.value_labels = BUTTON_MAINUI_LABELS,
@@ -102,7 +119,7 @@ void menu_buttonAction(void *_)
 			.action = action_setMenuButtonKeymap
 		});
 		list_addItem(&_menu_button_action, (ListItem){
-			.label = "[In-game] Single press",
+			.label = "In-game: Single press",
 			.item_type = MULTIVALUE,
 			.value_max = 3,
 			.value_labels = BUTTON_INGAME_LABELS,
@@ -111,7 +128,7 @@ void menu_buttonAction(void *_)
 			.action = action_setMenuButtonKeymap
 		});
 		list_addItem(&_menu_button_action, (ListItem){
-			.label = "[In-game] Long press",
+			.label = "In-game: Long press",
 			.item_type = MULTIVALUE,
 			.value_max = 3,
 			.value_labels = BUTTON_INGAME_LABELS,
@@ -120,7 +137,7 @@ void menu_buttonAction(void *_)
 			.action = action_setMenuButtonKeymap
 		});
 		list_addItem(&_menu_button_action, (ListItem){
-			.label = "[In-game] Double press",
+			.label = "In-game: Double press",
 			.item_type = MULTIVALUE,
 			.value_max = 3,
 			.value_labels = BUTTON_INGAME_LABELS,
@@ -301,19 +318,27 @@ void menu_advanced(void *_)
 void menu_tools(void *_)
 {
 	if (!_menu_tools._created) {
-		_menu_tools = list_create(4, LIST_SMALL);
+		_menu_tools = list_create(5, LIST_SMALL);
 		strcpy(_menu_tools.title, "Tools");
 		list_addItem(&_menu_tools, (ListItem){
-			.label = "[Favorites] Sort alphabetically"
+			.label = "Favorites: Sort alphabetically",
+			.action = tool_favoritesSortAlpha
 		});
 		list_addItem(&_menu_tools, (ListItem){
-			.label = "[Favorites] Sort by system"
+			.label = "Favorites: Sort by system",
+			.action = tool_favoritesSortSystem
 		});
 		list_addItem(&_menu_tools, (ListItem){
-			.label = "[Favorites] Fix thumbnails"
+			.label = "Favorites: Fix thumbnails and duplicates",
+			.action = tool_favoritesFixThumbnails
 		});
 		list_addItem(&_menu_tools, (ListItem){
-			.label = "Remove OSX system files"
+			.label = "Remove apps from recents",
+			.action = tool_recentsRemoveApps
+		});
+		list_addItem(&_menu_tools, (ListItem){
+			.label = "Remove OSX system files",
+			.action = tool_removeMacFiles
 		});
 	}
 	menu_stack[++level] = &_menu_tools;

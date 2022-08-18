@@ -282,7 +282,7 @@ int main(void)
     SDL_ShowCursor(SDL_DISABLE);
     TTF_Init();
 
-    SDL_Surface* video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE | SDL_DOUBLEBUF);     // activate double buffering to display the UI after MainUI
+    SDL_Surface* video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE );
     SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
 
     font = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 30);
@@ -485,8 +485,7 @@ int main(void)
 
     SDL_BlitSurface(screen, NULL, video, NULL);
     SDL_Flip(video);
-    SDL_BlitSurface(screen, NULL, video, NULL); // two times to manage double buffering from MainUI
-    SDL_Flip(video);
+
 
     SDL_FreeSurface(screen);
     SDL_FreeSurface(video);
