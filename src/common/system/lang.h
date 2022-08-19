@@ -47,7 +47,7 @@ void lang_removeIconLabels(bool remove_icon_labels, bool remove_hints)
         if (strcmp("lang", file_getExtension(ep->d_name)) != 0)
             continue; // skip files not having the `.lang` extension
 
-        const char file_path[STR_MAX];
+        char file_path[STR_MAX];
         snprintf(file_path, STR_MAX - 1, LANG_DIR "/%s", ep->d_name);
 
         const char *json_data = file_read(file_path);
@@ -126,7 +126,7 @@ bool lang_load(void)
     if (!lang_getFilePath(settings.language, lang_path) && !lang_getFilePath(LANG_DEFAULT, lang_path))
         return false;
 
-    lang_list = malloc(LANG_MAX * sizeof(char*));
+    lang_list = (char**)malloc(LANG_MAX * sizeof(char*));
 
     cJSON *lang_file = json_load(lang_path);
 
@@ -135,7 +135,7 @@ bool lang_load(void)
     for (int i = 0; i < LANG_MAX; i++) {
         sprintf(key, "%d", i);
         if (json_getString(lang_file, key, value)) {
-            lang_list[i] = malloc(STR_MAX * sizeof(char));
+            lang_list[i] = (char*)malloc(STR_MAX * sizeof(char));
             strcpy(lang_list[i], value);
         }
     }

@@ -1,0 +1,8 @@
+{
+  "images": [
+    { "path": "./page1.png" },
+    { "path": "./page2.png" },
+    { "path": "./page3.png" },
+    { "path": "./page4.png" }
+  ]
+}

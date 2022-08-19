@@ -1,6 +1,0 @@
-{
-"label":"Clock",
-"icon":"clock.png",
-"launch":"launch.sh",
-"description":"Set the current time"
-}

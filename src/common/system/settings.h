@@ -37,13 +37,15 @@ static struct settings_s
     int time_skip;
     int vibration;
     int startup_tab;
+    int startup_application;
     int mainui_single_press;
     int mainui_long_press;
     int mainui_double_press;
     int ingame_single_press;
     int ingame_long_press;
     int ingame_double_press;
-    int startup_application;
+    char mainui_button_x[JSON_STRING_LEN];
+    char mainui_button_y[JSON_STRING_LEN];
 }
 settings = {
     // MainUI settings
@@ -72,6 +74,7 @@ settings = {
     .time_skip = 4,
     .vibration = 2,
     .startup_tab = 0,
+    .startup_application = 0,
     // Menu button actions
     .mainui_single_press = 1,
     .mainui_long_press = 0,
@@ -79,23 +82,26 @@ settings = {
     .ingame_single_press = 1,
     .ingame_long_press = 2,
     .ingame_double_press = 3,
-    .startup_application = 0
+    .mainui_button_x = "",
+    .mainui_button_y = ""
 };
 
 static bool settings_loaded = false;
 
 void _settings_load_keymap(void)
 {
-    if (!exists(CONFIG_PATH "menu_button_keymap.json"))
+    if (!exists(CONFIG_PATH "keymap.json"))
         return;
 
-    cJSON *keymap = json_load(CONFIG_PATH "menu_button_keymap.json");
+    cJSON *keymap = json_load(CONFIG_PATH "keymap.json");
     json_getInt(keymap, "mainui_single_press", &settings.mainui_single_press);
     json_getInt(keymap, "mainui_long_press", &settings.mainui_long_press);
     json_getInt(keymap, "mainui_double_press", &settings.mainui_double_press);
     json_getInt(keymap, "ingame_single_press", &settings.ingame_single_press);
     json_getInt(keymap, "ingame_long_press", &settings.ingame_long_press);
     json_getInt(keymap, "ingame_double_press", &settings.ingame_double_press);
+    json_getString(keymap, "mainui_button_x", settings.mainui_button_x);
+    json_getString(keymap, "mainui_button_y", settings.mainui_button_y);
     cJSON_free(keymap);
 }
 
@@ -135,8 +141,11 @@ void settings_load(void)
     settings.show_expert = !config_flag_get(".hideExpert");
     settings.low_battery_autosave = !config_flag_get(".noLowBatteryAutoSave");
 
-    if (config_flag_get(".noBatteryWarning"))
+    if (config_flag_get(".noBatteryWarning")) // flag is deprecated, but keep compatibility
         settings.low_battery_warn_at = 0;
+
+    if (config_flag_get(".noVibration")) // flag is deprecated, but keep compatibility
+        settings.vibration = 0;
 
     config_get("battery/warnAt", "%d", &settings.low_battery_warn_at);
     config_get("startup/app", "%d", &settings.startup_application);
@@ -165,7 +174,7 @@ void _settings_save_keymap(void)
 {
     FILE *fp;
 
-    if ((fp = fopen(CONFIG_PATH "menu_button_keymap.json", "w+")) == 0)
+    if ((fp = fopen(CONFIG_PATH "keymap.json", "w+")) == 0)
         return;
 
     fprintf(fp, "{\n");
@@ -174,7 +183,9 @@ void _settings_save_keymap(void)
     fprintf(fp, JSON_FORMAT_NUMBER, "mainui_double_press", settings.mainui_double_press);
     fprintf(fp, JSON_FORMAT_NUMBER, "ingame_single_press", settings.ingame_single_press);
     fprintf(fp, JSON_FORMAT_NUMBER, "ingame_long_press", settings.ingame_long_press);
-    fprintf(fp, JSON_FORMAT_NUMBER_NC, "ingame_double_press", settings.ingame_double_press);
+    fprintf(fp, JSON_FORMAT_NUMBER, "ingame_double_press", settings.ingame_double_press);
+    fprintf(fp, JSON_FORMAT_STRING, "mainui_button_x", settings.mainui_button_x);
+    fprintf(fp, JSON_FORMAT_STRING_NC, "mainui_button_y", settings.mainui_button_y);
     fprintf(fp, "}\n");
 
     fflush(fp);
@@ -214,7 +225,6 @@ void _settings_save_mainui(void)
 void settings_save(void)
 {
     config_flag_set(".noAutoStart", !settings.startup_auto_resume);
-    config_flag_set(".noVibration", !settings.vibration);
     config_flag_set(".menuHaptics", settings.menu_button_haptics);
     config_flag_set(".hideRecents", !settings.show_recents);
     config_flag_set(".hideExpert", !settings.show_expert);
@@ -225,8 +235,17 @@ void settings_save(void)
     config_setNumber("vibration", settings.vibration);
     config_setNumber("startup/tab", settings.startup_tab);
 
+    // remove deprecated flags
+    remove(CONFIG_PATH ".noBatteryWarning");
+    remove(CONFIG_PATH ".noVibration");
+    remove(CONFIG_PATH ".menuInverted");
+    remove(CONFIG_PATH ".noGameSwitcher");
+
     _settings_save_keymap();
     _settings_save_mainui();
+
+    FILE *fp;
+    file_put_sync(fp, "/tmp/settings_changed", "%s", "");
 }
 
 void settings_setBrightness(uint32_t value, bool apply)

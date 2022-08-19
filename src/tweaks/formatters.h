@@ -5,11 +5,39 @@
 
 #include "utils/str.h"
 #include "components/list.h"
+#include "system/state.h"
+#include "./tools.h"
 
 #define BUTTON_MAINUI_LABELS {"Context menu", "GameSwitcher", "Resume game"}
 #define BUTTON_INGAME_LABELS {"Off", "GameSwitcher", "Exit to menu", "Quick switch"}
 
 #define THEME_TOGGLE_LABELS {"-", "Off", "On"}
+
+void formatter_appShortcut(void *pt, char *out_label)
+{
+	ListItem *item = (ListItem*)pt;
+	int value = item->value;
+	char ***apps = getInstalledApps();
+
+	if (value <= 0 || value > installed_apps_count + NUM_TOOLS) {
+		strcpy(out_label, "Off");
+		return;
+	}
+
+	// apps
+	value -= 1;
+	if (value < installed_apps_count) {
+		sprintf(out_label, "App: %s", apps[value][1]);
+		return;
+	}
+
+	// tools
+	value -= installed_apps_count;
+	if (value < NUM_TOOLS) {
+		sprintf(out_label, "Tool: %s", tools_short_names[value]);
+		return;
+	}
+}
 
 void formatter_battWarn(void *pt, char *out_label)
 {

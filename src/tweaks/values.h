@@ -4,8 +4,30 @@
 #include "utils/msleep.h"
 #include "theme/resources.h"
 #include "components/list.h"
+#include "system/state.h"
 
 #include "./appstate.h"
+#include "./tools.h"
+
+int value_appShortcut(int button)
+{
+    int i;
+    char *saved_value = button == 0 ? settings.mainui_button_x : settings.mainui_button_y;
+    char ***apps = getInstalledApps();
+
+    if (strncmp(saved_value, "app:", 4) == 0) {
+        for (i = 0; i < installed_apps_count; i++)
+            if (strcmp(saved_value + 4, apps[i][0]) == 0)
+                return 1 + i;
+    }
+    else if (strncmp(saved_value, "tool:", 5) == 0) {
+        for (i = 0; i < NUM_TOOLS; i++)
+            if (strcmp(saved_value + 5, tools_short_names[i]) == 0)
+                return 1 + installed_apps_count + i;
+    }
+
+    return 0;
+}
 
 int value_batteryPercentageVisible(void)
 {

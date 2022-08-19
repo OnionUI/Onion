@@ -1,10 +1,12 @@
 #ifndef TWEAKS_APPSTATE_H__
 #define TWEAKS_APPSTATE_H__
 
+#include <signal.h>
+
 #include "utils/keystate.h"
 #include "components/list.h"
 
-static int level = 0;
+static int menu_level = 0;
 static List *menu_stack[5];
 
 static SDL_Surface* video;

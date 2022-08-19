@@ -21,8 +21,10 @@
 #include "utils/utils.h"
 #include "utils/json.h"
 #include "utils/hash.h"
+#include "utils/msleep.h"
 #include "utils/log.h"
-#include "system/keymap_hw.h"
+#include "utils/keystate.h"
+#include "system/keymap_sw.h"
 
 #define MAXHISTORY 50
 #define MAXHROMNAMESIZE 250
@@ -73,7 +75,7 @@ static Game_s game_list[MAXHISTORY];
 static int game_list_len = 0;
 static int current_game = 0;
 
-static cJSON* request_json = NULL;
+static cJSON* json_root = NULL;
 static cJSON* items = NULL;
 
 // Play activity database
@@ -165,8 +167,8 @@ void readHistory()
 
     char path[STR_MAX], core_path[STR_MAX];
 
-    cJSON *request_json = json_load(HISTORY_PATH);
-    items = cJSON_GetObjectItem(request_json, "items");
+    json_root = json_load(HISTORY_PATH);
+    items = cJSON_GetObjectItem(json_root, "items");
 
     for (int nbGame = 0; nbGame < MAXHISTORY; nbGame++) {
         cJSON *subitem = cJSON_GetArrayItem(items, nbGame);
@@ -202,10 +204,10 @@ void readHistory()
     }
 }
 
-void removeCurrentItem(){
+void removeCurrentItem() {
     if (items != NULL)
         cJSON_DeleteItemFromArray(items, game_list[current_game].jsonIndex);
-    json_save(request_json, HISTORY_PATH);
+    json_save(json_root, HISTORY_PATH);
 }
 
 SDL_Surface* loadRomscreen(Game_s *game)
@@ -217,6 +219,16 @@ SDL_Surface* loadRomscreen(Game_s *game)
     if (exists(currPicture))
         return IMG_Load(currPicture);
     return NULL;
+}
+
+int checkQuitAction(void)
+{
+    FILE *fp;
+    char prev_state[10];
+    file_get(fp, "/tmp/prev_state", "%s", prev_state);
+    if (strncmp(prev_state, "mainui", 6) == 0)
+        return 1;
+    return 0;
 }
 
 int main(void)
@@ -245,22 +257,6 @@ int main(void)
     SDL_Rect     rectArrowLeft = { 6, 217, 28, 32};
     SDL_Rect     rectArrowRight = { 604, 217, 28, 32};
 
-    uint32_t        val;
-    uint32_t        l2_pressed = 0;
-    uint32_t        r2_pressed = 0;
-    uint32_t        menu_pressed = 0;
-
-    uint32_t        a_pressed = 0;
-    uint32_t        b_pressed = 0;
-    uint32_t        up_pressed = 0;
-    uint32_t        down_pressed = 0;
-    uint32_t        x_pressed = 0;
-    uint32_t        y_pressed = 0;
-    uint32_t        start_pressed = 0;
-    uint32_t        power_pressed = 0;
-    uint32_t        select_pressed = 0;
-    uint32_t        left_pressed = 0;
-    uint32_t        right_pressed = 0;
     readRomDB();
     readHistory();
 
@@ -280,10 +276,11 @@ int main(void)
 
     SDL_Init(SDL_INIT_VIDEO);
     SDL_ShowCursor(SDL_DISABLE);
+    SDL_EnableKeyRepeat(300, 50);
     TTF_Init();
 
-    SDL_Surface* video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE );
-    SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
+    SDL_Surface *video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
+    SDL_Surface *screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
 
     font = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 30);
 
@@ -296,7 +293,19 @@ int main(void)
     SDL_Surface* imageBackgroundGame = NULL;
     SDL_Surface* imageFooterHelp = IMG_Load("res/footerHelp.png");
 
-    while(!quit) {
+    uint32_t acc_ticks = 0,
+			 last_ticks = SDL_GetTicks(),
+			 time_step = 1000 / 60;
+
+    bool changed = true;
+    KeyState keystate[320] = {(KeyState)0};
+    bool menu_pressed = false;
+
+	while (!quit) {
+		uint32_t ticks = SDL_GetTicks();
+		acc_ticks += ticks - last_ticks;
+		last_ticks = ticks;
+
         int bBrightChange = 0;
         if (firstPass > 0) {
             // First screen draw
@@ -312,35 +321,16 @@ int main(void)
             if (game_list_len > 1)
                 SDL_BlitSurface(surfaceArrowRight, NULL, screen, &rectArrowRight);
         }
-        else if(read(input_fd, &ev, sizeof(ev)) == sizeof(ev) ) {
-            val = ev.value;
+        else if (updateKeystate(keystate, &quit, true)) {
+			if (keystate[SW_BTN_MENU] == PRESSED)
+                menu_pressed = true;
 
-            if (ev.type != EV_KEY || val > 1) continue;
-
-            if (ev.code == HW_BTN_MENU && val == 1) {
+            if (keystate[SW_BTN_MENU] == RELEASED && menu_pressed) {
                 quit = true;
                 break;
             }
 
-            switch (ev.code)
-            {
-                case HW_BTN_SELECT: select_pressed = val; break;
-                case HW_BTN_A:      a_pressed = val; break;
-                case HW_BTN_B:      b_pressed = val; break;
-                case HW_BTN_LEFT:   left_pressed = val; break;
-                case HW_BTN_RIGHT:  right_pressed = val; break;
-                case HW_BTN_MENU:   menu_pressed = val; break;
-                case HW_BTN_X:      x_pressed = val; break;
-                case HW_BTN_Y:      y_pressed = val; break;
-                case HW_BTN_START:  start_pressed = val; break;
-                case HW_BTN_UP:     up_pressed = val; break;
-                case HW_BTN_DOWN:   down_pressed = val; break;
-                default: break;
-            }
-
-            if ( val == 0 ) continue;
-
-            if (right_pressed) {
+            if (keystate[SW_BTN_RIGHT] >= PRESSED) {
                 if (current_game < game_list_len - 1) {
                     current_game++;
 
@@ -350,7 +340,7 @@ int main(void)
                 }
             }
 
-            if (left_pressed) {
+            if (keystate[SW_BTN_LEFT] >= PRESSED) {
                 if (current_game > 0) {
                     current_game--;
                     if (imageBackgroundGame != NULL)
@@ -365,27 +355,31 @@ int main(void)
             //     break;
             // }
 
-            if (start_pressed) {
+            if (keystate[SW_BTN_START] == PRESSED) {
                 nExitToMiyoo = 1;
                 break;
             }
 
-            if ((a_pressed)||(b_pressed)) {
-
+            if (keystate[SW_BTN_A] == PRESSED)
+                break;
+            
+            if (keystate[SW_BTN_B] == PRESSED) {
+                nExitToMiyoo = checkQuitAction();
+                quit = true;
                 break;
             }
 
-            if (up_pressed){
+            if (keystate[SW_BTN_UP] >= PRESSED){
                 // Change brightness
-                    bBrightChange = 1;
-                    int brightVal = getMiyooLum();
-                    if (brightVal < 10) {
-                        brightVal++;
-                        SetBrightness(brightVal);
-                    }
+                bBrightChange = 1;
+                int brightVal = getMiyooLum();
+                if (brightVal < 10) {
+                    brightVal++;
+                    SetBrightness(brightVal);
+                }
             }
 
-            if (down_pressed){
+            if (keystate[SW_BTN_DOWN] >= PRESSED){
                 // Change brightness
                 bBrightChange = 1;
                     int brightVal = getMiyooLum();
@@ -443,27 +437,26 @@ int main(void)
         imagePlay = TTF_RenderUTF8_Blended(font, game_list[current_game].totalTime, color);
         SDL_BlitSurface(imagePlay, NULL, screen, &rectTime);
 
-        if (x_pressed) {
-            if (game_list_len != 0){
-                x_pressed = 0;
+        if (keystate[SW_BTN_X] == PRESSED) {
+            if (game_list_len != 0) {
                 SDL_BlitSurface(imageRemoveDialog, NULL, screen, NULL);
                 SDL_BlitSurface(screen, NULL, video, NULL);
                 SDL_Flip(video);
 
-                while(read(input_fd, &ev, sizeof(ev)) == sizeof(ev) ){
-                    val = ev.value;
-
-                    if (( ev.code == HW_BTN_A)&&(val == 1)) {
-                        removeCurrentItem();
-                        readHistory();
-                        current_game = 0;
-                        firstPass = 1;
-                        break;
-                    }
-                    if (( ev.code == HW_BTN_B)&&(val == 1)) {
-
-                        firstPass = 1;
-                        break;
+                while (!quit) {
+                    if (updateKeystate(keystate, &quit, true)) {
+                        if (keystate[SW_BTN_A] == PRESSED) {
+                            removeCurrentItem();
+                            readHistory();
+                            if (current_game > 0)
+                                current_game--;
+                            firstPass = 1;
+                            break;
+                        }
+                        if (keystate[SW_BTN_B] == PRESSED) {
+                            firstPass = 1;
+                            break;
+                        }
                     }
                 }
             }
@@ -478,14 +471,23 @@ int main(void)
     remove("/mnt/SDCARD/.tmp_update/.runGameSwitcher");
     remove("/mnt/SDCARD/.tmp_update/cmd_to_run.sh");
     if (nExitToMiyoo != 1){
+        print_debug("Resuming game");
         FILE *file = fopen("/mnt/SDCARD/.tmp_update/cmd_to_run.sh", "w");
         fputs(game_list[current_game].RACommand, file);
         fclose(file);
     }
+    else {
+        print_debug("Exiting to menu");
+    }
+
+    #ifndef PLATFORM_MIYOOMINI
+    msleep(200);
+    #endif
+
+    cJSON_free(json_root);
 
     SDL_BlitSurface(screen, NULL, video, NULL);
     SDL_Flip(video);
-
 
     SDL_FreeSurface(screen);
     SDL_FreeSurface(video);
