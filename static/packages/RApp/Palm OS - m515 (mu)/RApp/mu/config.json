@@ -1,0 +1,12 @@
+{
+"label":"mu",
+"icon":"mu.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/PALM",
+"imgpath":"../../Roms/PALM/Imgs",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}
