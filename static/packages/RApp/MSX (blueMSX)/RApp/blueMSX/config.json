@@ -1,0 +1,13 @@
+{
+"label":"MSX",
+"icon":"blueMSX.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/MSX",
+"imgpath":"../../Roms/MSX/Imgs",
+"gamelist":"../../Roms/MSX/miyoogamelist.xml",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}
