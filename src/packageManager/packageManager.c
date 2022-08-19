@@ -70,7 +70,6 @@ void appUninstall(char *basePath, int strlenBase)
 {
     char path[1000];
     char pathInstalledApp[1000];
-    char *basePathDestination = "/mnt/SDCARD";
 
     struct dirent *dp;
     DIR *dir = opendir(basePath);
@@ -140,7 +139,7 @@ bool checkAppInstalled(const char *basePath, int base_len)
     return is_installed;
 }
 
-void loadRessources()
+void loadResources()
 {
     DIR *dp;
     struct dirent *ep;
@@ -164,17 +163,22 @@ void loadRessources()
             char cShort[MAX_LAYER_NAME_SIZE];
             strcpy(cShort, ep->d_name);
 
-            size_t len = strlen(ep->d_name);
+            const char *file_name = ep->d_name;
+            if (strcmp(file_name, ".") == 0 || strcmp(file_name, "..") == 0)
+            {
+                // skip special dirs
+                continue;
+            }
             
-            if (len > 2 || ep->d_name[0] != '.') {
+            if (file_name[0] != '.') {
                 // Installation check
-                sprintf(basePath,"%s/%s", data_path, ep->d_name);
+                sprintf(basePath,"%s/%s", data_path, file_name);
 
                 bool is_installed = checkAppInstalled(basePath, strlen(basePath));
                 package_installed[nT][package_count[nT]] = is_installed;
                 if (is_installed)
                     package_installed_count[nT]++;
-                strcpy(package_names[nT][package_count[nT]], ep->d_name);
+                strcpy(package_names[nT][package_count[nT]], file_name);
                 package_count[nT]++;
             }
 
@@ -211,19 +215,19 @@ void loadRessources()
 }
 
 void displayLayersNames(){
-    SDL_Rect rectRessName = {35, 92, 80, 20};
-    SDL_Surface* surfaceRessName;
+    SDL_Rect rectResName = {35, 92, 80, 20};
+    SDL_Surface* surfaceResName;
     for (int i = 0 ; i < 7 ; i++){
         if ((i + nListPosition) < package_count[nTab]) {
             bool package_changed = package_changes[nTab][i + nListPosition];
             char package_name[STR_MAX];
             sprintf(package_name, "%s%c", package_names[nTab][i + nListPosition], package_changed ? '*' : 0);
-            surfaceRessName = TTF_RenderUTF8_Blended(font25, package_name, color_white);
-            rectRessName.y = 92 + i * 47;
-            SDL_BlitSurface(surfaceRessName, NULL, screen, &rectRessName);
+            surfaceResName = TTF_RenderUTF8_Blended(font25, package_name, color_white);
+            rectResName.y = 92 + i * 47;
+            SDL_BlitSurface(surfaceResName, NULL, screen, &rectResName);
         }
     }
-    SDL_FreeSurface(surfaceRessName);
+    SDL_FreeSurface(surfaceResName);
 }
 
 void displayLayersInstall(){
@@ -251,7 +255,7 @@ void showScroller()
     SDL_BlitSurface(surfaceScroller, NULL, screen, &rectSroller);
 }
 
-bool confirmDoNothing(KeyState keystate[320])
+bool confirmDoNothing(KeyState *keystate)
 {
     bool quit = false;
     SDL_Surface* image = IMG_Load("res/confirmDoNothing.png");
@@ -264,11 +268,11 @@ bool confirmDoNothing(KeyState keystate[320])
 
     while (!quit) {
         if (updateKeystate(keystate, &quit, true)) {
-            if (*(keystate + SW_BTN_A) == PRESSED)
+            if (keystate[SW_BTN_A] == PRESSED)
                 confirm = true;
-            else if (*(keystate + SW_BTN_A) == RELEASED && confirm)
+            else if (keystate[SW_BTN_A] == RELEASED && confirm)
                 quit = true;
-            else if (*(keystate + SW_BTN_B) == PRESSED)
+            else if (keystate[SW_BTN_B] == PRESSED)
                 quit = true;
         }
     }
@@ -319,11 +323,9 @@ int main(int argc, char *argv[])
     SDL_Flip(video);
     SDL_FreeSurface(loadingScreen);
 
-    loadRessources();
+    loadResources();
 
-    SDL_Color color_pink = {136, 97, 252};
     SDL_Rect rectSelection = {15, 84, 593, 49};
-    SDL_Rect rectTitle = {457, 9, 200, 50};
     SDL_Rect rectTabSelection = {15, 59, 199, 26};
 
     bool quit = false;
@@ -402,10 +404,10 @@ int main(int argc, char *argv[])
 
                 if (show_confirm) {
                     if (apply_changes) {
-                        if (changes_total > 0 || (reapply_all && package_installed_count[0] > 0) || confirmDoNothing(&keystate))
+                        if (changes_total > 0 || (reapply_all && package_installed_count[0] > 0) || confirmDoNothing(keystate))
                             quit = true;
                     }
-                    else if (confirmDoNothing(&keystate))
+                    else if (confirmDoNothing(keystate))
                         quit = true;
                 }
                 else
