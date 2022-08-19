@@ -1,6 +1,8 @@
 $(TARGET): $(OFILES)
-	@$(CXX) $(OFILES) -o "$@" $(LDFLAGS)
-	@$(STRIP) "$@"
+	@$(CXX) $(OFILES) -o "$@" $(LDFLAGS)	
+	@if test -z "$(DEBUG)"; then \
+		$(STRIP) "$@"; \
+	fi
 	@-mv -f $(TARGET) "$(BUILD_DIR)/$(TARGET)"
 
 %.o: %.c
