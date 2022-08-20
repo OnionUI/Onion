@@ -32,6 +32,8 @@ int main(int argc, char *argv[])
                 old_percentage = current_percentage;
                 file_put_sync(fp, "/tmp/percBat", "%d", current_percentage);
             }
+
+            ticks = 0;
         }
 
         #ifdef PLATFORM_MIYOOMINI
