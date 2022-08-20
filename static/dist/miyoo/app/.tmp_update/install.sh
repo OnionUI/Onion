@@ -413,7 +413,11 @@ debloat_apps() {
         StartGameSwitcher \
         Guest_Mode \
         SearchFilter \
-        ThemeSwitcher
+        ThemeSwitcher \
+        Clock \
+        240pSuite \
+        Gmu \
+        Commander_Italic
 }
 
 refresh_roms() {
