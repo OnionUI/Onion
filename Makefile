@@ -1,7 +1,7 @@
 ###########################################################
 
 TARGET=Onion
-VERSION=3.13.0
+VERSION=4.0.0
 RA_SUBVERSION=0.1
 
 ###########################################################
@@ -53,6 +53,7 @@ $(CACHE)/.setup:
 # Set version number
 	@mkdir -p $(BUILD_DIR)/.tmp_update/onionVersion
 	@echo -n "$(VERSION)" > $(BUILD_DIR)/.tmp_update/onionVersion/version.txt
+	@sed -i "s/{VERSION}/$(VERSION)/g" $(BUILD_DIR)/autorun.inf
 # Copy all resources from src folders
 	@find \
 		$(SRC_DIR)/gameSwitcher \
@@ -60,7 +61,7 @@ $(CACHE)/.setup:
 		$(SRC_DIR)/bootScreen \
 		$(SRC_DIR)/themeSwitcher \
 		$(SRC_DIR)/tweaks \
-	-depth -type d -name res -exec cp -r {}/. $(BUILD_DIR)/.tmp_update/res/ \;
+		-depth -type d -name res -exec cp -r {}/. $(BUILD_DIR)/.tmp_update/res/ \;
 	@find $(SRC_DIR)/installUI -depth -type d -name res -exec cp -r {}/. $(INSTALLER_DIR)/res/ \;
 # Download themes from theme repo
 	@chmod a+x $(ROOT_DIR)/.github/get_themes.sh && $(ROOT_DIR)/.github/get_themes.sh
@@ -86,6 +87,8 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/themeSwitcher && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/tweaks && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/packageManager && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/sendkeys && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/setState && BUILD_DIR=$(BIN_DIR) make
 # Build dependencies for installer
 	@mkdir -p $(DIST_FULL)/miyoo/app/.tmp_update/bin
 	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(INSTALLER_DIR)/bin make
@@ -96,13 +99,15 @@ core: $(CACHE)/.setup
 apps: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
 	@cd $(SRC_DIR)/playActivityUI && BUILD_DIR=$(BUILD_DIR)/App/PlayActivity make
+	@find $(SRC_DIR)/playActivityUI -depth -type d -name res -exec cp -r {}/. $(BUILD_DIR)/App/PlayActivity/res/ \;
 	@find $(SRC_DIR)/packageManager -depth -type d -name res -exec cp -r {}/. $(BUILD_DIR)/App/The_Onion_Installer/res/ \;
+	@cd $(SRC_DIR)/clock && BUILD_DIR=$(PACKAGES_APP_DEST)/Set\ emulated\ time/App/Clock make
 
 external: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
 	@cd $(THIRD_PARTY_DIR)/RetroArch && make && cp retroarch $(BUILD_DIR)/RetroArch/
 	@echo $(RA_SUBVERSION) > $(BUILD_DIR)/RetroArch/onion_ra_version.txt
-	@cd $(THIRD_PARTY_DIR)/SearchFilter && make build && cp -a build/. "$(PACKAGES_APP_DEST)/Search and Filter/"
+	@cd $(THIRD_PARTY_DIR)/SearchFilter && make build && cp -a build/. "$(PACKAGES_APP_DEST)/Search game library/" && cp build/App/SearchFilter/tools $(BIN_DIR)
 
 dist: build
 	@$(ECHO) $(PRINT_RECIPE)
@@ -146,8 +151,15 @@ git-clean:
 git-submodules:
 	@git submodule update --init --recursive
 
-with-toolchain:
+$(CACHE)/.docker:
 	docker pull $(TOOLCHAIN)
+	mkdir -p cache
+	touch $(CACHE)/.docker
+
+toolchain: $(CACHE)/.docker
+	docker run -it --rm -v "$(ROOT_DIR)":/root/workspace $(TOOLCHAIN) /bin/bash
+
+with-toolchain: $(CACHE)/.docker
 	docker run --rm -v "$(ROOT_DIR)":/root/workspace $(TOOLCHAIN) /bin/bash -c "source /root/.bashrc; make $(CMD)"
 
 patch:

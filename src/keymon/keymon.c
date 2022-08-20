@@ -24,6 +24,7 @@
 #include "system/screenshot.h"
 #include "system/state.h"
 
+#include "system/settings_sync.h"
 #include "./input_fd.h"
 #include "./menuButtonAction.h"
 
@@ -298,7 +299,8 @@ int main(void) {
     bool b_BTN_Not_Menu_Pressed = false;
     bool b_BTN_Menu_Pressed = false;
     bool power_pressed = false;
-    bool comboKey = false;
+    bool comboKey_menu = false;
+    bool comboKey_select = false;
 
     int ticks = getTicks();
     int hibernate_start = ticks;
@@ -306,12 +308,31 @@ int main(void) {
     int elapsed_sec = 0;
     int wait_ms = 1000;
 
+    bool delete_flag = false;
+
     while(1) {
         if (poll(fds, 1, (CHECK_SEC - elapsed_sec) * 1000) > 0) {
-            read(input_fd, &ev, sizeof(ev));
+            if (!keyinput_isValid()) continue;
             val = ev.value;
 
-            if (ev.type != EV_KEY || val > REPEAT) continue;
+            printf_debug("Keymon input: code=%d, value=%d\n", ev.code, ev.value);
+
+            if (exists("/tmp/settings_changed")) {
+                settings_load();
+                remove("/tmp/settings_changed");
+                sync();
+            }
+
+            if (exists("/tmp/state_changed")) {
+                system_state_update();
+                
+                if (delete_flag) {
+                    system_state_update();
+                    remove("/tmp/state_changed");
+                    sync();
+                    delete_flag = false;
+                }
+            }
 
             if (val != REPEAT) {
                 if (ev.code == HW_BTN_MENU)
@@ -320,14 +341,14 @@ int main(void) {
                     b_BTN_Not_Menu_Pressed = val == PRESSED;
 
                 if (b_BTN_Menu_Pressed && b_BTN_Not_Menu_Pressed)
-                    comboKey = true;
+                    comboKey_menu = true;
             }
 
             switch (ev.code) {
                 case HW_BTN_POWER:
                     if (val == PRESSED)
                         power_pressed = true;
-                    if (!comboKey && val == REPEAT) {
+                    if (!comboKey_menu && val == REPEAT) {
                         repeat_power++;
                         if (repeat_power == 7)
                             deepsleep(); // 0.5sec deepsleep
@@ -345,16 +366,29 @@ int main(void) {
                     if (val == RELEASED) {
                         // suspend
                         if (power_pressed && repeat_power < 7) {
-                            settings_load();
-                            suspend_exec(settings.sleep_timer == 0 || temp_flag_get("stay_awake") ? -1 : (settings.sleep_timer + SHUTDOWN_MIN) * 60000);
+                            if (comboKey_menu) {
+                                short_pulse();
+                                screenshot_recent();
+                            }
+                            else {
+                                suspend_exec(settings.sleep_timer == 0 || temp_flag_get("stay_awake") ? -1 : (settings.sleep_timer + SHUTDOWN_MIN) * 60000);
+                            }
                         }
                         power_pressed = false;
                     }
                     repeat_power = 0;
                     break;
                 case HW_BTN_SELECT:
+                    if (!comboKey_select && val == RELEASED) {
+                        if (system_state == MODE_MAIN_UI) {
+                            keyinput_send(HW_BTN_MENU, PRESSED);
+                            keyinput_send(HW_BTN_MENU, RELEASED);
+                        }
+                    }
                     if (val != REPEAT)
                         button_flag = (button_flag & (~SELECT)) | (val<<SELECT_BIT);
+                    if (val == RELEASED)
+                        comboKey_select = false;
                     break;
                 case HW_BTN_START:
                     if (val != REPEAT)
@@ -378,12 +412,12 @@ int main(void) {
                                 break;
                             case SELECT:
                                 // START + L2 : brightness down
-                                settings_load();
                                 if (settings.brightness > 0) {
                                     settings_setBrightness(settings.brightness - 1, true);
                                     settings_sync();
                                     settings_save();
                                 }
+                                comboKey_select = true;
                                 break;
                             default: break;
                         }
@@ -406,12 +440,12 @@ int main(void) {
                             break;
                         case SELECT:
                             // START + R2 : brightness up
-                            settings_load();
                             if (settings.brightness < MAX_BRIGHTNESS) {
                                 settings_setBrightness(settings.brightness + 1, true);
                                 settings_sync();
                                 settings_save();
                             }
+                            comboKey_select = true;
                             break;
                         default:
                             break;
@@ -419,7 +453,16 @@ int main(void) {
                     }
                     break;
                 case HW_BTN_MENU:
-                    comboKey = menuButtonAction(val, comboKey);
+                    system_state_update();
+                    comboKey_menu = menuButtonAction(val, comboKey_menu);
+                    break;
+                case HW_BTN_X:
+                    if (val == PRESSED)
+                        applyExtraButtonShortcut(0);
+                    break;
+                case HW_BTN_Y:
+                    if (val == PRESSED)
+                        applyExtraButtonShortcut(1);
                     break;
                 default:
                     break;
@@ -432,10 +475,19 @@ int main(void) {
 
         // Comes here every CHECK_SEC(def:15) seconds interval
 
+        // Delete flag if no input was given
+        if (delete_flag && exists("/tmp/state_changed")) {
+            system_state_update();
+            remove("/tmp/state_changed");
+            sync();
+            delete_flag = false;
+        }
+
+        // Delete `state_changed` flag on next input
+        delete_flag = true;
+
         // Update ticks
         ticks = getTicks();
-        
-        settings_load();
 
         // Check Hibernate
         if (battery_isCharging())

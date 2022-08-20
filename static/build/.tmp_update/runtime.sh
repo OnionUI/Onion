@@ -30,6 +30,7 @@ main() {
 
     # Auto launch
     if [ ! -f $sysdir/config/.noAutoStart ]; then
+        state_change
         check_game
     fi
 
@@ -42,17 +43,27 @@ main() {
         LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v
     fi
 
+    state_change
     check_switcher
+
+    set_startup_tab
 
     # Main runtime loop
     while true; do
+        state_change
         check_main_ui
-        check_game    
+        state_change
+        check_game
+        state_change  
         check_switcher
         
         # Free memory
         $sysdir/bin/freemma
     done
+}
+
+state_change() {
+    touch /tmp/state_changed
 }
 
 clear_logs() {
@@ -83,6 +94,8 @@ launch_main_ui() {
     cd /mnt/SDCARD/miyoo/app
     LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./MainUI 2>&1 >> $sysdir/logs/MainUI.log
     mv /tmp/cmd_to_run.sh $sysdir/cmd_to_run.sh
+
+    echo "mainui" > /tmp/prev_state
 }
 
 check_game() {
@@ -97,8 +110,10 @@ launch_game() {
     is_game=0
 
     if echo "$romfile" | grep -q "retroarch" || echo "$romfile" | grep -q "/mnt/SDCARD/Emu/" || echo "$romfile" | grep -q "/mnt/SDCARD/RApp/"; then
-        echo "Game found:" $(basename "$romfile")
-        is_game=1
+        if ! echo "$romfile" | grep -q "/mnt/SDCARD/Emu/SEARCH/../../App/SearchFilter"; then
+            echo "Game found:" $(basename "$romfile")
+            is_game=1
+        fi
     fi
 
     # TIMER BEGIN
@@ -116,8 +131,10 @@ launch_game() {
         cd $sysdir
         ./bin/playActivity "$(basename "$romfile")" 2>&1 >> ./logs/playActivity.log
         
+        echo "game" > /tmp/prev_state        
         check_off_order "End_Save"
     else
+        echo "app" > /tmp/prev_state
         check_off_order "End"
     fi
 }
@@ -141,6 +158,7 @@ launch_switcher() {
     cd $sysdir
     LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./bin/gameSwitcher 2>&1 >> ./logs/gameSwitcher.log
     rm $sysdir/.runGameSwitcher
+    echo "switcher" > /tmp/prev_state
     sync
 }
 
@@ -239,6 +257,16 @@ update_time() {
     addTime=$(($hours * 3600))
     currentTime=$(($currentTime + $addTime))
     date +%s -s @$currentTime
+}
+
+set_startup_tab() {
+    startup_tab=0
+    if [ -f $sysdir/config/startup/tab ]; then
+        startup_tab=`cat $sysdir/config/startup/tab`
+    fi
+    
+    cd $sysdir
+    ./bin/setState "$startup_tab"
 }
 
 main

@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
         }
 
         #ifdef PLATFORM_MIYOOMINI
-        if (is_suspended)
+        if (is_suspended || battery_isCharging())
             batteryWarning_hide();
         else if (current_percentage < warn_at && !config_flag_get(".noBatteryWarning"))
             batteryWarning_show();

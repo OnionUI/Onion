@@ -2,6 +2,7 @@
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
 #include <stdio.h>
+#include <signal.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdint.h>
@@ -14,8 +15,10 @@
 #include "sys/ioctl.h"
 
 #include "system/system.h"
-#include "system/keymap_hw.h"
+#include "system/keymap_sw.h"
 #include "utils/utils.h"
+#include "utils/log.h"
+#include "utils/keystate.h"
 
 // Max number of records in the DB
 #define MAXVALUES 1000
@@ -37,7 +40,7 @@ int readRomDB()
       if (exists(PLAY_ACTIVITY_DB_PATH)) {
         if ((fp = fopen(PLAY_ACTIVITY_DB_PATH, "rb")) != NULL) {
             fread(rom_list, sizeof(rom_list), 1, fp);
-             rom_list_len = 0;
+            rom_list_len = 0;
 
             for (int i = 0; i < MAXVALUES; i++){
                 if (strlen(rom_list[i].name) != 0)
@@ -68,6 +71,7 @@ void writeRomDB(void)
 
 void displayRomDB(void)
 {
+    #ifdef LOG_DEBUG
     printf("--------------------------------\n");
     for (int i = 0 ; i < rom_list_len ; i++) {
             printf("rom_list name: %s\n", rom_list[i].name);
@@ -77,7 +81,7 @@ void displayRomDB(void)
             printf("playtime: %s\n", cPlayTime);
      }
     printf("--------------------------------\n");
-
+    #endif
 }
 
 int searchRomDB(char* romName)
@@ -94,16 +98,30 @@ int searchRomDB(char* romName)
     return position;
 }
 
+static bool quit = false;
+
+static void sigHandler(int sig)
+{
+    switch (sig) {
+        case SIGINT:
+        case SIGTERM:
+            quit = true;
+            break;
+        default: break;
+    }
+}
+
 int main(void)
 {
+    print_debug("Debug logging enabled");
+	
+    signal(SIGINT, sigHandler);
+    signal(SIGTERM, sigHandler);
+
     SDL_Init(SDL_INIT_VIDEO);
     SDL_ShowCursor(SDL_DISABLE);
+    SDL_EnableKeyRepeat(300, 50);
     TTF_Init();
-    int input_fd;
-    struct input_event ev;
-
-    // Prepare for Poll HW_BTN input
-    input_fd = open("/dev/input/event0", O_RDONLY);
 
     SDL_Surface* video = SDL_SetVideoMode(640,480, 32, SDL_HWSURFACE);
     SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640,480, 32, 0,0,0,0);
@@ -116,7 +134,7 @@ int main(void)
     SDL_Color color_white = {255, 255, 255};
     SDL_Color color_lilla = {136, 97, 252};
 
-    SDL_Surface* imageBackground = IMG_Load("background.png");
+    SDL_Surface* imageBackground = IMG_Load("res/background.png");
 
     SDL_Surface* imageRomPosition;
     SDL_Surface* imageRomPlayTime;
@@ -126,26 +144,35 @@ int main(void)
     SDL_Surface* imageMileage;
 
     // Loading DB
-    if (readRomDB() == -1)
+    if (readRomDB() == -1) {
+        print_debug("Failed reading rom db");
         // To avoid a DB overwrite
         return EXIT_SUCCESS;
+    }
 
-    //displayRomDB();
+    displayRomDB();
     // Sorting DB
     rom_list_s tempStruct;
     int bFound = 1;
 
-    while (bFound == 1){
+    while (bFound == 1) {
         bFound = 0;
-        for (int i = 0 ; i < (rom_list_len-1) ; i++){
-            if (rom_list[i].playTime < rom_list[i+1].playTime){
+        for (int i = 0 ; i < rom_list_len - 1; i++) {
+            if (rom_list[i].playTime < rom_list[i+1].playTime) {
                 tempStruct = rom_list[i+1];
                 rom_list[i+1] = rom_list[i];
                 rom_list[i] = tempStruct;
-                bFound = 1 ;
+                bFound = 1;
             }
         }
     }
+
+    int end;
+    for (end = 0 ; end < rom_list_len; end++) {
+        if (rom_list[end].playTime < 60)
+            break;
+    }
+    rom_list_len = end;
 
     //writeRomDB();
 
@@ -164,7 +191,7 @@ int main(void)
     m = (ntotalTime - 3600 * h) / 60;
     sprintf(cTotalHandheldMileage, "%d:%02d", h, m);
 
-    //displayRomDB();
+    displayRomDB();
 
     int nPages = (int)((rom_list_len - 1) / 4 + 1);
     char cMessage[50];
@@ -219,30 +246,39 @@ int main(void)
     SDL_BlitSurface(screen, NULL, video, NULL);
     SDL_Flip(video);
 
-    signed int keystate[120] = {0};
+    bool changed = true;
+    KeyState keystate[320] = {(KeyState)0};
 
-    while(read(input_fd, &ev, sizeof(ev)) == sizeof(ev)) {
-        if (ev.type != EV_KEY || ev.value > 1) continue;
+    uint32_t acc_ticks = 0,
+			 last_ticks = SDL_GetTicks(),
+			 time_step = 1000 / 60;
 
-        keystate[ev.code] = ev.value;
+	while (!quit) {
+		uint32_t ticks = SDL_GetTicks();
+		acc_ticks += ticks - last_ticks;
+		last_ticks = ticks;
 
-        if (keystate[HW_BTN_POWER]) {
-            system_shutdown();
-            break;
+        if (updateKeystate(keystate, &quit, true)) {
+            if (keystate[SW_BTN_B] == PRESSED)
+                quit = true;
+
+            if (keystate[SW_BTN_RIGHT] >= PRESSED) {
+                if (nCurrentPage < nPages - 1) {
+                    nCurrentPage ++;
+                    changed = true;
+                }
+            }
+
+            if (keystate[SW_BTN_LEFT] >= PRESSED) {
+                if (nCurrentPage > 0) {
+                    nCurrentPage --;
+                    changed = true;
+                }
+            }
         }
 
-        if (keystate[HW_BTN_B])
-            break;
-
-        if (keystate[HW_BTN_RIGHT]) {
-            if (nCurrentPage < nPages - 1)
-                nCurrentPage ++;
-        }
-
-        if (keystate[HW_BTN_LEFT]) {
-            if (nCurrentPage > 0)
-                nCurrentPage --;
-        }
+        if (!changed)
+            continue;
 
         // Page update
         SDL_BlitSurface(imageBackground, NULL, screen, NULL);
@@ -284,6 +320,11 @@ int main(void)
 
     SDL_FreeSurface(screen);
     SDL_FreeSurface(video);
+
+	#ifndef PLATFORM_MIYOOMINI
+	msleep(200); // to clear SDL input on quit
+	#endif
+
     SDL_Quit();
 
     return EXIT_SUCCESS;

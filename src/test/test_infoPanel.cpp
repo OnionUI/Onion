@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
 #include <string>
-#include <SDL.h>
+#include <SDL/SDL.h>
 
 #include "../infoPanel/imagesCache.h"
 

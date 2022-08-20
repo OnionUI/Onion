@@ -14,6 +14,7 @@
 #include "./formatters.h"
 #include "./values.h"
 #include "./actions.h"
+#include "./tools.h"
 
 static List _menu_main;
 static List _menu_system;
@@ -28,7 +29,7 @@ static List _menu_tools;
 void menu_system(void *_)
 {
 	if (!_menu_system._created) {
-		_menu_system = list_create(4, LIST_SMALL);
+		_menu_system = list_create(6, LIST_SMALL);
 		strcpy(_menu_system.title, "System");
 		list_addItem(&_menu_system, (ListItem){
 			.label = "Auto-resume last game",
@@ -51,6 +52,22 @@ void menu_system(void *_)
 			.action = action_setStartupApplication
 		});
 		list_addItem(&_menu_system, (ListItem){
+			.label = "MainUI: Start tab",
+			.item_type = MULTIVALUE,
+			.value_max = 5,
+			.value_formatter = formatter_startupTab,
+			.value = settings.startup_tab,
+			.action = action_setStartupTab
+		});
+		list_addItem(&_menu_system, (ListItem){
+			.label = "Emulated time skip",
+			.item_type = MULTIVALUE,
+			.value_max = 24,
+			.value_formatter = formatter_timeSkip,
+			.value = settings.time_skip,
+			.action = action_setTimeSkip
+		});
+		list_addItem(&_menu_system, (ListItem){
 			.label = "Vibration intensity",
 			.item_type = MULTIVALUE,
 			.value_max = 3,
@@ -59,15 +76,15 @@ void menu_system(void *_)
 			.action = action_setVibration
 		});
 	}
-	menu_stack[++level] = &_menu_system;
+	menu_stack[++menu_level] = &_menu_system;
 	header_changed = true;
 }
 
 void menu_buttonAction(void *_)
 {
 	if (!_menu_button_action._created) {
-		_menu_button_action = list_create(7, LIST_SMALL);
-		strcpy(_menu_button_action.title, "Menu button");
+		_menu_button_action = list_create(9, LIST_SMALL);
+		strcpy(_menu_button_action.title, "Button shortcuts");
 		list_addItem(&_menu_button_action, (ListItem){
 			.label = "Vibrate on single press",
 			.item_type = TOGGLE,
@@ -75,7 +92,7 @@ void menu_buttonAction(void *_)
 			.action = action_setMenuButtonHaptics
 		});
 		list_addItem(&_menu_button_action, (ListItem){
-			.label = "[MainUI] Single press",
+			.label = "MainUI: Single press",
 			.item_type = MULTIVALUE,
 			.value_max = 2,
 			.value_labels = BUTTON_MAINUI_LABELS,
@@ -84,7 +101,7 @@ void menu_buttonAction(void *_)
 			.action = action_setMenuButtonKeymap
 		});
 		list_addItem(&_menu_button_action, (ListItem){
-			.label = "[MainUI] Long press",
+			.label = "MainUI: Long press",
 			.item_type = MULTIVALUE,
 			.value_max = 2,
 			.value_labels = BUTTON_MAINUI_LABELS,
@@ -93,7 +110,7 @@ void menu_buttonAction(void *_)
 			.action = action_setMenuButtonKeymap
 		});
 		list_addItem(&_menu_button_action, (ListItem){
-			.label = "[MainUI] Double press",
+			.label = "MainUI: Double press",
 			.item_type = MULTIVALUE,
 			.value_max = 2,
 			.value_labels = BUTTON_MAINUI_LABELS,
@@ -102,7 +119,7 @@ void menu_buttonAction(void *_)
 			.action = action_setMenuButtonKeymap
 		});
 		list_addItem(&_menu_button_action, (ListItem){
-			.label = "[In-game] Single press",
+			.label = "In-game: Single press",
 			.item_type = MULTIVALUE,
 			.value_max = 3,
 			.value_labels = BUTTON_INGAME_LABELS,
@@ -111,7 +128,7 @@ void menu_buttonAction(void *_)
 			.action = action_setMenuButtonKeymap
 		});
 		list_addItem(&_menu_button_action, (ListItem){
-			.label = "[In-game] Long press",
+			.label = "In-game: Long press",
 			.item_type = MULTIVALUE,
 			.value_max = 3,
 			.value_labels = BUTTON_INGAME_LABELS,
@@ -120,7 +137,7 @@ void menu_buttonAction(void *_)
 			.action = action_setMenuButtonKeymap
 		});
 		list_addItem(&_menu_button_action, (ListItem){
-			.label = "[In-game] Double press",
+			.label = "In-game: Double press",
 			.item_type = MULTIVALUE,
 			.value_max = 3,
 			.value_labels = BUTTON_INGAME_LABELS,
@@ -128,8 +145,28 @@ void menu_buttonAction(void *_)
 			.action_id = 5,
 			.action = action_setMenuButtonKeymap
 		});
+
+		getInstalledApps();
+		list_addItem(&_menu_button_action, (ListItem){
+			.label = "MainUI: X button",
+			.item_type = MULTIVALUE,
+			.value_max = installed_apps_count + NUM_TOOLS + 1,
+			.value = value_appShortcut(0),
+			.value_formatter = formatter_appShortcut,
+			.action_id = 0,
+			.action = action_setAppShortcut
+		});
+		list_addItem(&_menu_button_action, (ListItem){
+			.label = "MainUI: Y button",
+			.item_type = MULTIVALUE,
+			.value_max = installed_apps_count + NUM_TOOLS + 1,
+			.value = value_appShortcut(1),
+			.value_formatter = formatter_appShortcut,
+			.action_id = 1,
+			.action = action_setAppShortcut
+		});
 	}
-	menu_stack[++level] = &_menu_button_action;
+	menu_stack[++menu_level] = &_menu_button_action;
 	header_changed = true;
 }
 
@@ -171,7 +208,7 @@ void menu_batteryPercentage(void *_)
 			.action = action_batteryPercentageOffsetY
 		});
 	}
-	menu_stack[++level] = &_menu_battery_percentage;
+	menu_stack[++menu_level] = &_menu_battery_percentage;
 	header_changed = true;
 }
 
@@ -216,7 +253,7 @@ void menu_themeOverrides(void *_)
 		// 	.label = "[Battery] Font size", .item_type = MULTIVALUE, .value_max = num_font_sizes, .value_formatter = formatter_fontSize
 		// });
 	}
-	menu_stack[++level] = &_menu_theme_overrides;
+	menu_stack[++menu_level] = &_menu_theme_overrides;
 	header_changed = true;
 }
 
@@ -250,7 +287,7 @@ void menu_userInterface(void *_)
 			.action = menu_themeOverrides
 		});
 	}
-	menu_stack[++level] = &_menu_user_interface;
+	menu_stack[++menu_level] = &_menu_user_interface;
 	header_changed = true;
 }
 
@@ -275,7 +312,7 @@ void menu_resetSettings(void *_)
 			.label = "Reset RetroArch core configuration..." // TODO: This needs to lead to a dynamic menu listing the cores
 		});
 	}
-	menu_stack[++level] = &_menu_reset_settings;
+	menu_stack[++menu_level] = &_menu_reset_settings;
 	header_changed = true;
 }
 
@@ -294,29 +331,37 @@ void menu_advanced(void *_)
 			.label = "Reset settings...", .action = menu_resetSettings
 		});
 	}
-	menu_stack[++level] = &_menu_advanced;
+	menu_stack[++menu_level] = &_menu_advanced;
 	header_changed = true;
 }
 
 void menu_tools(void *_)
 {
 	if (!_menu_tools._created) {
-		_menu_tools = list_create(4, LIST_SMALL);
+		_menu_tools = list_create(5, LIST_SMALL);
 		strcpy(_menu_tools.title, "Tools");
 		list_addItem(&_menu_tools, (ListItem){
-			.label = "[Favorites] Sort alphabetically"
+			.label = "Favorites: Sort alphabetically",
+			.action = tool_favoritesSortAlpha
 		});
 		list_addItem(&_menu_tools, (ListItem){
-			.label = "[Favorites] Sort by system"
+			.label = "Favorites: Sort by system",
+			.action = tool_favoritesSortSystem
 		});
 		list_addItem(&_menu_tools, (ListItem){
-			.label = "[Favorites] Fix thumbnails"
+			.label = "Favorites: Fix thumbnails and duplicates",
+			.action = tool_favoritesFix
 		});
 		list_addItem(&_menu_tools, (ListItem){
-			.label = "Remove OSX system files"
+			.label = "Remove apps from recents",
+			.action = tool_recentsRemoveApps
+		});
+		list_addItem(&_menu_tools, (ListItem){
+			.label = "Remove OSX system files",
+			.action = tool_removeMacFiles
 		});
 	}
-	menu_stack[++level] = &_menu_tools;
+	menu_stack[++menu_level] = &_menu_tools;
 	header_changed = true;
 }
 
@@ -332,8 +377,8 @@ void menu_main(void)
 			.icon_ptr = (void*)IMG_Load("res/tweaks_system.png")
 		});
 		list_addItem(&_menu_main, (ListItem){
-			.label = "Menu button",
-			.description = "Customize menu button actions",
+			.label = "Button shortcuts",
+			.description = "Customize global button actions",
 			.action = menu_buttonAction,
 			.icon_ptr = (void*)IMG_Load("res/tweaks_menu_button.png")
 		});
@@ -356,6 +401,7 @@ void menu_main(void)
 			.icon_ptr = (void*)IMG_Load("res/tweaks_tools.png")
 		});
 	}
+	menu_level = 0;
 	menu_stack[0] = &_menu_main;
 	header_changed = true;
 }
