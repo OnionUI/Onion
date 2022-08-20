@@ -100,15 +100,29 @@ void system_clock_pause(bool enabled)
     clock_paused = enabled;
 }
 
-int getTicks(void)
+/**
+ * @brief Get current time in milliseconds (uses CLOCK_MONOTONIC_RAW)
+ * 
+ * @return int Milliseconds
+ */
+int getMilliseconds(void)
 {
     struct timespec te;
     clock_gettime(CLOCK_MONOTONIC_RAW, &te);
-    int ms = te.tv_sec * 1000 + te.tv_nsec / 1000000;
-    // struct timeval te;
-    // gettimeofday(&te, NULL);
-    // int ms = (int)(te.tv_sec * 1000.0 + te.tv_usec / 1000);
+    int ms = (int)(te.tv_sec * 1000 + te.tv_nsec / 1000000);
     return ms;
+}
+
+/**
+ * @brief Get current time in seconds (uses CLOCK_MONOTONIC_COARSE)
+ * 
+ * @return int Seconds
+ */
+int getSeconds(void)
+{
+    struct timespec te;
+    clock_gettime(CLOCK_MONOTONIC_COARSE, &te);
+    return (int)te.tv_sec;
 }
 
 #endif // CLOCK_H__
