@@ -77,8 +77,6 @@ int main(int argc, char *argv[])
 			 last_ticks = SDL_GetTicks(),
 			 time_step = 1000 / FRAMES_PER_SECOND;
 
-	print_debug("Got to main loop");
-
 	while (!quit) {
 		uint32_t ticks = SDL_GetTicks();
 		acc_ticks += ticks - last_ticks;
@@ -137,7 +135,7 @@ int main(int argc, char *argv[])
 			battery_changed = true;
 
 		if (acc_ticks >= time_step) {
-			if (header_changed)
+			if (header_changed || battery_changed)
 				theme_renderHeader(screen, menu_stack[menu_level]->title, false);
 
 			if (list_changed)
@@ -174,6 +172,8 @@ int main(int argc, char *argv[])
 	SDL_Flip(video);
 
 	settings_save();
+	value_setFrameThrottle();
+	value_setSwapTriggers();
 	
 	lang_free();
 	list_free(&_menu_main);

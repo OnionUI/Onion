@@ -9,6 +9,9 @@
 #include <assert.h>
 #include <time.h>
 #include <sys/ioctl.h>
+#include <linux/fb.h>
+#include <linux/input.h>
+#include <poll.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 
@@ -20,6 +23,7 @@
 #include "system/display.h"
 #include "system/settings.h"
 #include "system/keymap_sw.h"
+#include "system/keymap_hw.h"
 #include "system/rumble.h"
 #include "theme/config.h"
 
@@ -28,6 +32,9 @@
 
 static bool quit = false;
 static bool suspended = false;
+static int input_fd;
+static struct input_event ev;
+static struct pollfd fds[1];
 
 void getImageDir(const char *theme_path, char *image_dir)
 {
@@ -59,8 +66,22 @@ void suspend(bool enabled, SDL_Surface *video)
     display_setScreen(!suspended);
 }
 
+static void sigHandler(int sig)
+{
+    switch (sig) {
+        case SIGINT:
+        case SIGTERM:
+            quit = true;
+            break;
+        default: break;
+    }
+}
+
 int main(void)
 {
+    signal(SIGINT, sigHandler);
+    signal(SIGTERM, sigHandler);
+
     bool turn_off = false;
 
     settings_load();
@@ -76,6 +97,7 @@ int main(void)
     SDL_Surface* video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
     SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
 
+    int frame_delay = 80;
     int frame_count = 0;
     SDL_Surface *frames[24];
     SDL_Surface *image;
@@ -87,18 +109,25 @@ int main(void)
             frames[frame_count++] = image;
     }
 
-    int fps = frame_count > 1 ? 12 : 1;
     printf_debug("Frame count: %d\n", frame_count);
 
+    // Prepare for Poll button input
+    input_fd = open("/dev/input/event0", O_RDONLY);
+    memset(&fds, 0, sizeof(fds));
+    fds[0].fd = input_fd;
+    fds[0].events = POLLIN;
+
     KeyState keystate[320] = {RELEASED};
-    bool keychange = false;
     bool power_pressed = false;
 
-    uint32_t display_timer = 0,
-             shutdown_timer = 0,
-             acc_ticks = 0,
-             last_ticks = SDL_GetTicks(),
-             time_step = 1000 / fps;
+    if (frame_delay <= 0)
+        frame_delay = 80;
+
+    int ticks = 0,
+        display_ticks = 0,
+        shutdown_ticks = 0,
+        display_max = DISPLAY_TIMEOUT / frame_delay,
+        shutdown_max = SHUTDOWN_TIMEOUT / frame_delay;
 
     int current_frame = 0;
 
@@ -106,71 +135,78 @@ int main(void)
     system_powersave_on();
 
     while (!quit) {
-        uint32_t ticks = SDL_GetTicks(),
-                 delta = ticks - last_ticks;
-        last_ticks = ticks;
-
-        if ((keychange = updateKeystate(keystate, &quit, true))) {
-            if (keystate[SW_BTN_POWER] == REPEATING && (ticks - shutdown_timer) > SHUTDOWN_TIMEOUT) {
-                short_pulse();
-                quit = true; // power on
+        if (suspended) {
+            if (poll(fds, 1, 1000)) {
+                read(input_fd, &ev, sizeof(ev));
+                if (ev.type != EV_KEY || ev.value > REPEATING) continue;
+                if (ev.code == HW_BTN_POWER && ev.value == PRESSED)
+                    suspend(false, video);
             }
-            else if (keystate[SW_BTN_POWER] == PRESSED) {
-                shutdown_timer = ticks;
-                power_pressed = true;
-            }
-            else if (keystate[SW_BTN_POWER] == RELEASED && power_pressed) {
-                suspend(!suspended, video); // toggle display
-                power_pressed = false;
-            }
-            display_timer = ticks;
         }
 
         if (!battery_isCharging()) {
             quit = true;
             turn_off = true;
+            break;
+        }
+
+        if (suspended)
+            continue;
+
+        if (updateKeystate(keystate, &quit, true)) {
+            if (keystate[SW_BTN_POWER] == REPEATING && shutdown_ticks >= shutdown_max) {
+                short_pulse();
+                quit = true; // power on
+            }
+            else if (keystate[SW_BTN_POWER] == PRESSED) {
+                shutdown_ticks = 0;
+                power_pressed = true;
+            }
+            else if (keystate[SW_BTN_POWER] == RELEASED && power_pressed) {
+                suspend(true, video); // toggle display
+                power_pressed = false;
+            }
+            display_ticks = 0;
         }
 
         if (quit)
             break;
 
-        if (!suspended && (ticks - display_timer) > DISPLAY_TIMEOUT)
+        if (!suspended && display_ticks >= display_max)
             suspend(true, video);
 
-        if (suspended)
-            continue;
+        // Clear screen
+        SDL_FillRect(screen, NULL, 0);
 
-        acc_ticks += delta;
-
-        while (acc_ticks >= time_step) {
-            // Clear screen
-            SDL_FillRect(screen, NULL, 0);
-
-            if (current_frame < frame_count) {
-                SDL_Surface *frame = frames[current_frame];
-                SDL_Rect frame_rect = {320 - frame->w / 2, 240 - frame->h / 2};
-                SDL_BlitSurface(frame, NULL, screen, &frame_rect);
-                current_frame = (current_frame + 1) % frame_count;
-            }
-
-            SDL_BlitSurface(screen, NULL, video, NULL);
-            SDL_Flip(video);
-
-            acc_ticks -= time_step;
+        if (current_frame < frame_count) {
+            SDL_Surface *frame = frames[current_frame];
+            SDL_Rect frame_rect = {320 - frame->w / 2, 240 - frame->h / 2};
+            SDL_BlitSurface(frame, NULL, screen, &frame_rect);
+            current_frame = (current_frame + 1) % frame_count;
         }
+
+        SDL_BlitSurface(screen, NULL, video, NULL);
+        SDL_Flip(video);
+        
+        ticks++;
+        display_ticks++;
+        shutdown_ticks++;
+        msleep(frame_delay);
     }
 
     // Clear the screen when exiting
     SDL_FillRect(video, NULL, 0);
     SDL_Flip(video);
 
+    #ifndef PLATFORM_MIYOOMINI
+    msleep(100);
+    #endif
+
     for (int i = 0; i < frame_count; i++)
         SDL_FreeSurface(frames[i]);
     SDL_FreeSurface(screen);
     SDL_FreeSurface(video);
     SDL_Quit();
-
-    msleep(100);
 
     #ifdef PLATFORM_MIYOOMINI
     if (turn_off) {

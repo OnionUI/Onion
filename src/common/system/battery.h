@@ -39,14 +39,14 @@ int battery_getPercentage(void)
         msleep(100);
     }
 
-#ifndef PLATFORM_MIYOOMINI
-#ifdef LOG_DEBUG
+    #ifndef PLATFORM_MIYOOMINI
+    #ifdef LOG_DEBUG
     return 78;
-#endif
-#endif
+    #endif
+    #endif
 
     if (percentage == -1)
-        percentage = 500;
+        percentage = 0; // show zero when percBat not found
 
     return percentage;
 }

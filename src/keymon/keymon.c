@@ -302,7 +302,7 @@ int main(void) {
     bool comboKey_menu = false;
     bool comboKey_select = false;
 
-    int ticks = getTicks();
+    int ticks = getMilliseconds();
     int hibernate_start = ticks;
     int hibernate_time;
     int elapsed_sec = 0;
@@ -468,7 +468,7 @@ int main(void) {
                     break;
             }
 
-            hibernate_start = getTicks();
+            hibernate_start = getMilliseconds();
             elapsed_sec = (hibernate_start - ticks) / 1000;
             if (elapsed_sec < CHECK_SEC) continue;
         }
@@ -487,7 +487,7 @@ int main(void) {
         delete_flag = true;
 
         // Update ticks
-        ticks = getTicks();
+        ticks = getMilliseconds();
 
         // Check Hibernate
         if (battery_isCharging())
