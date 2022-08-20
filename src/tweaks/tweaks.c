@@ -69,8 +69,10 @@ int main(int argc, char *argv[])
 			 last_ticks = SDL_GetTicks(),
 			 time_step = 1000 / FRAMES_PER_SECOND;
 
+	bool menu_combo_pressed = false;
 	bool key_changed = false;
 	bool skip_next_change = false;
+	SDLKey changed_key;
 
 	while (!quit) {
 		uint32_t ticks = SDL_GetTicks();
@@ -84,7 +86,10 @@ int main(int argc, char *argv[])
 			battery_changed = true;
 		}
 
-		if (updateKeystate(keystate, &quit, keys_enabled)) {
+		if (updateKeystate(keystate, &quit, keys_enabled, &changed_key)) {
+			if (keystate[SW_BTN_MENU] >= PRESSED && changed_key != SW_BTN_MENU)
+				menu_combo_pressed = true;
+
 			if (keystate[SW_BTN_UP] >= PRESSED) {
 				key_changed = list_keyUp(menu_stack[menu_level], keystate[SW_BTN_UP] == REPEATING);
 			}
@@ -107,8 +112,10 @@ int main(int argc, char *argv[])
 				}
 				key_changed = list_activateItem(menu_stack[menu_level]) || header_changed;
 			}
-			else if (keystate[SW_BTN_MENU] == PRESSED) {
-				quit = true;
+			else if (changed_key == SW_BTN_MENU && keystate[SW_BTN_MENU] == RELEASED) {
+				if (!menu_combo_pressed)
+					quit = true;
+				menu_combo_pressed = false;
 			}
 			else if (keystate[SW_BTN_B] == PRESSED) {
 				if (menu_level == 0)

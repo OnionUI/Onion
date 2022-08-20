@@ -261,7 +261,7 @@ bool confirmDoNothing(KeyState *keystate)
     bool confirm = false;
 
     while (!quit) {
-        if (updateKeystate(keystate, &quit, true)) {
+        if (updateKeystate(keystate, &quit, true, NULL)) {
             if (keystate[SW_BTN_A] == PRESSED)
                 confirm = true;
             else if (keystate[SW_BTN_A] == RELEASED && confirm)
@@ -332,7 +332,7 @@ int main(int argc, char *argv[])
     bool apply_changes = false;
 
     while (!quit) {
-        if (updateKeystate(keystate, &quit, true)) {
+        if (updateKeystate(keystate, &quit, true, NULL)) {
             if (keystate[SW_BTN_RIGHT] >= PRESSED) {
                 if (nTab < 2) {
                     nTab++;

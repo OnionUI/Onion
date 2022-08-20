@@ -321,7 +321,7 @@ int main(void)
             if (game_list_len > 1)
                 SDL_BlitSurface(surfaceArrowRight, NULL, screen, &rectArrowRight);
         }
-        else if (updateKeystate(keystate, &quit, true)) {
+        else if (updateKeystate(keystate, &quit, true, NULL)) {
 			if (keystate[SW_BTN_MENU] == PRESSED)
                 menu_pressed = true;
 
@@ -444,7 +444,7 @@ int main(void)
                 SDL_Flip(video);
 
                 while (!quit) {
-                    if (updateKeystate(keystate, &quit, true)) {
+                    if (updateKeystate(keystate, &quit, true, NULL)) {
                         if (keystate[SW_BTN_A] == PRESSED) {
                             removeCurrentItem();
                             readHistory();
