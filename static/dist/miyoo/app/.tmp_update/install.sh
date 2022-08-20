@@ -55,16 +55,15 @@ main() {
     echo 80     > $pwmdir/pwm0/duty_cycle
     echo 1  	> $pwmdir/pwm0/enable
 
+    # Start the battery monitor
+    cd $sysdir
+    ./bin/batmon 2>&1 > ./logs/batmon.log &
+
     if [ ! -d /mnt/SDCARD/.tmp_update/onionVersion ]; then
         fresh_install 1
         cleanup
         return
     fi
-
-    cd $sysdir
-
-    # Start the battery monitor
-    ./bin/batmon 2>&1 > ./logs/batmon.log &
 
     # Prompt for update or fresh install
     ./bin/prompt -r -m "Welcome to the Onion installer!\nPlease choose an action:" \

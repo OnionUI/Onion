@@ -3,7 +3,7 @@ INCLUDE_SHMVAR=1
 include ../common/config.mk
 
 TARGET = bootScreen
-LDFLAGS := $(LDFLAGS) -s -lSDL -lSDL_image -lSDL_ttf
+LDFLAGS := $(LDFLAGS) -s -lSDL -lSDL_image -lSDL_ttf -lSDL_mixer
 
 include ../common/commands.mk
 include ../common/recipes.mk

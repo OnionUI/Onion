@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_ttf.h>
+#include <SDL/SDL_mixer.h>
 
 #include "utils/log.h"
 #include "system/lang.h"
@@ -56,9 +57,17 @@ typedef struct Theme_Resources
     TTF_Font *fonts[(int)fonts_count];
     SDL_Surface *background;
     bool _background_loaded;
+    Mix_Music *bgm;
+    Mix_Chunk *sound_change;
 } Resources_s;
 
-static Resources_s resources = { ._theme_loaded = false };
+static Resources_s resources = {
+    ._theme_loaded = false,
+    .background = NULL,
+    ._background_loaded = false,
+    .bgm = NULL,
+    .sound_change = NULL
+};
 
 Theme_s* theme(void)
 {
@@ -144,6 +153,32 @@ void resource_reloadFont(ThemeFonts request)
     resources.fonts[request] = _loadFont(request);
 }
 
+Mix_Chunk* resource_getSoundChange(void)
+{
+    if (resources.sound_change == NULL) {
+        char sound_path[STR_MAX];
+        sprintf(sound_path, "%ssound/change.wav", theme()->path);
+        if (!is_file(sound_path))
+            strcpy(sound_path, "/mnt/SDCARD/miyoo/app/sound/change.wav");
+        if (is_file)
+            resources.sound_change = Mix_LoadWAV(sound_path);
+    }
+    return resources.sound_change;
+}
+
+Mix_Music* resource_getBGM(void)
+{
+    if (resources.bgm == NULL) {
+        char sound_path[STR_MAX];
+        sprintf(sound_path, "%ssound/bgm.mp3", theme()->path);
+        if (!is_file(sound_path))
+            strcpy(sound_path, "/mnt/SDCARD/miyoo/app/sound/bgm.mp3");
+        if (is_file)
+            resources.bgm = Mix_LoadMUS(sound_path);
+    }
+    return resources.bgm;
+}
+
 void resources_free()
 {
     for (int i = 0; i < images_count; i++)
@@ -156,6 +191,12 @@ void resources_free()
 
     if (resources._background_loaded)
         SDL_FreeSurface(resources.background);
+
+    if (resources.sound_change != NULL)
+        Mix_FreeChunk(resources.sound_change);
+
+    if (resources.bgm != NULL)
+        Mix_FreeMusic(resources.bgm);
 
     if (_theme_overrides_changed) {
         bool hide_labels_icons = resources.theme_back.hideLabels.icons,

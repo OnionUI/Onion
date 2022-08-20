@@ -3,14 +3,12 @@
 
 #include <signal.h>
 
+#include "utils/sdl_init.h"
 #include "utils/keystate.h"
 #include "components/list.h"
 
 static int menu_level = 0;
 static List *menu_stack[5];
-
-static SDL_Surface* video;
-static SDL_Surface* screen;
 
 static bool quit = false;
 static bool all_changed = true;
