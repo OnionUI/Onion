@@ -163,13 +163,7 @@ void loadResources()
             char cShort[MAX_LAYER_NAME_SIZE];
             strcpy(cShort, ep->d_name);
 
-            const char *file_name = ep->d_name;
-            if (strcmp(file_name, ".") == 0 || strcmp(file_name, "..") == 0)
-            {
-                // skip special dirs
-                continue;
-            }
-            
+            const char *file_name = ep->d_name;            
             if (file_name[0] != '.') {
                 // Installation check
                 sprintf(basePath,"%s/%s", data_path, file_name);
