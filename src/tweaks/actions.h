@@ -3,6 +3,7 @@
 
 #include "utils/msleep.h"
 #include "theme/resources.h"
+#include "theme/sound.h"
 #include "components/list.h"
 #include "system/settings.h"
 #include "system/rumble.h"
@@ -51,6 +52,8 @@ void action_setStartupApplication(void *pt)
 
 void action_setVibration(void *pt)
 {
+    sound_change();
+    skip_next_change = true;
     settings.vibration = ((ListItem*)pt)->value;
     short_pulse();
 }

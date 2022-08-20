@@ -109,7 +109,7 @@ int suspend(uint32_t mode)
                      (strcmp(comm,"(sh)")) && (!(flags & PF_KTHREAD)) ) {
                     if (mode) {
                         if ( (strcmp(comm,"(runtime.sh)")) && (strcmp(comm,"(updater)")) && (strcmp(comm,"(MainUI)"))
-                          && (strcmp(comm,"(tee)")) && (strncmp(comm,"(audioserver",12)) ) {
+                          && (strcmp(comm,"(tee)")) && (strncmp(comm,"(audioserver",12)) && (strcmp(comm,"(batmon)")) ) {
                             kill(pid, (mode == 1) ? SIGTERM : SIGKILL); ret++;
                         }
                     } else {

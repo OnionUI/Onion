@@ -31,24 +31,14 @@ bool _runCommand(const char *cmd)
         return false;
 }
 
-void _blackScreenWithText(const char *text_str)
+void _blackScreenWithText(const char *title_str, const char *message_str)
 {
     if (video == NULL) {
-        printf("%s\n", text_str);
+        printf("%s: %s\n", title_str, message_str);
         return;
     }
-    
-    int popup_width = 640,
-        popup_height = 160;
 
-    SDL_Surface *text = theme_textboxSurface(text_str, resource_getFont(TITLE), (SDL_Color){255, 255, 255}, ALIGN_CENTER);
-
-    SDL_Rect popup_rect = {320 - popup_width / 2, 240 - popup_height / 2, popup_width, popup_height};
-    SDL_FillRect(screen, &popup_rect, 0);
-
-    SDL_Rect text_rect = {320 - text->w / 2, 240 - text->h / 2};
-    SDL_BlitSurface(text, NULL, screen, &text_rect);
-    SDL_FreeSurface(text);
+    theme_renderDialog(screen, title_str, message_str, false);
 
     SDL_BlitSurface(screen, NULL, video, NULL);
     SDL_Flip(video);
@@ -57,13 +47,14 @@ void _blackScreenWithText(const char *text_str)
 void _runCommandPopup(const char *tool_name, const char *cmd)
 {
     keys_enabled = false;
-    char msg[STR_MAX];
-    sprintf(msg, "Applying tool...\n<%s>", tool_name);
-    _blackScreenWithText(msg);
+    char full_title[STR_MAX];
+    sprintf(full_title, "Tool: %s", tool_name);
+    _blackScreenWithText(full_title, "Applying tool...");
     tool_success = _runCommand(cmd);
     if (video != NULL) msleep(300);
-    _blackScreenWithText(tool_success ? "Done" : "Tool failed");
+    _blackScreenWithText(full_title, tool_success ? "Done" : "Tool failed");
     if (video != NULL) msleep(300);
+    theme_clearDialog();
     keys_enabled = true;
     all_changed = true;
 }

@@ -18,6 +18,8 @@ static bool footer_changed = true;
 static bool battery_changed = true;
 static KeyState keystate[320] = {(KeyState)0};
 static bool keys_enabled = true;
+static bool reset_menus = false;
+static bool skip_next_change = false;
 
 static void sigHandler(int sig)
 {

@@ -232,12 +232,15 @@ void list_getItemValueLabel(ListItem *item, char *out_label)
 
 void list_free(List *list)
 {
+	if (!list->_created)
+		return;
 	for (int i = 0; i < list->item_count; i++) {
 		ListItem *item = &list->items[i];
 		if (item->icon_ptr != NULL)
 			SDL_FreeSurface((SDL_Surface*)item->icon_ptr);
 	}
 	free(list->items);
+	list->_created = false;
 }
 
 #endif // MENU_H__

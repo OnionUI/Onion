@@ -27,6 +27,19 @@ static List _menu_advanced;
 static List _menu_reset_settings;
 static List _menu_tools;
 
+void menu_free_all(void)
+{
+	list_free(&_menu_main);
+	list_free(&_menu_system);
+	list_free(&_menu_button_action);
+	list_free(&_menu_user_interface);
+	list_free(&_menu_theme_overrides);
+	list_free(&_menu_battery_percentage);
+	list_free(&_menu_advanced);
+	list_free(&_menu_reset_settings);
+	list_free(&_menu_tools);
+}
+
 void menu_system(void *_)
 {
 	if (!_menu_system._created) {
@@ -305,22 +318,31 @@ void menu_userInterface(void *_)
 void menu_resetSettings(void *_)
 {
 	if (!_menu_reset_settings._created) {
-		_menu_reset_settings = list_create(5, LIST_SMALL);
+		_menu_reset_settings = list_create(6, LIST_SMALL);
 		strcpy(_menu_reset_settings.title, "Reset settings");
 		list_addItem(&_menu_reset_settings, (ListItem){
-			.label = "Reset all to default"
+			.label = "Reset all to default",
+			.action = action_resetAll
 		});
 		list_addItem(&_menu_reset_settings, (ListItem){
-			.label = "Reset tweaks to default"
+			.label = "Reset tweaks to default",
+			.action = action_resetTweaks
 		});
 		list_addItem(&_menu_reset_settings, (ListItem){
-			.label = "Reset MainUI settings"
+			.label = "Reset theme overrides",
+			.action = action_resetThemeOverrides
 		});
 		list_addItem(&_menu_reset_settings, (ListItem){
-			.label = "Reset RetroArch main configuration"
+			.label = "Reset MainUI settings",
+			.action = action_resetMainUI
 		});
 		list_addItem(&_menu_reset_settings, (ListItem){
-			.label = "Reset RetroArch all core overrides"
+			.label = "Reset RetroArch main configuration",
+			.action = action_resetRAMain
+		});
+		list_addItem(&_menu_reset_settings, (ListItem){
+			.label = "Reset all RetroArch core overrides",
+			.action = action_resetRACores
 		});
 	}
 	menu_stack[++menu_level] = &_menu_reset_settings;

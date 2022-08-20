@@ -33,6 +33,7 @@ typedef enum theme_images
     BUTTON_B,
     LEFT_ARROW,
     RIGHT_ARROW,
+    POP_BG,
     images_count
 } ThemeImages;
 
@@ -106,6 +107,7 @@ SDL_Surface* _loadImage(ThemeImages request)
         case BUTTON_B: return theme_loadImage(t->path, "icon-B-54");
         case LEFT_ARROW: return theme_loadImage(t->path, "icon-left-arrow-24");
         case RIGHT_ARROW: return theme_loadImage(t->path, "icon-right-arrow-24");
+        case POP_BG: return theme_loadImage(t->path, "pop-bg");
         default: break;
     }
     return NULL;

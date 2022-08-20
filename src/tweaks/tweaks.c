@@ -71,20 +71,12 @@ int main(int argc, char *argv[])
 
 	bool menu_combo_pressed = false;
 	bool key_changed = false;
-	bool skip_next_change = false;
 	SDLKey changed_key;
 
 	while (!quit) {
 		uint32_t ticks = SDL_GetTicks();
 		acc_ticks += ticks - last_ticks;
 		last_ticks = ticks;
-
-		if (all_changed) {
-			header_changed = true;
-			list_changed = true;
-			footer_changed = true;
-			battery_changed = true;
-		}
 
 		if (updateKeystate(keystate, &quit, keys_enabled, &changed_key)) {
 			if (keystate[SW_BTN_MENU] >= PRESSED && changed_key != SW_BTN_MENU)
@@ -138,6 +130,16 @@ int main(int argc, char *argv[])
 			key_changed = false;
 		}
 
+		if (reset_menus)
+			reset_tweaksMenu();
+
+		if (all_changed) {
+			header_changed = true;
+			list_changed = true;
+			footer_changed = true;
+			battery_changed = true;
+		}
+
 		if (quit)
 			break;
 
@@ -186,7 +188,7 @@ int main(int argc, char *argv[])
 	value_setSwapTriggers();
 
 	lang_free();
-	list_free(&_menu_main);
+	menu_free_all();
 	resources_free();
    	SDL_FreeSurface(screen);
    	SDL_FreeSurface(video);
