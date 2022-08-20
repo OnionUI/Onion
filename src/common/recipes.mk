@@ -13,11 +13,6 @@ $(TARGET): $(OFILES)
 	@$(ECHO) $(PRINT_BUILD)
 	@$(ECHO) $(COMPILE_CXX_OUT)
 
-../infoPanel/imagesCache.o: ../infoPanel/imagesCache.c
-	$(info CXX $(CXX))
-	$(info CXXFLAGS $(CXXFLAGS))
-	$(CXX) $(CXXFLAGS) -c ../infoPanel/imagesCache.c -o ../infoPanel/imagesCache.o
-
 clean:
 	@$(ECHO) $(PRINT_RECIPE)
 	@rm -f $(TARGET) $(OFILES)
