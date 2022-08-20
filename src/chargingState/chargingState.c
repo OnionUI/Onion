@@ -144,7 +144,7 @@ int main(void)
     system_powersave_on();
 
     while (!quit) {
-        if (poll(fds, 1, suspended ? 1000 - min_delay : 0)) {
+        while (poll(fds, 1, suspended ? 1000 - min_delay : 0)) {
             read(input_fd, &ev, sizeof(ev));
 
             if (ev.type != EV_KEY || ev.value > REPEATING) continue;
