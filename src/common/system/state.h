@@ -9,10 +9,6 @@
 #include "./settings.h"
 #include "./display.h"
 
-#define CMD_TO_RUN_PATH "/mnt/SDCARD/.tmp_update/cmd_to_run.sh"
-#define RETROARCH_CONFIG "/mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg"
-#define HISTORY_PATH "/mnt/SDCARD/Saves/CurrentProfile/lists/content_history.lpl"
-
 typedef enum system_state_e
 {
     MODE_UNKNOWN,

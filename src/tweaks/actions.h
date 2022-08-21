@@ -3,11 +3,13 @@
 
 #include "utils/msleep.h"
 #include "theme/resources.h"
+#include "theme/sound.h"
 #include "components/list.h"
 #include "system/settings.h"
 #include "system/rumble.h"
 
 #include "./appstate.h"
+#include "./values.h"
 
 void action_setAppShortcut(void *pt)
 {
@@ -50,6 +52,8 @@ void action_setStartupApplication(void *pt)
 
 void action_setVibration(void *pt)
 {
+    sound_change();
+    skip_next_change = true;
     settings.vibration = ((ListItem*)pt)->value;
     short_pulse();
 }
@@ -88,7 +92,39 @@ void action_batteryPercentageVisible(void *pt)
     static int value_types[] = {cJSON_NULL, cJSON_False, cJSON_True};
     theme_changeOverride("batteryPercentage", "visible", NULL, value_types[item_value]);
 
-    header_changed = true;
+    battery_changed = true;
+}
+
+void action_batteryPercentageFontFamily(void *pt)
+{
+    int item_value = ((ListItem*)pt)->value;
+    char theme_value[JSON_STRING_LEN];
+    strcpy(theme_value, resources.theme_back.batteryPercentage.font);
+
+    if (item_value == 0) {
+        strcpy(resources.theme.batteryPercentage.font, theme_value);
+    }
+    else {
+        char font_path[JSON_STRING_LEN] = "/mnt/SDCARD/miyoo/app/";
+        strcat(font_path, font_families[item_value - 1]);
+        strcpy(resources.theme.batteryPercentage.font, font_path);
+    }
+
+    theme_changeOverride("batteryPercentage", "font", resources.theme.batteryPercentage.font, item_value == 0 ? cJSON_NULL : cJSON_String);
+    resource_reloadFont(BATTERY);
+    battery_changed = true;
+}
+
+void action_batteryPercentageFontSize(void *pt)
+{
+    int theme_value = resources.theme_back.batteryPercentage.size;
+    int item_value = ((ListItem*)pt)->value;
+    int new_value = item_value == 0 ? theme_value : font_sizes[item_value - 1];
+    resources.theme.batteryPercentage.size = new_value;
+
+    theme_changeOverride("batteryPercentage", "size", &new_value, item_value == 0 ? cJSON_NULL : cJSON_Number);
+    resource_reloadFont(BATTERY);
+    battery_changed = true;
 }
 
 void action_batteryPercentagePosition(void *pt)
@@ -101,7 +137,7 @@ void action_batteryPercentagePosition(void *pt)
     static int value_types[] = {cJSON_NULL, cJSON_True, cJSON_False};
     theme_changeOverride("batteryPercentage", "onleft", NULL, value_types[((ListItem*)pt)->value]);
 
-    header_changed = true;
+    battery_changed = true;
 }
 
 void action_batteryPercentageOffsetX(void *pt)
@@ -113,7 +149,7 @@ void action_batteryPercentageOffsetX(void *pt)
 
     theme_changeOverride("batteryPercentage", "offsetX", &new_value, item_value == 0 ? cJSON_NULL : cJSON_Number);
 
-    header_changed = true;
+    battery_changed = true;
 }
 
 void action_batteryPercentageOffsetY(void *pt)
@@ -125,7 +161,7 @@ void action_batteryPercentageOffsetY(void *pt)
 
     theme_changeOverride("batteryPercentage", "offsetY", &new_value, item_value == 0 ? cJSON_NULL : cJSON_Number);
 
-    header_changed = true;
+    battery_changed = true;
 }
 
 void action_hideLabelsIcons(void *pt)
@@ -176,6 +212,20 @@ void action_setStartupTab(void *pt)
 void action_setTimeSkip(void *pt)
 {
     settings.time_skip = ((ListItem*)pt)->value;
+}
+
+void action_advancedSetFrameThrottle(void *pt)
+{
+    int item_value = ((ListItem*)pt)->value;
+    stored_value_frame_throttle = item_value;
+    stored_value_frame_throttle_changed = true;
+}
+
+void action_advancedSetSwapTriggers(void *pt)
+{
+    int item_value = ((ListItem*)pt)->value;
+    stored_value_swap_triggers = item_value;
+    stored_value_swap_triggers_changed = true;
 }
 
 #endif // TWEAKS_ACTIONS_H__

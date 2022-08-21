@@ -126,6 +126,7 @@ int main(int argc, char *argv[])
 
 	bool cache_used = false;
 	if (exists(image_path)) {
+		g_images_paths_count = 1;
 		drawImage(image_path, screen);
 	}
 	else if(exists(images_json_path))

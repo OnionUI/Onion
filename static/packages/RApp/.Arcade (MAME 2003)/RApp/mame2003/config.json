@@ -1,0 +1,12 @@
+{
+"label":"mame2003",
+"icon":"mame2003.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/MAME2003",
+"imgpath":"../../Imgs/ARCADE",
+"useswap":1,
+"shortname":1,
+"hidebios":1,
+"extlist":"zip"
+}

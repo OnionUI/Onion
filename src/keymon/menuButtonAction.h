@@ -232,11 +232,11 @@ bool menuButtonAction(uint32_t val, bool comboKey)
         else {
             menu_long_press_timeout = 1000;
         }
-        menu_last_pressed = getTicks();
+        menu_last_pressed = getMilliseconds();
         menu_last_state = system_state;
     }
     else if (val == REPEAT) {
-        if (getTicks() - menu_last_pressed >= menu_long_press_timeout) {
+        if (getMilliseconds() - menu_last_pressed >= menu_long_press_timeout) {
             print_debug("LONG-PRESS");
             keyinput_enable();
             menuButtonEvent_longPress();
@@ -253,7 +253,7 @@ bool menuButtonAction(uint32_t val, bool comboKey)
             menu_super_short_pulse();
 
         while(1) {
-            if (poll(fds, 1, 300 - (getTicks() - menu_last_pressed)) > 0) {
+            if (poll(fds, 1, 300 - (getMilliseconds() - menu_last_pressed)) > 0) {
                 if (!keyinput_isValid()) continue;
 
                 if (ev.code == HW_BTN_MENU && ev.value == PRESSED) {

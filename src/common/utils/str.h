@@ -131,5 +131,16 @@ size_t str_trim(char *out, size_t len, const char *str, bool first)
     return out_size;
 }
 
+int str_endsWith(const char *str, const char *suffix)
+{
+    if (!str || !suffix)
+        return 0;
+    size_t lenstr = strlen(str);
+    size_t lensuffix = strlen(suffix);
+    if (lensuffix >  lenstr)
+        return 0;
+    return strncmp(str + lenstr - lensuffix, suffix, lensuffix) == 0;
+}
+
 
 #endif // UTILS_STR_H__

@@ -15,6 +15,7 @@
 #include "./values.h"
 #include "./actions.h"
 #include "./tools.h"
+#include "./reset.h"
 
 static List _menu_main;
 static List _menu_system;
@@ -25,6 +26,19 @@ static List _menu_battery_percentage;
 static List _menu_advanced;
 static List _menu_reset_settings;
 static List _menu_tools;
+
+void menu_free_all(void)
+{
+	list_free(&_menu_main);
+	list_free(&_menu_system);
+	list_free(&_menu_button_action);
+	list_free(&_menu_user_interface);
+	list_free(&_menu_theme_overrides);
+	list_free(&_menu_battery_percentage);
+	list_free(&_menu_advanced);
+	list_free(&_menu_reset_settings);
+	list_free(&_menu_tools);
+}
 
 void menu_system(void *_)
 {
@@ -173,7 +187,7 @@ void menu_buttonAction(void *_)
 void menu_batteryPercentage(void *_)
 {
 	if (!_menu_battery_percentage._created) {
-		_menu_battery_percentage = list_create(7, LIST_SMALL);
+		_menu_battery_percentage = list_create(6, LIST_SMALL);
 		strcpy(_menu_battery_percentage.title, "Battery percentage");
 		list_addItem(&_menu_battery_percentage, (ListItem){
 			.label = "Visible",
@@ -182,6 +196,22 @@ void menu_batteryPercentage(void *_)
 			.value_labels = THEME_TOGGLE_LABELS,
 			.value = value_batteryPercentageVisible(),
 			.action = action_batteryPercentageVisible
+		});
+		list_addItem(&_menu_battery_percentage, (ListItem){
+			.label = "Font family",
+			.item_type = MULTIVALUE,
+			.value_max = num_font_families,
+			.value_formatter = formatter_fontFamily,
+			.value = value_batteryPercentageFontFamily(),
+			.action = action_batteryPercentageFontFamily
+		});
+		list_addItem(&_menu_battery_percentage, (ListItem){
+			.label = "Font size",
+			.item_type = MULTIVALUE,
+			.value_max = num_font_sizes,
+			.value_formatter = formatter_fontSize,
+			.value = value_batteryPercentageFontSize(),
+			.action = action_batteryPercentageFontSize
 		});
 		list_addItem(&_menu_battery_percentage, (ListItem){
 			.label = "Position",
@@ -238,9 +268,6 @@ void menu_themeOverrides(void *_)
 			.action = action_hideLabelsHints
 		});
 		// list_addItem(&_menu_theme_overrides, (ListItem){
-		// 	.label = "Font family", .item_type = MULTIVALUE, .value_max = num_font_families, .value_formatter = formatter_fontFamily
-		// });
-		// list_addItem(&_menu_theme_overrides, (ListItem){
 		// 	.label = "[Title] Font size", .item_type = MULTIVALUE, .value_max = num_font_sizes, .value_formatter = formatter_fontSize
 		// });
 		// list_addItem(&_menu_theme_overrides, (ListItem){
@@ -248,9 +275,6 @@ void menu_themeOverrides(void *_)
 		// });
 		// list_addItem(&_menu_theme_overrides, (ListItem){
 		// 	.label = "[Hint] Font size", .item_type = MULTIVALUE, .value_max = num_font_sizes, .value_formatter = formatter_fontSize
-		// });
-		// list_addItem(&_menu_theme_overrides, (ListItem){
-		// 	.label = "[Battery] Font size", .item_type = MULTIVALUE, .value_max = num_font_sizes, .value_formatter = formatter_fontSize
 		// });
 	}
 	menu_stack[++menu_level] = &_menu_theme_overrides;
@@ -294,22 +318,31 @@ void menu_userInterface(void *_)
 void menu_resetSettings(void *_)
 {
 	if (!_menu_reset_settings._created) {
-		_menu_reset_settings = list_create(5, LIST_SMALL);
+		_menu_reset_settings = list_create(6, LIST_SMALL);
 		strcpy(_menu_reset_settings.title, "Reset settings");
 		list_addItem(&_menu_reset_settings, (ListItem){
-			.label = "Reset all"
+			.label = "Reset all to default",
+			.action = action_resetAll
 		});
 		list_addItem(&_menu_reset_settings, (ListItem){
-			.label = "Reset tweaks"
+			.label = "Reset tweaks to default",
+			.action = action_resetTweaks
 		});
 		list_addItem(&_menu_reset_settings, (ListItem){
-			.label = "Reset MainUI settings"
+			.label = "Reset theme overrides",
+			.action = action_resetThemeOverrides
 		});
 		list_addItem(&_menu_reset_settings, (ListItem){
-			.label = "Reset RetroArch main configuration"
+			.label = "Reset MainUI settings",
+			.action = action_resetMainUI
 		});
 		list_addItem(&_menu_reset_settings, (ListItem){
-			.label = "Reset RetroArch core configuration..." // TODO: This needs to lead to a dynamic menu listing the cores
+			.label = "Reset RetroArch main configuration",
+			.action = action_resetRAMain
+		});
+		list_addItem(&_menu_reset_settings, (ListItem){
+			.label = "Reset all RetroArch core overrides",
+			.action = action_resetRACores
 		});
 	}
 	menu_stack[++menu_level] = &_menu_reset_settings;
@@ -322,14 +355,24 @@ void menu_advanced(void *_)
 		_menu_advanced = list_create(3, LIST_SMALL);
 		strcpy(_menu_advanced.title, "Advanced");
 		list_addItem(&_menu_advanced, (ListItem){
-			.label = "Fast forward multiplier", .item_type = MULTIVALUE, .value_max = 50, .value_formatter = formatter_fastForward
+			.label = "Fast forward multiplier",
+			.item_type = MULTIVALUE,
+			.value_max = 50,
+			.value = value_getFrameThrottle(),
+			.value_formatter = formatter_fastForward,
+			.action = action_advancedSetFrameThrottle
 		});
 		list_addItem(&_menu_advanced, (ListItem){
-			.label = "Swap L/R with L2/R2", .item_type = TOGGLE
+			.label = "Swap triggers (L<>L2, R<>R2)",
+			.item_type = TOGGLE,
+			.value = value_getSwapTriggers(),
+			.action = action_advancedSetSwapTriggers
 		});
-		list_addItem(&_menu_advanced, (ListItem){
-			.label = "Reset settings...", .action = menu_resetSettings
-		});
+		if (exists(RESET_CONFIGS_PAK)) {
+			list_addItem(&_menu_advanced, (ListItem){
+				.label = "Reset settings...", .action = menu_resetSettings
+			});
+		}
 	}
 	menu_stack[++menu_level] = &_menu_advanced;
 	header_changed = true;

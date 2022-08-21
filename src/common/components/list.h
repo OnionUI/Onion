@@ -80,41 +80,47 @@ void list_scroll(List *list)
 		list->scroll_pos = list->item_count - list->scroll_height;
 }
 
-void list_keyUp(List *list, bool key_repeat)
+bool list_keyUp(List *list, bool key_repeat)
 {
 	// Wrap-around (move to bottom)
 	if (list->active_pos == 0) {
 		if (key_repeat)
-			return;
+			return false;
 		list->active_pos = list->item_count - 1;
 	}
 	// Descrease selection (move up)
 	else
 		list->active_pos -= 1;
 	list_scroll(list);
+
+	return true;
 }
 
-void list_keyDown(List *list, bool key_repeat)
+bool list_keyDown(List *list, bool key_repeat)
 {
 	// Wrap-around (move to top)
 	if (list->active_pos == list->item_count - 1) {
 		if (key_repeat)
-			return;
+			return false;
 		list->active_pos = 0;
 	}
 	// Increase selection (move down)
 	else
 		list->active_pos += 1;
 	list_scroll(list);
+
+	return true;
 }
 
-ListItem* list_keyLeft(List *list, bool key_repeat)
+bool list_keyLeft(List *list, bool key_repeat)
 {
 	bool apply_action = false;
 	ListItem *item = list_currentItem(list);
 
 	if (item == NULL)
-		return NULL;
+		return false;
+
+	int old_value = item->value;
 
 	switch (item->item_type) {
 		case TOGGLE:
@@ -137,16 +143,18 @@ ListItem* list_keyLeft(List *list, bool key_repeat)
 	if (apply_action && item->action != NULL)
 		item->action((void*)item);
 
-	return item;
+	return old_value != item->value;
 }
 
-ListItem* list_keyRight(List *list, bool key_repeat)
+bool list_keyRight(List *list, bool key_repeat)
 {
 	bool apply_action = false;
 	ListItem *item = list_currentItem(list);
 
 	if (item == NULL)
-		return NULL;
+		return false;
+
+	int old_value = item->value;
 
 	switch (item->item_type) {
 		case TOGGLE:
@@ -169,15 +177,17 @@ ListItem* list_keyRight(List *list, bool key_repeat)
 	if (apply_action && item->action != NULL)
 		item->action((void*)item);
 
-	return item;
+	return old_value != item->value;
 }
 
-ListItem* list_activateItem(List *list)
+bool list_activateItem(List *list)
 {
 	ListItem *item = list_currentItem(list);
 
 	if (item == NULL)
-		return NULL;
+		return false;
+
+	int old_value = item->value;
 
 	switch (item->item_type) {
 		case TOGGLE: item->value = !item->value; break;
@@ -192,22 +202,22 @@ ListItem* list_activateItem(List *list)
 	if (item->action != NULL)
 		item->action((void*)item);
 
-	return item;
+	return old_value != item->value;
 }
 
-ListItem* list_resetCurrentItem(List *list)
+bool list_resetCurrentItem(List *list)
 {
 	ListItem *item = list_currentItem(list);
 
-	if (item == NULL)
-		return NULL;
+	if (item == NULL || item->value == item->_reset_value)
+		return false;
 
 	item->value = item->_reset_value;
 
 	if (item->action != NULL)
 		item->action((void*)item);
 
-	return item;
+	return true;
 }
 
 void list_getItemValueLabel(ListItem *item, char *out_label)
@@ -222,12 +232,15 @@ void list_getItemValueLabel(ListItem *item, char *out_label)
 
 void list_free(List *list)
 {
+	if (!list->_created)
+		return;
 	for (int i = 0; i < list->item_count; i++) {
 		ListItem *item = &list->items[i];
 		if (item->icon_ptr != NULL)
 			SDL_FreeSurface((SDL_Surface*)item->icon_ptr);
 	}
 	free(list->items);
+	list->_created = false;
 }
 
 #endif // MENU_H__

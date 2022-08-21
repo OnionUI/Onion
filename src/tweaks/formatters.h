@@ -6,6 +6,7 @@
 #include "utils/str.h"
 #include "components/list.h"
 #include "system/state.h"
+
 #include "./tools.h"
 
 #define BUTTON_MAINUI_LABELS {"Context menu", "GameSwitcher", "Resume game"}

@@ -9,25 +9,33 @@
 #include <assert.h>
 #include <time.h>
 #include <sys/ioctl.h>
+#include <linux/fb.h>
+#include <linux/input.h>
+#include <poll.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 
 #include "utils/msleep.h"
-#include "utils/keystate.h"
 #include "utils/log.h"
 #include "system/battery.h"
 #include "system/system.h"
 #include "system/display.h"
 #include "system/settings.h"
-#include "system/keymap_sw.h"
+#include "system/keymap_hw.h"
 #include "system/rumble.h"
 #include "theme/config.h"
 
-#define SHUTDOWN_TIMEOUT 500
+#define RELEASED  0
+#define PRESSED   1
+#define REPEATING 2
+
 #define DISPLAY_TIMEOUT 10000
 
 static bool quit = false;
 static bool suspended = false;
+static int input_fd;
+static struct input_event ev;
+static struct pollfd fds[1];
 
 void getImageDir(const char *theme_path, char *image_dir)
 {
@@ -59,8 +67,22 @@ void suspend(bool enabled, SDL_Surface *video)
     display_setScreen(!suspended);
 }
 
+static void sigHandler(int sig)
+{
+    switch (sig) {
+        case SIGINT:
+        case SIGTERM:
+            quit = true;
+            break;
+        default: break;
+    }
+}
+
 int main(void)
 {
+    signal(SIGINT, sigHandler);
+    signal(SIGTERM, sigHandler);
+
     bool turn_off = false;
 
     settings_load();
@@ -76,6 +98,7 @@ int main(void)
     SDL_Surface* video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
     SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
 
+    int frame_delay = 80;
     int frame_count = 0;
     SDL_Surface *frames[24];
     SDL_Surface *image;
@@ -87,18 +110,33 @@ int main(void)
             frames[frame_count++] = image;
     }
 
-    int fps = frame_count > 1 ? 12 : 1;
-    printf_debug("Frame count: %d\n", frame_count);
+    char json_path[STR_MAX];
+    sprintf(json_path, "%s/chargingState.json", image_dir);
+    if (is_file(json_path)) {
+        char json_value[STR_MAX];
+        if (file_parseKeyValue(json_path, "frame_delay", json_value, ':', 0) != NULL)
+            frame_delay = atoi(json_value) / 1000;
+    }
 
-    KeyState keystate[320] = {RELEASED};
-    bool keychange = false;
+    printf_debug("Frame count: %d\n", frame_count);
+    printf_debug("Frame delay: %d ms\n", frame_delay);
+
+    // Prepare for Poll button input
+    input_fd = open("/dev/input/event0", O_RDONLY);
+    memset(&fds, 0, sizeof(fds));
+    fds[0].fd = input_fd;
+    fds[0].events = POLLIN;
+
     bool power_pressed = false;
 
-    uint32_t display_timer = 0,
-             shutdown_timer = 0,
-             acc_ticks = 0,
-             last_ticks = SDL_GetTicks(),
-             time_step = 1000 / fps;
+    int min_delay = 40;
+
+    if (frame_delay < min_delay)
+        frame_delay = min_delay;
+
+    int repeat_power = 0,
+        animation_ticks = 0,
+        display_ticks = 0;
 
     int current_frame = 0;
 
@@ -106,43 +144,48 @@ int main(void)
     system_powersave_on();
 
     while (!quit) {
-        uint32_t ticks = SDL_GetTicks(),
-                 delta = ticks - last_ticks;
-        last_ticks = ticks;
+        while (poll(fds, 1, suspended ? 1000 - min_delay : 0)) {
+            read(input_fd, &ev, sizeof(ev));
 
-        if ((keychange = updateKeystate(keystate, &quit, true))) {
-            if (keystate[SW_BTN_POWER] == REPEATING && (ticks - shutdown_timer) > SHUTDOWN_TIMEOUT) {
-                short_pulse();
-                quit = true; // power on
+            if (ev.type != EV_KEY || ev.value > REPEATING) continue;
+
+            if (ev.code == HW_BTN_POWER) {
+                if (ev.value == PRESSED) {
+                    power_pressed = true;
+                    repeat_power = 0;
+                }
+                else if (ev.value == RELEASED && power_pressed) {
+                    suspend(!suspended, video);
+                    power_pressed = false;
+                }
+                else if (ev.value == REPEATING) {
+                    if (repeat_power >= 5) {
+                        short_pulse();
+                        quit = true; // power on
+                    }
+                    repeat_power++;
+                }
             }
-            else if (keystate[SW_BTN_POWER] == PRESSED) {
-                shutdown_timer = ticks;
-                power_pressed = true;
-            }
-            else if (keystate[SW_BTN_POWER] == RELEASED && power_pressed) {
-                suspend(!suspended, video); // toggle display
-                power_pressed = false;
-            }
-            display_timer = ticks;
+            
+            display_ticks = 0;
         }
 
         if (!battery_isCharging()) {
             quit = true;
             turn_off = true;
+            break;
         }
 
         if (quit)
             break;
 
-        if (!suspended && (ticks - display_timer) > DISPLAY_TIMEOUT)
+        if (!suspended && display_ticks >= DISPLAY_TIMEOUT)
             suspend(true, video);
 
         if (suspended)
             continue;
 
-        acc_ticks += delta;
-
-        while (acc_ticks >= time_step) {
+        if (animation_ticks >= frame_delay) {
             // Clear screen
             SDL_FillRect(screen, NULL, 0);
 
@@ -156,21 +199,27 @@ int main(void)
             SDL_BlitSurface(screen, NULL, video, NULL);
             SDL_Flip(video);
 
-            acc_ticks -= time_step;
+            animation_ticks = animation_ticks - frame_delay;
         }
+        
+        animation_ticks += min_delay;
+        display_ticks += min_delay;
+        msleep(min_delay);
     }
 
     // Clear the screen when exiting
     SDL_FillRect(video, NULL, 0);
     SDL_Flip(video);
 
+    #ifndef PLATFORM_MIYOOMINI
+    msleep(100);
+    #endif
+
     for (int i = 0; i < frame_count; i++)
         SDL_FreeSurface(frames[i]);
     SDL_FreeSurface(screen);
     SDL_FreeSurface(video);
     SDL_Quit();
-
-    msleep(100);
 
     #ifdef PLATFORM_MIYOOMINI
     if (turn_off) {

@@ -19,13 +19,12 @@ int main(int argc, char *argv[])
 
     display_init();
 
-    int ticks, last_check = 0;
+    int ticks = CHECK_BATTERY_TIMEOUT;
 
     while (!quit) {
-        ticks = getTicks();
         config_get("battery/warnAt", "%d", &warn_at);
 
-        if (ticks - last_check > CHECK_BATTERY_TIMEOUT) {
+        if (ticks >= CHECK_BATTERY_TIMEOUT) {
             adc_value = updateADCValue(adc_value);
             current_percentage = batteryPercentage(adc_value);
 
@@ -34,17 +33,20 @@ int main(int argc, char *argv[])
                 file_put_sync(fp, "/tmp/percBat", "%d", current_percentage);
             }
 
-            last_check = ticks;
+            ticks = 0;
         }
 
         #ifdef PLATFORM_MIYOOMINI
-        if (is_suspended || battery_isCharging())
+        if (is_suspended)
             batteryWarning_hide();
         else if (current_percentage < warn_at && !config_flag_get(".noBatteryWarning"))
             batteryWarning_show();
         else
             batteryWarning_hide();
         #endif
+
+        ticks++;
+        sleep(1);
     }
 
     return EXIT_SUCCESS;

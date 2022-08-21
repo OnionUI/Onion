@@ -6,10 +6,8 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <linux/input.h>
-#include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
-#include <SDL/SDL_ttf.h>
 
+#include "utils/sdl_init.h"
 #include "utils/file.h"
 #include "utils/log.h"
 #include "utils/keystate.h"
@@ -20,6 +18,7 @@
 #include "system/lang.h"
 #include "theme/theme.h"
 #include "theme/background.h"
+#include "theme/sound.h"
 #include "components/list.h"
 
 #include "./appstate.h"
@@ -44,15 +43,8 @@ int main(int argc, char *argv[])
     signal(SIGINT, sigHandler);
     signal(SIGTERM, sigHandler);
 
-	if (use_display || strlen(apply_tool) == 0) {
-		SDL_Init(SDL_INIT_VIDEO);
-		SDL_ShowCursor(SDL_DISABLE);
-		SDL_EnableKeyRepeat(300, 50);
-		TTF_Init();
-
-		video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
-		screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
-	}
+	if (use_display || strlen(apply_tool) == 0)
+		SDL_InitDefault(true);
 
 	settings_load();
 	lang_load();
@@ -77,44 +69,45 @@ int main(int argc, char *argv[])
 			 last_ticks = SDL_GetTicks(),
 			 time_step = 1000 / FRAMES_PER_SECOND;
 
-	print_debug("Got to main loop");
+	bool menu_combo_pressed = false;
+	bool key_changed = false;
+	SDLKey changed_key;
 
 	while (!quit) {
 		uint32_t ticks = SDL_GetTicks();
 		acc_ticks += ticks - last_ticks;
 		last_ticks = ticks;
 
-		if (all_changed) {
-			header_changed = true;
-			list_changed = true;
-			footer_changed = true;
-			battery_changed = true;
-		}
+		if (updateKeystate(keystate, &quit, keys_enabled, &changed_key)) {
+			if (keystate[SW_BTN_MENU] >= PRESSED && changed_key != SW_BTN_MENU)
+				menu_combo_pressed = true;
 
-		if (updateKeystate(keystate, &quit, keys_enabled)) {
 			if (keystate[SW_BTN_UP] >= PRESSED) {
-				list_keyUp(menu_stack[menu_level], keystate[SW_BTN_UP] == REPEATING);
-				list_changed = true;
+				key_changed = list_keyUp(menu_stack[menu_level], keystate[SW_BTN_UP] == REPEATING);
 			}
 			else if (keystate[SW_BTN_DOWN] >= PRESSED) {
-				list_keyDown(menu_stack[menu_level], keystate[SW_BTN_DOWN] == REPEATING);
-				list_changed = true;
+				key_changed = list_keyDown(menu_stack[menu_level], keystate[SW_BTN_DOWN] == REPEATING);
 			}
 			else if (keystate[SW_BTN_LEFT] >= PRESSED) {
-				list_keyLeft(menu_stack[menu_level], keystate[SW_BTN_LEFT] == REPEATING);
-				list_changed = true;
+				key_changed = list_keyLeft(menu_stack[menu_level], keystate[SW_BTN_LEFT] == REPEATING);
 			}
 			else if (keystate[SW_BTN_RIGHT] >= PRESSED) {
-				list_keyRight(menu_stack[menu_level], keystate[SW_BTN_RIGHT] == REPEATING);
-				list_changed = true;
+				key_changed = list_keyRight(menu_stack[menu_level], keystate[SW_BTN_RIGHT] == REPEATING);
 			}
 			else if (keystate[SW_BTN_Y] == PRESSED) {
-				list_resetCurrentItem(menu_stack[menu_level]);
-				list_changed = true;
+				key_changed = list_resetCurrentItem(menu_stack[menu_level]);
 			}
 			else if (keystate[SW_BTN_A] == PRESSED) {
-				list_activateItem(menu_stack[menu_level]);
-				list_changed = true;
+				if (list_currentItem(menu_stack[menu_level])->action != NULL) {
+					sound_change();
+					skip_next_change = true;
+				}
+				key_changed = list_activateItem(menu_stack[menu_level]) || header_changed;
+			}
+			else if (changed_key == SW_BTN_MENU && keystate[SW_BTN_MENU] == RELEASED) {
+				if (!menu_combo_pressed)
+					quit = true;
+				menu_combo_pressed = false;
 			}
 			else if (keystate[SW_BTN_B] == PRESSED) {
 				if (menu_level == 0)
@@ -123,11 +116,28 @@ int main(int argc, char *argv[])
 					menu_stack[menu_level] = NULL;
 					menu_level--;
 					header_changed = true;
-					list_changed = true;
+					key_changed = true;
 				}
 			}
-			else if (keystate[SW_BTN_MENU] == PRESSED)
-				quit = true;
+
+			if (!skip_next_change) {
+				if (key_changed)
+					sound_change();
+			}
+			else skip_next_change = false;
+
+			list_changed = list_changed || key_changed;
+			key_changed = false;
+		}
+
+		if (reset_menus)
+			reset_tweaksMenu();
+
+		if (all_changed) {
+			header_changed = true;
+			list_changed = true;
+			footer_changed = true;
+			battery_changed = true;
 		}
 
 		if (quit)
@@ -137,7 +147,7 @@ int main(int argc, char *argv[])
 			battery_changed = true;
 
 		if (acc_ticks >= time_step) {
-			if (header_changed)
+			if (header_changed || battery_changed)
 				theme_renderHeader(screen, menu_stack[menu_level]->title, false);
 
 			if (list_changed)
@@ -174,9 +184,11 @@ int main(int argc, char *argv[])
 	SDL_Flip(video);
 
 	settings_save();
-	
+	value_setFrameThrottle();
+	value_setSwapTriggers();
+
 	lang_free();
-	list_free(&_menu_main);
+	menu_free_all();
 	resources_free();
    	SDL_FreeSurface(screen);
    	SDL_FreeSurface(video);

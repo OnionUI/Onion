@@ -12,7 +12,7 @@ typedef enum
 
 static SDL_Event keystate_event;
 
-bool updateKeystate(KeyState keystate[320], bool *quit_flag, bool enabled)
+bool updateKeystate(KeyState keystate[320], bool *quit_flag, bool enabled, SDLKey *changed_key)
 {
     bool retval = false;
 
@@ -31,15 +31,21 @@ bool updateKeystate(KeyState keystate[320], bool *quit_flag, bool enabled)
                     keystate[key] = REPEATING;
                 else
                     keystate[key] = PRESSED;
+                if (changed_key != NULL)
+                    *changed_key = key;
                 retval = true;
                 break;
             case SDL_KEYUP:
                 keystate[key] = RELEASED;
+                if (changed_key != NULL)
+                    *changed_key = key;
                 retval = true;
                 break;
             default: break;
         }
     }
+    
+	msleep(15);
 
     return retval;
 }

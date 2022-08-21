@@ -249,16 +249,8 @@ int main(void)
     bool changed = true;
     KeyState keystate[320] = {(KeyState)0};
 
-    uint32_t acc_ticks = 0,
-			 last_ticks = SDL_GetTicks(),
-			 time_step = 1000 / 60;
-
 	while (!quit) {
-		uint32_t ticks = SDL_GetTicks();
-		acc_ticks += ticks - last_ticks;
-		last_ticks = ticks;
-
-        if (updateKeystate(keystate, &quit, true)) {
+        if (updateKeystate(keystate, &quit, true, NULL)) {
             if (keystate[SW_BTN_B] == PRESSED)
                 quit = true;
 

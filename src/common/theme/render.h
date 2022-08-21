@@ -6,5 +6,6 @@
 #include "./render/header.h"
 #include "./render/list.h"
 #include "./render/textbox.h"
+#include "./render/dialog.h"
 
 #endif // THEME_RENDER_H__

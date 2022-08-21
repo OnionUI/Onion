@@ -185,4 +185,52 @@ char* file_parseKeyValue(const char *file_path, const char *key_in, char *value_
     return value_out;
 }
 
+void file_changeKeyValue(const char *file_path, const char *key, const char *replacement_line)
+{
+    FILE *fp, *cp;
+    char *line = NULL;
+    size_t len = 0;
+    ssize_t read;
+
+    fp = fopen(file_path, "r");
+    cp = fopen("temp", "w+");
+    if (fp == NULL)
+        exit(EXIT_FAILURE);
+        
+    int key_len = strlen(key);
+    int line_idx = 0, line_len;
+    bool found = false;
+
+    printf_debug("Changing '%s' in '%s'\n", key, file_path);
+
+    while ((read = getline(&line, &len, fp)) != -1) {
+        for (line_idx = 0; line_idx < read && strchr("\r\n\t {},", (unsigned char)line[line_idx]) != NULL; line_idx++);
+        if (strncmp(line + line_idx, key, key_len) == 0) {
+            fprintf(cp, "%s\n", replacement_line);
+            printf_debug("Replace: %s\n", replacement_line);
+            found = true;
+            continue;
+        }
+
+        line_len = strlen(line);
+        if (line[line_len - 1] != '\n') {
+            line[line_len - 1] = '\n';
+            line[line_len] = '\0';
+        }
+        fprintf(cp, "%s", line);
+    }
+    
+    if (!found) {
+        printf_debug("Append: %s\n", replacement_line);
+        fprintf(cp, "%s\n", replacement_line);
+    }
+
+    fclose(fp);
+    fclose(cp);
+    if (line) free(line);
+
+    remove(file_path);
+    rename("temp", file_path);
+}
+
 #endif // UTILS_FILE_H__

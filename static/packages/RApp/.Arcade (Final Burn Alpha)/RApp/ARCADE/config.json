@@ -1,0 +1,12 @@
+{
+"label":"ARCADE FB",
+"icon":"../../Icons/arcade.png",
+"iconsel":"../../Icons/arcade_sel.png",
+"launch":"launch.sh",
+"rompath":"../../Roms/FBALPHA",
+"imgpath":"../../Roms/FBALPHA/Imgs",
+"useswap":1,
+"shortname":1,
+"hidebios":1,
+"extlist":"zip|ZIP|7z|7Z|cue|CUE"
+}
