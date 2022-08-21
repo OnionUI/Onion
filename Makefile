@@ -171,5 +171,5 @@ lib:
 	@cd $(ROOT_DIR)/include/SDL && make clean && make
 
 test:
-	mkdir -p $(BUILD_TEST_DIR) && cd $(ROOT_DIR)/test && BUILD_DIR=$(BUILD_TEST_DIR)/ make
+	@mkdir -p $(BUILD_TEST_DIR) && cd $(ROOT_DIR)/test && BUILD_DIR=$(BUILD_TEST_DIR)/ make
 	$(BUILD_TEST_DIR)/test_infoPanel

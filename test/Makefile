@@ -9,6 +9,4 @@ include ../src/common/commands.mk
 include ../src/common/recipes.mk
 
 ../src/infoPanel/imagesCache.o: ../src/infoPanel/imagesCache.c
-	$(info CXX $(CXX))
-	$(info CXXFLAGS $(CXXFLAGS))
-	$(CXX) $(CXXFLAGS) -c ../src/infoPanel/imagesCache.c -o ../src/infoPanel/imagesCache.o
+	@$(CXX) $(CXXFLAGS) -c ../src/infoPanel/imagesCache.c -o ../src/infoPanel/imagesCache.o
