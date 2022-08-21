@@ -13,6 +13,7 @@ ROOT_DIR            := $(shell pwd -P)
 SRC_DIR             := $(ROOT_DIR)/src
 THIRD_PARTY_DIR     := $(ROOT_DIR)/third-party
 BUILD_DIR           := $(ROOT_DIR)/build
+BUILD_TEST_DIR      := $(ROOT_DIR)/build_test
 BIN_DIR             := $(ROOT_DIR)/build/.tmp_update/bin
 DIST_FULL           := $(ROOT_DIR)/dist/full
 DIST_CORE           := $(ROOT_DIR)/dist/core
@@ -33,7 +34,7 @@ include ./src/common/commands.mk
 
 ###########################################################
 
-.PHONY: all version core apps external release clean git-clean with-toolchain patch lib
+.PHONY: all version core apps external release clean git-clean with-toolchain patch lib test
 
 all: dist
 
@@ -138,7 +139,7 @@ release: dist
 
 clean:
 	@$(ECHO) $(PRINT_RECIPE)
-	@rm -rf $(BUILD_DIR) $(ROOT_DIR)/dist $(ROOT_DIR)/temp/configs
+	@rm -rf $(BUILD_DIR) $(BUILD_TEST_DIR) $(ROOT_DIR)/dist $(ROOT_DIR)/temp/configs
 	@rm -f $(CACHE)/.setup
 	@find include src -type f -name *.o -exec rm -f {} \;
 
@@ -170,4 +171,5 @@ lib:
 	@cd $(ROOT_DIR)/include/SDL && make clean && make
 
 test:
-	@mkdir -p $(BUILD_DIR)/test && cd $(SRC_DIR)/test && BUILD_DIR=$(BUILD_DIR)/test make && $(BUILD_DIR)/test/test_infoPanel
+	mkdir -p $(BUILD_TEST_DIR) && cd $(ROOT_DIR)/test && BUILD_DIR=$(BUILD_TEST_DIR)/ make
+	$(BUILD_TEST_DIR)/test_infoPanel

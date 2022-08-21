@@ -3,7 +3,7 @@
 #include <string>
 #include <SDL/SDL.h>
 
-#include "../infoPanel/imagesCache.h"
+#include "../src/infoPanel/imagesCache.h"
 
 #define STR_MAX 256
 
