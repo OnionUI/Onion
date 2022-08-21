@@ -81,6 +81,25 @@ void keyinput_send(unsigned short code, signed int value)
     print_debug("Keys sent");
 }
 
+void keyinput_sendMulti(int n, int code_value_pairs[n][2])
+{
+    if (keyinput_disabled)
+        return;
+    char cmd[512];
+    strcpy(cmd, "./bin/sendkeys ");
+
+    for (int i = 0; i < n; i++) {
+        int code = code_value_pairs[i][0];
+        int value = code_value_pairs[i][1];
+        _ignoreQueue_add(code, value);
+        sprintf(cmd + strlen(cmd), "%d %d ", code, value);
+    }
+
+    printf_debug("Send keys: %s\n", cmd);
+    system(cmd);
+    print_debug("Keys sent");
+}
+
 /**
  * @brief stop input event for other processes
  * 

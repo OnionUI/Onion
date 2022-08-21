@@ -382,6 +382,7 @@ int main(void)
 
         if (game_list_len == 0) {
             SDL_BlitSurface(imageBackgroundNoGame, NULL, screen, NULL);
+            image_drawn = true;
         }
         else {
             SDL_Surface *imageBackgroundGame = imageCache_getItem(&current_game);

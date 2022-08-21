@@ -54,7 +54,7 @@ bool _confirmReset(const char *title_str, const char *message_str)
 
 void action_resetTweaks(void *pt)
 {
-    if (!_disable_confirm && !_confirmReset("Reset tweaks to default", "Are you sure you want to\nreset tweaks to default?"))
+    if (!_disable_confirm && !_confirmReset("Reset tweaks", "Are you sure you want to\nreset tweaks?"))
         return;
     rename(RESET_CONFIGS_PAK, "/mnt/SDCARD/.tmp_update/temp");
     system("rm -rf /mnt/SDCARD/.tmp_update/config && mkdir -p /mnt/SDCARD/.tmp_update/config");
@@ -100,7 +100,7 @@ void action_resetRACores(void *pt)
 
 void action_resetAll(void *pt)
 {
-    if (!_confirmReset("Reset all to default", "Are you sure you want to\nreset everything to default?"))
+    if (!_confirmReset("Reset everything", "Are you sure you want to\nreset everything?"))
         return;
     _disable_confirm = true;
     action_resetTweaks(pt);
