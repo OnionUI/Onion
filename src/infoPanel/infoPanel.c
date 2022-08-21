@@ -162,11 +162,11 @@ int main(int argc, char *argv[])
 				bool navigating_forward = true;
 				switch(event.key.keysym.sym) {
 				case SW_BTN_A:
-				case SW_BTN_LEFT:
+				case SW_BTN_RIGHT:
 					navigating_forward = true;
 					break;
 				case SW_BTN_B:
-				case SW_BTN_RIGHT:
+				case SW_BTN_LEFT:
 					navigating_forward = false;
 					break;
 				case SW_BTN_MENU:
