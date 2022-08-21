@@ -69,7 +69,6 @@ int main(int argc, char *argv[])
     int spinner_tick = 0;
 
     SDL_Event event;
-    int start = SDL_GetTicks();
 
     uint32_t acc_ticks = 0,
              last_ticks = SDL_GetTicks(),
@@ -155,7 +154,6 @@ int main(int argc, char *argv[])
 
         while (!quit) {
             while (SDL_PollEvent(&event)) {
-                SDLKey key = event.key.keysym.sym;
                 if (event.type == SDL_KEYUP)
                     quit = true;
             }

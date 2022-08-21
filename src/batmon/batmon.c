@@ -19,12 +19,12 @@ int main(int argc, char *argv[])
 
     display_init();
 
-    int ticks = CHECK_BATTERY_TIMEOUT;
+    int ticks = CHECK_BATTERY_TIMEOUT_S;
 
     while (!quit) {
         config_get("battery/warnAt", "%d", &warn_at);
 
-        if (ticks >= CHECK_BATTERY_TIMEOUT) {
+        if (ticks >= CHECK_BATTERY_TIMEOUT_S) {
             adc_value = updateADCValue(adc_value);
             current_percentage = batteryPercentage(adc_value);
 

@@ -2,6 +2,9 @@
 #define FLAGS_H__
 
 #include <stdbool.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #include "file.h"
 #include "str.h"

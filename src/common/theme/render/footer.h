@@ -37,7 +37,7 @@ void theme_renderStandardHint(SDL_Surface *screen, const char *btn_a_str, const 
         offsetX += label_open->w + 30;
     }
 
-    if (label_b_str) {
+    if (strlen(label_b_str) > 0) {
         SDL_Surface *button_b = resource_getSurface(BUTTON_B);
         SDL_Rect btn_b_rect = {offsetX, 450 - button_b->h / 2};
         SDL_BlitSurface(button_b, NULL, screen, &btn_b_rect);

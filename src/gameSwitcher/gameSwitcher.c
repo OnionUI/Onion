@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <stdbool.h>
 #include <libgen.h>
+#include <pthread.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <signal.h>
@@ -15,7 +16,6 @@
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
 
-// #include "SDL/SDL_rotozoom.h"
 #include "png/png.h"
 
 #include "utils/utils.h"
@@ -25,6 +25,7 @@
 #include "utils/log.h"
 #include "utils/keystate.h"
 #include "system/keymap_sw.h"
+#include "utils/imageCache.h"
 
 #define MAXHISTORY 50
 #define MAXHROMNAMESIZE 250
@@ -59,7 +60,7 @@ static void sigHandler(int sig)
     }
 }
 
-char sTotalTimePlayed[50];
+char sTotalTimePlayed[20];
 
 // Game history list
 typedef struct
@@ -67,7 +68,7 @@ typedef struct
     uint32_t hash;
     char name[MAXHROMNAMESIZE];
     char RACommand[STR_MAX * 2 + 80] ;
-    char totalTime[30];
+    char totalTime[50];
     int jsonIndex;
 } Game_s;
 static Game_s game_list[MAXHISTORY];
@@ -122,7 +123,6 @@ void SetBrightness(int value) // value = 0-10
 
 int readRomDB()
 {
-    FILE *fp;
     int totalTimePlayed = 0 ;
     // Check to avoid corruption
     if (exists(ROM_DB_PATH)) {
@@ -138,7 +138,7 @@ int readRomDB()
         }
 
         int h = totalTimePlayed / 3600;
-        sprintf(sTotalTimePlayed, "%dh", h);
+        snprintf(sTotalTimePlayed, 19, "%dh", h);
         fclose(file);
     }
     return 1;
@@ -196,7 +196,7 @@ void readHistory()
             if (nTime >= 0) {
                 int h = nTime / 3600;
                 int m = (nTime - 3600 * h) / 60;
-                sprintf(game->totalTime, "%d:%02d / %s", h, m, sTotalTimePlayed);
+                snprintf(game->totalTime, 49, "%d:%02d / %s", h, m, sTotalTimePlayed);
             }
         }
 
@@ -205,19 +205,22 @@ void readHistory()
 }
 
 void removeCurrentItem() {
+    imageCache_removeItem(current_game);
     if (items != NULL)
         cJSON_DeleteItemFromArray(items, game_list[current_game].jsonIndex);
     json_save(json_root, HISTORY_PATH);
 }
 
-SDL_Surface* loadRomscreen(Game_s *game)
+SDL_Surface* loadRomscreen(int index)
 {
+    Game_s *game = &game_list[index];
     char currPicture[STR_MAX];
     sprintf(currPicture, ROM_SCREENS_DIR "/%"PRIu32".png", game->hash);
     if (!exists(currPicture))
         sprintf(currPicture, ROM_SCREENS_DIR "/%s.png", file_removeExtension(game->name));
     if (exists(currPicture))
         return IMG_Load(currPicture);
+    print_debug("Rom screen failed");
     return NULL;
 }
 
@@ -238,41 +241,32 @@ int main(void)
     signal(SIGINT, sigHandler);
     signal(SIGTERM, sigHandler);
 
-    SDL_Color    color = {255,255,255,0};
-    TTF_Font*    font;
-    SDL_Surface*    imagePlay;
-    SDL_Surface*    imageGameName;
-    SDL_Surface*     surfaceArrowLeft = IMG_Load("res/arrowLeft.png");
-    SDL_Surface*     surfaceArrowRight = IMG_Load("res/arrowRight.png");
-
-    SDL_Rect    rectBatt = { 566, -1, 113, 29};
-    SDL_Rect    rectLum = { 106, 59, 40, 369};
-    SDL_Rect    rectWhiteLigne = { 0, 0, 1280, 39};
-    SDL_Rect    rectMenuBar = {0,0,640,480};
-    SDL_Rect    rectTime = { 263, -1, 150, 39};
-    SDL_Rect    rectBatteryIcon = {541,6,13,27};
-    SDL_Rect    rectFooterHelp = { 420, 441, 220, 39};
-    SDL_Rect    rectGameName = { 9, 439, 640, 39};
-
-    SDL_Rect     rectArrowLeft = { 6, 217, 28, 32};
-    SDL_Rect     rectArrowRight = { 604, 217, 28, 32};
-
     readRomDB();
     readHistory();
 
     print_debug("Read ROM DB and history");
 
+    imageCache_load(&current_game, loadRomscreen, game_list_len);
+
+    SDL_Color color = {255,255,255,0};
+    TTF_Font *font;
+    SDL_Surface *imagePlay;
+    SDL_Surface *imageGameName;
+    SDL_Surface *surfaceArrowLeft = IMG_Load("res/arrowLeft.png");
+    SDL_Surface *surfaceArrowRight = IMG_Load("res/arrowRight.png");
+
+    SDL_Rect rectLum = {106, 59, 40, 369};
+    SDL_Rect rectMenuBar = {0, 0, 640, 480};
+    SDL_Rect rectTime = {263, -1, 150, 39};
+    SDL_Rect rectFooterHelp = {420, 441, 220, 39};
+    SDL_Rect rectGameName = {9, 439, 640, 39};
+
+    SDL_Rect rectArrowLeft = { 6, 217, 28, 32};
+    SDL_Rect rectArrowRight = { 604, 217, 28, 32};
+
     int nExitToMiyoo = 0;
 
-    SDL_Surface* imageMenuBar = IMG_Load("res/menuBar.png");
-    SDL_Surface* imageTuto;
-
-    int bShowBoot = 0;
-
-    int input_fd = open("/dev/input/event0", O_RDONLY);
-    struct input_event ev;
-
-    int firstPass = 1;
+    SDL_Surface *imageMenuBar = IMG_Load("res/menuBar.png");
 
     SDL_Init(SDL_INIT_VIDEO);
     SDL_ShowCursor(SDL_DISABLE);
@@ -286,42 +280,22 @@ int main(void)
 
     print_debug("Loading images");
 
-    SDL_Surface* imageBackgroundDefault = IMG_Load("res/bootScreen.png");
-    SDL_Surface* imageBackgroundLowBat = IMG_Load("res/lowBat.png");
-    SDL_Surface* imageBackgroundNoGame= IMG_Load("res/noGame.png");
-    SDL_Surface* imageRemoveDialog= IMG_Load("res/removeDialog.png");
-    SDL_Surface* imageBackgroundGame = NULL;
-    SDL_Surface* imageFooterHelp = IMG_Load("res/footerHelp.png");
-
-    uint32_t acc_ticks = 0,
-			 last_ticks = SDL_GetTicks(),
-			 time_step = 1000 / 60;
+    SDL_Surface *imageBackgroundDefault = IMG_Load("res/bootScreen.png");
+    SDL_Surface *imageBackgroundLowBat = IMG_Load("res/lowBat.png");
+    SDL_Surface *imageBackgroundNoGame= IMG_Load("res/noGame.png");
+    SDL_Surface *imageRemoveDialog= IMG_Load("res/removeDialog.png");
+    SDL_Surface *imageFooterHelp = IMG_Load("res/footerHelp.png");
 
     bool changed = true;
+    bool image_drawn = false;
+
     KeyState keystate[320] = {(KeyState)0};
     bool menu_pressed = false;
 
 	while (!quit) {
-		uint32_t ticks = SDL_GetTicks();
-		acc_ticks += ticks - last_ticks;
-		last_ticks = ticks;
-
         int bBrightChange = 0;
-        if (firstPass > 0) {
-            // First screen draw
-            firstPass ++;
 
-            // Needs another refresh
-            if (firstPass > 2)
-                firstPass = 0;
-
-            print_debug("loading rom screen");
-            imageBackgroundGame = loadRomscreen(&game_list[current_game]);
-
-            if (game_list_len > 1)
-                SDL_BlitSurface(surfaceArrowRight, NULL, screen, &rectArrowRight);
-        }
-        else if (updateKeystate(keystate, &quit, true, NULL)) {
+        if (updateKeystate(keystate, &quit, true, NULL)) {
 			if (keystate[SW_BTN_MENU] == PRESSED)
                 menu_pressed = true;
 
@@ -331,29 +305,16 @@ int main(void)
             }
 
             if (keystate[SW_BTN_RIGHT] >= PRESSED) {
-                if (current_game < game_list_len - 1) {
+                if (current_game < game_list_len - 1)
                     current_game++;
-
-                    if (imageBackgroundGame != NULL)
-                        SDL_FreeSurface(imageBackgroundGame);
-                    imageBackgroundGame = loadRomscreen(&game_list[current_game]);
-                }
+                changed = true;
             }
 
             if (keystate[SW_BTN_LEFT] >= PRESSED) {
-                if (current_game > 0) {
+                if (current_game > 0)
                     current_game--;
-                    if (imageBackgroundGame != NULL)
-                        SDL_FreeSurface(imageBackgroundGame);
-                    imageBackgroundGame = loadRomscreen(&game_list[current_game]);
-                }
+                changed = true;
             }
-
-            // if (y_pressed) {
-            //     int fd = creat(".menuActivity", 777);
-            //     close(fd);
-            //     break;
-            // }
 
             if (keystate[SW_BTN_START] == PRESSED) {
                 nExitToMiyoo = 1;
@@ -382,29 +343,58 @@ int main(void)
             if (keystate[SW_BTN_DOWN] >= PRESSED){
                 // Change brightness
                 bBrightChange = 1;
-                    int brightVal = getMiyooLum();
-                    if (brightVal > 0) {
-                        brightVal--;
-                        SetBrightness(brightVal);
+                int brightVal = getMiyooLum();
+                if (brightVal > 0) {
+                    brightVal--;
+                    SetBrightness(brightVal);
+                }
+            }
+
+            if (keystate[SW_BTN_X] == PRESSED) {
+                if (game_list_len != 0) {
+                    SDL_BlitSurface(imageRemoveDialog, NULL, screen, NULL);
+                    SDL_BlitSurface(screen, NULL, video, NULL);
+                    SDL_Flip(video);
+
+                    while (!quit) {
+                        if (updateKeystate(keystate, &quit, true, NULL)) {
+                            if (keystate[SW_BTN_A] == PRESSED) {
+                                removeCurrentItem();
+                                readHistory();
+                                if (current_game > 0)
+                                    current_game--;
+                                imageCache_load(&current_game, loadRomscreen, game_list_len);
+                                changed = true;
+                                break;
+                            }
+                            if (keystate[SW_BTN_B] == PRESSED) {
+                                changed = true;
+                                break;
+                            }
+                        }
                     }
+                }
             }
         }
 
-        long lSize;
-        FILE *fp;
+        if (!changed && image_drawn && bBrightChange == 0)
+            continue;
 
         if (game_list_len == 0) {
             SDL_BlitSurface(imageBackgroundNoGame, NULL, screen, NULL);
         }
-        else /*if (nBat > LOWBATRUMBLE)*/ {
-            if (imageBackgroundGame != NULL)
+        else {
+            SDL_Surface *imageBackgroundGame = imageCache_getItem(&current_game);
+            if (imageBackgroundGame != NULL) {
                 SDL_BlitSurface(imageBackgroundGame, NULL, screen, NULL);
-            else
+                image_drawn = true;
+            }
+            else {
                 SDL_BlitSurface(imageBackgroundDefault, NULL, screen, NULL);
+                if (imageCache_isActive())
+                    image_drawn = false;
+            }
         }
-        // else {
-        //     SDL_BlitSurface(imageBackgroundLowBat, NULL, screen, NULL);
-        // }
 
         if (current_game > 0) {
             SDL_BlitSurface(surfaceArrowLeft, NULL, screen, &rectArrowLeft);
@@ -437,33 +427,10 @@ int main(void)
         imagePlay = TTF_RenderUTF8_Blended(font, game_list[current_game].totalTime, color);
         SDL_BlitSurface(imagePlay, NULL, screen, &rectTime);
 
-        if (keystate[SW_BTN_X] == PRESSED) {
-            if (game_list_len != 0) {
-                SDL_BlitSurface(imageRemoveDialog, NULL, screen, NULL);
-                SDL_BlitSurface(screen, NULL, video, NULL);
-                SDL_Flip(video);
-
-                while (!quit) {
-                    if (updateKeystate(keystate, &quit, true, NULL)) {
-                        if (keystate[SW_BTN_A] == PRESSED) {
-                            removeCurrentItem();
-                            readHistory();
-                            if (current_game > 0)
-                                current_game--;
-                            firstPass = 1;
-                            break;
-                        }
-                        if (keystate[SW_BTN_B] == PRESSED) {
-                            firstPass = 1;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
         SDL_BlitSurface(screen, NULL, video, NULL);
         SDL_Flip(video);
+
+        changed = false;
     }
 
     screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640,480, 32, 0,0,0,0);
@@ -494,7 +461,8 @@ int main(void)
 
     SDL_FreeSurface(imageBackgroundDefault);
     SDL_FreeSurface(imageBackgroundLowBat);
-    //SDL_FreeSurface(imageBackgroundGame);
+
+    imageCache_freeAll();
 
     SDL_FreeSurface(imageMenuBar);
 
