@@ -141,11 +141,18 @@ void registerTimerEnd(const char *gameName)
 	rewind(fp);
 	baseTime = (char*)calloc(1, lSize + 1);
 
-	if(!baseTime)
-		fclose(fp), fputs("memory alloc fails", stderr), exit(1);
+	if(!baseTime) {
+		fclose(fp);
+		fputs("memory alloc fails", stderr);
+		exit(1);
+	}
 
-	if (1 != fread(baseTime, lSize, 1, fp))
-		fclose(fp),free(baseTime),fputs("entire read fails",stderr),exit(1);
+	if (1 != fread(baseTime, lSize, 1, fp)) {
+		fclose(fp);
+		free(baseTime);
+		fputs("entire read fails",stderr);
+		exit(1);
+	}
 	fclose(fp);
 
 	int iBaseTime = atoi(baseTime) ;
@@ -160,8 +167,9 @@ void registerTimerEnd(const char *gameName)
 
 	// Loading DB
 	if (readRomDB()  == -1){
+		free(baseTime);
 		// To avoid a DB overwrite
-		return EXIT_SUCCESS;
+		return;
 	}
 		
 	//Addition of the new time
@@ -222,6 +230,7 @@ void registerTimerEnd(const char *gameName)
 	writeRomDB();
 	
 	remove(INIT_TIMER_PATH);
+	free(baseTime);
 }
 
 
