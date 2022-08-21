@@ -1,6 +1,6 @@
 name: Check build
 on:
-  push
+  [push, pull_request]
 
 jobs:
   build:
