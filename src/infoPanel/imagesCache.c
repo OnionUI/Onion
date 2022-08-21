@@ -13,9 +13,16 @@ static SDL_Surface *g_image_cache_next = NULL;
 # define DEBUG_PRINT(x) do {} while (0)
 #endif
 
+static SDL_Surface *g_screen;
+
 static void drawImage(SDL_Surface *image_to_draw, SDL_Surface *screen)
 {
 	if (image_to_draw) {
+		SDL_Rect screen_size = {0, 0, 640, 480};
+		if (!g_screen)
+			g_screen = SDL_CreateRGBSurface(0, 640, 480, 16, 0, 0, 0, 0);
+    	SDL_BlitSurface(g_screen, &screen_size, screen, &screen_size);
+
 		SDL_Rect image_rect = {(int16_t)(320 - image_to_draw->w / 2), (int16_t)(240 - image_to_draw->h / 2)};
 		SDL_BlitSurface(image_to_draw, NULL, screen, &image_rect);
 	}
