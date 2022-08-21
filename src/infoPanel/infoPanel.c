@@ -14,12 +14,13 @@
 #include "theme/theme.h"
 #include "theme/background.h"
 #include "imagesCache.h"
+#include "imagesBrowser.h"
 
 static char **g_images_paths;
 static int g_images_paths_count = 0;
 static int g_image_index = 0;
 
-bool loadImagesPaths(const char* config_path, char ***images_paths, int *images_paths_count)
+static bool loadImagesPathsFromJson(const char* config_path, char ***images_paths, int *images_paths_count)
 {
 	const char *json_str = NULL;
 
@@ -49,7 +50,7 @@ bool loadImagesPaths(const char* config_path, char ***images_paths, int *images_
     return true;
 }
 
-void drawInfoPanel(SDL_Surface *screen, SDL_Surface *video, const char *title_str, char *message_str)
+static void drawInfoPanel(SDL_Surface *screen, SDL_Surface *video, const char *title_str, char *message_str)
 {
 	SDL_BlitSurface(theme_background(), NULL, screen, NULL);
 	SDL_BlitSurface(screen, NULL, video, NULL); 
@@ -100,6 +101,7 @@ int main(int argc, char *argv[])
 	char message_str[STR_MAX] = "";
 	char image_path[STR_MAX] = "";
 	char images_json_path[STR_MAX] = "";
+	char images_dir_path[STR_MAX] = "";
 	bool wait_confirm = true;
 
 	for (int i = 1; i < argc; i++) {
@@ -112,6 +114,8 @@ int main(int argc, char *argv[])
 				strncpy(image_path, argv[++i], STR_MAX-1);
 			else if (strcmp(argv[i], "-j") == 0 || strcmp(argv[i], "--images-json") == 0)
 				strncpy(images_json_path, argv[++i], STR_MAX-1);
+			else if (strcmp(argv[i], "-d") == 0 || strcmp(argv[i], "--directory") == 0)
+				strncpy(images_dir_path, argv[++i], STR_MAX-1);
 			else if (strcmp(argv[i], "-a") == 0 || strcmp(argv[i], "--auto") == 0)
 				wait_confirm = false;
 		}
@@ -131,7 +135,21 @@ int main(int argc, char *argv[])
 	}
 	else if(exists(images_json_path))
 	{
-		if (loadImagesPaths(images_json_path, &g_images_paths, &g_images_paths_count))
+		if (loadImagesPathsFromJson(images_json_path, &g_images_paths, &g_images_paths_count))
+		{
+			if (g_images_paths_count > 0)
+			{
+				drawImageByIndex(0, g_image_index, g_images_paths, g_images_paths_count, screen, &cache_used);
+			}
+		}
+		else
+		{
+			sdlQuit(screen, video);
+			return EXIT_FAILURE;
+		}
+	}
+	else if (exists(images_dir_path)) {
+		if (loadImagesPathsFromDir(images_dir_path, &g_images_paths, &g_images_paths_count))
 		{
 			if (g_images_paths_count > 0)
 			{
