@@ -1,4 +1,5 @@
 INCLUDE_CJSON=1
+OFILES := $(OFILES) ../common/utils/keystate.o ../common/utils/msleep.o
 include ../common/config.mk
 
 TARGET = gameSwitcher

@@ -19,7 +19,7 @@ SOURCES := $(SOURCES) ../../include/cjson
 endif
 CFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.c))
 CPPFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.cpp))
-OFILES = $(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
+OFILES := $(OFILES) $(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
 
 CFLAGS := -I../../include -I../common -DPLATFORM_$(shell echo $(PLATFORM) | tr a-z A-Z) -Wall
 

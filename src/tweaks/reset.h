@@ -2,6 +2,7 @@
 #define TWEAKS_RESET_H__
 
 #include <stdio.h>
+#include <SDL/SDL.h>
 #include "system/keymap_sw.h"
 #include "theme/sound.h"
 #include "theme/render/dialog.h"
@@ -12,7 +13,7 @@
 
 static bool _disable_confirm = false;
 
-void reset_tweaksMenu(void)
+void reset_tweaksMenu(SDL_Surface * screen)
 {
     int current_state[10][2];
     int current_level = menu_level;
@@ -31,7 +32,7 @@ void reset_tweaksMenu(void)
     reset_menus = false;
 }
 
-bool _confirmReset(const char *title_str, const char *message_str)
+bool _confirmReset(SDL_Surface *video, SDL_Surface *screen, const char *title_str, const char *message_str)
 {
     bool retval = false;
     bool confirm_quit = false;
@@ -71,9 +72,9 @@ bool _confirmReset(const char *title_str, const char *message_str)
     return retval;
 }
 
-void action_resetTweaks(void *pt)
+void action_resetTweaks(SDL_Surface *video, SDL_Surface *screen, void *pt)
 {
-    if (!_disable_confirm && !_confirmReset("Reset tweaks to default", "Are you sure you want to\nreset tweaks to default?"))
+    if (!_disable_confirm && !_confirmReset(video, screen, "Reset tweaks to default", "Are you sure you want to\nreset tweaks to default?"))
         return;
     rename(RESET_CONFIGS_PAK, "/mnt/SDCARD/.tmp_update/temp");
     system("rm -rf /mnt/SDCARD/.tmp_update/config && mkdir -p /mnt/SDCARD/.tmp_update/config");
@@ -83,15 +84,15 @@ void action_resetTweaks(void *pt)
 	settings_load();
 }
 
-void action_resetThemeOverrides(void *pt)
+void action_resetThemeOverrides(SDL_Surface *video, SDL_Surface *screen, void *pt)
 {
-    if (!_disable_confirm && _confirmReset("Reset theme overrides", "Are you sure you want to\nreset theme overrides?"))
+    if (!_disable_confirm && _confirmReset(video, screen, "Reset theme overrides", "Are you sure you want to\nreset theme overrides?"))
         system("rm -rf /mnt/SDCARD/Saves/CurrentProfile/theme/*");
 }
 
-void action_resetMainUI(void *pt)
+void action_resetMainUI(SDL_Surface *video, SDL_Surface *screen, void *pt)
 {
-    if (!_disable_confirm && !_confirmReset("Reset MainUI settings", "Are you sure you want to\nreset MainUI settings?"))
+    if (!_disable_confirm && !_confirmReset(video, screen, "Reset MainUI settings", "Are you sure you want to\nreset MainUI settings?"))
         return;
     system("rm -f /appconfigs/system.json");
     system("unzip -o " RESET_CONFIGS_PAK " \".tmp_update/config/system.json\" -d /mnt/SDCARD/");
@@ -100,32 +101,32 @@ void action_resetMainUI(void *pt)
 	settings_load();
 }
 
-void action_resetRAMain(void *pt)
+void action_resetRAMain(SDL_Surface *video, SDL_Surface *screen, void *pt)
 {
-    if (!_disable_confirm && !_confirmReset("Reset RA main configuration", "Are you sure you want to reset\nRetroArch main configuration?"))
+    if (!_disable_confirm && !_confirmReset(video, screen, "Reset RA main configuration", "Are you sure you want to reset\nRetroArch main configuration?"))
         return;
     system("unzip -o " RESET_CONFIGS_PAK " \"RetroArch/*\" -d /mnt/SDCARD/");
     reset_menus = true;
 }
 
-void action_resetRACores(void *pt)
+void action_resetRACores(SDL_Surface *video, SDL_Surface *screen, void *pt)
 {
-    if (!_disable_confirm && !_confirmReset("Reset all RA core overrides", "Are you sure you want to reset\nall RetroArch core overrides?"))
+    if (!_disable_confirm && !_confirmReset(video, screen, "Reset all RA core overrides", "Are you sure you want to reset\nall RetroArch core overrides?"))
         return;
     system("rm -rf /mnt/SDCARD/Saves/CurrentProfile/config/*");
     system("unzip -o " RESET_CONFIGS_PAK " \"Saves/CurrentProfile/config/*\" -d /mnt/SDCARD/");
     reset_menus = true;
 }
 
-void action_resetAll(void *pt)
+void action_resetAll(SDL_Surface *video, SDL_Surface *screen, void *pt)
 {
-    if (!_confirmReset("Reset all to default", "Are you sure you want to\nreset everything to default?"))
+    if (!_confirmReset(video, screen, "Reset all to default", "Are you sure you want to\nreset everything to default?"))
         return;
     _disable_confirm = true;
-    action_resetTweaks(pt);
-    action_resetThemeOverrides(pt);
-    action_resetRAMain(pt);
-    action_resetRACores(pt);
+    action_resetTweaks(video, screen, pt);
+    action_resetThemeOverrides(video, screen, pt);
+    action_resetRAMain(video, screen, pt);
+    action_resetRACores(video, screen, pt);
     _disable_confirm = false;
     reset_menus = true;
 	settings_load();

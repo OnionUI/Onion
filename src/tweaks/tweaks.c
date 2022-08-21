@@ -26,6 +26,9 @@
 
 #define FRAMES_PER_SECOND 60
 
+ static SDL_Surface *g_video;
+ static SDL_Surface *g_screen;
+
 int main(int argc, char *argv[])
 {
 	print_debug("Debug logging enabled");
@@ -44,7 +47,7 @@ int main(int argc, char *argv[])
     signal(SIGTERM, sigHandler);
 
 	if (use_display || strlen(apply_tool) == 0)
-		SDL_InitDefault(true);
+		SDL_InitDefault(true, g_video, g_screen);
 
 	settings_load();
 	lang_load();
@@ -63,7 +66,7 @@ int main(int argc, char *argv[])
 
     int battery_percentage = battery_getPercentage();
 
-	menu_main();
+	menu_main(g_screen);
 
 	uint32_t acc_ticks = 0,
 			 last_ticks = SDL_GetTicks(),
@@ -131,7 +134,7 @@ int main(int argc, char *argv[])
 		}
 
 		if (reset_menus)
-			reset_tweaksMenu();
+			reset_tweaksMenu(g_screen);
 
 		if (all_changed) {
 			header_changed = true;
@@ -148,25 +151,25 @@ int main(int argc, char *argv[])
 
 		if (acc_ticks >= time_step) {
 			if (header_changed || battery_changed)
-				theme_renderHeader(screen, menu_stack[menu_level]->title, false);
+				theme_renderHeader(g_screen, menu_stack[menu_level]->title, false);
 
 			if (list_changed)
-				theme_renderList(screen, menu_stack[menu_level]);
+				theme_renderList(g_screen, menu_stack[menu_level]);
 			
 			if (footer_changed) {
-				theme_renderFooter(screen);
-				theme_renderStandardHint(screen, lang_get(LANG_SELECT), lang_get(LANG_BACK));
+				theme_renderFooter(g_screen);
+				theme_renderStandardHint(g_screen, lang_get(LANG_SELECT), lang_get(LANG_BACK));
 			}
 
 			if (footer_changed || list_changed)
-				theme_renderFooterStatus(screen, menu_stack[menu_level]->active_pos + 1, menu_stack[menu_level]->item_count);
+				theme_renderFooterStatus(g_screen, menu_stack[menu_level]->active_pos + 1, menu_stack[menu_level]->item_count);
 
 			if (header_changed || battery_changed)
-				theme_renderHeaderBattery(screen, battery_percentage);
+				theme_renderHeaderBattery(g_screen, battery_percentage);
 
 			if (header_changed || list_changed || footer_changed || battery_changed) {
-				SDL_BlitSurface(screen, NULL, video, NULL); 
-				SDL_Flip(video);
+				SDL_BlitSurface(g_screen, NULL, g_video, NULL); 
+				SDL_Flip(g_video);
 			}
 
 			header_changed = false;
@@ -180,8 +183,8 @@ int main(int argc, char *argv[])
 	}
 
 	// Clear the screen when exiting
-	SDL_FillRect(video, NULL, 0);
-	SDL_Flip(video);
+	SDL_FillRect(g_video, NULL, 0);
+	SDL_Flip(g_video);
 
 	settings_save();
 	value_setFrameThrottle();
@@ -190,8 +193,8 @@ int main(int argc, char *argv[])
 	lang_free();
 	menu_free_all();
 	resources_free();
-   	SDL_FreeSurface(screen);
-   	SDL_FreeSurface(video);
+   	SDL_FreeSurface(g_screen);
+   	SDL_FreeSurface(g_video);
 
 	#ifndef PLATFORM_MIYOOMINI
 	msleep(200); // to clear SDL input on quit

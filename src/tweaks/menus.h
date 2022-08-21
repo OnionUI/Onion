@@ -315,7 +315,7 @@ void menu_userInterface(void *_)
 	header_changed = true;
 }
 
-void menu_resetSettings(void *_)
+void menu_resetSettings(SDL_Surface * screen, void *_)
 {
 	if (!_menu_reset_settings._created) {
 		_menu_reset_settings = list_create(6, LIST_SMALL);
@@ -349,7 +349,7 @@ void menu_resetSettings(void *_)
 	header_changed = true;
 }
 
-void menu_advanced(void *_)
+void menu_advanced(SDL_Surface * screen, void *_)
 {
 	if (!_menu_advanced._created) {
 		_menu_advanced = list_create(3, LIST_SMALL);
@@ -408,7 +408,7 @@ void menu_tools(void *_)
 	header_changed = true;
 }
 
-void menu_main(void)
+void menu_main(SDL_Surface * screen)
 {
 	if (!_menu_main._created) {
 		_menu_main = list_create(5, LIST_LARGE);

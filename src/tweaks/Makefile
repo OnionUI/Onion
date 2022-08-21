@@ -1,5 +1,6 @@
 INCLUDE_SHMVAR=1
 INCLUDE_CJSON=1
+OFILES := $(OFILES) ../common/utils/sdl_init.o ../common/utils/msleep.o ../common/utils/keystate.o
 include ../common/config.mk
 
 TARGET = tweaks
