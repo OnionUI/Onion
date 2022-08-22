@@ -3,6 +3,8 @@
 
 #include <SDL/SDL.h>
 
+#include "./msleep.h"
+
 typedef enum
 {
     RELEASED,

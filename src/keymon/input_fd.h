@@ -31,7 +31,6 @@ static struct pollfd fds[1];
 static bool keyinput_disabled = false;
 static int ignore_queue[QUEUE_MAX][2];
 static int ignore_queue_count = 0;
-static bool keyinput_is_quiet = false;
 
 void _ignoreQueue_remove(int index)
 {
@@ -41,9 +40,6 @@ void _ignoreQueue_remove(int index)
         ignore_queue[i][1] = ignore_queue[i + 1][1];
     }
     ignore_queue_count--;
-
-    if (ignore_queue_count == 0 && keyinput_is_quiet)
-        keyinput_sound_on();
 }
 
 void _ignoreQueue_add(int code, int value)
@@ -54,22 +50,6 @@ void _ignoreQueue_add(int code, int value)
     ignore_queue[ignore_queue_count][0] = code;
     ignore_queue[ignore_queue_count][1] = value;
     ignore_queue_count++;
-}
-
-void keyinput_sound_off(void)
-{
-    #ifdef PLATFORM_MIYOOMINI
-    SetKeyShm(&shminfo, MONITOR_BGM_VOLUME, 0);
-    #endif
-    keyinput_is_quiet = true;
-}
-
-void keyinput_sound_on(void)
-{
-    #ifdef PLATFORM_MIYOOMINI
-    SetKeyShm(&shminfo, MONITOR_BGM_VOLUME, settings.bgm_volume);
-    #endif
-    keyinput_is_quiet = false;
 }
 
 bool keyinput_isValid(void)
@@ -97,6 +77,25 @@ void keyinput_send(unsigned short code, signed int value)
     sprintf(cmd, "./bin/sendkeys %d %d", code, value);
     printf_debug("Send keys: code=%d, value=%d\n", code, value);
     _ignoreQueue_add(code, value);
+    system(cmd);
+    print_debug("Keys sent");
+}
+
+void keyinput_sendMulti(int n, int code_value_pairs[n][2])
+{
+    if (keyinput_disabled)
+        return;
+    char cmd[512];
+    strcpy(cmd, "./bin/sendkeys ");
+
+    for (int i = 0; i < n; i++) {
+        int code = code_value_pairs[i][0];
+        int value = code_value_pairs[i][1];
+        _ignoreQueue_add(code, value);
+        sprintf(cmd + strlen(cmd), "%d %d ", code, value);
+    }
+
+    printf_debug("Send keys: %s\n", cmd);
     system(cmd);
     print_debug("Keys sent");
 }

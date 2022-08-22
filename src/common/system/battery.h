@@ -1,7 +1,9 @@
 #ifndef BATTERY_H__
 #define BATTERY_H__
 
+#include "utils/msleep.h"
 #include "utils/file.h"
+#include "utils/log.h"
 #include "utils/process.h"
 #include "system/system.h"
 

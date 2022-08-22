@@ -88,7 +88,6 @@ int main(void)
 	char themes[NUMBER_OF_THEMES][MAX_THEME_NAME_SIZE];
     char theme_path[512];
     int current_page = 0;
-    int hideIconTitle = 0;
 
 	settings_load();
 	char *installed_theme = basename(settings.theme);
@@ -143,8 +142,6 @@ int main(void)
     SDL_Rect rectThemePreview = {80, 46, 480, 360};
     SDL_Rect rectImageThemeNom = {77, 7, 557, 54};
     int levelPage = 0;
-    FILE *fp;
-    long lSize;
 
     SDL_FillRect(screen, NULL, 0);
 
@@ -245,9 +242,9 @@ int main(void)
             SDL_BlitSurface(imagePages, NULL, screen, &rectPages);
 	        SDL_FreeSurface(imagePages);
 
-            char title[256];
+            char title[STR_MAX + 13];
             if (current_page == installed_page)
-                sprintf(title, "%s - Installed", theme.name);
+                snprintf(title, STR_MAX + 12, "%s - Installed", theme.name);
             else strcpy(title, theme.name);
 
             imageThemeNom = TTF_RenderUTF8_Blended(font21, title, color_white);
@@ -257,11 +254,11 @@ int main(void)
         else {
             SDL_BlitSurface(background_page1, NULL, screen, NULL);
 
-            char title[256];
+            char title[STR_MAX * 2 + 5];
             if (strlen(theme.author) > 0)
-                sprintf(title, "%s by %s", theme.name, theme.author);
+                snprintf(title, STR_MAX * 2 + 4, "%s by %s", theme.name, theme.author);
             else
-                sprintf(title, "%s", theme.name);
+                snprintf(title, STR_MAX * 2 + 4, "%s", theme.name);
 
             imagePages = TTF_RenderUTF8_Blended(font40, title, color_white);
             SDL_BlitSurface(imagePages, NULL, screen, &rectThemeDescription);
@@ -276,8 +273,9 @@ int main(void)
 
     msleep(100);
 
-    for (int i = 0; i < themes_count; i++)
+    for (int i = 0; i < themes_count; i++) {
         SDL_FreeSurface(previews[i]);
+    }
 	SDL_FreeSurface(surfaceArrowLeft);
 	SDL_FreeSurface(surfaceArrowRight);
 	SDL_FreeSurface(background_page0);

@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
 		}
 
 		if (reset_menus)
-			reset_tweaksMenu();
+			menu_resetAll();
 
 		if (all_changed) {
 			header_changed = true;

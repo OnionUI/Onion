@@ -20,7 +20,7 @@ static char tools_short_names[NUM_TOOLS][STR_MAX] = {
     "recents",
     "dot_clean"
 };
-static tool_success = false;
+static bool tool_success = false;
 
 bool _runCommand(const char *cmd)
 {
