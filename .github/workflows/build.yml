@@ -10,6 +10,8 @@ jobs:
       image: ghcr.io/onionui/miyoomini-toolchain:latest
       options: --user root
     steps:
+    - name: Install gtest manually
+      run: sudo apt-get install libgtest-dev && cd /usr/src/gtest && sudo cmake CMakeLists.txt && sudo make && sudo cp *.a /usr/lib && sudo ln -s /usr/lib/libgtest.a /usr/local/lib/libgtest.a && sudo ln -s /usr/lib/libgtest_main.a /usr/local/lib/libgtest_main.a
     - name: Checkout repository
       uses: actions/checkout@v3
       with:
