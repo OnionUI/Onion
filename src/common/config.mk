@@ -34,7 +34,7 @@ CFLAGS := $(CFLAGS) -DLOG_DEBUG -g
 endif
 
 ifeq ($(TEST),1)
-CFLAGS := $(CFLAGS) -std=c++17
+CFLAGS := $(CFLAGS) -I../include -I../src/common
 endif
 
 CXXFLAGS := $(CFLAGS)
