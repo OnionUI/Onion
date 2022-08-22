@@ -74,7 +74,8 @@ void imageCache_removeItem(int image_index)
     if (curr_item != NULL)
         SDL_FreeSurface(curr_item);
 
-    for (int i = 0; i < image_cache_len; i++) {
+    int num_images = (images_total < image_cache_len ? images_total : image_cache_len) - 1;
+    for (int i = 0; i < num_images; i++) {
         int curr = (image_index + i) % image_cache_len;
         int next = (image_index + i + 1) % image_cache_len;
         image_cache[curr] = image_cache[next];
