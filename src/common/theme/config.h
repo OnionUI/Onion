@@ -210,10 +210,11 @@ Theme_s theme_loadFromPath(const char* theme_path, bool apply_overrides)
 	
     theme_applyConfig(&config, config_path, true);
 
-    if (apply_overrides)
+    if (apply_overrides) {
         theme_applyConfig(&config, THEME_OVERRIDES "/config.json", false);
+    }
 
-	return config;
+    return config;
 }
 
 Theme_s theme_load(void)

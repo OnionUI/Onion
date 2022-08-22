@@ -13,7 +13,7 @@ void theme_renderHeaderBackground(SDL_Surface *screen)
 	SDL_BlitSurface(resource_getSurface(BG_TITLE), &header_size, screen, &header_size);    
 }
 
-theme_renderHeaderBattery(SDL_Surface *screen, int battery_percentage)
+void theme_renderHeaderBattery(SDL_Surface *screen, int battery_percentage)
 {
     SDL_Surface *battery = theme_batterySurface(battery_percentage);
     SDL_Rect battery_rect = {596 - battery->w / 2, 30 - battery->h / 2};

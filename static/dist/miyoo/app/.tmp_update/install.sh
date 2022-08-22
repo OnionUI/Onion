@@ -165,7 +165,7 @@ fresh_install() {
 
     if [ $install_ra -eq 1 ]; then
         install_core "(1 of 2) Installing Onion..."
-        free_memory_inbetween
+        # free_memory_inbetween
         install_retroarch "(2 of 2) Installing RetroArch..."
     else
         install_core "(1 of 1) Installing Onion..."
@@ -219,7 +219,7 @@ update_only() {
 
     if [ $install_ra -eq 1 ]; then
         install_core "(1 of 2) Updating Onion..."
-        free_memory_inbetween
+        # free_memory_inbetween
         install_retroarch "(2 of 2) Updating RetroArch..."
         restore_ra_config
     else
@@ -228,11 +228,16 @@ update_only() {
     fi
 
     install_configs 0
+    
     echo "Update complete!" >> /tmp/.update_msg
+    sleep 1
 
     touch $sysdir/.waitConfirm
     sync
+    
     echo "Press any key to turn off" >> /tmp/.update_msg
+    sleep 1
+
     touch $sysdir/.installed
 
     until [ ! -f $sysdir/.waitConfirm ]; do

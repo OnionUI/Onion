@@ -127,7 +127,6 @@ int main(void)
     SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640,480, 32, 0,0,0,0);
 
     TTF_Font* font40 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 40);
-    TTF_Font* font25 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 25);
     TTF_Font* font30 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 30);
     TTF_Font* fontRomName25 = TTF_OpenFont("/customer/app/wqy-microhei.ttc", 25);
 
@@ -194,20 +193,14 @@ int main(void)
     displayRomDB();
 
     int nPages = (int)((rom_list_len - 1) / 4 + 1);
-    char cMessage[50];
 
     SDL_BlitSurface(imageBackground, NULL, screen, NULL);
-
-    SDL_Rect rectPosition;
-    SDL_Rect rectRomPlayTime;
-    SDL_Rect rectRomNames;
 
     SDL_Rect rectPages = { 561, 430, 90, 44};
     SDL_Rect rectMileage = { 484, 8, 170, 42};
 
     int nCurrentPage = 0;
     char cPosition[5];
-    char cPlayTime[20];
     char cTotalTimePlayed[50];
 
     char cPages[10];
@@ -224,7 +217,7 @@ int main(void)
         if (strlen(rom_list[i].name) != 0)
             sprintf(cTotalTimePlayed, "%d:%02d", h, m);
         else
-            sprintf(cTotalTimePlayed, "");
+            memset(cTotalTimePlayed, 0, sizeof(cTotalTimePlayed));
 
         char *bnameWOExt = file_removeExtension(rom_list[i].name);
         imageRomPosition = TTF_RenderUTF8_Blended(font40, cPosition, color_lilla);
@@ -290,7 +283,7 @@ int main(void)
             if (strlen(curr.name) != 0)
                 sprintf(cTotalTimePlayed, "%d:%02d", h,m);
             else
-                sprintf(cTotalTimePlayed, "");
+                memset(cTotalTimePlayed, 0, sizeof(cTotalTimePlayed));
 
             char *bnameWOExt = file_removeExtension(curr.name);
             imageRomPosition = TTF_RenderUTF8_Blended(font40, cPosition, color_lilla);

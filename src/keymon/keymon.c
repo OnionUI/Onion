@@ -294,7 +294,6 @@ int main(void) {
     uint32_t button_flag = 0;
     uint32_t repeat_LR = 0;
     uint32_t repeat_power = 0;
-    uint32_t repeat_menu = 0;
     uint32_t val;
     bool b_BTN_Not_Menu_Pressed = false;
     bool b_BTN_Menu_Pressed = false;
@@ -306,7 +305,6 @@ int main(void) {
     int hibernate_start = ticks;
     int hibernate_time;
     int elapsed_sec = 0;
-    int wait_ms = 1000;
 
     bool delete_flag = false;
 

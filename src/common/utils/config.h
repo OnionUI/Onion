@@ -9,6 +9,7 @@
 #include "file.h"
 #include "str.h"
 #include "flags.h"
+#include "log.h"
 
 #define CONFIG_PATH "/mnt/SDCARD/.tmp_update/config/"
 

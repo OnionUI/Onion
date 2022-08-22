@@ -19,7 +19,10 @@
 
 static List _menu_main;
 static List _menu_system;
+static List _menu_system_startup;
 static List _menu_button_action;
+static List _menu_button_action_mainui_menu;
+static List _menu_button_action_ingame_menu;
 static List _menu_user_interface;
 static List _menu_theme_overrides;
 static List _menu_battery_percentage;
@@ -31,7 +34,10 @@ void menu_free_all(void)
 {
 	list_free(&_menu_main);
 	list_free(&_menu_system);
+	list_free(&_menu_system_startup);
 	list_free(&_menu_button_action);
+	list_free(&_menu_button_action_mainui_menu);
+	list_free(&_menu_button_action_ingame_menu);
 	list_free(&_menu_user_interface);
 	list_free(&_menu_theme_overrides);
 	list_free(&_menu_battery_percentage);
@@ -40,24 +46,18 @@ void menu_free_all(void)
 	list_free(&_menu_tools);
 }
 
-void menu_system(void *_)
+void menu_systemStartup(void *_)
 {
-	if (!_menu_system._created) {
-		_menu_system = list_create(6, LIST_SMALL);
-		strcpy(_menu_system.title, "System");
-		list_addItem(&_menu_system, (ListItem){
+	if (!_menu_system_startup._created) {
+		_menu_system_startup = list_create(4, LIST_SMALL);
+		strcpy(_menu_system_startup.title, "Startup");
+		list_addItem(&_menu_system_startup, (ListItem){
 			.label = "Auto-resume last game",
 			.item_type = TOGGLE,
 			.value = (int)settings.startup_auto_resume,
 			.action = action_setStartupAutoResume
 		});
-		list_addItem(&_menu_system, (ListItem){
-			.label = "Save and exit when battery <4%",
-			.item_type = TOGGLE,
-			.value = (int)settings.low_battery_autosave,
-			.action = action_setLowBatteryAutoSave
-		});
-		list_addItem(&_menu_system, (ListItem){
+		list_addItem(&_menu_system_startup, (ListItem){
 			.label = "Start application",
 			.item_type = MULTIVALUE,
 			.value_max = 2,
@@ -65,7 +65,7 @@ void menu_system(void *_)
 			.value = settings.startup_application,
 			.action = action_setStartupApplication
 		});
-		list_addItem(&_menu_system, (ListItem){
+		list_addItem(&_menu_system_startup, (ListItem){
 			.label = "MainUI: Start tab",
 			.item_type = MULTIVALUE,
 			.value_max = 5,
@@ -73,13 +73,33 @@ void menu_system(void *_)
 			.value = settings.startup_tab,
 			.action = action_setStartupTab
 		});
-		list_addItem(&_menu_system, (ListItem){
+		list_addItem(&_menu_system_startup, (ListItem){
 			.label = "Emulated time skip",
 			.item_type = MULTIVALUE,
 			.value_max = 24,
 			.value_formatter = formatter_timeSkip,
 			.value = settings.time_skip,
 			.action = action_setTimeSkip
+		});
+	}
+	menu_stack[++menu_level] = &_menu_system_startup;
+	header_changed = true;
+}
+
+void menu_system(void *_)
+{
+	if (!_menu_system._created) {
+		_menu_system = list_create(3, LIST_SMALL);
+		strcpy(_menu_system.title, "System");
+		list_addItem(&_menu_system, (ListItem){
+			.label = "Startup...",
+			.action = menu_systemStartup
+		});
+		list_addItem(&_menu_system, (ListItem){
+			.label = "Save and exit when battery <4%",
+			.item_type = TOGGLE,
+			.value = (int)settings.low_battery_autosave,
+			.action = action_setLowBatteryAutoSave
 		});
 		list_addItem(&_menu_system, (ListItem){
 			.label = "Vibration intensity",
@@ -94,19 +114,13 @@ void menu_system(void *_)
 	header_changed = true;
 }
 
-void menu_buttonAction(void *_)
+void menu_buttonActionMainUIMenu(void *_)
 {
-	if (!_menu_button_action._created) {
-		_menu_button_action = list_create(9, LIST_SMALL);
-		strcpy(_menu_button_action.title, "Button shortcuts");
-		list_addItem(&_menu_button_action, (ListItem){
-			.label = "Vibrate on single press",
-			.item_type = TOGGLE,
-			.value = (int)settings.menu_button_haptics,
-			.action = action_setMenuButtonHaptics
-		});
-		list_addItem(&_menu_button_action, (ListItem){
-			.label = "MainUI: Single press",
+	if (!_menu_button_action_mainui_menu._created) {
+		_menu_button_action_mainui_menu = list_create(3, LIST_SMALL);
+		strcpy(_menu_button_action_mainui_menu.title, "MainUI: Menu button");
+		list_addItem(&_menu_button_action_mainui_menu, (ListItem){
+			.label = "Single press",
 			.item_type = MULTIVALUE,
 			.value_max = 2,
 			.value_labels = BUTTON_MAINUI_LABELS,
@@ -114,8 +128,8 @@ void menu_buttonAction(void *_)
 			.action_id = 0,
 			.action = action_setMenuButtonKeymap
 		});
-		list_addItem(&_menu_button_action, (ListItem){
-			.label = "MainUI: Long press",
+		list_addItem(&_menu_button_action_mainui_menu, (ListItem){
+			.label = "Long press",
 			.item_type = MULTIVALUE,
 			.value_max = 2,
 			.value_labels = BUTTON_MAINUI_LABELS,
@@ -123,8 +137,8 @@ void menu_buttonAction(void *_)
 			.action_id = 1,
 			.action = action_setMenuButtonKeymap
 		});
-		list_addItem(&_menu_button_action, (ListItem){
-			.label = "MainUI: Double press",
+		list_addItem(&_menu_button_action_mainui_menu, (ListItem){
+			.label = "Double press",
 			.item_type = MULTIVALUE,
 			.value_max = 2,
 			.value_labels = BUTTON_MAINUI_LABELS,
@@ -132,8 +146,18 @@ void menu_buttonAction(void *_)
 			.action_id = 2,
 			.action = action_setMenuButtonKeymap
 		});
-		list_addItem(&_menu_button_action, (ListItem){
-			.label = "In-game: Single press",
+	}
+	menu_stack[++menu_level] = &_menu_button_action_mainui_menu;
+	header_changed = true;
+}
+
+void menu_buttonActionInGameMenu(void *_)
+{
+	if (!_menu_button_action_ingame_menu._created) {
+		_menu_button_action_ingame_menu = list_create(3, LIST_SMALL);
+		strcpy(_menu_button_action_ingame_menu.title, "In-game: Menu button");
+		list_addItem(&_menu_button_action_ingame_menu, (ListItem){
+			.label = "Single press",
 			.item_type = MULTIVALUE,
 			.value_max = 3,
 			.value_labels = BUTTON_INGAME_LABELS,
@@ -141,8 +165,8 @@ void menu_buttonAction(void *_)
 			.action_id = 3,
 			.action = action_setMenuButtonKeymap
 		});
-		list_addItem(&_menu_button_action, (ListItem){
-			.label = "In-game: Long press",
+		list_addItem(&_menu_button_action_ingame_menu, (ListItem){
+			.label = "Long press",
 			.item_type = MULTIVALUE,
 			.value_max = 3,
 			.value_labels = BUTTON_INGAME_LABELS,
@@ -150,14 +174,38 @@ void menu_buttonAction(void *_)
 			.action_id = 4,
 			.action = action_setMenuButtonKeymap
 		});
-		list_addItem(&_menu_button_action, (ListItem){
-			.label = "In-game: Double press",
+		list_addItem(&_menu_button_action_ingame_menu, (ListItem){
+			.label = "Double press",
 			.item_type = MULTIVALUE,
 			.value_max = 3,
 			.value_labels = BUTTON_INGAME_LABELS,
 			.value = settings.ingame_double_press,
 			.action_id = 5,
 			.action = action_setMenuButtonKeymap
+		});
+	}
+	menu_stack[++menu_level] = &_menu_button_action_ingame_menu;
+	header_changed = true;
+}
+
+void menu_buttonAction(void *_)
+{
+	if (!_menu_button_action._created) {
+		_menu_button_action = list_create(5, LIST_SMALL);
+		strcpy(_menu_button_action.title, "Button shortcuts");
+		list_addItem(&_menu_button_action, (ListItem){
+			.label = "Menu single press vibration",
+			.item_type = TOGGLE,
+			.value = (int)settings.menu_button_haptics,
+			.action = action_setMenuButtonHaptics
+		});
+		list_addItem(&_menu_button_action, (ListItem){
+			.label = "In-game: Menu button...",
+			.action = menu_buttonActionInGameMenu
+		});
+		list_addItem(&_menu_button_action, (ListItem){
+			.label = "MainUI: Menu button...",
+			.action = menu_buttonActionMainUIMenu
 		});
 
 		getInstalledApps();
@@ -321,11 +369,7 @@ void menu_resetSettings(void *_)
 		_menu_reset_settings = list_create(6, LIST_SMALL);
 		strcpy(_menu_reset_settings.title, "Reset settings");
 		list_addItem(&_menu_reset_settings, (ListItem){
-			.label = "Reset all to default",
-			.action = action_resetAll
-		});
-		list_addItem(&_menu_reset_settings, (ListItem){
-			.label = "Reset tweaks to default",
+			.label = "Reset tweaks",
 			.action = action_resetTweaks
 		});
 		list_addItem(&_menu_reset_settings, (ListItem){
@@ -343,6 +387,10 @@ void menu_resetSettings(void *_)
 		list_addItem(&_menu_reset_settings, (ListItem){
 			.label = "Reset all RetroArch core overrides",
 			.action = action_resetRACores
+		});
+		list_addItem(&_menu_reset_settings, (ListItem){
+			.label = "Reset everything",
+			.action = action_resetAll
 		});
 	}
 	menu_stack[++menu_level] = &_menu_reset_settings;
@@ -447,6 +495,25 @@ void menu_main(void)
 	menu_level = 0;
 	menu_stack[0] = &_menu_main;
 	header_changed = true;
+}
+
+void menu_resetAll(void)
+{
+    int current_state[10][2];
+    int current_level = menu_level;
+    for (int i = 0; i <= current_level; i++) {
+        current_state[i][0] = menu_stack[i]->active_pos;
+        current_state[i][1] = menu_stack[i]->scroll_pos;
+    }
+    menu_free_all();
+    menu_main();
+    for (int i = 0; i <= current_level; i++) {
+        menu_stack[i]->active_pos = current_state[i][0];
+        menu_stack[i]->scroll_pos = current_state[i][1];
+        if (i < current_level)
+            list_activateItem(menu_stack[i]);
+    }
+    reset_menus = false;
 }
 
 #endif

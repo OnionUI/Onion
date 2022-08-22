@@ -59,7 +59,8 @@ void drawBatteryPercentage(void)
     SDL_Surface* image = theme_batterySurface(percentage);
 
     // Save custom battery icon
-    IMG_Save(image, icon_path);
+    if (percentage != 500)
+        IMG_Save(image, icon_path);
 
     SDL_FreeSurface(image);
 	resources_free();

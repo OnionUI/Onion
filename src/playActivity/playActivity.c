@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <unistd.h>
 #include <libgen.h>
 #include <sys/stat.h>  
 #include <fcntl.h>
@@ -50,6 +51,7 @@ int readRomDB(void)
     }
 
     fclose(file);
+	return 0;
 }
 
 void writeRomDB(void)
@@ -82,7 +84,7 @@ void displayRomDB(void){
 
 }
     
-int searchRomDB(char* romName)
+int searchRomDB(const char *romName)
 {
     int position = -1;
     
@@ -108,7 +110,7 @@ void backupDB(void)
 	
     for (i = 0; i < MAXBACKUPFILES; i++) {
         snprintf(fileNameToBackup, sizeof(fileNameToBackup), PLAY_ACTIVITY_BACKUP_NUM("%02d"), i);
-        if ( access(fileNameToBackup, F_OK) != 0 ) break;
+        if (!is_file(fileNameToBackup)) break;
     } 
             
     // Backup        
@@ -134,14 +136,14 @@ void registerTimerEnd(const char *gameName)
 	char *baseTime;
 
 	if ((fp = fopen(INIT_TIMER_PATH, "rb")) == 0)
-		return 1;
+		return;
 
 	fseek(fp, 0L, SEEK_END);
 	lSize = ftell(fp);
 	rewind(fp);
 	baseTime = (char*)calloc(1, lSize + 1);
 
-	if(!baseTime) {
+	if (!baseTime) {
 		fclose(fp);
 		fputs("memory alloc fails", stderr);
 		exit(1);
@@ -166,7 +168,7 @@ void registerTimerEnd(const char *gameName)
 	sprintf(cTempsDeJeuSession, "%d", iTempsDeJeuSession);
 
 	// Loading DB
-	if (readRomDB()  == -1){
+	if (readRomDB() == -1){
 		free(baseTime);
 		// To avoid a DB overwrite
 		return;

@@ -25,7 +25,7 @@
 #include "utils/file.h"
 #include "utils/log.h"
 
-#define CHECK_BATTERY_TIMEOUT 15 //s - check battery percentage every 15s
+#define CHECK_BATTERY_TIMEOUT_S 15 //s - check battery percentage every 15s
 
 // for reading battery
 #define SARADC_IOC_MAGIC 'a'

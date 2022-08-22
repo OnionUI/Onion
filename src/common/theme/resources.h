@@ -158,11 +158,11 @@ void resource_reloadFont(ThemeFonts request)
 Mix_Chunk* resource_getSoundChange(void)
 {
     if (resources.sound_change == NULL) {
-        char sound_path[STR_MAX];
-        sprintf(sound_path, "%ssound/change.wav", theme()->path);
+        char sound_path[STR_MAX * 2];
+        snprintf(sound_path, STR_MAX * 2 - 1, "%ssound/change.wav", theme()->path);
         if (!is_file(sound_path))
             strcpy(sound_path, "/mnt/SDCARD/miyoo/app/sound/change.wav");
-        if (is_file)
+        if (is_file(sound_path))
             resources.sound_change = Mix_LoadWAV(sound_path);
     }
     return resources.sound_change;
@@ -171,11 +171,11 @@ Mix_Chunk* resource_getSoundChange(void)
 Mix_Music* resource_getBGM(void)
 {
     if (resources.bgm == NULL) {
-        char sound_path[STR_MAX];
-        sprintf(sound_path, "%ssound/bgm.mp3", theme()->path);
+        char sound_path[STR_MAX * 2];
+        snprintf(sound_path, STR_MAX * 2 - 1, "%ssound/bgm.mp3", theme()->path);
         if (!is_file(sound_path))
             strcpy(sound_path, "/mnt/SDCARD/miyoo/app/sound/bgm.mp3");
-        if (is_file)
+        if (is_file(sound_path))
             resources.bgm = Mix_LoadMUS(sound_path);
     }
     return resources.bgm;
