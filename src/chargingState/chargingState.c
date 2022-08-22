@@ -98,8 +98,10 @@ int main(void)
     SDL_Surface* video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
     SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
 
+    int min_delay = 15;
     int frame_delay = 80;
     int frame_count = 0;
+
     SDL_Surface *frames[24];
     SDL_Surface *image;
 
@@ -113,9 +115,13 @@ int main(void)
     char json_path[STR_MAX + 20];
     snprintf(json_path, STR_MAX + 19, "%s/chargingState.json", image_dir);
     if (is_file(json_path)) {
+        int value;
         char json_value[STR_MAX];
-        if (file_parseKeyValue(json_path, "frame_delay", json_value, ':', 0) != NULL)
-            frame_delay = atoi(json_value) / 1000;
+        if (file_parseKeyValue(json_path, "frame_delay", json_value, ':', 0) != NULL) {
+            value = atoi(json_value);
+            // accept both microseconds and milliseconds
+            frame_delay = value >= 10000 ? value / 1000 : value;
+        }
     }
 
     printf_debug("Frame count: %d\n", frame_count);
@@ -127,21 +133,20 @@ int main(void)
     fds[0].fd = input_fd;
     fds[0].events = POLLIN;
 
-    bool power_pressed = false;
-
-    int min_delay = 40;
-
     if (frame_delay < min_delay)
         frame_delay = min_delay;
 
-    int repeat_power = 0,
-        animation_ticks = 0,
-        display_ticks = 0;
+    bool power_pressed = false;
+    int repeat_power = 0;
 
     int current_frame = 0;
 
     // Set the CPU to powersave (charges faster?)
     system_powersave_on();
+
+    uint32_t acc_ticks = 0,
+             last_ticks = SDL_GetTicks(),
+             display_timer = last_ticks;
 
     while (!quit) {
         while (poll(fds, 1, suspended ? 1000 - min_delay : 0)) {
@@ -159,13 +164,15 @@ int main(void)
                     power_pressed = false;
                 }
                 else if (ev.value == REPEATING) {
-                    if (repeat_power >= 5)
+                    if (repeat_power >= 5) {
                         quit = true; // power on
+                        break;
+                    }
                     repeat_power++;
                 }
             }
             
-            display_ticks = 0;
+            display_timer = SDL_GetTicks();
         }
 
         if (!battery_isCharging()) {
@@ -177,13 +184,19 @@ int main(void)
         if (quit)
             break;
 
-        if (!suspended && display_ticks >= DISPLAY_TIMEOUT)
-            suspend(true, video);
-
         if (suspended)
             continue;
 
-        if (animation_ticks >= frame_delay) {
+        uint32_t ticks = SDL_GetTicks();
+        acc_ticks += ticks - last_ticks;
+        last_ticks = ticks;
+
+        if (!suspended && ticks - display_timer >= DISPLAY_TIMEOUT) {
+            suspend(true, video);
+            continue;
+        }
+
+        if (acc_ticks >= frame_delay) {
             // Clear screen
             SDL_FillRect(screen, NULL, 0);
 
@@ -197,11 +210,9 @@ int main(void)
             SDL_BlitSurface(screen, NULL, video, NULL);
             SDL_Flip(video);
 
-            animation_ticks = animation_ticks - frame_delay;
+            acc_ticks -= frame_delay;
         }
         
-        animation_ticks += min_delay;
-        display_ticks += min_delay;
         msleep(min_delay);
     }
 
@@ -219,16 +230,18 @@ int main(void)
     SDL_FreeSurface(video);
     SDL_Quit();
 
-    #ifdef PLATFORM_MIYOOMINI
     if (turn_off) {
+        #ifdef PLATFORM_MIYOOMINI
         display_setScreen(false);
         system("sync; reboot; sleep 10");
+        #endif
     }
     else {
+        #ifdef PLATFORM_MIYOOMINI
         display_setScreen(true);
         short_pulse();
+        #endif
     }
-    #endif
 
     // restore CPU performance mode
     system_powersave_off();

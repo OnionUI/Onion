@@ -7,10 +7,8 @@
 #include "utils/process.h"
 #include "system/system.h"
 
-#define CHECK_BATTERY_TIMEOUT 15000 //ms
-
-static int battery_check_time = 0;
 static time_t battery_last_modified = 0;
+static bool battery_is_charging = false;
 
 /**
  * @brief Retrieve the current battery percentage as reported by batmon
@@ -80,17 +78,28 @@ bool battery_isCharging(void)
 bool battery_hasChanged(int ticks, int *out_percentage)
 {
     bool changed = false;
-    if (ticks - battery_check_time > CHECK_BATTERY_TIMEOUT) {
-        if (file_isModified("/tmp/percBat", &battery_last_modified)) {
-            int current_percentage = battery_getPercentage();
 
-            if (current_percentage != *out_percentage) {
-                *out_percentage = current_percentage;
-                changed = true;
-            }
+    if (battery_isCharging()) {
+        if (!battery_is_charging) {
+            *out_percentage = 500;
+            battery_is_charging = true;
+            return true;
         }
-        battery_check_time = ticks;
+        return false;
     }
+    else if (battery_is_charging) {
+        battery_is_charging = false;
+    }
+
+    if (file_isModified("/tmp/percBat", &battery_last_modified)) {
+        int current_percentage = battery_getPercentage();
+
+        if (current_percentage != *out_percentage) {
+            *out_percentage = current_percentage;
+            changed = true;
+        }
+    }
+
     return changed;
 }
 
