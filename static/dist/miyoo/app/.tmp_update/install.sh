@@ -228,11 +228,16 @@ update_only() {
     fi
 
     install_configs 0
+    
     echo "Update complete!" >> /tmp/.update_msg
+    sleep 1
 
     touch $sysdir/.waitConfirm
     sync
+    
     echo "Press any key to turn off" >> /tmp/.update_msg
+    sleep 1
+
     touch $sysdir/.installed
 
     until [ ! -f $sysdir/.waitConfirm ]; do
