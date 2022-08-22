@@ -47,7 +47,7 @@ bool updateKeystate(KeyState keystate[320], bool *quit_flag, bool enabled, SDLKe
         }
     }
     
-	msleep(15);
+	msleep(4);
 
     return retval;
 }
