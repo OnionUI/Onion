@@ -4,7 +4,7 @@ ECHO = echo
 PRINT_BUILD = "make[$(TARGET_NAME)]: Building $<"
 PRINT_RECIPE = "make[$(TARGET_NAME)]: $@"
 
-COMPILE_CC = $(CC) $(CFLAGS) -std=c99 -c "$<" -o "$@"
+COMPILE_CC = $(CC) $(CFLAGS) -std=gnu18 -c "$<" -o "$@"
 COMPILE_CXX = $(CXX) $(CXXFLAGS) -std=c++17 -c "$<" -o "$@"
 
 COMPILE_CC_OUT = "> $(COMPILE_CC)$$($(COMPILE_CC) 2>&1)"
