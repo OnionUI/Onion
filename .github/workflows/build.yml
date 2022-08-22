@@ -19,3 +19,8 @@ jobs:
       run: |
         source /root/.bashrc
         make build
+    - name: Test
+      shell: bash
+      run: |
+        source /root/.bashrc
+        make test
