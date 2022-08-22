@@ -159,10 +159,8 @@ int main(void)
                     power_pressed = false;
                 }
                 else if (ev.value == REPEATING) {
-                    if (repeat_power >= 5) {
-                        short_pulse();
+                    if (repeat_power >= 5)
                         quit = true; // power on
-                    }
                     repeat_power++;
                 }
             }
@@ -228,6 +226,7 @@ int main(void)
     }
     else {
         display_setScreen(true);
+        short_pulse();
     }
     #endif
 
