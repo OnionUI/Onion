@@ -214,8 +214,8 @@ void displayLayersNames(){
     for (int i = 0 ; i < 7 ; i++){
         if ((i + nListPosition) < package_count[nTab]) {
             bool package_changed = package_changes[nTab][i + nListPosition];
-            char package_name[STR_MAX];
-            sprintf(package_name, "%s%c", package_names[nTab][i + nListPosition], package_changed ? '*' : 0);
+            char package_name[STR_MAX + 2];
+            snprintf(package_name, STR_MAX + 1, "%s%c", package_names[nTab][i + nListPosition], package_changed ? '*' : 0);
             surfaceResName = TTF_RenderUTF8_Blended(font25, package_name, color_white);
             rectResName.y = 92 + i * 47;
             SDL_BlitSurface(surfaceResName, NULL, screen, &rectResName);

@@ -10,7 +10,7 @@ uint32_t FNV1A_Pippip_Yurii(const char *str, size_t wrdlen) {
 	size_t Cycles, NDhead;
 if (wrdlen > 8) {
 	Cycles = ((wrdlen - 1)>>4) + 1; NDhead = wrdlen - (Cycles<<3);
-#pragma nounroll
+// #pragma nounroll
         for(; Cycles--; str += 8) {
 		hash64 = ( hash64 ^ (*(uint64_t *)(str)) ) * PRIME;        
 		hash64 = ( hash64 ^ (*(uint64_t *)(str+NDhead)) ) * PRIME;        

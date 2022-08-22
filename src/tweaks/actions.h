@@ -132,10 +132,10 @@ void action_batteryPercentagePosition(void *pt)
     static bool applied_values[] = {false, true, false};
     applied_values[0] = resources.theme_back.batteryPercentage.onleft;
     int item_value = ((ListItem*)pt)->value;    
-    resources.theme.batteryPercentage.onleft = applied_values[((ListItem*)pt)->value];
+    resources.theme.batteryPercentage.onleft = applied_values[item_value];
 
     static int value_types[] = {cJSON_NULL, cJSON_True, cJSON_False};
-    theme_changeOverride("batteryPercentage", "onleft", NULL, value_types[((ListItem*)pt)->value]);
+    theme_changeOverride("batteryPercentage", "onleft", NULL, value_types[item_value]);
 
     battery_changed = true;
 }

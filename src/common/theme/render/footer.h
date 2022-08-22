@@ -11,9 +11,11 @@ void theme_renderStandardHint(SDL_Surface *screen, const char *btn_a_str, const 
     char label_a_str[STR_MAX] = " ", label_b_str[STR_MAX] = " ";
 
     if (!theme()->hideLabels.hints) {
-        strncpy(label_a_str, btn_a_str, STR_MAX - 1);
-        strncpy(label_b_str, btn_b_str, STR_MAX - 1);
+        if (btn_a_str != NULL) strncpy(label_a_str, btn_a_str, STR_MAX - 1);
+        if (btn_b_str != NULL) strncpy(label_b_str, btn_b_str, STR_MAX - 1);
     }
+
+    print_debug("Got here!");
 
     SDL_Rect btn_a_rect = {offsetX, 450};
     SDL_Rect label_open_rect = {0, 449};
@@ -37,7 +39,7 @@ void theme_renderStandardHint(SDL_Surface *screen, const char *btn_a_str, const 
         offsetX += label_open->w + 30;
     }
 
-    if (label_b_str) {
+    if (btn_b_str != NULL && strlen(label_b_str) > 0) {
         SDL_Surface *button_b = resource_getSurface(BUTTON_B);
         SDL_Rect btn_b_rect = {offsetX, 450 - button_b->h / 2};
         SDL_BlitSurface(button_b, NULL, screen, &btn_b_rect);

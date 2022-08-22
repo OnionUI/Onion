@@ -91,8 +91,12 @@ int main(int argc, char *argv[])
 	List list = list_create(pargc, LIST_SMALL);
 
 	for (i = 0; i < pargc; i++) {
-		ListItem item;
-		strcpy(item.label, pargs[i]);
+		ListItem item = {
+			.action_id = i,
+			.action = NULL
+		};
+		strncpy(item.label, pargs[i], STR_MAX - 1);
+		printf_debug("Adding list item: %s (%d)\n", item.label, item.action_id);
 		list_addItem(&list, item);
 	}
 
@@ -104,6 +108,7 @@ int main(int argc, char *argv[])
 
 	if (has_message) {
 		char *str = str_replace(message_str, "\\n", "\n");
+		printf_debug("Message: %s\n", str);
 		message = theme_textboxSurface(str, resource_getFont(TITLE), theme()->grid.color, ALIGN_CENTER);
 		list.scroll_height = 3;
 		message_rect.x = 320 - message->w / 2;
@@ -173,7 +178,7 @@ int main(int argc, char *argv[])
 			else if (event.type == SDL_KEYUP) {
 				switch (key) {
 					case SW_BTN_A:
-						return_code = list_currentItem(&list)->_id;
+						return_code = list_currentItem(&list)->action_id;
 						quit = true;
 						break;
 					case SW_BTN_B:
@@ -221,13 +226,19 @@ int main(int argc, char *argv[])
 	// Clear the screen when exiting
 	SDL_FillRect(video, NULL, 0);
 	SDL_Flip(video);
-	
+
 	lang_free();
 	free(pargs);
+	
+	print_debug("Freeing list...");
 	list_free(&list);
+	printf_debug(LOG_SUCCESS, "freed list");
+
 	resources_free();
+
 	if (has_message)
 		SDL_FreeSurface(message);
+
    	SDL_FreeSurface(screen);
    	SDL_FreeSurface(video);
     SDL_Quit();
