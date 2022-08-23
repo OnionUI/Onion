@@ -11,7 +11,7 @@ jobs:
       options: --user root
     steps:
     - name: Install gtest manually
-      run: apt-get update && apt-get install -y libgtest-dev && cp -r /usr/src/gtest/include /usr/include/ && cd /usr/src/gtest && cmake CMakeLists.txt && make && cp *.a /usr/lib && ln -s /usr/lib/libgtest.a /usr/local/lib/libgtest.a && ln -s /usr/lib/libgtest_main.a /usr/local/lib/libgtest_main.a
+      run: apt-get update && apt-get install -y libgtest-dev && cd /usr/src/gtest && cmake CMakeLists.txt && make && cp *.a /usr/lib && ln -s /usr/lib/libgtest.a /usr/local/lib/libgtest.a && ln -s /usr/lib/libgtest_main.a /usr/local/lib/libgtest_main.a
     - name: Checkout repository
       uses: actions/checkout@v3
       with:
@@ -25,4 +25,4 @@ jobs:
       shell: bash
       run: |
         source /root/.bashrc
-        GTEST_INCLUDE_DIR=/usr/include/ make test
+        GTEST_INCLUDE_DIR=/usr/src/gtest/include make test

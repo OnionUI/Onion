@@ -38,7 +38,7 @@ CFLAGS := $(CFLAGS) -I../include -I../src/common -I$(GTEST_INCLUDE_DIR)
 endif
 
 CXXFLAGS := $(CFLAGS)
-LDFLAGS := -L../../lib
+LDFLAGS := -L../../lib -L/usr/local/lib/
 
 ifeq ($(PLATFORM),miyoomini)
 CFLAGS := $(CFLAGS) -marm -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7ve -Wl,-rpath=$(LIB)
