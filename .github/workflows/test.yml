@@ -1,0 +1,29 @@
+name: Test build
+on:
+  [push, pull_request]
+
+jobs:
+  build:
+    name: Test build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install SDL libs
+      run: |
+        sudo apt-get update && sudo apt-get install libsdl1.2-dev libsdl-image1.2-dev libsdl-image1.2-dev libsdl-ttf2.0-dev
+    - name: Install gtest manually
+      run: |
+        sudo apt-get install build-essential libgtest-dev cmake
+        cd /usr/src/gtest
+        sudo cmake CMakeLists.txt && sudo make
+        sudo cp /usr/src/gtest/lib/*.a /usr/lib
+        sudo ln -s /usr/lib/libgtest.a /usr/local/lib/libgtest.a
+        sudo ln -s /usr/lib/libgtest_main.a /usr/local/lib/libgtest_main.a
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    - name: Test
+      shell: bash
+      run: |
+        GTEST_INCLUDE_DIR=/usr/src/gtest/include make test
