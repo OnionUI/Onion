@@ -3,6 +3,7 @@
 *.o
 /src/**/*.log
 /build/
+/build_test/
 /release/
 /dist/
 temp/
