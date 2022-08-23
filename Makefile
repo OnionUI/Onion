@@ -28,7 +28,7 @@ PACKAGES_EMU_DEST   := $(BUILD_DIR)/App/The_Onion_Installer/data/Layer1
 PACKAGES_APP_DEST   := $(BUILD_DIR)/App/The_Onion_Installer/data/Layer2
 PACKAGES_RAPP_DEST  := $(BUILD_DIR)/App/The_Onion_Installer/data/Layer3
 ifeq (,$(GTEST_INCLUDE_DIR))
-GTEST_INCLUDE_DIR = /usr/include/gtest
+GTEST_INCLUDE_DIR = /usr/include/
 endif
 
 TOOLCHAIN := ghcr.io/onionui/miyoomini-toolchain:latest
