@@ -25,4 +25,4 @@ jobs:
       shell: bash
       run: |
         source /root/.bashrc
-        make test
+        GTEST_INCLUDE_DIR=/usr/include/gmake make test

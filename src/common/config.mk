@@ -34,7 +34,7 @@ CFLAGS := $(CFLAGS) -DLOG_DEBUG -g
 endif
 
 ifeq ($(TEST),1)
-CFLAGS := $(CFLAGS) -I../include -I../src/common
+CFLAGS := $(CFLAGS) -I../include -I../src/common -I$(GTEST_INCLUDE_DIR)
 endif
 
 CXXFLAGS := $(CFLAGS)
