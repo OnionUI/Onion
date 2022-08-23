@@ -10,9 +10,7 @@ endif
 LIB = /mnt/SDCARD/.tmp_update/lib
 
 CC 		= $(CROSS_COMPILE)gcc
-ifeq (,$(CXX))
 CXX 	= $(CROSS_COMPILE)g++
-endif
 STRIP 	= $(CROSS_COMPILE)strip
 
 SOURCES := $(SOURCES) .

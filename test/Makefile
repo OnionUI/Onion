@@ -1,7 +1,5 @@
 TEST = 1
 INCLUDE_UTILS = 0
-UNION_PLATFORM = linux
-CXX = /usr/bin/c++
 CFILES := ../src/infoPanel/imagesCache.c
 include ../src/common/config.mk
 
