@@ -13,7 +13,7 @@ jobs:
         sudo apt-get update && sudo apt-get install build-essential libgtest-dev cmake
         cd /usr/src/gtest
         sudo cmake CMakeLists.txt && sudo make
-        sudo cp ./*.a /usr/lib
+        sudo cp /usr/src/gtest/lib/*.a /usr/lib
         sudo ln -s /usr/lib/libgtest.a /usr/local/lib/libgtest.a
         sudo ln -s /usr/lib/libgtest_main.a /usr/local/lib/libgtest_main.a
     - name: Checkout repository
