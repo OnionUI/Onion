@@ -172,4 +172,4 @@ lib:
 
 test:
 	@mkdir -p $(BUILD_TEST_DIR) && cd $(ROOT_DIR)/test && BUILD_DIR=$(BUILD_TEST_DIR)/ make
-	$(BUILD_TEST_DIR)/test_infoPanel
+	$(BUILD_TEST_DIR)/test
