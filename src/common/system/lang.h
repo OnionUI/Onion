@@ -151,7 +151,7 @@ void lang_free(void)
 
 char* lang_get(lang_hash key)
 {
-    if (lang_list[key])
+    if (lang_list && lang_list[key])
         return lang_list[key];
     return "";
 }

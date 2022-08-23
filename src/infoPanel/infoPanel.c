@@ -1,9 +1,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
-#include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
-#include <SDL/SDL_ttf.h>
 
+#include "utils/sdl_init.h"
 #include "utils/utils.h"
 #include "utils/msleep.h"
 #include "utils/json.h"
@@ -15,6 +13,9 @@
 #include "theme/background.h"
 #include "imagesCache.h"
 #include "imagesBrowser.h"
+#include "appstate.h"
+
+#define FRAMES_PER_SECOND 60
 
 static char **g_images_paths;
 static int g_images_paths_count = 0;
@@ -121,12 +122,18 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	SDL_Init(SDL_INIT_VIDEO);
-	SDL_ShowCursor(SDL_DISABLE);
-	TTF_Init();
-	
-	SDL_Surface *video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
-	SDL_Surface *screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
+	signal(SIGINT, sigHandler);
+    signal(SIGTERM, sigHandler);
+
+	SDL_InitDefault(true);
+
+	lang_load();
+
+	int battery_percentage = battery_getPercentage();
+
+	uint32_t acc_ticks = 0;
+	uint32_t last_ticks = SDL_GetTicks();
+	uint32_t time_step = 1000 / FRAMES_PER_SECOND;
 
 	bool cache_used = false;
 	if (exists(image_path)) {
@@ -173,6 +180,10 @@ int main(int argc, char *argv[])
 	SDL_Event event;
 
 	while (!quit && wait_confirm) {
+		uint32_t ticks = SDL_GetTicks();
+		acc_ticks += ticks - last_ticks;
+		last_ticks = ticks;
+
 		while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_KEYDOWN)
 			{
@@ -207,7 +218,49 @@ int main(int argc, char *argv[])
 					SDL_BlitSurface(screen, NULL, video, NULL);
 					SDL_Flip(video);
 				}
+				header_changed = true;
+				footer_changed = true;
 			}
+		}
+
+		if (all_changed) {
+			header_changed = true;
+			footer_changed = true;
+			battery_changed = true;
+		}
+
+		if (quit)
+			break;
+
+		if (battery_hasChanged(ticks, &battery_percentage))
+			battery_changed = true;
+		
+		if (acc_ticks >= time_step) {
+			if (header_changed || battery_changed)
+				theme_renderHeader(screen, "infoPanel", false);
+			
+			if (footer_changed) {
+				theme_renderFooter(screen);
+				theme_renderStandardHint(screen, lang_get(LANG_SELECT), lang_get(LANG_BACK));
+			}
+
+			if (footer_changed)
+				theme_renderFooterStatus(screen, g_image_index, g_images_paths_count);
+
+			if (header_changed || battery_changed)
+				theme_renderHeaderBattery(screen, battery_percentage);
+
+			if (header_changed || footer_changed || battery_changed) {
+				SDL_BlitSurface(screen, NULL, video, NULL); 
+				SDL_Flip(video);
+			}
+
+			header_changed = false;
+			footer_changed = false;
+			battery_changed = false;
+			all_changed = false;
+
+			acc_ticks -= time_step;
 		}
 	}
 
@@ -221,15 +274,22 @@ int main(int argc, char *argv[])
 	if (!wait_confirm)
 		msleep(2000);
 
-	SDL_FillRect(screen, NULL, 0);
-	SDL_BlitSurface(screen, NULL, video, NULL);
+	// Clear the screen when exiting
+	SDL_FillRect(video, NULL, 0);
 	SDL_Flip(video);
-
-	msleep(100);
 
 	cleanImagesCache();
 
-   	sdlQuit(screen, video);
+   	lang_free();
+	resources_free();
+   	SDL_FreeSurface(screen);
+   	SDL_FreeSurface(video);
+
+	#ifndef PLATFORM_MIYOOMINI
+	msleep(200); // to clear SDL input on quit
+	#endif
+
+    SDL_Quit();
 	
     return EXIT_SUCCESS;
 }
