@@ -161,6 +161,8 @@ fresh_install() {
         # Remove stock folders
         cd /mnt/SDCARD
         rm -rf Emu/* App/* RApp/* miyoo
+    else
+        debloat_apps
     fi
 
     refresh_roms
@@ -410,7 +412,7 @@ debloat_apps() {
         Onion_Manual \
         PlayActivity \
         Retroarch \
-        PackageManager \
+        The_Onion_Installer \
         Clean_View_Toggle \
         StartGameSwitcher \
         Guest_Mode \
