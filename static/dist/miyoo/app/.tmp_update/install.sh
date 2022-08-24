@@ -198,7 +198,7 @@ fresh_install() {
     free_mma
 
     # Launch layer manager
-    cd /mnt/SDCARD/App/The_Onion_Installer/ 
+    cd /mnt/SDCARD/App/PackageManager/ 
     $sysdir/bin/packageManager --confirm --reapply
     free_mma
 
@@ -410,7 +410,7 @@ debloat_apps() {
         Onion_Manual \
         PlayActivity \
         Retroarch \
-        The_Onion_Installer \
+        PackageManager \
         Clean_View_Toggle \
         StartGameSwitcher \
         Guest_Mode \
