@@ -55,15 +55,15 @@ main() {
     echo 80     > $pwmdir/pwm0/duty_cycle
     echo 1  	> $pwmdir/pwm0/enable
 
-    # Start the battery monitor
-    cd $sysdir
-    ./bin/batmon 2>&1 > ./logs/batmon.log &
-
     if [ ! -d /mnt/SDCARD/.tmp_update/onionVersion ]; then
         fresh_install 1
         cleanup
         return
     fi
+    
+    # Start the battery monitor
+    cd $sysdir
+    ./bin/batmon 2>&1 > ./logs/batmon.log &
 
     # Prompt for update or fresh install
     ./bin/prompt -r -m "Welcome to the Onion installer!\nPlease choose an action:" \
@@ -71,6 +71,8 @@ main() {
         "Repair (keep settings)" \
         "Reinstall (reset settings)"
     retcode=$?
+
+    killall batmon
 
     if [ $retcode -eq 0 ]; then
         # Update
@@ -150,7 +152,7 @@ fresh_install() {
     echo "Backing up files..." >> /tmp/.update_msg
     backup_system
 
-    echo "Removing redundant files..." >> /tmp/.update_msg
+    echo "Removing old files..." >> /tmp/.update_msg
 
     if [ $reset_configs -eq 1 ]; then
         remove_configs
@@ -164,11 +166,11 @@ fresh_install() {
     refresh_roms
 
     if [ $install_ra -eq 1 ]; then
-        install_core "(1 of 2) Installing Onion..."
+        install_core "1/2: Installing Onion..."
         # free_memory_inbetween
-        install_retroarch "(2 of 2) Installing RetroArch..."
+        install_retroarch "2/2: Installing RetroArch..."
     else
-        install_core "(1 of 1) Installing Onion..."
+        install_core "1/1: Installing Onion..."
         echo "Skipped installing RetroArch"
     fi
 
@@ -186,6 +188,10 @@ fresh_install() {
     if [ $reset_configs -eq 1 ]; then
         cp -f $sysdir/config/system.json /appconfigs/system.json
     fi
+
+    # Start the battery monitor
+    cd $sysdir
+    ./bin/batmon 2>&1 > ./logs/batmon.log &
 
     cd /mnt/SDCARD/App/Onion_Manual/
     ./launch.sh
@@ -218,12 +224,12 @@ update_only() {
     sleep 1
 
     if [ $install_ra -eq 1 ]; then
-        install_core "(1 of 2) Updating Onion..."
+        install_core "1/2: Updating Onion..."
         # free_memory_inbetween
-        install_retroarch "(2 of 2) Updating RetroArch..."
+        install_retroarch "2/2: Updating RetroArch..."
         restore_ra_config
     else
-        install_core "(1 of 1) Updating Onion..."
+        install_core "1/1: Updating Onion..."
         echo "Skipped installing RetroArch"
     fi
 
@@ -256,19 +262,16 @@ install_core() {
         return
     fi
 
-    rm -f $sysdir/updater
+    rm -f \
+        $sysdir/updater \
+        $sysdir/bin/batmon \
+        $sysdir/bin/prompt
 
     echo "$msg 0%" >> /tmp/.update_msg
 
     # Onion core installation / update
     cd /
     unzip_progress "$core_zipfile" "$msg" /mnt/SDCARD $total_core
-
-    if [ $? -ne 0 ]; then
-        touch $sysdir/.installFailed
-        echo Onion - installation failed
-        exit 0
-    fi
 }
 
 free_memory_inbetween() {
@@ -308,12 +311,6 @@ install_retroarch() {
     # Install RetroArch
     cd /
     unzip_progress "$ra_zipfile" "$msg" /mnt/SDCARD $total_ra
-    
-    if [ $? -ne 0 ]; then
-        touch $sysdir/.installFailed
-        echo RetroArch - installation failed
-        exit 0
-    fi
 }
 
 maybe_remove_retroarch() {
@@ -453,6 +450,7 @@ unzip_progress() {
     echo "   - Extract '$zipfile' ($total files) into $dest"
 
     unzip -o "$zipfile" -d "$dest" | awk -v total="$total" -v out="/tmp/.update_msg" -v msg="$msg" 'BEGIN { cnt = 0; l = 0; printf "" > out; }{
+        print $0;
         p = int(cnt * 100 / total);
         if (p != l) {
             printf "%s %3.0f%%\n", msg, p >> out;
@@ -461,8 +459,17 @@ unzip_progress() {
         }
         cnt += 1;
     }'
-
-    echo "$msg 100%" >> /tmp/.update_msg
+    
+    if [ $? -ne 0 ]; then
+        touch $sysdir/.installFailed
+        echo ":: Installation failed!"
+        sync
+        reboot
+        sleep 10
+        exit 0
+    else
+        echo "$msg 100%" >> /tmp/.update_msg
+    fi
 }
 
 free_mma() {
