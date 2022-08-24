@@ -27,9 +27,11 @@
 #include "utils/config.h"
 #include "utils/surfaceSetAlpha.h"
 #include "utils/sdl_init.h"
+#include "utils/imageCache.h"
 #include "system/battery.h"
 #include "system/keymap_sw.h"
-#include "utils/imageCache.h"
+#include "system/settings.h"
+#include "system/lang.h"
 #include "theme/theme.h"
 #include "theme/background.h"
 #include "theme/sound.h"
@@ -96,38 +98,6 @@ struct structPlayActivity
 rom_list[MAXVALUES];
 int rom_list_len = 0;
 int bDisplayBoxArt = 0;
-
-int getMiyooLum(void)
-{
-    cJSON* request_json = json_load(SYSTEM_CONFIG);
-    int brightness = 10;
-    json_getInt(request_json, "brightness", &brightness);
-    cJSON_free(request_json);
-    return brightness;
-}
-
-void setMiyooLum(int nLum)
-{
-    cJSON* request_json = json_load(SYSTEM_CONFIG);
-    cJSON* itemBrightness = cJSON_GetObjectItem(request_json, "brightness");
-
-    cJSON_SetNumberValue(itemBrightness, nLum);
-
-    json_save(request_json, SYSTEM_CONFIG);
-    cJSON_free(request_json);
-}
-
-void SetRawBrightness(int val) // val = 0-100
-{
-    FILE *fp;
-    file_put(fp, "/sys/class/pwm/pwmchip0/pwm0/duty_cycle", "%d", val);
-}
-
-void SetBrightness(int value) // value = 0-10
-{
-    SetRawBrightness(value==0 ? 6 : value * 10);
-    setMiyooLum(value);
-}
 
 int readRomDB()
 {
@@ -317,6 +287,7 @@ int main(void)
     int battery_percentage = battery_getPercentage();
 
     bool changed = true;
+    bool brightness_changed = false;
     bool image_drawn = false;
 
     KeyState keystate[320] = {(KeyState)0};
@@ -344,7 +315,8 @@ int main(void)
 		uint32_t ticks = SDL_GetTicks();
 		acc_ticks += ticks - last_ticks;
 		last_ticks = ticks;
-        int bBrightChange = 0;
+
+        brightness_changed = false;
 
         if (show_legend && ticks - start > legend_timeout) {
             show_legend = false;
@@ -399,29 +371,26 @@ int main(void)
 
             if (keystate[SW_BTN_UP] >= PRESSED){
                 // Change brightness
-                int brightVal = getMiyooLum();
-                if (brightVal < 10) {
-                    brightVal++;
-                    bBrightChange = 1;
+                if (settings.brightness < 10) {
+                    settings_setBrightness(settings.brightness + 1, true, true);
+                    brightness_changed = true;
                     changed = true;
-                    SetBrightness(brightVal);
                 }
             }
 
             if (keystate[SW_BTN_DOWN] >= PRESSED){
                 // Change brightness
-                int brightVal = getMiyooLum();
-                if (brightVal > 0) {
-                    brightVal--;
-                    bBrightChange = 1;
+                if (settings.brightness > 0) {
+                    settings_setBrightness(settings.brightness - 1, true, true);
+                    brightness_changed = true;
                     changed = true;
-                    SetBrightness(brightVal);
                 }
             }
 
             if (select_pressed && ((changed_key == SW_BTN_L2 && keystate[SW_BTN_L2] == RELEASED)
                     || (changed_key == SW_BTN_R2 && keystate[SW_BTN_R2] == RELEASED))) {
-                bBrightChange = 1;
+                settings_load();
+                brightness_changed = true;
                 changed = true;
             }
 
@@ -495,7 +464,7 @@ int main(void)
 		if (battery_hasChanged(ticks, &battery_percentage))
 			changed = true;
 
-        if (!changed && image_drawn && bBrightChange == 0)
+        if (!changed && image_drawn && brightness_changed == false)
             continue;
 
         if (acc_ticks >= time_step) {
@@ -564,10 +533,9 @@ int main(void)
                 SDL_BlitSurface(legend, NULL, screen, &legend_rect);
             }
 
-            if (bBrightChange == 1) {
+            if (brightness_changed) {
                 // Display luminosity slider
-                int brightness_value = getMiyooLum();
-                SDL_Surface* brightness = resource_getBrightness(brightness_value);
+                SDL_Surface* brightness = resource_getBrightness(settings.brightness);
                 bool vertical = brightness->h > brightness->w;
                 SDL_Rect brightness_rect = {0, (view_mode == 0 ? 240 : 210) - brightness->h / 2};
                 if (!vertical) {

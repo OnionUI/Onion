@@ -60,7 +60,6 @@ void config_setNumber(const char *key, int value) {
     char filename[STR_MAX];
     _config_prepare(key, filename);
     file_put_sync(fp, filename, "%d", value);
-    printf_debug("config set: <%s> = %d\n", key, value);
 }
 
 void config_setString(const char *key, char *value) {
@@ -68,7 +67,6 @@ void config_setString(const char *key, char *value) {
     char filename[STR_MAX];
     _config_prepare(key, filename);
     file_put_sync(fp, filename, "%s", value);
-    printf_debug("config set: <%s> = '%s'\n", key, value);
 }
 
 #endif // CONFIG_H__

@@ -13,6 +13,7 @@ ROOT_DIR            := $(shell pwd -P)
 SRC_DIR             := $(ROOT_DIR)/src
 THIRD_PARTY_DIR     := $(ROOT_DIR)/third-party
 BUILD_DIR           := $(ROOT_DIR)/build
+BUILD_TEST_DIR      := $(ROOT_DIR)/build_test
 BIN_DIR             := $(ROOT_DIR)/build/.tmp_update/bin
 DIST_FULL           := $(ROOT_DIR)/dist/full
 DIST_CORE           := $(ROOT_DIR)/dist/core
@@ -26,6 +27,9 @@ STATIC_PACKAGES     := $(ROOT_DIR)/static/packages
 PACKAGES_EMU_DEST   := $(BUILD_DIR)/App/The_Onion_Installer/data/Layer1
 PACKAGES_APP_DEST   := $(BUILD_DIR)/App/The_Onion_Installer/data/Layer2
 PACKAGES_RAPP_DEST  := $(BUILD_DIR)/App/The_Onion_Installer/data/Layer3
+ifeq (,$(GTEST_INCLUDE_DIR))
+GTEST_INCLUDE_DIR = /usr/include/
+endif
 
 TOOLCHAIN := ghcr.io/onionui/miyoomini-toolchain:latest
 
@@ -33,7 +37,7 @@ include ./src/common/commands.mk
 
 ###########################################################
 
-.PHONY: all version core apps external release clean git-clean with-toolchain patch lib
+.PHONY: all version core apps external release clean git-clean with-toolchain patch lib test
 
 all: dist
 
@@ -89,12 +93,16 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/packageManager && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/sendkeys && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/setState && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/infoPanel && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/prompt && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/batmon && BUILD_DIR=$(BIN_DIR) make
 # Build dependencies for installer
 	@mkdir -p $(DIST_FULL)/miyoo/app/.tmp_update/bin
-	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(INSTALLER_DIR)/bin make
-	@cd $(SRC_DIR)/infoPanel && BUILD_DIR=$(INSTALLER_DIR)/bin make
-	@cd $(SRC_DIR)/prompt && BUILD_DIR=$(INSTALLER_DIR)/bin make
-	@cd $(SRC_DIR)/batmon && BUILD_DIR=$(INSTALLER_DIR)/bin make
+	@cp $(BIN_DIR)/installUI $(INSTALLER_DIR)/bin/
+	@cp $(BIN_DIR)/infoPanel $(INSTALLER_DIR)/bin/
+	@cp $(BIN_DIR)/prompt $(INSTALLER_DIR)/bin/
+	@cp $(BIN_DIR)/batmon $(INSTALLER_DIR)/bin/
 
 apps: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
@@ -138,7 +146,7 @@ release: dist
 
 clean:
 	@$(ECHO) $(PRINT_RECIPE)
-	@rm -rf $(BUILD_DIR) $(ROOT_DIR)/dist $(ROOT_DIR)/temp/configs
+	@rm -rf $(BUILD_DIR) $(BUILD_TEST_DIR) $(ROOT_DIR)/dist $(ROOT_DIR)/temp/configs
 	@rm -f $(CACHE)/.setup
 	@find include src -type f -name *.o -exec rm -f {} \;
 
@@ -168,3 +176,7 @@ patch:
 lib:
 	@cd $(ROOT_DIR)/include/cJSON && make clean && make
 	@cd $(ROOT_DIR)/include/SDL && make clean && make
+
+test:
+	@mkdir -p $(BUILD_TEST_DIR) && cd $(ROOT_DIR)/test && BUILD_DIR=$(BUILD_TEST_DIR)/ make
+	$(BUILD_TEST_DIR)/test

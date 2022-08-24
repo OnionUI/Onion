@@ -256,12 +256,22 @@ void settings_save(void)
     file_put_sync(fp, "/tmp/settings_changed", "%s", "");
 }
 
-void settings_setBrightness(uint32_t value, bool apply)
+void settings_setBrightness(uint32_t value, bool apply, bool save)
 {
     settings.brightness = value;
 
     if (apply)
         display_setBrightness(value);
+
+    if (save) {
+        cJSON* request_json = json_load(MAIN_UI_SETTINGS);
+        cJSON* itemBrightness = cJSON_GetObjectItem(request_json, "brightness");
+        cJSON_SetNumberValue(itemBrightness, settings.brightness);
+        json_save(request_json, MAIN_UI_SETTINGS);
+        cJSON_free(request_json);
+        FILE *fp;
+        file_put_sync(fp, "/tmp/settings_changed", "%s", "");
+    }
 }
 
 
