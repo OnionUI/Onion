@@ -197,6 +197,7 @@ int main(int argc, char *argv[])
 				}
 			}
 		}
+		msleep(4);
 	}
 
 	if (g_images_paths != NULL)
