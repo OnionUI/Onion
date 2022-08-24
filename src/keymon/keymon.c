@@ -411,9 +411,8 @@ int main(void) {
                             case SELECT:
                                 // START + L2 : brightness down
                                 if (settings.brightness > 0) {
-                                    settings_setBrightness(settings.brightness - 1, true);
+                                    settings_setBrightness(settings.brightness - 1, true, true);
                                     settings_sync();
-                                    settings_save();
                                 }
                                 comboKey_select = true;
                                 break;
@@ -439,9 +438,8 @@ int main(void) {
                         case SELECT:
                             // START + R2 : brightness up
                             if (settings.brightness < MAX_BRIGHTNESS) {
-                                settings_setBrightness(settings.brightness + 1, true);
+                                settings_setBrightness(settings.brightness + 1, true, true);
                                 settings_sync();
-                                settings_save();
                             }
                             comboKey_select = true;
                             break;
