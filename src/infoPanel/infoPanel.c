@@ -220,9 +220,6 @@ int main(int argc, char *argv[])
 					const int current_index = g_image_index;
 					navigating_forward ? g_image_index++ : g_image_index--;
 					drawImageByIndex(g_image_index, current_index, g_images_paths, g_images_paths_count, screen, &cache_used);
-
-					SDL_BlitSurface(screen, NULL, video, NULL);
-					SDL_Flip(video);
 				}
 				header_changed = true;
 				footer_changed = true;
@@ -251,7 +248,7 @@ int main(int argc, char *argv[])
 			}
 
 			if (footer_changed)
-				theme_renderFooterStatus(screen, g_image_index, g_images_paths_count);
+				theme_renderFooterStatus(screen, g_image_index + 1, g_images_paths_count);
 
 			if (header_changed || battery_changed)
 				theme_renderHeaderBattery(screen, battery_percentage);
