@@ -6,8 +6,7 @@ cleanup() {
     rm -rf \
         /tmp/.update_msg \
         $installdir/.installed \
-        $installdir/.installFailed \
-        $installdir/temp
+        $installdir/.installFailed
 }
 
 unzip_progress() {
@@ -15,7 +14,10 @@ unzip_progress() {
 	msg="$2"
     dest="$3"
     total=`unzip -l "$zipfile" | tail -1 | grep -Eo "([0-9]+) files" | sed "s/[^0-9]*//g"`
-    unzip -d "$dest" -o "$zipfile" | awk -v total="$total" -v out="/tmp/.update_msg" -v msg="$msg" 'BEGIN { cnt = 0; l = 0; printf "" > out; }{
+    echo "   - Extract '$zipfile' ($total files) into $dest"
+
+    unzip -ou "$zipfile" -d "$dest" | awk -v total="$total" -v out="/tmp/.update_msg" -v msg="$msg" 'BEGIN { cnt = 0; l = 0; printf "" > out; }{
+        print $0;
         p = int(cnt * 100 / total);
         if (p != l) {
             printf "%s %3.0f%%\n", msg, p >> out;
@@ -24,6 +26,7 @@ unzip_progress() {
         }
         cnt += 1;
     }'
+
     echo "$msg 100%" >> /tmp/.update_msg
 }
 
@@ -39,6 +42,7 @@ main() {
 
     if [ -f "$zipfile" ]; then
         unzip_progress "$zipfile" "Updating core..." temp
+        sleep 5
     else
         echo "Invalid zip file"
         touch $installdir/.installFailed

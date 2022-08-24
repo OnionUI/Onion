@@ -22,3 +22,4 @@ cd $sysdir
 ./updater
 
 reboot
+sleep 10
