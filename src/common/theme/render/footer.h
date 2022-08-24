@@ -15,8 +15,6 @@ void theme_renderStandardHint(SDL_Surface *screen, const char *btn_a_str, const 
         if (btn_b_str != NULL) strncpy(label_b_str, btn_b_str, STR_MAX - 1);
     }
 
-    print_debug("Got here!");
-
     SDL_Rect btn_a_rect = {offsetX, 450};
     SDL_Rect label_open_rect = {0, 449};
     
@@ -59,19 +57,22 @@ void theme_renderStandardHint(SDL_Surface *screen, const char *btn_a_str, const 
 
 void theme_renderFooter(SDL_Surface *screen)
 {
-    SDL_Rect footer_rect = {0, 420};
+    SDL_Rect footer_rect = {0, 420, 640, 60};
+    SDL_BlitSurface(theme_background(), &footer_rect, screen, &footer_rect);
 	SDL_BlitSurface(resource_getSurface(BG_FOOTER), NULL, screen, &footer_rect);
 }
 
-static int old_status_width = 200;
+static int old_status_width = -1;
 
 void theme_renderFooterStatus(SDL_Surface *screen, int current_num, int total_num)
 {
-    SDL_Rect status_pos = {620 - old_status_width, 420, old_status_width, 60};
-    SDL_Rect status_size = {status_pos.x, 0, old_status_width, 60};
+    if (old_status_width != -1) {
+        SDL_Rect status_pos = {620 - old_status_width, 420, old_status_width, 60};
+        SDL_Rect status_size = {status_pos.x, 0, old_status_width, 60};
 
-    SDL_BlitSurface(theme_background(), &status_pos, screen, &status_pos);
-    SDL_BlitSurface(resource_getSurface(BG_FOOTER), &status_size, screen, &status_pos);
+        SDL_BlitSurface(theme_background(), &status_pos, screen, &status_pos);
+        SDL_BlitSurface(resource_getSurface(BG_FOOTER), &status_size, screen, &status_pos);
+    }
 
     TTF_Font *font_hint = resource_getFont(HINT);
 

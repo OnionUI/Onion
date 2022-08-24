@@ -13,40 +13,41 @@ int main(int argc, char *argv[])
     signal(SIGSTOP, sigHandler);
     signal(SIGCONT, sigHandler);
 
-    sar_fd = open("/dev/sar", O_WRONLY);
-    ioctl(sar_fd, IOCTL_SAR_INIT, NULL);
-    ioctl(sar_fd, IOCTL_SAR_SET_CHANNEL_READ_VALUE, &adcConfig);
-
     display_init();
 
     int ticks = CHECK_BATTERY_TIMEOUT_S;
     bool is_charging = false;
 
     while (!quit) {
-        config_get("battery/warnAt", "%d", &warn_at);
-
-        if (ticks >= CHECK_BATTERY_TIMEOUT_S) {
-            adc_value = updateADCValue(adc_value);
-            ticks = 0;
-        }
-
         if (battery_isCharging()) {
-            if (!is_charging) {
-                is_charging = true;
-            }
+            is_charging = true;
             current_percentage = 500;
         }
-        else {
-            if (is_charging) {
-                is_charging = false;
-                adc_value = updateADCValue(0);
-            }
-            current_percentage = batteryPercentage(adc_value);
+        else if (is_charging) {
+            is_charging = false;
+            adc_value_g = updateADCValue(0);
+            current_percentage = batteryPercentage(adc_value_g);
+            printf_debug("charging stopped: suspended = %d, perc = %d, warn = %d\n", is_suspended, current_percentage, warn_at);
         }
-        
-        if (current_percentage != old_percentage) {
-            old_percentage = current_percentage;
-            file_put_sync(fp, "/tmp/percBat", "%d", current_percentage);
+
+        if (!is_suspended) {
+            config_get("battery/warnAt", "%d", &warn_at);
+
+            if (ticks >= CHECK_BATTERY_TIMEOUT_S) {
+                adc_value_g = updateADCValue(adc_value_g);
+                current_percentage = batteryPercentage(adc_value_g);
+                printf_debug("battery check: suspended = %d, perc = %d, warn = %d\n", is_suspended, current_percentage, warn_at);
+                ticks = -1;
+            }
+            
+            if (current_percentage != old_percentage) {
+                printf_debug("saving percBat: suspended = %d, perc = %d, warn = %d\n", is_suspended, current_percentage, warn_at);
+                old_percentage = current_percentage;
+                file_put_sync(fp, "/tmp/percBat", "%d", current_percentage);
+            }
+        }
+        else {
+            ticks = -1;
         }
 
         #ifdef PLATFORM_MIYOOMINI
@@ -77,8 +78,8 @@ static void sigHandler(int sig)
             is_suspended = true;
             break;
         case SIGCONT:
+            adc_value_g = updateADCValue(0);
             is_suspended = false;
-            adc_value = 0; // reset
             break;
         default: break;
     }
@@ -91,28 +92,33 @@ void cleanup(void)
     close(sar_fd);
 }
 
-int updateADCValue(int adc_value)
+int updateADCValue(int value)
 {    
     if (battery_isCharging())
         return 100;
 
-    if (adc_value <= 100)
-        adc_value = adcConfig.adc_value;
-    else if (adcConfig.adc_value > adc_value)
-        adc_value++;
-    else if (adcConfig.adc_value < adc_value)
-        adc_value--;
+    if (!sar_fd) {
+		sar_fd = open("/dev/sar", O_WRONLY);
+		ioctl(sar_fd, IOCTL_SAR_INIT, NULL);
+	}
 
-    return adc_value;
+    static SAR_ADC_CONFIG_READ adcConfig;
+	ioctl(sar_fd, IOCTL_SAR_SET_CHANNEL_READ_VALUE, &adcConfig);
+
+    if (value <= 100) value = adcConfig.adc_value;
+    else if (adcConfig.adc_value > value) value++;
+    else if (adcConfig.adc_value < value) value--;
+
+    return value;
 }
 
-int batteryPercentage(int adc_value)
+int batteryPercentage(int value)
 {
-    if (adc_value == 100) return 500;
-    if (adc_value >= 578) return 100;
-    if (adc_value >= 528) return adc_value - 478;
-    if (adc_value >= 512) return (int)(adc_value * 2.125 - 1068);
-    if (adc_value >= 480) return (int)(adc_value * 0.51613 - 243.742);
+    if (value == 100) return 500;
+    if (value >= 578) return 100;
+    if (value >= 528) return value - 478;
+    if (value >= 512) return (int)(value * 2.125 - 1068);
+    if (value >= 480) return (int)(value * 0.51613 - 243.742);
     return 0;
 }
 

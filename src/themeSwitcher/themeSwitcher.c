@@ -156,7 +156,7 @@ int main(void)
         previews[i] = IMG_Load(exists(theme_path) ? theme_path : "res/noThemePreview.png");
     }
 
-    char cPages[10];
+    char cPages[25];
 
     SDL_Event event;
     Uint8 keystate[320] = {0};
@@ -235,7 +235,7 @@ int main(void)
             if (current_page != themes_count - 1)
                 SDL_BlitSurface(surfaceArrowRight, NULL, screen, &rectArrowRight);
 
-            sprintf(cPages, "%d/%d", current_page + 1, themes_count);
+            snprintf(cPages, sizeof(cPages) - 1, "%d/%d", current_page + 1, themes_count);
             imagePages = TTF_RenderUTF8_Blended(font30, cPages, color_white);
             rectPages.x = 620 - imagePages->w;
             rectPages.y = 450 - imagePages->h / 2;
