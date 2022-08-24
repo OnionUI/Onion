@@ -36,11 +36,10 @@ typedef struct {
     int adc_value;
 } SAR_ADC_CONFIG_READ;
 
-static SAR_ADC_CONFIG_READ adcConfig = {0,0};
 static bool adcthread_active;
 static pthread_t adc_pt;
 static bool quit = false;
-static int sar_fd, adc_value;
+static int sar_fd, adc_value_g;
 static bool is_suspended = false;
 
 static void sigHandler(int sig);

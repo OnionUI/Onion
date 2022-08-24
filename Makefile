@@ -93,12 +93,16 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/packageManager && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/sendkeys && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/setState && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/infoPanel && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/prompt && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/batmon && BUILD_DIR=$(BIN_DIR) make
 # Build dependencies for installer
 	@mkdir -p $(DIST_FULL)/miyoo/app/.tmp_update/bin
-	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(INSTALLER_DIR)/bin make
-	@cd $(SRC_DIR)/infoPanel && BUILD_DIR=$(INSTALLER_DIR)/bin make
-	@cd $(SRC_DIR)/prompt && BUILD_DIR=$(INSTALLER_DIR)/bin make
-	@cd $(SRC_DIR)/batmon && BUILD_DIR=$(INSTALLER_DIR)/bin make
+	@cp $(BIN_DIR)/installUI $(INSTALLER_DIR)/bin/
+	@cp $(BIN_DIR)/infoPanel $(INSTALLER_DIR)/bin/
+	@cp $(BIN_DIR)/prompt $(INSTALLER_DIR)/bin/
+	@cp $(BIN_DIR)/batmon $(INSTALLER_DIR)/bin/
 
 apps: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
