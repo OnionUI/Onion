@@ -98,12 +98,12 @@ int updateADCValue(int value)
         return 100;
 
     if (!sar_fd) {
-		sar_fd = open("/dev/sar", O_WRONLY);
-		ioctl(sar_fd, IOCTL_SAR_INIT, NULL);
-	}
+        sar_fd = open("/dev/sar", O_WRONLY);
+        ioctl(sar_fd, IOCTL_SAR_INIT, NULL);
+    }
 
     static SAR_ADC_CONFIG_READ adcConfig;
-	ioctl(sar_fd, IOCTL_SAR_SET_CHANNEL_READ_VALUE, &adcConfig);
+    ioctl(sar_fd, IOCTL_SAR_SET_CHANNEL_READ_VALUE, &adcConfig);
 
     if (value <= 100) value = adcConfig.adc_value;
     else if (adcConfig.adc_value > value) value++;
