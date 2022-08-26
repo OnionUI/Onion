@@ -79,7 +79,7 @@ void installTheme(Theme_s *theme)
     installFaultyImage(settings.theme, "ic-MENU+A");
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
 	DIR *dp;
 	struct dirent *ep;
@@ -92,6 +92,14 @@ int main(void)
 	settings_load();
 	char *installed_theme = basename(settings.theme);
     int installed_page = 0;
+
+    const char reapply_flag[] = "--reapply";
+    if (argc == 2 && strncmp(argv[1], reapply_flag, sizeof(reapply_flag)) == 0) {
+        Theme_s current_theme = theme_loadFromPath(settings.theme, true);
+        installTheme(&current_theme);
+        printf_debug("Reapplied: \"%s\"\n", installed_theme);
+        return 0;
+    }
 
 	if ((dp = opendir("/mnt/SDCARD/Themes")) != NULL) {
         while ((ep = readdir(dp))) {

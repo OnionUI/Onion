@@ -224,6 +224,7 @@ fresh_install() {
     # Start the battery monitor
     cd $sysdir
     ./bin/batmon 2>&1 > ./logs/batmon.log &
+    ./bin/themeSwitcher --reapply
 
     cd /mnt/SDCARD/App/Onion_Manual/
     ./launch.sh
@@ -236,12 +237,7 @@ fresh_install() {
 
     cd $sysdir
     ./config/boot_mod.sh
-
-    # display turning off message
-    cd $sysdir
     ./bin/infoPanel -i "res/install_complete.png"
-
-    cd $sysdir
     ./bin/bootScreen "End"
 }
 
@@ -272,6 +268,7 @@ update_only() {
     # Start the battery monitor
     cd $sysdir
     ./bin/batmon 2>&1 > ./logs/batmon.log &
+    ./bin/themeSwitcher --reapply
     
     echo "Update complete!" >> /tmp/.update_msg
     sleep 1
