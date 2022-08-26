@@ -29,7 +29,6 @@ static SDL_Surface *_tool_bg_cache = NULL;
 static void* _runCommandThread(void *cmd)
 {
     int ret = system((char*)cmd);
-    msleep(4000);
     thread_success = WEXITSTATUS(ret) == 0;
     thread_active = false;
     return 0;
