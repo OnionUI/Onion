@@ -2,7 +2,7 @@
 
 TARGET=Onion
 VERSION=4.0.0
-RA_SUBVERSION=0.1
+RA_SUBVERSION=0.1.1
 
 ###########################################################
 
@@ -24,9 +24,9 @@ STATIC_DIST         := $(ROOT_DIR)/static/dist
 STATIC_CONFIGS      := $(ROOT_DIR)/static/configs
 CACHE               := $(ROOT_DIR)/cache
 STATIC_PACKAGES     := $(ROOT_DIR)/static/packages
-PACKAGES_EMU_DEST   := $(BUILD_DIR)/App/The_Onion_Installer/data/Layer1
-PACKAGES_APP_DEST   := $(BUILD_DIR)/App/The_Onion_Installer/data/Layer2
-PACKAGES_RAPP_DEST  := $(BUILD_DIR)/App/The_Onion_Installer/data/Layer3
+PACKAGES_EMU_DEST   := $(BUILD_DIR)/Packages/Emu
+PACKAGES_APP_DEST   := $(BUILD_DIR)/Packages/App
+PACKAGES_RAPP_DEST  := $(BUILD_DIR)/Packages/RApp
 ifeq (,$(GTEST_INCLUDE_DIR))
 GTEST_INCLUDE_DIR = /usr/include/
 endif
@@ -104,16 +104,22 @@ core: $(CACHE)/.setup
 
 apps: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
-	@cd $(SRC_DIR)/playActivityUI && BUILD_DIR=$(BUILD_DIR)/App/PlayActivity make
-	@find $(SRC_DIR)/playActivityUI -depth -type d -name res -exec cp -r {}/. $(BUILD_DIR)/App/PlayActivity/res/ \;
-	@find $(SRC_DIR)/packageManager -depth -type d -name res -exec cp -r {}/. $(BUILD_DIR)/App/The_Onion_Installer/res/ \;
-	@cd $(SRC_DIR)/clock && BUILD_DIR=$(PACKAGES_APP_DEST)/Set\ emulated\ time/App/Clock make
+	@cd $(SRC_DIR)/playActivityUI && BUILD_DIR="$(PACKAGES_APP_DEST)/Activity Tracker/App/PlayActivity" make
+	@find $(SRC_DIR)/playActivityUI -depth -type d -name res -exec cp -r {}/. "$(PACKAGES_APP_DEST)/Activity Tracker/App/PlayActivity/res/" \;
+	@find $(SRC_DIR)/packageManager -depth -type d -name res -exec cp -r {}/. $(BUILD_DIR)/App/PackageManager/res/ \;
+	@cd $(SRC_DIR)/clock && BUILD_DIR="$(PACKAGES_APP_DEST)/Clock (Set emulated time)/App/Clock" make
+# Preinstalled apps
+	@cp -a "$(PACKAGES_APP_DEST)/Activity Tracker/." $(BUILD_DIR)/
+	@cp -a "$(PACKAGES_APP_DEST)/Quick Guide/." $(BUILD_DIR)/
+	@cp -a "$(PACKAGES_APP_DEST)/RetroArch (Emulator settings)/." $(BUILD_DIR)/
+	@cp -a "$(PACKAGES_APP_DEST)/Tweaks/." $(BUILD_DIR)/
 
 external: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
 	@cd $(THIRD_PARTY_DIR)/RetroArch && make && cp retroarch $(BUILD_DIR)/RetroArch/
 	@echo $(RA_SUBVERSION) > $(BUILD_DIR)/RetroArch/onion_ra_version.txt
-	@cd $(THIRD_PARTY_DIR)/SearchFilter && make build && cp -a build/. "$(PACKAGES_APP_DEST)/Search game library/" && cp build/App/SearchFilter/tools $(BIN_DIR)
+	@cd $(THIRD_PARTY_DIR)/SearchFilter && make build && cp -a build/. "$(PACKAGES_APP_DEST)/Search/" && cp build/App/SearchFilter/tools $(BIN_DIR)
+	@cd $(THIRD_PARTY_DIR)/Terminal && make && cp ./st "$(PACKAGES_APP_DEST)/Terminal (Developer tool)/App/Terminal"
 
 dist: build
 	@$(ECHO) $(PRINT_RECIPE)

@@ -4,3 +4,6 @@
 [submodule "third-party/SearchFilter"]
 	path = third-party/SearchFilter
 	url = https://github.com/OnionUI/SearchFilter.git
+[submodule "third-party/Terminal"]
+	path = third-party/Terminal
+	url = https://github.com/OnionUI/app-Terminal.git

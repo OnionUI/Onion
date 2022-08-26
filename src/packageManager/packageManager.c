@@ -19,14 +19,15 @@
 #include "utils/log.h"
 #include "utils/msleep.h"
 #include "utils/keystate.h"
+#include "utils/surfaceSetAlpha.h"
 
 #ifndef DT_DIR
 #define DT_DIR 4
 #endif
 
-#define PACKAGE_LAYER_1 "data/Layer1"
-#define PACKAGE_LAYER_2 "data/Layer2"
-#define PACKAGE_LAYER_3 "data/Layer3"
+#define PACKAGE_LAYER_1 "/mnt/SDCARD/Packages/Emu"
+#define PACKAGE_LAYER_2 "/mnt/SDCARD/Packages/App"
+#define PACKAGE_LAYER_3 "/mnt/SDCARD/Packages/RApp"
 
 // Max number of records in the DB
 #define NUMBER_OF_LAYERS 200
@@ -208,20 +209,53 @@ void loadResources()
     }
 }
 
+SDL_Surface* createLabelSurface(const char *label)
+{
+    SDL_Surface *textbox = SDL_CreateRGBSurface(0, 593, 49, 32,
+        0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000); /* important */
+    SDL_FillRect(textbox, NULL, 0x000000FF);
+
+    char label_text[STR_MAX], parens[STR_MAX] = "";
+    strncpy(label_text, label, STR_MAX - 1);
+
+    if (strchr(label, '(') != NULL) {
+        parens[0] = '(';
+        strncat(parens, str_split(label_text, "("), STR_MAX - 2);
+    }
+
+    SDL_Surface *label_surface = TTF_RenderUTF8_Blended(font25, label_text, color_white);
+    SDL_SetAlpha(label_surface, 0, 0); /* important */
+    SDL_Rect label_pos = {0, 0};
+    SDL_BlitSurface(label_surface, NULL, textbox, &label_pos);
+
+    if (strlen(parens) > 0) {
+        SDL_Surface *parens_surface = TTF_RenderUTF8_Blended(font25, parens, color_white);
+        SDL_SetAlpha(parens_surface, 0, 0); /* important */
+        surfaceSetAlpha(parens_surface, 120);
+        SDL_Rect parens_pos = {label_surface->w, 0};
+        SDL_BlitSurface(parens_surface, NULL, textbox, &parens_pos);
+        SDL_FreeSurface(parens_surface);
+    }
+
+    SDL_FreeSurface(label_surface);
+
+    return textbox;
+}
+
 void displayLayersNames(){
     SDL_Rect rectResName = {35, 92, 80, 20};
-    SDL_Surface* surfaceResName;
+    SDL_Surface *surfaceResName;
     for (int i = 0 ; i < 7 ; i++){
         if ((i + nListPosition) < package_count[nTab]) {
             bool package_changed = package_changes[nTab][i + nListPosition];
             char package_name[STR_MAX + 2];
             snprintf(package_name, STR_MAX + 1, "%s%c", package_names[nTab][i + nListPosition], package_changed ? '*' : 0);
-            surfaceResName = TTF_RenderUTF8_Blended(font25, package_name, color_white);
+            surfaceResName = createLabelSurface(package_name);
             rectResName.y = 92 + i * 47;
             SDL_BlitSurface(surfaceResName, NULL, screen, &rectResName);
+            SDL_FreeSurface(surfaceResName);
         }
     }
-    SDL_FreeSurface(surfaceResName);
 }
 
 void displayLayersInstall(){
@@ -319,8 +353,8 @@ int main(int argc, char *argv[])
 
     loadResources();
 
-    SDL_Rect rectSelection = {15, 84, 593, 49};
-    SDL_Rect rectTabSelection = {15, 59, 199, 26};
+    SDL_Rect rectSelection = {14, 84, 593, 49};
+    SDL_Rect rectTabSelection = {14, 59, 199, 26};
 
     bool quit = false;
     bool state_changed = true;
@@ -431,8 +465,8 @@ int main(int argc, char *argv[])
             break;
 
         if (state_changed) {
-            rectSelection.y = 84 + nSelection * 47;
-            rectTabSelection.x = 15 + (199 * nTab);
+            rectSelection.y = 83 + nSelection * 47;
+            rectTabSelection.x = 14 + (199 * nTab);
 
             SDL_BlitSurface(surfaceBackground, NULL, screen, NULL);
             SDL_BlitSurface(surfacesTabSelection, NULL, screen, &rectTabSelection);
@@ -472,9 +506,8 @@ int main(int argc, char *argv[])
 
     if (apply_changes) {
         // installation
-        char param1[250];
-        char data_path[250];
-        char cmd[500];
+        char data_path[STR_MAX];
+        char cmd[STR_MAX * 2 + 50];
 
         SDL_Surface* surfaceBackground = IMG_Load("/mnt/SDCARD/.tmp_update/res/waitingBG.png");
         SDL_Surface* surfaceMessage;
@@ -489,8 +522,6 @@ int main(int argc, char *argv[])
 
             if (!exists(data_path))
                 continue;
-
-            sprintf(param1, "/mnt/SDCARD/App/The_Onion_Installer/data/Layer%d", nT + 1);
 
             SDL_Rect rectMessage = {10, 420 , 603, 48};
 

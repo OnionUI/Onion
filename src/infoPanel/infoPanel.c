@@ -314,7 +314,8 @@ int main(int argc, char *argv[])
 		else {
 			SDL_BlitSurface(screen, NULL, video, NULL); 
 			SDL_Flip(video);
-		}		
+		}
+		msleep(4);
 	}
 
 	if (g_images_paths != NULL)

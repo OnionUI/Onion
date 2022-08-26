@@ -161,6 +161,8 @@ fresh_install() {
         # Remove stock folders
         cd /mnt/SDCARD
         rm -rf Emu/* App/* RApp/* miyoo
+    else
+        debloat_apps
     fi
 
     refresh_roms
@@ -198,7 +200,7 @@ fresh_install() {
     free_mma
 
     # Launch layer manager
-    cd /mnt/SDCARD/App/The_Onion_Installer/ 
+    cd /mnt/SDCARD/App/PackageManager/ 
     $sysdir/bin/packageManager --confirm --reapply
     free_mma
 
