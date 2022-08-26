@@ -78,8 +78,6 @@ static bool loadImagesPathsFromJson(const char* config_path, char ***images_path
 
 static void drawInfoPanel(SDL_Surface *screen, SDL_Surface *video, const char *title_str, char *message_str)
 {
-	theme_backgroundBlit(video);
-
 	bool has_title = strlen(title_str) > 0;
 	bool has_message = strlen(message_str) > 0;
 
@@ -185,6 +183,7 @@ int main(int argc, char *argv[])
 			&& g_images_paths_count > 0)
 		{
 			g_image_index = 0;
+			SDL_BlitSurface(theme_background(), NULL, screen, NULL);
 			drawImageByIndex(0, g_image_index, g_images_paths, g_images_paths_count, screen, &cache_used);
 		}
 		else
@@ -199,6 +198,7 @@ int main(int argc, char *argv[])
 			&& g_images_paths_count > 0)
 		{
 			g_image_index = 0;
+			SDL_BlitSurface(theme_background(), NULL, screen, NULL);
 			drawImageByIndex(0, g_image_index, g_images_paths, g_images_paths_count, screen, &cache_used);
 		}
 		else
@@ -207,10 +207,15 @@ int main(int argc, char *argv[])
 			return EXIT_FAILURE;
 		}
 	}
-	else
+	else if (strlen(title_str) > 0 && strlen(message_str) > 0)
 	{
 		info_panel_mode = true;
 		show_theme_controls = true;
+	}
+	else
+	{
+		sdlQuit(screen, video);
+		return EXIT_FAILURE;
 	}
 
 	SDL_BlitSurface(screen, NULL, video, NULL);
@@ -268,6 +273,7 @@ int main(int argc, char *argv[])
 				}
 				const int current_index = g_image_index;
 				navigating_forward ? g_image_index++ : g_image_index--;
+				SDL_BlitSurface(theme_background(), NULL, screen, NULL);
 				drawImageByIndex(g_image_index, current_index, g_images_paths, g_images_paths_count, screen, &cache_used);
 				header_changed = true;
 				footer_changed = true;
@@ -286,7 +292,7 @@ int main(int argc, char *argv[])
 		if (show_theme_controls)
 		{
 			if (battery_hasChanged(ticks, &battery_percentage))
-			battery_changed = true;
+				battery_changed = true;
 		
 			if (acc_ticks >= time_step)
 			{
@@ -294,11 +300,13 @@ int main(int argc, char *argv[])
 				{
 					if (info_panel_mode)
 					{
+						SDL_BlitSurface(theme_background(), NULL, screen, NULL);
 						drawInfoPanel(screen, video, title_str, message_str);
 					}
 					else if (g_images_titles)
 					{
-						theme_renderHeader(screen, g_images_titles[g_image_index], false);
+						const char *title = g_images_titles[g_image_index];
+						theme_renderHeader(screen, title, !title);
 					}
 					else
 					{
@@ -307,7 +315,8 @@ int main(int argc, char *argv[])
 						{
 							current_image_path = g_images_paths[g_image_index];
 						}
-						theme_renderHeader(screen, getFilename(current_image_path), false);
+						const char *filename = getFilename(current_image_path);
+						theme_renderHeader(screen, filename, !filename);
 					}
 				}
 				
