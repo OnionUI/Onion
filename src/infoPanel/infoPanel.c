@@ -40,18 +40,33 @@ static bool loadImagesPathsFromJson(const char* config_path, char ***images_path
 	*images_paths = (char**)malloc(*images_paths_count * sizeof(char*));
 	*images_titles = (char**)malloc(*images_paths_count * sizeof(char*));
 
+	const int images_count = *images_paths_count;
 	for (int i = 0; i < *images_paths_count; i++)
 	{
 		(*images_paths)[i] = (char*)malloc(STR_MAX * sizeof(char));
 		static const int g_title_max_length = 50;
 		(*images_titles)[i] = (char*)malloc(g_title_max_length * sizeof(char));
 
-		cJSON* json_image_item = cJSON_GetArrayItem(json_images_array, i);
-		cJSON* json_image_path = cJSON_GetObjectItem(json_image_item, "path");
-		char* image_path = cJSON_GetStringValue(json_image_path);
+		const cJSON* json_image_item = cJSON_GetArrayItem(json_images_array, i);
+		if (!json_image_item)
+		{
+			(*images_paths_count)--;
+			continue;
+		}
+		const cJSON* json_image_path = cJSON_GetObjectItem(json_image_item, "path");
+		if (!json_image_path)
+		{
+			(*images_paths_count)--;
+			continue;
+		}
+		const char* image_path = cJSON_GetStringValue(json_image_path);
 		strncpy((*images_paths)[i], image_path, STR_MAX);
 
 		cJSON* json_image_title = cJSON_GetObjectItem(json_image_item, "title");
+		if (!json_image_title)
+		{
+			continue;
+		}
 		char* image_title = cJSON_GetStringValue(json_image_title);
 		strncpy((*images_titles)[i], image_title, g_title_max_length);
 	}
