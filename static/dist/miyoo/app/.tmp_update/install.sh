@@ -248,7 +248,7 @@ update_only() {
     touch $sysdir/.waitConfirm
     sync
     
-    echo "Press any key to turn off" >> /tmp/.update_msg
+    echo "Press any button to turn off" >> /tmp/.update_msg
     sleep 1
 
     touch $sysdir/.installed
