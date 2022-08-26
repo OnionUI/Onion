@@ -129,13 +129,13 @@ dist: build
 	@mkdir -p $(DIST_FULL)/RetroArch
 	@mv $(BUILD_DIR)/retroarch.pak $(DIST_FULL)/RetroArch/
 	@echo $(RA_SUBVERSION) > $(DIST_FULL)/RetroArch/ra_package_version.txt
-# Package core
-	@cd $(BUILD_DIR) && zip -rq $(DIST_FULL)/miyoo/app/.tmp_update/onion.pak .
 # Package configs
-	@mkdir -p $(ROOT_DIR)/temp/configs $(DIST_FULL)/miyoo/app/.tmp_update/config
+	@mkdir -p $(ROOT_DIR)/temp/configs $(BUILD_DIR)/.tmp_update/config
 	@rsync -a --exclude='.gitkeep' $(STATIC_CONFIGS)/ $(ROOT_DIR)/temp/configs
 	@cp -R $(ROOT_DIR)/temp/configs/Saves/CurrentProfile/ $(ROOT_DIR)/temp/configs/Saves/GuestProfile
-	@cd $(ROOT_DIR)/temp/configs && zip -rq $(DIST_FULL)/miyoo/app/.tmp_update/config/configs.pak .
+	@cd $(ROOT_DIR)/temp/configs && zip -rq $(BUILD_DIR)/.tmp_update/config/configs.pak .
+# Package core
+	@cd $(BUILD_DIR) && zip -rq $(DIST_FULL)/miyoo/app/.tmp_update/onion.pak .
 # Create core-only dist
 	@cp -R $(DIST_FULL)/.tmp_update $(DIST_CORE)/.tmp_update
 	@cp -R $(DIST_FULL)/miyoo $(DIST_CORE)/miyoo

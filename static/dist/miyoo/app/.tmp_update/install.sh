@@ -160,11 +160,10 @@ fresh_install() {
 
         # Remove stock folders
         cd /mnt/SDCARD
-        rm -rf Emu/* App/* RApp/* miyoo
-    else
-        debloat_apps
+        rm -rf miyoo
     fi
 
+    debloat_apps
     refresh_roms
 
     if [ $install_ra -eq 1 ]; then
@@ -224,6 +223,8 @@ update_only() {
     cd $sysdir
     ./bin/installUI -m "Preparing update..." &
     sleep 1
+    
+    debloat_apps
 
     if [ $install_ra -eq 1 ]; then
         install_core "1/2: Updating Onion..."
@@ -236,6 +237,10 @@ update_only() {
     fi
 
     install_configs 0
+
+    # Start the battery monitor
+    cd $sysdir
+    ./bin/batmon 2>&1 > ./logs/batmon.log &
     
     echo "Update complete!" >> /tmp/.update_msg
     sleep 1
@@ -305,6 +310,7 @@ install_retroarch() {
 
     # Backup old RA configuration
     cd /mnt/SDCARD/RetroArch
+    mkdir -p /mnt/SDCARD/Backup
     mv .retroarch/retroarch.cfg /mnt/SDCARD/Backup/
 
     # Remove old RetroArch before unzipping
@@ -391,12 +397,6 @@ backup_system() {
     if [ -d /mnt/SDCARD/Imgs ]; then
         mv -f /mnt/SDCARD/Imgs/* /mnt/SDCARD/Backup/Imgs
     fi
-
-    # Romscreens
-    if [ -d $sysdir/romScreens ]; then
-        mkdir -p /mnt/SDCARD/Saves/CurrentProfile/romScreens
-        mv -f $sysdir/romScreens/* /mnt/SDCARD/Saves/CurrentProfile/romScreens
-    fi
 }
 
 debloat_apps() {
@@ -405,23 +405,10 @@ debloat_apps() {
     rm -rf \
         Commander_CN \
         power \
-        RetroArch \
         swapskin \
-        Pal \
-        OpenBor \
-        Onion_Manual \
-        PlayActivity \
         Retroarch \
         The_Onion_Installer \
-        Clean_View_Toggle \
-        StartGameSwitcher \
-        Guest_Mode \
-        SearchFilter \
-        ThemeSwitcher \
-        Clock \
-        240pSuite \
-        Gmu \
-        Commander_Italic
+        Clean_View_Toggle
 }
 
 refresh_roms() {
