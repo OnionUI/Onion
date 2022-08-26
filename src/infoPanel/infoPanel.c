@@ -73,7 +73,8 @@ static void drawInfoPanel(SDL_Surface *screen, SDL_Surface *video, const char *t
 
 	theme_renderHeader(screen, has_title ? title_str : NULL, !has_title);
 
-	if (has_message) {
+	if (has_message)
+	{
 		const char *str = str_replace(message_str, "\\n", "\n");
 		message = theme_textboxSurface(str, resource_getFont(TITLE), theme()->grid.color, ALIGN_CENTER);
 		message_rect.x -= message->w / 2;
@@ -86,7 +87,8 @@ static void drawInfoPanel(SDL_Surface *screen, SDL_Surface *video, const char *t
 static void drawImage(const char *image_path, SDL_Surface *screen)
 {
 	SDL_Surface *image = IMG_Load(image_path);
-	if (image) {
+	if (image)
+	{
 		SDL_Rect image_rect = {320 - image->w / 2, 240 - image->h / 2};
 		SDL_BlitSurface(image, NULL, screen, &image_rect);
 		SDL_FreeSurface(image);
@@ -102,7 +104,10 @@ static void sdlQuit(SDL_Surface *screen, SDL_Surface *video)
 
 static const char *getFilename(const char *full_path) {
     const char *slash = strrchr(full_path, '/');
-    if(!slash || slash == full_path) return "";
+    if (!slash || slash == full_path)
+	{
+		return "";
+	}
     return slash + 1;
 }
 
@@ -117,8 +122,10 @@ int main(int argc, char *argv[])
 	bool show_theme_controls = false;
 	bool info_panel_mode = false;
 
-	for (int i = 1; i < argc; i++) {
-		if (argv[i][0] == '-') {
+	for (int i = 1; i < argc; i++)
+	{
+		if (argv[i][0] == '-')
+		{
 			if (strcmp(argv[i], "-t") == 0 || strcmp(argv[i], "--title") == 0)
 				strncpy(title_str, argv[++i], STR_MAX-1);
 			else if (strcmp(argv[i], "-m") == 0 || strcmp(argv[i], "--message") == 0)
@@ -150,20 +157,19 @@ int main(int argc, char *argv[])
 	uint32_t time_step = 1000 / FRAMES_PER_SECOND;
 
 	bool cache_used = false;
-	if (exists(image_path)) {
+	if (exists(image_path))
+	{
 		g_images_paths_count = 1;
 		g_image_index = 0;
 		drawImage(image_path, screen);
 	}
 	else if(exists(images_json_path))
 	{
-		if (loadImagesPathsFromJson(images_json_path, &g_images_paths, &g_images_paths_count, &g_images_titles))
+		if (loadImagesPathsFromJson(images_json_path, &g_images_paths, &g_images_paths_count, &g_images_titles)
+			&& g_images_paths_count > 0)
 		{
-			if (g_images_paths_count > 0)
-			{
-				g_image_index = 0;
-				drawImageByIndex(0, g_image_index, g_images_paths, g_images_paths_count, screen, &cache_used);
-			}
+			g_image_index = 0;
+			drawImageByIndex(0, g_image_index, g_images_paths, g_images_paths_count, screen, &cache_used);
 		}
 		else
 		{
@@ -171,14 +177,13 @@ int main(int argc, char *argv[])
 			return EXIT_FAILURE;
 		}
 	}
-	else if (exists(images_dir_path)) {
-		if (loadImagesPathsFromDir(images_dir_path, &g_images_paths, &g_images_paths_count))
+	else if (exists(images_dir_path))
+	{
+		if (loadImagesPathsFromDir(images_dir_path, &g_images_paths, &g_images_paths_count)
+			&& g_images_paths_count > 0)
 		{
-			if (g_images_paths_count > 0)
-			{
-				g_image_index = 0;
-				drawImageByIndex(0, g_image_index, g_images_paths, g_images_paths_count, screen, &cache_used);
-			}
+			g_image_index = 0;
+			drawImageByIndex(0, g_image_index, g_images_paths, g_images_paths_count, screen, &cache_used);
 		}
 		else
 		{
@@ -186,7 +191,8 @@ int main(int argc, char *argv[])
 			return EXIT_FAILURE;
 		}
 	}
-	else {
+	else
+	{
 		info_panel_mode = true;
 		show_theme_controls = true;
 	}
@@ -197,17 +203,20 @@ int main(int argc, char *argv[])
 	bool quit = false;
 	SDL_Event event;
 
-	while (!quit && wait_confirm) {
+	while (!quit && wait_confirm)
+	{
 		uint32_t ticks = SDL_GetTicks();
 		acc_ticks += ticks - last_ticks;
 		last_ticks = ticks;
 
-		while (SDL_PollEvent(&event)) {
+		while (SDL_PollEvent(&event))
+		{
 			if (event.type == SDL_KEYDOWN)
 			{
 				bool navigation_pressed = true;
 				bool navigating_forward = true;
-				switch(event.key.keysym.sym) {
+				const SDLKey key_pressed = event.key.keysym.sym;
+				switch(key_pressed) {
 				case SW_BTN_A:
 				case SW_BTN_RIGHT:
 					navigating_forward = true;
@@ -228,18 +237,22 @@ int main(int argc, char *argv[])
 				{
 					continue;
 				}
+				if (navigating_forward && key_pressed == SW_BTN_RIGHT && g_image_index == g_images_paths_count - 1
+					|| !navigating_forward && key_pressed == SW_BTN_LEFT && g_image_index == 0
+					|| info_panel_mode && (key_pressed == SW_BTN_RIGHT || key_pressed == SW_BTN_LEFT))
+				{
+					continue;
+				}
 				if (info_panel_mode // drawing info panel
 					|| (navigating_forward && g_image_index == g_images_paths_count - 1) // exit after last image
 					|| (!navigating_forward && g_image_index == 0)) // or when navigating backwards from the first image
 				{
 					quit = true;
+					continue;
 				}
-				else
-				{
-					const int current_index = g_image_index;
-					navigating_forward ? g_image_index++ : g_image_index--;
-					drawImageByIndex(g_image_index, current_index, g_images_paths, g_images_paths_count, screen, &cache_used);
-				}
+				const int current_index = g_image_index;
+				navigating_forward ? g_image_index++ : g_image_index--;
+				drawImageByIndex(g_image_index, current_index, g_images_paths, g_images_paths_count, screen, &cache_used);
 				header_changed = true;
 				footer_changed = true;
 			}
@@ -254,39 +267,50 @@ int main(int argc, char *argv[])
 		if (quit)
 			break;
 
-		if (show_theme_controls) {
+		if (show_theme_controls)
+		{
 			if (battery_hasChanged(ticks, &battery_percentage))
 			battery_changed = true;
 		
-			if (acc_ticks >= time_step) {
-				if (header_changed || battery_changed) {
-					if (info_panel_mode) {
+			if (acc_ticks >= time_step)
+			{
+				if (header_changed || battery_changed)
+				{
+					if (info_panel_mode)
+					{
 						drawInfoPanel(screen, video, title_str, message_str);
 					}
-					else if (g_images_titles) {
+					else if (g_images_titles)
+					{
 						theme_renderHeader(screen, g_images_titles[g_image_index], false);
 					}
-					else {
+					else
+					{
 						const char *current_image_path = image_path;
-						if (g_images_paths_count > 0 && g_images_paths && g_image_index >= 0) {
+						if (g_images_paths_count > 0 && g_images_paths && g_image_index >= 0)
+						{
 							current_image_path = g_images_paths[g_image_index];
 						}
 						theme_renderHeader(screen, getFilename(current_image_path), false);
 					}
 				}
 				
-				if (footer_changed) {
+				if (footer_changed)
+				{
 					theme_renderFooter(screen);
 					const char * a_btn_text = lang_get(LANG_NEXT);
 					const char * b_btn_text = lang_get(LANG_BACK);
-					if (info_panel_mode || g_images_paths_count == 1) {
+					if (info_panel_mode || g_images_paths_count == 1)
+					{
 						a_btn_text = lang_get(LANG_OK);
 						b_btn_text = NULL;
 					}
-					else if (g_image_index == g_images_paths_count - 1) {
+					else if (g_image_index == g_images_paths_count - 1)
+					{
 						a_btn_text = lang_get(LANG_EXIT);
 					}
-					else if (g_image_index == 0) {
+					else if (g_image_index == 0)
+					{
 						b_btn_text = lang_get(LANG_EXIT);
 					}
 					theme_renderStandardHint(screen, a_btn_text, b_btn_text);
@@ -298,7 +322,8 @@ int main(int argc, char *argv[])
 				if (header_changed || battery_changed)
 					theme_renderHeaderBattery(screen, battery_percentage);
 
-				if (header_changed || footer_changed || battery_changed) {
+				if (header_changed || footer_changed || battery_changed)
+				{
 					SDL_BlitSurface(screen, NULL, video, NULL); 
 					SDL_Flip(video);
 				}
@@ -311,7 +336,8 @@ int main(int argc, char *argv[])
 				acc_ticks -= time_step;
 			}
 		}
-		else {
+		else
+		{
 			SDL_BlitSurface(screen, NULL, video, NULL); 
 			SDL_Flip(video);
 		}
@@ -323,6 +349,9 @@ int main(int argc, char *argv[])
 		for (int i = 0; i < g_images_paths_count; i++)
         	free(g_images_paths[i]);
     	free(g_images_paths);
+	}
+	if (g_images_titles != NULL)
+	{
 		for (int i = 0; i < g_images_paths_count; i++)
         	free(g_images_titles[i]);
 		free(g_images_titles);
