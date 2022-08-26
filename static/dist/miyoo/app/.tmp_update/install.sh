@@ -8,7 +8,7 @@ ra_package_version_file="/mnt/SDCARD/RetroArch/ra_package_version.txt"
 install_ra=1
 
 version() {
-    echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }';
+    echo "$@" | awk -F. '{ f=$1; if (substr(f,2,1) == "v") f = substr(f,3); printf("%d%03d%03d%03d\n", f,$2,$3,$4); }';
 }
 
 # An existing version of Onion's RetroArch exist
@@ -65,6 +65,18 @@ main() {
     cd $sysdir
     ./bin/batmon 2>&1 > ./logs/batmon.log &
 
+    onion_version=`cat /mnt/SDCARD/.tmp_update/onionVersion/version.txt`
+
+    if [ $(version $onion_version) -ge 4000000000 ]; then
+        prompt_update
+    else
+        prompt_upgrade
+    fi
+
+    cleanup
+}
+
+prompt_update() {
     # Prompt for update or fresh install
     ./bin/prompt -r -m "Welcome to the Onion installer!\nPlease choose an action:" \
         "Update" \
@@ -87,8 +99,27 @@ main() {
         # Cancel (can be reached if pressing POWER)
         return
     fi
+}
 
-    cleanup
+prompt_upgrade() {
+    # Prompt for update or fresh install
+    ./bin/prompt -r -m "Welcome to the Onion installer!\nPlease choose an action:" \
+        "Upgrade (keep settings)" \
+        "Reinstall (reset settings)"
+    retcode=$?
+
+    killall batmon
+
+    if [ $retcode -eq 0 ]; then
+        # Upgrade (keep settings)
+        fresh_install 0
+    elif [ $retcode -eq 1 ]; then
+        # Reinstall (reset settings)
+        fresh_install 1
+    else
+        # Cancel (can be reached if pressing POWER)
+        return
+    fi
 }
 
 cleanup() {
@@ -408,7 +439,9 @@ debloat_apps() {
         swapskin \
         Retroarch \
         The_Onion_Installer \
-        Clean_View_Toggle
+        Clean_View_Toggle \
+        Onion_Manual \
+        PlayActivity
 }
 
 refresh_roms() {
