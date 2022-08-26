@@ -148,6 +148,7 @@ int main(int argc, char *argv[])
 
 	SDL_InitDefault(true);
 
+	settings_load();
 	lang_load();
 
 	int battery_percentage = battery_getPercentage();
