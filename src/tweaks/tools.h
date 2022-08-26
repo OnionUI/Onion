@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <sys/wait.h>
+#include <pthread.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_ttf.h>
 
@@ -20,41 +21,77 @@ static char tools_short_names[NUM_TOOLS][STR_MAX] = {
     "recents",
     "dot_clean"
 };
-static bool tool_success = false;
+static pthread_t thread_pt;
+static bool thread_active = false;
+static bool thread_success = false;
+static SDL_Surface *_tool_bg_cache = NULL;
 
-bool _runCommand(const char *cmd)
+static void* _runCommandThread(void *cmd)
 {
-    int ret = system(cmd);
-    if (WEXITSTATUS(ret) == 0)
-        return true;
-    else
-        return false;
+    int ret = system((char*)cmd);
+    thread_success = WEXITSTATUS(ret) == 0;
+    thread_active = false;
+    return 0;
 }
 
-void _blackScreenWithText(const char *title_str, const char *message_str)
+void _toolDialog(const char *title_str, const char *message_str, bool show_progress)
 {
     if (video == NULL) {
         printf("%s: %s\n", title_str, message_str);
         return;
     }
 
-    theme_renderDialog(screen, title_str, message_str, false);
+    if (_tool_bg_cache == NULL) {
+        _tool_bg_cache = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
+        SDL_BlitSurface(screen, NULL, _tool_bg_cache, NULL);
+    }
+
+    SDL_BlitSurface(_tool_bg_cache, NULL, screen, NULL);
+
+    if (show_progress)
+        theme_renderDialogProgress(screen, title_str, message_str, false);
+    else
+        theme_renderDialog(screen, title_str, message_str, false);
 
     SDL_BlitSurface(screen, NULL, video, NULL);
     SDL_Flip(video);
 }
 
-void _runCommandPopup(const char *tool_name, const char *cmd)
+void _runCommandPopup(const char *tool_name, const char *_cmd)
 {
+    static char msg_apply[] = "Applying tool...\n \n \n ";
+
     keys_enabled = false;
     char full_title[STR_MAX];
     sprintf(full_title, "Tool: %s", tool_name);
-    _blackScreenWithText(full_title, "Applying tool...");
-    tool_success = _runCommand(cmd);
+    _toolDialog(full_title, msg_apply, false);
+
+    char cmd[STR_MAX];
+    strncpy(cmd, _cmd, STR_MAX - 1);
+    thread_active = true;
+    pthread_create(&thread_pt, NULL, _runCommandThread, cmd);
+
+    theme_clearDialogProgress();
+
+    while (thread_active) {
+        if (video == NULL) {
+            msleep(15);
+            continue;
+        }
+        msleep(300);
+        if (!thread_active)
+            break;
+        _toolDialog(full_title, msg_apply, true);
+    }
+
     if (video != NULL) msleep(300);
-    _blackScreenWithText(full_title, tool_success ? "Done" : "Tool failed");
+    _toolDialog(full_title, thread_success ? "Done" : "Tool failed", false);
+    
     if (video != NULL) msleep(300);
-    theme_clearDialog();
+    
+    SDL_FreeSurface(_tool_bg_cache);
+    _tool_bg_cache = NULL;
+
     keys_enabled = true;
     all_changed = true;
 }
