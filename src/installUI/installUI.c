@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
         last_ticks = ticks;
 
         while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) {
+            if (event.type == SDL_QUIT || (exists(".waitConfirm") && event.type == SDL_KEYUP)) {
                 quit = true;
                 break;
             }
@@ -117,7 +117,8 @@ int main(int argc, char *argv[])
         
         if (exists(".installed")) {
             progress = 100;
-            quit = true;
+            if (!exists(".waitConfirm"))
+                quit = true;
         }
         
         if (exists(".installFailed")) {
@@ -135,7 +136,7 @@ int main(int argc, char *argv[])
                     progress = (int)(start_at + n / progress_div);
                 check_timer = ticks; // reset timeout
             }
-            else if (!quit && ticks - check_timer > TIMEOUT_M * 60 * 1000) {
+            else if (!quit && ticks - check_timer > TIMEOUT_M * 60 * 1000 && !exists(".waitConfirm")) {
                 sprintf(message_str, "The installation timed out, exiting...");
                 progress = 100;
                 failed = true;
@@ -184,18 +185,8 @@ int main(int argc, char *argv[])
     }
 
     if (exists(".installed") && exists(".waitConfirm")) {
-        quit = false;
-
-        while (!quit) {
-            while (SDL_PollEvent(&event)) {
-                if (event.type == SDL_KEYUP)
-                    quit = true;
-            }
-        }
-
         remove(".waitConfirm");
-        SDL_FillRect(screen, NULL, 0);
-        SDL_BlitSurface(screen, NULL, video, NULL); 
+        SDL_FillRect(video, NULL, 0);
         SDL_Flip(video);
     }
     

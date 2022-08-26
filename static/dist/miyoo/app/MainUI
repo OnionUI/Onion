@@ -5,6 +5,11 @@ sysdir=/mnt/SDCARD/.tmp_update
 
 if [ -d $sysdir ]; then
     cd $sysdir
+
+    # Move romScreens to new location
+    mkdir -p /mnt/SDCARD/Saves/CurrentProfile/romScreens
+    mv ./romScreens/* /mnt/SDCARD/Saves/CurrentProfile/romScreens/
+
     # Remove old system files, except dotfiles and onionVersion
     find * -maxdepth 0 -not -name "onionVersion" -not -name "config" -exec rm -rf {} \;
 
