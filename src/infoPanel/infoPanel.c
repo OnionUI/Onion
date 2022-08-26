@@ -175,6 +175,7 @@ int main(int argc, char *argv[])
 	{
 		g_images_paths_count = 1;
 		g_image_index = 0;
+		SDL_BlitSurface(theme_background(), NULL, screen, NULL);
 		drawImage(image_path, screen);
 	}
 	else if(exists(images_json_path))
@@ -218,9 +219,6 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	SDL_BlitSurface(screen, NULL, video, NULL);
-	SDL_Flip(video);
-	
 	bool quit = false;
 	SDL_Event event;
 
