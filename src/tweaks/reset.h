@@ -20,6 +20,9 @@ bool _confirmReset(const char *title_str, const char *message_str)
 
     keys_enabled = false;
 
+    SDL_Surface *background_cache = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
+    SDL_BlitSurface(screen, NULL, background_cache, NULL);
+
     theme_renderDialog(screen, title_str, message_str, true);
     SDL_BlitSurface(screen, NULL, video, NULL);
     SDL_Flip(video);
@@ -39,13 +42,14 @@ bool _confirmReset(const char *title_str, const char *message_str)
 
     if (retval) {
         msleep(300);
+        SDL_BlitSurface(background_cache, NULL, screen, NULL);
+        SDL_FreeSurface(background_cache);
         theme_renderDialog(screen, title_str, "Done", true);
         SDL_BlitSurface(screen, NULL, video, NULL);
         SDL_Flip(video);
         msleep(300);
     }
     
-    theme_clearDialog();
     keys_enabled = true;
     all_changed = true;
 

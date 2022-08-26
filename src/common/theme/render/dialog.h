@@ -6,35 +6,14 @@
 #include "utils/surfaceSetAlpha.h"
 #include "./textbox.h"
 
-static bool _dialog_active = false;
-
-void theme_clearDialog(void)
-{
-    _dialog_active = false;
-}
+static int dialog_progress = 0;
 
 void theme_renderDialog(SDL_Surface *screen, const char *title_str, const char *message_str, bool show_hint)
 {
-    if (!_dialog_active) {
-        SDL_Surface *transparent_bg = SDL_CreateRGBSurface(0, 640, 480, 32,
-            0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
-        SDL_FillRect(transparent_bg, NULL, 0xBE000000);
-        SDL_BlitSurface(transparent_bg, NULL, screen, NULL);
-        SDL_FreeSurface(transparent_bg);
-    }
-
     SDL_Surface *pop_bg = resource_getSurface(POP_BG);
     SDL_Rect center_rect = {320 - pop_bg->w / 2, 240 - pop_bg->h / 2};
 
-    if (!_dialog_active) {
-        SDL_BlitSurface(pop_bg, NULL, screen, &center_rect);
-    }
-    else {
-        static int padding = 40;
-        SDL_Rect pop_bg_size = {padding, padding, pop_bg->w - padding * 2, pop_bg->h - padding * 2};
-        SDL_Rect pop_bg_pos = {320 - pop_bg->w / 2 + padding, 240 - pop_bg->h / 2 + padding};
-        SDL_BlitSurface(pop_bg, &pop_bg_size, screen, &pop_bg_pos);
-    }
+    SDL_BlitSurface(pop_bg, NULL, screen, &center_rect);
 
     SDL_Surface *title = TTF_RenderUTF8_Blended(resource_getFont(TITLE), title_str, theme()->grid.selectedcolor);
     if (title) {
@@ -79,8 +58,26 @@ void theme_renderDialog(SDL_Surface *screen, const char *title_str, const char *
             SDL_FreeSurface(label_cancel);
         }
     }
+}
 
-    _dialog_active = true;
+void theme_renderDialogProgress(SDL_Surface *screen, const char *title_str, const char *message_str, bool show_hint)
+{
+    theme_renderDialog(screen, title_str, message_str, show_hint);
+
+    SDL_Surface *dot = resource_getSurface(PROGRESS_DOT);
+    SDL_Rect dot_rect = {320 - 32 - dot->w / 2, 225 - dot->h / 2};
+
+    if (dialog_progress >= 1) SDL_BlitSurface(dot, NULL, screen, &dot_rect);
+    dot_rect.x += 32;
+    if (dialog_progress >= 2) SDL_BlitSurface(dot, NULL, screen, &dot_rect);
+    dot_rect.x += 32;
+    if (dialog_progress >= 3) SDL_BlitSurface(dot, NULL, screen, &dot_rect);
+
+    dialog_progress = (dialog_progress + 1) % 4;
+}
+
+void theme_clearDialogProgress(void) {
+    dialog_progress = 0;
 }
 
 #endif // THEME_RENDER_DIALOG_H__
