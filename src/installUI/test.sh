@@ -49,8 +49,20 @@ main() {
         exit -1;
     fi
 
-    touch $installdir/.installed
+    echo "Update complete!" >> /tmp/.update_msg
     sleep 1
+
+    touch $installdir/.waitConfirm
+    sync
+    
+    echo "Press any button to turn off" >> /tmp/.update_msg
+    sleep 1
+
+    touch $installdir/.installed
+
+    until [ ! -f $installdir/.waitConfirm ]; do
+        sync
+    done
 
     cleanup
 }
