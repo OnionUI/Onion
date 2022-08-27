@@ -297,10 +297,12 @@ int main(void)
     bool select_pressed = false;
     bool select_combo_key = false;
 
-    bool view_min = config_flag_get("gameSwitcher-minimal");
-    bool show_time = config_flag_get("gameSwitcher-showTime");
-    bool show_total = !config_flag_get("gameSwitcher-hideTotal");
-    bool show_legend = !config_flag_get("gameSwitcher-hideLegend");
+    mkdirs("/mnt/SDCARD/.tmp_update/config/gameSwitcher");
+
+    bool view_min = config_flag_get("gameSwitcher/minimal");
+    bool show_time = config_flag_get("gameSwitcher/showTime");
+    bool show_total = !config_flag_get("gameSwitcher/hideTotal");
+    bool show_legend = !config_flag_get("gameSwitcher/hideLegend");
     int view_mode = view_min ? VIEW_MINIMAL : VIEW_NORMAL, view_restore;
 
     SDLKey changed_key = SDLK_UNKNOWN;
@@ -335,7 +337,7 @@ int main(void)
 
         if (show_legend && ticks - start > legend_timeout) {
             show_legend = false;
-            config_flag_set("gameSwitcher-hideLegend", true);
+            config_flag_set("gameSwitcher/hideLegend", true);
         }
 
         if (updateKeystate(keystate, &quit, true, &changed_key)) {
@@ -419,8 +421,8 @@ int main(void)
                         if (!show_time && !show_total) show_time = true, show_total = false;
                         else if (show_time && !show_total) show_time = true, show_total = true;
                         else show_time = false, show_total = false;
-                        config_flag_set("gameSwitcher-showTime", show_time);
-                        config_flag_set("gameSwitcher-hideTotal", !show_total);
+                        config_flag_set("gameSwitcher/showTime", show_time);
+                        config_flag_set("gameSwitcher/hideTotal", !show_total);
                         changed = true;
                     }
                     select_pressed = false;
@@ -431,7 +433,7 @@ int main(void)
             if (changed_key == SW_BTN_Y && keystate[SW_BTN_Y] == RELEASED) {
                 if (button_y_repeat < 75) {
                     view_mode = view_mode == VIEW_FULLSCREEN ? view_restore : !view_mode;
-                    config_flag_set("gameSwitcher-minimal", view_mode == VIEW_MINIMAL);
+                    config_flag_set("gameSwitcher/minimal", view_mode == VIEW_MINIMAL);
                     changed = true;
                 }
                 button_y_repeat = 0;
