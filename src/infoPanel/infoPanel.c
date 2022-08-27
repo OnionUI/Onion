@@ -219,7 +219,6 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	bool quit = false;
 	SDL_Event event;
 
 	while (!quit && wait_confirm)
