@@ -15,7 +15,7 @@ void theme_renderDialog(SDL_Surface *screen, const char *title_str, const char *
 
     SDL_BlitSurface(pop_bg, NULL, screen, &center_rect);
 
-    SDL_Surface *title = TTF_RenderUTF8_Blended(resource_getFont(TITLE), title_str, theme()->grid.selectedcolor);
+    SDL_Surface *title = TTF_RenderUTF8_Blended(resource_getFont(TITLE), title_str, theme()->total.color);
     if (title) {
         SDL_Rect title_rect = {320 - title->w / 2, center_rect.y + 30 - title->h / 2};
         SDL_BlitSurface(title, NULL, screen, &title_rect);
