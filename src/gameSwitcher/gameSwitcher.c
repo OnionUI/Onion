@@ -315,7 +315,9 @@ int main(void)
     SDL_Surface *custom_footer = use_custom_footer ? IMG_Load(footer_path) : NULL;
 
     int header_height = use_custom_header ? custom_header->h : 60;
+    if (header_height == 1) header_height = 0;
     int footer_height = use_custom_footer ? custom_footer->h : 60;
+    if (footer_height == 1) footer_height = 0;
 
     SDL_Rect frame = {theme()->frame.border_left, 0, 640 - theme()->frame.border_right, 480};
 
@@ -531,9 +533,11 @@ int main(void)
             }
 
             if (view_mode == 0) {
-                if (use_custom_footer) {
-                    SDL_Rect footer_rect = {0, 480 - custom_footer->h};
-                    SDL_BlitSurface(custom_footer, NULL, screen, &footer_rect);
+                if (custom_footer) {
+                    if (footer_height > 0) {
+                        SDL_Rect footer_rect = {0, 480 - custom_footer->h};
+                        SDL_BlitSurface(custom_footer, NULL, screen, &footer_rect);
+                    }
                 }
                 else {
                     theme_renderFooter(screen);
@@ -548,19 +552,21 @@ int main(void)
                     strcpy(title_str, game_list[current_game].totalTime);
 
                 if (custom_header) {
-                    SDL_BlitSurface(custom_header, NULL, screen, NULL);
-                    SDL_Surface *title = TTF_RenderUTF8_Blended(resource_getFont(TITLE), title_str, theme()->title.color);
-                    if (title) {
-                        SDL_Rect title_rect = {320 - title->w / 2, (header_height - title->h) / 2};
-                        SDL_BlitSurface(title, NULL, screen, &title_rect);
-                        SDL_FreeSurface(title);
+                    if (header_height > 0) {
+                        SDL_BlitSurface(custom_header, NULL, screen, NULL);
+                        SDL_Surface *title = TTF_RenderUTF8_Blended(resource_getFont(TITLE), title_str, theme()->title.color);
+                        if (title) {
+                            SDL_Rect title_rect = {320 - title->w / 2, (header_height - title->h) / 2};
+                            SDL_BlitSurface(title, NULL, screen, &title_rect);
+                            SDL_FreeSurface(title);
+                        }
+                        theme_renderHeaderBatteryCustom(screen, battery_percentage, header_height);
                     }
                 }
                 else {
                     theme_renderHeader(screen, title_str, false);
+                    theme_renderHeaderBattery(screen, battery_percentage);
                 }
-				
-                theme_renderHeaderBatteryCustom(screen, battery_percentage, header_height);
             }
 
             if (show_legend && view_mode >= 0) {
@@ -613,6 +619,7 @@ int main(void)
     SDL_Flip(video);
 
     if (custom_header != NULL) SDL_FreeSurface(custom_header);
+    if (custom_footer != NULL) SDL_FreeSurface(custom_footer);
 
     resources_free();
     SDL_FreeSurface(transparent_bg);
