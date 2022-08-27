@@ -73,6 +73,7 @@ void lang_removeIconLabels(bool remove_icon_labels, bool remove_hints)
             json_setString(root, "89", " "); // BACK
             json_setString(root, "111", " "); // EXIT
             json_setString(root, "112", " "); // SAVE AND EXIT
+            json_setString(root, "131", " "); // NEXT
         }
 
         json_save(root, file_path);
@@ -100,7 +101,8 @@ typedef enum
     LANG_MENU = 91,
     LANG_APPS_TAB = 107,
     LANG_EXIT = 111,
-    LANG_SAVE_EXIT
+    LANG_SAVE_EXIT,
+    LANG_NEXT = 131
 } lang_hash;
 
 bool lang_getFilePath(const char *lang_name, char *lang_path)
@@ -151,7 +153,7 @@ void lang_free(void)
 
 char* lang_get(lang_hash key)
 {
-    if (lang_list[key])
+    if (lang_list && lang_list[key])
         return lang_list[key];
     return "";
 }

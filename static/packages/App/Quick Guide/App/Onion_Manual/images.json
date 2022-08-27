@@ -1,8 +1,8 @@
 {
   "images": [
-    { "path": "./page1.png" },
-    { "path": "./page2.png" },
-    { "path": "./page3.png" },
-    { "path": "./page4.png" }
+    { "path": "./page1.png", "title": "Onion Manual" },
+    { "path": "./page2.png", "title": "Onion Manual" },
+    { "path": "./page3.png", "title": "Onion Manual - Shortcuts" },
+    { "path": "./page4.png", "title": "Onion Manual" }
   ]
 }
