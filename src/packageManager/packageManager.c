@@ -102,7 +102,7 @@ void appUninstall(char *basePath, int strlenBase)
     closedir(dir);
 }
 
-bool checkAppInstalled(const char *basePath, int base_len)
+bool checkAppInstalled(const char *basePath, int base_len, int level)
 {
     char path[1000];
     char pathInstalledApp[1000];
@@ -118,21 +118,26 @@ bool checkAppInstalled(const char *basePath, int base_len)
         return true;
 
     while ((dp = readdir(dir)) != NULL && run == 1) {
-        if (strcmp(dp->d_name, ".") != 0 && strcmp(dp->d_name, "..") != 0) {
-            // Construct new path from our base path
-            sprintf(path, "%s/%s", basePath, dp->d_name);
+        if (strcmp(dp->d_name, ".") == 0 || strcmp(dp->d_name, "..") == 0)
+            continue;
 
-            if (exists(path)) {
-                sprintf(pathInstalledApp, "/mnt/SDCARD%s", path + base_len);
+        // Ignore "Roms" folder - it does not indicate installed status
+        if (level == 0 && strcmp(dp->d_name, "Roms") == 0)
+            continue;
 
-                if (!exists(pathInstalledApp))
-                    is_installed = false;
-                else if (dp->d_type == DT_DIR)
-                    is_installed = checkAppInstalled(path, base_len);
+        // Construct new path from our base path
+        sprintf(path, "%s/%s", basePath, dp->d_name);
 
-                if (!is_installed)
-                    run = 0;
-            }
+        if (exists(path)) {
+            sprintf(pathInstalledApp, "/mnt/SDCARD%s", path + base_len);
+
+            if (!exists(pathInstalledApp))
+                is_installed = false;
+            else if (dp->d_type == DT_DIR)
+                is_installed = checkAppInstalled(path, base_len, level + 1);
+
+            if (!is_installed)
+                run = 0;
         }
     }
 
@@ -169,7 +174,7 @@ void loadResources()
                 // Installation check
                 sprintf(basePath,"%s/%s", data_path, file_name);
 
-                bool is_installed = checkAppInstalled(basePath, strlen(basePath));
+                bool is_installed = checkAppInstalled(basePath, strlen(basePath), 0);
                 package_installed[nT][package_count[nT]] = is_installed;
                 if (is_installed)
                     package_installed_count[nT]++;
