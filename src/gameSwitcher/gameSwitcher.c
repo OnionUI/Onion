@@ -265,9 +265,6 @@ int main(void)
 
     SDL_Color color_white = {255, 255, 255};
 
-    SDL_Rect game_name_bg_size = {0, 0, 640, 60};
-    SDL_Rect game_name_bg_pos = {0, 360};
-
     int nExitToMiyoo = 0;
 
     SDL_InitDefault(true);
@@ -310,6 +307,17 @@ int main(void)
 
     uint32_t start = last_ticks;
     uint32_t legend_timeout = 5000;
+
+    char header_path[STR_MAX], footer_path[STR_MAX];
+    bool use_custom_header = theme_getImagePath(theme()->path, "extra/gs-top-bar", header_path);
+    bool use_custom_footer = theme_getImagePath(theme()->path, "extra/gs-bottom-bar", footer_path);
+    SDL_Surface *custom_header = use_custom_header ? IMG_Load(header_path) : NULL;
+    SDL_Surface *custom_footer = use_custom_footer ? IMG_Load(footer_path) : NULL;
+
+    int header_height = use_custom_header ? custom_header->h : 60;
+    int footer_height = use_custom_footer ? custom_footer->h : 60;
+
+    SDL_Rect frame = {theme()->frame.border_left, 0, 640 - theme()->frame.border_right, 480};
 
 	while (!quit) {
 		uint32_t ticks = SDL_GetTicks();
@@ -466,8 +474,9 @@ int main(void)
             continue;
 
         if (acc_ticks >= time_step) {
+            SDL_BlitSurface(theme_background(), NULL, screen, NULL);
+
             if (game_list_len == 0) {
-                SDL_BlitSurface(theme_background(), NULL, screen, NULL);
                 SDL_Surface *empty = resource_getSurface(EMPTY_BG);
                 SDL_Rect empty_rect = {320 - empty->w / 2, 240 - empty->h / 2};
                 SDL_BlitSurface(empty, NULL, screen, &empty_rect);
@@ -476,11 +485,13 @@ int main(void)
             else {
                 SDL_Surface *imageBackgroundGame = imageCache_getItem(&current_game);
                 if (imageBackgroundGame != NULL) {
-                    SDL_BlitSurface(imageBackgroundGame, NULL, screen, NULL);
+                    if (view_mode == 0)
+                        SDL_BlitSurface(imageBackgroundGame, &frame, screen, &frame);
+                    else
+                        SDL_BlitSurface(imageBackgroundGame, NULL, screen, NULL);
                     image_drawn = true;
                 }
                 else {
-                    SDL_BlitSurface(theme_background(), NULL, screen, NULL);
                     if (imageCache_isActive())
                         image_drawn = false;
                 }
@@ -488,7 +499,15 @@ int main(void)
 
             if (view_mode >= 0 && game_list_len > 0) {
                 char *game_name_str = game_list[current_game].shortname;
-                game_name_bg_pos.y = view_mode == 0 ? 360 : 420;
+                SDL_Rect game_name_bg_size = {0, 0, 640, 60};
+                SDL_Rect game_name_bg_pos = {0, 360};
+
+                if (view_mode == 0) {
+                    game_name_bg_size.x = game_name_bg_pos.x = theme()->frame.border_left;
+                    game_name_bg_size.w -= theme()->frame.border_right;
+                }
+
+                game_name_bg_pos.y = view_mode == 0 ? (480 - footer_height - 60) : 420;
                 SDL_BlitSurface(transparent_bg, &game_name_bg_size, screen, &game_name_bg_pos);
 
                 if (current_game > 0) {
@@ -512,22 +531,41 @@ int main(void)
             }
 
             if (view_mode == 0) {
-				theme_renderFooter(screen);
-				theme_renderStandardHint(screen, "RESUME", lang_get(LANG_BACK));
-                theme_renderFooterStatus(screen, game_list_len > 0 ? current_game + 1 : 0, game_list_len);
+                if (use_custom_footer) {
+                    SDL_Rect footer_rect = {0, 480 - custom_footer->h};
+                    SDL_BlitSurface(custom_footer, NULL, screen, &footer_rect);
+                }
+                else {
+                    theme_renderFooter(screen);
+                    theme_renderStandardHint(screen, "RESUME", lang_get(LANG_BACK));
+                    theme_renderFooterStatus(screen, game_list_len > 0 ? current_game + 1 : 0, game_list_len);
+                }
             }
 
             if (view_mode == 0) {
                 char title_str[STR_MAX] = "GameSwitcher";
                 if (show_time && game_list_len > 0)
                     strcpy(title_str, game_list[current_game].totalTime);
-                theme_renderHeader(screen, title_str, true);
-				theme_renderHeaderBattery(screen, battery_percentage);
+
+                if (custom_header) {
+                    SDL_BlitSurface(custom_header, NULL, screen, NULL);
+                    SDL_Surface *title = TTF_RenderUTF8_Blended(resource_getFont(TITLE), title_str, theme()->title.color);
+                    if (title) {
+                        SDL_Rect title_rect = {320 - title->w / 2, (header_height - title->h) / 2};
+                        SDL_BlitSurface(title, NULL, screen, &title_rect);
+                        SDL_FreeSurface(title);
+                    }
+                }
+                else {
+                    theme_renderHeader(screen, title_str, false);
+                }
+				
+                theme_renderHeaderBatteryCustom(screen, battery_percentage, header_height);
             }
 
             if (show_legend && view_mode >= 0) {
                 SDL_Surface *legend = resource_getSurface(LEGEND_GAMESWITCHER);
-                SDL_Rect legend_rect = {640 - legend->w, view_mode == 0 ? 60 : 0};
+                SDL_Rect legend_rect = {640 - legend->w, view_mode == 0 ? header_height : 0};
                 SDL_BlitSurface(legend, NULL, screen, &legend_rect);
             }
 
@@ -538,7 +576,7 @@ int main(void)
                 SDL_Rect brightness_rect = {0, (view_mode == 0 ? 240 : 210) - brightness->h / 2};
                 if (!vertical) {
                     brightness_rect.x = 320 - brightness->w / 2;
-                    brightness_rect.y = view_mode == 0 ? 60 : 0;
+                    brightness_rect.y = view_mode == 0 ? header_height : 0;
                 }
                 SDL_BlitSurface(brightness, NULL, screen, &brightness_rect);
             }
@@ -573,6 +611,8 @@ int main(void)
 
     SDL_BlitSurface(screen, NULL, video, NULL);
     SDL_Flip(video);
+
+    if (custom_header != NULL) SDL_FreeSurface(custom_header);
 
     resources_free();
     SDL_FreeSurface(transparent_bg);
