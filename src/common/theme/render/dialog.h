@@ -10,6 +10,12 @@ static int dialog_progress = 0;
 
 void theme_renderDialog(SDL_Surface *screen, const char *title_str, const char *message_str, bool show_hint)
 {
+    SDL_Surface *transparent_bg = SDL_CreateRGBSurface(0, 640, 480, 32,
+        0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
+    SDL_FillRect(transparent_bg, NULL, 0xBE000000);
+    SDL_BlitSurface(transparent_bg, NULL, screen, NULL);
+    SDL_FreeSurface(transparent_bg);
+
     SDL_Surface *pop_bg = resource_getSurface(POP_BG);
     SDL_Rect center_rect = {320 - pop_bg->w / 2, 240 - pop_bg->h / 2};
 
