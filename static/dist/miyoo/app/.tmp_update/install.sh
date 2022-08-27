@@ -237,7 +237,27 @@ fresh_install() {
 
     cd $sysdir
     ./config/boot_mod.sh
-    ./bin/infoPanel -i "res/install_complete.png"
+
+    # Show installation complete
+    cd $sysdir
+    rm -f .installed
+    echo "Update complete!" >> /tmp/.update_msg
+    touch $sysdir/.waitConfirm
+    sync
+    ./bin/installUI &
+    sleep 1
+
+    echo "Press any button to turn off" >> /tmp/.update_msg
+    sleep 1
+
+    touch $sysdir/.installed
+
+    until [ ! -f $sysdir/.waitConfirm ]; do
+        sync
+    done
+
+    rm -f $sysdir/config/currentSlide
+
     ./bin/bootScreen "End"
 }
 
@@ -284,6 +304,8 @@ update_only() {
     until [ ! -f $sysdir/.waitConfirm ]; do
         sync
     done
+
+    rm -f $sysdir/config/currentSlide
 
     cd $sysdir
     ./bin/bootScreen "End"
