@@ -403,7 +403,7 @@ void menu_advanced(void *_)
 		_menu_advanced = list_create(3, LIST_SMALL);
 		strcpy(_menu_advanced.title, "Advanced");
 		list_addItem(&_menu_advanced, (ListItem){
-			.label = "Fast forward multiplier",
+			.label = "Fast forward rate",
 			.item_type = MULTIVALUE,
 			.value_max = 50,
 			.value = value_getFrameThrottle(),
