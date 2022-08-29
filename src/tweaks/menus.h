@@ -212,7 +212,7 @@ void menu_buttonAction(void *_)
 		list_addItem(&_menu_button_action, (ListItem){
 			.label = "MainUI: X button",
 			.item_type = MULTIVALUE,
-			.value_max = installed_apps_count + NUM_TOOLS + 1,
+			.value_max = installed_apps_count + NUM_TOOLS,
 			.value = value_appShortcut(0),
 			.value_formatter = formatter_appShortcut,
 			.action_id = 0,
@@ -221,7 +221,7 @@ void menu_buttonAction(void *_)
 		list_addItem(&_menu_button_action, (ListItem){
 			.label = "MainUI: Y button",
 			.item_type = MULTIVALUE,
-			.value_max = installed_apps_count + NUM_TOOLS + 1,
+			.value_max = installed_apps_count + NUM_TOOLS,
 			.value = value_appShortcut(1),
 			.value_formatter = formatter_appShortcut,
 			.action_id = 1,
