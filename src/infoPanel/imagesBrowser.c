@@ -17,7 +17,10 @@ static const char *getFilenameExt(const char *filename) {
 }
 
 static char* toLower(char* s) {
-  for(char *p=s; *p; p++) *p=tolower(*p);
+  for (char *p = s; *p; p++)
+  {
+    *p = tolower(*p);
+  }
   return s;
 }
 
@@ -25,13 +28,14 @@ static bool getImagePath(const char *dir_path, const struct dirent *ent, char *i
     const int ext_size = 50;
     char ext[ext_size];
     const char *filename = ent->d_name;
-    if (strcmp(".", filename) == 0 || strcmp("..", filename) == 0 ||
-        S_ISDIR(ent->d_type & DT_DIR)) {
+    if (filename[0] == '.' || S_ISDIR(ent->d_type & DT_DIR))
+    {
         return false;
     }
     strncpy(ext, getFilenameExt(filename), ext_size);
     const char *fileExt = toLower(ext);
-    if (strcmp(fileExt, "png") == 0 || strcmp(fileExt, "jpg") == 0 || strcmp(fileExt, "jpeg") == 0) {
+    if (strcmp(fileExt, "png") == 0 || strcmp(fileExt, "jpg") == 0 || strcmp(fileExt, "jpeg") == 0)
+    {
         char full_path[PATH_MAX];
         sprintf(full_path, "%s%s", dir_path, filename);
         strcpy(image_path, full_path);
@@ -45,13 +49,15 @@ static int getImagesCount(const char* dir_path) {
     int images_count = 0;
 
     DIR* dir = opendir(dir_path);
-    if (dir == NULL) {
+    if (dir == NULL)
+    {
         return 0;
     }
 
     struct dirent *ent;
     
-    while((ent = readdir(dir)) != NULL){
+    while((ent = readdir(dir)) != NULL)
+    {
         char image_path[PATH_MAX];
         const bool is_image = getImagePath(dir_path, ent, image_path);
         if (is_image)
