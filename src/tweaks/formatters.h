@@ -76,7 +76,10 @@ void formatter_fontSize(void *pt, char *out_label)
 
 void formatter_fastForward(void *pt, char *out_label)
 {
-	sprintf(out_label, "%d.0x", ((ListItem*)pt)->value);
+	ListItem *item = (ListItem*)pt;
+	if (item->value == 0)
+		strcpy(out_label, "Unlimited");
+	else sprintf(out_label, "%d.0x", item->value);
 }
 
 void formatter_positionOffset(void *pt, char *out_label)

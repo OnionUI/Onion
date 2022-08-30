@@ -57,6 +57,10 @@
 #define GPIO_DIR1 "/sys/class/gpio/"
 #define GPIO_DIR2 "/sys/devices/gpiochip0/gpio/"
 
+#define VIEW_NORMAL 0
+#define VIEW_MINIMAL 1
+#define VIEW_FULLSCREEN -1
+
 static bool quit = false;
 static void sigHandler(int sig)
 {
@@ -200,9 +204,9 @@ void readHistory()
             int h = nTime / 3600;
             int m = (nTime - 3600 * h) / 60;
             if (h > 0)
-                snprintf(game->totalTime, sizeof(game->totalTime) - 1, "%dh %dm / %s", h, m, sTotalTimePlayed);
+                snprintf(game->totalTime, sizeof(game->totalTime) - 1, "%dh %dm", h, m);
             else
-                snprintf(game->totalTime, sizeof(game->totalTime) - 1, "%dm / %s", m, sTotalTimePlayed);
+                snprintf(game->totalTime, sizeof(game->totalTime) - 1, "%dm", m);
         }
 
         game_list_len++;
@@ -265,9 +269,6 @@ int main(void)
 
     SDL_Color color_white = {255, 255, 255};
 
-    SDL_Rect game_name_bg_size = {0, 0, 640, 60};
-    SDL_Rect game_name_bg_pos = {0, 360};
-
     int nExitToMiyoo = 0;
 
     SDL_InitDefault(true);
@@ -296,10 +297,13 @@ int main(void)
     bool select_pressed = false;
     bool select_combo_key = false;
 
-    bool view_min = config_flag_get("gameSwitcher-minimal");
-    bool show_time = config_flag_get("gameSwitcher-showTime");
-    bool show_legend = !config_flag_get("gameSwitcher-hideLegend");
-    int view_mode = view_min ? 1 : 0, view_restore;
+    mkdirs("/mnt/SDCARD/.tmp_update/config/gameSwitcher");
+
+    bool view_min = config_flag_get("gameSwitcher/minimal");
+    bool show_time = config_flag_get("gameSwitcher/showTime");
+    bool show_total = !config_flag_get("gameSwitcher/hideTotal");
+    bool show_legend = !config_flag_get("gameSwitcher/hideLegend");
+    int view_mode = view_min ? VIEW_MINIMAL : VIEW_NORMAL, view_restore;
 
     SDLKey changed_key = SDLK_UNKNOWN;
     int button_y_repeat = 0;
@@ -311,6 +315,19 @@ int main(void)
     uint32_t start = last_ticks;
     uint32_t legend_timeout = 5000;
 
+    char header_path[STR_MAX], footer_path[STR_MAX];
+    bool use_custom_header = theme_getImagePath(theme()->path, "extra/gs-top-bar", header_path);
+    bool use_custom_footer = theme_getImagePath(theme()->path, "extra/gs-bottom-bar", footer_path);
+    SDL_Surface *custom_header = use_custom_header ? IMG_Load(header_path) : NULL;
+    SDL_Surface *custom_footer = use_custom_footer ? IMG_Load(footer_path) : NULL;
+
+    int header_height = use_custom_header ? custom_header->h : 60;
+    if (header_height == 1) header_height = 0;
+    int footer_height = use_custom_footer ? custom_footer->h : 60;
+    if (footer_height == 1) footer_height = 0;
+
+    SDL_Rect frame = {theme()->frame.border_left, 0, 640 - theme()->frame.border_right, 480};
+
 	while (!quit) {
 		uint32_t ticks = SDL_GetTicks();
 		acc_ticks += ticks - last_ticks;
@@ -320,7 +337,7 @@ int main(void)
 
         if (show_legend && ticks - start > legend_timeout) {
             show_legend = false;
-            config_flag_set("gameSwitcher-hideLegend", true);
+            config_flag_set("gameSwitcher/hideLegend", true);
         }
 
         if (updateKeystate(keystate, &quit, true, &changed_key)) {
@@ -401,8 +418,11 @@ int main(void)
                     if (!select_combo_key) {
                         show_legend = !show_legend;
                         legend_timeout = 0;
-                        show_time = !show_time;
-                        config_flag_set("gameSwitcher-showTime", show_time);
+                        if (!show_time && !show_total) show_time = true, show_total = false;
+                        else if (show_time && !show_total) show_time = true, show_total = true;
+                        else show_time = false, show_total = false;
+                        config_flag_set("gameSwitcher/showTime", show_time);
+                        config_flag_set("gameSwitcher/hideTotal", !show_total);
                         changed = true;
                     }
                     select_pressed = false;
@@ -412,8 +432,8 @@ int main(void)
 
             if (changed_key == SW_BTN_Y && keystate[SW_BTN_Y] == RELEASED) {
                 if (button_y_repeat < 75) {
-                    view_mode = view_mode == -1 ? view_restore : !view_mode;
-                    config_flag_set("gameSwitcher-minimal", view_mode == 1);
+                    view_mode = view_mode == VIEW_FULLSCREEN ? view_restore : !view_mode;
+                    config_flag_set("gameSwitcher/minimal", view_mode == VIEW_MINIMAL);
                     changed = true;
                 }
                 button_y_repeat = 0;
@@ -450,11 +470,11 @@ int main(void)
                 sound_change();
         }
 
-        if (keystate[SW_BTN_Y] == PRESSED && view_mode != -1) {
+        if (keystate[SW_BTN_Y] == PRESSED && view_mode != VIEW_FULLSCREEN) {
             button_y_repeat++;
             if (button_y_repeat >= 75) {
                 view_restore = view_mode;
-                view_mode = -1;
+                view_mode = VIEW_FULLSCREEN;
                 changed = true;
             }
         }
@@ -466,8 +486,9 @@ int main(void)
             continue;
 
         if (acc_ticks >= time_step) {
+            SDL_BlitSurface(theme_background(), NULL, screen, NULL);
+
             if (game_list_len == 0) {
-                SDL_BlitSurface(theme_background(), NULL, screen, NULL);
                 SDL_Surface *empty = resource_getSurface(EMPTY_BG);
                 SDL_Rect empty_rect = {320 - empty->w / 2, 240 - empty->h / 2};
                 SDL_BlitSurface(empty, NULL, screen, &empty_rect);
@@ -476,19 +497,29 @@ int main(void)
             else {
                 SDL_Surface *imageBackgroundGame = imageCache_getItem(&current_game);
                 if (imageBackgroundGame != NULL) {
-                    SDL_BlitSurface(imageBackgroundGame, NULL, screen, NULL);
+                    if (view_mode == VIEW_NORMAL)
+                        SDL_BlitSurface(imageBackgroundGame, &frame, screen, &frame);
+                    else
+                        SDL_BlitSurface(imageBackgroundGame, NULL, screen, NULL);
                     image_drawn = true;
                 }
                 else {
-                    SDL_BlitSurface(theme_background(), NULL, screen, NULL);
                     if (imageCache_isActive())
                         image_drawn = false;
                 }
             }
 
-            if (view_mode >= 0 && game_list_len > 0) {
+            if (view_mode != VIEW_FULLSCREEN && game_list_len > 0) {
                 char *game_name_str = game_list[current_game].shortname;
-                game_name_bg_pos.y = view_mode == 0 ? 360 : 420;
+                SDL_Rect game_name_bg_size = {0, 0, 640, 60};
+                SDL_Rect game_name_bg_pos = {0, 360};
+
+                if (view_mode == VIEW_NORMAL) {
+                    game_name_bg_size.x = game_name_bg_pos.x = theme()->frame.border_left;
+                    game_name_bg_size.w -= theme()->frame.border_right;
+                }
+
+                game_name_bg_pos.y = view_mode == VIEW_NORMAL ? (480 - footer_height - 60) : 420;
                 SDL_BlitSurface(transparent_bg, &game_name_bg_size, screen, &game_name_bg_pos);
 
                 if (current_game > 0) {
@@ -511,23 +542,51 @@ int main(void)
                 SDL_FreeSurface(game_name);
             }
 
-            if (view_mode == 0) {
-				theme_renderFooter(screen);
-				theme_renderStandardHint(screen, "RESUME", lang_get(LANG_BACK));
-                theme_renderFooterStatus(screen, game_list_len > 0 ? current_game + 1 : 0, game_list_len);
+            if (view_mode == VIEW_NORMAL) {
+                if (custom_footer) {
+                    if (footer_height > 0) {
+                        SDL_Rect footer_rect = {0, 480 - custom_footer->h};
+                        SDL_BlitSurface(custom_footer, NULL, screen, &footer_rect);
+                    }
+                }
+                else {
+                    theme_renderFooter(screen);
+                    theme_renderStandardHint(screen, "RESUME", lang_get(LANG_BACK));
+                    theme_renderFooterStatus(screen, game_list_len > 0 ? current_game + 1 : 0, game_list_len);
+                }
             }
 
-            if (view_mode == 0) {
+            if (view_mode == VIEW_NORMAL) {
                 char title_str[STR_MAX] = "GameSwitcher";
-                if (show_time && game_list_len > 0)
+                if (show_time && game_list_len > 0) {
                     strcpy(title_str, game_list[current_game].totalTime);
-                theme_renderHeader(screen, title_str, true);
-				theme_renderHeaderBattery(screen, battery_percentage);
+
+                    if (show_total) {
+                        sprintf(title_str + strlen(title_str), " / %s", sTotalTimePlayed);
+                    }
+                }
+
+                if (custom_header) {
+                    if (header_height > 0) {
+                        SDL_BlitSurface(custom_header, NULL, screen, NULL);
+                        SDL_Surface *title = TTF_RenderUTF8_Blended(resource_getFont(TITLE), title_str, theme()->title.color);
+                        if (title) {
+                            SDL_Rect title_rect = {320 - title->w / 2, (header_height - title->h) / 2};
+                            SDL_BlitSurface(title, NULL, screen, &title_rect);
+                            SDL_FreeSurface(title);
+                        }
+                        theme_renderHeaderBatteryCustom(screen, battery_percentage, header_height);
+                    }
+                }
+                else {
+                    theme_renderHeader(screen, title_str, false);
+                    theme_renderHeaderBattery(screen, battery_percentage);
+                }
             }
 
-            if (show_legend && view_mode >= 0) {
+            if (show_legend && view_mode != VIEW_FULLSCREEN) {
                 SDL_Surface *legend = resource_getSurface(LEGEND_GAMESWITCHER);
-                SDL_Rect legend_rect = {640 - legend->w, view_mode == 0 ? 60 : 0};
+                SDL_Rect legend_rect = {640 - legend->w, view_mode == VIEW_NORMAL ? header_height : 0};
                 SDL_BlitSurface(legend, NULL, screen, &legend_rect);
             }
 
@@ -535,10 +594,10 @@ int main(void)
                 // Display luminosity slider
                 SDL_Surface* brightness = resource_getBrightness(settings.brightness);
                 bool vertical = brightness->h > brightness->w;
-                SDL_Rect brightness_rect = {0, (view_mode == 0 ? 240 : 210) - brightness->h / 2};
+                SDL_Rect brightness_rect = {0, (view_mode == VIEW_NORMAL ? 240 : 210) - brightness->h / 2};
                 if (!vertical) {
                     brightness_rect.x = 320 - brightness->w / 2;
-                    brightness_rect.y = view_mode == 0 ? 60 : 0;
+                    brightness_rect.y = view_mode == VIEW_NORMAL ? header_height : 0;
                 }
                 SDL_BlitSurface(brightness, NULL, screen, &brightness_rect);
             }
@@ -573,6 +632,9 @@ int main(void)
 
     SDL_BlitSurface(screen, NULL, video, NULL);
     SDL_Flip(video);
+
+    if (custom_header != NULL) SDL_FreeSurface(custom_header);
+    if (custom_footer != NULL) SDL_FreeSurface(custom_footer);
 
     resources_free();
     SDL_FreeSurface(transparent_bg);

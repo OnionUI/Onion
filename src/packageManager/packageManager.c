@@ -34,14 +34,21 @@
 #define MAX_LAYER_NAME_SIZE 256
 #define MAY_LAYER_DISPLAY 35
 
-static char package_names[3][NUMBER_OF_LAYERS][MAX_LAYER_NAME_SIZE];
-static bool package_installed[3][NUMBER_OF_LAYERS];
-static bool package_changes[3][NUMBER_OF_LAYERS];
+typedef struct package_s {
+    char name[STR_MAX];
+    bool installed;
+    bool changed;
+    bool complete;
+} Package;
+
+static Package packages[3][NUMBER_OF_LAYERS];
 static int package_count[3];
 static int package_installed_count[] = {0, 0, 0};
 static int nSelection = 0;
 static int nListPosition = 0;
 static int nTab = 0;
+static int changes_installs = 0;
+static int changes_removals = 0;
 
 static SDL_Surface *video = NULL,
                    *screen = NULL,
@@ -58,11 +65,57 @@ static TTF_Font *font35 = NULL;
 
 static SDL_Color color_white = {255, 255, 255};
 
-void setLayersInstall(bool should_install)
+int changesTotal(void)
 {
-    for (int n = 0; n < 3; n++) {
-        for (int i = 0 ; i < NUMBER_OF_LAYERS; i++) {
-            package_changes[n][i] = package_installed[n][i] ? !should_install : should_install;
+    return changes_installs + changes_removals;
+}
+
+void setLayersInstall(bool should_install, int layer)
+{
+    for (int i = 0; i < package_count[layer]; i++) {
+        Package *package = &packages[layer][i];
+        bool new_value = package->installed ? !should_install : should_install;
+
+        if (package->changed != new_value) {
+            package->changed = new_value;
+
+            if (package->installed) {
+                changes_removals += new_value ? 1 : -1;
+                if (!package->complete)
+                    changes_installs += new_value ? -1 : 1;
+            }
+            else changes_installs += new_value ? 1 : -1;
+        }
+    }
+}
+
+void layerToggleAll(int layer) {
+    bool all_on = true;
+
+    for (int i = 0; i < package_count[layer]; i++) {
+        Package *package = &packages[layer][i];
+        if (package->installed == package->changed) {
+            all_on = false;
+            break;
+        }
+    }
+
+    setLayersInstall(!all_on, layer);
+}
+
+void layerReset(int layer) {
+    for (int i = 0; i < package_count[layer]; i++) {
+        Package *package = &packages[layer][i];
+
+        if (package->changed) {
+            if (package->installed) {
+                changes_removals--;
+                if (!package->complete)
+                    changes_installs++;
+            }
+            else changes_installs--;
+
+            package->changed = false;
         }
     }
 }
@@ -102,7 +155,7 @@ void appUninstall(char *basePath, int strlenBase)
     closedir(dir);
 }
 
-bool checkAppInstalled(const char *basePath, int base_len)
+bool checkAppInstalled(const char *basePath, int base_len, int level, bool complete)
 {
     char path[1000];
     char pathInstalledApp[1000];
@@ -118,21 +171,29 @@ bool checkAppInstalled(const char *basePath, int base_len)
         return true;
 
     while ((dp = readdir(dir)) != NULL && run == 1) {
-        if (strcmp(dp->d_name, ".") != 0 && strcmp(dp->d_name, "..") != 0) {
-            // Construct new path from our base path
-            sprintf(path, "%s/%s", basePath, dp->d_name);
+        if (strcmp(dp->d_name, ".") == 0 || strcmp(dp->d_name, "..") == 0)
+            continue;
 
-            if (exists(path)) {
-                sprintf(pathInstalledApp, "/mnt/SDCARD%s", path + base_len);
+        // Ignore "Roms" folder - it does not indicate installed status
+        if (level == 0 && strcmp(dp->d_name, "Roms") == 0)
+            continue;
 
-                if (!exists(pathInstalledApp))
-                    is_installed = false;
-                else if (dp->d_type == DT_DIR)
-                    is_installed = checkAppInstalled(path, base_len);
+        // Construct new path from our base path
+        sprintf(path, "%s/%s", basePath, dp->d_name);
 
-                if (!is_installed)
-                    run = 0;
-            }
+        if (exists(path)) {
+            sprintf(pathInstalledApp, "/mnt/SDCARD%s", path + base_len);
+
+            if (!exists(pathInstalledApp))
+                is_installed = false;
+            else if (dp->d_type == DT_DIR)
+                is_installed = checkAppInstalled(path, base_len, level + 1, complete);
+
+            if (!complete && level >= 2 && exists(pathInstalledApp))
+                return true;
+
+            if ((complete || level < 2) && !is_installed)
+                run = 0;
         }
     }
 
@@ -169,11 +230,25 @@ void loadResources()
                 // Installation check
                 sprintf(basePath,"%s/%s", data_path, file_name);
 
-                bool is_installed = checkAppInstalled(basePath, strlen(basePath));
-                package_installed[nT][package_count[nT]] = is_installed;
-                if (is_installed)
+                bool is_installed = checkAppInstalled(basePath, strlen(basePath), 0, false);
+                bool is_complete = is_installed ? checkAppInstalled(basePath, strlen(basePath), 0, true) : false;
+
+                Package package = {
+                    .installed = is_installed,
+                    .changed = false,
+                    .complete = is_complete
+                };
+
+                if (is_installed) {
                     package_installed_count[nT]++;
-                strcpy(package_names[nT][package_count[nT]], file_name);
+
+                    if (!is_complete)
+                        changes_installs++;
+                }
+                
+                strcpy(package.name, file_name);
+
+                packages[nT][package_count[nT]] = package;
                 package_count[nT]++;
             }
 
@@ -182,43 +257,40 @@ void loadResources()
         closedir(dp);
     }
 
+    Package temp;
+
     // Sort function
-    for (int nT = 0 ; nT < 3 ; nT ++){
-        char tempFolder[MAX_LAYER_NAME_SIZE];
-        bool bInstallTemp;
+    for (int nT = 0; nT < 3; nT++) {
+        bool found = true;
 
-        int bFound = 1;
-        while (bFound == 1){
-            bFound = 0;
-            for (int i = 0 ; i < package_count[nT]-1; i ++){
-                if (strcmp(package_names[nT][i], package_names[nT][i+1])>0){
+        while (found) {
+            found = false;
 
-                    strcpy(tempFolder, package_names[nT][i+1]);
-                    strcpy(package_names[nT][i+1], package_names[nT][i]);
-                    strcpy(package_names[nT][i], tempFolder);
+            for (int i = 0; i < package_count[nT] - 1; i++) {
+                Package *package_a = &packages[nT][i];
+                Package *package_b = &packages[nT][i + 1];
 
-                    bInstallTemp = package_installed[nT][i+1];
-                    package_installed[nT][i+1] = package_installed[nT][i];
-                    package_installed[nT][i] = bInstallTemp;
-
-                    bFound = 1 ;
+                if (strcmp(package_a->name, package_b->name) > 0) {
+                    temp = *package_a;
+                    *package_a = *package_b;
+                    *package_b = temp;
+                    found = true;
                 }
             }
-
         }
     }
 }
 
-SDL_Surface* createLabelSurface(const char *label)
+SDL_Surface* createLabelSurface(Package *package)
 {
     SDL_Surface *textbox = SDL_CreateRGBSurface(0, 593, 49, 32,
         0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000); /* important */
     SDL_FillRect(textbox, NULL, 0x000000FF);
 
     char label_text[STR_MAX], parens[STR_MAX] = "";
-    strncpy(label_text, label, STR_MAX - 1);
+    strncpy(label_text, package->name, STR_MAX - 1);
 
-    if (strchr(label, '(') != NULL) {
+    if (strchr(package->name, '(') != NULL) {
         parens[0] = '(';
         strncat(parens, str_split(label_text, "("), STR_MAX - 2);
     }
@@ -227,6 +299,9 @@ SDL_Surface* createLabelSurface(const char *label)
     SDL_SetAlpha(label_surface, 0, 0); /* important */
     SDL_Rect label_pos = {0, 0};
     SDL_BlitSurface(label_surface, NULL, textbox, &label_pos);
+    
+    if (package->installed && !package->complete) strcat(parens, " [!]");
+    else if (package->changed) strcat(parens, "*");
 
     if (strlen(parens) > 0) {
         SDL_Surface *parens_surface = TTF_RenderUTF8_Blended(font25, parens, color_white);
@@ -247,10 +322,8 @@ void displayLayersNames(){
     SDL_Surface *surfaceResName;
     for (int i = 0 ; i < 7 ; i++){
         if ((i + nListPosition) < package_count[nTab]) {
-            bool package_changed = package_changes[nTab][i + nListPosition];
-            char package_name[STR_MAX + 2];
-            snprintf(package_name, STR_MAX + 1, "%s%c", package_names[nTab][i + nListPosition], package_changed ? '*' : 0);
-            surfaceResName = createLabelSurface(package_name);
+            Package *package = &packages[nTab][i + nListPosition];
+            surfaceResName = createLabelSurface(package);
             rectResName.y = 92 + i * 47;
             SDL_BlitSurface(surfaceResName, NULL, screen, &rectResName);
             SDL_FreeSurface(surfaceResName);
@@ -263,10 +336,9 @@ void displayLayersInstall(){
 
     for (int i = 0 ; i < 7 ; i++) {
         if ((i + nListPosition) < package_count[nTab]) {
-            bool is_installed = package_installed[nTab][i + nListPosition];
-            bool should_change = package_changes[nTab][i + nListPosition];
+            Package *package = &packages[nTab][i + nListPosition];
             rectInstall.y = 108 - surfaceCheck->h / 2 + i * 47;
-            if (is_installed != should_change)
+            if (package->installed != package->changed)
                 SDL_BlitSurface(surfaceCheck, NULL, screen, &rectInstall);
             else
                 SDL_BlitSurface(surfaceCross, NULL, screen, &rectInstall);
@@ -360,9 +432,6 @@ int main(int argc, char *argv[])
     bool state_changed = true;
     KeyState keystate[320] = {0};
 
-    int changes_total = 0;
-    int changes_installs = 0;
-    int changes_removals = 0;
     bool apply_changes = false;
 
     while (!quit) {
@@ -432,7 +501,7 @@ int main(int argc, char *argv[])
 
                 if (show_confirm) {
                     if (apply_changes) {
-                        if (changes_total > 0 || (reapply_all && package_installed_count[0] > 0) || confirmDoNothing(keystate))
+                        if (changesTotal() > 0 || (reapply_all && package_installed_count[0] > 0) || confirmDoNothing(keystate))
                             quit = true;
                     }
                     else if (confirmDoNothing(keystate))
@@ -446,18 +515,27 @@ int main(int argc, char *argv[])
             if (keystate[SW_BTN_A] == PRESSED && package_count[nTab] > 0) {
                 int pos = nListPosition + nSelection;
                 if (pos < package_count[nTab]) {
-                    bool package_changed = !package_changes[nTab][pos];
-                    bool is_installed = package_installed[nTab][pos];
+                    Package *package = &packages[nTab][pos];
+                    package->changed = !package->changed;
 
-                    package_changes[nTab][pos] = package_changed;
-
-                    if (!is_installed)
-                        changes_installs += package_changed ? 1 : -1;
-                    else
-                        changes_removals += package_changed ? 1 : -1;
-                    changes_total += package_changed ? 1 : -1;
+                    if (package->installed) {
+                        changes_removals += package->changed ? 1 : -1;
+                        if (!package->complete)
+                            changes_installs += package->changed ? -1 : 1;
+                    }
+                    else changes_installs += package->changed ? 1 : -1;
                     state_changed = true;
                 }
+            }
+
+            if (keystate[SW_BTN_X] == PRESSED && package_count[nTab] > 0) {
+                layerToggleAll(nTab);
+                state_changed = true;
+            }
+
+            if (keystate[SW_BTN_Y] == PRESSED && package_count[nTab] > 0) {
+                layerReset(nTab);
+                state_changed = true;
             }
         }
 
@@ -479,7 +557,7 @@ int main(int argc, char *argv[])
                 displayLayersInstall();
             }
 
-            if (changes_total > 0) {
+            if (changesTotal() > 0) {
                 char status_str[STR_MAX] = "";
                 if (changes_installs > 0)
                     sprintf(status_str, "+%d", changes_installs);
@@ -526,34 +604,33 @@ int main(int argc, char *argv[])
             SDL_Rect rectMessage = {10, 420 , 603, 48};
 
             for (int nLayer = 0; nLayer < package_count[nT]; nLayer++) {
-                char *package_name = package_names[nT][nLayer];
-                bool should_change = package_changes[nT][nLayer];
+                Package *package = &packages[nT][nLayer];
 
-                if (!reapply_all && !should_change)
+                bool should_apply = (package->installed && !package->complete) || package->changed;
+                bool should_install = package->installed != package->changed || (package->installed && !package->complete && !package->changed);
+
+                if (!reapply_all && !should_apply)
                     continue;
 
-                bool is_installed = package_installed[nT][nLayer];
-                bool should_install = is_installed != should_change;
-
                 if (should_install) {
-                    printf_debug("Installing %s...\n", package_name);
+                    printf_debug("Installing %s...\n", package->name);
                     SDL_BlitSurface(surfaceBackground, NULL, screen, NULL);
 
-                    surfaceMessage = TTF_RenderUTF8_Blended(font35, package_name, color_white);
+                    surfaceMessage = TTF_RenderUTF8_Blended(font35, package->name, color_white);
                     SDL_BlitSurface(surfaceMessage, NULL, screen, &rectMessage);
                     SDL_FreeSurface(surfaceMessage);
 
                     SDL_BlitSurface(screen, NULL, video, NULL);
                     SDL_Flip(video);
 
-                    sprintf(cmd, "./install.sh \"%s\" \"%s\"", data_path, package_name);
+                    sprintf(cmd, "./install.sh \"%s\" \"%s\"", data_path, package->name);
                     system(cmd);
                 }
-                else if (is_installed) {
-                    printf_debug("Removing %s...\n", package_name);
+                else if (package->installed) {
+                    printf_debug("Removing %s...\n", package->name);
                     // app uninstallation
                     char pathAppUninstall[1000];
-                    sprintf(pathAppUninstall, "%s/%s", data_path, package_name);
+                    sprintf(pathAppUninstall, "%s/%s", data_path, package->name);
                     appUninstall(pathAppUninstall, strlen(pathAppUninstall));
                 }
             }

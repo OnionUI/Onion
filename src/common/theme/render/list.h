@@ -87,8 +87,8 @@ void theme_renderList(SDL_Surface *screen, List *list)
         else if (item->item_type == MULTIVALUE) {
             SDL_Surface *arrow_left = resource_getSurface(LEFT_ARROW);
             SDL_Surface *arrow_right = resource_getSurface(RIGHT_ARROW);
-            SDL_Rect arrow_left_pos = {640 - 20 - 24 - multivalue_width - 24, item_center_y - 12};
-            SDL_Rect arrow_right_pos = {640 - 20 - 24, item_center_y - 12};
+            SDL_Rect arrow_left_pos = {640 - 20 - arrow_right->w - multivalue_width - arrow_left->w, item_center_y - arrow_left->h / 2};
+            SDL_Rect arrow_right_pos = {640 - 20 - arrow_right->w, item_center_y - arrow_right->h / 2};
             SDL_BlitSurface(arrow_left, NULL, screen, &arrow_left_pos);
             SDL_BlitSurface(arrow_right, NULL, screen, &arrow_right_pos);
             label_end = arrow_left_pos.x;
@@ -98,7 +98,7 @@ void theme_renderList(SDL_Surface *screen, List *list)
             SDL_Surface *value_label = TTF_RenderUTF8_Blended(list_font, value_str, theme()->list.color);
             SDL_Rect value_size = {0, 0, multivalue_width, value_label->h};
             int label_width = value_label->w > value_size.w ? value_size.w : value_label->w;
-            SDL_Rect value_pos = {640 - 20 - 24 - multivalue_width / 2 - label_width / 2, item_center_y - value_size.h / 2};
+            SDL_Rect value_pos = {640 - 20 - arrow_right->w - multivalue_width / 2 - label_width / 2, item_center_y - value_size.h / 2};
             SDL_BlitSurface(value_label, &value_size, screen, &value_pos);
         }
 

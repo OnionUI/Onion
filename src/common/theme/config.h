@@ -23,6 +23,12 @@ typedef struct Theme_BatteryPercentage
     bool onleft;
 } BatteryPercentage_s;
 
+typedef struct Theme_Frame
+{
+    int border_left;
+    int border_right;
+} Frame_s;
+
 typedef struct Theme_HideLabels
 {
     bool icons;
@@ -53,6 +59,7 @@ typedef struct Theme
     char description[STR_MAX];
     HideLabels_s hideLabels;
     BatteryPercentage_s batteryPercentage;
+    Frame_s frame;
     FontStyle_s title;
     FontStyle_s hint;
     FontStyle_s currentpage;
@@ -94,6 +101,7 @@ bool theme_applyConfig(Theme_s* config, const char* config_path, bool use_fallba
 	cJSON* json_root = cJSON_Parse(json_str);
 	cJSON* json_batteryPercentage = cJSON_GetObjectItem(json_root, "batteryPercentage");
 	cJSON* json_hideLabels = cJSON_GetObjectItem(json_root, "hideLabels");
+	cJSON* json_frame = cJSON_GetObjectItem(json_root, "frame");
 	cJSON* json_title = cJSON_GetObjectItem(json_root, "title");
 	cJSON* json_hint = cJSON_GetObjectItem(json_root, "hint");
 	cJSON* json_currentpage = cJSON_GetObjectItem(json_root, "currentpage");
@@ -140,6 +148,9 @@ bool theme_applyConfig(Theme_s* config, const char* config_path, bool use_fallba
     json_getInt(json_batteryPercentage, "offsetY", &config->batteryPercentage.offsetY);
     json_getBool(json_batteryPercentage, "onleft", &config->batteryPercentage.onleft);
 
+    json_getInt(json_frame, "border-left", &config->frame.border_left);
+    json_getInt(json_frame, "border-right", &config->frame.border_right);
+
 	cJSON_free(json_root);
 
     return true;
@@ -164,6 +175,10 @@ Theme_s theme_loadFromPath(const char* theme_path, bool apply_overrides)
             .offsetX = 0,
             .offsetY = 0,
             .onleft = false
+        },
+        .frame = {
+            .border_left = 0,
+            .border_right = 0
         },
         .title = {
             .font = FALLBACK_FONT,
