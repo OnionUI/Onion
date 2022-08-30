@@ -29,6 +29,22 @@ SDL_Surface* _loadSlide(int index)
     return NULL;
 }
 
+int nextSlide(int current_slide, int num_slides, int direction)
+{
+    int next_slide = current_slide;
+    do {
+        next_slide += direction;
+
+        if (next_slide >= num_slides)
+            next_slide = -1;
+
+        if (next_slide < -1)
+            next_slide = num_slides - 1;
+    }
+    while (imageCache_getItem(&next_slide) == NULL && next_slide != current_slide && next_slide != -1);
+    return next_slide;
+}
+
 int main(int argc, char *argv[])
 {
     // The percentage to start at
@@ -100,21 +116,28 @@ int main(int argc, char *argv[])
         last_ticks = ticks;
 
         while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT || (event.type == SDL_KEYUP && exists(".waitConfirm"))) {
+            if (event.type == SDL_QUIT)
                 quit = true;
-                break;
+            else if (event.type == SDL_KEYUP) {
+                switch (event.key.keysym.sym) {
+                    case SW_BTN_LEFT:
+                        current_slide = nextSlide(current_slide, num_slides, -1);
+                        slide_timer = ticks;
+                        break;
+                    case SW_BTN_RIGHT:
+                        current_slide = nextSlide(current_slide, num_slides, 1);
+                        slide_timer = ticks;
+                        break;
+                    default:
+                        if (exists(".waitConfirm"))
+                            quit = true;
+                        break;
+                }
             }
         }
 
         if (ticks - slide_timer > SLIDE_TIMEOUT) {
-            int next_slide = current_slide;
-            do {
-                next_slide++;
-                if (next_slide >= num_slides)
-                    next_slide = -1;
-            }
-            while (imageCache_getItem(&next_slide) == NULL && next_slide != current_slide && next_slide != -1);
-            current_slide = next_slide;
+            current_slide = nextSlide(current_slide, num_slides, 1);
             slide_timer = ticks;
         }
         
