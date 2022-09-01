@@ -47,8 +47,8 @@ static int package_installed_count[] = {0, 0, 0};
 static int nSelection = 0;
 static int nListPosition = 0;
 static int nTab = 0;
-static int changes_installs = 0;
-static int changes_removals = 0;
+static int changes_installs[] = {0, 0, 0};
+static int changes_removals[] = {0, 0, 0};
 
 static SDL_Surface *video = NULL,
                    *screen = NULL,
@@ -60,14 +60,31 @@ static SDL_Surface *video = NULL,
                    *surfaceCheck = NULL,
                    *surfaceCross = NULL;
 
+static TTF_Font *font18 = NULL;
 static TTF_Font *font25 = NULL;
 static TTF_Font *font35 = NULL;
 
 static SDL_Color color_white = {255, 255, 255};
 
+int changesInstalls(void)
+{
+    int total = 0;
+    for (int i = 0; i < 3; i++)
+        total += changes_installs[i];
+    return total;
+}
+
+int changesRemovals(void)
+{
+    int total = 0;
+    for (int i = 0; i < 3; i++)
+        total += changes_removals[i];
+    return total;
+}
+
 int changesTotal(void)
 {
-    return changes_installs + changes_removals;
+    return changesInstalls() + changesRemovals();
 }
 
 void setLayersInstall(bool should_install, int layer)
@@ -80,11 +97,11 @@ void setLayersInstall(bool should_install, int layer)
             package->changed = new_value;
 
             if (package->installed) {
-                changes_removals += new_value ? 1 : -1;
+                changes_removals[layer] += new_value ? 1 : -1;
                 if (!package->complete)
-                    changes_installs += new_value ? -1 : 1;
+                    changes_installs[layer] += new_value ? -1 : 1;
             }
-            else changes_installs += new_value ? 1 : -1;
+            else changes_installs[layer] += new_value ? 1 : -1;
         }
     }
 }
@@ -109,11 +126,11 @@ void layerReset(int layer) {
 
         if (package->changed) {
             if (package->installed) {
-                changes_removals--;
+                changes_removals[layer]--;
                 if (!package->complete)
-                    changes_installs++;
+                    changes_installs[layer]++;
             }
-            else changes_installs--;
+            else changes_installs[layer]--;
 
             package->changed = false;
         }
@@ -243,7 +260,7 @@ void loadResources()
                     package_installed_count[nT]++;
 
                     if (!is_complete)
-                        changes_installs++;
+                        changes_installs[nT]++;
                 }
                 
                 strcpy(package.name, file_name);
@@ -300,7 +317,7 @@ SDL_Surface* createLabelSurface(Package *package)
     SDL_Rect label_pos = {0, 0};
     SDL_BlitSurface(label_surface, NULL, textbox, &label_pos);
     
-    if (package->installed && !package->complete) strcat(parens, " [!]");
+    if (package->installed && !package->complete) strcat(parens, "**");
     else if (package->changed) strcat(parens, "*");
 
     if (strlen(parens) > 0) {
@@ -317,7 +334,8 @@ SDL_Surface* createLabelSurface(Package *package)
     return textbox;
 }
 
-void displayLayersNames(){
+void displayLayersNames(void)
+{
     SDL_Rect rectResName = {35, 92, 80, 20};
     SDL_Surface *surfaceResName;
     for (int i = 0 ; i < 7 ; i++){
@@ -331,7 +349,8 @@ void displayLayersNames(){
     }
 }
 
-void displayLayersInstall(){
+void displayLayersInstall(void)
+{
     SDL_Rect rectInstall = {600 - surfaceCheck->w, 96};
 
     for (int i = 0 ; i < 7 ; i++) {
@@ -344,14 +363,26 @@ void displayLayersInstall(){
                 SDL_BlitSurface(surfaceCross, NULL, screen, &rectInstall);
         }
     }
+
+    char footer_str[STR_MAX];
+    sprintf(footer_str, "%d added  |  %d removed  |  %d installed  |  %d total",
+        changes_installs[nTab],
+        changes_removals[nTab],
+        package_installed_count[nTab],
+        package_count[nTab]);
+    SDL_Surface *footer = TTF_RenderUTF8_Blended(font18, footer_str, color_white);
+    surfaceSetAlpha(footer, 120);
+    SDL_Rect footer_rect = {320 - footer->w / 2, 416};
+    SDL_BlitSurface(footer, NULL, screen, &footer_rect);
+    SDL_FreeSurface(footer);
 }
 
-void showScroller()
+void showScroller(void)
 {
     int shiftY = 0;
     if (package_count[nTab] - 7 > 0)
         shiftY = (int)(nListPosition * 311 / (package_count[nTab] - 7));
-    SDL_Rect rectSroller = { 608, 86 + shiftY, 16, 16};
+    SDL_Rect rectSroller = { 607, 85 + shiftY, 16, 16};
     SDL_BlitSurface(surfaceScroller, NULL, screen, &rectSroller);
 }
 
@@ -414,6 +445,7 @@ int main(int argc, char *argv[])
 	surfaceCheck = IMG_Load("/mnt/SDCARD/.tmp_update/res/toggle-on.png");
 	surfaceCross = IMG_Load("/mnt/SDCARD/.tmp_update/res/toggle-off.png");
 
+    font18 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 18);
     font25 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 25);
     font35 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 35);
 
@@ -519,11 +551,11 @@ int main(int argc, char *argv[])
                     package->changed = !package->changed;
 
                     if (package->installed) {
-                        changes_removals += package->changed ? 1 : -1;
+                        changes_removals[nTab] += package->changed ? 1 : -1;
                         if (!package->complete)
-                            changes_installs += package->changed ? -1 : 1;
+                            changes_installs[nTab] += package->changed ? -1 : 1;
                     }
-                    else changes_installs += package->changed ? 1 : -1;
+                    else changes_installs[nTab] += package->changed ? 1 : -1;
                     state_changed = true;
                 }
             }
@@ -558,16 +590,18 @@ int main(int argc, char *argv[])
             }
 
             if (changesTotal() > 0) {
+                int installs_count = changesInstalls();
+                int removals_count = changesRemovals();
                 char status_str[STR_MAX] = "";
-                if (changes_installs > 0)
-                    sprintf(status_str, "+%d", changes_installs);
-                if (changes_removals > 0) {
+                if (installs_count > 0)
+                    sprintf(status_str, "+%d", installs_count);
+                if (removals_count > 0) {
                     int len = strlen(status_str);
                     if (len > 0) {
                         strcpy(status_str + len, "  ");
                         len += 2;
                     }
-                    sprintf(status_str + len, " −%d", changes_removals);
+                    sprintf(status_str + len, " −%d", removals_count);
                 }
                 SDL_Surface *status = TTF_RenderUTF8_Blended(font25, status_str, color_white);
                 SDL_Rect status_rect = {620 - status->w, 30 - status->h / 2};
@@ -640,6 +674,7 @@ int main(int argc, char *argv[])
 
     msleep(200);
 
+    TTF_CloseFont(font18);
     TTF_CloseFont(font25);
     TTF_CloseFont(font35);
     TTF_Quit();

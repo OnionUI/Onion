@@ -65,14 +65,7 @@ main() {
     cd $sysdir
     ./bin/batmon 2>&1 > ./logs/batmon.log &
 
-    onion_version=`cat /mnt/SDCARD/.tmp_update/onionVersion/version.txt`
-
-    if [ $(version $onion_version) -ge 4000000000 ]; then
-        prompt_update
-    else
-        prompt_upgrade
-    fi
-
+    prompt_update
     cleanup
 }
 
@@ -101,27 +94,6 @@ prompt_update() {
     fi
 }
 
-prompt_upgrade() {
-    # Prompt for update or fresh install
-    ./bin/prompt -r -m "Welcome to the Onion installer!\nPlease choose an action:" \
-        "Upgrade (keep settings)" \
-        "Reinstall (reset settings)"
-    retcode=$?
-
-    killall batmon
-
-    if [ $retcode -eq 0 ]; then
-        # Upgrade (keep settings)
-        fresh_install 0
-    elif [ $retcode -eq 1 ]; then
-        # Reinstall (reset settings)
-        fresh_install 1
-    else
-        # Cancel (can be reached if pressing POWER)
-        return
-    fi
-}
-
 cleanup() {
     echo ":: Cleanup"
     cd $sysdir
@@ -136,8 +108,6 @@ cleanup() {
 }
 
 get_install_stats() {
-    check_install_retroarch
-
     total_core=$(zip_total "$core_zipfile")
     total_ra=0
 
