@@ -7,7 +7,6 @@ BASEROMNAME=${ROMNAME##*/}
 ROMNAMETMP=${BASEROMNAME%.*}
 
 cd $progdir
-echo test 
 
 
 if [ -f "/mnt/SDCARD/BIOS/${ROMNAMETMP}.bin" ]; then  # To swap bios depending the game :
