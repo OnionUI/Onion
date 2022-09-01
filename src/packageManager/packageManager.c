@@ -65,6 +65,7 @@ static TTF_Font *font25 = NULL;
 static TTF_Font *font35 = NULL;
 
 static SDL_Color color_white = {255, 255, 255};
+static SDL_Color color_bg = {36, 38, 48};
 
 int changesInstalls(void)
 {
@@ -85,6 +86,14 @@ int changesRemovals(void)
 int changesTotal(void)
 {
     return changesInstalls() + changesRemovals();
+}
+
+int totalInstalls(void)
+{
+    int total = 0;
+    for (int i = 0; i < 3; i++)
+        total += package_installed_count[i];
+    return total;
 }
 
 void setLayersInstall(bool should_install, int layer)
@@ -218,7 +227,7 @@ bool checkAppInstalled(const char *basePath, int base_len, int level, bool compl
     return is_installed;
 }
 
-void loadResources()
+void loadResources(bool reapply_all)
 {
     DIR *dp;
     struct dirent *ep;
@@ -248,7 +257,7 @@ void loadResources()
                 sprintf(basePath,"%s/%s", data_path, file_name);
 
                 bool is_installed = checkAppInstalled(basePath, strlen(basePath), 0, false);
-                bool is_complete = is_installed ? checkAppInstalled(basePath, strlen(basePath), 0, true) : false;
+                bool is_complete = !reapply_all && is_installed ? checkAppInstalled(basePath, strlen(basePath), 0, true) : false;
 
                 Package package = {
                     .installed = is_installed,
@@ -372,7 +381,7 @@ void displayLayersInstall(void)
         package_count[nTab]);
     SDL_Surface *footer = TTF_RenderUTF8_Blended(font18, footer_str, color_white);
     surfaceSetAlpha(footer, 120);
-    SDL_Rect footer_rect = {320 - footer->w / 2, 416};
+    SDL_Rect footer_rect = {320 - footer->w / 2, 414};
     SDL_BlitSurface(footer, NULL, screen, &footer_rect);
     SDL_FreeSurface(footer);
 }
@@ -455,7 +464,7 @@ int main(int argc, char *argv[])
     SDL_Flip(video);
     SDL_FreeSurface(loadingScreen);
 
-    loadResources();
+    loadResources(reapply_all);
 
     SDL_Rect rectSelection = {14, 84, 593, 49};
     SDL_Rect rectTabSelection = {14, 59, 199, 26};
@@ -465,6 +474,9 @@ int main(int argc, char *argv[])
     KeyState keystate[320] = {0};
 
     bool apply_changes = false;
+
+    bool show_reinstall = reapply_all && totalInstalls() > 0;
+    SDL_Surface *reinstall_surface = IMG_Load("res/start_alt.png");
 
     while (!quit) {
         if (updateKeystate(keystate, &quit, true, NULL)) {
@@ -589,6 +601,11 @@ int main(int argc, char *argv[])
                 displayLayersInstall();
             }
 
+            if (show_reinstall) {
+                SDL_Rect reinstall_rect = {640 - reinstall_surface->w, 480 - reinstall_surface->h};
+                SDL_BlitSurface(reinstall_surface, NULL, screen, &reinstall_rect);
+            }
+
             if (changesTotal() > 0) {
                 int installs_count = changesInstalls();
                 int removals_count = changesRemovals();
@@ -640,10 +657,10 @@ int main(int argc, char *argv[])
             for (int nLayer = 0; nLayer < package_count[nT]; nLayer++) {
                 Package *package = &packages[nT][nLayer];
 
-                bool should_apply = (package->installed && !package->complete) || package->changed;
+                bool should_apply = reapply_all || (package->installed && !package->complete) || package->changed;
                 bool should_install = package->installed != package->changed || (package->installed && !package->complete && !package->changed);
 
-                if (!reapply_all && !should_apply)
+                if (!should_apply)
                     continue;
 
                 if (should_install) {
@@ -678,6 +695,7 @@ int main(int argc, char *argv[])
     TTF_CloseFont(font25);
     TTF_CloseFont(font35);
     TTF_Quit();
+    SDL_FreeSurface(reinstall_surface);
     SDL_FreeSurface(surfaceCheck);
     SDL_FreeSurface(surfaceCross);
     SDL_FreeSurface(surfaceBackground);
