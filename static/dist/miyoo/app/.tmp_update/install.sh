@@ -432,6 +432,7 @@ debloat_apps() {
         power \
         swapskin \
         Retroarch \
+        StartGameSwitcher \
         The_Onion_Installer \
         Clean_View_Toggle \
         Onion_Manual \
