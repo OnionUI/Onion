@@ -1,0 +1,39 @@
+{
+    "name": "Silky",
+    "author": "DiMo",
+    "description": "[Onion default theme]",
+    "hideIconTitle": false,
+    "batteryPercentage": {
+        "visible": true,
+        "color": "#FFFFFF",
+        "onleft": true
+    },
+    "title": {
+        "font": "/mnt/SDCARD/miyoo/app/Exo-2-Bold-Italic_Universal.ttf",
+        "size": 25,
+        "color": "#FFFFFF"
+    },
+    "hint": {
+        "font": "/mnt/SDCARD/miyoo/app/Exo-2-Bold-Italic_Universal.ttf",
+        "size": 40,
+        "color": "#FFFFFF"
+    },
+    "currentpage": {
+        "color": "#FFFFFF"
+    },
+    "total": {
+        "color": "#FFFFFF"
+    },
+    "grid": {
+        "font": "/mnt/SDCARD/miyoo/app/Exo-2-Bold-Italic_Universal.ttf",
+        "grid1x4": 25,
+        "grid3x4": 18,
+        "color": "#686868",
+        "selectedcolor": "#FFFFFF"
+    },
+    "list": {
+        "font": "/mnt/SDCARD/miyoo/app/wqy-microhei.ttc",
+        "size": 25,
+        "color": "#FFFFFF"
+    }
+}

@@ -1,0 +1,12 @@
+{
+"label":"lutro",
+"icon":"lutro.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/LUTRO",
+"imgpath":"../../Imgs/LUTRO",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

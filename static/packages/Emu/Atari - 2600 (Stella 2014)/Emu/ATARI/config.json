@@ -1,0 +1,13 @@
+{
+"label":"Atari 2600",
+"icon":"../../Icons/atari.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/ATARI",
+"imgpath":"../../Roms/ATARI/Imgs",
+"gamelist":"../../Roms/ATARI/miyoogamelist.xml",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

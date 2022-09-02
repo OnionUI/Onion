@@ -1,0 +1,13 @@
+{
+"label":"Sega CD",
+"icon":"../../Icons/segacd.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/SEGACD",
+"imgpath":"../../Roms/SEGACD/Imgs",
+"gamelist":"../../Roms/SEGACD/miyoogamelist.xml",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":"bin|BIN|chd|CHD|cue|CUE|iso|ISO|zip|ZIP"
+}

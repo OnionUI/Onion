@@ -1,0 +1,13 @@
+{
+"label":"CPS3",
+"icon":"../../Icons/cps3.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/CPS3",
+"imgpath":"../../Roms/CPS3/Imgs",
+"gamelist":"../../Roms/CPS3/miyoogamelist.xml",
+"useswap":1,
+"shortname":1,
+"hidebios":1,
+"extlist":"zip"
+}

@@ -1,0 +1,19 @@
+# Software Information
+display_name = "Commodore - CBM-II 6x0/7x0 (VICE xcbm2)"
+categories = "Emulator"
+authors = "VICE Team"
+corename = "VICE xcbm2"
+supported_extensions = "d64|d71|d80|d81|d82|g64|g41|x64|t64|tap|prg|p00|crt|bin|zip|gz|d6z|d7z|d8z|g6z|g4z|x6z|cmd|m3u|vfl|vsf|nib|nbz|d2m|d4m"
+license = "GPLv2"
+permissions = ""
+display_version = "3.5"
+description = "Versatile Commodore Emulator - CBM-II 6x0/7x0"
+
+# Hardware Information
+manufacturer = "Commodore"
+systemname = "CBM-II"
+systemid = "commodore_cbm2"
+
+# Libretro Features
+database = "Commodore - CBM-II"
+supports_no_game = "true"

@@ -1,0 +1,13 @@
+{
+"label":"mame2003-xtreme",
+"icon":"mame2003-xtreme.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/ARCADE",
+"imgpath":"../../Roms/ARCADE/Imgs",
+"gamelist":"../../Roms/ARCADE/miyoogamelist.xml",
+"useswap":1,
+"shortname":1,
+"hidebios":1,
+"extlist":"zip|ZIP|7z|7Z|cue|CUE"
+}

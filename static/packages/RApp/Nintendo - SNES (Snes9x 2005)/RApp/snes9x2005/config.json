@@ -1,0 +1,13 @@
+{
+"label":"snes9x2005",
+"icon":"snes9x2005.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/SFC",
+"imgpath":"../../Roms/SFC/Imgs",
+"useswap":1,
+"shortname":0,
+"hidebios":0,
+"extlist":""
+}
+

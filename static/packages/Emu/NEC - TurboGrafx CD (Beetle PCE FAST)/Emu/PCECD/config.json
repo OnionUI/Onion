@@ -1,0 +1,13 @@
+{
+"label":"TG-CD",
+"icon":"../../Icons/pcecd.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/PCECD",
+"imgpath":"../../Roms/PCECD/Imgs",
+"gamelist":"../../Roms/PCECD/miyoogamelist.xml",
+"useswap":1,
+"shortname":0,
+"hidebios":0,
+"extlist":""
+}

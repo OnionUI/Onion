@@ -1,0 +1,21 @@
+name: Check build
+on:
+  [push, pull_request]
+
+jobs:
+  build:
+    name: Check build
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/onionui/miyoomini-toolchain:latest
+      options: --user root
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    - name: Build
+      shell: bash
+      run: |
+        source /root/.bashrc
+        make build

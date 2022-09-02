@@ -1,0 +1,13 @@
+{
+"label":"ZXSpect",
+"icon":"../../Icons/zxs.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/ZXS",
+"imgpath":"../../Roms/ZXS/Imgs",
+"gamelist":"../../Roms/ZXS/miyoogamelist.xml",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

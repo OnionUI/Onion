@@ -1,0 +1,13 @@
+{
+"label":"SG1000",
+"icon":"../../Icons/segasgone.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/SEGASGONE",
+"imgpath":"../../Roms/SEGASGONE/Imgs",
+"gamelist":"../../Roms/SEGASGONE/miyoogamelist.xml",
+"useswap":0,
+"shortname":0,
+"hidebios":0,
+"extlist":""
+}

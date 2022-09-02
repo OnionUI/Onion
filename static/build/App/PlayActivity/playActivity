@@ -1,0 +1,4 @@
+#!/bin/sh
+
+echo "[Deprecated] Play Activity registration is now done by the Onion runtime."
+exit 0

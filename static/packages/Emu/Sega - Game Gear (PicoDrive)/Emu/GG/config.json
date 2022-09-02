@@ -1,0 +1,13 @@
+{
+"label":"GameGear",
+"icon":"../../Icons/gg.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/GG",
+"imgpath":"../../Roms/GG/Imgs",
+"gamelist":"../../Roms/GG/miyoogamelist.xml",
+"useswap":0,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

@@ -1,0 +1,4 @@
+map1bmp:../image/map/map1_1.bmp
+ibmp:../image/map/item1.bmp
+ebmp:../image/map/e32.bmp
+map2bmp:../image/map/map1_2.bmp

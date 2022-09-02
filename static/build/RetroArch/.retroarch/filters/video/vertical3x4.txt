@@ -1,0 +1,4 @@
+place `vertical3x4.so` and `Vertical3x4.filt` into `.retroarch/filters/video`
+select Video Filter `Vertical3x4.filt`
+set scaler `Keep Aspect Ratio:OFF`
+launch vertical games

@@ -1,0 +1,6 @@
+{
+"label":"GameSwitcher",
+"icon":"icon.png",
+"launch":"launch.sh",
+"description":"Quickly switch games"
+}

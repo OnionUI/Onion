@@ -1,0 +1,13 @@
+{
+"label":"FDS",
+"icon":"../../Icons/fds.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/FDS",
+"imgpath":"../../Roms/FDS/Imgs",
+"gamelist":"../../Roms/FDS/miyoogamelist.xml",
+"useswap":0,
+"shortname":0,
+"hidebios":0,
+"extlist":""
+}

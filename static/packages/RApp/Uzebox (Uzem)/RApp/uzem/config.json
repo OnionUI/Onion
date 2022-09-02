@@ -1,0 +1,12 @@
+{
+"label":"uzem",
+"icon":"uzem.png",
+"iconsel":"uzem.png",
+"launch":"launch.sh",
+"rompath":"../../Roms/UZEBOX",
+"imgpath":"../../Roms/UZEBOX/Imgs",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

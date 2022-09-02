@@ -1,0 +1,17 @@
+Little Sound Dj
+Copyright (c) 2000, Johan Kotlinski - https://www.littlesounddj.com
+All rights reserved.
+
+Permission to use Little Sound Dj in binary form, for non-commercial
+purposes, is hereby granted without fee.
+
+It is NOT permitted to copy, publish, distribute, sublicense, and/or
+sell copies of the Software.
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event shall the author be held liable for any damages
+arising from the use of this software.
+
+Little Sound Dj is freeware for PERSONAL AND/OR EDUCATIONAL USE only.
+Commercial users should seek permission of the copyright holder first.
+Commercial use includes charging money for Little Sound Dj.

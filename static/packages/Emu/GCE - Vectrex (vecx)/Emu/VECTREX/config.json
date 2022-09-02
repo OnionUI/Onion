@@ -1,0 +1,13 @@
+{
+"label":"Vectrex",
+"icon":"../../Icons/vectrex.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/VECTREX",
+"imgpath":"../../Roms/VECTREX/Imgs",
+"gamelist":"../../Roms/VECTREX/miyoogamelist.xml",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

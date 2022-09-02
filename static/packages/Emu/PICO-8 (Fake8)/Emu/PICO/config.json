@@ -1,0 +1,13 @@
+{
+"label":"PICO-8",
+"icon":"../../Icons/pico.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/PICO",
+"imgpath":"../../Roms/PICO",
+"gamelist":"../../Roms/PICO/miyoogamelist.xml",
+"useswap":1,
+"shortname":0,
+"hidebios":0,
+"extlist":"p8|png"
+}

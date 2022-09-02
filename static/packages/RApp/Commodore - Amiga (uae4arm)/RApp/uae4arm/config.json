@@ -1,0 +1,12 @@
+{
+"label":"uae4arm",
+"icon":"uae4arm.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/AMIGA",
+"imgpath":"../../Roms/AMIGA/Imgs",
+"useswap":0,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

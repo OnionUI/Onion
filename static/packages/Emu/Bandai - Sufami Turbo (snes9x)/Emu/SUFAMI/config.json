@@ -1,0 +1,13 @@
+{
+"label":"SufamTrbo",
+"icon":"../../Icons/sufami.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/SUFAMI",
+"imgpath":"../../Roms/SUFAMI/Imgs",
+"gamelist":"../../Roms/SUFAMI/miyoogamelist.xml",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

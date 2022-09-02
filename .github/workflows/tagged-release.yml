@@ -1,0 +1,35 @@
+name: Tagged release
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  tagged-release:
+    name: Tagged release
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/onionui/miyoomini-toolchain:latest
+      options: --user root
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    - name: Get version
+      run: echo "BUILD_VERSION=$(make version)" >> $GITHUB_ENV
+    - name: Build release
+      shell: bash
+      run: |
+        source /root/.bashrc
+        make release
+    - uses: marvinpinto/action-automatic-releases@latest
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        prerelease: false
+        draft: true
+        title: "Onion V${{ env.BUILD_VERSION }}"
+        files: |
+          release/Onion-v${{ env.BUILD_VERSION }}-full.zip
+          release/Onion-v${{ env.BUILD_VERSION }}-core.zip

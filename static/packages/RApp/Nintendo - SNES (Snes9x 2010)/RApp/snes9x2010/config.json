@@ -1,0 +1,12 @@
+{
+"label":"snes9x2010",
+"icon":"snes9x2010.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/SFC",
+"imgpath":"../../Roms/SFC/Imgs",
+"useswap":0,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

@@ -1,0 +1,2 @@
+gba_hle = "enabled"
+gba_use_mednafen_save_method = "mednafen"

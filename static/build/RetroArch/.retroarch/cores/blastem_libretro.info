@@ -1,0 +1,42 @@
+# Software Information
+display_name = "Sega - Mega Drive - Genesis (BlastEm)"
+authors = "Mike Pavone"
+supported_extensions = "md|bin|smd|gen"
+corename = "BlastEm"
+license = "GPLv3"
+permissions = ""
+display_version = "v0.6.3-pre"
+categories = "Emulator"
+
+# Hardware Information
+manufacturer = "Sega"
+systemid = "mega_drive"
+systemname = "Sega Genesis"
+
+# Libretro Features
+database = "Sega - Mega Drive - Genesis"
+supports_no_game = "false"
+savestate = "true"
+savestate_features = "serialized"
+cheats = "false"
+input_descriptors = "true"
+memory_descriptors = "false"
+libretro_saves = "true"
+core_options = "false"
+core_options_version = "null"
+load_subsystem = "false"
+hw_render = "false"
+needs_fullpath = "false"
+disk_control = "false"
+is_experimental = "false"
+
+# BIOS/Firmware
+firmware_count = 1
+
+firmware0_desc = "rom.db (ROM feature database)"
+firmware0_path = "rom.db"
+firmware0_opt = "true"
+
+notes = "(!) rom.db (md5): ff4a3572475236e859e3e9ac5c87d1f1"
+
+description = "A port of the BlastEm Sega Genesis/Mega Drive emulator to libretro. This emulator is focused on being both extremely accurate and extremely fast. While it is not as mature as Genesis Plus GX, its extreme accuracy makes it capable of running many demos and test ROMs that choke other emulators, including the notoriously complex Titan Overdrive I and II demos."

@@ -1,0 +1,21 @@
+{
+	"88":	"SELECT",
+	"89":	"BACK",
+	"90":	"NAV",
+	"91":	"MENU",
+	"92":	"Resume",
+	"93":	"Save",
+	"94":	"Load",
+	"95":	"Volume",
+	"96":	"Exit to menu",
+	"97":	"State %d/%d",
+	"98":	"Empty",
+	"99":	"No thumbnail",
+	"100":	"Load failed",
+	"101":	"Save failed",
+	"102":	"Slot %d saved",
+	"103":  "Fullscreen",
+	"104":  "ON",
+	"105":  "OFF",
+	"106":  "Advanced"
+}

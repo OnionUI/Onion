@@ -1,0 +1,7 @@
+{
+"label":"Package Manager",
+"icon":"icon.png",
+"iconsel":"",
+"launch":"launch.sh",
+"description":"Add or remove systems and apps"
+}

@@ -1,0 +1,7 @@
+{
+"label":"Display Calibration",
+"icon":"icon.png",
+"iconsel":"icon.png",
+"launch":"launch.sh",
+"description":"Tools for display calibration"
+}

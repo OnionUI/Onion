@@ -1,0 +1,12 @@
+{
+"label":"snes9x_next",
+"icon":"snes9x_next.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/SFC",
+"imgpath":"../../Roms/SFC/Imgs",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

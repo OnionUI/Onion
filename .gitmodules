@@ -1,0 +1,12 @@
+[submodule "third-party/RetroArch"]
+	path = third-party/RetroArch
+	url = https://github.com/OnionUI/RetroArch.git
+[submodule "third-party/SearchFilter"]
+	path = third-party/SearchFilter
+	url = https://github.com/OnionUI/SearchFilter.git
+[submodule "third-party/Terminal"]
+	path = third-party/Terminal
+	url = https://github.com/OnionUI/app-Terminal.git
+[submodule "third-party/DinguxCommander"]
+	path = third-party/DinguxCommander
+	url = https://github.com/OnionUI/app-DinguxCommander

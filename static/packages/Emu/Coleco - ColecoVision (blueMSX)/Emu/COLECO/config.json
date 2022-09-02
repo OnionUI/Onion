@@ -1,0 +1,13 @@
+{
+"label":"ColecoVis",
+"icon":"../../Icons/col.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/COLECO",
+"imgpath":"../../Roms/COLECO/Imgs",
+"gamelist":"../../Roms/COLECO/miyoogamelist.xml",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

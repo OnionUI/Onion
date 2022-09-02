@@ -1,0 +1,13 @@
+{
+"label":"VideoPac",
+"icon":"../../Icons/vdp.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/VIDEOPAC",
+"imgpath":"../../Roms/VIDEOPAC/Imgs",
+"gamelist":"../../Roms/VIDEOPAC/miyoogamelist.xml",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

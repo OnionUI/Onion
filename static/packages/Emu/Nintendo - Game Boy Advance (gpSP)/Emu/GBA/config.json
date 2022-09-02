@@ -1,0 +1,13 @@
+{
+"label":"GB Adv",
+"icon":"../../Icons/gba.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/GBA",
+"imgpath":"../../Roms/GBA/Imgs",
+"gamelist":"../../Roms/GBA/miyoogamelist.xml",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

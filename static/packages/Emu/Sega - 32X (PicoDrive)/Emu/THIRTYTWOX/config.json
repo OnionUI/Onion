@@ -1,0 +1,13 @@
+{
+"label":"Sega 32X",
+"icon":"../../Icons/32X.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/THIRTYTWOX",
+"imgpath":"../../Roms/THIRTYTWOX/Imgs",
+"gamelist":"../../Roms/THIRTYTWOX/miyoogamelist.xml",
+"useswap":1,
+"shortname":0,
+"hidebios":0,
+"extlist":""
+}

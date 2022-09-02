@@ -1,0 +1,12 @@
+{
+"label":"mednafen_pcfx",
+"icon":"mednafen_pcfx.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/PCFX",
+"imgpath":"../../Imgs/PCFX",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

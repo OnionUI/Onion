@@ -1,0 +1,12 @@
+{
+"label":"arduous",
+"icon":"arduous.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"/mnt/SDCARD/Roms/ARDUBOY",
+"imgpath":"/mnt/SDCARD/Roms/Arduous/Imgs",
+"useswap":0,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

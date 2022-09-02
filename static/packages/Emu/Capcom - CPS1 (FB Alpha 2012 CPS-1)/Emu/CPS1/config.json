@@ -1,0 +1,13 @@
+{
+"label":"CPS1",
+"icon":"../../Icons/cps1.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/CPS1",
+"imgpath":"../../Roms/CPS1/Imgs",
+"gamelist":"../../Roms/CPS1/miyoogamelist.xml",
+"useswap":1,
+"shortname":1,
+"hidebios":1,
+"extlist":"zip"
+}

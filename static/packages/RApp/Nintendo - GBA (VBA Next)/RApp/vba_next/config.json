@@ -1,0 +1,12 @@
+{
+"label":"vba_next",
+"icon":"vba_next.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/GBA",
+"imgpath":"../../Roms/GBA/Imgs",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}

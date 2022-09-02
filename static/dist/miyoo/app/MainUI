@@ -1,0 +1,30 @@
+#!/bin/sh
+echo $0 $*
+appdir=`cd -- "$(dirname "$0")" >/dev/null 2>&1; pwd -P`
+sysdir=/mnt/SDCARD/.tmp_update
+
+if [ -d $sysdir ]; then
+    cd $sysdir
+
+    # Move romScreens to new location
+    mkdir -p /mnt/SDCARD/Saves/CurrentProfile/romScreens
+    mv ./romScreens/* /mnt/SDCARD/Saves/CurrentProfile/romScreens/
+
+    # Remove old system files, except dotfiles and onionVersion
+    find * -maxdepth 0 -not -name "onionVersion" -not -name "config" -exec rm -rf {} \;
+
+    # Move dotfiles to new location
+    mkdir -p config
+    mv .* config/
+fi
+
+# Move installation files
+cd $appdir
+mkdir -p $sysdir
+mv .tmp_update/* $sysdir
+
+cd $sysdir
+./updater
+
+reboot
+sleep 10

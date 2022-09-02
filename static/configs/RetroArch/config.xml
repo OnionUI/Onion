@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<video>
+	<mode>0</mode>
+	<window>
+		<scale>1</scale>
+	</window>
+	<scanlines>0</scanlines>
+	<fps>2</fps>
+	<widescreen>0</widescreen>
+	<hires>0</hires>
+</video>
+<sound>
+	<enable>1</enable>
+	<advertise>1</advertise>
+	<preview>1</preview>
+	<fix_samples>1</fix_samples>
+</sound>
+<controls>
+	<gear>3</gear>
+	<steerspeed>3</steerspeed>
+	<pedalspeed>4</pedalspeed>
+	<keyconfig>
+		<up>273</up>
+		<down>274</down>
+		<left>276</left>
+		<right>275</right>
+		<acc>122</acc>
+		<brake>120</brake>
+		<gear1>32</gear1>
+		<gear2>32</gear2>
+		<start>49</start>
+		<coin>53</coin>
+		<menu>286</menu>
+		<view>304</view>
+	</keyconfig>
+	<padconfig>
+		<acc>0</acc>
+		<brake>1</brake>
+		<gear1>2</gear1>
+		<gear2>2</gear2>
+		<start>3</start>
+		<coin>4</coin>
+		<menu>5</menu>
+		<view>6</view>
+	</padconfig>
+	<analog enabled="1"/>
+</controls>
+<engine>
+	<force_ai>false</force_ai>
+	<time>0</time>
+	<traffic>1</traffic>
+	<japanese_tracks>0</japanese_tracks>
+	<prototype>0</prototype>
+	<levelobjects>1</levelobjects>
+	<new_attract>1</new_attract>
+</engine>
+<time_trial>
+	<laps>3</laps>
+	<traffic>3</traffic>
+</time_trial>
+<continuous>
+	<traffic>3</traffic>
+</continuous>

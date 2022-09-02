@@ -1,0 +1,12 @@
+{
+"label":"uae4arm_cd32",
+"icon":"uae4arm.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/AMIGACD",
+"imgpath":"../../Roms/AMIGACD/Imgs",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}
