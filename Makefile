@@ -120,6 +120,7 @@ external: $(CACHE)/.setup
 	@echo $(RA_SUBVERSION) > $(BUILD_DIR)/RetroArch/onion_ra_version.txt
 	@cd $(THIRD_PARTY_DIR)/SearchFilter && make build && cp -a build/. "$(PACKAGES_APP_DEST)/Search/" && cp build/App/SearchFilter/tools $(BIN_DIR)
 	@cd $(THIRD_PARTY_DIR)/Terminal && make && cp ./st "$(PACKAGES_APP_DEST)/Terminal (Developer tool)/App/Terminal"
+	@cd $(THIRD_PARTY_DIR)/DinguxCommander && make && cp ./output/DinguxCommander "$(PACKAGES_APP_DEST)/File Explorer (DinguxCommander)/App/Commander_Italic"
 
 dist: build
 	@$(ECHO) $(PRINT_RECIPE)
@@ -153,6 +154,10 @@ clean:
 	@rm -rf $(BUILD_DIR) $(BUILD_TEST_DIR) $(ROOT_DIR)/dist $(ROOT_DIR)/temp/configs
 	@rm -f $(CACHE)/.setup
 	@find include src -type f -name *.o -exec rm -f {} \;
+	@cd $(THIRD_PARTY_DIR)/RetroArch && make clean
+	@cd $(THIRD_PARTY_DIR)/SearchFilter && make clean
+	@cd $(THIRD_PARTY_DIR)/Terminal && make clean
+	@cd $(THIRD_PARTY_DIR)/DinguxCommander && make clean
 
 dev: clean
 	@$(MAKE_DEV)
