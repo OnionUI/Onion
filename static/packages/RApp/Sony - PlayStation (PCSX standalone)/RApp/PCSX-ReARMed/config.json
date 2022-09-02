@@ -1,0 +1,12 @@
+{
+"label":"PCSX-ReARMed",
+"icon":"pcsx_rearmed.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/PS",
+"imgpath":"../../Roms/PS/Imgs",
+"useswap":0,
+"shortname":0,
+"hidebios":1,
+"extlist":""
+}
