@@ -154,6 +154,10 @@ clean:
 	@rm -rf $(BUILD_DIR) $(BUILD_TEST_DIR) $(ROOT_DIR)/dist $(ROOT_DIR)/temp/configs
 	@rm -f $(CACHE)/.setup
 	@find include src -type f -name *.o -exec rm -f {} \;
+	@cd $(THIRD_PARTY_DIR)/RetroArch && make clean
+	@cd $(THIRD_PARTY_DIR)/SearchFilter && make clean
+	@cd $(THIRD_PARTY_DIR)/Terminal && make clean
+	@cd $(THIRD_PARTY_DIR)/DinguxCommander && make clean
 
 dev: clean
 	@$(MAKE_DEV)
