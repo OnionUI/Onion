@@ -23,7 +23,7 @@ static MainUIState tools_states[NUM_TOOLS] = {FAVORITES, FAVORITES, FAVORITES, R
 
 static SystemState menu_last_state = MODE_UNKNOWN;
 static int menu_last_pressed = 0;
-static int menu_long_press_timeout = 1000;
+static int menu_long_press_timeout = 700;
 static bool menu_ignore_next = false;
 
 void _action_runApp(const char *app_dir_name)
@@ -230,7 +230,7 @@ bool menuButtonAction(uint32_t val, bool comboKey)
             menu_long_press_timeout = 300;
         }
         else {
-            menu_long_press_timeout = 1000;
+            menu_long_press_timeout = 700;
         }
         menu_last_pressed = getMilliseconds();
         menu_last_state = system_state;
