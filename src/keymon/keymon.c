@@ -330,9 +330,6 @@ int main(void) {
                     sync();
                     delete_flag = false;
                 }
-                else {
-                    delete_flag = true;
-                }
             }
 
             if (val != REPEAT) {
@@ -473,6 +470,18 @@ int main(void) {
         }
 
         // Comes here every CHECK_SEC(def:15) seconds interval
+
+        if (delete_flag) {
+            if (exists("/tmp/state_changed")) {
+                system_state_update();
+                remove("/tmp/state_changed");
+                sync();
+            }
+            delete_flag = false;
+        }
+        else {
+            delete_flag = true;
+        }
 
         // Update ticks
         ticks = getMilliseconds();

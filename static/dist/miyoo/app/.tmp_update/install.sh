@@ -105,6 +105,11 @@ cleanup() {
     rm -f $core_zipfile
     rm -f $ra_zipfile
     rm -f $ra_package_version_file
+
+    # Remove dirs if empty
+    rm -d /mnt/SDCARD/Backup/saves
+    rm -d /mnt/SDCARD/Backup/states
+    rm -d /mnt/SDCARD/Backup
 }
 
 get_install_stats() {
