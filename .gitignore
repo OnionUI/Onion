@@ -44,3 +44,5 @@ src/**/sendkeys
 !sendkeys/
 src/**/setState
 !setState/
+test/**/test
+!test/
