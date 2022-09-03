@@ -183,5 +183,7 @@ lib:
 	@cd $(ROOT_DIR)/include/SDL && make clean && make
 
 test:
-	@mkdir -p $(BUILD_TEST_DIR) && cd $(ROOT_DIR)/test && BUILD_DIR=$(BUILD_TEST_DIR)/ make dev
+	TEST_SRC_DIR := $(ROOT_DIR)/test
+	@mkdir -p $(BUILD_TEST_DIR)/infoPanel_test_data && cd $(TEST_SRC_DIR) && BUILD_DIR=$(BUILD_TEST_DIR)/ make dev
+	@cp -R $(TEST_SRC_DIR)/infoPanel_test_data $(BUILD_TEST_DIR)/infoPanel_test_data
 	$(BUILD_TEST_DIR)/test
