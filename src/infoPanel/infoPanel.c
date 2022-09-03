@@ -247,10 +247,18 @@ int main(int argc, char *argv[])
 					quit = true;
 					continue;
 					break;
+				case SW_BTN_Y:
+					show_theme_controls = !show_theme_controls;
+					SDL_BlitSurface(theme_background(), NULL, screen, NULL);
+					drawImageByIndex(g_image_index, g_image_index, g_images_paths, g_images_paths_count, screen, &cache_used);
+					all_changed = true;
+					continue;
+					break;
 				default:
 					navigation_pressed = false;
 					break;
 				}
+				
 				if (!navigation_pressed) 
 				{
 					continue;
@@ -272,8 +280,7 @@ int main(int argc, char *argv[])
 				navigating_forward ? g_image_index++ : g_image_index--;
 				SDL_BlitSurface(theme_background(), NULL, screen, NULL);
 				drawImageByIndex(g_image_index, current_index, g_images_paths, g_images_paths_count, screen, &cache_used);
-				header_changed = true;
-				footer_changed = true;
+				all_changed = true;
 			}
 		}
 
