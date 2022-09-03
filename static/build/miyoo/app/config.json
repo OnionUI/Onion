@@ -5,11 +5,17 @@
     "hideIconTitle": false,
     "batteryPercentage": {
         "visible": true,
-        "color": "#FFFFFF"
+        "color": "#FFFFFF",
+        "onleft": true
     },
     "title": {
-        "font": "Exo-2-Bold-Italic_Universal.ttf",
-        "size": 36,
+        "font": "/mnt/SDCARD/miyoo/app/Exo-2-Bold-Italic_Universal.ttf",
+        "size": 25,
+        "color": "#FFFFFF"
+    },
+    "hint": {
+        "font": "/mnt/SDCARD/miyoo/app/Exo-2-Bold-Italic_Universal.ttf",
+        "size": 40,
         "color": "#FFFFFF"
     },
     "currentpage": {
@@ -19,14 +25,14 @@
         "color": "#FFFFFF"
     },
     "grid": {
-        "font": "Exo-2-Bold-Italic_Universal.ttf",
+        "font": "/mnt/SDCARD/miyoo/app/Exo-2-Bold-Italic_Universal.ttf",
         "grid1x4": 25,
         "grid3x4": 18,
         "color": "#686868",
         "selectedcolor": "#FFFFFF"
     },
     "list": {
-        "font": "wqy-microhei.ttc",
+        "font": "/mnt/SDCARD/miyoo/app/wqy-microhei.ttc",
         "size": 25,
         "color": "#FFFFFF"
     }

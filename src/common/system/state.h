@@ -20,14 +20,17 @@ typedef enum system_state_e
 static SystemState system_state = MODE_UNKNOWN;
 static pid_t system_state_pid = 0;
 
-bool check_gameActive(void)
+bool check_isRetroArch(void)
 {
     if (!exists(CMD_TO_RUN_PATH))
         return false;
     const char *cmd = file_read(CMD_TO_RUN_PATH);
     if (strstr(cmd, "retroarch") != NULL || strstr(cmd, "/mnt/SDCARD/Emu/") != NULL || strstr(cmd, "/mnt/SDCARD/RApp/") != NULL) {
-        system_state_pid = 0;
-        return true;
+        pid_t pid;
+        if ((pid = process_searchpid("retroarch")) != 0 || (pid = process_searchpid("ra32")) != 0) {
+            system_state_pid = pid;
+            return true;
+        }
     }
     return false;
 }
@@ -56,7 +59,7 @@ void system_state_update(void)
 {
     if (check_isGameSwitcher())
         system_state = MODE_SWITCHER;
-    else if (check_gameActive())
+    else if (check_isRetroArch())
         system_state = MODE_GAME;
     else if (check_isMainUI())
         system_state = MODE_MAIN_UI;

@@ -55,6 +55,10 @@ void display_setScreen(bool enabled)
         file_write(PWM_DIR "export", "0", 1);
         file_write(PWM_DIR "pwm0/enable", "0", 1);
         file_write(PWM_DIR "pwm0/enable", "1", 1);
+        display_restore();
+    }
+    else {
+        display_save();
     }
 
     display_enabled = enabled;

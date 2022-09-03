@@ -12,7 +12,7 @@
 
 <p>&nbsp;</p>
 
-<h3 align="center"><a href="https://github.com/OnionUI/Onion/releases"><img src="https://user-images.githubusercontent.com/44569252/179315622-e29e0971-87c8-4855-85e6-fc8de4ccd940.png" width="74"><br/>Download latest release</a><br><br>&nbsp;&nbsp; <sup>Read the installation guide below</sup> ⤸</h3>
+<h3 align="center"><a href="https://github.com/OnionUI/Onion/releases/latest"><img src="https://user-images.githubusercontent.com/44569252/179315622-e29e0971-87c8-4855-85e6-fc8de4ccd940.png" width="74"><br/>Download latest release</a><br><br>&nbsp;&nbsp; <sup>Read the installation guide below</sup> ⤸</h3>
 
 <p>&nbsp;</p>
 
@@ -45,22 +45,25 @@ You can check your current version in `Settings` ➜ `Device Info` ➜ `Version`
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179306127-e8a2c99c-a078-46b0-9561-47abf5c16208.png" width="54"></sup>Fresh install
 
-- Format your SD card as FAT32. (Use a fast, trusted brand. The SD card sent with your Miyoo Mini is slow, and will likely ruin your experience and data.)
-- Unzip the `.tmp_update` folder and its contents to the root of your SD.
-- If on Mac: This OS will add .-* files everywhere in your SD, you need to remove them before continuing.
+> *Note: Use a fast, trusted brand SD Card as the one included with the Miyoo Mini is slow and will fail/corrupt data.*
+> *The following process will erase everything on your SD card. Please ensure any Roms, Bios & Saves are backed up to your PC.*
+
+- Format your SD card as FAT32. (You will need to use a third party application to do this on Windows).
+- Unzip the `.tmp_update` folder and its contents to the root of your SD. Nothing else should be on the SD card.
+- If on Mac: This OS will add .\_* files everywhere in your SD, you need to remove them before continuing. You can go to your SD root in the **Terminal** and input `find . -name "._*" -depth -exec rm {} \;` to delete all the .\_* files 
 - Boot up your Miyoo Mini and follow the on-screen instructions to get started.
 - When installation is complete, press <kbd>A</kbd> and wait for the device to turn off.
 - Keep the .tmp_update folder, it is now part of the Onion installation.
-- Copy your Bios files into the `BIOS` folder.
+- Copy your Bios files into the `BIOS` folder and your roms into the applicable `Roms` subfolders for each system.
 - Go to the console page, and refresh your rom lists by pressing the menu button.
 
 <p>&nbsp;</p>
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179321292-8198613d-380c-4022-8ce6-ea020cc9b347.png" width="54"></sup>Upgrading from any Onion version
 
-> *Note: in older versions up to V3.9, your saves and states were located here: `RetroArch/.retroarch/saves` | `states`.*
+> *Note: In older versions up to V3.9, your saves and states were located here: `RetroArch/.retroarch/saves` | `states`.*
 
-- Delete all folders from your SD except `BIOS`, `Roms`, `Saves` and `Themes` (Save your ports if you used some in `Emu/PORTS`)
+- Delete all folders from your SD except `BIOS`, `Roms`, `Saves` and `Themes` (Save your ports if you used some in `Emu/PORTS`).
 - *Note:* Save your `Saves` folder to copy it back if you want to keep your custom emulator settings.
 - Unzip the `.tmp_update` folder to the root of your SD.
 - Boot up your Miyoo Mini and follow the on-screen instructions to get started.
@@ -229,7 +232,12 @@ The audio sever lag has been removed. (Credit: Eggs)
 <tbody>
 <tr>
 <td><kbd>MENU</kbd></td>
-<td>Launch Game Switcher (save and exit)</td>
+<td>Save and exit to Game Switcher</td>
+<td><em>In-game</em></td>
+</tr>
+<tr>
+<td><kbd>MENU</kbd> <sup>hold</sup></td>
+<td>Save and exit to menu</td>
 <td><em>In-game</em></td>
 </tr>
 <tr>
