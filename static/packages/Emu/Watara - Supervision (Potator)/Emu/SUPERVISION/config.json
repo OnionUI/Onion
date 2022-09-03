@@ -1,5 +1,5 @@
 {
-"label":"WtSupVis",
+"label":"Supervis.",
 "icon":"../../Icons/supervision.png",
 "iconsel":"",
 "launch":"launch.sh",
@@ -9,5 +9,5 @@
 "useswap":0,
 "shortname":0,
 "hidebios":0,
-"extlist":""
+"extlist":"sv|SV|bin|BIN|zip|ZIP|7z|7Z"
 }

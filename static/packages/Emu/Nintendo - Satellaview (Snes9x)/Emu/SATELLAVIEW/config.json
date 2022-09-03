@@ -1,5 +1,5 @@
 {
-"label":"Satlview",
+"label":"BS-X",
 "icon":"../../Icons/satella.png",
 "iconsel":"",
 "launch":"launch.sh",
@@ -9,5 +9,5 @@
 "useswap":1,
 "shortname":0,
 "hidebios":1,
-"extlist":""
+"extlist":"bs|BS|sfc|SFC|smc|SMC|swc|SWC|fig|FIG|st|ST|zip|ZIP|7z|7Z"
 }

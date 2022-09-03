@@ -1,5 +1,5 @@
 {
-"label":"SG1000",
+"label":"SG-1000",
 "icon":"../../Icons/segasgone.png",
 "iconsel":"",
 "launch":"launch.sh",
@@ -9,5 +9,5 @@
 "useswap":0,
 "shortname":0,
 "hidebios":0,
-"extlist":""
+"extlist":"sms|SMS|gg|GG|sg|SG|mv|MV|bin|BIN|rom|ROM|zip|ZIP|7z|7Z"
 }

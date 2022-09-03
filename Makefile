@@ -138,7 +138,6 @@ dist: build
 # Package core
 	@cd $(BUILD_DIR) && zip -rq $(DIST_FULL)/miyoo/app/.tmp_update/onion.pak .
 # Create core-only dist
-	@cp -R $(DIST_FULL)/.tmp_update $(DIST_CORE)/.tmp_update
 	@cp -R $(DIST_FULL)/miyoo $(DIST_CORE)/miyoo
 # Restore RetroArch in build dir
 	@mv -f $(ROOT_DIR)/cache/RetroArch $(BUILD_DIR)/RetroArch

@@ -107,9 +107,9 @@ cleanup() {
     rm -f $ra_package_version_file
 
     # Remove dirs if empty
-    rm -d /mnt/SDCARD/Backup/saves
-    rm -d /mnt/SDCARD/Backup/states
-    rm -d /mnt/SDCARD/Backup
+    rmdir /mnt/SDCARD/Backup/saves
+    rmdir /mnt/SDCARD/Backup/states
+    rmdir /mnt/SDCARD/Backup
 }
 
 get_install_stats() {
@@ -170,11 +170,11 @@ fresh_install() {
     fi
 
     debloat_apps
+    move_ports_collection
     refresh_roms
 
     if [ $install_ra -eq 1 ]; then
         install_core "1/2: Installing Onion..."
-        # free_memory_inbetween
         install_retroarch "2/2: Installing RetroArch..."
     else
         install_core "1/1: Installing Onion..."
@@ -247,10 +247,10 @@ update_only() {
     sleep 1
     
     debloat_apps
+    move_ports_collection
 
     if [ $install_ra -eq 1 ]; then
         install_core "1/2: Updating Onion..."
-        # free_memory_inbetween
         install_retroarch "2/2: Updating RetroArch..."
         restore_ra_config
     else
@@ -304,22 +304,6 @@ install_core() {
     # Onion core installation / update
     cd /
     unzip_progress "$core_zipfile" "$msg" /mnt/SDCARD $total_core
-}
-
-free_memory_inbetween() {
-    touch $sysdir/.installed
-    sync
-
-    # Free memory
-    free_mma
-
-    rm -f $sysdir/.installed
-    rm -f /tmp/.update_msg
-
-    # Show installation progress for RetroArch
-    cd $sysdir
-    ./bin/installUI &
-    sleep 1
 }
 
 install_retroarch() {
@@ -439,12 +423,26 @@ debloat_apps() {
         PlayActivity
 }
 
+move_ports_collection() {
+    echo ":: Move ports collection"
+    if [ -d /mnt/SDCARD/Emu/PORTS/Binaries ] ; then
+        echo "Ports collection found! Moving..."
+        mkdir -p /mnt/SDCARD/Roms/PORTS/Binaries
+        mv -f /mnt/SDCARD/Emu/PORTS/Binaries/* /mnt/SDCARD/Roms/PORTS/Binaries
+        mv -f /mnt/SDCARD/Emu/PORTS/PORTS/* /mnt/SDCARD/Roms/PORTS
+        rmdir /mnt/SDCARD/Emu/PORTS/Binaries
+        rmdir /mnt/SDCARD/Emu/PORTS/PORTS
+        rm -f /mnt/SDCARD/Roms/PORTS/PORTS_cache2.db
+        rm -f /mnt/SDCARD/Emu/PORTS/config.json # Triggers a reinstall
+    fi
+}
+
 refresh_roms() {
     echo ":: Refresh roms"
     # Force refresh the rom lists
     if [ -d /mnt/SDCARD/Roms ] ; then
         cd /mnt/SDCARD/Roms
-        find . -type f -name "*.db" -exec rm -f {} \;
+        find . -type f -name "*_cache2.db" -exec rm -f {} \;
     fi
 }
 
