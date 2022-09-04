@@ -134,6 +134,8 @@ dist: build
 	@rsync -a --exclude='.gitkeep' $(STATIC_CONFIGS)/ $(ROOT_DIR)/temp/configs
 	@cp -R $(ROOT_DIR)/temp/configs/Saves/CurrentProfile/ $(ROOT_DIR)/temp/configs/Saves/GuestProfile
 	@cd $(ROOT_DIR)/temp/configs && zip -rq $(BUILD_DIR)/.tmp_update/config/configs.pak .
+	@rm -rf $(ROOT_DIR)/temp/configs
+	@rmdir $(ROOT_DIR)/temp
 # Package Onion core
 	@cd $(BUILD_DIR) && zip -rq $(DIST_DIR)/miyoo/app/.tmp_update/onion.pak .
 
