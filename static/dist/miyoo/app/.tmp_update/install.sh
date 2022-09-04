@@ -421,11 +421,8 @@ debloat_apps() {
         Clean_View_Toggle \
         Onion_Manual \
         PlayActivity
-
-    cd /mnt/SDCARD/Packages
-    rm -rf \
-        "Emu/SNK - NeoGeo (FB Alpha 2012 Neo Geo)" \
-        "Emu/SNK - Neo Geo Pocket  Color (B. NeoPop)"
+        
+    rm -rf /mnt/SDCARD/Packages
 }
 
 move_ports_collection() {
