@@ -129,7 +129,7 @@ launch_game() {
     # TIMER END + SHUTDOWN CHECK
     if [ $is_game -eq 1 ]; then
         cd $sysdir
-        ./bin/playActivity "$(basename "$romfile")" 2>&1 >> ./logs/playActivity.log
+        ./bin/playActivity "$romfile" 2>&1 >> ./logs/playActivity.log
         
         echo "game" > /tmp/prev_state        
         check_off_order "End_Save"

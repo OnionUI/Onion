@@ -89,7 +89,7 @@ int searchRomDB(const char *romName)
     int position = -1;
     
     for (int i = 0; i < rom_list_len; i++) {
-        if (strcmp(rom_list[i].name, romName) == 0) {
+        if (strcmp(rom_list[i].name, romName) == 0 || strcmp(file_removeExtension(rom_list[i].name), romName) == 0) {
             position = i;
             break;
         }
@@ -184,11 +184,11 @@ void registerTimerEnd(const char *gameName)
 	}
 	else {
 		// Game inexistant, add to the DB    
-		if (rom_list_len<MAXVALUES-1){
+		if (rom_list_len < MAXVALUES - 1) {
 			rom_list[rom_list_len].playTime = iTempsDeJeuSession;
-			totalPlayTime = iTempsDeJeuSession ;
-			strcpy (rom_list[rom_list_len].name, gameName);    
-			rom_list_len ++;
+			totalPlayTime = iTempsDeJeuSession;
+			strcpy(rom_list[rom_list_len].name, gameName);    
+			rom_list_len++;
 		}
 		else {
 			totalPlayTime = -1;
@@ -265,7 +265,7 @@ int main(int argc, char *argv[]) {
 	char *lastc = gameName + strlen(gameName) - 1;
 	if ((unsigned char)*lastc == '"')
 		*lastc = 0;
-	registerTimerEnd(gameName);
+	registerTimerEnd(file_removeExtension(gameName));
     
     return EXIT_SUCCESS;
 }
