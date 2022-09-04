@@ -8,7 +8,7 @@ filename=`basename "$rompath"`
 gamename="${filename%.*}"
 
 if [ -d "$homedir/$gamename" ] ; then
-    rompath="$homedir/$gamename/$gamename.scummvm.0"
+    rompath="$homedir/$gamename/$gamename.scummvm0"
     cp "$1" "$rompath"
     echo "scummvm file: $rompath"
 fi

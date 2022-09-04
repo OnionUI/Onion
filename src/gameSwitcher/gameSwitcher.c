@@ -133,15 +133,17 @@ int readRomDB()
     return 1;
 }
 
-int searchRomDB(char* romName){
+int searchRomDB(const char *romName)
+{
     int position = -1;
-
-    for (int i = 0 ; i < rom_list_len ; i++) {
-        if (strcmp(rom_list[i].name,romName) == 0){
+    
+    for (int i = 0; i < rom_list_len; i++) {
+        if (strcmp(rom_list[i].name, romName) == 0 || strcmp(file_removeExtension(rom_list[i].name), romName) == 0) {
             position = i;
             break;
         }
     }
+
     return position;
 }
 
@@ -196,7 +198,7 @@ void readHistory()
 
         Game_s *game = &game_list[game_list_len];
         sprintf(game->RACommand, "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v -L \"%s\" \"%s\"", core_path, path);
-        strcpy(game->name, basename(path));
+        strcpy(game->name, file_removeExtension(basename(path)));
         game->hash = FNV1A_Pippip_Yurii(path, strlen(path));
         game->jsonIndex = nbGame;
 
@@ -218,7 +220,7 @@ void readHistory()
     for (int i = 0; i < game_list_len; i++) {
         Game_s *game = &game_list[i];
         char shortname[STR_MAX];
-        removeParentheses(shortname, file_removeExtension(game->name));
+        removeParentheses(shortname, game->name);
         strcpy(game->shortname, shortname);
     }
 }
