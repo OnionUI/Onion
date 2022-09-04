@@ -25,6 +25,7 @@ char* drawImageByIndex(const int new_image_index, const int image_index, char **
     const int images_paths_count, SDL_Surface *screen, bool *cache_used)
 {
 	DEBUG_PRINT(("image_index: %d, new_image_index: %d\n", image_index, new_image_index));
+
 	if (new_image_index < 0 || new_image_index >= images_paths_count)
 	{
 		// out of range, draw nothing
@@ -47,9 +48,6 @@ char* drawImageByIndex(const int new_image_index, const int image_index, char **
 			*cache_used = false;
 			return image_path_to_draw;
 		}
-		
-		DEBUG_PRINT(("no movements, draw nothing\n"));
-		return NULL;
 	}
 	if (abs(new_image_index - image_index) > 1)
 	{
@@ -57,9 +55,9 @@ char* drawImageByIndex(const int new_image_index, const int image_index, char **
 		return NULL;
 	}
 
-	bool moving_forward = new_image_index > image_index;
+	int move_direction = new_image_index - image_index;
 
-	if (moving_forward)
+	if (move_direction > 0)
 	{
 		DEBUG_PRINT(("moving forward\n"));
 		if (g_image_cache_prev)
@@ -79,7 +77,7 @@ char* drawImageByIndex(const int new_image_index, const int image_index, char **
 		}
 		*cache_used = true;
 	}
-	else
+	else if (move_direction < 0)
 	{
 		DEBUG_PRINT(("moving backward\n"));
 		
@@ -99,6 +97,11 @@ char* drawImageByIndex(const int new_image_index, const int image_index, char **
 			g_image_cache_prev =  IMG_Load(image_path_to_load);
 		}
 
+		*cache_used = true;
+	}
+	else
+	{
+		DEBUG_PRINT(("same slide\n"));
 		*cache_used = true;
 	}
 

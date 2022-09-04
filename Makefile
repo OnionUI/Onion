@@ -14,6 +14,7 @@ SRC_DIR             := $(ROOT_DIR)/src
 THIRD_PARTY_DIR     := $(ROOT_DIR)/third-party
 BUILD_DIR           := $(ROOT_DIR)/build
 BUILD_TEST_DIR      := $(ROOT_DIR)/build_test
+TEST_SRC_DIR		:= $(ROOT_DIR)/test
 BIN_DIR             := $(ROOT_DIR)/build/.tmp_update/bin
 DIST_FULL           := $(ROOT_DIR)/dist/full
 DIST_CORE           := $(ROOT_DIR)/dist/core
@@ -182,5 +183,6 @@ lib:
 	@cd $(ROOT_DIR)/include/SDL && make clean && make
 
 test:
-	@mkdir -p $(BUILD_TEST_DIR) && cd $(ROOT_DIR)/test && BUILD_DIR=$(BUILD_TEST_DIR)/ make
-	$(BUILD_TEST_DIR)/test
+	@mkdir -p $(BUILD_TEST_DIR)/infoPanel_test_data && cd $(TEST_SRC_DIR) && BUILD_DIR=$(BUILD_TEST_DIR)/ make dev
+	@cp -R $(TEST_SRC_DIR)/infoPanel_test_data $(BUILD_TEST_DIR)/
+	cd $(BUILD_TEST_DIR) && ./test
