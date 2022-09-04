@@ -95,6 +95,10 @@ int main(int argc, char *argv[])
 
     const char reapply_flag[] = "--reapply";
     if (argc == 2 && strncmp(argv[1], reapply_flag, sizeof(reapply_flag)) == 0) {
+        if (!is_dir(settings.theme)) {
+            strcpy(settings.theme, "/mnt/SDCARD/Themes/Silky by DiMo/");
+            settings_save();
+        }
         Theme_s current_theme = theme_loadFromPath(settings.theme, true);
         installTheme(&current_theme);
         printf_debug("Reapplied: \"%s\"\n", installed_theme);
