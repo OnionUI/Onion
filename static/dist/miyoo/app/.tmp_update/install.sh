@@ -419,7 +419,7 @@ debloat_apps() {
         Onion_Manual \
         PlayActivity
         
-    rm -rf /mnt/SDCARD/miyoo
+    rm -rf /mnt/SDCARD/miyoo/app/.isExpert
     rm -rf /mnt/SDCARD/Packages
 }
 
