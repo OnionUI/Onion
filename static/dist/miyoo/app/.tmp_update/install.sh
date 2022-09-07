@@ -420,7 +420,7 @@ debloat_apps() {
         PlayActivity
         
     rm -rf /mnt/SDCARD/miyoo/app/.isExpert
-    rm -rf /mnt/SDCARD/Packages
+    rm -rf /mnt/SDCARD/miyoo/packages
 }
 
 move_ports_collection() {
