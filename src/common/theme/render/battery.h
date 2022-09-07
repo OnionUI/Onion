@@ -19,7 +19,7 @@ ThemeImages _getBatteryRequest(int percentage)
     return BATTERY_100;
 }
 
-SDL_Surface* theme_batterySurface(int percentage)
+SDL_Surface* theme_batterySurfaceWithBg(int percentage, SDL_Surface *background)
 {
     BatteryPercentage_s* style = &theme()->batteryPercentage;
     bool visible = style->visible;
@@ -39,12 +39,15 @@ SDL_Surface* theme_batterySurface(int percentage)
     char buffer[5];
     sprintf(buffer, "%d%%", percentage);
     SDL_Surface *text = TTF_RenderUTF8_Blended(font, buffer, style->color);
-    SDL_SetAlpha(text, 0, 0); /* important */
+    SDL_SetAlpha(text, 0, SDL_ALPHA_TRANSPARENT); /* important */
 
     // Battery icon
     ThemeImages icon_request = _getBatteryRequest(percentage);
     SDL_Surface *icon = resource_getSurface(icon_request);
-    SDL_SetAlpha(icon, 0, 0); /* important */
+    SDL_SetAlpha(icon, 0, SDL_ALPHA_TRANSPARENT); /* important */
+
+    if (icon->w > 640)
+        visible = false;
 
     const int SPACER = 5;
     int img_width = 2 * (text->w + SPACER) + icon->w;
@@ -54,6 +57,12 @@ SDL_Surface* theme_batterySurface(int percentage)
         img_width = icon->w;
         img_height = icon->h;
     }
+
+    if (img_width % 2 != 0) img_width += 1;
+    if (img_height % 2 != 0) img_height += 1;
+
+    if (img_width < 48) img_width = 48;
+    if (img_height < 48) img_height = 48;
 
     SDL_Surface *image = SDL_CreateRGBSurface(0, img_width, img_height, 32,
         0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000); /* important */
@@ -71,9 +80,40 @@ SDL_Surface* theme_batterySurface(int percentage)
     if (visible)
         SDL_BlitSurface(text, NULL, image, &rect_text);
 
+    if (background != NULL) {
+        SDL_Surface *bg = SDL_CreateRGBSurface(0, 48, 48, 32,
+            0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000); /* important */
+        SDL_SetAlpha(bg, 0, SDL_ALPHA_OPAQUE);
+        
+        SDL_Rect bg_crop = {572, 6, 48, 48};
+        SDL_BlitSurface(background, &bg_crop, bg, NULL);
+        SDL_BlitSurface(resource_getSurface(BG_TITLE), &bg_crop, bg, NULL);
+
+        SDL_Rect bg_size = {0, 0, 48, 48};
+        SDL_Rect bg_pos = {(img_width - 48) / 2, (img_height - 48) / 2};
+        
+        rect_icon.x -= bg_pos.x; rect_icon.y -= bg_pos.y;
+        rect_text.x -= bg_pos.x; rect_text.y -= bg_pos.y;
+
+        SDL_SetAlpha(icon, SDL_SRCALPHA, SDL_ALPHA_TRANSPARENT);
+        SDL_SetAlpha(text, SDL_SRCALPHA, SDL_ALPHA_TRANSPARENT);
+
+        SDL_BlitSurface(icon, NULL, bg, &rect_icon);
+        if (visible)
+            SDL_BlitSurface(text, NULL, bg, &rect_text);
+
+        SDL_BlitSurface(bg, &bg_size, image, &bg_pos);
+        SDL_FreeSurface(bg);
+    }
+
     SDL_FreeSurface(text);
 
     return image;
+}
+
+SDL_Surface* theme_batterySurface(int percentage)
+{
+    return theme_batterySurfaceWithBg(percentage, NULL);
 }
 
 #endif // RENDER_BATTERY_H__

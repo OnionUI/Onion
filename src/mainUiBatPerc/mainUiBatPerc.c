@@ -18,6 +18,7 @@
 #include "system/battery.h"
 #include "system/settings.h"
 #include "theme/theme.h"
+#include "theme/background.h"
 
 void restoreRegularDisplay(void)
 {
@@ -56,7 +57,7 @@ void drawBatteryPercentage(void)
     TTF_Init();
 
     int percentage = battery_getPercentage();
-    SDL_Surface* image = theme_batterySurface(percentage);
+    SDL_Surface *image = theme_batterySurfaceWithBg(percentage, theme_background());
 
     // Save custom battery icon
     if (percentage != 500)
