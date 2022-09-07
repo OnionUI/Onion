@@ -358,6 +358,7 @@ install_configs() {
     cd /mnt/SDCARD
     if [ $reset_configs -eq 1 ]; then
         # Overwrite all default configs
+        rm -rf /mnt/SDCARD/Saves/CurrentProfile/config/*
         unzip -oq $zipfile
     else
         # Extract config files without overwriting any existing files
@@ -371,6 +372,7 @@ check_firmware() {
         cd $sysdir
         ./bin/infoPanel -i "res/firmware.png"
         reboot
+        sleep 10
         exit 0
     fi
 }
@@ -397,14 +399,9 @@ backup_system() {
         cp -R $old_ra_dir/states/. /mnt/SDCARD/Backup/states/
     fi
 
-    # Themes
-    if [ -d /mnt/SDCARD/Themes ]; then
-        mv -f /mnt/SDCARD/Themes/* /mnt/SDCARD/Backup/Themes
-    fi
-
     # Imgs
     if [ -d /mnt/SDCARD/Imgs ]; then
-        mv -f /mnt/SDCARD/Imgs/* /mnt/SDCARD/Backup/Imgs
+        mv -f /mnt/SDCARD/Imgs /mnt/SDCARD/Backup/Imgs
     fi
 }
 
@@ -422,6 +419,7 @@ debloat_apps() {
         Onion_Manual \
         PlayActivity
         
+    rm -rf /mnt/SDCARD/miyoo
     rm -rf /mnt/SDCARD/Packages
 }
 

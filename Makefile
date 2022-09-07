@@ -24,9 +24,10 @@ STATIC_DIST         := $(ROOT_DIR)/static/dist
 STATIC_CONFIGS      := $(ROOT_DIR)/static/configs
 CACHE               := $(ROOT_DIR)/cache
 STATIC_PACKAGES     := $(ROOT_DIR)/static/packages
-PACKAGES_EMU_DEST   := $(BUILD_DIR)/Packages/Emu
-PACKAGES_APP_DEST   := $(BUILD_DIR)/Packages/App
-PACKAGES_RAPP_DEST  := $(BUILD_DIR)/Packages/RApp
+PACKAGES_DIR        := $(ROOT_DIR)/build/.tmp_update/packages
+PACKAGES_EMU_DEST   := $(PACKAGES_DIR)/Emu
+PACKAGES_APP_DEST   := $(PACKAGES_DIR)/App
+PACKAGES_RAPP_DEST  := $(PACKAGES_DIR)/RApp
 ifeq (,$(GTEST_INCLUDE_DIR))
 GTEST_INCLUDE_DIR = /usr/include/
 endif
@@ -101,6 +102,7 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(INSTALLER_DIR)/bin/ make
 	@cp $(BIN_DIR)/prompt $(INSTALLER_DIR)/bin/
 	@cp $(BIN_DIR)/batmon $(INSTALLER_DIR)/bin/
+	@cp $(BIN_DIR)/infoPanel $(INSTALLER_DIR)/bin/
 
 apps: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)

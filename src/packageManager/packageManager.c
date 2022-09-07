@@ -25,9 +25,10 @@
 #define DT_DIR 4
 #endif
 
-#define PACKAGE_LAYER_1 "/mnt/SDCARD/Packages/Emu"
-#define PACKAGE_LAYER_2 "/mnt/SDCARD/Packages/App"
-#define PACKAGE_LAYER_3 "/mnt/SDCARD/Packages/RApp"
+#define PACKAGE_DIR "/mnt/SDCARD/.tmp_update/packages/"
+#define PACKAGE_LAYER_1 PACKAGE_DIR "Emu"
+#define PACKAGE_LAYER_2 PACKAGE_DIR "App"
+#define PACKAGE_LAYER_3 PACKAGE_DIR "RApp"
 
 // Max number of records in the DB
 #define LAYER_ITEM_COUNT 200
