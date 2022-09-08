@@ -417,10 +417,15 @@ debloat_apps() {
         The_Onion_Installer \
         Clean_View_Toggle \
         Onion_Manual \
-        PlayActivity
+        PlayActivity \
+        SearchFilter
         
-    rm -rf /mnt/SDCARD/miyoo/app/.isExpert
-    rm -rf /mnt/SDCARD/miyoo/packages
+    rm -rf /mnt/SDCARD/Emu/SEARCH
+    rm -f /mnt/SDCARD/miyoo/app/.isExpert
+
+    if [ -d /mnt/SDCARD/Packages ]; then
+        rm -rf /mnt/SDCARD/Packages
+    fi
 }
 
 move_ports_collection() {

@@ -118,9 +118,15 @@ apps: $(CACHE)/.setup
 
 external: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
+# RetroArch
 	@cd $(THIRD_PARTY_DIR)/RetroArch && make && cp retroarch $(BUILD_DIR)/RetroArch/
 	@echo $(RA_SUBVERSION) > $(BUILD_DIR)/RetroArch/onion_ra_version.txt
-	@cd $(THIRD_PARTY_DIR)/SearchFilter && make build && cp -a build/. "$(PACKAGES_APP_DEST)/Search/" && cp build/App/SearchFilter/tools $(BIN_DIR)
+# SearchFilter
+	@cd $(THIRD_PARTY_DIR)/SearchFilter && make build && cp -a build/. $(BUILD_DIR)
+	@mkdir -p "$(PACKAGES_APP_DEST)/Search/App/Search" "$(PACKAGES_APP_DEST)/Filter/App"
+	@cp -a $(BUILD_DIR)/App/Search/. "$(PACKAGES_APP_DEST)/Search/App/Search"
+	@mv $(BUILD_DIR)/App/Filter "$(PACKAGES_APP_DEST)/Filter/App/Filter"
+# Other
 	@cd $(THIRD_PARTY_DIR)/Terminal && make && cp ./st "$(PACKAGES_APP_DEST)/Terminal (Developer tool)/App/Terminal"
 	@cd $(THIRD_PARTY_DIR)/DinguxCommander && make && cp ./output/DinguxCommander "$(PACKAGES_APP_DEST)/File Explorer (DinguxCommander)/App/Commander_Italic"
 
