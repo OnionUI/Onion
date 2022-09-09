@@ -6,7 +6,7 @@
 
 <p>&nbsp;</p>
 
-<p align="center"><img src="https://user-images.githubusercontent.com/44569252/189336183-3078514e-cee6-4fa5-9f20-d68863ceb80f.gif" width="512" height="512"></p>
+<p align="center"><img src="https://user-images.githubusercontent.com/44569252/189336183-3078514e-cee6-4fa5-9f20-d68863ceb80f.gif"></p>
 
 <p>&nbsp;</p>
 
