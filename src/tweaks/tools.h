@@ -130,6 +130,9 @@ void tool_patchRAConfig(void *_)
     char theme_preset[STR_MAX];
     int color_theme = 0;
 
+    if (!is_file(RETROARCH_CONFIG))
+        return;
+
     if (file_parseKeyValue(RETROARCH_CONFIG, "rgui_menu_color_theme", value, '=', 0) != NULL)
         color_theme = atoi(value);
     if (file_parseKeyValue(RETROARCH_CONFIG, "rgui_menu_theme_preset", value, '=', 0) != NULL)
