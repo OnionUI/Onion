@@ -43,7 +43,7 @@ typedef struct package_s {
     bool complete;
 } Package;
 
-static char layer_names[][STR_MAX] = {"CONSOLES", "APPS", "EXPERIMENTAL"};
+static char layer_names[][STR_MAX] = {"VERIFIED", "APPS", "EXPERT"};
 static Package packages[3][LAYER_ITEM_COUNT];
 static int package_count[3];
 static int package_installed_count[] = {0, 0, 0};
