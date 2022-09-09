@@ -1,5 +1,5 @@
 {
-"label":"Game Boy",
+"label":"GB",
 "icon":"../../Icons/gb.png",
 "iconsel":"",
 "launch":"launch.sh",

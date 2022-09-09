@@ -110,6 +110,11 @@ cleanup() {
     rmdir /mnt/SDCARD/Backup/saves
     rmdir /mnt/SDCARD/Backup/states
     rmdir /mnt/SDCARD/Backup
+
+    # Patch RA config
+    if [ -f ./bin/tweaks ]; then
+        ./bin/tweaks --apply_tool "patch_ra_cfg" --no_display
+    fi
 }
 
 get_install_stats() {
@@ -135,8 +140,9 @@ get_install_stats() {
 
 remove_configs() {
     echo ":: Remove configs"
+    rm -f /mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg
+
     rm -rf \
-        /mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg
         /mnt/SDCARD/Saves/CurrentProfile/config/*
         /mnt/SDCARD/Saves/GuestProfile/config/*
 }
@@ -166,7 +172,7 @@ fresh_install() {
 
         # Remove stock folders
         cd /mnt/SDCARD
-        rm -rf miyoo
+        rm -rf App Emu RApp miyoo
     fi
 
     debloat_apps
