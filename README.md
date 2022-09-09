@@ -51,15 +51,6 @@ It also allows you to quickly change games and many other features:
 
 <p>&nbsp;</p>
 
-## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179304061-647e63ff-5113-4a8a-aaa9-4dfda248d54e.png" width="54"></sup>Themes
-
-<p align="center"><img src="https://user-images.githubusercontent.com/44569252/189352231-03ae9688-a859-41c2-a8e3-4eba8ef360c8.png"></p>
-
-- Preview and change themes.
-- [Get more themes](https://github.com/OnionUI/Themes/blob/main/README.md) from our <sup><sub>❤️</sub></sup> community
-
-<p>&nbsp;</p>
-
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179315622-e29e0971-87c8-4855-85e6-fc8de4ccd940.png" width="54"></sup>Package Manager
 
 <p align="center"><img src="https://user-images.githubusercontent.com/44569252/189438069-2926cf7b-1e72-476f-8b41-79132146d7c9.png" width="320"></p>
@@ -88,6 +79,15 @@ It also allows you to quickly change games and many other features:
 - **Tools:** Sort favorites, fix thumbnails, remove OSX system files
 
 <p align="center"><img src="https://user-images.githubusercontent.com/44569252/189440460-0afffde0-2e5e-41a4-b85e-0484b23c461a.png"></p>
+
+<p>&nbsp;</p>
+
+## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179304061-647e63ff-5113-4a8a-aaa9-4dfda248d54e.png" width="54"></sup>Themes
+
+<p align="center"><a href="https://github.com/OnionUI/Themes/blob/main/README.md"><img src="https://user-images.githubusercontent.com/44569252/189352231-03ae9688-a859-41c2-a8e3-4eba8ef360c8.png"></a></p>
+
+- Preview and change themes.
+- [Get more themes](https://github.com/OnionUI/Themes/blob/main/README.md) from our <sup><sub>❤️</sub></sup> community
 
 <p>&nbsp;</p>
 
