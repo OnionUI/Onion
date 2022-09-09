@@ -28,15 +28,16 @@
 
 <p>&nbsp;</p>
 
-## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179304061-647e63ff-5113-4a8a-aaa9-4dfda248d54e.png" width="54"></sup>Theme Switcher (with custom themes)
-<img src="https://user-images.githubusercontent.com/16885275/172026971-2640251c-b781-4083-8715-e5e076e2cbfe.png" width="32%"> <img src="https://user-images.githubusercontent.com/16885275/172026972-c3602c24-b0df-43c6-942e-c975a2eac71b.png" width="32%"> <img src="https://user-images.githubusercontent.com/16885275/154789504-84253d41-373d-4c84-b194-547c6343f904.png" width="32%">
+## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179304061-647e63ff-5113-4a8a-aaa9-4dfda248d54e.png" width="54"></sup>Themes
 
-- Preview and change themes on the fly, no reboot required.
-- Check out the [custom themes](https://github.com/OnionUI/Themes/blob/main/README.md) from our <sup><sub>❤️</sub></sup> community
+![custom_themes_preview](https://user-images.githubusercontent.com/44569252/189352231-03ae9688-a859-41c2-a8e3-4eba8ef360c8.png)
+
+- Preview and change themes.
+- [Get more themes](https://github.com/OnionUI/Themes/blob/main/README.md) from our <sup><sub>❤️</sub></sup> community
 
 <p>&nbsp;</p>
 
-## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179302769-4169e57a-860f-4c0e-8792-007e7557ba48.png" width="54"></sup>The Onion Installer
+## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179302769-4169e57a-860f-4c0e-8792-007e7557ba48.png" width="54"></sup>Package Manager
 
 <img src="https://user-images.githubusercontent.com/16885275/162589315-1d127c72-d404-4487-b379-3bde8179f566.png" width="350">
 
@@ -45,14 +46,14 @@
 
 <p>&nbsp;</p>
 
-## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179302722-7fa82e4d-d72d-4b1e-bb4d-96a2a52aaa62.png" width="54"></sup>Play Activity
+## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179302722-7fa82e4d-d72d-4b1e-bb4d-96a2a52aaa62.png" width="54"></sup>Activity Tracker
 <img src="https://user-images.githubusercontent.com/16885275/162589339-e779c6dd-4e9d-47f0-8543-4646d84fc748.png" width="350">
 
 - Track your game playtimes.
 
 <p>&nbsp;</p>
 
-## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179301923-635b60fa-22de-4cf3-894a-2f3c34702d64.png" width="54"></sup>Game Switcher
+## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179301923-635b60fa-22de-4cf3-894a-2f3c34702d64.png" width="54"></sup>GameSwitcher
 <img src="https://user-images.githubusercontent.com/16885275/164890313-c83dfc84-a684-416b-bd40-9f54c9f4e7db.png" width="350">
 
 Although it's optional, we consider the game switcher to be central to the Onion UI experience.  
@@ -97,7 +98,7 @@ Some examples made for this RetroArch port:
 
 <p>&nbsp;</p>
 
-## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179304290-8c7e5140-5fb4-4ae1-bd90-faa416f9a37c.png" width="54"></sup>Guest mode
+## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179304290-8c7e5140-5fb4-4ae1-bd90-faa416f9a37c.png" width="54"></sup>Guest Mode
 
 Guest mode is a separate profile so you can safely lend your device to your kid or your friend. The profile contains the following properties:
 - Saves
@@ -122,15 +123,7 @@ Simply copy this folder when you want to backup your data.
 
 <p>&nbsp;</p>
 
-<!--## <sup><img align="left" src="https://user-images.githubusercontent.com/16885275/168315341-d07bdf2f-b424-44d2-a845-e56ca67b04f1.png" width="54"></sup>Miyoo audio server adoption
-
-The *pop* sound that appears each time a binary is launched is now gone.   
-
-The audio sever lag has been removed. (Credit: Eggs)
-
-<p>&nbsp;</p>-->
-
-## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179305495-2ae1f522-6918-469f-a2eb-63dd30262e17.png" width="54"></sup>Main UI improvements
+## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179305495-2ae1f522-6918-469f-a2eb-63dd30262e17.png" width="54"></sup>MainUI improvements
 
 - Battery percentage is shown in the top bar  
   > You can configure the battery percentage visibility and color in the theme configuration file. It is also possible to make a theme that only shows the percentage text.
@@ -157,112 +150,6 @@ The audio sever lag has been removed. (Credit: Eggs)
   > Drag and drop custom icons into the `Icons` folder at the root of your SD
 - Boxart moved to `/Roms/[SYSTEM]/Imgs` for easier scraping
 - Various bug fixes and optimizations
-
-<p>&nbsp;</p>
-
-<h1 align="center">System controls</h1>
-
-<p>&nbsp;</p>
-
-<p align="center"><img src="https://user-images.githubusercontent.com/16885275/178003377-10332587-c44e-46f6-b3cc-315df906a00b.png" width="500"></p>
-
-<p>&nbsp;</p>
-
-<table align="center">
-<thead>
-<tr>
-<th>Button combination</th>
-<th>Action</th>
-<th><em>Active...</em></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><kbd>MENU</kbd></td>
-<td>Save and exit to Game Switcher</td>
-<td><em>In-game</em></td>
-</tr>
-<tr>
-<td><kbd>MENU</kbd> <sup>hold</sup></td>
-<td>Save and exit to menu</td>
-<td><em>In-game</em></td>
-</tr>
-<tr>
-<td><kbd>MENU</kbd> + <kbd>L2</kbd></td>
-<td>Load state</td>
-<td><em>In-game</em></td>
-</tr>
-<tr>
-<td><kbd>MENU</kbd> + <kbd>R2</kbd></td>
-<td>Save state</td>
-<td><em>In-game</em></td>
-</tr>
-<tr>
-<td><kbd>MENU</kbd> + <kbd>L</kbd></td>
-<td>Toggle rewind (if available)</td>
-<td><em>In-game</em></td>
-</tr>
-<tr>
-<td><kbd>MENU</kbd> + <kbd>R</kbd></td>
-<td>Toggle fast forward</td>
-<td><em>In-game</em></td>
-</tr>
-<tr>
-<td><kbd>MENU</kbd> + <kbd>SELECT</kbd></td>
-<td>RetroArch menu</td>
-<td><em>In-game</em></td>
-</tr>
-<tr>
-<td><kbd>MENU</kbd> + <kbd>X</kbd></td>
-<td>Toggle FPS display</td>
-<td><em>In-game</em></td>
-</tr>
-<tr>
-<td><kbd>MENU</kbd> + <kbd>POWER</kbd></td>
-<td>Take screenshot</td>
-<td><em>Always</em></td>
-</tr>
-<tr>
-<td><kbd>SELECT</kbd> + <kbd>L2</kbd> / <kbd>R2</kbd></td>
-<td>Adjust brightness</td>
-<td><em>Always</em></td>
-</tr>
-<tr>
-<td><kbd>POWER</kbd></td>
-<td>Sleep mode</td>
-<td><em>Always</em></td>
-</tr>
-<tr>
-<td><kbd>POWER</kbd> <sup>hold</sup></td>
-<td>Save and turn off</td>
-<td><em>Always</em></td>
-</tr>
-<tr>
-<td><kbd>POWER</kbd> <sup>hold 5s</sup></td>
-<td>Force quit the current app</td>
-<td><em>Always</em></td>
-</tr>
-<tr>
-<td><kbd>POWER</kbd> <sup>hold 10s</sup></td>
-<td>Force turn off</td>
-<td><em>Always</em></td>
-</tr>
-<tr>
-<td><kbd>L2</kbd> / <kbd>R2</kbd></td>
-<td>Change color palette</td>
-<td><em>For GB only</em></td>
-</tr>
-</tbody>
-</table>
-
-<p>&nbsp;</p>
-
----
-
-<p>&nbsp;</p>
-
-<p align="center"><img src="https://user-images.githubusercontent.com/16885275/164891039-665fffcf-b454-4b3c-87c6-13a92cb88a8b.png" width="500"></p>
-<p align="center"><img src="https://user-images.githubusercontent.com/16885275/164891137-2bbdcfb5-e2c2-4658-8049-79b01d57dfed.png" width="500"></p>
 
 <p>&nbsp;</p>
 
