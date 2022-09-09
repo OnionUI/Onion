@@ -1,14 +1,32 @@
-display_name = "ARC (km_MAME 2003 Xtreme)"
-authors = "MAMEdev"
+# Software Information
+display_name = "Arcade (km_MAME 2003 Xtreme)"
+authors = "MAMEdev, MAME 2003-Plus Team, et al (see license and changelog)"
 supported_extensions = "zip"
 corename = "MAME 2003 Xtreme (2K21)"
-manufacturer = "Various"
-categories = "Emulator"
-systemname = "Arcade (various)"
-systemid = "mame"
-database = "MAME 2003 Xtreme|MAME 2003"
-license = "MAME"
+license = "MAME Noncommercial"
 permissions = ""
 display_version = "2K21"
+categories = "Emulator"
+
+# Hardware Information
+manufacturer = "Various"
+systemname = "Arcade (various)"
+systemid = "mame"
+
+# Libretro Information
 supports_no_game = "false"
-notes = "(!) The BIOS files must be inside the ROM directory.|"
+database = "MAME 2003 Xtreme|MAME 2003"
+savestate = "true"
+savestate_features = "serialized"
+cheats = "false"
+input_descriptors = "true"
+memory_descriptors = "false"
+libretro_saves = "false"
+core_options = "true"
+core_options_version = "1.0"
+hw_render = "false"
+disk_control = "false"
+notes = "(!) Unless using Full Non-Merged romsets, BIOS files must be inside the ROM directory.|See libretro core documentation for more information about content paths.|"
+
+description = "MAME as it was in 2003, with a 2K22 touch up! Suitable for lower-spec devices that would struggle to run current versions of MAME (later versions of MAME are increasingly accurate, thus can perform worse)."
+

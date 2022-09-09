@@ -1,5 +1,5 @@
 bluemsx_auto_rewind_cas = "ON"
-bluemsx_cartmapper = "Normal"
+bluemsx_cartmapper = "Auto"
 bluemsx_msxtype = "Auto"
 bluemsx_nospritelimits = "OFF"
 bluemsx_overscan = "enabled"

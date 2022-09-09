@@ -55,6 +55,8 @@ main() {
     echo 80     > $pwmdir/pwm0/duty_cycle
     echo 1  	> $pwmdir/pwm0/enable
 
+    killall keymon
+
     if [ ! -d /mnt/SDCARD/.tmp_update/onionVersion ]; then
         fresh_install 1
         cleanup
@@ -107,9 +109,9 @@ cleanup() {
     rm -f $ra_package_version_file
 
     # Remove dirs if empty
-    rm -d /mnt/SDCARD/Backup/saves
-    rm -d /mnt/SDCARD/Backup/states
-    rm -d /mnt/SDCARD/Backup
+    rmdir /mnt/SDCARD/Backup/saves
+    rmdir /mnt/SDCARD/Backup/states
+    rmdir /mnt/SDCARD/Backup
 }
 
 get_install_stats() {
@@ -135,8 +137,9 @@ get_install_stats() {
 
 remove_configs() {
     echo ":: Remove configs"
+    rm -f /mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg
+
     rm -rf \
-        /mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg
         /mnt/SDCARD/Saves/CurrentProfile/config/*
         /mnt/SDCARD/Saves/GuestProfile/config/*
 }
@@ -158,7 +161,7 @@ fresh_install() {
     echo "Backing up files..." >> /tmp/.update_msg
     backup_system
 
-    echo "Removing old files..." >> /tmp/.update_msg
+    echo "Removing old system files..." >> /tmp/.update_msg
 
     if [ $reset_configs -eq 1 ]; then
         remove_configs
@@ -166,15 +169,15 @@ fresh_install() {
 
         # Remove stock folders
         cd /mnt/SDCARD
-        rm -rf miyoo
+        rm -rf App Emu RApp miyoo
     fi
 
     debloat_apps
+    move_ports_collection
     refresh_roms
 
     if [ $install_ra -eq 1 ]; then
         install_core "1/2: Installing Onion..."
-        # free_memory_inbetween
         install_retroarch "2/2: Installing RetroArch..."
     else
         install_core "1/1: Installing Onion..."
@@ -184,6 +187,12 @@ fresh_install() {
     echo "Completing installation..." >> /tmp/.update_msg
     if [ $reset_configs -eq 0 ]; then
         restore_ra_config
+
+        # Patch RA config
+        cd $sysdir
+        if [ -f ./bin/tweaks ]; then
+            ./bin/tweaks --apply_tool "patch_ra_cfg" --no_display
+        fi
     fi
     install_configs $reset_configs
     
@@ -207,7 +216,11 @@ fresh_install() {
 
     # Launch layer manager
     cd /mnt/SDCARD/App/PackageManager/ 
-    $sysdir/bin/packageManager --confirm --reapply
+    if [ $reset_configs -eq 1 ]; then
+        $sysdir/bin/packageManager --confirm
+    else
+        $sysdir/bin/packageManager --confirm --reapply
+    fi
     free_mma
 
     cd $sysdir
@@ -247,10 +260,10 @@ update_only() {
     sleep 1
     
     debloat_apps
+    move_ports_collection
 
     if [ $install_ra -eq 1 ]; then
         install_core "1/2: Updating Onion..."
-        # free_memory_inbetween
         install_retroarch "2/2: Updating RetroArch..."
         restore_ra_config
     else
@@ -259,6 +272,12 @@ update_only() {
     fi
 
     install_configs 0
+
+    # Patch RA config
+    cd $sysdir
+    if [ -f ./bin/tweaks ]; then
+        ./bin/tweaks --apply_tool "patch_ra_cfg" --no_display
+    fi
 
     # Start the battery monitor
     cd $sysdir
@@ -304,22 +323,6 @@ install_core() {
     # Onion core installation / update
     cd /
     unzip_progress "$core_zipfile" "$msg" /mnt/SDCARD $total_core
-}
-
-free_memory_inbetween() {
-    touch $sysdir/.installed
-    sync
-
-    # Free memory
-    free_mma
-
-    rm -f $sysdir/.installed
-    rm -f /tmp/.update_msg
-
-    # Show installation progress for RetroArch
-    cd $sysdir
-    ./bin/installUI &
-    sleep 1
 }
 
 install_retroarch() {
@@ -374,6 +377,7 @@ install_configs() {
     cd /mnt/SDCARD
     if [ $reset_configs -eq 1 ]; then
         # Overwrite all default configs
+        rm -rf /mnt/SDCARD/Saves/CurrentProfile/config/*
         unzip -oq $zipfile
     else
         # Extract config files without overwriting any existing files
@@ -387,6 +391,7 @@ check_firmware() {
         cd $sysdir
         ./bin/infoPanel -i "res/firmware.png"
         reboot
+        sleep 10
         exit 0
     fi
 }
@@ -398,29 +403,24 @@ backup_system() {
     # Move BIOS files from stock location
     if [ -d $old_ra_dir/system ] ; then
         mkdir -p /mnt/SDCARD/BIOS
-        cp -R $old_ra_dir/system/. /mnt/SDCARD/BIOS/
+        mv -f $old_ra_dir/system/* /mnt/SDCARD/BIOS/
     fi
 
     # Backup old saves
     if [ -d $old_ra_dir/saves ] ; then
         mkdir -p /mnt/SDCARD/Backup/saves
-        cp -R $old_ra_dir/saves/. /mnt/SDCARD/Backup/saves/
+        mv -f $old_ra_dir/saves/* /mnt/SDCARD/Backup/saves/
     fi    
 
     # Backup old states
     if [ -d $old_ra_dir/states ] ; then
         mkdir -p /mnt/SDCARD/Backup/states
-        cp -R $old_ra_dir/states/. /mnt/SDCARD/Backup/states/
-    fi
-
-    # Themes
-    if [ -d /mnt/SDCARD/Themes ]; then
-        mv -f /mnt/SDCARD/Themes/* /mnt/SDCARD/Backup/Themes
+        mv -f $old_ra_dir/states/* /mnt/SDCARD/Backup/states/
     fi
 
     # Imgs
     if [ -d /mnt/SDCARD/Imgs ]; then
-        mv -f /mnt/SDCARD/Imgs/* /mnt/SDCARD/Backup/Imgs
+        mv -f /mnt/SDCARD/Imgs /mnt/SDCARD/Backup/Imgs
     fi
 }
 
@@ -432,10 +432,33 @@ debloat_apps() {
         power \
         swapskin \
         Retroarch \
+        StartGameSwitcher \
         The_Onion_Installer \
         Clean_View_Toggle \
         Onion_Manual \
-        PlayActivity
+        PlayActivity \
+        SearchFilter
+        
+    rm -rf /mnt/SDCARD/Emu/SEARCH
+    rm -f /mnt/SDCARD/miyoo/app/.isExpert
+
+    if [ -d /mnt/SDCARD/Packages ]; then
+        rm -rf /mnt/SDCARD/Packages
+    fi
+}
+
+move_ports_collection() {
+    echo ":: Move ports collection"
+    if [ -d /mnt/SDCARD/Emu/PORTS/Binaries ] ; then
+        echo "Ports collection found! Moving..."
+        mkdir -p /mnt/SDCARD/Roms/PORTS/Binaries
+        mv -f /mnt/SDCARD/Emu/PORTS/Binaries/* /mnt/SDCARD/Roms/PORTS/Binaries
+        mv -f /mnt/SDCARD/Emu/PORTS/PORTS/* /mnt/SDCARD/Roms/PORTS
+        rmdir /mnt/SDCARD/Emu/PORTS/Binaries
+        rmdir /mnt/SDCARD/Emu/PORTS/PORTS
+        rm -f /mnt/SDCARD/Roms/PORTS/PORTS_cache2.db
+        rm -f /mnt/SDCARD/Emu/PORTS/config.json # Triggers a reinstall
+    fi
 }
 
 refresh_roms() {
@@ -443,7 +466,7 @@ refresh_roms() {
     # Force refresh the rom lists
     if [ -d /mnt/SDCARD/Roms ] ; then
         cd /mnt/SDCARD/Roms
-        find . -type f -name "*.db" -exec rm -f {} \;
+        find . -type f -name "*_cache2.db" -exec rm -f {} \;
     fi
 }
 

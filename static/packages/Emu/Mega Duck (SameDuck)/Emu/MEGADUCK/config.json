@@ -1,5 +1,5 @@
 {
-"label":"MegaDuck",
+"label":"Mega Duck",
 "icon":"../../Icons/megaduck.png",
 "iconsel":"",
 "launch":"launch.sh",
@@ -9,5 +9,5 @@
 "useswap":1,
 "shortname":0,
 "hidebios":1,
-"extlist":""
+"extlist":"bin|BIN|zip|ZIP|7z|7Z"
 }

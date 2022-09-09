@@ -1,0 +1,13 @@
+{
+"label":"NG Pocket",
+"icon":"../../Icons/ngp.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/NGP",
+"imgpath":"../../Roms/NGP/Imgs",
+"gamelist":"../../Roms/NGP/miyoogamelist.xml",
+"useswap":0,
+"shortname":0,
+"hidebios":0,
+"extlist":"ngp|NGP|ngc|NGC|zip|ZIP|7z|7Z"
+}

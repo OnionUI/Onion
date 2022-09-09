@@ -21,18 +21,19 @@ TEST(test_infoPanel, cacheTest)
     int images_paths_count = 5;
     SDL_Surface *screen = NULL;
 
-    const int test_data_count = 10;
+    const int test_data_count = 11;
     TestItem test_data[test_data_count];
     test_data[0] = { 0, -1, false, "" };
-    test_data[1] = { 0, 0, false, "./page0.png" };
-    test_data[2] = { 0, 1, true, "./page1.png" };
-    test_data[3] = { 1, 2, true, "./page2.png" };
-    test_data[4] = { 2, 3, true, "./page3.png" };
-    test_data[5] = { 3, 2, true, "./page2.png" };
-    test_data[6] = { 2, 4, false, "" }; // random jump is not yet implemented
-    test_data[7] = { 2, 3, true, "./page3.png" };
-    test_data[8] = { 3, 4, true, "./page4.png" };
-    test_data[9] = { 4, 5, false, "" };
+    test_data[1] = { 0, 0, false, "./infoPanel_test_data/page0.png" };
+    test_data[2] = { 0, 1, true, "./infoPanel_test_data/page1.png" };
+    test_data[3] = { 1, 1, true, "./infoPanel_test_data/page1.png" };
+    test_data[4] = { 1, 2, true, "./infoPanel_test_data/page2.png" };
+    test_data[5] = { 2, 3, true, "./infoPanel_test_data/page3.png" };
+    test_data[6] = { 3, 2, true, "./infoPanel_test_data/page2.png" };
+    test_data[7] = { 2, 4, false, "" }; // random jump is not yet implemented
+    test_data[8] = { 2, 3, true, "./infoPanel_test_data/page3.png" };
+    test_data[9] = { 3, 4, true, "./infoPanel_test_data/page4.png" };
+    test_data[10] = { 4, 5, false, "" };
 
     images_paths = (char**)malloc(images_paths_count * sizeof(char*));
 
@@ -40,7 +41,7 @@ TEST(test_infoPanel, cacheTest)
 	{
 		images_paths[i] = (char*)malloc(STR_MAX * sizeof(char));
 
-		strcat(images_paths[i], "./page");
+		strcat(images_paths[i], "./infoPanel_test_data/page");
         char index_str[10];
         sprintf(index_str, "%d", i);
         strcat(images_paths[i], index_str);

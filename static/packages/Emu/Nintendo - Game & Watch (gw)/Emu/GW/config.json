@@ -1,5 +1,5 @@
 {
-"label":"GameWtch",
+"label":"GameWatch",
 "icon":"../../Icons/gw.png",
 "iconsel":"",
 "launch":"launch.sh",
@@ -9,5 +9,5 @@
 "useswap":0,
 "shortname":0,
 "hidebios":1,
-"extlist":""
+"extlist":"mgw|MGW|zip|ZIP|7z|7Z"
 }

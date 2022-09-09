@@ -1,5 +1,5 @@
 {
-"label":"GameGear",
+"label":"Game Gear",
 "icon":"../../Icons/gg.png",
 "iconsel":"",
 "launch":"launch.sh",
@@ -9,5 +9,5 @@
 "useswap":0,
 "shortname":0,
 "hidebios":1,
-"extlist":""
+"extlist":"bin|BIN|gg|GG|zip|ZIP|7z|7Z"
 }

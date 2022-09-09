@@ -110,7 +110,7 @@ launch_game() {
     is_game=0
 
     if echo "$romfile" | grep -q "retroarch" || echo "$romfile" | grep -q "/mnt/SDCARD/Emu/" || echo "$romfile" | grep -q "/mnt/SDCARD/RApp/"; then
-        if ! echo "$romfile" | grep -q "/mnt/SDCARD/Emu/SEARCH/../../App/SearchFilter"; then
+        if ! echo "$romfile" | grep -q "/mnt/SDCARD/Emu/SEARCH/../../App/Search"; then
             echo "Game found:" $(basename "$romfile")
             is_game=1
         fi
@@ -129,7 +129,7 @@ launch_game() {
     # TIMER END + SHUTDOWN CHECK
     if [ $is_game -eq 1 ]; then
         cd $sysdir
-        ./bin/playActivity "$(basename "$romfile")" 2>&1 >> ./logs/playActivity.log
+        ./bin/playActivity "$romfile" 2>&1 >> ./logs/playActivity.log
         
         echo "game" > /tmp/prev_state        
         check_off_order "End_Save"
@@ -204,7 +204,7 @@ expert_flag=/mnt/SDCARD/miyoo/app/.isExpert
 check_hide_expert() {
     if [ -f $sysdir/config/.hideExpert ]; then
         # Should be clean
-        if [ ! -f $clean_flag ]; then
+        if [ ! -f $clean_flag ] || [ -f $expert_flag ]; then
             rm /mnt/SDCARD/miyoo/app/MainUI
             rm -f $expert_flag
 	        cp $sysdir/bin/MainUI-clean /mnt/SDCARD/miyoo/app/MainUI
@@ -212,7 +212,7 @@ check_hide_expert() {
         fi
     else
         # Should be expert
-        if [ ! -f $expert_flag ]; then
+        if [ ! -f $expert_flag ] || [ -f $clean_flag ]; then
             rm /mnt/SDCARD/miyoo/app/MainUI
             rm -f $clean_flag
 	        cp $sysdir/bin/MainUI-expert /mnt/SDCARD/miyoo/app/MainUI

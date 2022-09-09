@@ -34,6 +34,49 @@ void display_init(void)
     fb_addr = (uint32_t*)mmap(0, finfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fb_fd, 0);
 }
 
+//
+//    Save/Clear Display area
+//
+void display_save(void) {
+    stride = finfo.line_length;
+    ioctl(fb_fd, FBIOGET_VSCREENINFO, &vinfo);
+    bpp = vinfo.bits_per_pixel / 8;    // byte per pixel
+    fbofs = (uint8_t*)fb_addr + ( vinfo.yoffset * stride );
+
+    // Save display area and clear
+    if ((savebuf = (uint8_t*)malloc(DISPLAY_WIDTH * bpp * DISPLAY_HEIGHT))) {
+        uint32_t i, ofss, ofsd;
+        ofss = ofsd = 0;
+        for (i = DISPLAY_HEIGHT; i > 0; i--, ofss += stride, ofsd += DISPLAY_WIDTH * bpp) {
+            memcpy(savebuf + ofsd, fbofs + ofss, DISPLAY_WIDTH * bpp);
+            memset(fbofs + ofss, 0, DISPLAY_WIDTH * bpp);
+        }
+    }
+}
+
+//
+//    Restore Display area
+//
+void display_restore(void) {
+    // Restore display area
+    if (savebuf) {
+        uint32_t i, ofss, ofsd;
+        ofss = ofsd = 0;
+        for (i=DISPLAY_HEIGHT; i>0; i--, ofsd += stride, ofss += DISPLAY_WIDTH * bpp) {
+            memcpy(fbofs + ofsd, savebuf + ofss, DISPLAY_WIDTH * bpp);
+        }
+        free(savebuf);
+        savebuf = NULL;
+    }
+}
+
+void display_reset(void) {
+    ioctl(fb_fd, FBIOGET_VSCREENINFO, &vinfo);
+    vinfo.yoffset = 0;
+    memset(fb_addr, 0, finfo.smem_len);
+    ioctl(fb_fd, FBIOPUT_VSCREENINFO, &vinfo);
+}
+
 
 //
 //    Screen On/Off
@@ -99,49 +142,6 @@ void display_drawFrame(uint32_t color)
     for(i=0; i<640; i++) { ofs[i] = color; }
     ofs = fb_addr + 639;
     for(i=0; i<480*3-1; i++, ofs+=640) { ofs[0] = color; ofs[1] = color; }
-}
-
-//
-//    Save/Clear Display area
-//
-void display_save(void) {
-    stride = finfo.line_length;
-    ioctl(fb_fd, FBIOGET_VSCREENINFO, &vinfo);
-    bpp = vinfo.bits_per_pixel / 8;    // byte per pixel
-    fbofs = (uint8_t*)fb_addr + ( vinfo.yoffset * stride );
-
-    // Save display area and clear
-    if ((savebuf = (uint8_t*)malloc(DISPLAY_WIDTH * bpp * DISPLAY_HEIGHT))) {
-        uint32_t i, ofss, ofsd;
-        ofss = ofsd = 0;
-        for (i = DISPLAY_HEIGHT; i > 0; i--, ofss += stride, ofsd += DISPLAY_WIDTH * bpp) {
-            memcpy(savebuf + ofsd, fbofs + ofss, DISPLAY_WIDTH * bpp);
-            memset(fbofs + ofss, 0, DISPLAY_WIDTH * bpp);
-        }
-    }
-}
-
-//
-//    Restore Display area
-//
-void display_restore(void) {
-    // Restore display area
-    if (savebuf) {
-        uint32_t i, ofss, ofsd;
-        ofss = ofsd = 0;
-        for (i=DISPLAY_HEIGHT; i>0; i--, ofsd += stride, ofss += DISPLAY_WIDTH * bpp) {
-            memcpy(fbofs + ofsd, savebuf + ofss, DISPLAY_WIDTH * bpp);
-        }
-        free(savebuf);
-        savebuf = NULL;
-    }
-}
-
-void display_reset(void) {
-    ioctl(fb_fd, FBIOGET_VSCREENINFO, &vinfo);
-    vinfo.yoffset = 0;
-    memset(fb_addr, 0, finfo.smem_len);
-    ioctl(fb_fd, FBIOPUT_VSCREENINFO, &vinfo);
 }
 
 void display_free(void) {

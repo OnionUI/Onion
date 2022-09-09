@@ -57,6 +57,10 @@ int main(int argc, char *argv[])
 				(*tools_pt[i])(NULL);
 				break;
 			}
+			if (strncmp("patch_ra_cfg", apply_tool, STR_MAX - 1) == 0) {
+				tool_patchRAConfig(NULL);
+				break;
+			}
 		}
 		return 0;
 	}

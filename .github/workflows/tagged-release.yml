@@ -31,5 +31,4 @@ jobs:
         draft: true
         title: "Onion V${{ env.BUILD_VERSION }}"
         files: |
-          release/Onion-v${{ env.BUILD_VERSION }}-full.zip
-          release/Onion-v${{ env.BUILD_VERSION }}-core.zip
+          release/Onion-v${{ env.BUILD_VERSION }}.zip

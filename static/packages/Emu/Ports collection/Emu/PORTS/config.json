@@ -3,11 +3,11 @@
 "icon":"../../Icons/ports.png",
 "iconsel":"../../Icons/ports.png",
 "launch":"launch.sh",
-"rompath":"./PORTS",
-"imgpath":"./PORTS/Imgs",
+"rompath":"../../Roms/PORTS",
+"imgpath":"../../Roms/PORTS/Imgs",
 "gamelist":"../../Roms/PORTS/miyoogamelist.xml",
 "useswap":0,
 "shortname":1,
 "hidebios":0,
-"extlist":""
+"extlist":"port"
 }

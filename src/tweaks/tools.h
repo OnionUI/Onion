@@ -124,6 +124,41 @@ void tool_removeMacFiles(void *pt)
     );
 }
 
+void tool_patchRAConfig(void *_)
+{
+    char value[STR_MAX];
+    char theme_preset[STR_MAX];
+    int color_theme = 0;
+
+    if (!is_file(RETROARCH_CONFIG))
+        return;
+
+    if (file_parseKeyValue(RETROARCH_CONFIG, "rgui_menu_color_theme", value, '=', 0) != NULL)
+        color_theme = atoi(value);
+    if (file_parseKeyValue(RETROARCH_CONFIG, "rgui_menu_theme_preset", value, '=', 0) != NULL)
+        strncpy(theme_preset, value, STR_MAX - 1);
+        
+    if (color_theme == 25 && strlen(theme_preset) == 0 && is_file("/mnt/SDCARD/RetroArch/.retroarch/assets/rgui/Onion.cfg")) {
+        file_changeKeyValue(RETROARCH_CONFIG, "rgui_menu_color_theme =", "rgui_menu_color_theme = \"0\"");
+        file_changeKeyValue(RETROARCH_CONFIG, "rgui_menu_theme_preset =", "rgui_menu_theme_preset = \":/.retroarch/assets/rgui/Onion.cfg\"");
+    }
+
+    file_changeKeyValue(RETROARCH_CONFIG, "savestate_thumbnail_enable =", "savestate_thumbnail_enable = \"true\"");
+    file_changeKeyValue(RETROARCH_CONFIG, "fastforward_frameskip =", "fastforward_frameskip = \"false\"");
+    file_changeKeyValue(RETROARCH_CONFIG, "log_dir =", "log_dir = \"/mnt/SDCARD/.tmp_update/logs\"");
+
+    file_changeKeyValue(RETROARCH_CONFIG, "menu_ticker_speed =", "menu_ticker_speed = \"4.800000\"");
+    
+    file_changeKeyValue(RETROARCH_CONFIG, "notification_show_autoconfig =", "notification_show_autoconfig = \"false\"");
+    file_changeKeyValue(RETROARCH_CONFIG, "notification_show_cheats_applied =", "notification_show_cheats_applied = \"false\"");
+    file_changeKeyValue(RETROARCH_CONFIG, "notification_show_config_override_load =", "notification_show_config_override_load = \"false\"");
+    file_changeKeyValue(RETROARCH_CONFIG, "notification_show_patch_applied =", "notification_show_patch_applied = \"false\"");
+    file_changeKeyValue(RETROARCH_CONFIG, "notification_show_remap_load =", "notification_show_remap_load = \"false\"");
+    file_changeKeyValue(RETROARCH_CONFIG, "notification_show_screenshot =", "notification_show_screenshot = \"false\"");
+    file_changeKeyValue(RETROARCH_CONFIG, "notification_show_set_initial_disk =", "notification_show_set_initial_disk = \"false\"");
+    
+}
+
 static void (*tools_pt[NUM_TOOLS])(void*) = {
     tool_favoritesSortAlpha,
     tool_favoritesSortSystem,

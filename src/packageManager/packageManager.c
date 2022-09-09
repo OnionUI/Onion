@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <stdint.h>
 #include <string.h>
+#include <libgen.h>
 #include <fcntl.h>
 #include <stdbool.h>
 #include <sys/stat.h>
@@ -25,9 +26,10 @@
 #define DT_DIR 4
 #endif
 
-#define PACKAGE_LAYER_1 "/mnt/SDCARD/Packages/Emu"
-#define PACKAGE_LAYER_2 "/mnt/SDCARD/Packages/App"
-#define PACKAGE_LAYER_3 "/mnt/SDCARD/Packages/RApp"
+#define PACKAGE_DIR "/mnt/SDCARD/miyoo/packages/"
+#define PACKAGE_LAYER_1 PACKAGE_DIR "Emu"
+#define PACKAGE_LAYER_2 PACKAGE_DIR "App"
+#define PACKAGE_LAYER_3 PACKAGE_DIR "RApp"
 
 // Max number of records in the DB
 #define LAYER_ITEM_COUNT 200
@@ -41,7 +43,7 @@ typedef struct package_s {
     bool complete;
 } Package;
 
-static char layer_names[][STR_MAX] = {"CONSOLES", "APPS", "EXPERIMENTAL"};
+static char layer_names[][STR_MAX] = {"VERIFIED", "APPS", "EXPERT"};
 static Package packages[3][LAYER_ITEM_COUNT];
 static int package_count[3];
 static int package_installed_count[] = {0, 0, 0};
@@ -201,8 +203,8 @@ bool checkAppInstalled(const char *basePath, int base_len, int level, bool compl
         if (strcmp(dp->d_name, ".") == 0 || strcmp(dp->d_name, "..") == 0)
             continue;
 
-        // Ignore "Roms" folder - it does not indicate installed status
-        if (level == 0 && strcmp(dp->d_name, "Roms") == 0)
+        // Ignore other dirs
+        if (level == 0 && strcmp(dp->d_name, "Emu") > 0 && strcmp(dp->d_name, "App") > 0 && strcmp(dp->d_name, "RApp") > 0)
             continue;
 
         // Construct new path from our base path
@@ -447,6 +449,48 @@ void renderCurrentTab(void)
         renderTabName(layer_names[nTab == 2 ? 0 : nTab + 1], 524, false);
         static SDL_Rect arrow_right_rect = {640 - 14 - 204 - 24, 60};
         SDL_BlitSurface(surfaceArrowRight, NULL, screen, &arrow_right_rect);
+    }
+}
+
+bool getPackageMainPath(char *out_path, const char *data_path, const char *package_name)
+{
+    const char *base_dir = basename((char*)data_path);
+    sprintf(out_path, "%s/%s/%s/", data_path, package_name, base_dir);
+
+    if (!is_dir(out_path))
+        return false;
+
+    struct dirent *dp;
+    DIR *dir = opendir(out_path);
+
+    // Unable to open directory stream
+    if (!dir)
+        return false;
+
+    while ((dp = readdir(dir)) != NULL) {
+        if (strcmp(dp->d_name, ".") == 0 || strcmp(dp->d_name, "..") == 0)
+            continue;
+        if (dp->d_type != DT_DIR)
+            continue;
+        sprintf(out_path, "/mnt/SDCARD/%s/%s", base_dir, dp->d_name);
+        return is_dir(out_path);
+    }
+
+    return false;
+}
+
+void callPackageInstaller(const char *data_path, const char *package_name, bool install)
+{
+    char main_path[STR_MAX], cmd[STR_MAX];
+
+    if (getPackageMainPath(main_path, data_path, package_name)) {
+        char installer_path[STR_MAX + 32];
+        concat(installer_path, main_path, install ? "/install.sh" : "/uninstall.sh");
+        if (is_file(installer_path)) {
+            sprintf(cmd, install ? "cd \"%s\"; chmod a+x ./install.sh; ./install.sh"
+                                 : "cd \"%s\"; chmod a+x ./uninstall.sh; ./uninstall.sh", main_path);
+            system(cmd);
+        }
     }
 }
 
@@ -711,20 +755,25 @@ int main(int argc, char *argv[])
 
                     sprintf(cmd, "./install.sh \"%s\" \"%s\"", data_path, package->name);
                     system(cmd);
+                    
+                    callPackageInstaller(data_path, package->name, true);
                 }
                 else if (package->installed) {
                     printf_debug("Removing %s...\n", package->name);
+                    callPackageInstaller(data_path, package->name, false);
+
                     // app uninstallation
                     char pathAppUninstall[1000];
                     sprintf(pathAppUninstall, "%s/%s", data_path, package->name);
                     appUninstall(pathAppUninstall, strlen(pathAppUninstall));
                 }
             }
-
         }
     }
 
+    #ifndef PLATFORM_MIYOOMINI
     msleep(200);
+    #endif
 
     TTF_CloseFont(font18);
     TTF_CloseFont(font25);

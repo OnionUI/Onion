@@ -1,8 +1,8 @@
 ###########################################################
 
 TARGET=Onion
-VERSION=4.0.0-rc
-RA_SUBVERSION=0.1.1
+VERSION=4.0.0
+RA_SUBVERSION=0.1.3
 
 ###########################################################
 
@@ -14,19 +14,20 @@ SRC_DIR             := $(ROOT_DIR)/src
 THIRD_PARTY_DIR     := $(ROOT_DIR)/third-party
 BUILD_DIR           := $(ROOT_DIR)/build
 BUILD_TEST_DIR      := $(ROOT_DIR)/build_test
+TEST_SRC_DIR		:= $(ROOT_DIR)/test
 BIN_DIR             := $(ROOT_DIR)/build/.tmp_update/bin
-DIST_FULL           := $(ROOT_DIR)/dist/full
-DIST_CORE           := $(ROOT_DIR)/dist/core
-INSTALLER_DIR       := $(DIST_FULL)/miyoo/app/.tmp_update
+DIST_DIR            := $(ROOT_DIR)/dist
+INSTALLER_DIR       := $(DIST_DIR)/miyoo/app/.tmp_update
 RELEASE_DIR         := $(ROOT_DIR)/release
 STATIC_BUILD        := $(ROOT_DIR)/static/build
 STATIC_DIST         := $(ROOT_DIR)/static/dist
 STATIC_CONFIGS      := $(ROOT_DIR)/static/configs
 CACHE               := $(ROOT_DIR)/cache
 STATIC_PACKAGES     := $(ROOT_DIR)/static/packages
-PACKAGES_EMU_DEST   := $(BUILD_DIR)/Packages/Emu
-PACKAGES_APP_DEST   := $(BUILD_DIR)/Packages/App
-PACKAGES_RAPP_DEST  := $(BUILD_DIR)/Packages/RApp
+PACKAGES_DIR        := $(ROOT_DIR)/build/miyoo/packages
+PACKAGES_EMU_DEST   := $(PACKAGES_DIR)/Emu
+PACKAGES_APP_DEST   := $(PACKAGES_DIR)/App
+PACKAGES_RAPP_DEST  := $(PACKAGES_DIR)/RApp
 ifeq (,$(GTEST_INCLUDE_DIR))
 GTEST_INCLUDE_DIR = /usr/include/
 endif
@@ -37,7 +38,7 @@ include ./src/common/commands.mk
 
 ###########################################################
 
-.PHONY: all version core apps external release clean git-clean with-toolchain patch lib test
+.PHONY: all version core apps external release clean deepclean git-clean with-toolchain patch lib test
 
 all: dist
 
@@ -49,11 +50,11 @@ print-version:
 
 $(CACHE)/.setup:
 	@$(ECHO) $(PRINT_RECIPE)
-	@mkdir -p $(BUILD_DIR) $(DIST_FULL) $(DIST_CORE) $(RELEASE_DIR)
+	@mkdir -p $(BUILD_DIR) $(DIST_DIR) $(RELEASE_DIR)
 	@rsync -a --exclude='.gitkeep' $(STATIC_BUILD)/ $(BUILD_DIR)
-	@rsync -a --exclude='.gitkeep' $(STATIC_DIST)/ $(DIST_FULL)
+	@rsync -a --exclude='.gitkeep' $(STATIC_DIST)/ $(DIST_DIR)
 # Copy shared libraries
-	@cp -R $(ROOT_DIR)/lib/. $(DIST_FULL)/miyoo/app/.tmp_update/lib
+	@cp -R $(ROOT_DIR)/lib/. $(DIST_DIR)/miyoo/app/.tmp_update/lib
 # Set version number
 	@mkdir -p $(BUILD_DIR)/.tmp_update/onionVersion
 	@echo -n "$(VERSION)" > $(BUILD_DIR)/.tmp_update/onionVersion/version.txt
@@ -97,10 +98,11 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/prompt && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/batmon && BUILD_DIR=$(BIN_DIR) make
 # Build dependencies for installer
-	@mkdir -p $(DIST_FULL)/miyoo/app/.tmp_update/bin
+	@mkdir -p $(DIST_DIR)/miyoo/app/.tmp_update/bin
 	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(INSTALLER_DIR)/bin/ make
 	@cp $(BIN_DIR)/prompt $(INSTALLER_DIR)/bin/
 	@cp $(BIN_DIR)/batmon $(INSTALLER_DIR)/bin/
+	@cp $(BIN_DIR)/infoPanel $(INSTALLER_DIR)/bin/
 
 apps: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
@@ -111,14 +113,20 @@ apps: $(CACHE)/.setup
 # Preinstalled apps
 	@cp -a "$(PACKAGES_APP_DEST)/Activity Tracker/." $(BUILD_DIR)/
 	@cp -a "$(PACKAGES_APP_DEST)/Quick Guide/." $(BUILD_DIR)/
-	@cp -a "$(PACKAGES_APP_DEST)/RetroArch (Emulator settings)/." $(BUILD_DIR)/
+	@cp -a "$(PACKAGES_APP_DEST)/RetroArch (Shortcut)/." $(BUILD_DIR)/
 	@cp -a "$(PACKAGES_APP_DEST)/Tweaks/." $(BUILD_DIR)/
 
 external: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
+# RetroArch
 	@cd $(THIRD_PARTY_DIR)/RetroArch && make && cp retroarch $(BUILD_DIR)/RetroArch/
 	@echo $(RA_SUBVERSION) > $(BUILD_DIR)/RetroArch/onion_ra_version.txt
-	@cd $(THIRD_PARTY_DIR)/SearchFilter && make build && cp -a build/. "$(PACKAGES_APP_DEST)/Search/" && cp build/App/SearchFilter/tools $(BIN_DIR)
+# SearchFilter
+	@cd $(THIRD_PARTY_DIR)/SearchFilter && make build && cp -a build/. $(BUILD_DIR)
+	@mkdir -p "$(PACKAGES_APP_DEST)/Search (Find your games)/App/Search" "$(PACKAGES_APP_DEST)/Filter (Manage game lists)/App"
+	@cp -a $(BUILD_DIR)/App/Search/. "$(PACKAGES_APP_DEST)/Search (Find your games)/App/Search"
+	@mv $(BUILD_DIR)/App/Filter "$(PACKAGES_APP_DEST)/Filter (Manage game lists)/App/Filter"
+# Other
 	@cd $(THIRD_PARTY_DIR)/Terminal && make && cp ./st "$(PACKAGES_APP_DEST)/Terminal (Developer tool)/App/Terminal"
 	@cd $(THIRD_PARTY_DIR)/DinguxCommander && make && cp ./output/DinguxCommander "$(PACKAGES_APP_DEST)/File Explorer (DinguxCommander)/App/Commander_Italic"
 
@@ -126,34 +134,35 @@ dist: build
 	@$(ECHO) $(PRINT_RECIPE)
 # Package RetroArch separately
 	@cd $(BUILD_DIR) && zip -rq retroarch.pak RetroArch
-	@mv -f $(BUILD_DIR)/RetroArch $(ROOT_DIR)/cache/RetroArch
-	@mkdir -p $(DIST_FULL)/RetroArch
-	@mv $(BUILD_DIR)/retroarch.pak $(DIST_FULL)/RetroArch/
-	@echo $(RA_SUBVERSION) > $(DIST_FULL)/RetroArch/ra_package_version.txt
+	@mkdir -p $(DIST_DIR)/RetroArch
+	@mv $(BUILD_DIR)/retroarch.pak $(DIST_DIR)/RetroArch/
+	@echo $(RA_SUBVERSION) > $(DIST_DIR)/RetroArch/ra_package_version.txt
 # Package configs
 	@mkdir -p $(ROOT_DIR)/temp/configs $(BUILD_DIR)/.tmp_update/config
 	@rsync -a --exclude='.gitkeep' $(STATIC_CONFIGS)/ $(ROOT_DIR)/temp/configs
 	@cp -R $(ROOT_DIR)/temp/configs/Saves/CurrentProfile/ $(ROOT_DIR)/temp/configs/Saves/GuestProfile
 	@cd $(ROOT_DIR)/temp/configs && zip -rq $(BUILD_DIR)/.tmp_update/config/configs.pak .
-# Package core
-	@cd $(BUILD_DIR) && zip -rq $(DIST_FULL)/miyoo/app/.tmp_update/onion.pak .
-# Create core-only dist
-	@cp -R $(DIST_FULL)/.tmp_update $(DIST_CORE)/.tmp_update
-	@cp -R $(DIST_FULL)/miyoo $(DIST_CORE)/miyoo
-# Restore RetroArch in build dir
-	@mv -f $(ROOT_DIR)/cache/RetroArch $(BUILD_DIR)/RetroArch
+	@rm -rf $(ROOT_DIR)/temp/configs
+	@rmdir $(ROOT_DIR)/temp
+# Package Onion core
+	@cd $(BUILD_DIR) && zip -rq $(DIST_DIR)/miyoo/app/.tmp_update/onion.pak .
 
 release: dist
 	@$(ECHO) $(PRINT_RECIPE)
-	@rm -f $(RELEASE_DIR)/$(RELEASE_NAME)-full.zip $(RELEASE_DIR)/$(RELEASE_NAME)-core.zip
-	@cd $(DIST_FULL) && zip -rq $(RELEASE_DIR)/$(RELEASE_NAME)-full.zip .
-	@cd $(DIST_CORE) && zip -rq $(RELEASE_DIR)/$(RELEASE_NAME)-core.zip .
+	@rm -f $(RELEASE_DIR)/$(RELEASE_NAME).zip
+	@cd $(DIST_DIR) && zip -rq $(RELEASE_DIR)/$(RELEASE_NAME).zip .
 
 clean:
 	@$(ECHO) $(PRINT_RECIPE)
 	@rm -rf $(BUILD_DIR) $(BUILD_TEST_DIR) $(ROOT_DIR)/dist $(ROOT_DIR)/temp/configs
 	@rm -f $(CACHE)/.setup
 	@find include src -type f -name *.o -exec rm -f {} \;
+
+deepclean: clean
+	@cd $(THIRD_PARTY_DIR)/RetroArch && make clean
+	@cd $(THIRD_PARTY_DIR)/SearchFilter && make clean
+	@cd $(THIRD_PARTY_DIR)/Terminal && make clean
+	@cd $(THIRD_PARTY_DIR)/DinguxCommander && make clean
 
 dev: clean
 	@$(MAKE_DEV)
@@ -183,5 +192,6 @@ lib:
 	@cd $(ROOT_DIR)/include/SDL && make clean && make
 
 test:
-	@mkdir -p $(BUILD_TEST_DIR) && cd $(ROOT_DIR)/test && BUILD_DIR=$(BUILD_TEST_DIR)/ make
-	$(BUILD_TEST_DIR)/test
+	@mkdir -p $(BUILD_TEST_DIR)/infoPanel_test_data && cd $(TEST_SRC_DIR) && BUILD_DIR=$(BUILD_TEST_DIR)/ make dev
+	@cp -R $(TEST_SRC_DIR)/infoPanel_test_data $(BUILD_TEST_DIR)/
+	cd $(BUILD_TEST_DIR) && ./test

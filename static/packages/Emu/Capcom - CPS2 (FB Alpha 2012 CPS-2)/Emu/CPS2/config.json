@@ -9,5 +9,5 @@
 "useswap":1,
 "shortname":1,
 "hidebios":1,
-"extlist":"zip"
+"extlist":"zip|ZIP|7z|7Z|cue|CUE"
 }
