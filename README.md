@@ -6,7 +6,7 @@
 
 <p>&nbsp;</p>
 
-<p align="center"><img src="https://user-images.githubusercontent.com/44569252/189336183-3078514e-cee6-4fa5-9f20-d68863ceb80f.gif"></p>
+<p align="center"><img src="https://user-images.githubusercontent.com/44569252/189437613-6fe9a5ed-b47a-4d4f-babe-a4236f21d6e3.gif"></p>
 
 <p>&nbsp;</p>
 
@@ -14,11 +14,40 @@
 
 <p>&nbsp;</p>
 
-<h3 align="center"><a href="https://github.com/OnionUI/Onion/releases/latest"><img src="https://user-images.githubusercontent.com/44569252/179315622-e29e0971-87c8-4855-85e6-fc8de4ccd940.png" width="40"><br/>Download latest release</a></h3>
+<h3 align="center"><a href="https://github.com/OnionUI/Onion/releases/latest"><img src="https://user-images.githubusercontent.com/44569252/179302769-4169e57a-860f-4c0e-8792-007e7557ba48.png" width="40"><br/>Download Latest Release</a></h3>
 
 <p>&nbsp;</p>
 
 <h1 align="center">Features</h1>
+
+<p>&nbsp;</p>
+
+## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/189434056-b1148ff9-393b-43d1-b362-20d97b64b393.png" width="54"></sup>Global Shortcuts
+
+<p align="center"><a href="https://github.com/OnionUI/Onion/wiki/Global-Shortcuts"><img src="https://user-images.githubusercontent.com/44569252/189388343-3fa73c5d-31ca-4931-b310-4e7ba43c536d.png" width="640"></a></p>
+
+<p align="center"><a href="https://github.com/OnionUI/Onion/wiki/Global-Shortcuts">Click here</a> to see all the shortcuts.</p>
+
+<p>&nbsp;</p>
+
+## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179301923-635b60fa-22de-4cf3-894a-2f3c34702d64.png" width="54"></sup>GameSwitcher
+
+<img src="https://user-images.githubusercontent.com/44569252/189434217-72ef0daf-c630-4ec9-b96a-30fd76cb709f.png" width="320"> <img src="https://user-images.githubusercontent.com/44569252/189434224-aeba7b8f-c881-4784-ba2f-65c60d41d20c.png" width="320">
+
+The GameSwitcher is designed to be the central user interface of Onion.
+Launch the GameSwitcher by pressing the <kbd>MENU</kbd> button.
+The last game played will be resumed in a few seconds, and with the simple press of a button, save your progress and turn off the console.  
+It also allows you to quickly change games and many other features:
+
+- Quick boot your last played game.
+- Quickly switch games from your history.
+  - Remove a game by pressing <kbd>X</kbd>.
+- Full overlay with accurate brightness, battery readings and playtimes.
+  - Press <kbd>SELECT</kbd> to toggle playtime display.
+- **Minimal view mode:** Press <kbd>Y</kbd> to toggle.
+- Improved *Sleep Mode* with full game suspension (press <kbd>POWER</kbd>).
+- Large new low battery (<10%) indicator with periodic warning rumble.
+- When the battery goes below 4%, the device will automatically save and exit to prevent losing progress.
 
 <p>&nbsp;</p>
 
@@ -31,38 +60,24 @@
 
 <p>&nbsp;</p>
 
-## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179302769-4169e57a-860f-4c0e-8792-007e7557ba48.png" width="54"></sup>Package Manager
+## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179315622-e29e0971-87c8-4855-85e6-fc8de4ccd940.png" width="54"></sup>Package Manager
 
-<img src="https://user-images.githubusercontent.com/16885275/162589315-1d127c72-d404-4487-b379-3bde8179f566.png" width="350">
+<img src="https://user-images.githubusercontent.com/44569252/189438069-2926cf7b-1e72-476f-8b41-79132146d7c9.png" width="320">
 
-- Install/uninstall only the systems and apps you need. All actions are reversible.
-- Community presets, homebrews and more.
+- Choose the systems and apps you need.
+- Optimized presets, homebrew apps, and more.
+- Three sections:
+  - **Verified:** Contains all verified systems (see [Emulators](https://github.com/OnionUI/Onion/wiki/Emulators) for more information).
+  - **Apps:** Contains all the included Onion and third-party apps.
+  - **Expert:** Contains experimental/expert systems (see [Emulators](https://github.com/OnionUI/Onion/wiki/Emulators) for more information).
 
 <p>&nbsp;</p>
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179302722-7fa82e4d-d72d-4b1e-bb4d-96a2a52aaa62.png" width="54"></sup>Activity Tracker
-<img src="https://user-images.githubusercontent.com/16885275/162589339-e779c6dd-4e9d-47f0-8543-4646d84fc748.png" width="350">
+
+<img src="https://user-images.githubusercontent.com/44569252/189435280-9de4f088-b013-4c71-a44b-71f953b128a8.png" width="320">
 
 - Track your game playtimes.
-
-<p>&nbsp;</p>
-
-## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179301923-635b60fa-22de-4cf3-894a-2f3c34702d64.png" width="54"></sup>GameSwitcher
-<img src="https://user-images.githubusercontent.com/16885275/164890313-c83dfc84-a684-416b-bd40-9f54c9f4e7db.png" width="350">
-
-Although it's optional, we consider the game switcher to be central to the Onion UI experience.  
-The Game Switcher is a user interface designed to be triggered when the Miyoo Mini starts.
-It allows you to launch the last game played in a few seconds, and, with the simple press of a button, save your progress and turn off the console.  
-It also allows you to quickly change games and many other features:
-
-- Quick boot your last game played.
-- Quickly switch games from your history.
-- Full overlay with accurate brightness, battery readings and playtimes.
-- Improved *Sleep Mode* with full game suspension (press <kbd>POWER</kbd>).
-- Custom charging screen that prevents screen burn-in.
-- Removed low bat flickering icon.
-- Large new low battery (<10%) indicator with periodic warning rumble.
-- When the battery goes below 4%, the game is automatically saved to prevent losing progress, and the handheld is turned off.
 
 <p>&nbsp;</p>
 
