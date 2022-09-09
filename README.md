@@ -32,7 +32,7 @@
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179301923-635b60fa-22de-4cf3-894a-2f3c34702d64.png" width="54"></sup>GameSwitcher
 
-<img src="https://user-images.githubusercontent.com/44569252/189434217-72ef0daf-c630-4ec9-b96a-30fd76cb709f.png" width="320"> <img src="https://user-images.githubusercontent.com/44569252/189434224-aeba7b8f-c881-4784-ba2f-65c60d41d20c.png" width="320">
+<p align="center"><img src="https://user-images.githubusercontent.com/44569252/189434217-72ef0daf-c630-4ec9-b96a-30fd76cb709f.png" width="320"> <img src="https://user-images.githubusercontent.com/44569252/189434224-aeba7b8f-c881-4784-ba2f-65c60d41d20c.png" width="320"></p>
 
 The GameSwitcher is designed to be the central user interface of Onion.
 Launch the GameSwitcher by pressing the <kbd>MENU</kbd> button.
@@ -53,7 +53,7 @@ It also allows you to quickly change games and many other features:
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179304061-647e63ff-5113-4a8a-aaa9-4dfda248d54e.png" width="54"></sup>Themes
 
-![custom_themes_preview](https://user-images.githubusercontent.com/44569252/189352231-03ae9688-a859-41c2-a8e3-4eba8ef360c8.png)
+<p align="center"><img src="https://user-images.githubusercontent.com/44569252/189352231-03ae9688-a859-41c2-a8e3-4eba8ef360c8.png"></p>
 
 - Preview and change themes.
 - [Get more themes](https://github.com/OnionUI/Themes/blob/main/README.md) from our <sup><sub>❤️</sub></sup> community
@@ -62,7 +62,7 @@ It also allows you to quickly change games and many other features:
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179315622-e29e0971-87c8-4855-85e6-fc8de4ccd940.png" width="54"></sup>Package Manager
 
-<img src="https://user-images.githubusercontent.com/44569252/189438069-2926cf7b-1e72-476f-8b41-79132146d7c9.png" width="320">
+<p align="center"><img src="https://user-images.githubusercontent.com/44569252/189438069-2926cf7b-1e72-476f-8b41-79132146d7c9.png" width="320"></p>
 
 - Choose the systems and apps you need.
 - Optimized presets, homebrew apps, and more.
@@ -78,7 +78,7 @@ It also allows you to quickly change games and many other features:
 
 *Make Onion your own!*
 
-<img src="https://user-images.githubusercontent.com/44569252/189440370-23849320-e130-4cdf-a1d6-ca97d2696e3a.png" width="320">
+<p align="center"><img src="https://user-images.githubusercontent.com/44569252/189440370-23849320-e130-4cdf-a1d6-ca97d2696e3a.png" width="320"></p>
 
 - **System settings:** Startup behavior, auto-save and exit, vibration
 - **Custom shortcuts:** Single/long/double press <kbd>MENU</kbd>, and launch apps or tools via <kbd>X</kbd> or <kbd>Y</kbd> in MainUI
@@ -87,13 +87,13 @@ It also allows you to quickly change games and many other features:
 - **Advanced:** Quick access to advanced emulator settings, plus a submenu to reset different settings
 - **Tools:** Sort favorites, fix thumbnails, remove OSX system files
 
-![tweaks_preview](https://user-images.githubusercontent.com/44569252/189440460-0afffde0-2e5e-41a4-b85e-0484b23c461a.png)
+<p align="center"><img src="https://user-images.githubusercontent.com/44569252/189440460-0afffde0-2e5e-41a4-b85e-0484b23c461a.png"></p>
 
 <p>&nbsp;</p>
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179302722-7fa82e4d-d72d-4b1e-bb4d-96a2a52aaa62.png" width="54"></sup>Activity Tracker
 
-<img src="https://user-images.githubusercontent.com/44569252/189435280-9de4f088-b013-4c71-a44b-71f953b128a8.png" width="320">
+<p align="center"><img src="https://user-images.githubusercontent.com/44569252/189435280-9de4f088-b013-4c71-a44b-71f953b128a8.png" width="320"></p>
 
 - Track your game playtimes (format `h:m`).
 - View your total playtime in the top bar (format `h:m`).
@@ -105,7 +105,7 @@ It also allows you to quickly change games and many other features:
 
 *Rebuilt for Miyoo Mini - synched with [RA main](https://github.com/libretro/RetroArch)*
 
-<img src="https://user-images.githubusercontent.com/44569252/189438841-f419f936-6376-436e-89b5-78ce1f88494f.png" width="320">
+<p align="center"><img src="https://user-images.githubusercontent.com/44569252/189438841-f419f936-6376-436e-89b5-78ce1f88494f.png" width="320"></p>
 
 - Save State Thumbnails enabled
 - Compiled and partially rebuilt by [Eggs](https://discordapp.com/users/778867980096241715) for precision and performance  
@@ -149,6 +149,7 @@ Guest mode is a separate profile so you can safely lend your device to your kid 
 <p>&nbsp;</p>
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179305837-59922e34-e18f-45d1-b5fb-89593ee08152.png" width="54"></sup>Personal files gathered in one place
+
 Your saves and most of your preferences are now in `/Saves` (Example: `D:/Saves/`).
 This also includes your secondary profile, your config files, RetroArch lists and play activity database.
 Simply copy this folder when you want to backup your data.
