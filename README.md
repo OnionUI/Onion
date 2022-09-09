@@ -66,10 +66,28 @@ It also allows you to quickly change games and many other features:
 
 - Choose the systems and apps you need.
 - Optimized presets, homebrew apps, and more.
-- Three sections:
+- Packages are divided into three sections:
   - **Verified:** Contains all verified systems (see [Emulators](https://github.com/OnionUI/Onion/wiki/Emulators) for more information).
   - **Apps:** Contains all the included Onion and third-party apps.
   - **Expert:** Contains experimental/expert systems (see [Emulators](https://github.com/OnionUI/Onion/wiki/Emulators) for more information).
+- To reinstall a package, first toggle it off and press <kbd>START</kbd> to apply, then open Package Manager, toggle it on and apply.
+
+<p>&nbsp;</p>
+
+## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/189439761-e03a9684-ade4-4dcc-8fdd-c006a1663c05.png" width="54"></sup>Tweaks
+
+*Make Onion your own!*
+
+<img src="https://user-images.githubusercontent.com/44569252/189440370-23849320-e130-4cdf-a1d6-ca97d2696e3a.png" width="320">
+
+- **System settings:** Startup behavior, auto-save and exit, vibration
+- **Custom shortcuts:** Single/long/double press <kbd>MENU</kbd>, and launch apps or tools via <kbd>X</kbd> or <kbd>Y</kbd> in MainUI
+  - *Known limitation:* Some apps can't be launched this way (for now only Music Player / GMU is known not to support this)
+- **User interface:** Show/hide recents/expert tabs, theme overrides
+- **Advanced:** Quick access to advanced emulator settings, plus a submenu to reset different settings
+- **Tools:** Sort favorites, fix thumbnails, remove OSX system files
+
+![tweaks_preview](https://user-images.githubusercontent.com/44569252/189440460-0afffde0-2e5e-41a4-b85e-0484b23c461a.png)
 
 <p>&nbsp;</p>
 
@@ -77,25 +95,19 @@ It also allows you to quickly change games and many other features:
 
 <img src="https://user-images.githubusercontent.com/44569252/189435280-9de4f088-b013-4c71-a44b-71f953b128a8.png" width="320">
 
-- Track your game playtimes.
+- Track your game playtimes (format `h:m`).
+- View your total playtime in the top bar (format `h:m`).
+- Share your playtimes by taking a screenshot (press <kbd>MENU</kbd>+<kbd>POWER</kbd> - screenshot is saved in `Screenshots`).
 
 <p>&nbsp;</p>
 
-## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179318731-7e262588-cb92-4ea3-9001-2991c4f8ccbe.png" width="54"></sup>RetroArch (rebuilt from scratch)
-<img src="https://user-images.githubusercontent.com/16885275/154791260-d1a4d0b2-5582-45cc-a291-bead843a5171.png" width="350">
+## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179318731-7e262588-cb92-4ea3-9001-2991c4f8ccbe.png" width="54"></sup>RetroArch
 
-1. Rotation support for arcade games
-2. Custom video filters  
-   > You can now modify, or create your own
+*Rebuilt for Miyoo Mini - synched with [RA main](https://github.com/libretro/RetroArch)*
 
-Some examples made for this RetroArch port:
+<img src="https://user-images.githubusercontent.com/44569252/189438841-f419f936-6376-436e-89b5-78ce1f88494f.png" width="320">
 
-**Normal_3X:**  
-<img src="https://user-images.githubusercontent.com/16885275/166151805-fa2315c6-f783-4c7d-ba59-fd1996352fef.png" width="500"> 
-
-**LCD filters, click to magnify (Integer scaling):**  
-![](https://user-images.githubusercontent.com/16885275/173250366-dbaed067-640e-485d-8244-c62b9a7bd722.png)
-
+- Save State Thumbnails enabled
 - Compiled and partially rebuilt by [Eggs](https://discordapp.com/users/778867980096241715) for precision and performance  
   > Custom audio driver, custom scalers, new display driver, and a new input driver
 - Minimal input and audio lag
@@ -104,6 +116,17 @@ Some examples made for this RetroArch port:
 - Crisp 640×480 resolution
 - Can also work as a game launcher  
   > Cores embedded, playlists and favorites unlocked
+- Rotation support for arcade games
+- Custom video filters  
+  > You can now modify, or create your own
+
+Some examples of video filters made for this RetroArch port (click to view full resolution):
+
+**Normal_3X:**  
+<img src="https://user-images.githubusercontent.com/16885275/166151805-fa2315c6-f783-4c7d-ba59-fd1996352fef.png" width="240"> 
+
+**LCD filters, click to magnify (Integer scaling):**  
+![](https://user-images.githubusercontent.com/16885275/173250366-dbaed067-640e-485d-8244-c62b9a7bd722.png)
 
 <p>&nbsp;</p>
 
