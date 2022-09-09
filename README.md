@@ -6,21 +6,15 @@
 
 <p>&nbsp;</p>
 
-<table align="center"><tr>
-<td>
+<p align="center"><img src="https://user-images.githubusercontent.com/44569252/189336183-3078514e-cee6-4fa5-9f20-d68863ceb80f.gif" width="512" height="512"></p>
 
-<img src="https://user-images.githubusercontent.com/44569252/189336183-3078514e-cee6-4fa5-9f20-d68863ceb80f.gif" width="512" height="512">
-
-</td><td>
+<p>&nbsp;</p>
 
 <h3 align="center"><a href="https://github.com/OnionUI/Onion/wiki"><img src="https://user-images.githubusercontent.com/44569252/179306509-8472e8a2-4989-4416-9fcf-d3b033c9e2fb.png" width="40"><br/>Getting Started Guide</a></h3>
 
 <p>&nbsp;</p>
 
 <h3 align="center"><a href="https://github.com/OnionUI/Onion/releases/latest"><img src="https://user-images.githubusercontent.com/44569252/179315622-e29e0971-87c8-4855-85e6-fc8de4ccd940.png" width="40"><br/>Download latest release</a></h3>
-
-</td>
-</tr></table>
 
 <p>&nbsp;</p>
 
