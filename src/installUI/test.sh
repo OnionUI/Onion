@@ -41,7 +41,7 @@ main() {
     mkdir -p temp
 
     if [ -f "$zipfile" ]; then
-        unzip_progress "$zipfile" "Updating core..." temp
+        unzip_progress "$zipfile" "1/2: Updating Onion..." temp
         sleep 5
     else
         echo "Invalid zip file"
