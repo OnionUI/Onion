@@ -46,7 +46,7 @@ It also allows you to quickly change games and many other features:
   - Press <kbd>SELECT</kbd> to toggle playtime display.
 - **Minimal view mode:** Press <kbd>Y</kbd> to toggle.
 - Improved *Sleep Mode* with full game suspension (press <kbd>POWER</kbd>).
-- Large new low battery (<10%) indicator with periodic warning rumble.
+- Low battery indicator: Red frame when <15% (can be adjusted in Tweaks).
 - When the battery goes below 4%, the device will automatically save and exit to prevent losing progress.
 
 <p>&nbsp;</p>
