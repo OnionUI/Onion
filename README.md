@@ -82,6 +82,25 @@ It also allows you to quickly change games and many other features:
 
 <p>&nbsp;</p>
 
+## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/189498482-2590f31f-cca2-46e9-a316-3af98828446a.png" width="54"></sup>Search
+
+<p align="center"><img src="https://user-images.githubusercontent.com/44569252/189498639-8e2a43a6-4020-4492-b4b1-6e3f0c0d5fd6.png" width="320"> <img src="https://user-images.githubusercontent.com/44569252/189498645-f615dd73-ed0c-4505-a439-5fb5b611237d.png" width="320"></p>
+
+- The *Search* app lets you search all your games.
+  - *Note: For now only verified systems are supported (the ones that are in the `Games` tab).*
+- You'll find Search under `Apps` - and it's a popular choice for mapping to <kbd>X</kbd> or <kbd>Y</kbd> (via Tweaks).
+- When a search is active, the results will be shown under `Games` ➜ `Search`, you can remove the search again by choosing "Clear search".
+- "Missing caches" lists all systems which haven't been cached yet, and thereby haven't been included in the search.
+  - *Reason:* All game caches are cleared everytime you "Refresh all roms".
+  - *Solution:* Go into each system you want included in the search.
+
+**Filter**
+- You can install *Filter* via Package Manager, which will add a "Filter" and "Refresh roms" shortcut to each game list.
+  - **Filter:** Will prompt you to enter a keyword for filtering the selected game list.
+  - **Refresh roms:** Will refresh roms only for the selected game list.
+
+<p>&nbsp;</p>
+
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179304061-647e63ff-5113-4a8a-aaa9-4dfda248d54e.png" width="54"></sup>Themes
 
 <p align="center"><a href="https://github.com/OnionUI/Themes/blob/main/README.md"><img src="https://user-images.githubusercontent.com/44569252/189352231-03ae9688-a859-41c2-a8e3-4eba8ef360c8.png"></a></p>
