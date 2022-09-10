@@ -15,7 +15,7 @@ body:
       label: Checklist
       description: Please confirm the following in order to prevent misuse of issues
       options:
-        - label: I have reviewed the [Onion Wiki](https://github.com/Sichroteph/Onion/wiki) and something is incorrect or missing
+        - label: I have reviewed the [Onion Wiki](https://github.com/OnionUI/Onion/wiki) and something is incorrect or missing
           required: true
   - type: input
     id: os
