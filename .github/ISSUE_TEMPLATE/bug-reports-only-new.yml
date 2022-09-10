@@ -17,7 +17,7 @@ body:
       options:
         - label: I am reporting a bug in the Onion OS (Note that Onion devs can’t fix inherited issues with RA Cores)
           required: true
-        - label: I have reviewed the [Onion Wiki](https://github.com/Sichroteph/Onion/wiki) and did not find the answer
+        - label: I have reviewed the [Onion Wiki](https://github.com/OnionUI/Onion/wiki) and did not find the answer
           required: true
         - label: I have searched the existing (open and closed) issues to ensure I do not log a duplicate
           required: true
