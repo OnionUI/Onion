@@ -327,7 +327,7 @@ int main(void)
     int footer_height = use_custom_footer ? custom_footer->h : 60;
     if (footer_height == 1) footer_height = 0;
 
-    SDL_Rect frame = {theme()->frame.border_left, 0, 640 - theme()->frame.border_right, 480};
+    SDL_Rect frame = {theme()->frame.border_left, 0, 640 - theme()->frame.border_left - theme()->frame.border_right, 480};
 
 	while (!quit) {
 		uint32_t ticks = SDL_GetTicks();
@@ -517,19 +517,19 @@ int main(void)
 
                 if (view_mode == VIEW_NORMAL) {
                     game_name_bg_size.x = game_name_bg_pos.x = theme()->frame.border_left;
-                    game_name_bg_size.w -= theme()->frame.border_right;
+                    game_name_bg_size.w -= theme()->frame.border_left + theme()->frame.border_right;
                 }
 
                 game_name_bg_pos.y = view_mode == VIEW_NORMAL ? (480 - footer_height - 60) : 420;
                 SDL_BlitSurface(transparent_bg, &game_name_bg_size, screen, &game_name_bg_pos);
 
                 if (current_game > 0) {
-                    SDL_Rect arrow_left_rect = {10, game_name_bg_pos.y + 30 - arrow_left->h / 2};
+                    SDL_Rect arrow_left_rect = {theme()->frame.border_left + 10, game_name_bg_pos.y + 30 - arrow_left->h / 2};
                     SDL_BlitSurface(arrow_left, NULL, screen, &arrow_left_rect);
                 }
 
                 if (current_game < game_list_len - 1) {
-                    SDL_Rect arrow_right_rect = {630 - arrow_right->w, game_name_bg_pos.y + 30 - arrow_right->h / 2};
+                    SDL_Rect arrow_right_rect = {630 - theme()->frame.border_right - arrow_right->w, game_name_bg_pos.y + 30 - arrow_right->h / 2};
                     SDL_BlitSurface(arrow_right, NULL, screen, &arrow_right_rect);
                 }
                 
