@@ -188,7 +188,7 @@ Simply copy this folder when you want to backup your data.
   <sup>Credit: DiMo</sup>
 - Box art size fix in the included themes  
   <sup>Credit: DiMo</sup>
-- For more information check the [FAQ](https://github.com/OnionUI/Onion/wiki/3.-Frequently-Asked-Questions-(FAQ))
+- For more information check the [FAQ](https://github.com/OnionUI/Onion/wiki/Frequently-Asked-Questions-%28FAQ%29)
 
 ### Others
 - Many additional systems supported
