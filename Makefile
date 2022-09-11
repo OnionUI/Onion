@@ -57,7 +57,7 @@ $(CACHE)/.setup:
 	@cp -R $(ROOT_DIR)/lib/. $(DIST_DIR)/miyoo/app/.tmp_update/lib
 # Set version number
 	@mkdir -p $(BUILD_DIR)/.tmp_update/onionVersion
-	@echo -n "$(VERSION)" > $(BUILD_DIR)/.tmp_update/onionVersion/version.txt
+	@echo -n "v$(VERSION)" > $(BUILD_DIR)/.tmp_update/onionVersion/version.txt
 	@sed -i "s/{VERSION}/$(VERSION)/g" $(BUILD_DIR)/autorun.inf
 # Copy all resources from src folders
 	@find \

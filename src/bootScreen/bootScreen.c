@@ -49,9 +49,7 @@ int main(int argc, char *argv[])
     TTF_Font* font = theme_loadFont(theme_path, theme()->hint.font, theme()->hint.size);
     SDL_Color color = theme()->total.color;
 
-    char version_str[12];
-    sprintf(version_str, "v%s", file_read("/mnt/SDCARD/.tmp_update/onionVersion/version.txt"));
-
+    const char *version_str = file_read("/mnt/SDCARD/.tmp_update/onionVersion/version.txt");
     SDL_Surface* version = TTF_RenderUTF8_Blended(font, version_str, color);
     SDL_Rect rectVersion = {20, 450 - version->h / 2};
     SDL_BlitSurface(version, NULL, screen, &rectVersion);
