@@ -1,7 +1,7 @@
 ###########################################################
 
 TARGET=Onion
-VERSION=4.0.0
+VERSION=4.0.1
 RA_SUBVERSION=0.1.3
 
 ###########################################################
@@ -115,6 +115,7 @@ apps: $(CACHE)/.setup
 	@cp -a "$(PACKAGES_APP_DEST)/Quick Guide/." $(BUILD_DIR)/
 	@cp -a "$(PACKAGES_APP_DEST)/RetroArch (Shortcut)/." $(BUILD_DIR)/
 	@cp -a "$(PACKAGES_APP_DEST)/Tweaks/." $(BUILD_DIR)/
+	@cp -a "$(PACKAGES_APP_DEST)/Themes (Change theme)/." $(BUILD_DIR)/
 
 external: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)

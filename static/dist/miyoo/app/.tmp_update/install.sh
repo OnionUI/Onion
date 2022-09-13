@@ -437,7 +437,8 @@ debloat_apps() {
         Clean_View_Toggle \
         Onion_Manual \
         PlayActivity \
-        SearchFilter
+        SearchFilter \
+        ThemeSwitcher
         
     rm -rf /mnt/SDCARD/Emu/SEARCH
     rm -f /mnt/SDCARD/miyoo/app/.isExpert
