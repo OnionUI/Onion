@@ -1,12 +1,12 @@
 {
 "label":"OpenBOR",
-"icon":"openbor.png",
-"iconsel":"",
+"icon":"icon.png",
+"iconsel":"icon.png",
 "launch":"launch.sh",
-"rompath":"./Launch",
-"imgpath":"",
+"rompath":"../../Roms/OPENBOR",
+"imgpath":"../../Imgs/OPENBOR",
 "useswap":1,
 "shortname":0,
-"hidebios":1,
+"hidebios":0,
 "extlist":""
 }
