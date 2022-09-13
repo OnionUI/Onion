@@ -145,7 +145,7 @@ dist: build
 	@rm -rf $(ROOT_DIR)/temp/configs
 	@rmdir $(ROOT_DIR)/temp
 # Package Onion core
-	@cd $(BUILD_DIR) && zip -rq $(DIST_DIR)/miyoo/app/.tmp_update/onion.pak .
+	@cd $(BUILD_DIR) && zip -rq $(DIST_DIR)/miyoo/app/.tmp_update/onion.pak . -x RetroArch RetroArch/\*
 
 release: dist
 	@$(ECHO) $(PRINT_RECIPE)
