@@ -98,6 +98,7 @@ It also allows you to quickly change games and many other features:
 - You can install *Filter* via Package Manager, which will add a "Filter" and "Refresh roms" shortcut to each game list.
   - **Filter:** Will prompt you to enter a keyword for filtering the selected game list.
   - **Refresh roms:** Will refresh roms only for the selected game list.
+  - *Note: If you use a `miyoogamelist.xml` you will need to add an entry for each of the above for them to be visible.*
 
 <p>&nbsp;</p>
 
