@@ -174,13 +174,14 @@ run_installation() {
         # Remove stock folders
         cd /mnt/SDCARD
         rm -rf App Emu RApp miyoo
-    else
+        
+    elif [ $system_only -ne 1 ]; then
         echo "Preparing update..." >> /tmp/.update_msg
-    fi
 
-    debloat_apps
-    move_ports_collection
-    refresh_roms
+        debloat_apps
+        move_ports_collection
+        refresh_roms
+    fi
 
     if [ $install_ra -eq 1 ]; then
         install_core "1/2: $verb Onion..."
