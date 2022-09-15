@@ -9,5 +9,5 @@
 "useswap":0,
 "shortname":0,
 "hidebios":1,
-"extlist":"adf|ADF|hdf|HDF|lha|LHA|zip|ZIP|bin|BIN|cue|CUE|iso|ISO"
+"extlist":"adf|ADF|hdf|HDF|lha|LHA|zip|ZIP|cue|CUE"
 }
