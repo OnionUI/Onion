@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
     // The amount of progress constituting 100% of sub-install
     int total_offset = 100;
     // The initial message - if `/tmp/.update_msg` isn't found
-    char message_str[STR_MAX] = "Preparing installation...";
+    char message_str[STR_MAX] = " ";
 
     int i;
     for (i = 1; i < argc; i++) {

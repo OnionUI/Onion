@@ -57,8 +57,10 @@ main() {
 
     killall keymon
 
+    check_firmware
+
     if [ ! -d /mnt/SDCARD/.tmp_update/onionVersion ]; then
-        fresh_install 1
+        run_installation 1 0
         cleanup
         return
     fi
@@ -74,22 +76,22 @@ main() {
 prompt_update() {
     # Prompt for update or fresh install
     ./bin/prompt -r -m "Welcome to the Onion installer!\nPlease choose an action:" \
-        "Update" \
-        "Repair (keep settings)" \
-        "Reinstall (reset settings)"
+        "Update (keep settings)" \
+        "Reinstall (reset settings)" \
+        "Update OS/RetroArch only"
     retcode=$?
 
     killall batmon
 
     if [ $retcode -eq 0 ]; then
-        # Update
-        update_only
+        # Update (keep settings)
+        run_installation 0 0
     elif [ $retcode -eq 1 ]; then
-        # Repair (keep settings)
-        fresh_install 0
-    elif [ $retcode -eq 2 ]; then
         # Reinstall (reset settings)
-        fresh_install 1
+        run_installation 1 0
+    elif [ $retcode -eq 2 ]; then
+        # Update OS/RetroArch only
+        run_installation 0 1
     else
         # Cancel (can be reached if pressing POWER)
         return
@@ -103,10 +105,6 @@ cleanup() {
         /tmp/.update_msg \
         .installed \
         install.sh
-
-    rm -f $core_zipfile
-    rm -f $ra_zipfile
-    rm -f $ra_package_version_file
 
     # Remove dirs if empty
     rmdir /mnt/SDCARD/Backup/saves
@@ -144,9 +142,9 @@ remove_configs() {
         /mnt/SDCARD/Saves/GuestProfile/config/*
 }
 
-fresh_install() {
+run_installation() {
     reset_configs=$1
-    echo ":: Fresh install (reset: $reset_configs)"
+    system_only=$2
 
     get_install_stats
 
@@ -157,19 +155,27 @@ fresh_install() {
     ./bin/installUI &
     sleep 1
 
-    # Backup important stock files
-    echo "Backing up files..." >> /tmp/.update_msg
-    backup_system
-
-    echo "Removing old system files..." >> /tmp/.update_msg
+    verb="Updating"
+    verb2="Update"
 
     if [ $reset_configs -eq 1 ]; then
+        # Backup important stock files
+        echo "Backing up files..." >> /tmp/.update_msg
+        backup_system
+
+        echo "Removing old system files..." >> /tmp/.update_msg
+
+        verb="Installing"
+        verb2="Installation"
+
         remove_configs
         maybe_remove_retroarch
 
         # Remove stock folders
         cd /mnt/SDCARD
         rm -rf App Emu RApp miyoo
+    else
+        echo "Preparing update..." >> /tmp/.update_msg
     fi
 
     debloat_apps
@@ -177,14 +183,13 @@ fresh_install() {
     refresh_roms
 
     if [ $install_ra -eq 1 ]; then
-        install_core "1/2: Installing Onion..."
-        install_retroarch "2/2: Installing RetroArch..."
+        install_core "1/2: $verb Onion..."
+        install_retroarch "2/2: $verb RetroArch..."
     else
-        install_core "1/1: Installing Onion..."
+        install_core "1/1: $verb Onion..."
         echo "Skipped installing RetroArch"
     fi
 
-    echo "Completing installation..." >> /tmp/.update_msg
     if [ $reset_configs -eq 0 ]; then
         restore_ra_config
 
@@ -195,41 +200,43 @@ fresh_install() {
         fi
     fi
     install_configs $reset_configs
-    
-    echo "Installation complete!" >> /tmp/.update_msg
 
-    touch $sysdir/.installed
-    sync
+    if [ $system_only -ne 1 ]; then
+        touch $sysdir/.installed
+        sync
 
-    if [ $reset_configs -eq 1 ]; then
-        cp -f $sysdir/config/system.json /appconfigs/system.json
+        if [ $reset_configs -eq 1 ]; then
+            cp -f $sysdir/config/system.json /appconfigs/system.json
+        fi
+
+        # Start the battery monitor
+        cd $sysdir
+        ./bin/batmon 2>&1 > ./logs/batmon.log &
+        ./bin/themeSwitcher --reapply
+
+        if [ $reset_configs -eq 1 ]; then
+            cd /mnt/SDCARD/App/Onion_Manual/
+            ./launch.sh
+        fi
+
+        # Launch layer manager
+        cd /mnt/SDCARD/App/PackageManager/ 
+        if [ $reset_configs -eq 1 ]; then
+            $sysdir/bin/packageManager --confirm
+        else
+            $sysdir/bin/packageManager --confirm --reapply
+        fi
+        free_mma
+
+        cd $sysdir
+        ./config/boot_mod.sh
+
+        # Show installation complete
+        cd $sysdir
+        rm -f .installed
     fi
 
-    # Start the battery monitor
-    cd $sysdir
-    ./bin/batmon 2>&1 > ./logs/batmon.log &
-    ./bin/themeSwitcher --reapply
-
-    cd /mnt/SDCARD/App/Onion_Manual/
-    ./launch.sh
-    free_mma
-
-    # Launch layer manager
-    cd /mnt/SDCARD/App/PackageManager/ 
-    if [ $reset_configs -eq 1 ]; then
-        $sysdir/bin/packageManager --confirm
-    else
-        $sysdir/bin/packageManager --confirm --reapply
-    fi
-    free_mma
-
-    cd $sysdir
-    ./config/boot_mod.sh
-
-    # Show installation complete
-    cd $sysdir
-    rm -f .installed
-    echo "Update complete!" >> /tmp/.update_msg
+    echo "$verb2 complete!" >> /tmp/.update_msg
     touch $sysdir/.waitConfirm
     sync
     ./bin/installUI &
@@ -246,62 +253,6 @@ fresh_install() {
 
     rm -f $sysdir/config/currentSlide
 
-    ./bin/bootScreen "End"
-}
-
-update_only() {
-    echo ":: Update only"
-
-    get_install_stats
-
-    # Show installation progress
-    cd $sysdir
-    ./bin/installUI -m "Preparing update..." &
-    sleep 1
-    
-    debloat_apps
-    move_ports_collection
-
-    if [ $install_ra -eq 1 ]; then
-        install_core "1/2: Updating Onion..."
-        install_retroarch "2/2: Updating RetroArch..."
-        restore_ra_config
-    else
-        install_core "1/1: Updating Onion..."
-        echo "Skipped installing RetroArch"
-    fi
-
-    install_configs 0
-
-    # Patch RA config
-    cd $sysdir
-    if [ -f ./bin/tweaks ]; then
-        ./bin/tweaks --apply_tool "patch_ra_cfg" --no_display
-    fi
-
-    # Start the battery monitor
-    cd $sysdir
-    ./bin/batmon 2>&1 > ./logs/batmon.log &
-    ./bin/themeSwitcher --reapply
-    
-    echo "Update complete!" >> /tmp/.update_msg
-    sleep 1
-
-    touch $sysdir/.waitConfirm
-    sync
-    
-    echo "Press any button to turn off" >> /tmp/.update_msg
-    sleep 1
-
-    touch $sysdir/.installed
-
-    until [ ! -f $sysdir/.waitConfirm ]; do
-        sync
-    done
-
-    rm -f $sysdir/config/currentSlide
-
-    cd $sysdir
     ./bin/bootScreen "End"
 }
 
@@ -316,13 +267,17 @@ install_core() {
     rm -f \
         $sysdir/updater \
         $sysdir/bin/batmon \
-        $sysdir/bin/prompt
+        $sysdir/bin/prompt \
+        /mnt/SDCARD/miyoo/app/.isExpert
 
     echo "$msg 0%" >> /tmp/.update_msg
 
     # Onion core installation / update
     cd /
     unzip_progress "$core_zipfile" "$msg" /mnt/SDCARD $total_core
+
+    # Cleanup
+    rm -f $core_zipfile
 }
 
 install_retroarch() {
@@ -347,6 +302,10 @@ install_retroarch() {
     # Install RetroArch
     cd /
     unzip_progress "$ra_zipfile" "$msg" /mnt/SDCARD $total_ra
+
+    # Cleanup
+    rm -f $ra_zipfile
+    rm -f $ra_package_version_file
 }
 
 maybe_remove_retroarch() {
@@ -390,6 +349,9 @@ check_firmware() {
     if [ ! -f /customer/lib/libpadsp.so ]; then
         cd $sysdir
         ./bin/infoPanel -i "res/firmware.png"
+
+        rm -rf $sysdir
+
         reboot
         sleep 10
         exit 0
@@ -441,7 +403,6 @@ debloat_apps() {
         ThemeSwitcher
         
     rm -rf /mnt/SDCARD/Emu/SEARCH
-    rm -f /mnt/SDCARD/miyoo/app/.isExpert
 
     if [ -d /mnt/SDCARD/Packages ]; then
         rm -rf /mnt/SDCARD/Packages
