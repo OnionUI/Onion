@@ -120,7 +120,8 @@ void tool_removeMacFiles(void *pt)
 {
     _runCommandPopup(tools_short_names[4], 
         "find /mnt/SDCARD/ -depth -type f \\( -name \"._*\" -o -name \".DS_Store\" \\) -delete; "
-        "find /mnt/SDCARD/ -depth -type d -name \"__MACOSX\" -exec rm -rf {} \\;"
+        "find /mnt/SDCARD/ -depth -type d -name \"__MACOSX\" -exec rm -rf {} \\; ; "
+        "cd /mnt/SDCARD/; rm -rf .Spotlight-V100 .apDisk .fseventsd .TemporaryItems .Trash .Trashes"
     );
 }
 
