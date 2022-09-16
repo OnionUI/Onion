@@ -30,11 +30,6 @@ fi
 # globals
 total_core=0
 total_ra=0
-total_all=0
-install_core_begin=0
-install_core_offset=50
-install_ra_begin=50
-install_ra_offset=50
 
 main() {
     # init_lcd
@@ -110,27 +105,25 @@ cleanup() {
     rmdir /mnt/SDCARD/Backup/saves
     rmdir /mnt/SDCARD/Backup/states
     rmdir /mnt/SDCARD/Backup
+
+    # Clean zips if still present
+    rm -f $core_zipfile
+    rm -f $ra_zipfile
+    rm -f $ra_package_version_file
 }
 
 get_install_stats() {
     total_core=$(zip_total "$core_zipfile")
     total_ra=0
 
-    if [ $install_ra -eq 1 ] && [ -f "$ra_zipfile" ]; then
+    if [ -f $ra_zipfile ]; then
         total_ra=$(zip_total "$ra_zipfile")
     fi
-
-    total_all=$(($total_core + $total_ra))
 
     echo "STATS"
     echo "Install RA check:" $install_ra
     echo "Onion total:" $total_core
     echo "RetroArch total:" $total_ra
-
-    install_core_begin=0
-    install_core_offset=$(($total_core / $total_all * 100))
-    install_ra_begin=$install_core_offset
-    install_ra_offset=$((100 - $install_core_offset))
 }
 
 remove_configs() {
@@ -159,17 +152,18 @@ run_installation() {
     verb2="Update"
 
     if [ $reset_configs -eq 1 ]; then
-        # Backup important stock files
-        echo "Backing up files..." >> /tmp/.update_msg
-        backup_system
-
-        echo "Removing old system files..." >> /tmp/.update_msg
-
         verb="Installing"
         verb2="Installation"
+        echo "Preparing installation..." >> /tmp/.update_msg
+
+        # Backup important stock files
+        backup_system
 
         remove_configs
-        maybe_remove_retroarch
+        if [ -f $ra_zipfile ]; then
+            maybe_remove_retroarch
+            install_ra=1
+        fi
 
         # Remove stock folders
         cd /mnt/SDCARD
@@ -189,6 +183,8 @@ run_installation() {
     else
         install_core "1/1: $verb Onion..."
         echo "Skipped installing RetroArch"
+        rm -f $ra_zipfile
+        rm -f $ra_package_version_file
     fi
 
     if [ $reset_configs -eq 0 ]; then
@@ -239,18 +235,21 @@ run_installation() {
 
     echo "$verb2 complete!" >> /tmp/.update_msg
     touch $sysdir/.waitConfirm
+    touch $sysdir/.installed
     sync
+
     ./bin/installUI &
     sleep 1
 
-    echo "Press any button to turn off" >> /tmp/.update_msg
-    sleep 1
+    counter=10
 
-    touch $sysdir/.installed
-
-    until [ ! -f $sysdir/.waitConfirm ]; do
-        sync
+    while [ -f $sysdir/.waitConfirm ] && [ $counter -ge 0 ]; do
+        echo "Press A to turn off (""$counter""s)" >> /tmp/.update_msg
+        counter=$(( counter - 1 ))
+        sleep 1
     done
+
+    killall installUI
 
     rm -f $sysdir/config/currentSlide
 
@@ -312,7 +311,22 @@ install_retroarch() {
 maybe_remove_retroarch() {
     if [ -f $ra_zipfile ]; then
         cd /mnt/SDCARD/RetroArch
+
+        tempdir=/mnt/SDCARD/.temp
+        mkdir -p $tempdir
+
+        if [ -d .retroarch/cheats ]; then
+            mv .retroarch/cheats $tempdir/
+        fi
+        if [ -d .retroarch/thumbnails ]; then
+            mv .retroarch/thumbnails $tempdir/
+        fi
+
         remove_everything_except `basename $ra_zipfile`
+
+        mkdir -p .retroarch
+        mv $tempdir/* .retroarch/
+        rm -rf $tempdir
     fi
 }
 

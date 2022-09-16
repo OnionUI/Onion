@@ -128,9 +128,11 @@ int main(int argc, char *argv[])
                         current_slide = nextSlide(current_slide, num_slides, 1);
                         slide_timer = ticks;
                         break;
-                    default:
+                    case SW_BTN_A:
                         if (exists(".waitConfirm"))
                             quit = true;
+                        break;
+                    default:
                         break;
                 }
             }
@@ -158,7 +160,7 @@ int main(int argc, char *argv[])
             if (exists("/tmp/.update_msg")) {
                 file_readLastLine("/tmp/.update_msg", message_str);
                 long n = 0;
-                if (str_getLastNumber(message_str, &n))
+                if (!exists(".installed") && str_getLastNumber(message_str, &n))
                     progress = (int)(start_at + n / progress_div);
                 check_timer = ticks; // reset timeout
             }
