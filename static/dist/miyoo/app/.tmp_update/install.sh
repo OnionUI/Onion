@@ -419,6 +419,12 @@ debloat_apps() {
         
     rm -rf /mnt/SDCARD/Emu/SEARCH
 
+    # Remove faulty PicoDrive remap
+    pdrmp_file="/mnt/SDCARD/Saves/CurrentProfile/config/remaps/PicoDrive/PicoDrive.rmp"
+    if [ -f "$pdrmp_file" ] && [ `md5hash "$pdrmp_file"` == "a3895a0eab19d4ce8aad6a8f7ded57bc" ]; then
+        rm -f "$pdrmp_file"
+    fi
+
     if [ -d /mnt/SDCARD/Packages ]; then
         rm -rf /mnt/SDCARD/Packages
     fi
@@ -449,6 +455,10 @@ refresh_roms() {
 
 remove_everything_except() {
     find * .* -maxdepth 0 -not -name "$1" -exec rm -rf {} \;
+}
+
+md5hash() {
+    echo `md5sum "$1" | awk '{ print $1; }'`
 }
 
 zip_total() {
