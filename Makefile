@@ -6,6 +6,10 @@ RA_SUBVERSION=0.1.4
 
 ###########################################################
 
+ifneq ($(VERSION_OVERRIDE),)
+VERSION = $(VERSION_OVERRIDE)
+endif
+
 RELEASE_NAME := $(TARGET)-v$(VERSION)
 
 # Directories
