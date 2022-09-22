@@ -6,7 +6,7 @@
 
 <p>&nbsp;</p>
 
-<p align="center"><img src="https://user-images.githubusercontent.com/44569252/189437613-6fe9a5ed-b47a-4d4f-babe-a4236f21d6e3.gif"></p>
+<p align="center"><a href="https://github.com/OnionUI/Onion/wiki/Features"><img src="https://user-images.githubusercontent.com/44569252/189437613-6fe9a5ed-b47a-4d4f-babe-a4236f21d6e3.gif"></a></p>
 
 <p>&nbsp;</p>
 
