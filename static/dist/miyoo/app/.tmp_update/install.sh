@@ -30,11 +30,6 @@ fi
 # globals
 total_core=0
 total_ra=0
-total_all=0
-install_core_begin=0
-install_core_offset=50
-install_ra_begin=50
-install_ra_offset=50
 
 main() {
     # init_lcd
@@ -57,8 +52,10 @@ main() {
 
     killall keymon
 
+    check_firmware
+
     if [ ! -d /mnt/SDCARD/.tmp_update/onionVersion ]; then
-        fresh_install 1
+        run_installation 1 0
         cleanup
         return
     fi
@@ -74,22 +71,22 @@ main() {
 prompt_update() {
     # Prompt for update or fresh install
     ./bin/prompt -r -m "Welcome to the Onion installer!\nPlease choose an action:" \
-        "Update" \
-        "Repair (keep settings)" \
-        "Reinstall (reset settings)"
+        "Update (keep settings)" \
+        "Reinstall (reset settings)" \
+        "Update OS/RetroArch only"
     retcode=$?
 
     killall batmon
 
     if [ $retcode -eq 0 ]; then
-        # Update
-        update_only
+        # Update (keep settings)
+        run_installation 0 0
     elif [ $retcode -eq 1 ]; then
-        # Repair (keep settings)
-        fresh_install 0
-    elif [ $retcode -eq 2 ]; then
         # Reinstall (reset settings)
-        fresh_install 1
+        run_installation 1 0
+    elif [ $retcode -eq 2 ]; then
+        # Update OS/RetroArch only
+        run_installation 0 1
     else
         # Cancel (can be reached if pressing POWER)
         return
@@ -104,35 +101,29 @@ cleanup() {
         .installed \
         install.sh
 
-    rm -f $core_zipfile
-    rm -f $ra_zipfile
-    rm -f $ra_package_version_file
-
     # Remove dirs if empty
     rmdir /mnt/SDCARD/Backup/saves
     rmdir /mnt/SDCARD/Backup/states
     rmdir /mnt/SDCARD/Backup
+
+    # Clean zips if still present
+    rm -f $core_zipfile
+    rm -f $ra_zipfile
+    rm -f $ra_package_version_file
 }
 
 get_install_stats() {
     total_core=$(zip_total "$core_zipfile")
     total_ra=0
 
-    if [ $install_ra -eq 1 ] && [ -f "$ra_zipfile" ]; then
+    if [ -f $ra_zipfile ]; then
         total_ra=$(zip_total "$ra_zipfile")
     fi
-
-    total_all=$(($total_core + $total_ra))
 
     echo "STATS"
     echo "Install RA check:" $install_ra
     echo "Onion total:" $total_core
     echo "RetroArch total:" $total_ra
-
-    install_core_begin=0
-    install_core_offset=$(($total_core / $total_all * 100))
-    install_ra_begin=$install_core_offset
-    install_ra_offset=$((100 - $install_core_offset))
 }
 
 remove_configs() {
@@ -144,9 +135,9 @@ remove_configs() {
         /mnt/SDCARD/Saves/GuestProfile/config/*
 }
 
-fresh_install() {
+run_installation() {
     reset_configs=$1
-    echo ":: Fresh install (reset: $reset_configs)"
+    system_only=$2
 
     get_install_stats
 
@@ -157,34 +148,45 @@ fresh_install() {
     ./bin/installUI &
     sleep 1
 
-    # Backup important stock files
-    echo "Backing up files..." >> /tmp/.update_msg
-    backup_system
-
-    echo "Removing old system files..." >> /tmp/.update_msg
+    verb="Updating"
+    verb2="Update"
 
     if [ $reset_configs -eq 1 ]; then
+        verb="Installing"
+        verb2="Installation"
+        echo "Preparing installation..." >> /tmp/.update_msg
+
+        # Backup important stock files
+        backup_system
+
         remove_configs
-        maybe_remove_retroarch
+        if [ -f $ra_zipfile ]; then
+            maybe_remove_retroarch
+            install_ra=1
+        fi
 
         # Remove stock folders
         cd /mnt/SDCARD
         rm -rf App Emu RApp miyoo
-    fi
+        
+    elif [ $system_only -ne 1 ]; then
+        echo "Preparing update..." >> /tmp/.update_msg
 
-    debloat_apps
-    move_ports_collection
-    refresh_roms
+        debloat_apps
+        move_ports_collection
+        refresh_roms
+    fi
 
     if [ $install_ra -eq 1 ]; then
-        install_core "1/2: Installing Onion..."
-        install_retroarch "2/2: Installing RetroArch..."
+        install_core "1/2: $verb Onion..."
+        install_retroarch "2/2: $verb RetroArch..."
     else
-        install_core "1/1: Installing Onion..."
+        install_core "1/1: $verb Onion..."
         echo "Skipped installing RetroArch"
+        rm -f $ra_zipfile
+        rm -f $ra_package_version_file
     fi
 
-    echo "Completing installation..." >> /tmp/.update_msg
     if [ $reset_configs -eq 0 ]; then
         restore_ra_config
 
@@ -195,113 +197,62 @@ fresh_install() {
         fi
     fi
     install_configs $reset_configs
-    
-    echo "Installation complete!" >> /tmp/.update_msg
 
+    if [ $system_only -ne 1 ]; then
+        touch $sysdir/.installed
+        sync
+
+        if [ $reset_configs -eq 1 ]; then
+            cp -f $sysdir/config/system.json /appconfigs/system.json
+        fi
+
+        # Start the battery monitor
+        cd $sysdir
+        ./bin/batmon 2>&1 > ./logs/batmon.log &
+        ./bin/themeSwitcher --reapply
+
+        if [ $reset_configs -eq 1 ]; then
+            cd /mnt/SDCARD/App/Onion_Manual/
+            ./launch.sh
+        fi
+
+        # Launch layer manager
+        cd /mnt/SDCARD/App/PackageManager/ 
+        if [ $reset_configs -eq 1 ]; then
+            $sysdir/bin/packageManager --confirm
+        else
+            $sysdir/bin/packageManager --confirm --reapply
+        fi
+        free_mma
+
+        cd $sysdir
+        ./config/boot_mod.sh
+
+        # Show installation complete
+        cd $sysdir
+        rm -f .installed
+    fi
+
+    echo "$verb2 complete!" >> /tmp/.update_msg
+    touch $sysdir/.waitConfirm
     touch $sysdir/.installed
     sync
 
-    if [ $reset_configs -eq 1 ]; then
-        cp -f $sysdir/config/system.json /appconfigs/system.json
-    fi
-
-    # Start the battery monitor
-    cd $sysdir
-    ./bin/batmon 2>&1 > ./logs/batmon.log &
-    ./bin/themeSwitcher --reapply
-
-    cd /mnt/SDCARD/App/Onion_Manual/
-    ./launch.sh
-    free_mma
-
-    # Launch layer manager
-    cd /mnt/SDCARD/App/PackageManager/ 
-    if [ $reset_configs -eq 1 ]; then
-        $sysdir/bin/packageManager --confirm
-    else
-        $sysdir/bin/packageManager --confirm --reapply
-    fi
-    free_mma
-
-    cd $sysdir
-    ./config/boot_mod.sh
-
-    # Show installation complete
-    cd $sysdir
-    rm -f .installed
-    echo "Update complete!" >> /tmp/.update_msg
-    touch $sysdir/.waitConfirm
-    sync
     ./bin/installUI &
     sleep 1
 
-    echo "Press any button to turn off" >> /tmp/.update_msg
-    sleep 1
+    counter=10
 
-    touch $sysdir/.installed
-
-    until [ ! -f $sysdir/.waitConfirm ]; do
-        sync
+    while [ -f $sysdir/.waitConfirm ] && [ $counter -ge 0 ]; do
+        echo "Press A to turn off (""$counter""s)" >> /tmp/.update_msg
+        counter=$(( counter - 1 ))
+        sleep 1
     done
+
+    killall installUI
 
     rm -f $sysdir/config/currentSlide
 
-    ./bin/bootScreen "End"
-}
-
-update_only() {
-    echo ":: Update only"
-
-    get_install_stats
-
-    # Show installation progress
-    cd $sysdir
-    ./bin/installUI -m "Preparing update..." &
-    sleep 1
-    
-    debloat_apps
-    move_ports_collection
-
-    if [ $install_ra -eq 1 ]; then
-        install_core "1/2: Updating Onion..."
-        install_retroarch "2/2: Updating RetroArch..."
-        restore_ra_config
-    else
-        install_core "1/1: Updating Onion..."
-        echo "Skipped installing RetroArch"
-    fi
-
-    install_configs 0
-
-    # Patch RA config
-    cd $sysdir
-    if [ -f ./bin/tweaks ]; then
-        ./bin/tweaks --apply_tool "patch_ra_cfg" --no_display
-    fi
-
-    # Start the battery monitor
-    cd $sysdir
-    ./bin/batmon 2>&1 > ./logs/batmon.log &
-    ./bin/themeSwitcher --reapply
-    
-    echo "Update complete!" >> /tmp/.update_msg
-    sleep 1
-
-    touch $sysdir/.waitConfirm
-    sync
-    
-    echo "Press any button to turn off" >> /tmp/.update_msg
-    sleep 1
-
-    touch $sysdir/.installed
-
-    until [ ! -f $sysdir/.waitConfirm ]; do
-        sync
-    done
-
-    rm -f $sysdir/config/currentSlide
-
-    cd $sysdir
     ./bin/bootScreen "End"
 }
 
@@ -316,13 +267,17 @@ install_core() {
     rm -f \
         $sysdir/updater \
         $sysdir/bin/batmon \
-        $sysdir/bin/prompt
+        $sysdir/bin/prompt \
+        /mnt/SDCARD/miyoo/app/.isExpert
 
     echo "$msg 0%" >> /tmp/.update_msg
 
     # Onion core installation / update
     cd /
     unzip_progress "$core_zipfile" "$msg" /mnt/SDCARD $total_core
+
+    # Cleanup
+    rm -f $core_zipfile
 }
 
 install_retroarch() {
@@ -347,12 +302,31 @@ install_retroarch() {
     # Install RetroArch
     cd /
     unzip_progress "$ra_zipfile" "$msg" /mnt/SDCARD $total_ra
+
+    # Cleanup
+    rm -f $ra_zipfile
+    rm -f $ra_package_version_file
 }
 
 maybe_remove_retroarch() {
     if [ -f $ra_zipfile ]; then
         cd /mnt/SDCARD/RetroArch
+
+        tempdir=/mnt/SDCARD/.temp
+        mkdir -p $tempdir
+
+        if [ -d .retroarch/cheats ]; then
+            mv .retroarch/cheats $tempdir/
+        fi
+        if [ -d .retroarch/thumbnails ]; then
+            mv .retroarch/thumbnails $tempdir/
+        fi
+
         remove_everything_except `basename $ra_zipfile`
+
+        mkdir -p .retroarch
+        mv $tempdir/* .retroarch/
+        rm -rf $tempdir
     fi
 }
 
@@ -390,6 +364,9 @@ check_firmware() {
     if [ ! -f /customer/lib/libpadsp.so ]; then
         cd $sysdir
         ./bin/infoPanel -i "res/firmware.png"
+
+        rm -rf $sysdir
+
         reboot
         sleep 10
         exit 0
@@ -437,10 +414,16 @@ debloat_apps() {
         Clean_View_Toggle \
         Onion_Manual \
         PlayActivity \
-        SearchFilter
+        SearchFilter \
+        ThemeSwitcher
         
     rm -rf /mnt/SDCARD/Emu/SEARCH
-    rm -f /mnt/SDCARD/miyoo/app/.isExpert
+
+    # Remove faulty PicoDrive remap
+    pdrmp_file="/mnt/SDCARD/Saves/CurrentProfile/config/remaps/PicoDrive/PicoDrive.rmp"
+    if [ -f "$pdrmp_file" ] && [ `md5hash "$pdrmp_file"` == "a3895a0eab19d4ce8aad6a8f7ded57bc" ]; then
+        rm -f "$pdrmp_file"
+    fi
 
     if [ -d /mnt/SDCARD/Packages ]; then
         rm -rf /mnt/SDCARD/Packages
@@ -472,6 +455,10 @@ refresh_roms() {
 
 remove_everything_except() {
     find * .* -maxdepth 0 -not -name "$1" -exec rm -rf {} \;
+}
+
+md5hash() {
+    echo `md5sum "$1" | awk '{ print $1; }'`
 }
 
 zip_total() {

@@ -25,7 +25,7 @@ jobs:
       shell: bash
       run: |
         source /root/.bashrc
-        make release
+        VERSION_OVERRIDE=${{ env.BUILD_VERSION }}-dev make release
     - uses: marvinpinto/action-automatic-releases@latest
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -33,4 +33,4 @@ jobs:
         prerelease: true
         title: "Development Build"
         files: |
-          release/Onion-v${{ env.BUILD_VERSION }}.zip
+          release/Onion-v${{ env.BUILD_VERSION }}-dev.zip

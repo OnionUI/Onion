@@ -1,10 +1,14 @@
 ###########################################################
 
 TARGET=Onion
-VERSION=4.0.0
-RA_SUBVERSION=0.1.3
+VERSION=4.0.2
+RA_SUBVERSION=0.1.4
 
 ###########################################################
+
+ifneq ($(VERSION_OVERRIDE),)
+VERSION = $(VERSION_OVERRIDE)
+endif
 
 RELEASE_NAME := $(TARGET)-v$(VERSION)
 
@@ -115,6 +119,7 @@ apps: $(CACHE)/.setup
 	@cp -a "$(PACKAGES_APP_DEST)/Quick Guide/." $(BUILD_DIR)/
 	@cp -a "$(PACKAGES_APP_DEST)/RetroArch (Shortcut)/." $(BUILD_DIR)/
 	@cp -a "$(PACKAGES_APP_DEST)/Tweaks/." $(BUILD_DIR)/
+	@cp -a "$(PACKAGES_APP_DEST)/Themes (Change theme)/." $(BUILD_DIR)/
 
 external: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)

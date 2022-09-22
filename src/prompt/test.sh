@@ -9,9 +9,9 @@ main() {
 
 	# Prompt for update or fresh install
 	$installdir/prompt -r -m "Welcome to the Onion installer!\nPlease choose an action:" \
-		"Update" \
-		"Repair (keep settings)" \
-		"Fresh install"
+        "Update (keep settings)" \
+        "Reinstall (reset settings)" \
+        "Update OS/RetroArch only"
     retcode=$?
 
 	if [ $retcode -eq 0 ]; then

@@ -1,6 +1,11 @@
 name: Test build
 on:
-  [push, pull_request]
+  push:
+    paths-ignore:
+      - '**/README.md'
+  pull_request:
+    paths-ignore:
+      - '**/README.md'
 
 jobs:
   build:

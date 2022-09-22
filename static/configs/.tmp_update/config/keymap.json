@@ -1,0 +1,10 @@
+{
+    "mainui_single_press": 1,
+    "mainui_long_press": 0,
+    "mainui_double_press": 2,
+    "ingame_single_press": 1,
+    "ingame_long_press": 2,
+    "ingame_double_press": 3,
+    "mainui_button_x": "app:Search",
+    "mainui_button_y": ""
+}

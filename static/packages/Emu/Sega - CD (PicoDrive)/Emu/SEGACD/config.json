@@ -9,5 +9,5 @@
 "useswap":1,
 "shortname":0,
 "hidebios":1,
-"extlist":"bin|BIN|gen|GEN|smd|SMD|md|MD|32x|32X|cue|CUE|iso|ISO|sms|SMS|68k|68K|chd|CHD|zip|ZIP|7z|7Z"
+"extlist":"gen|GEN|smd|SMD|md|MD|32x|32X|cue|CUE|iso|ISO|sms|SMS|68k|68K|chd|CHD|zip|ZIP|7z|7Z"
 }

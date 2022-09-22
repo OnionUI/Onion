@@ -73,11 +73,12 @@ void imageCache_removeItem(int image_index)
         return;
 
     int idx = modulo(image_index, image_cache_len);
-    printf_debug("Removing image %d (%d)\n", image_index, idx);
 
-    SDL_Surface *curr_item = image_cache[idx];
-    if (curr_item != NULL)
-        SDL_FreeSurface(curr_item);
+    if (image_cache[idx] != NULL) {
+        printf_debug("Removing image %d (%d)\n", image_index, idx);
+        SDL_FreeSurface(image_cache[idx]);
+        image_cache[idx] = NULL;
+    }
 
     int num_images = (images_total < image_cache_len ? images_total : image_cache_len) - 1;
     for (int i = 0; i < num_images; i++) {

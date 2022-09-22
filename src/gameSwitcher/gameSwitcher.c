@@ -171,18 +171,25 @@ void removeParentheses(char *str_out, const char *str_in)
     str_trim(str_out, STR_MAX - 1, temp, false);
 }
 
+/**
+ * @brief History extraction
+ * 
+ */
 void readHistory()
 {
-    // History extraction
     game_list_len = 0;
 
-    if (!exists(HISTORY_PATH))
+    if (!exists(HISTORY_PATH)) {
+        print_debug("History file missing");
         return;
+    }
 
     char path[STR_MAX], core_path[STR_MAX];
 
-    json_root = json_load(HISTORY_PATH);
-    items = cJSON_GetObjectItem(json_root, "items");
+    if (items == NULL) {
+        json_root = json_load(HISTORY_PATH);
+        items = cJSON_GetObjectItem(json_root, "items");
+    }
 
     for (int nbGame = 0; nbGame < MAXHISTORY; nbGame++) {
         cJSON *subitem = cJSON_GetArrayItem(items, nbGame);
@@ -202,6 +209,10 @@ void readHistory()
         game->hash = FNV1A_Pippip_Yurii(path, strlen(path));
         game->jsonIndex = nbGame;
 
+        char shortname[STR_MAX];
+        removeParentheses(shortname, game->name);
+        strcpy(game->shortname, shortname);
+
         // Rom name
         int nTimePosition = searchRomDB(game->name);
         int nTime = nTimePosition >= 0 ? rom_list[nTimePosition].playTime : 0;
@@ -213,23 +224,30 @@ void readHistory()
             else
                 snprintf(game->totalTime, sizeof(game->totalTime) - 1, "%dm", m);
         }
+        else {
+            strcpy(game->totalTime, "0m");
+        }
+
+        printf_debug("Game loaded:\n\tname: '%s' (%s)\n\tcmd: '%s'\n\thash: %"PRIu32"\n\tidx: %d\n\ttime: %s\n\n",
+            game->name,
+            game->shortname,
+            game->RACommand,
+            game->hash,
+            game->jsonIndex,
+            game->totalTime);
 
         game_list_len++;
-    }
-
-    for (int i = 0; i < game_list_len; i++) {
-        Game_s *game = &game_list[i];
-        char shortname[STR_MAX];
-        removeParentheses(shortname, game->name);
-        strcpy(game->shortname, shortname);
     }
 }
 
 void removeCurrentItem() {
+    printf_debug("removing: %s\n", game_list[current_game].name);
     imageCache_removeItem(current_game);
     if (items != NULL)
         cJSON_DeleteItemFromArray(items, game_list[current_game].jsonIndex);
     json_save(json_root, HISTORY_PATH);
+    readHistory();
+    printf_debug("game list len: %d\n", game_list_len);
 }
 
 SDL_Surface* loadRomscreen(int index)
@@ -451,7 +469,6 @@ int main(void)
                         if (updateKeystate(keystate, &quit, true, NULL)) {
                             if (keystate[SW_BTN_A] == PRESSED) {
                                 removeCurrentItem();
-                                readHistory();
                                 if (current_game > 0)
                                     current_game--;
                                 imageCache_load(&current_game, loadRomscreen, game_list_len);
@@ -629,7 +646,7 @@ int main(void)
     msleep(200);
     #endif
 
-    cJSON_free(json_root);
+    if (json_root != NULL) cJSON_free(json_root);
 
     SDL_BlitSurface(screen, NULL, video, NULL);
     SDL_Flip(video);
@@ -639,10 +656,12 @@ int main(void)
 
     resources_free();
     SDL_FreeSurface(transparent_bg);
+
     imageCache_freeAll();
 
     SDL_FreeSurface(screen);
     SDL_FreeSurface(video);
+
     TTF_Quit();
     SDL_Quit();
 

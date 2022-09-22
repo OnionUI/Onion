@@ -18,12 +18,14 @@ jobs:
       with:
         submodules: recursive
     - name: Get version
-      run: echo "BUILD_VERSION=$(make version)" >> $GITHUB_ENV
+      run: |
+        VERSION="${GITHUB_REF#refs/*/}"
+        echo "BUILD_VERSION=${VERSION:1}" >> $GITHUB_ENV
     - name: Build release
       shell: bash
       run: |
         source /root/.bashrc
-        make release
+        VERSION_OVERRIDE=${{ env.BUILD_VERSION }} make release
     - uses: marvinpinto/action-automatic-releases@latest
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
