@@ -8,7 +8,7 @@ main() {
     clear_logs
 
     # Start the battery monitor
-    ./bin/batmon 2>&1 > ./logs/batmon.log &
+    ./bin/batmon &
     
     if [ `cat /sys/devices/gpiochip0/gpio/gpio59/value` -eq 1 ]; then
         cd $sysdir
@@ -22,7 +22,7 @@ main() {
     ./bin/bootScreen "Boot"
 
     # Start the key monitor
-    ./bin/keymon 2>&1 > ./logs/keymon.log &
+    ./bin/keymon &
 
     # Init
     rm /tmp/.offOrder
@@ -71,7 +71,6 @@ clear_logs() {
     
     cd $sysdir
     rm -f \
-        ./logs/mainUiBatPerc.log \
         ./logs/MainUI.log \
         ./logs/gameSwitcher.log
 }
@@ -85,14 +84,14 @@ check_main_ui() {
 
 launch_main_ui() {
     cd $sysdir
-    ./bin/mainUiBatPerc 2>&1 >> ./logs/mainUiBatPerc.log
+    ./bin/mainUiBatPerc
 
     check_hide_recents
     check_hide_expert
 
     # MainUI launch
     cd /mnt/SDCARD/miyoo/app
-    LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./MainUI 2>&1 >> $sysdir/logs/MainUI.log
+    LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./MainUI 2>&1 > /dev/null
     mv /tmp/cmd_to_run.sh $sysdir/cmd_to_run.sh
 
     echo "mainui" > /tmp/prev_state
@@ -119,7 +118,7 @@ launch_game() {
     # TIMER BEGIN
     if [ $is_game -eq 1 ]; then
         cd $sysdir
-        ./bin/playActivity "init" 2>&1 >> ./logs/playActivity.log
+        ./bin/playActivity "init"
     fi
 
     # GAME LAUNCH
@@ -129,7 +128,7 @@ launch_game() {
     # TIMER END + SHUTDOWN CHECK
     if [ $is_game -eq 1 ]; then
         cd $sysdir
-        ./bin/playActivity "$romfile" 2>&1 >> ./logs/playActivity.log
+        ./bin/playActivity "$romfile"
         
         echo "game" > /tmp/prev_state        
         check_off_order "End_Save"
@@ -156,7 +155,7 @@ check_switcher() {
 
 launch_switcher() {
     cd $sysdir
-    LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./bin/gameSwitcher 2>&1 >> ./logs/gameSwitcher.log
+    LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./bin/gameSwitcher
     rm $sysdir/.runGameSwitcher
     echo "switcher" > /tmp/prev_state
     sync
@@ -166,6 +165,9 @@ check_off_order() {
     if  [ -f /tmp/.offOrder ] ; then
         cd $sysdir
         ./bin/bootScreen "$1"
+
+        killall tee
+        rm -f /mnt/SDCARD/update.log
         
         sync
         reboot
