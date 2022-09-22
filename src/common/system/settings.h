@@ -209,21 +209,21 @@ void _settings_save_mainui(void)
         return;
 
     fprintf(fp, "{\n");
-    fprintf(fp, JSON_FORMAT_NUMBER, "vol", settings.volume);
-    fprintf(fp, JSON_FORMAT_STRING, "keymap", settings.keymap);
-    fprintf(fp, JSON_FORMAT_NUMBER, "mute", settings.mute);
-    fprintf(fp, JSON_FORMAT_NUMBER, "bgmvol", settings.bgm_volume);
-    fprintf(fp, JSON_FORMAT_NUMBER, "brightness", settings.brightness);
-    fprintf(fp, JSON_FORMAT_STRING, "language", settings.language);
-    fprintf(fp, JSON_FORMAT_NUMBER, "hibernate", settings.sleep_timer);
-    fprintf(fp, JSON_FORMAT_NUMBER, "lumination", settings.lumination);
-    fprintf(fp, JSON_FORMAT_NUMBER, "hue", settings.hue);
-    fprintf(fp, JSON_FORMAT_NUMBER, "saturation", settings.saturation);
-    fprintf(fp, JSON_FORMAT_NUMBER, "contrast", settings.contrast);
-    fprintf(fp, JSON_FORMAT_STRING, "theme", settings.theme);
-    fprintf(fp, JSON_FORMAT_NUMBER, "fontsize", settings.fontsize);
-    fprintf(fp, JSON_FORMAT_NUMBER_NC, "audiofix", settings.audiofix);
-    fprintf(fp, "}\n");
+    fprintf(fp, JSON_FORMAT_TAB_NUMBER, "vol", settings.volume);
+    fprintf(fp, JSON_FORMAT_TAB_STRING, "keymap", settings.keymap);
+    fprintf(fp, JSON_FORMAT_TAB_NUMBER, "mute", settings.mute);
+    fprintf(fp, JSON_FORMAT_TAB_NUMBER, "bgmvol", settings.bgm_volume);
+    fprintf(fp, JSON_FORMAT_TAB_NUMBER, "brightness", settings.brightness);
+    fprintf(fp, JSON_FORMAT_TAB_STRING, "language", settings.language);
+    fprintf(fp, JSON_FORMAT_TAB_NUMBER, "hibernate", settings.sleep_timer);
+    fprintf(fp, JSON_FORMAT_TAB_NUMBER, "lumination", settings.lumination);
+    fprintf(fp, JSON_FORMAT_TAB_NUMBER, "hue", settings.hue);
+    fprintf(fp, JSON_FORMAT_TAB_NUMBER, "saturation", settings.saturation);
+    fprintf(fp, JSON_FORMAT_TAB_NUMBER, "contrast", settings.contrast);
+    fprintf(fp, JSON_FORMAT_TAB_STRING, "theme", settings.theme);
+    fprintf(fp, JSON_FORMAT_TAB_NUMBER, "fontsize", settings.fontsize);
+    fprintf(fp, JSON_FORMAT_TAB_NUMBER_NC, "audiofix", settings.audiofix);
+    fprintf(fp, "}");
 
     fflush(fp);
     fsync(fileno(fp));
