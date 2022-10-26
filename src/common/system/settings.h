@@ -144,9 +144,9 @@ void settings_load(void)
     _settings_reset();
 
     settings.startup_auto_resume = !config_flag_get(".noAutoStart");
-    settings.menu_button_haptics = config_flag_get(".menuHaptics");
-    settings.show_recents = !config_flag_get(".hideRecents");
-    settings.show_expert = !config_flag_get(".hideExpert");
+    settings.menu_button_haptics = !config_flag_get(".noMenuHaptics");
+    settings.show_recents = config_flag_get(".showRecents");
+    settings.show_expert = config_flag_get(".showExpert");
     settings.low_battery_autosave = !config_flag_get(".noLowBatteryAutoSave");
 
     if (config_flag_get(".noBatteryWarning")) // flag is deprecated, but keep compatibility
@@ -233,9 +233,9 @@ void _settings_save_mainui(void)
 void settings_save(void)
 {
     config_flag_set(".noAutoStart", !settings.startup_auto_resume);
-    config_flag_set(".menuHaptics", settings.menu_button_haptics);
-    config_flag_set(".hideRecents", !settings.show_recents);
-    config_flag_set(".hideExpert", !settings.show_expert);
+    config_flag_set(".noMenuHaptics", !settings.menu_button_haptics);
+    config_flag_set(".showRecents", settings.show_recents);
+    config_flag_set(".showExpert", settings.show_expert);
     config_flag_set(".noLowBatteryAutoSave", !settings.low_battery_autosave);
     config_setNumber("battery/warnAt", settings.low_battery_warn_at);
     config_setNumber("startup/app", settings.startup_application);
