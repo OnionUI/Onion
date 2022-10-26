@@ -1,7 +1,7 @@
 {
 "label":"NES",
 "icon":"../../Icons/fc.png",
-"iconsel":"",
+"iconsel":"../../Icons/fc.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/FC",
 "imgpath":"../../Roms/FC/Imgs",

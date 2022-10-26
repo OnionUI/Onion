@@ -1,7 +1,7 @@
 {
 "label":"Odyssey2",
 "icon":"../../Icons/ody.png",
-"iconsel":"",
+"iconsel":"../../Icons/ody.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/ODYSSEY",
 "imgpath":"../../Roms/ODYSSEY/Imgs",

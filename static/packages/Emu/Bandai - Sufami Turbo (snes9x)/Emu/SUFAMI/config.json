@@ -1,7 +1,7 @@
 {
 "label":"SufamTrbo",
 "icon":"../../Icons/sufami.png",
-"iconsel":"",
+"iconsel":"../../Icons/sufami.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/SUFAMI",
 "imgpath":"../../Roms/SUFAMI/Imgs",

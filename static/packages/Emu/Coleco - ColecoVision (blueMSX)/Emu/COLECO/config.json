@@ -1,7 +1,7 @@
 {
 "label":"ColecoVis",
 "icon":"../../Icons/col.png",
-"iconsel":"",
+"iconsel":"../../Icons/col.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/COLECO",
 "imgpath":"../../Roms/COLECO/Imgs",

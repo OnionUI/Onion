@@ -1,0 +1,12 @@
+{
+"label":"VIC-20",
+"icon":"../../Icons/c64.png",
+"iconsel":"../../Icons/c64.png",
+"launch":"launch.sh",
+"rompath":"../../Roms/VIC20",
+"imgpath":"../../Roms/VIC20/Imgs",
+"useswap":0,
+"shortname":0,
+"hidebios":0,
+"extlist":"d64|d6z|d71|d7z|d80|d81|d82|d8z|g64|g6z|g41|g4z|x64|x6z|nib|nbz|d2m|d4m|t64|tap|tcrt|prg|p00|crt|bin|cmd|m3u|vfl|vsf|zip|7z|gz|20|40|60|a0|b0|rom"
+}

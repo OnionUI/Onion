@@ -1,7 +1,7 @@
 {
 "label":"PICO-8",
 "icon":"../../Icons/pico.png",
-"iconsel":"",
+"iconsel":"../../Icons/pico.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/PICO",
 "imgpath":"../../Roms/PICO",

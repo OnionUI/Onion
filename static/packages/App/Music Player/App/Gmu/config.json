@@ -1,6 +1,6 @@
 {
 "label":"Music Player",
-"icon":"logo.png",
+"icon":"../../Icons/app/music.png",
 "launch":"launch.sh",
 "description":"GMU (Menu + start to exit)"
 }

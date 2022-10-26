@@ -1,7 +1,7 @@
 {
 "label":"SNES 9x 2005p",
 "icon":"../../Icons/sfc.png",
-"iconsel":"../../Icons/sfc.png",
+"iconsel":"",
 "launch":"launch.sh",
 "rompath":"../../Roms/SFC",
 "imgpath":"../../Roms/SFC/Imgs",

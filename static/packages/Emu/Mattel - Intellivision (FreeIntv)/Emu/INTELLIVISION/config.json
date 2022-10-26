@@ -1,7 +1,7 @@
 {
 "label":"IntelliVis",
 "icon":"../../Icons/itv.png",
-"iconsel":"",
+"iconsel":"../../Icons/itv.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/INTELLIVISION",
 "imgpath":"../../Roms/INTELLIVISION/Imgs",

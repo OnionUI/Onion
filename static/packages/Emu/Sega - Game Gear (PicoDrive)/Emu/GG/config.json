@@ -1,7 +1,7 @@
 {
 "label":"Game Gear",
 "icon":"../../Icons/gg.png",
-"iconsel":"",
+"iconsel":"../../Icons/gg.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/GG",
 "imgpath":"../../Roms/GG/Imgs",

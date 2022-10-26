@@ -4,7 +4,7 @@
 "iconsel":"",
 "launch":"launch.sh",
 "rompath":"../../Roms/CHAI",
-"imgpath":"../../Imgs/CHAI",
+"imgpath":"../../Roms/CHAI/Imgs",
 "useswap":1,
 "shortname":0,
 "hidebios":1,

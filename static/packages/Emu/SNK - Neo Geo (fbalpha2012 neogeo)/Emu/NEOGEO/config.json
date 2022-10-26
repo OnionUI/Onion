@@ -1,7 +1,7 @@
 {
 "label":"NeoGeo",
 "icon":"../../Icons/neogeo.png",
-"iconsel":"",
+"iconsel":"../../Icons/neogeo.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/NEOGEO",
 "imgpath":"../../Roms/NEOGEO/Imgs",
