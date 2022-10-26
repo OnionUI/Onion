@@ -4,7 +4,7 @@
 "iconsel":"",
 "launch":"launch.sh",
 "rompath":"../../Roms/PCFX",
-"imgpath":"../../Imgs/PCFX",
+"imgpath":"../../Roms/PCFX/Imgs",
 "useswap":1,
 "shortname":0,
 "hidebios":1,

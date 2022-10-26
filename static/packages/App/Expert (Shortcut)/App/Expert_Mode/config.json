@@ -1,6 +1,6 @@
 {
 "label":"Expert",
-"icon":"icon.png",
+"icon":"../../Icons/app/expert.png",
 "launch":"launch.sh",
 "description":"Expert tab shortcut"
 }

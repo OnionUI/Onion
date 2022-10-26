@@ -5,11 +5,13 @@
 #include "utils/log.h"
 #include "imageCache.h"
 
+#define IMAGECACHE_MAXSIZE 50
+
 static pthread_t thread_pt;
 static bool thread_active = false;
 
-static const int image_cache_len = 10;
-static SDL_Surface *image_cache[10] = {NULL};
+static const int image_cache_len = IMAGECACHE_MAXSIZE;
+static SDL_Surface *image_cache[IMAGECACHE_MAXSIZE] = {NULL};
 static int image_cache_offset = -1;
 
 static SDL_Surface* (*load_image)(int) = NULL;

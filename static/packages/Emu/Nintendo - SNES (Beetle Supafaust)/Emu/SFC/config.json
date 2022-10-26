@@ -1,7 +1,7 @@
 {
 "label":"SNES",
 "icon":"../../Icons/sfc.png",
-"iconsel":"",
+"iconsel":"../../Icons/sfc.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/SFC",
 "imgpath":"../../Roms/SFC/Imgs",

@@ -1,7 +1,7 @@
 {
 "label":"Amiga",
 "icon":"../../Icons/amiga.png",
-"iconsel":"",
+"iconsel":"../../Icons/amiga.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/AMIGA",
 "imgpath":"../../Roms/AMIGA/Imgs",

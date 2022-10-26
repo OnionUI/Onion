@@ -1,7 +1,7 @@
 {
 "label":"Supervis.",
 "icon":"../../Icons/supervision.png",
-"iconsel":"",
+"iconsel":"../../Icons/supervision.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/SUPERVISION",
 "imgpath":"../../Roms/SUPERVISION/Imgs",

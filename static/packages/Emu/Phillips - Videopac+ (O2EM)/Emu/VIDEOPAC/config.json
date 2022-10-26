@@ -1,7 +1,7 @@
 {
 "label":"VideoPac",
 "icon":"../../Icons/vdp.png",
-"iconsel":"",
+"iconsel":"../../Icons/vdp.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/VIDEOPAC",
 "imgpath":"../../Roms/VIDEOPAC/Imgs",

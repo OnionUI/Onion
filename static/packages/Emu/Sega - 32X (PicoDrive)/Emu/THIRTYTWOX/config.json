@@ -1,7 +1,7 @@
 {
 "label":"Sega 32X",
 "icon":"../../Icons/32X.png",
-"iconsel":"",
+"iconsel":"../../Icons/32X.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/THIRTYTWOX",
 "imgpath":"../../Roms/THIRTYTWOX/Imgs",

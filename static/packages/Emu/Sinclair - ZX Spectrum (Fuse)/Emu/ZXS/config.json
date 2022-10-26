@@ -1,7 +1,7 @@
 {
 "label":"ZXSpect",
 "icon":"../../Icons/zxs.png",
-"iconsel":"",
+"iconsel":"../../Icons/zxs.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/ZXS",
 "imgpath":"../../Roms/ZXS/Imgs",

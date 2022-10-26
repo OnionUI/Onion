@@ -4,7 +4,7 @@
 "iconsel":"",
 "launch":"launch.sh",
 "rompath":"../../Roms/GB",
-"imgpath":"../../Imgs/GB",
+"imgpath":"../../Roms/GB/Imgs",
 "useswap":0,
 "shortname":0,
 "hidebios":1,

@@ -123,7 +123,7 @@
     "120":  "Hue",
     "121":  "Saturation",
     "122":  "Contrast",
-	"123":  " \n \nDisplay settings\nsaved.\n \n ",
+	"123":  " \n \nDisplay settings saved!\nPlease reboot the device.\n \n ",
     "124":  "Apply changes",
     "125":  "Themes",
     "126":  "Font size",

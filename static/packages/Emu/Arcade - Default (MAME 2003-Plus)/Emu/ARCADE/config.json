@@ -1,7 +1,7 @@
 {
 "label":"Arcade",
 "icon":"../../Icons/arcade.png",
-"iconsel":"",
+"iconsel":"../../Icons/arcade.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/ARCADE",
 "imgpath":"../../Roms/ARCADE/Imgs",
