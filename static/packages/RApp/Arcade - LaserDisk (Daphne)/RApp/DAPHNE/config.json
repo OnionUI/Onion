@@ -1,7 +1,7 @@
 {
 "label":"Daphne",
-"icon":"../../Icons/daphne.png",
-"iconsel":"../../Icons/daphne.png",
+"icon":"../../Icons/rapp/daphne.png",
+"iconsel":"",
 "launch":"launch.sh",
 "rompath":"../../Roms/DAPHNE",
 "imgpath":"../../Roms/DAPHNE/Imgs",

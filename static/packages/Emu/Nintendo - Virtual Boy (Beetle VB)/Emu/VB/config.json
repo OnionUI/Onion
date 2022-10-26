@@ -1,7 +1,7 @@
 {
 "label":"VirtualBoy",
 "icon":"../../Icons/vb.png",
-"iconsel":"",
+"iconsel":"../../Icons/vb.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/VB",
 "imgpath":"../../Roms/VB/Imgs",

@@ -1,7 +1,7 @@
 {
 "label":"PSX",
 "icon":"../../Icons/ps.png",
-"iconsel":"",
+"iconsel":"../../Icons/ps.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/PS",
 "imgpath":"../../Roms/PS/Imgs",
@@ -9,5 +9,5 @@
 "useswap":1,
 "shortname":0,
 "hidebios":0,
-"extlist":"iso|ISO|img|IMG|bin|BIN|mdf|MDF|pbp|PBP|toc|TOC|cbn|CBN|m3u|M3U|ccd|CCD|chd|CHD"
+"extlist":"cue|CUE|mdf|MDF|pbp|PBP|toc|TOC|cbn|CBN|m3u|M3U|ccd|CCD|chd|CHD"
 }

@@ -1,7 +1,7 @@
 {
 "label":"Vectrex",
 "icon":"../../Icons/vectrex.png",
-"iconsel":"",
+"iconsel":"../../Icons/vectrex.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/VECTREX",
 "imgpath":"../../Roms/VECTREX/Imgs",

@@ -1,6 +1,6 @@
 {
 "label":"Themes",
-"icon":"icon.png",
+"icon":"../../Icons/app/themes.png",
 "launch":"launch.sh",
 "description":"Change system theme"
 }

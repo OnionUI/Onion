@@ -1,7 +1,6 @@
 {
 "label":"Activity Tracker",
-"icon":"icon.png",
-"iconsel":"icon.png",
+"icon":"../../Icons/app/activity.png",
 "launch":"launch.sh",
 "description":"See your play activity"
 }

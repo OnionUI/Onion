@@ -1,7 +1,7 @@
 {
 "label":"Amst CPC",
 "icon":"../../Icons/cpc.png",
-"iconsel":"",
+"iconsel":"../../Icons/cpc.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/CPC",
 "imgpath":"../../Roms/CPC/Imgs",

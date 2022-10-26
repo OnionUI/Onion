@@ -1,7 +1,7 @@
 {
 "label":"GameWatch",
 "icon":"../../Icons/gw.png",
-"iconsel":"",
+"iconsel":"../../Icons/gw.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/GW",
 "imgpath":"../../Roms/GW/Imgs",

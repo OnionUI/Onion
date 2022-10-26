@@ -1,7 +1,7 @@
 {
 "label":"Atari 7800",
 "icon":"../../Icons/7800.png",
-"iconsel":"",
+"iconsel":"../../Icons/7800.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/SEVENTYEIGHTHUNDRED",
 "imgpath":"../../Roms/SEVENTYEIGHTHUNDRED/Imgs",

@@ -7,7 +7,6 @@ supported_extensions = "d64|d71|d80|d81|d82|g64|g41|x64|t64|tap|prg|p00|crt|bin|
 license = "GPLv2"
 permissions = ""
 display_version = "3.5"
-description = "Versatile Commodore Emulator - VIC-20"
 
 # Hardware Information
 manufacturer = "Commodore"
@@ -17,3 +16,7 @@ systemid = "commodore_vic20"
 # Libretro Features
 database = "Commodore - VIC-20"
 supports_no_game = "true"
+savestate = "true"
+savestate_features = "serialized"
+
+description = "The VICE VIC-20 emulator, isolated and ported to libretro. This core emulates all of the internal hardware, including the VIA chips. The VIC-I video chip is fully emulated except for NTSC interlace mode."

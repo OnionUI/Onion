@@ -1,7 +1,7 @@
 {
 "label":"GB",
 "icon":"../../Icons/gb.png",
-"iconsel":"",
+"iconsel":"../../Icons/gb.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/GB",
 "imgpath":"../../Roms/GB/Imgs",
