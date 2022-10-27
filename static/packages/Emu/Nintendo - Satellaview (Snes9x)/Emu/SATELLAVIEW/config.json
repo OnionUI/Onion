@@ -9,5 +9,5 @@
 "useswap":1,
 "shortname":0,
 "hidebios":1,
-"extlist":"bs|BS|sfc|SFC|smc|SMC|swc|SWC|fig|FIG|st|ST|zip|ZIP|7z|7Z"
+"extlist":"bs|sfc|smc|swc|fig|st|zip|7z"
 }
