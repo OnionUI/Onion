@@ -1,7 +1,7 @@
 {
 "label":"MSX",
 "icon":"../../Icons/msx.png",
-"iconsel":"",
+"iconsel":"../../Icons/msx.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/MSX",
 "imgpath":"../../Roms/MSX/Imgs",

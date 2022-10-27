@@ -1,7 +1,6 @@
 {
 "label":"Package Manager",
-"icon":"icon.png",
-"iconsel":"",
+"icon":"../../Icons/app/pacman.png",
 "launch":"launch.sh",
 "description":"Add or remove systems and apps"
 }

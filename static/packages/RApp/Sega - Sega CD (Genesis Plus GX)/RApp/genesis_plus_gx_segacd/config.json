@@ -4,7 +4,7 @@
 "iconsel":"",
 "launch":"launch.sh",
 "rompath":"../../Roms/SEGACD",
-"imgpath":"../../Imgs/SEGACD",
+"imgpath":"../../Roms/SEGACD/Imgs",
 "useswap":1,
 "shortname":0,
 "hidebios":1,

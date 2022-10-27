@@ -1,7 +1,7 @@
 {
 "label":"GBA",
 "icon":"../../Icons/gba.png",
-"iconsel":"",
+"iconsel":"../../Icons/gba.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/GBA",
 "imgpath":"../../Roms/GBA/Imgs",

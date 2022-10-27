@@ -1,7 +1,7 @@
 {
 "label":"FairChanF",
 "icon":"../../Icons/fairchild.png",
-"iconsel":"",
+"iconsel":"../../Icons/fairchild.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/FAIRCHILD",
 "imgpath":"../../Roms/FAIRCHILD/Imgs",

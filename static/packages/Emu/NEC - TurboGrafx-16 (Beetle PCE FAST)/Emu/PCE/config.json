@@ -1,7 +1,7 @@
 {
 "label":"TG-16",
 "icon":"../../Icons/pce.png",
-"iconsel":"",
+"iconsel":"../../Icons/pce.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/PCE",
 "imgpath":"../../Roms/PCE/Imgs",

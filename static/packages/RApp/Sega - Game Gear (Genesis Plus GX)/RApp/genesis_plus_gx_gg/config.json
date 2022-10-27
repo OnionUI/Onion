@@ -4,7 +4,7 @@
 "iconsel":"",
 "launch":"launch.sh",
 "rompath":"../../Roms/GG",
-"imgpath":"../../Imgs/GG",
+"imgpath":"../../Roms/GG/Imgs",
 "useswap":0,
 "shortname":0,
 "hidebios":1,

@@ -1,6 +1,6 @@
 {
 "label":"Guest mode - disabled",
-"icon":"GuestOFF.png",
+"icon":"../../Icons/app/guest-off.png",
 "launch":"launch.sh",
 "description":"Activate the guest profile"
 }

@@ -1,7 +1,7 @@
 {
 "label":"Mega Duck",
 "icon":"../../Icons/megaduck.png",
-"iconsel":"",
+"iconsel":"../../Icons/megaduck.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/MEGADUCK",
 "imgpath":"../../Roms/MEGADUCK/Imgs",

@@ -1,7 +1,7 @@
 {
 "label":"CPS1",
 "icon":"../../Icons/cps1.png",
-"iconsel":"",
+"iconsel":"../../Icons/cps1.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/CPS1",
 "imgpath":"../../Roms/CPS1/Imgs",

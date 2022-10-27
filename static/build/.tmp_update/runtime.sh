@@ -181,7 +181,7 @@ recentlist_temp=/tmp/recentlist-temp.json
 
 check_hide_recents() {
     # Hide recents on
-    if [ -f $sysdir/config/.hideRecents ]; then
+    if [ ! -f $sysdir/config/.showRecents ]; then
         # Hide recents by removing the json file
         if [ -f $recentlist ]; then
             cat $recentlist $recentlist_hidden > $recentlist_temp
@@ -204,7 +204,7 @@ clean_flag=/mnt/SDCARD/miyoo/app/.isClean
 expert_flag=/mnt/SDCARD/miyoo/app/.isExpert
 
 check_hide_expert() {
-    if [ -f $sysdir/config/.hideExpert ]; then
+    if [ ! -f $sysdir/config/.showExpert ]; then
         # Should be clean
         if [ ! -f $clean_flag ] || [ -f $expert_flag ]; then
             rm /mnt/SDCARD/miyoo/app/MainUI

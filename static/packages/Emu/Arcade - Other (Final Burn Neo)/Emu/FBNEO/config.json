@@ -1,0 +1,13 @@
+{
+"label":"FB Neo",
+"icon":"../../Icons/arcade.png",
+"iconsel":"../../Icons/arcade.png",
+"launch":"launch.sh",
+"rompath":"../../Roms/FBNEO",
+"imgpath":"../../Roms/FBNEO/Imgs",
+"gamelist":"../../Roms/FBNEO/miyoogamelist.xml",
+"useswap":1,
+"shortname":1,
+"hidebios":1,
+"extlist":"zip"
+}

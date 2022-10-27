@@ -1,7 +1,7 @@
 {
 "label":"BS-X",
 "icon":"../../Icons/satella.png",
-"iconsel":"",
+"iconsel":"../../Icons/satella.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/SATELLAVIEW",
 "imgpath":"../../Roms/SATELLAVIEW/Imgs",
