@@ -1,10 +1,7 @@
 #!/bin/sh
 mydir=`dirname "$0"`
 
-
-export HOME=$mydir
-export PATH=$mydir:$mydir/bin:$PATH
-export LD_LIBRARY_PATH=$mydir/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/mnt/SDCARD/.tmp_update/lib/parasyte:$LD_LIBRARY_PATH
 
 export SDL_VIDEODRIVER=mmiyoo
 export SDL_AUDIODRIVER=mmiyoo
