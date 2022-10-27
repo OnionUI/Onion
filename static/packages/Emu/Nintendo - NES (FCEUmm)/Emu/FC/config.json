@@ -9,5 +9,5 @@
 "useswap":1,
 "shortname":0,
 "hidebios":0,
-"extlist":"fds|FDS|nes|NES|unif|UNIF|unf|UNF|zip|ZIP|7z|7Z"
+"extlist":"fds|nes|unif|unf|zip|7z"
 }

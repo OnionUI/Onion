@@ -9,5 +9,5 @@
 "useswap":1,
 "shortname":0,
 "hidebios":1,
-"extlist":"a52|A52|zip|ZIP|7z|7Z|bin|BIN"
+"extlist":"a52|zip|7z|bin"
 }
