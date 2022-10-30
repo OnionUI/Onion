@@ -1,6 +1,6 @@
 {
-"label":"mgba",
-"icon":"mgba.png",
+"label":"gpsp",
+"icon":"gpsp.png",
 "iconsel":"",
 "launch":"launch.sh",
 "rompath":"../../Roms/GBA",
@@ -8,5 +8,5 @@
 "useswap":1,
 "shortname":0,
 "hidebios":1,
-"extlist":"bin|BIN|gb|GB|gbc|GBC|gba|GBA|zip|ZIP|7z|7Z"
+"extlist":"bin|gb|gbc|gba|zip|7z"
 }

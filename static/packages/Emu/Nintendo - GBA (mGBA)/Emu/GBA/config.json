@@ -1,7 +1,7 @@
 {
 "label":"GBA",
 "icon":"../../Icons/gba.png",
-"iconsel":"",
+"iconsel":"../../Icons/gba.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/GBA",
 "imgpath":"../../Roms/GBA/Imgs",
@@ -9,5 +9,5 @@
 "useswap":1,
 "shortname":0,
 "hidebios":1,
-"extlist":"bin|BIN|gba|GBA|zip|ZIP|7z|7Z"
+"extlist":"bin|gba|zip|7z"
 }
