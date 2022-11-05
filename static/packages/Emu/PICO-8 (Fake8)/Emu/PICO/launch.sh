@@ -6,10 +6,9 @@ homedir=`dirname "$1"`
 cd $progdir
 ./cpufreq.sh
 
-killall audioserver
-killall audioserver.mod
+# Timer initialisation
+cd /mnt/SDCARD/App/PlayActivity
+./playActivity "init"
 
-HOME=$homedir $progdir/FAKE08 "$1"
-
-/mnt/SDCARD/miyoo/app/audioserver &
-
+cd /mnt/SDCARD/RetroArch/
+HOME=/mnt/SDCARD/RetroArch/ $progdir/../../RetroArch/retroarch -v --log-file retroarch.log -L $progdir/../../RetroArch/.retroarch/cores/fake08_libretro.so "$1"
