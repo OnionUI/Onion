@@ -1,0 +1,31 @@
+# Software Information
+display_name = "M.B.A-mini"
+authors = "wonder199999"
+supported_extensions = "zip|7z|chd"
+corename = "M.B.A-mini (705854e)"
+license = "MAME"
+permissions = ""
+display_version = "705854e"
+categories = "Emulator"
+
+# Hardware Information
+manufacturer = "Various"
+systemname = "Arcade (various)"
+systemid = "mame"
+
+# Libretro Features
+supports_no_game = "false"
+database = "FBAlpha 02.97.38"
+savestate = "false"
+savestate_features = "null"
+cheats = "false"
+input_descriptors = "false"
+memory_descriptors = "false"
+libretro_saves = "false"
+core_options = "true"
+core_options_version = "1.0"
+hw_render = "false"
+disk_control = "false"
+notes = "(!) Unless using Full Non-Merged romsets, BIOS files must be inside the ROM directory.|"
+
+description = "M.B.A = MAME's skeleton + FBA's romsets. M.B.A-mini from MAME2010-libretro after the codes is streamlined, only CPS 1/2, NEOGEO, IREM M92 machines && roms is supported. M.B.A-mini gave up the original mame0.139 romsets, but supported FBAlpha 02.97.38 romsets with more games (it's >= mame0.172 romsets). also in process, many roms graphics and sound issues have been fixed (especially for CPS1)." In the current situation, M.B.A-mini supports 270 CPS1 games (including clones), 305 CPS2 games, 293 NEOGEO games, and 37 games for IREM M92. "
