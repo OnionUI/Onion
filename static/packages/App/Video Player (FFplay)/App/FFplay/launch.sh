@@ -1,6 +1,7 @@
 #!/bin/sh
 mydir=`dirname "$0"`
-
+export HOME=$mydir
+export PATH=$mydir/bin:$PATH
 export LD_LIBRARY_PATH=/mnt/SDCARD/.tmp_update/lib/parasyte:$LD_LIBRARY_PATH
 echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 

@@ -6,8 +6,8 @@ SelectedVideo=$( (ls /mnt/SDCARD/Media/Videos) | awk '!/^-/ && !/==/' | "/mnt/SD
 echo ============
 echo /mnt/SDCARD/Media/Videos/${SelectedVideo}
 
-if [ "$SelectedVideo" = " LastPlay.pls" ]; then
-	SelectedVideo=$(cat "/mnt/SDCARD/Media/Videos/ LastPlay.pls")
+if [ ! "$SelectedVideo" = " LastPlay.pls" ]; then
+	echo /mnt/SDCARD/Media/Videos/${SelectedVideo}>"/mnt/SDCARD/Media/Videos/ LastPlay.pls"
 fi
 
 
@@ -18,11 +18,3 @@ fi
 	# touch /mnt/SDCARD/App/FFplay/.noResume
  # fi
   
-
-echo /mnt/SDCARD/Media/Videos/${SelectedVideo}>"/mnt/SDCARD/Media/Videos/ LastPlay.pls"
-echo ============
-  
-  
- 
-	
- 
