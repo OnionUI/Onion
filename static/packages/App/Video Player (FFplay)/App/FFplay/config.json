@@ -3,5 +3,5 @@
 "icon":"../../Icons/app/ffplay.png",
 "iconsel":"",
 "launch":"launch.sh",
-"description":"ffplay"
+"description":"FFplay"
 }
