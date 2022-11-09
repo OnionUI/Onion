@@ -1,7 +1,7 @@
 # Software Information
 display_name = "Sinclair - ZX Spectrum (Fuse)"
 authors = "Team Fuse"
-supported_extensions = "tzx|tap|z80|rzx|scl|trd|dsk"
+supported_extensions = "tzx|tap|z80|rzx|scl|trd|dsk|zip"
 corename = "Fuse"
 categories = "Emulator"
 license = "GPLv3"

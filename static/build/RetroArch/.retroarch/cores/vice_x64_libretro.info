@@ -7,7 +7,6 @@ supported_extensions = "d64|d71|d80|d81|d82|g64|g41|x64|t64|tap|prg|p00|crt|bin|
 license = "GPLv2"
 permissions = ""
 display_version = "3.5"
-description = "Versatile Commodore Emulator - C64 (fast)"
 
 # Hardware Information
 manufacturer = "Commodore"
@@ -17,6 +16,8 @@ systemid = "commodore_c64"
 # Libretro Features
 database = "Commodore - 64"
 supports_no_game = "true"
+savestate = "true"
+savestate_features = "serialized"
 
 # Firmware
 firmware_count = 4
@@ -33,3 +34,5 @@ firmware3_desc = "vice/JiffyDOS_1581.bin (JiffyDOS 1581 drive BIOS)"
 firmware3_path = "vice/JiffyDOS_1581.bin"
 firmware3_opt = "true"
 notes = "(!) JiffyDOS_C64.bin (md5): be09394f0576cf81fa8bacf634daf9a2|(!) JiffyDOS_1541-II.bin (md5): 1b1e985ea5325a1f46eb7fd9681707bf|(!) JiffyDOS_1571_repl310654.bin (md5): 41c6cc528e9515ffd0ed9b180f8467c0|(!) JiffyDOS_1581.bin (md5): 20b6885c6dc2d42c38754a365b043d71"
+
+description = "The VICE x64 (fast) Commodore 64 emulator, isolated and ported to libretro. This core features a fairly complete emulation of the VIC-II video chip, with all sprites, registers and video modes emulated in a fully cycle-accurate manner. However, the 'x64sc' core's VIC-II emulation is both cycle-based and pixel-accurate, making it a better choice for devices powerful enough to run it. Both cores include options to switch between the original 'fastSID' sound chip emulation and the slower but much more accurate 'reSID' module."

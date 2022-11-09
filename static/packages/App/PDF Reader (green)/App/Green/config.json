@@ -1,0 +1,7 @@
+{
+"label":"PDF Reader",
+"icon":"../../Icons/app/pdf.png",
+"iconsel":"",
+"launch":"launch.sh",
+"description":"Green is a lightweight PDF reader"
+}
