@@ -98,6 +98,7 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/packageManager && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/sendkeys && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/setState && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/renameRom && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/infoPanel && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/prompt && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/batmon && BUILD_DIR=$(BIN_DIR) make

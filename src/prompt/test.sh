@@ -8,7 +8,7 @@ main() {
 	# fi
 
 	# Prompt for update or fresh install
-	$installdir/prompt -r -m "Welcome to the Onion installer!\nPlease choose an action:" \
+	$installdir/prompt -m "Welcome to the Onion installer!\nPlease choose an action:" \
         "Update (keep settings)" \
         "Reinstall (reset settings)" \
         "Update OS/RetroArch only"
