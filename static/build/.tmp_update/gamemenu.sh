@@ -79,7 +79,7 @@ get_core_info() {
     launch_script=`cat "$emupath/launch.sh"`
     retroarch_core=""
 
-    romcfgpath="$(dirname "$rompath")/$(basename "$rompath" ".$romext").cfg"
+    romcfgpath="$(dirname "$rompath")/$(basename "$rompath" ".$romext").db_cfg"
 
     if [ -f "$romcfgpath" ]; then
         romcfg=`cat "$romcfgpath"`

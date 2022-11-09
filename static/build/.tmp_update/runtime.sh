@@ -174,7 +174,7 @@ launch_game() {
 
         rompath=$(echo "$cmd" | awk '{st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3)}')
         romext=`echo "$(basename "$rompath")" | awk -F. '{print tolower($NF)}'`
-        romcfgpath="$(dirname "$rompath")/$(basename "$rompath" ".$romext").cfg"
+        romcfgpath="$(dirname "$rompath")/$(basename "$rompath" ".$romext").db_cfg"
     fi
 
     # GAME LAUNCH
