@@ -187,7 +187,7 @@ launch_game() {
 
         echo "per game core: $retroarch_core" >> $sysdir/logs/game_menu.log
 
-        if [ -f "$corepath" ]; then
+        if [ -f "$corepath" ] && ! [ echo "$cmd" | grep -q "$sysdir/reset.cfg" ]; then
             echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
         fi
     fi

@@ -110,10 +110,10 @@ change_core() {
     ext="$romext"
 
     if [ "$ext" == "zip" ]; then
-        tmp_files="`unzip -l "$rompath" | sed '1,3d;$d' | sed '$d' | awk '{$1=""; $2=""; $3=""; print $0}'`"
-        inner_name=`basename "$(echo "$tmp_files" | grep "[!]")"`
+        zip_files=`unzip -l "$rompath" | sed '1,4d;$d' | sed '$d' | sort -n -r`
+        inner_name=`basename "$(echo "$zip_files" | grep "[!]")"`
         if [ "$inner_name" == "" ]; then
-            inner_name=`basename "$(echo "$tmp_files" | head -n 1)"`
+            inner_name=`basename "$(echo "$zip_files" | head -n 1)"`
         fi
         ext=`echo "$inner_name" | awk -F. '{print tolower($NF)}'`
         echo "$ext"
