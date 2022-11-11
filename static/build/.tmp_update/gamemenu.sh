@@ -44,42 +44,36 @@ main() {
     echo "emupath: $emupath"
     echo "extension: $romext"
 
+    menu_options=""
+    menu_option_labels=""
+
     get_core_info
 
-    if [ ! -f "$corepath" ] || [ ! -f "$coreinfopath" ]; then
-        exit 1
+    if [ -f "$corepath" ] && [ -f "$coreinfopath" ]; then
+        coreinfo=`cat "$coreinfopath"`
+        corename=`get_info_value "$coreinfo" corename`
+
+        game_core_label="Game core: $corename"
+
+        if [ "$retroarch_core" == "$default_core" ]; then
+            game_core_label="$game_core_label (Default)"
+        fi
+
+        menu_options="$menu_options reset_game change_core"
+        menu_option_labels="$menu_option_labels \"Reset game\" \"$game_core_label\""
     fi
 
-    coreinfo=`cat "$coreinfopath"`
-    corename=`get_info_value "$coreinfo" corename`
+    menu_options="$menu_options filter_roms refresh_roms"
+    menu_option_labels="$menu_option_labels \"Filter list\" \"Refresh roms\""
 
-    game_core_label="Game core: $corename"
-
-    if [ "$retroarch_core" == "$default_core" ]; then
-        game_core_label="$game_core_label (Default)"
-    fi
-
-    LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./bin/prompt -t "GAME MENU" \
-        "Reset game" \
-        "$game_core_label" \
-        "Rename" \
-        "Filter list" \
-        "Refresh roms"
+    runcmd="LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./bin/prompt -t \"GAME MENU\" $menu_option_labels"
+    eval $runcmd
     retcode=$?
 
     echo "retcode: $retcode"
 
-    if [ $retcode -eq 0 ]; then
-        reset_game
-    elif [ $retcode -eq 1 ]; then
-        change_core
-    elif [ $retcode -eq 2 ]; then
-        rename_rom
-    elif [ $retcode -eq 3 ]; then
-        filter_roms
-    elif [ $retcode -eq 4 ]; then
-        refresh_roms
-    fi
+    menu_action=`echo $menu_options | awk -v N=$((retcode+1)) '{print $N}'`
+    eval $menu_action
 
     exit 1
 }
@@ -121,10 +115,14 @@ reset_game() {
 change_core() {
     ext="$romext"
 
-    if [ "$ext" == "zip" ]; then
-        zip_files=`unzip -l "$rompath" | sed '1,3d;$d' | sed '$d' | sort -n -r`
+    if [ "$ext" == "zip" ] || [ "$ext" == "7z" ]; then
+        if [ "$ext" == "zip" ]; then
+            zip_files=`unzip -l "$rompath" | sed '1,3d;$d' | sed '$d' | sort -n -r`
+        else
+            zip_files=`./bin/7zz l -ba "$rompath" | awk '{$1="";$2="";$3="";print $0;}' | sort -n -r`
+        fi
 
-        echo "unzip output:"
+        echo "zip/7z output:"
         echo "$zip_files"
 
         inner_name=`basename "$(echo "$zip_files" | grep "[!]")"`
@@ -185,7 +183,7 @@ change_core() {
     echo "corenames: $available_corenames"
 
     if [ $is_valid -eq 0 ]; then
-        ./bin/infoPanel --title "GAME CORE" --message "Not available for this system" --auto
+        ./bin/infoPanel --title "GAME CORE" --message "Not available for this rom" --auto
         exit 1
     fi
 
@@ -216,7 +214,7 @@ change_core() {
 
 get_core_extensions() {
     if [ ! -f "$ext_cache_path" ]; then
-        ./bin/infoPanel --title "CACHING CORES" --message "Caching core info\n \nThis may take a minute..." --auto &
+        ./bin/infoPanel --title "CACHING CORES" --message "Caching core info\n \nThis may take a minute..." --persistent &
 
         for entry in "$radir/cores"/*.info ; do
             tmp_info=`cat "$entry"`
@@ -235,6 +233,8 @@ get_core_extensions() {
             rm -f "$ext_cache_path"
             mv temp "$ext_cache_path"
         done
+
+        touch /tmp/dismiss_info_panel
     fi
 }
 
@@ -263,11 +263,15 @@ rename_rom() {
 }
 
 filter_roms() {
-    return
+    echo ":: filter roms"
+    echo "./bin/filter filter \"$emupath\""
+    ./bin/filter filter "$emupath"
 }
 
 refresh_roms() {
-    return
+    echo ":: refresh roms"
+    echo "./bin/filter refresh \"$emupath\""
+    ./bin/filter refresh "$emupath"
 }
 
 main
