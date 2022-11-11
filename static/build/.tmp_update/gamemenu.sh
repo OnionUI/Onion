@@ -1,7 +1,9 @@
 #!/bin/sh
 sysdir=/mnt/SDCARD/.tmp_update
 radir=/mnt/SDCARD/RetroArch/.retroarch
-extpath=$radir/cores/core_extensions.csv
+ext_cache_path=$radir/cores/cache/core_extensions.cache
+
+mkdir -p $radir/cores/cache
 
 cd $sysdir
 if [ ! -f $sysdir/cmd_to_run.sh ]; then
@@ -14,6 +16,7 @@ rompath=""
 emupath=""
 romext=""
 romcfgpath=""
+default_core=""
 retroarch_core=""
 corepath=""
 coreinfopath=""
@@ -50,9 +53,15 @@ main() {
     coreinfo=`cat "$coreinfopath"`
     corename=`get_info_value "$coreinfo" corename`
 
-    LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./bin/prompt -t "GAME MENU" \
+    game_core_label="Game core: $corename"
+
+    if [ "$retroarch_core" == "$default_core" ]; then
+        game_core_label="$game_core_label (Default)"
+    fi
+
+    LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./bin/prompt -t "GAME MENU" \
         "Reset game" \
-        "Default core: $corename" \
+        "$game_core_label" \
         "Rename" \
         "Filter list" \
         "Refresh roms"
@@ -86,11 +95,14 @@ get_core_info() {
         retroarch_core=`get_info_value "$romcfg" core`
     fi
 
+    default_core=`echo "$launch_script" | awk '{st = index($0,".retroarch/cores/"); s = substr($0,st+17); st2 = index(s,".so"); print substr(s,0,st2-1)}' | xargs`
+
     if [ "$retroarch_core" == "" ]; then
-        retroarch_core=`echo "$launch_script" | awk '{st = index($0,".retroarch/cores/"); s = substr($0,st+17); st2 = index(s,".so"); print substr(s,0,st2-1)}' | xargs`
+        retroarch_core="$default_core"
     fi
 
-    echo "ra_core: $retroarch_core"
+    echo "default_core: $default_core"
+    echo "retroarch_core: $retroarch_core"
 
     corepath="$radir/cores/$retroarch_core.so"
     coreinfopath="$radir/cores/$retroarch_core.info"
@@ -110,28 +122,53 @@ change_core() {
     ext="$romext"
 
     if [ "$ext" == "zip" ]; then
-        zip_files=`unzip -l "$rompath" | sed '1,4d;$d' | sed '$d' | sort -n -r`
+        zip_files=`unzip -l "$rompath" | sed '1,3d;$d' | sed '$d' | sort -n -r`
+
+        echo "unzip output:"
+        echo "$zip_files"
+
         inner_name=`basename "$(echo "$zip_files" | grep "[!]")"`
         if [ "$inner_name" == "" ]; then
             inner_name=`basename "$(echo "$zip_files" | head -n 1)"`
         fi
         ext=`echo "$inner_name" | awk -F. '{print tolower($NF)}'`
-        echo "$ext"
+        echo "inner extension: $ext"
         echo "-------------------------------------"
     fi
 
     get_core_extensions
-    count=0
     available_corenames=""
     available_cores=""
 
-    while read entry; do
-        tmp_core=`echo "$entry" | awk '{split($0,a,","); print a[1]}'`
-        tmp_corename=`echo "$entry" | awk '{split($0,a,","); print a[2]}'`
-        tmp_extensions=`echo "$entry" | awk '{split($0,a,","); print a[3]}'`
+    count=0
+    is_valid=0
+    selected_index=0
 
-        if ! echo "$tmp_extensions" | tr '|' '\n' | grep -q "$ext"; then
-            continue
+    single_ext_cache_path="$radir/cores/cache/ext_cores_$ext.cache"
+
+    if [ ! -f "$single_ext_cache_path" ]; then
+        while read entry; do
+            tmp_extensions=`echo "$entry" | awk '{split($0,a,";"); print a[3]}'`
+
+            if ! echo "$tmp_extensions" | tr '|' '\n' | grep -q "$ext"; then
+                continue
+            fi
+
+            echo "$entry" >> $single_ext_cache_path
+        done < $ext_cache_path
+    fi
+
+    while read entry; do
+        tmp_corename=`echo "$entry" | awk '{split($0,a,";"); print a[1]}'`
+        tmp_core=`echo "$entry" | awk '{split($0,a,";"); print a[2]}'`
+
+        if [ "$tmp_core" == "$default_core" ]; then
+            is_valid=1
+            tmp_corename="$tmp_corename (Default)"
+        fi
+
+        if [ "$tmp_core" == "$retroarch_core" ]; then
+            selected_index=$count
         fi
 
         count=$(($count + 1))
@@ -142,12 +179,17 @@ change_core() {
 
         available_cores="$available_cores $tmp_core"
         available_corenames="$available_corenames \"$tmp_corename\""
-    done < $extpath
+    done < $single_ext_cache_path
 
     echo "cores: $available_cores"
     echo "corenames: $available_corenames"
 
-    runcmd="LD_PRELOAD=\"/mnt/SDCARD/miyoo/lib/libpadsp.so\" ./bin/prompt -t \"DEFAULT CORE\" $available_corenames"
+    if [ $is_valid -eq 0 ]; then
+        ./bin/infoPanel --title "GAME CORE" --message "Not available for this system" --auto
+        exit 1
+    fi
+
+    runcmd="LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./bin/prompt -t \"GAME CORE\" -s $selected_index $available_corenames"
     eval $runcmd
     retcode=$?
 
@@ -159,15 +201,23 @@ change_core() {
 
     echo "new default core: $new_core"
 
-    if [ -f "$romcfgpath" ]; then
-        awk '!/core /' "$romcfgpath" > temp && mv temp "$romcfgpath"
-    fi
+    if [ "$new_core" == "$default_core" ]; then
+        if [ -f "$romcfgpath" ]; then
+            rm -f "$romcfgpath"
+        fi
+    else
+        if [ -f "$romcfgpath" ]; then
+            awk '!/core /' "$romcfgpath" > temp && mv temp "$romcfgpath"
+        fi
 
-    echo "core = \"$new_core\"" >> "$romcfgpath"
+        echo "core = \"$new_core\"" >> "$romcfgpath"
+    fi
 }
 
 get_core_extensions() {
-    if [ ! -f "$extpath" ]; then
+    if [ ! -f "$ext_cache_path" ]; then
+        ./bin/infoPanel --title "CACHING CORES" --message "Caching core info\n \nThis may take a minute..." --auto &
+
         for entry in "$radir/cores"/*.info ; do
             tmp_info=`cat "$entry"`
             tmp_core=`basename "$entry" .info`
@@ -179,7 +229,11 @@ get_core_extensions() {
             tmp_corename=`get_info_value "$tmp_info" "corename"`
             tmp_extensions=`get_info_value "$tmp_info" "supported_extensions"`
 
-            echo "$tmp_core,$tmp_corename,$tmp_extensions" >> "$extpath"
+            echo "$tmp_corename;$tmp_core;$tmp_extensions" >> "$ext_cache_path"
+
+            sort -f -o temp "$ext_cache_path"
+            rm -f "$ext_cache_path"
+            mv temp "$ext_cache_path"
         done
     fi
 }

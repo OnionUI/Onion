@@ -17,7 +17,8 @@ static int image_cache_offset = -1;
 static SDL_Surface* (*load_image)(int) = NULL;
 static int images_total = 0;
 
-int modulo(int x, int n){
+int modulo(int x, int n)
+{
     return (x % n + n) % n;
 }
 

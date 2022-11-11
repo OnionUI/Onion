@@ -38,6 +38,11 @@ typedef struct List
 	bool _created;
 } List;
 
+int _list_modulo(int x, int n)
+{
+    return (x % n + n) % n;
+}
+
 List list_create(int max_items, ListType list_type)
 {
 	return (List){
@@ -78,6 +83,13 @@ void list_scroll(List *list)
 	// Max scroll to last item
 	else if (list->scroll_pos + list->scroll_height > list->item_count)
 		list->scroll_pos = list->item_count - list->scroll_height;
+}
+
+bool list_scrollTo(List *list, int active_pos)
+{
+	list->active_pos = _list_modulo(active_pos, list->item_count);
+	list_scroll(list);
+	return true;
 }
 
 bool list_keyUp(List *list, bool key_repeat)

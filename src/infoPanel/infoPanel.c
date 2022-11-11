@@ -2,7 +2,8 @@
 #include <stdlib.h>
 
 #include "utils/sdl_init.h"
-#include "utils/utils.h"
+#include "utils/str.h"
+#include "utils/file.h"
 #include "utils/msleep.h"
 #include "utils/json.h"
 #include "utils/file.h"
@@ -167,7 +168,7 @@ int main(int argc, char *argv[])
 	int battery_percentage = battery_getPercentage();
 
 	uint32_t acc_ticks = 0;
-	uint32_t last_ticks = SDL_GetTicks();
+	uint32_t last_ticks = 0;
 	uint32_t time_step = 1000 / FRAMES_PER_SECOND;
 
 	bool cache_used = false;
@@ -221,7 +222,7 @@ int main(int argc, char *argv[])
 
 	SDL_Event event;
 
-	while (!quit && wait_confirm)
+	while (!quit)
 	{
 		uint32_t ticks = SDL_GetTicks();
 		acc_ticks += ticks - last_ticks;
@@ -371,6 +372,9 @@ int main(int argc, char *argv[])
 			SDL_Flip(video);
 		}
 		msleep(4);
+
+		if (!wait_confirm)
+			break;
 	}
 
 	if (g_images_paths != NULL)

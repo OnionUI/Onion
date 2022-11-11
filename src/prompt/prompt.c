@@ -55,6 +55,7 @@ int main(int argc, char *argv[])
 	char title_str[STR_MAX] = "";
 	char message_str[STR_MAX] = "";
 	bool required = false;
+	int selected = 0;
 
 	pargs = malloc(MAX_ELEMENTS * sizeof(char*));
 
@@ -71,6 +72,10 @@ int main(int argc, char *argv[])
 			}
 			if (strcmp(argv[i], "-r") == 0 || strcmp(argv[i], "--required") == 0) {
 				required = true;
+				continue;
+			}
+			if (strcmp(argv[i], "-s") == 0 || strcmp(argv[i], "--selected") == 0) {
+				selected = atoi(argv[++i]);
 				continue;
 			}
 		}
@@ -106,6 +111,8 @@ int main(int argc, char *argv[])
 		printf_debug("Adding list item: %s (%d)\n", item.label, item.action_id);
 		list_addItem(&list, item);
 	}
+
+	list_scrollTo(&list, selected);
 
 	bool has_title = strlen(title_str) > 0;
 

@@ -18,7 +18,8 @@
 
 #include "png/png.h"
 
-#include "utils/utils.h"
+#include "utils/str.h"
+#include "utils/file.h"
 #include "utils/json.h"
 #include "utils/hash.h"
 #include "utils/msleep.h"

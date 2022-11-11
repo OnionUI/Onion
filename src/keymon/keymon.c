@@ -10,7 +10,8 @@
 #include <sys/reboot.h>
 #include <sys/stat.h>
 
-#include "utils/utils.h"
+#include "utils/str.h"
+#include "utils/file.h"
 #include "utils/log.h"
 #include "utils/process.h"
 #include "utils/flags.h"

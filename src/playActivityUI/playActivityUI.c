@@ -16,7 +16,8 @@
 
 #include "system/system.h"
 #include "system/keymap_sw.h"
-#include "utils/utils.h"
+#include "utils/str.h"
+#include "utils/file.h"
 #include "utils/log.h"
 #include "utils/keystate.h"
 
