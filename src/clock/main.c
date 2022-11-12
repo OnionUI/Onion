@@ -171,14 +171,8 @@ static void FallbackToDefaultTime(uint32_t *date_selected, uint32_t *month_selec
 {
 	if (*year_selected == 1970)
 	{
-		*date_selected = MIN_DAY;
-		*month_selected = MIN_MONTH;
 		*year_selected = DEFAULT_YEAR;
-		*hour_selected = 0;
-		*minute_selected = 0;
-		*seconds_selected = 0;
 	}
-	
 }
 
 int main (int argc, char *argv[]) 

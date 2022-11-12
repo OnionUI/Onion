@@ -9,7 +9,7 @@ i=0
 
 
 echo "Running scummVM Scan ============================================================="
-$sysdir/bin/infoPanel -t "ScummVM Script" -m "Please wait..." --persistent &
+$sysdir/bin/infoPanel -t "ScummVM import" -m "Please wait..." --persistent &
 
 cp $ScummvmCfgPath $scummdir/standalone/.config/scummvm/scummvm.ini
 export HOME=$scummdir/standalone
@@ -24,49 +24,40 @@ touch "$scandir/◦ Import games in ScummVM.target"
 
 
 # here we get all the targets names
-cat $ScummvmCfgPath | sed -n 's/^[ \t]*\[\(.*\)\].*/\1/p' | (while read target ;
+cat $ScummvmCfgPath | sed -n 's/^[ \t]*\[\(.*\)\].*/\1/p' | (
+	while read target ; do
+		# We skip the first Scummvm section which is not a game
+		if [ "$target" = "scummvm" ]; then continue; fi
 
-do
+		# get the full name of the game (we also remove special characters)  :
+		FullName=`cat $ScummvmCfgPath | sed -n "/^[ \t]*\["$target"]/,/\[/s/^[ \t]*description[ \t]*=[ \t]*//p"  | sed -e 's/: / - /g' | tr -cd "A-Z a-z0-9()._'-"`
 
-	# We skip the first Scummvm section which is not a game
-	if [ "$target" = "scummvm" ]; then continue; fi
-
-	# get the full name of the game (we also remove special characters)  :
-	FullName=`cat $ScummvmCfgPath | sed -n "/^[ \t]*\["$target"]/,/\[/s/^[ \t]*description[ \t]*=[ \t]*//p"  | sed -e 's/: / - /g' | tr -cd "A-Z a-z0-9()._'-"`
-
-	# get the current path of the game :
-	Path=`cat $ScummvmCfgPath | sed -n "/^[ \t]*\["$target"]/,/\[/s/^[ \t]*path[ \t]*=[ \t]*//p" `
+		# get the current path of the game :
+		Path=`cat $ScummvmCfgPath | sed -n "/^[ \t]*\["$target"]/,/\[/s/^[ \t]*path[ \t]*=[ \t]*//p" `
 
 
-	echo ---- 
-	echo full name : $FullName
-	echo target : ${target}
-	echo path : $Path
-	echo creating file "$scandir/$FullName.target" with value ${target}
-	echo ---- 
-	
-	echo ${target} > "$scandir/$FullName.target"
-	
-	let i++;
+		echo ---- 
+		echo full name : $FullName
+		echo target : ${target}
+		echo path : $Path
+		echo creating file "$scandir/$FullName.target" with value ${target}
+		echo ---- 
+		
+		echo ${target} > "$scandir/$FullName.target"
+		
+		let i++;
+	done
 
-done
+	sleep 1
+	touch /tmp/dismiss_info_panel
 
-
-sleep 1
-touch /tmp/dismiss_info_panel
-
-
-if [ "$i" -eq 0 ] 
-then
-	$sysdir/bin/infoPanel -t "ScummVM Script" -m "Import done.\n\nNo games detected." --auto
-else
-	$sysdir/bin/infoPanel -t "ScummVM Script" -m "Done.\n\n$i game(s) detected." --auto
-fi
+	if [ "$i" -eq 0 ] 
+	then
+		$sysdir/bin/infoPanel -t "ScummVM Script" -m "Import done.\n\nNo games detected." --auto
+	else
+		$sysdir/bin/infoPanel -t "ScummVM Script" -m "Done.\n\n$i game(s) detected." --auto
+	fi
 
 	sed -i "/\"pageend\":/s/:.*,/:   6,/" "/tmp/state.json"   # Little trick which allows to displays all the new items in the game list of MainUI
 	rm "$scandir/Shortcuts_cache2.db"
-
-
 )
-
-
