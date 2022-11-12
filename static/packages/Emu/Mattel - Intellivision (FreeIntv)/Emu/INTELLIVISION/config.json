@@ -1,7 +1,7 @@
 {
 "label":"IntelliVis",
 "icon":"../../Icons/itv.png",
-"iconsel":"",
+"iconsel":"../../Icons/itv.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/INTELLIVISION",
 "imgpath":"../../Roms/INTELLIVISION/Imgs",
@@ -9,5 +9,5 @@
 "useswap":1,
 "shortname":0,
 "hidebios":1,
-"extlist":"bin|BIN|int|INT|zip|ZIP|7z|7Z"
+"extlist":"bin|int|zip|7z"
 }

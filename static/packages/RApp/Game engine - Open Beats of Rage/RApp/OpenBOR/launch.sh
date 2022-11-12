@@ -1,7 +1,21 @@
 #!/bin/sh
-echo $0 $*
-progdir=`dirname "$0"`
+mydir=`dirname "$0"`
 
-cd $progdir
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$progdir
-HOME=/mnt/SDCARD $progdir/OpenBOR.ss
+export LD_LIBRARY_PATH=/mnt/SDCARD/.tmp_update/lib/parasyte:$LD_LIBRARY_PATH
+
+export SDL_VIDEODRIVER=mmiyoo
+export SDL_AUDIODRIVER=mmiyoo
+
+echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+
+cd $mydir
+
+
+killall audioserver
+killall audioserver.mod
+
+
+./OpenBOR "$1"
+
+
+/mnt/SDCARD/miyoo/app/audioserver &

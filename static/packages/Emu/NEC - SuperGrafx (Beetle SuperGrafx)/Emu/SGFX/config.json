@@ -1,7 +1,7 @@
 {
 "label":"SuperGfx",
 "icon":"../../Icons/sgfx.png",
-"iconsel":"",
+"iconsel":"../../Icons/sgfx.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/SGFX",
 "imgpath":"../../Roms/SGFX/Imgs",
@@ -9,5 +9,5 @@
 "useswap":0,
 "shortname":0,
 "hidebios":1,
-"extlist":"pce|PCE|sgx|SGX|cue|CUE|ccd|CCD|chd|CHD"
+"extlist":"pce|sgx|cue|ccd|chd"
 }

@@ -1,7 +1,7 @@
 {
 "label":"SGB",
 "icon":"../../Icons/sgb.png",
-"iconsel":"",
+"iconsel":"../../Icons/sgb.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/SGB",
 "imgpath":"../../Roms/SGB/Imgs",
@@ -9,5 +9,5 @@
 "useswap":1,
 "shortname":0,
 "hidebios":0,
-"extlist":"bin|BIN|gb|GB|gbc|GBC|gba|GBA|zip|ZIP|7z|7Z"
+"extlist":"bin|gb|gbc|gba|zip|7z"
 }

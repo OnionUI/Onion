@@ -1,7 +1,7 @@
 {
 "label":"ZXSpect",
 "icon":"../../Icons/zxs.png",
-"iconsel":"",
+"iconsel":"../../Icons/zxs.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/ZXS",
 "imgpath":"../../Roms/ZXS/Imgs",
@@ -9,5 +9,5 @@
 "useswap":1,
 "shortname":0,
 "hidebios":1,
-"extlist":"tzx|TZX|tap|TAP|z80|Z80|rzx|RZX|scl|SCL|trd|TRD|zip|ZIP|7z|7Z"
+"extlist":"tzx|tap|z80|rzx|scl|trd|zip|7z"
 }

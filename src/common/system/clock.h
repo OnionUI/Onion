@@ -11,7 +11,8 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "utils/utils.h"
+#include "utils/str.h"
+#include "utils/file.h"
 
 #define CLOCK_SAVE_FILE "/mnt/SDCARD/Saves/CurrentProfile/saves/currentTime.txt"
 

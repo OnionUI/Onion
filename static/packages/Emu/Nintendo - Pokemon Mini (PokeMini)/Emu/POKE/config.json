@@ -1,7 +1,7 @@
 {
 "label":"Pokemini",
 "icon":"../../Icons/poke.png",
-"iconsel":"",
+"iconsel":"../../Icons/poke.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/POKE",
 "imgpath":"../../Roms/POKE/Imgs",
@@ -9,5 +9,5 @@
 "useswap":0,
 "shortname":0,
 "hidebios":1,
-"extlist":"min|MIN|zip|ZIP"
+"extlist":"min|zip"
 }

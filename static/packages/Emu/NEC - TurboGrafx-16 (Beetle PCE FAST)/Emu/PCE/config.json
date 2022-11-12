@@ -1,7 +1,7 @@
 {
 "label":"TG-16",
 "icon":"../../Icons/pce.png",
-"iconsel":"",
+"iconsel":"../../Icons/pce.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/PCE",
 "imgpath":"../../Roms/PCE/Imgs",
@@ -9,5 +9,5 @@
 "useswap":1,
 "shortname":0,
 "hidebios":0,
-"extlist":"pce|PCE|ccd|CCD|iso|ISO|img|IMG|chd|CHD|cue|CUE|zip|ZIP|7z|7Z"
+"extlist":"pce|ccd|iso|img|chd|cue|zip|7z"
 }

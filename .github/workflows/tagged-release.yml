@@ -19,8 +19,8 @@ jobs:
         submodules: recursive
     - name: Get version
       run: |
-        VERSION="${GITHUB_REF#refs/*/}"
-        echo "BUILD_VERSION=${VERSION:1}" >> $GITHUB_ENV
+        TAG="${{ github.ref_name }}"
+        echo "BUILD_VERSION=${TAG#v}" >> $GITHUB_ENV
     - name: Build release
       shell: bash
       run: |

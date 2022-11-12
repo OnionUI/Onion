@@ -1,7 +1,7 @@
 {
 "label":"MSX",
 "icon":"../../Icons/msx.png",
-"iconsel":"",
+"iconsel":"../../Icons/msx.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/MSX",
 "imgpath":"../../Roms/MSX/Imgs",
@@ -9,5 +9,5 @@
 "useswap":1,
 "shortname":0,
 "hidebios":1,
-"extlist":"rom|ROM|mx1|MX1|mx2|MX2|dsk|DSK|cas|CAS|zip|ZIP|7z|7Z"
+"extlist":"rom|mx1|mx2|dsk|cas|zip|7z"
 }

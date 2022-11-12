@@ -1,5 +1,4 @@
 #!/bin/sh
-progdir=`dirname "$0"`
-cd $progdir
-HOME=/mnt/SDCARD
-./st
+sysdir=/mnt/SDCARD/.tmp_update
+cd $sysdir
+HOME=/mnt/SDCARD ./bin/st

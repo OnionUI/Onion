@@ -1,7 +1,7 @@
 {
 "label":"Atari Lynx",
 "icon":"../../Icons/lynx.png",
-"iconsel":"",
+"iconsel":"../../Icons/lynx.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/LYNX",
 "imgpath":"../../Roms/LYNX/Imgs",
@@ -9,5 +9,5 @@
 "useswap":0,
 "shortname":0,
 "hidebios":1,
-"extlist":"lnx|LNX|zip|ZIP"
+"extlist":"lnx|zip"
 }

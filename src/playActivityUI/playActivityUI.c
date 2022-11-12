@@ -16,7 +16,8 @@
 
 #include "system/system.h"
 #include "system/keymap_sw.h"
-#include "utils/utils.h"
+#include "utils/str.h"
+#include "utils/file.h"
 #include "utils/log.h"
 #include "utils/keystate.h"
 
@@ -219,10 +220,9 @@ int main(void)
         else
             memset(cTotalTimePlayed, 0, sizeof(cTotalTimePlayed));
 
-        char *bnameWOExt = file_removeExtension(rom_list[i].name);
         imageRomPosition = TTF_RenderUTF8_Blended(font40, cPosition, color_lilla);
         imageRomPlayTime = TTF_RenderUTF8_Blended(font40, cTotalTimePlayed, color_white);
-        imageRomName = TTF_RenderUTF8_Blended(fontRomName25, bnameWOExt , color_white);
+        imageRomName = TTF_RenderUTF8_Blended(fontRomName25, rom_list[i].name, color_white);
 
         SDL_Rect rectPosition = { 16, 78 + 90 * i, 76, 39};
         SDL_Rect rectRomPlayTime = { 77, 66 + 90 * i, 254, 56};
@@ -285,10 +285,9 @@ int main(void)
             else
                 memset(cTotalTimePlayed, 0, sizeof(cTotalTimePlayed));
 
-            char *bnameWOExt = file_removeExtension(curr.name);
             imageRomPosition = TTF_RenderUTF8_Blended(font40, cPosition, color_lilla);
             imageRomPlayTime = TTF_RenderUTF8_Blended(font40, cTotalTimePlayed, color_white);
-            imageRomName = TTF_RenderUTF8_Blended(fontRomName25, bnameWOExt , color_white);
+            imageRomName = TTF_RenderUTF8_Blended(fontRomName25, curr.name, color_white);
 
             SDL_Rect rectPosition = { 16, 78 + 90 * i, 76, 39};
             SDL_Rect rectRomPlayTime = { 77, 66 + 90 * i, 254, 56};

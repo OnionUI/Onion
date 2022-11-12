@@ -1,7 +1,7 @@
 {
 "label":"GB",
 "icon":"../../Icons/gb.png",
-"iconsel":"",
+"iconsel":"../../Icons/gb.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/GB",
 "imgpath":"../../Roms/GB/Imgs",
@@ -9,5 +9,5 @@
 "useswap":0,
 "shortname":0,
 "hidebios":0,
-"extlist":"bin|BIN|dmg|DMG|gb|GB|gbc|GBC|zip|ZIP|7z|7Z"
+"extlist":"bin|dmg|gb|gbc|zip|7z"
 }

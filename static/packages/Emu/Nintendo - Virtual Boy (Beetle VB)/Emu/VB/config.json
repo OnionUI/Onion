@@ -1,7 +1,7 @@
 {
 "label":"VirtualBoy",
 "icon":"../../Icons/vb.png",
-"iconsel":"",
+"iconsel":"../../Icons/vb.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/VB",
 "imgpath":"../../Roms/VB/Imgs",
@@ -9,5 +9,5 @@
 "useswap":1,
 "shortname":0,
 "hidebios":1,
-"extlist":"vb|VB|vboy|VBOY|zip|ZIP|7z|7Z"
+"extlist":"vb|vboy|zip|7z"
 }

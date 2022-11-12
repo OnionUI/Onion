@@ -13,6 +13,10 @@
 #define JSON_FORMAT_NUMBER_NC "    \"%s\": %d\n"
 #define JSON_FORMAT_STRING    "    \"%s\": \"%s\",\n"
 #define JSON_FORMAT_STRING_NC "    \"%s\": \"%s\"\n"
+#define JSON_FORMAT_TAB_NUMBER     "	\"%s\":	%d,\n"
+#define JSON_FORMAT_TAB_NUMBER_NC  "	\"%s\":	%d\n"
+#define JSON_FORMAT_TAB_STRING     "	\"%s\":	\"%s\",\n"
+#define JSON_FORMAT_TAB_STRING_NC  "	\"%s\":	\"%s\"\n"
 
 bool json_getString(cJSON *object, const char *key, char *dest)
 {

@@ -10,7 +10,9 @@
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
 
+#include "utils/sdl_init.h"
 #include "utils/log.h"
+#include "utils/keystate.h"
 #include "system/battery.h"
 #include "system/settings.h"
 #include "system/display.h"
@@ -19,22 +21,43 @@
 #include "system/lang.h"
 #include "theme/theme.h"
 #include "theme/background.h"
+#include "theme/sound.h"
 #include "components/list.h"
 
-#define FRAMES_PER_SECOND 30
+#define FRAMES_PER_SECOND 60
 #define SHUTDOWN_TIMEOUT 500
+
+#define MAX_ELEMENTS 100
+
+static bool quit = false;
+static KeyState keystate[320] = {(KeyState)0};
+
+static void sigHandler(int sig)
+{
+    switch (sig) {
+        case SIGINT:
+        case SIGTERM:
+            quit = true;
+            break;
+        default: break;
+    }
+}
 
 int main(int argc, char *argv[])
 {
-	print_debug("Debug logging enabled");
+	print_debug("Debug logging enabled, prompt v2!");
+	
+    signal(SIGINT, sigHandler);
+    signal(SIGTERM, sigHandler);
 
 	int pargc = 0;
 	char **pargs = NULL;
 	char title_str[STR_MAX] = "";
 	char message_str[STR_MAX] = "";
 	bool required = false;
+	int selected = 0;
 
-	pargs = malloc(100 * sizeof(char*));
+	pargs = malloc(MAX_ELEMENTS * sizeof(char*));
 
 	int i;
 	for (i = 1; i < argc; i++) {
@@ -51,37 +74,26 @@ int main(int argc, char *argv[])
 				required = true;
 				continue;
 			}
+			if (strcmp(argv[i], "-s") == 0 || strcmp(argv[i], "--selected") == 0) {
+				selected = atoi(argv[++i]);
+				continue;
+			}
 		}
-		pargs[pargc] = malloc((STR_MAX + 1) * sizeof(char));
-		strncpy(pargs[pargc], argv[i], STR_MAX);
-		pargc++;
+		if (pargc < MAX_ELEMENTS) {
+			pargs[pargc] = malloc((STR_MAX + 1) * sizeof(char));
+			strncpy(pargs[pargc], argv[i], STR_MAX);
+			pargc++;
+		}
 	}
 
 	printf_debug(LOG_SUCCESS, "parsed command line arguments");
 
-	SDL_Init(SDL_INIT_VIDEO);
-	SDL_ShowCursor(SDL_DISABLE);
-	SDL_EnableKeyRepeat(300, 50);
-	TTF_Init();
+	SDL_InitDefault(true);
 
-	SDL_Surface* video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
-	SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
-
-	print_debug("Loading settings...");
 	settings_load();
-	printf_debug(LOG_SUCCESS, "loaded settings");
-
-	print_debug("Loading language file...");
 	lang_load();
-	printf_debug(LOG_SUCCESS, "loaded language file");
 
-	SDL_BlitSurface(theme_background(), NULL, screen, NULL);
-	SDL_BlitSurface(screen, NULL, video, NULL); 
-	SDL_Flip(video);
-
-	print_debug("Reading battery percentage...");
     int battery_percentage = battery_getPercentage();
-	printf_debug(LOG_SUCCESS, "read battery percentage");
 
 	if (pargc == 0) {
 		pargs[pargc++] = lang_get(LANG_OK);
@@ -100,6 +112,8 @@ int main(int argc, char *argv[])
 		list_addItem(&list, item);
 	}
 
+	list_scrollTo(&list, selected);
+
 	bool has_title = strlen(title_str) > 0;
 
 	SDL_Surface *message = NULL;
@@ -116,22 +130,25 @@ int main(int argc, char *argv[])
 		free(str);
 	}
 
-	bool quit = false;
 	bool list_changed = true;
 	bool header_changed = true;
+	bool footer_changed = true;
 	bool battery_changed = true;
-	bool first_draw = true;
 
-	SDL_Event event;
-	Uint8 keystate[320] = {0};
+	SDLKey changed_key;
+	bool key_changed = false;
+
+	#ifdef PLATFORM_MIYOOMINI
+	bool first_draw = true;
 	int	input_fd;
 	input_fd = open("/dev/input/event0", O_RDONLY);
 	struct input_event ev;
+	uint32_t shutdown_timer = 0;
+	#endif
 	
 	int return_code = -1;
 
-	uint32_t shutdown_timer = 0,
-			 acc_ticks = 0,
+	uint32_t acc_ticks = 0,
 			 last_ticks = SDL_GetTicks(),
 			 time_step = 1000 / FRAMES_PER_SECOND;
 
@@ -140,6 +157,7 @@ int main(int argc, char *argv[])
 		acc_ticks += ticks - last_ticks;
 		last_ticks = ticks;
 
+		#ifdef PLATFORM_MIYOOMINI
 		if (!first_draw) {
 			read(input_fd, &ev, sizeof(ev));
 			int val = ev.value;
@@ -151,44 +169,31 @@ int main(int argc, char *argv[])
 					shutdown_timer = ticks;
 			}
 		}
+		#endif
 
-		while (SDL_PollEvent(&event)) {
-			if (event.type == SDL_QUIT)
+		if (updateKeystate(keystate, &quit, true, &changed_key)) {
+			if (keystate[SW_BTN_DOWN] >= PRESSED) {
+				key_changed = list_keyDown(&list, keystate[SW_BTN_DOWN] == REPEATING);
+				list_changed = true;
+			}
+			else if (keystate[SW_BTN_UP] >= PRESSED) {
+				key_changed = list_keyUp(&list, keystate[SW_BTN_UP] == REPEATING);
+				list_changed = true;
+			}
+
+			if (changed_key == SW_BTN_A && keystate[SW_BTN_A] == RELEASED) {
+				return_code = list_currentItem(&list)->action_id;
 				quit = true;
+			}
 
-			SDLKey key = event.key.keysym.sym;
-			bool repeating = false;
-			
-			if (event.type == SDL_KEYDOWN) {
-				if (keystate[key] == 1)
-					repeating = true;
-				keystate[key] = 1;
-				switch (key) {
-					case SW_BTN_UP:
-						list_keyUp(&list, repeating);
-						list_changed = true;
-						break;
-					case SW_BTN_DOWN:
-						list_keyDown(&list, repeating);
-						list_changed = true;
-						break;
-					default: break;
-				}
+			if (!required && changed_key == SW_BTN_B && keystate[SW_BTN_B] == RELEASED) {
+				quit = true;
 			}
-			else if (event.type == SDL_KEYUP) {
-				switch (key) {
-					case SW_BTN_A:
-						return_code = list_currentItem(&list)->action_id;
-						quit = true;
-						break;
-					case SW_BTN_B:
-						if (!required)
-							quit = true;
-						break;
-					default: break;
-				}
-				keystate[key] = 0;
-			}
+		}
+
+		if (key_changed || quit) {
+			sound_change();
+			key_changed = false;
 		}
 
 		if (quit)
@@ -198,24 +203,36 @@ int main(int argc, char *argv[])
 			battery_changed = true;
 
 		if (acc_ticks >= time_step) {
-			if (header_changed) {
+			if (header_changed || battery_changed) {
 				theme_renderHeader(screen, has_title ? title_str : NULL, !has_title);
 			}
 			if (list_changed) {
 				theme_renderList(screen, &list);
-				theme_renderListFooter(screen, list.active_pos + 1, list.item_count, lang_get(LANG_SELECT), required ? NULL : lang_get(LANG_BACK));
 
 				if (has_message)
 					SDL_BlitSurface(message, NULL, screen, &message_rect);
 			}
+			
+			if (footer_changed) {
+				theme_renderFooter(screen);
+				theme_renderStandardHint(screen, lang_get(LANG_SELECT), required ? NULL : lang_get(LANG_BACK));
+			}
 
-			if (battery_changed)
+			if (footer_changed || list_changed)
+				theme_renderFooterStatus(screen, list.active_pos + 1, list.item_count);
+
+			if (header_changed || battery_changed)
 				theme_renderHeaderBattery(screen, battery_getPercentage());
 
+			footer_changed = false;
 			header_changed = false;
 			list_changed = false;
 			battery_changed = false;
+			
+			#ifdef PLATFORM_MIYOOMINI
 			first_draw = false;
+			#endif
+
 			SDL_BlitSurface(screen, NULL, video, NULL); 
 			SDL_Flip(video);
 
@@ -228,19 +245,35 @@ int main(int argc, char *argv[])
 	SDL_Flip(video);
 
 	lang_free();
-	free(pargs);
+
+	if (pargs != NULL) {
+		for (i = 0; i < pargc; i++) {
+			free(pargs[i]);
+		}
+		free(pargs);
+	}
+
+	#ifdef PLATFORM_MIYOOMINI
+	close(input_fd);
+	#endif
 	
 	print_debug("Freeing list...");
 	list_free(&list);
 	printf_debug(LOG_SUCCESS, "freed list");
 
-	resources_free();
-
 	if (has_message)
 		SDL_FreeSurface(message);
 
+	Mix_CloseAudio();
+	
+	resources_free();
    	SDL_FreeSurface(screen);
    	SDL_FreeSurface(video);
+
+	#ifndef PLATFORM_MIYOOMINI
+	msleep(200); // to clear SDL input on quit
+	#endif
+
     SDL_Quit();
 	
     return return_code;

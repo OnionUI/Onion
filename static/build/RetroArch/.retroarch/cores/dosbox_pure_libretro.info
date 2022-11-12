@@ -1,12 +1,12 @@
 # Software Information
 display_name = "DOS (DOSBox-Pure)"
 authors = "DOSBox Team|Psyraven"
-supported_extensions = "zip|dosz|exe|com|bat|iso|cue|ins|img|ima|vhd|m3u|m3u8"
-corename = "DOSBox"
+supported_extensions = "zip|dosz|exe|com|bat|iso|cue|ins|img|ima|vhd|jrc|tc|m3u|m3u8|conf"
+corename = "DOSBox-pure"
 categories = "Emulator"
 license = "GPLv2"
 permissions = ""
-display_version = "Pure"
+display_version = "0.9.7"
 
 # Hardware Information
 manufacturer = "Microsoft"

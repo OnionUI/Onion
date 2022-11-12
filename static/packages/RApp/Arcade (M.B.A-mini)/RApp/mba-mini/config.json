@@ -1,0 +1,12 @@
+{
+"label":"M.B.A-mini",
+"icon":"mbamini.png",
+"iconsel":"",
+"launch":"launch.sh",
+"rompath":"../../Roms/MBA",
+"imgpath":"../../Roms/MBA/Imgs",
+"useswap":1,
+"shortname":1,
+"hidebios":1,
+"extlist":""
+}

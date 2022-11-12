@@ -191,6 +191,8 @@ int main(int argc, char *argv[])
 	value_setFrameThrottle();
 	value_setSwapTriggers();
 
+	Mix_CloseAudio();
+	
 	lang_free();
 	menu_free_all();
 	resources_free();

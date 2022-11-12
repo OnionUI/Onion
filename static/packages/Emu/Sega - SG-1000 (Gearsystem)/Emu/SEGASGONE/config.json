@@ -1,7 +1,7 @@
 {
 "label":"SG-1000",
 "icon":"../../Icons/segasgone.png",
-"iconsel":"",
+"iconsel":"../../Icons/segasgone.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/SEGASGONE",
 "imgpath":"../../Roms/SEGASGONE/Imgs",
@@ -9,5 +9,5 @@
 "useswap":0,
 "shortname":0,
 "hidebios":0,
-"extlist":"sms|SMS|gg|GG|sg|SG|mv|MV|bin|BIN|rom|ROM|zip|ZIP|7z|7Z"
+"extlist":"sms|gg|sg|mv|bin|rom|zip|7z"
 }

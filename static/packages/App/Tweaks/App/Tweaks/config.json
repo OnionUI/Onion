@@ -1,6 +1,6 @@
 {
     "label": "Tweaks",
-    "icon": "icon.png",
+    "icon": "../../Icons/app/tweaks.png",
     "launch": "launch.sh",
     "description": "System tweaks and tools"
 }

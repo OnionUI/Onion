@@ -1,6 +1,6 @@
 #!/bin/sh
 sysdir=/mnt/SDCARD/.tmp_update
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$sysdir/lib"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$sysdir/lib:$sysdir/lib/parasyte"
 
 main() {
     init_system
@@ -8,7 +8,7 @@ main() {
     clear_logs
 
     # Start the battery monitor
-    ./bin/batmon 2>&1 > ./logs/batmon.log &
+    ./bin/batmon &
     
     if [ `cat /sys/devices/gpiochip0/gpio/gpio59/value` -eq 1 ]; then
         cd $sysdir
@@ -22,7 +22,7 @@ main() {
     ./bin/bootScreen "Boot"
 
     # Start the key monitor
-    ./bin/keymon 2>&1 > ./logs/keymon.log &
+    ./bin/keymon &
 
     # Init
     rm /tmp/.offOrder
@@ -53,6 +53,8 @@ main() {
         state_change
         check_main_ui
         state_change
+        check_game_menu
+        state_change
         check_game
         state_change  
         check_switcher
@@ -71,9 +73,9 @@ clear_logs() {
     
     cd $sysdir
     rm -f \
-        ./logs/mainUiBatPerc.log \
         ./logs/MainUI.log \
-        ./logs/gameSwitcher.log
+        ./logs/gameSwitcher.log \
+        ./logs/game_menu.log
 }
 
 check_main_ui() {
@@ -85,17 +87,53 @@ check_main_ui() {
 
 launch_main_ui() {
     cd $sysdir
-    ./bin/mainUiBatPerc 2>&1 >> ./logs/mainUiBatPerc.log
+    ./bin/mainUiBatPerc
 
     check_hide_recents
     check_hide_expert
 
     # MainUI launch
     cd /mnt/SDCARD/miyoo/app
-    LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./MainUI 2>&1 >> $sysdir/logs/MainUI.log
+    LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./MainUI 2>&1 > /dev/null
     mv /tmp/cmd_to_run.sh $sysdir/cmd_to_run.sh
 
     echo "mainui" > /tmp/prev_state
+}
+
+check_game_menu() {
+    if [ ! -f /tmp/launch_alt ]; then
+        return
+    fi
+    
+    rm -f /tmp/launch_alt
+
+    if [ ! -f $sysdir/cmd_to_run.sh ]; then
+        return
+    fi
+
+    romfile=`cat $sysdir/cmd_to_run.sh`
+    check_is_game "$romfile"
+    is_game=$?
+
+    if [ $is_game -eq 0 ]; then
+        return
+    fi
+    
+    launch_game_menu
+}
+
+launch_game_menu() {
+    cd $sysdir
+    echo "launch game menu" >> ./logs/game_menu.log
+    sync
+
+    $sysdir/script/gamemenu.sh 2>&1 >> ./logs/game_menu.log
+
+    if [ "$?" -ne "0" ]; then
+        echo "back to MainUI" >> ./logs/game_menu.log
+        rm -f $sysdir/cmd_to_run.sh
+        check_off_order "End"
+    fi
 }
 
 check_game() {
@@ -105,8 +143,8 @@ check_game() {
     fi
 }
 
-launch_game() {
-    romfile=`cat $sysdir/cmd_to_run.sh`
+check_is_game() {
+    romfile="$1"
     is_game=0
 
     if echo "$romfile" | grep -q "retroarch" || echo "$romfile" | grep -q "/mnt/SDCARD/Emu/" || echo "$romfile" | grep -q "/mnt/SDCARD/RApp/"; then
@@ -116,20 +154,50 @@ launch_game() {
         fi
     fi
 
+    return $is_game
+}
+
+launch_game() {
+    cmd=`cat $sysdir/cmd_to_run.sh`
+
+    check_is_game "$cmd"
+    is_game=$?
+
+    rompath=""
+    romcfgpath=""
+    retroarch_core=""
+
     # TIMER BEGIN
     if [ $is_game -eq 1 ]; then
         cd $sysdir
-        ./bin/playActivity "init" 2>&1 >> ./logs/playActivity.log
+        ./bin/playActivity "init"
+
+        rompath=$(echo "$cmd" | awk '{st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3)}')
+        romext=`echo "$(basename "$rompath")" | awk -F. '{print tolower($NF)}'`
+        romcfgpath="$(dirname "$rompath")/$(basename "$rompath" ".$romext").db_cfg"
     fi
 
     # GAME LAUNCH
     cd /mnt/SDCARD/RetroArch/
+
+    if [ -f "$romcfgpath" ]; then
+        romcfg=`cat "$romcfgpath"`
+        retroarch_core=`get_info_value "$romcfg" core`
+        corepath=".retroarch/cores/$retroarch_core.so"
+
+        echo "per game core: $retroarch_core" >> $sysdir/logs/game_menu.log
+
+        if [ -f "$corepath" ] && ! [ echo "$cmd" | grep -q "$sysdir/reset.cfg" ]; then
+            echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+        fi
+    fi
+
     $sysdir/cmd_to_run.sh
 
     # TIMER END + SHUTDOWN CHECK
     if [ $is_game -eq 1 ]; then
         cd $sysdir
-        ./bin/playActivity "$romfile" 2>&1 >> ./logs/playActivity.log
+        ./bin/playActivity "$cmd"
         
         echo "game" > /tmp/prev_state        
         check_off_order "End_Save"
@@ -137,6 +205,10 @@ launch_game() {
         echo "app" > /tmp/prev_state
         check_off_order "End"
     fi
+}
+
+get_info_value() {
+    echo "$1" | grep "$2\b" | awk '{split($0,a,"="); print a[2]}' | awk -F'"' '{print $2}' | tr -d '\n'
 }
 
 check_switcher() {
@@ -156,7 +228,7 @@ check_switcher() {
 
 launch_switcher() {
     cd $sysdir
-    LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./bin/gameSwitcher 2>&1 >> ./logs/gameSwitcher.log
+    LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./bin/gameSwitcher
     rm $sysdir/.runGameSwitcher
     echo "switcher" > /tmp/prev_state
     sync
@@ -166,6 +238,9 @@ check_off_order() {
     if  [ -f /tmp/.offOrder ] ; then
         cd $sysdir
         ./bin/bootScreen "$1"
+
+        killall tee
+        rm -f /mnt/SDCARD/update.log
         
         sync
         reboot
@@ -179,7 +254,7 @@ recentlist_temp=/tmp/recentlist-temp.json
 
 check_hide_recents() {
     # Hide recents on
-    if [ -f $sysdir/config/.hideRecents ]; then
+    if [ ! -f $sysdir/config/.showRecents ]; then
         # Hide recents by removing the json file
         if [ -f $recentlist ]; then
             cat $recentlist $recentlist_hidden > $recentlist_temp
@@ -202,7 +277,7 @@ clean_flag=/mnt/SDCARD/miyoo/app/.isClean
 expert_flag=/mnt/SDCARD/miyoo/app/.isExpert
 
 check_hide_expert() {
-    if [ -f $sysdir/config/.hideExpert ]; then
+    if [ ! -f $sysdir/config/.showExpert ]; then
         # Should be clean
         if [ ! -f $clean_flag ] || [ -f $expert_flag ]; then
             rm /mnt/SDCARD/miyoo/app/MainUI

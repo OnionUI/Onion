@@ -4,7 +4,7 @@
 "iconsel":"",
 "launch":"launch.sh",
 "rompath":"../../Roms/LYNX",
-"imgpath":"../../Imgs/LYNX",
+"imgpath":"../../Roms/LYNX/Imgs",
 "useswap":0,
 "shortname":0,
 "hidebios":1,

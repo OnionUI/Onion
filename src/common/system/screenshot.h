@@ -4,7 +4,8 @@
 #include <stdio.h>
 #include <png/png.h>
 
-#include "utils/utils.h"
+#include "utils/str.h"
+#include "utils/file.h"
 #include "utils/process.h"
 #include "utils/hash.h"
 #include "utils/log.h"

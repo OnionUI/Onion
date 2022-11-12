@@ -4,7 +4,7 @@
 "iconsel":"",
 "launch":"launch.sh",
 "rompath":"../../Roms/EBK",
-"imgpath":"../../Imgs/EBK",
+"imgpath":"../../Roms/EBK/Imgs",
 "useswap":1,
 "shortname":0,
 "hidebios":1,
