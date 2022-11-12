@@ -2,52 +2,45 @@
 echo $0 $*
 progdir=`dirname "$0"`
 homedir=`dirname "$1"`
+savedir=/mnt/SDCARD/Saves/CurrentProfile/saves
 
 # migration information gpSP to mGBA
 
-if ! [ -f "/mnt/SDCARD/Saves/CurrentProfile/saves/mGBA/.gpspImportDone" ]; then 
-	mkdir /mnt/SDCARD/Saves/CurrentProfile/saves/mGBA
-	
-	ls /mnt/SDCARD/Saves/CurrentProfile/saves/gpSP/*.sav
-	retVal=$?
+if ! [ -f "$savedir/mGBA/.gpspImportDone" ]; then 
+    mkdir $savedir/mGBA
+    
+    ls $savedir/gpSP/*.sav
+    retVal=$?
 
-	if [ $retVal -eq 0 ]; then
-		/mnt/SDCARD/.tmp_update/bin/prompt -r -t "New default GBA core!"  -m \
-		"- mGBA offers improved game compatibility!\n\
-		- gpSP moved to expert section.                                    \n\
-		Refer to the Onion Wiki.\n\
-		-\nDo you want to import saves from gpSP ?" \
-		"Yes" \
-		"No"
+    if [ $retVal -eq 0 ]; then
+        LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so /mnt/SDCARD/.tmp_update/bin/prompt -r \
+            -t "GBA CORE CHANGED" \
+            -m "mGBA offers improved game compatibility.\nRefer to the Onion Wiki.\n \nDo you want to import saves from gpSP?" \
+            "Yes" \
+            "No"
 
-		
-		retcode=$?
+        retcode=$?
 
-		if [ $retcode -eq 0 ]; then
-			cp /mnt/SDCARD/Saves/CurrentProfile/saves/gpSP/*.sav /mnt/SDCARD/Saves/CurrentProfile/saves/mGBA
-			for file in /mnt/SDCARD/Saves/CurrentProfile/saves/mGBA/*.sav; do
-				mv -n  -- "$file" "${file%.sav}.srm"
-			done
-			rm /mnt/SDCARD/Saves/CurrentProfile/saves/mGBA/*.sav
+        if [ $retcode -eq 0 ]; then
+            cp $savedir/gpSP/*.sav $savedir/mGBA
+            
+            for file in $savedir/mGBA/*.sav; do
+                mv -n -- "$file" "${file%.sav}.srm"
+            done
 
-		fi
-	else
-		/mnt/SDCARD/.tmp_update/bin/infoPanel -t "New default GBA core!"  -m "- mGBA offers improved game compatibility!\n\
-		- gpSP moved to expert section.                                 \n\
-		Refer to the Onion Wiki."
+            rm $savedir/mGBA/*.sav
+        fi
+    fi
 
-	fi
-
-touch "/mnt/SDCARD/Saves/CurrentProfile/saves/mGBA/.gpspImportDone"
+    touch "$savedir/mGBA/.gpspImportDone"
 fi
-
 
 # Timer initialisation
 cd /mnt/SDCARD/App/PlayActivity
 ./playActivity "init"
 
 cd /mnt/SDCARD/RetroArch/
-HOME=/mnt/SDCARD/RetroArch/ $progdir/../../RetroArch/retroarch -v -L $progdir/../../RetroArch/.retroarch/cores/mgba_libretro.so "$1"
+HOME=/mnt/SDCARD/RetroArch/ ./retroarch -v -L .retroarch/cores/mgba_libretro.so "$1"
 
 # Timer registration
 cd /mnt/SDCARD/App/PlayActivity

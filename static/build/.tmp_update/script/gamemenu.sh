@@ -23,6 +23,8 @@ coreinfopath=""
 coreinfo=""
 corename=""
 
+globalscriptdir=/mnt/SDCARD/App/romscripts
+
 main() {
     rm -f $sysdir/cmd_to_run.sh
 
@@ -49,6 +51,12 @@ main() {
 
     get_core_info
 
+    game_core_label="Game core"
+
+    if [ ! -f "$radir/cores/$default_core.so" ]; then
+        default_core=""
+    fi
+
     if [ -f "$corepath" ] && [ -f "$coreinfopath" ]; then
         coreinfo=`cat "$coreinfopath"`
         corename=`get_info_value "$coreinfo" corename`
@@ -59,12 +67,42 @@ main() {
             game_core_label="$game_core_label (Default)"
         fi
 
-        menu_options="$menu_options reset_game change_core"
-        menu_option_labels="$menu_option_labels \"Reset game\" \"$game_core_label\""
+        menu_options="$menu_options reset_game"
+        menu_option_labels="$menu_option_labels \"Reset game\""
     fi
 
-    menu_options="$menu_options filter_roms refresh_roms"
-    menu_option_labels="$menu_option_labels \"Filter list\" \"Refresh roms\""
+    menu_options="$menu_options change_core"
+    menu_option_labels="$menu_option_labels \"$game_core_label\""
+
+    if [ -f "$emupath/active_filter" ]; then
+        filter_kw=`cat "$emupath/active_filter"`
+        menu_options="$menu_options clear_filter filter_roms"
+        menu_option_labels="$menu_option_labels \"Clear filter\" \"Filter: $filter_kw\""
+    else
+        menu_options="$menu_options filter_roms"
+        menu_option_labels="$menu_option_labels \"Filter list\""
+    fi
+
+    menu_options="$menu_options refresh_roms"
+    menu_option_labels="$menu_option_labels \"Refresh roms\""
+
+    if [ -d "$globalscriptdir" ]; then
+        for entry in "$globalscriptdir"/*.sh ; do
+            script_name=`basename "$entry" .sh`
+            menu_options="$menu_options global_script"
+            menu_option_labels="$menu_option_labels \"$script_name\""
+        done
+    fi
+
+    scriptdir="$emupath/romscripts"
+
+    if [ -d "$scriptdir" ]; then
+        for entry in "$scriptdir"/*.sh ; do
+            script_name=`basename "$entry" .sh`
+            menu_options="$menu_options emu_script"
+            menu_option_labels="$menu_option_labels \"$script_name\""
+        done
+    fi
 
     runcmd="LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./bin/prompt -t \"GAME MENU\" $menu_option_labels"
     eval $runcmd
@@ -73,7 +111,36 @@ main() {
     echo "retcode: $retcode"
 
     menu_action=`echo $menu_options | awk -v N=$((retcode+1)) '{print $N}'`
-    eval $menu_action
+
+    if [ "$menu_action" == "global_script" ] || [ "$menu_action" == "emu_script" ]; then
+        idx_n=$((retcode+1))
+        idx_double=$((idx_n*2))
+
+        menu_label="$(echo "$menu_option_labels" \
+            | awk -F'"' -v N=$idx_double '{print $N}' \
+            | sed 's/^"//g' \
+            | sed 's/"$//g')"
+
+        if [ "$menu_action" == "global_script" ]; then
+            scriptpath="$globalscriptdir/$menu_label.sh"
+        else
+            scriptpath="$scriptdir/$menu_label.sh"
+        fi
+
+        echo "running custom script: $scriptpath"
+
+        if [ -f "$scriptpath" ]; then
+            runcmd="chmod a+x \"$scriptpath\"; LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so \"$scriptpath\" \"$rompath\""
+            eval $runcmd
+            retcode=$?
+
+            exit $retcode
+        else
+            ./bin/infoPanel --title "SCRIPT NOT FOUND" --message "$scriptpath" --auto
+        fi
+    else
+        eval $menu_action
+    fi
 
     exit 1
 }
@@ -154,6 +221,10 @@ change_core() {
 
             echo "$entry" >> $single_ext_cache_path
         done < $ext_cache_path
+    fi
+
+    if [ "$default_core" == "" ]; then
+        is_valid=1
     fi
 
     while read entry; do
@@ -260,6 +331,12 @@ rename_rom() {
 
     cd $sysdir
     ./bin/renameRom "$rompath" "$new_name"
+}
+
+clear_filter() {
+    echo ":: clear filter"
+    echo "./bin/filter clear_filter \"$emupath\""
+    ./bin/filter clear_filter "$emupath"
 }
 
 filter_roms() {
