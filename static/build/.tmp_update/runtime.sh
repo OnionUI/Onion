@@ -1,6 +1,6 @@
 #!/bin/sh
 sysdir=/mnt/SDCARD/.tmp_update
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$sysdir/lib"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$sysdir/lib:$sysdir/lib/parasyte"
 
 main() {
     init_system
@@ -127,7 +127,7 @@ launch_game_menu() {
     echo "launch game menu" >> ./logs/game_menu.log
     sync
 
-    $sysdir/gamemenu.sh 2>&1 >> ./logs/game_menu.log
+    $sysdir/script/gamemenu.sh 2>&1 >> ./logs/game_menu.log
 
     if [ "$?" -ne "0" ]; then
         echo "back to MainUI" >> ./logs/game_menu.log
