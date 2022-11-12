@@ -10,7 +10,8 @@
 #include <sys/reboot.h>
 #include <sys/stat.h>
 
-#include "utils/utils.h"
+#include "utils/str.h"
+#include "utils/file.h"
 #include "utils/log.h"
 #include "utils/process.h"
 #include "utils/flags.h"
@@ -457,8 +458,13 @@ int main(void) {
                         applyExtraButtonShortcut(0);
                     break;
                 case HW_BTN_Y:
-                    if (val == PRESSED)
-                        applyExtraButtonShortcut(1);
+                    if (val == PRESSED && system_state == MODE_MAIN_UI)
+                        temp_flag_set("launch_alt", true);
+                    break;
+                case HW_BTN_A:
+                case HW_BTN_B:
+                    if (val == PRESSED && system_state == MODE_MAIN_UI)
+                        temp_flag_set("launch_alt", false);
                     break;
                 default:
                     break;

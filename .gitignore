@@ -44,5 +44,7 @@ src/**/sendkeys
 !sendkeys/
 src/**/setState
 !setState/
+src/**/renameRom
+!renameRom/
 test/**/test
 !test/

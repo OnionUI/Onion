@@ -6,7 +6,8 @@
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
 
-#include "utils/utils.h"
+#include "utils/str.h"
+#include "utils/file.h"
 #include "utils/json.h"
 #include "system/lang.h"
 #include "./color.h"

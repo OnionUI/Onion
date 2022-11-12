@@ -3,7 +3,8 @@
 
 #include <unistd.h>
 
-#include "utils/utils.h"
+#include "utils/str.h"
+#include "utils/file.h"
 #include "utils/flags.h"
 #include "utils/process.h"
 #include "./settings.h"
