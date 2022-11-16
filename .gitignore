@@ -48,3 +48,5 @@ src/**/renameRom
 !renameRom/
 test/**/test
 !test/
+src/**/randomGamePicker
+!randomGamePicker/
