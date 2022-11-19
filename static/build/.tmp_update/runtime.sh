@@ -95,7 +95,8 @@ launch_main_ui() {
     # MainUI launch
     cd /mnt/SDCARD/miyoo/app
     LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./MainUI 2>&1 > /dev/null
-    mv /tmp/cmd_to_run.sh $sysdir/cmd_to_run.sh
+    cat /tmp/cmd_to_run.sh | sed 's/\$/\\\$/g' > $sysdir/cmd_to_run.sh
+    rm -f /tmp/cmd_to_run.sh
 
     echo "mainui" > /tmp/prev_state
 }

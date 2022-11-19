@@ -205,7 +205,10 @@ void readHistory()
             continue;
 
         Game_s *game = &game_list[game_list_len];
-        sprintf(game->RACommand, "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v -L \"%s\" \"%s\"", core_path, path);
+        sprintf(game->RACommand, "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v -L \"%s\" \"%s\"",
+            core_path,
+            str_replace(path, "$", "\\$")
+        );
         strcpy(game->name, file_removeExtension(basename(path)));
         game->hash = FNV1A_Pippip_Yurii(path, strlen(path));
         game->jsonIndex = nbGame;
