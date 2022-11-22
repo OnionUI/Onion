@@ -13,8 +13,8 @@
 
 #define MAXGAMES 100
 
-int totalGames = 0;
-JsonGameEntry allGames[MAXGAMES];
+int total_games = 0;
+JsonGameEntry all_games[MAXGAMES];
 
 bool readDatabase(const char *cache_path, const char *table_name) {
     sqlite3 *db;
@@ -52,11 +52,8 @@ bool readDatabase(const char *cache_path, const char *table_name) {
 
         JsonGameEntry jsonGameEntry = JsonGameEntry_fromJson(out);
 
-        printf("jsonGameEntry.emupath: %s\n", jsonGameEntry.emupath);
-        printf("jsonGameEntry.rompath: %s\n", jsonGameEntry.rompath);
-
-        allGames[totalGames] = jsonGameEntry;
-        totalGames++;
+        all_games[total_games] = jsonGameEntry;
+        total_games++;
     }
 
     sqlite3_finalize(res);
@@ -70,7 +67,6 @@ int main(int argc, char *argv[])
     DIR *dp;
     struct dirent *ep;
     char config_path[512];
-    int themes_count;
     
     if ((dp = opendir("/mnt/SDCARD/Emu")) != NULL) {
         
@@ -110,18 +106,17 @@ int main(int argc, char *argv[])
 		perror("Emu folder does not exists");
 	}
 
-    int randomNumber;
+    int random_number;
     srand(time(NULL));
-    randomNumber = rand() % totalGames;
+    random_number = rand() % total_games;
 
-    printf("randomNumber: %d\n", randomNumber);
-    printf("totalGames: %d\n", totalGames);
+    printf("random_number: %d\n", random_number);
 
     char emu_path[STR_MAX];
-    concat(emu_path, allGames[randomNumber].emupath, "/launch.sh");
+    concat(emu_path, all_games[random_number].emupath, "/launch.sh");
 
     char cmd_to_run[STR_MAX];
-    snprintf(cmd_to_run, STR_MAX, "%s \"%s\" \"%s\"", "LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so", emu_path ,allGames[randomNumber].rompath);
+    snprintf(cmd_to_run, STR_MAX, "%s \"%s\" \"%s\"", "LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so", emu_path, all_games[random_number].rompath);
     
     //LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so "/mnt/SDCARD/Emu/GBA/launch.sh" "/mnt/SDCARD/Emu/GBA/../../Roms/GBA/dragon.zip"
     FILE *fp;
