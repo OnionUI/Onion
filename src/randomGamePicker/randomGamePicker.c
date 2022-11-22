@@ -11,7 +11,8 @@
 #include "components/JsonGameEntry.h"
 #include "cjson/cJSON.h"
 
-#define MAXGAMES 100
+#define MAXGAMES 90000
+#define ERROR_CODE_NO_GAME_FOUND 99
 
 int total_games = 0;
 JsonGameEntry all_games[MAXGAMES];
@@ -105,6 +106,8 @@ int main(int argc, char *argv[])
 	else {
 		perror("Emu folder does not exists");
 	}
+    
+    if (total_games <= 0) return ERROR_CODE_NO_GAME_FOUND;
 
     int random_number;
     srand(time(NULL));
