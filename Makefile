@@ -70,6 +70,7 @@ $(CACHE)/.setup:
 		$(SRC_DIR)/bootScreen \
 		$(SRC_DIR)/themeSwitcher \
 		$(SRC_DIR)/tweaks \
+		$(SRC_DIR)/randomGamePicker \
 		-depth -type d -name res -exec cp -r {}/. $(BUILD_DIR)/.tmp_update/res/ \;
 	@find $(SRC_DIR)/installUI -depth -type d -name res -exec cp -r {}/. $(INSTALLER_DIR)/res/ \;
 # Download themes from theme repo
@@ -99,6 +100,7 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/sendkeys && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/setState && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/renameRom && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/randomGamePicker && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/infoPanel && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/prompt && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/batmon && BUILD_DIR=$(BIN_DIR) make
