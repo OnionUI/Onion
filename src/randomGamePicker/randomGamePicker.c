@@ -119,9 +119,8 @@ int main(int argc, char *argv[])
     concat(emu_path, all_games[random_number].emupath, "/launch.sh");
 
     char cmd_to_run[STR_MAX];
-    snprintf(cmd_to_run, STR_MAX, "%s \"%s\" \"%s\"", "LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so", emu_path, all_games[random_number].rompath);
+    snprintf(cmd_to_run, STR_MAX, "%s \"%s\" \"%s\"", "LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so", emu_path, str_replace(all_games[random_number].rompath, "$", "\\$"));
     
-    //LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so "/mnt/SDCARD/Emu/GBA/launch.sh" "/mnt/SDCARD/Emu/GBA/../../Roms/GBA/dragon.zip"
     FILE *fp;
     file_put_sync(fp, "/mnt/SDCARD/.tmp_update/cmd_to_run.sh", "%s", cmd_to_run);
 
