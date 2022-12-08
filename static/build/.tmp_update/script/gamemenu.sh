@@ -31,7 +31,12 @@ main() {
     echo "cmd: $cmd"
     # example: LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so "/mnt/SDCARD/Emu/GBATEST/../../.tmp_update/proxy.sh" "/mnt/SDCARD/Emu/GBATEST/../../Roms/GBATEST/mGBA/Final Fantasy IV Advance (U).zip"
 
-    rompath=$(echo "$cmd" | awk '{st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3)}')
+    rompath=$(echo "$cmd" | awk '{gsub("\\\\","",$0); st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3)}')
+
+    if echo "$rompath" | grep -q ":"; then
+        rompath=$(echo "$rompath" | awk '{st = index($0,":"); print substr($0,st+1)}')
+    fi
+
     echo "rompath: $rompath"
     # example: "/mnt/SDCARD/Emu/GBATEST/../../Roms/GBATEST/mGBA/Final Fantasy IV Advance (U).zip"
 
