@@ -2,7 +2,7 @@
 
 TARGET=Onion
 VERSION=4.1.0-alpha
-RA_SUBVERSION=0.1.6
+RA_SUBVERSION=0.1.7
 
 ###########################################################
 
@@ -114,7 +114,7 @@ apps: $(CACHE)/.setup
 	@cd $(SRC_DIR)/playActivityUI && BUILD_DIR="$(PACKAGES_APP_DEST)/Activity Tracker/App/PlayActivity" make
 	@find $(SRC_DIR)/playActivityUI -depth -type d -name res -exec cp -r {}/. "$(PACKAGES_APP_DEST)/Activity Tracker/App/PlayActivity/res/" \;
 	@find $(SRC_DIR)/packageManager -depth -type d -name res -exec cp -r {}/. $(BUILD_DIR)/App/PackageManager/res/ \;
-	@cd $(SRC_DIR)/clock && BUILD_DIR="$(PACKAGES_APP_DEST)/Clock (Set emulated time)/App/Clock" make
+	@cd $(SRC_DIR)/clock && BUILD_DIR="$(BIN_DIR)" make
 # Preinstalled apps
 	@cp -a "$(PACKAGES_APP_DEST)/Activity Tracker/." $(BUILD_DIR)/
 	@cp -a "$(PACKAGES_APP_DEST)/Quick Guide/." $(BUILD_DIR)/
@@ -129,9 +129,9 @@ external: $(CACHE)/.setup
 	@echo $(RA_SUBVERSION) > $(BUILD_DIR)/RetroArch/onion_ra_version.txt
 # SearchFilter
 	@cd $(THIRD_PARTY_DIR)/SearchFilter && make build && cp -a build/. $(BUILD_DIR)
-	@mkdir -p "$(PACKAGES_APP_DEST)/Search (Find your games)/App/Search" "$(PACKAGES_APP_DEST)/Filter (Manage game lists)/App"
+	@mkdir -p "$(PACKAGES_APP_DEST)/Search (Find your games)/App/Search" "$(PACKAGES_APP_DEST)/List shortcuts (Filter+Refresh)/App"
 	@cp -a $(BUILD_DIR)/App/Search/. "$(PACKAGES_APP_DEST)/Search (Find your games)/App/Search"
-	@mv $(BUILD_DIR)/App/Filter "$(PACKAGES_APP_DEST)/Filter (Manage game lists)/App/Filter"
+	@mv $(BUILD_DIR)/App/Filter "$(PACKAGES_APP_DEST)/List shortcuts (Filter+Refresh)/App/Filter"
 # Other
 	@cd $(THIRD_PARTY_DIR)/Terminal && make && cp ./st "$(BIN_DIR)"
 	@cd $(THIRD_PARTY_DIR)/DinguxCommander && make && cp ./output/DinguxCommander "$(PACKAGES_APP_DEST)/File Explorer (DinguxCommander)/App/Commander_Italic"

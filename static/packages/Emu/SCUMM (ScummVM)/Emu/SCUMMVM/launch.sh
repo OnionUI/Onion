@@ -8,11 +8,12 @@ filename=`basename "$rompath"`
 
 
 if [ "$filename" = "◦ Import games in ScummVM.target" ]; then
-	echo Importing ScummVM shortcuts now !
+	echo "Importing ScummVM shortcuts now !"
 	cd $progdir
 	./import_gamelist.sh
 else
-	echo Running game : "$rompath"
+	echo "Running game : \"$rompath\""
+	
 	# set CPU performance mode
 	echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 
