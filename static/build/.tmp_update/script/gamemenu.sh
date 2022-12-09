@@ -31,7 +31,7 @@ main() {
     echo "cmd: $cmd"
     # example: LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so "/mnt/SDCARD/Emu/GBATEST/../../.tmp_update/proxy.sh" "/mnt/SDCARD/Emu/GBATEST/../../Roms/GBATEST/mGBA/Final Fantasy IV Advance (U).zip"
 
-    rompath=$(echo "$cmd" | awk '{gsub("\\\\","",$0); st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3)}')
+    rompath=$(echo "$cmd" | awk '{ gsub("\\\\","",$0); st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3)}')
 
     if echo "$rompath" | grep -q ":"; then
         rompath=$(echo "$rompath" | awk '{st = index($0,":"); print substr($0,st+1)}')
@@ -62,6 +62,8 @@ main() {
         default_core=""
     fi
 
+    add_reset_core=0
+
     if [ -f "$corepath" ] && [ -f "$coreinfopath" ]; then
         coreinfo=`cat "$coreinfopath"`
         corename=`get_info_value "$coreinfo" corename`
@@ -70,6 +72,8 @@ main() {
 
         if [ "$retroarch_core" == "$default_core" ]; then
             game_core_label="$game_core_label (Default)"
+        else
+            add_reset_core=1
         fi
 
         menu_options="$menu_options reset_game"
@@ -78,6 +82,11 @@ main() {
 
     menu_options="$menu_options change_core"
     menu_option_labels="$menu_option_labels \"$game_core_label\""
+
+    if [ $add_reset_core -eq 1 ]; then
+        menu_options="$menu_options reset_core"
+        menu_option_labels="$menu_option_labels \"Restore default core\""
+    fi
 
     if [ -f "$emupath/active_filter" ]; then
         filter_kw=`cat "$emupath/active_filter"`
@@ -161,7 +170,7 @@ get_core_info() {
         retroarch_core=`get_info_value "$romcfg" core`
     fi
 
-    default_core=`echo "$launch_script" | awk '{st = index($0,".retroarch/cores/"); s = substr($0,st+17); st2 = index(s,".so"); print substr(s,0,st2-1)}' | xargs`
+    default_core=`echo "$launch_script" | grep ".retroarch/cores/" | awk '{st = index($0,".retroarch/cores/"); s = substr($0,st+17); st2 = index(s,".so"); print substr(s,0,st2-1)}' | xargs`
 
     if [ "$retroarch_core" == "" ]; then
         retroarch_core="$default_core"
@@ -276,15 +285,19 @@ change_core() {
     echo "new default core: $new_core"
 
     if [ "$new_core" == "$default_core" ]; then
-        if [ -f "$romcfgpath" ]; then
-            rm -f "$romcfgpath"
-        fi
+        reset_core
     else
         if [ -f "$romcfgpath" ]; then
             awk '!/core /' "$romcfgpath" > temp && mv temp "$romcfgpath"
         fi
 
         echo "core = \"$new_core\"" >> "$romcfgpath"
+    fi
+}
+
+reset_core() {
+    if [ -f "$romcfgpath" ]; then
+        rm -f "$romcfgpath"
     fi
 }
 

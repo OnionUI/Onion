@@ -95,8 +95,8 @@ launch_main_ui() {
     # MainUI launch
     cd /mnt/SDCARD/miyoo/app
     LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./MainUI 2>&1 > /dev/null
-    cat /tmp/cmd_to_run.sh | sed 's/\$/\\\$/g' > $sysdir/cmd_to_run.sh
-    rm -f /tmp/cmd_to_run.sh
+    
+    mv -f /tmp/cmd_to_run.sh $sysdir/cmd_to_run.sh
 
     echo "mainui" > /tmp/prev_state
 }
@@ -171,7 +171,7 @@ launch_game() {
         cd $sysdir
         ./bin/playActivity "init"
 
-        rompath=$(echo "$cmd" | awk '{st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3)}')
+        rompath=$(echo "$cmd" | awk '{ gsub("\\\\","",$0); st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3)}')
         romext=`echo "$(basename "$rompath")" | awk -F. '{print tolower($NF)}'`
         romcfgpath="$(dirname "$rompath")/$(basename "$rompath" ".$romext").db_cfg"
     fi
@@ -195,6 +195,16 @@ launch_game() {
         fi
     fi
 
+    # Handle dollar sign
+    if echo "$rompath" | grep -q "\$"; then
+        temp=`cat $sysdir/cmd_to_run.sh`
+        echo "$temp" | sed 's/\$/\\\$/g' > $sysdir/cmd_to_run.sh
+    fi
+
+    echo "----- COMMAND:"
+    cat $sysdir/cmd_to_run.sh
+
+    # Launch the command
     $sysdir/cmd_to_run.sh
 
     if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
@@ -352,4 +362,3 @@ set_startup_tab() {
 }
 
 main
-
