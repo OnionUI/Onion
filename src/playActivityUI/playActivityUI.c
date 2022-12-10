@@ -308,7 +308,7 @@ int main(void)
 	#ifndef PLATFORM_MIYOOMINI
 	msleep(200); // to clear SDL input on quit
 	#endif
-
+    //  #18808
     SDL_Quit();
 
     return EXIT_SUCCESS;
