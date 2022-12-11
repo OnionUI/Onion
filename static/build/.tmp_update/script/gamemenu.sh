@@ -102,6 +102,10 @@ main() {
 
     if [ -d "$globalscriptdir" ]; then
         for entry in "$globalscriptdir"/*.sh ; do
+            if [ ! -f "$entry" ]; then
+                continue
+            fi
+
             script_name=`basename "$entry" .sh`
             menu_options="$menu_options global_script"
             menu_option_labels="$menu_option_labels \"$script_name\""
@@ -112,6 +116,10 @@ main() {
 
     if [ -d "$scriptdir" ]; then
         for entry in "$scriptdir"/*.sh ; do
+            if [ ! -f "$entry" ]; then
+                continue
+            fi
+
             script_name=`basename "$entry" .sh`
             menu_options="$menu_options emu_script"
             menu_option_labels="$menu_option_labels \"$script_name\""
@@ -163,7 +171,7 @@ get_core_info() {
     launch_script=`cat "$emupath/launch.sh"`
     retroarch_core=""
 
-    romcfgpath="$(dirname "$rompath")/$(basename "$rompath" ".$romext").db_cfg"
+    romcfgpath="$(dirname "$rompath")/.game_config/$(basename "$rompath" ".$romext").cfg"
 
     if [ -f "$romcfgpath" ]; then
         romcfg=`cat "$romcfgpath"`
@@ -289,6 +297,8 @@ change_core() {
     else
         if [ -f "$romcfgpath" ]; then
             awk '!/core /' "$romcfgpath" > temp && mv temp "$romcfgpath"
+        else
+            mkdir -p `dirname "$romcfgpath"`
         fi
 
         echo "core = \"$new_core\"" >> "$romcfgpath"
@@ -298,6 +308,7 @@ change_core() {
 reset_core() {
     if [ -f "$romcfgpath" ]; then
         rm -f "$romcfgpath"
+        rm -d `dirname "$romcfgpath"`
     fi
 }
 
