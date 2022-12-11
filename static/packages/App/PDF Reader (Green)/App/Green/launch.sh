@@ -6,7 +6,7 @@ appdir=$sysdir/bin/green
 while :
 do
 	cd $sysdir
-	./bin/st -q -e "$sysdir/script/file_selector.sh" $mediadir
+	./bin/st -q -e "$sysdir/script/file_selector.sh" "PDF Reader" "$mediadir" "pdf"
 	retVal=$?
 	
 	# if we catch that terminal app has been killed then we exit
