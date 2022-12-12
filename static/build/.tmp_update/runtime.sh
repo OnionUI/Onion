@@ -66,6 +66,7 @@ main() {
 
 state_change() {
     touch /tmp/state_changed
+    sync
 }
 
 clear_logs() {
@@ -171,7 +172,7 @@ launch_game() {
         cd $sysdir
         ./bin/playActivity "init"
 
-        rompath=$(echo "$cmd" | awk '{ gsub("\\\\","",$0); st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3)}')
+        rompath=$(echo "$cmd" | awk '{ st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3)}')
         romext=`echo "$(basename "$rompath")" | awk -F. '{print tolower($NF)}'`
         romcfgpath="$(dirname "$rompath")/.game_config/$(basename "$rompath" ".$romext").cfg"
     fi

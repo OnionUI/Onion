@@ -22,6 +22,7 @@ corepath=""
 coreinfopath=""
 coreinfo=""
 corename=""
+manpath=""
 
 globalscriptdir=/mnt/SDCARD/App/romscripts
 
@@ -31,7 +32,7 @@ main() {
     echo "cmd: $cmd"
     # example: LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so "/mnt/SDCARD/Emu/GBATEST/../../.tmp_update/proxy.sh" "/mnt/SDCARD/Emu/GBATEST/../../Roms/GBATEST/mGBA/Final Fantasy IV Advance (U).zip"
 
-    rompath=$(echo "$cmd" | awk '{ gsub("\\\\","",$0); st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3)}')
+    rompath=$(echo "$cmd" | awk '{ st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3)}')
 
     if echo "$rompath" | grep -q ":"; then
         rompath=$(echo "$rompath" | awk '{st = index($0,":"); print substr($0,st+1)}')
@@ -78,6 +79,17 @@ main() {
 
         menu_options="$menu_options reset_game"
         menu_option_labels="$menu_option_labels \"Reset game\""
+    fi
+
+    romdirname=`echo "$rompath" | sed "s/^.*Roms\///g" | cut -d "/" -f1`
+    manpath="/mnt/SDCARD/Roms/$romdirname/Manuals/$(basename "$rompath" ".$romext").pdf"
+
+    echo "romdir: '$romdirname'"
+    echo "manual: $manpath"
+
+    if [ -f "$manpath" ]; then
+        menu_options="$menu_options open_manual"
+        menu_option_labels="$menu_option_labels \"Game manual\""
     fi
 
     menu_options="$menu_options change_core"
@@ -199,6 +211,12 @@ reset_game() {
     cat $radir/retroarch.cfg | sed 's/savestate_auto_load = "true"/savestate_auto_load = "false"/' > $sysdir/reset.cfg
     echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v -c \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
     exit 0
+}
+
+open_manual() {
+    if [ -f "$manpath" ]; then
+        LD_LIBRARY_PATH="$sysdir/lib/parasyte:$LD_LIBRARY_PATH" $sysdir/bin/green/green "$manpath"
+    fi
 }
 
 change_core() {
