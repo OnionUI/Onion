@@ -6,7 +6,7 @@ appdir=/mnt/SDCARD/App/FFplay
 while :
 do
 	cd $sysdir
-	./bin/st -q -e "$sysdir/script/file_selector.sh" $mediadir
+	./bin/st -q -e "$sysdir/script/file_selector.sh" "Video Player" "$mediadir" "3g2 3gp asf avi flv h264 m2t m2ts m4v mkv mod mov mp4 mpg tod vob webm wmv"
 	retVal=$?
 	
 	# if we catch that terminal app has been killed then we exit
