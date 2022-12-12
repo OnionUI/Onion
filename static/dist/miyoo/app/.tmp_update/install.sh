@@ -76,14 +76,21 @@ prompt_update() {
         "Update OS/RetroArch only"
     retcode=$?
 
-    killall batmon
-
     if [ $retcode -eq 0 ]; then
         # Update (keep settings)
         run_installation 0 0
     elif [ $retcode -eq 1 ]; then
-        # Reinstall (reset settings)
-        run_installation 1 0
+        ./bin/prompt -r -m "Warning: Reinstall will reset everything,\nremoving any custom emus or apps." \
+            "Yes, reset my system" \
+            "Cancel"
+        retcode=$?
+
+        if [ $retcode -eq 0 ]; then
+            # Reinstall (reset settings)
+            run_installation 1 0
+        else
+            prompt_update
+        fi
     elif [ $retcode -eq 2 ]; then
         # Update OS/RetroArch only
         run_installation 0 1
@@ -138,6 +145,8 @@ remove_configs() {
 run_installation() {
     reset_configs=$1
     system_only=$2
+    
+    killall batmon
 
     get_install_stats
 
