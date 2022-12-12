@@ -68,10 +68,12 @@ int main(int argc, char *argv[])
     DIR *dp;
     struct dirent *ep;
     char config_path[512];
-    
+
     if ((dp = opendir("/mnt/SDCARD/Emu")) != NULL) {
-        
+
         while ((ep = readdir(dp))) {
+
+            if (argc > 1 && strcmp(argv[1], ep->d_name) != 0) continue;
             if (ep->d_type != DT_DIR) continue;
 
             sprintf(config_path, "/mnt/SDCARD/Emu/%s/config.json", ep->d_name);
