@@ -126,7 +126,7 @@ main() {
         done
     fi
 
-    runcmd="LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./bin/prompt -t \"GAME MENU\" $menu_option_labels"
+    runcmd="LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./bin/prompt -t \"OPTIONS\" $menu_option_labels"
     eval $runcmd
     retcode=$?
 
@@ -205,22 +205,26 @@ change_core() {
     ext="$romext"
 
     if [ "$ext" == "zip" ] || [ "$ext" == "7z" ]; then
-        if [ "$ext" == "zip" ]; then
-            zip_files=`unzip -l "$rompath" | sed '1,3d;$d' | sed '$d' | sort -n -r`
-        else
-            zip_files=`./bin/7zz l -ba "$rompath" | awk '{$1="";$2="";$3="";print $0;}' | sort -n -r`
-        fi
+        if ! cat "$emupath/config.json" | grep -q "\"shortname\" *: *1"; then
 
-        echo "zip/7z output:"
-        echo "$zip_files"
+            if [ "$ext" == "zip" ]; then
+                zip_files=`unzip -l "$rompath" | sed '1,3d;$d' | sed '$d' | sort -n -r`
+            else
+                zip_files=`./bin/7zz l -ba "$rompath" | awk '{$1="";$2="";$3="";print $0;}' | sort -n -r`
+            fi
 
-        inner_name=`basename "$(echo "$zip_files" | grep "[!]")"`
-        if [ "$inner_name" == "" ]; then
-            inner_name=`basename "$(echo "$zip_files" | head -n 1)"`
+            echo "zip/7z output:"
+            echo "$zip_files"
+
+            inner_name=`basename "$(echo "$zip_files" | grep "[!]")"`
+            if [ "$inner_name" == "" ]; then
+                inner_name=`basename "$(echo "$zip_files" | head -n 1)"`
+            fi
+            ext=`echo "$inner_name" | awk -F. '{print tolower($NF)}'`
+            echo "inner extension: $ext"
+            echo "-------------------------------------"
+
         fi
-        ext=`echo "$inner_name" | awk -F. '{print tolower($NF)}'`
-        echo "inner extension: $ext"
-        echo "-------------------------------------"
     fi
 
     get_core_extensions

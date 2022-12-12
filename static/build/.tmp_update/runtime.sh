@@ -75,7 +75,7 @@ clear_logs() {
     rm -f \
         ./logs/MainUI.log \
         ./logs/gameSwitcher.log \
-        ./logs/game_menu.log
+        ./logs/game_list_options.log
 }
 
 check_main_ui() {
@@ -125,13 +125,13 @@ check_game_menu() {
 
 launch_game_menu() {
     cd $sysdir
-    echo "launch game menu" >> ./logs/game_menu.log
+    echo "launch game menu" >> ./logs/game_list_options.log
     sync
 
-    $sysdir/script/gamemenu.sh 2>&1 >> ./logs/game_menu.log
+    $sysdir/script/game_list_options.sh 2>&1 >> ./logs/game_list_options.log
 
     if [ "$?" -ne "0" ]; then
-        echo "back to MainUI" >> ./logs/game_menu.log
+        echo "back to MainUI" >> ./logs/game_list_options.log
         rm -f $sysdir/cmd_to_run.sh
         check_off_order "End"
     fi
@@ -184,7 +184,7 @@ launch_game() {
         retroarch_core=`get_info_value "$romcfg" core`
         corepath=".retroarch/cores/$retroarch_core.so"
 
-        echo "per game core: $retroarch_core" >> $sysdir/logs/game_menu.log
+        echo "per game core: $retroarch_core" >> $sysdir/logs/game_list_options.log
 
         if [ -f "$corepath" ]; then
             if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
