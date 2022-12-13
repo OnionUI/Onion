@@ -27,14 +27,16 @@ void lang_removeIconLabels(bool remove_icon_labels, bool remove_hints)
 	if ((dp = opendir(LANG_DIR)) == NULL)
         return;
 
-    if (!remove_icon_labels && !remove_hints) {
+    if (!remove_icon_labels || !remove_hints) {
         // restore original lang files
         if (exists(LANG_DIR_BACKUP)) {
             system("mv -f " LANG_DIR_BACKUP "/* " LANG_DIR "");
             remove(LANG_DIR_BACKUP);
         }
-        return;
     }
+
+    if (!remove_icon_labels && !remove_hints)
+        return;
 
     // backup lang files
     if (!exists(LANG_DIR_BACKUP))

@@ -1,7 +1,6 @@
 #!/bin/sh
 sysdir=/mnt/SDCARD/.tmp_update
 mediadir=/mnt/SDCARD/Media/PDF
-appdir=$sysdir/bin/green
 
 while :
 do
@@ -22,5 +21,5 @@ do
 	fi
 
 	echo "$selected_file"
-	LD_LIBRARY_PATH="$sysdir/lib/parasyte:$LD_LIBRARY_PATH" $appdir/green "$selected_file"
+	LD_LIBRARY_PATH="$sysdir/lib/parasyte:$LD_LIBRARY_PATH" $sysdir/bin/green/green "$selected_file"
 done

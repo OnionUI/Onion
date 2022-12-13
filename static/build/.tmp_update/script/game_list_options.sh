@@ -22,6 +22,7 @@ corepath=""
 coreinfopath=""
 coreinfo=""
 corename=""
+manpath=""
 
 globalscriptdir=/mnt/SDCARD/App/romscripts
 
@@ -31,7 +32,7 @@ main() {
     echo "cmd: $cmd"
     # example: LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so "/mnt/SDCARD/Emu/GBATEST/../../.tmp_update/proxy.sh" "/mnt/SDCARD/Emu/GBATEST/../../Roms/GBATEST/mGBA/Final Fantasy IV Advance (U).zip"
 
-    rompath=$(echo "$cmd" | awk '{ gsub("\\\\","",$0); st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3)}')
+    rompath=$(echo "$cmd" | awk '{ st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3) }')
 
     if echo "$rompath" | grep -q ":"; then
         rompath=$(echo "$rompath" | awk '{st = index($0,":"); print substr($0,st+1)}')
@@ -80,6 +81,17 @@ main() {
         menu_option_labels="$menu_option_labels \"Reset game\""
     fi
 
+    romdirname=`echo "$rompath" | sed "s/^.*Roms\///g" | cut -d "/" -f1`
+    manpath="/mnt/SDCARD/Roms/$romdirname/Manuals/$(basename "$rompath" ".$romext").pdf"
+
+    echo "romdir: '$romdirname'"
+    echo "manual: $manpath"
+
+    if [ -f "$manpath" ]; then
+        menu_options="$menu_options open_manual"
+        menu_option_labels="$menu_option_labels \"Game manual\""
+    fi
+
     menu_options="$menu_options change_core"
     menu_option_labels="$menu_option_labels \"$game_core_label\""
 
@@ -126,7 +138,7 @@ main() {
         done
     fi
 
-    runcmd="LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./bin/prompt -t \"GAME MENU\" $menu_option_labels"
+    runcmd="LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./bin/prompt -t \"OPTIONS\" $menu_option_labels"
     eval $runcmd
     retcode=$?
 
@@ -201,26 +213,36 @@ reset_game() {
     exit 0
 }
 
+open_manual() {
+    if [ -f "$manpath" ]; then
+        LD_LIBRARY_PATH="$sysdir/lib/parasyte:$LD_LIBRARY_PATH" $sysdir/bin/green/green "$manpath"
+    fi
+}
+
 change_core() {
     ext="$romext"
 
     if [ "$ext" == "zip" ] || [ "$ext" == "7z" ]; then
-        if [ "$ext" == "zip" ]; then
-            zip_files=`unzip -l "$rompath" | sed '1,3d;$d' | sed '$d' | sort -n -r`
-        else
-            zip_files=`./bin/7zz l -ba "$rompath" | awk '{$1="";$2="";$3="";print $0;}' | sort -n -r`
-        fi
+        if ! cat "$emupath/config.json" | grep -q "\"shortname\" *: *1"; then
 
-        echo "zip/7z output:"
-        echo "$zip_files"
+            if [ "$ext" == "zip" ]; then
+                zip_files=`unzip -l "$rompath" | sed '1,3d;$d' | sed '$d' | sort -n -r`
+            else
+                zip_files=`./bin/7zz l -ba "$rompath" | awk '{$1="";$2="";$3="";print $0;}' | sort -n -r`
+            fi
 
-        inner_name=`basename "$(echo "$zip_files" | grep "[!]")"`
-        if [ "$inner_name" == "" ]; then
-            inner_name=`basename "$(echo "$zip_files" | head -n 1)"`
+            echo "zip/7z output:"
+            echo "$zip_files"
+
+            inner_name=`basename "$(echo "$zip_files" | grep "[!]")"`
+            if [ "$inner_name" == "" ]; then
+                inner_name=`basename "$(echo "$zip_files" | head -n 1)"`
+            fi
+            ext=`echo "$inner_name" | awk -F. '{print tolower($NF)}'`
+            echo "inner extension: $ext"
+            echo "-------------------------------------"
+
         fi
-        ext=`echo "$inner_name" | awk -F. '{print tolower($NF)}'`
-        echo "inner extension: $ext"
-        echo "-------------------------------------"
     fi
 
     get_core_extensions
