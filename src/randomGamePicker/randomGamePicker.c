@@ -45,7 +45,7 @@ bool readDatabase(const char *cache_path, const char *table_name) {
         cJSON *games = cJSON_CreateObject();
         char *out;
 
-        cJSON_AddItemToObject(games, "rompath", cJSON_CreateString(sqlite3_column_text(res, 2)));
+        cJSON_AddItemToObject(games, "rompath", cJSON_CreateString((const char *)sqlite3_column_text(res, 2)));
         out = cJSON_Print(games);
 
         JsonGameEntry jsonGameEntry = JsonGameEntry_fromJson(out);
