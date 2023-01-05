@@ -235,7 +235,7 @@ run_installation() {
         free_mma
 
         cd $sysdir
-        ./config/boot_mod.sh
+        # ./config/boot_mod.sh # disabled because of possible incompatibility with new firmware
 
         # Show installation complete
         cd $sysdir
