@@ -46,6 +46,9 @@ uint32_t suspendpid[PIDMAX];
 #define MI_AO_SETVOLUME 0x4008690b
 #define MI_AO_GETVOLUME 0xc008690c
 
+const int KONAMI_CODE[] = { HW_BTN_UP, HW_BTN_UP, HW_BTN_DOWN, HW_BTN_DOWN, HW_BTN_LEFT, HW_BTN_RIGHT, HW_BTN_LEFT, HW_BTN_RIGHT, HW_BTN_B, HW_BTN_A };
+const int KONAMI_CODE_LENGTH = sizeof(KONAMI_CODE) / sizeof(KONAMI_CODE[0]);
+
 int setVolumeRaw(int volume, int add) {
     int recent_volume = 0;
     int fd = open("/dev/mi_ao", O_RDWR);
@@ -81,6 +84,8 @@ int suspend(uint32_t mode)
     uint32_t flags;
     char comm[128];
     int ret = 0;
+    
+    
 
     // terminate retroarch before kill
     if (mode == 2) ret = terminate_retroarch();
@@ -296,6 +301,7 @@ int main(void) {
     uint32_t repeat_LR = 0;
     uint32_t repeat_power = 0;
     uint32_t val;
+    int konamiCodeIndex = 0;
     bool b_BTN_Not_Menu_Pressed = false;
     bool b_BTN_Menu_Pressed = false;
     bool power_pressed = false;
@@ -342,7 +348,7 @@ int main(void) {
                 if (b_BTN_Menu_Pressed && b_BTN_Not_Menu_Pressed)
                     comboKey_menu = true;
             }
-
+                        
             switch (ev.code) {
                 case HW_BTN_POWER:
                     if (val == PRESSED)
@@ -468,6 +474,22 @@ int main(void) {
                     break;
                 default:
                     break;
+            }
+
+            if ((val == PRESSED) && (system_state == MODE_MAIN_UI)){
+             // Check for Konami code    
+                if (ev.code == KONAMI_CODE[konamiCodeIndex]) {
+                    ++konamiCodeIndex;
+                    if (konamiCodeIndex == KONAMI_CODE_LENGTH) {
+                        // The entire Konami code was entered!
+                        system("touch /mnt/SDCARD/.tmp_update/config/.konami");
+                        //kill(system_state_pid, SIGKILL);
+                        kill_mainUI();
+                        konamiCodeIndex = 0;
+                    }
+                } else {
+                    konamiCodeIndex = 0;
+                }
             }
 
             hibernate_start = getMilliseconds();
