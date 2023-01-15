@@ -14,7 +14,7 @@ main() {
         cd $sysdir
         ./bin/chargingState
     fi
-
+ 
     # Make sure MainUI doesn't show charging animation
     touch /tmp/no_charging_ui
 
@@ -23,7 +23,7 @@ main() {
 
     # Start the key monitor
     ./bin/keymon &
-
+ 
     # Init
     rm /tmp/.offOrder
     HOME=/mnt/SDCARD/RetroArch/
@@ -52,6 +52,8 @@ main() {
     while true; do
         state_change
         check_main_ui
+        state_change
+        check_konami
         state_change
         check_game_menu
         state_change
@@ -86,6 +88,14 @@ check_main_ui() {
     fi
 }
 
+check_konami() {
+    if [ -f $konami_flag ] ; then
+        cd /mnt/SDCARD/.tmp_update/bin
+        ./easter
+        rm $konami_flag
+    fi
+}
+ 
 launch_main_ui() {
     cd $sysdir
     ./bin/mainUiBatPerc
@@ -293,6 +303,7 @@ check_hide_recents() {
 
 clean_flag=/mnt/SDCARD/miyoo/app/.isClean
 expert_flag=/mnt/SDCARD/miyoo/app/.isExpert
+konami_flag=$sysdir/config/.konami
 
 check_hide_expert() {
     if [ ! -f $sysdir/config/.showExpert ]; then
