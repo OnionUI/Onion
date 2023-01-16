@@ -75,7 +75,7 @@ void logMessage(char* Message) {
 }
 
 int main(int argc, char* argv[]) {
-
+    printf("%s","\n --------EASTER LAUNCH---------------- \n");
     // Initialize SDL
     SDL_InitDefault(true);
 
@@ -95,7 +95,7 @@ int main(int argc, char* argv[]) {
     int bTouchWall2 = 0;
 
     int mainLoop = 1;
-   
+ 
     while (mainLoop) {
 
         bTouchWall1 = 0;
@@ -134,9 +134,8 @@ int main(int argc, char* argv[]) {
         rect.x = x;
         rect.y = y;
 
-        if ( ! bTouchWall1 && ! bTouchWall2){
-            return 0;
-            print_debug("kledw");
+        if ( bTouchWall1 && bTouchWall2){
+
             int loop = 1;
             int animationStep = 1;
             // Scrolling text     
@@ -264,13 +263,13 @@ int main(int argc, char* argv[]) {
             }          
 
         }
-        
+
         // Blit the icon onto the screen
         if (mainLoop){
             SDL_BlitSurface(logo1, NULL, screen, &rect);
             SDL_BlitSurface(screen, NULL, video, NULL);
             SDL_Flip(video);
-            SDL_Delay(2);  
+            SDL_Delay(2); 
         }       
     }
     // Clean up
