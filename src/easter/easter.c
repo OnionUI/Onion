@@ -21,7 +21,7 @@ typedef enum
     ALIGN_RIGHT
 } text_alignment_e;
 
-SDL_Surface* theme_textboxSurface(const char *message, TTF_Font *font, SDL_Color fg, text_alignment_e align)
+SDL_Surface* theme_textboxSurface_High_Memory(const char *message, TTF_Font *font, SDL_Color fg, text_alignment_e align)
 {
     SDL_Surface *lines[MAXTEXTLINES];
     int line_count = 0;
@@ -135,7 +135,8 @@ int main(int argc, char* argv[]) {
         rect.y = y;
 
         if ( bTouchWall1 && bTouchWall2){
-
+            // A corner is touched
+            
             int loop = 1;
             int animationStep = 1;
             // Scrolling text     
@@ -194,7 +195,7 @@ int main(int argc, char* argv[]) {
             fclose( file );
 
             TTF_Font* font35 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 35);
-            gTextSurface = theme_textboxSurface(gText, font35, gTextColor, ALIGN_LEFT);
+            gTextSurface = theme_textboxSurface_High_Memory(gText, font35, gTextColor, ALIGN_LEFT);
                   
             // DVD touching corner + text sliding Animation
             int cptFrames = 0 ;
@@ -203,10 +204,9 @@ int main(int argc, char* argv[]) {
             while (loop){
                 moduloFrame = cptFrames % moduloFrame ;
                 
-                
                 switch(animationStep) {
                     case 1 : 
-                       
+                       // Glitch animation
                         SDL_FillRect(screen, NULL, SDL_MapRGB(fmt,rand() % 256,rand() % 256,rand() % 256));
                         
                         switch(moduloFrame) {
@@ -230,8 +230,7 @@ int main(int argc, char* argv[]) {
                         break;
                     
                     case 2 :
-
-                        //SDL_FillRect(screen, NULL, 0); 
+                        //text sliding Animation
                         rect.x = 0;
                         rect.y = 0;
                         SDL_FillRect(screen, NULL, 0);
