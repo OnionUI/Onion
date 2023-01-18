@@ -17,6 +17,7 @@ PixelShift
 StubbornPixel
 e1000
 TheDewd
+Jeltron
 TechDevangelist
 Gaspacho
 Triforce Team
@@ -35,7 +36,6 @@ Andrez
 Cardsaysmoops
 Deletable_Man
 Diimdeep
-Jeltron
 Kalamer
 TadMSTER
 TheDewd
