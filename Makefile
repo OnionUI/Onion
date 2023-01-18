@@ -71,6 +71,7 @@ $(CACHE)/.setup:
 		$(SRC_DIR)/themeSwitcher \
 		$(SRC_DIR)/tweaks \
 		$(SRC_DIR)/randomGamePicker \
+		$(SRC_DIR)/easter \
 		-depth -type d -name res -exec cp -r {}/. $(BUILD_DIR)/.tmp_update/res/ \;
 	@find $(SRC_DIR)/installUI -depth -type d -name res -exec cp -r {}/. $(INSTALLER_DIR)/res/ \;
 # Download themes from theme repo
@@ -103,6 +104,7 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/infoPanel && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/prompt && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/batmon && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/easter && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/read_uuid && BUILD_DIR=$(BIN_DIR) make
 # Build dependencies for installer
 	@mkdir -p $(DIST_DIR)/miyoo/app/.tmp_update/bin
