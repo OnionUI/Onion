@@ -7,7 +7,7 @@ rompath="$1"
 filename=`basename "$rompath"`
 
 
-if [ "$filename" = "◦ Import games in ScummVM.target" ]; then
+if [ "$filename" = "~Import games.target" ]; then
 	echo "Importing ScummVM shortcuts now !"
 	cd $progdir
 	./import_gamelist.sh
