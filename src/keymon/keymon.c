@@ -482,10 +482,12 @@ int main(void) {
                     ++konamiCodeIndex;
                     if (konamiCodeIndex == KONAMI_CODE_LENGTH) {
                         // The entire Konami code was entered!
-                        system("touch /mnt/SDCARD/.tmp_update/config/.konami");
-                        //kill(system_state_pid, SIGKILL);
-                        kill_mainUI();
+                        FILE *file = fopen("/mnt/SDCARD/.tmp_update/cmd_to_run.sh", "w");
+                        fputs("cd /mnt/SDCARD/.tmp_update/bin; ./easter", file);
+                        fclose(file);
                         konamiCodeIndex = 0;
+                        kill_mainUI();
+                       
                     }
                 } else {
                     konamiCodeIndex = 0;
