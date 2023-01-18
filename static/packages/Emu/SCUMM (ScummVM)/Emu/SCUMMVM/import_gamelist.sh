@@ -20,7 +20,7 @@ cp $scummdir/standalone/.config/scummvm/scummvm.ini $ScummvmCfgPath
 # removing all the old shortcuts
 rm $scandir/*.target
 # ...and create the default shortcut to run import again
-touch "$scandir/◦ Import games in ScummVM.target"
+touch "$scandir/~Import games.target"
 
 
 # here we get all the targets names
