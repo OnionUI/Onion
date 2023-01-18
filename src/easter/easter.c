@@ -7,10 +7,7 @@
 #include <stdlib.h>
 
 #include "utils/sdl_init.h"
-#include "theme/config.h"
-#include "theme/resources.h"
 
- 
 #define MAXCHARACTERSARRAY 5000
 #define MAXTEXTLINES 150
 
