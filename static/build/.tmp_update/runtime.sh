@@ -14,7 +14,7 @@ main() {
         cd $sysdir
         ./bin/chargingState
     fi
- 
+
     # Make sure MainUI doesn't show charging animation
     touch /tmp/no_charging_ui
 
@@ -23,7 +23,7 @@ main() {
 
     # Start the key monitor
     ./bin/keymon &
- 
+
     # Init
     rm /tmp/.offOrder
     HOME=/mnt/SDCARD/RetroArch/
@@ -85,7 +85,7 @@ check_main_ui() {
         check_off_order "End"
     fi
 }
- 
+
 launch_main_ui() {
     cd $sysdir
     ./bin/mainUiBatPerc
