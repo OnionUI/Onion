@@ -1,5 +1,3 @@
-INCLUDE_CJSON=1
-INCLUDE_SHMVAR=1
 include ../common/config.mk
 
 TARGET = easter
