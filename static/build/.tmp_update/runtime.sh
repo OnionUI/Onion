@@ -293,7 +293,6 @@ check_hide_recents() {
 
 clean_flag=/mnt/SDCARD/miyoo/app/.isClean
 expert_flag=/mnt/SDCARD/miyoo/app/.isExpert
-konami_flag=$sysdir/config/.konami
 
 check_hide_expert() {
     if [ ! -f $sysdir/config/.showExpert ]; then
