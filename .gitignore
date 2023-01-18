@@ -50,5 +50,5 @@ test/**/test
 !test/
 src/**/randomGamePicker
 !randomGamePicker/
-src/easter/easter
 src/**/read_uuid
+src/easter/easter
