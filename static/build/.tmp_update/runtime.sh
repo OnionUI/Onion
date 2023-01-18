@@ -53,8 +53,6 @@ main() {
         state_change
         check_main_ui
         state_change
-        check_konami
-        state_change
         check_game_menu
         state_change
         check_game
@@ -85,14 +83,6 @@ check_main_ui() {
     if [ ! -f $sysdir/cmd_to_run.sh ] ; then
         launch_main_ui
         check_off_order "End"
-    fi
-}
-
-check_konami() {
-    if [ -f $konami_flag ] ; then
-        cd /mnt/SDCARD/.tmp_update/bin
-        ./easter
-        rm $konami_flag
     fi
 }
  
