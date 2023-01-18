@@ -52,6 +52,4 @@ src/**/randomGamePicker
 !randomGamePicker/
 src/**/read_uuid
 !read_uuid/
-
-
 src/easter/easter
