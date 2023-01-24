@@ -3,12 +3,15 @@ sysdir=/mnt/SDCARD/.tmp_update
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$sysdir/lib:$sysdir/lib/parasyte"
 
 main() {
+    check_device_model
     init_system
     update_time
     clear_logs
 
     # Start the battery monitor
-    ./bin/batmon &
+    if  [ -f /tmp/.deviceMM ] ; then
+        ./bin/batmon &
+    fi
     
     if [ `cat /sys/devices/gpiochip0/gpio/gpio59/value` -eq 1 ]; then
         cd $sysdir
@@ -315,6 +318,14 @@ check_hide_expert() {
     sync
 }
 
+check_device_model() {
+    if [ ! -f /customer/app/axp_test ]; then
+        touch /tmp/.deviceMM
+    else
+        touch /tmp/.deviceMMP  
+    fi
+}
+
 init_system() {
     # init_lcd
     cat /proc/ls
@@ -322,10 +333,12 @@ init_system() {
     
     /mnt/SDCARD/miyoo/app/audioserver &
 
-    # init charger detection
-    if [ ! -f /sys/devices/gpiochip0/gpio/gpio59/direction ]; then
-        echo 59 > /sys/class/gpio/export
-        echo in > /sys/devices/gpiochip0/gpio/gpio59/direction
+    if  [ -f /tmp/.deviceMM ] ; then
+        # init charger detection
+        if [ ! -f /sys/devices/gpiochip0/gpio/gpio59/direction ]; then
+            echo 59 > /sys/class/gpio/export
+            echo in > /sys/devices/gpiochip0/gpio/gpio59/direction
+        fi
     fi
 
     # init backlight
