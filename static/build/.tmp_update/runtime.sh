@@ -266,6 +266,8 @@ check_off_order() {
         if  [ -f /tmp/.deviceMM ] ; then  
             reboot
         else
+            # Allow the bootScreen to be displayed
+            sleep 1
             poweroff 
         fi
         sleep 10

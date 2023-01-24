@@ -59,8 +59,8 @@ int setVolumeRaw(int volume, int add) {
         recent_volume = buf2[1];
         if (add) {
             buf2[1] += add;
-            if (buf2[1] > 30) buf2[1] = 30;
-            else if (buf2[1] < -30) buf2[1] = -30;
+            if (buf2[1] > 0) buf2[1] = 0;
+            else if (buf2[1] < -60) buf2[1] = -60;
         } else buf2[1] = volume;
         if (buf2[1] != recent_volume) ioctl(fd, MI_AO_SETVOLUME, buf1);
         close(fd);
@@ -287,7 +287,7 @@ int main(void) {
     // Set Initial Volume / Brightness
     setVolumeRaw(0,0);
     display_setBrightness(settings.brightness);
-
+    
     display_init();
 
     // Prepare for Poll button input
@@ -340,6 +340,7 @@ int main(void) {
             }
 
             if (val != REPEAT) {
+
                 if (ev.code == HW_BTN_MENU)
                     b_BTN_Menu_Pressed = val == PRESSED;
                 else
@@ -471,6 +472,16 @@ int main(void) {
                 case HW_BTN_B:
                     if (val == PRESSED && system_state == MODE_MAIN_UI)
                         temp_flag_set("launch_alt", false);
+                    break;
+                 case HW_BTN_VOLUME_UP:
+                    if ((val == PRESSED)||(val == REPEAT))
+                         setVolumeRaw(0,5);
+                    break;
+                case HW_BTN_VOLUME_DOWN:
+                    if (val == PRESSED)
+                         setVolumeRaw(0,-5);
+                    else if (val == REPEAT)
+                        setVolumeRaw(-60,0);
                     break;
                 default:
                     break;
