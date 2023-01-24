@@ -11,13 +11,12 @@ main() {
     # Start the battery monitor
     if  [ -f /tmp/.deviceMM ] ; then
         ./bin/batmon &
+        if [ `cat /sys/devices/gpiochip0/gpio/gpio59/value` -eq 1 ]; then
+            cd $sysdir
+            ./bin/chargingState
+        fi
     fi
     
-    if [ `cat /sys/devices/gpiochip0/gpio/gpio59/value` -eq 1 ]; then
-        cd $sysdir
-        ./bin/chargingState
-    fi
-
     # Make sure MainUI doesn't show charging animation
     touch /tmp/no_charging_ui
 
@@ -264,7 +263,11 @@ check_off_order() {
         rm -f /mnt/SDCARD/update.log
         
         sync
-        reboot
+        if  [ -f /tmp/.deviceMM ] ; then  
+            reboot
+        else
+            poweroff 
+        fi
         sleep 10
     fi
 }
