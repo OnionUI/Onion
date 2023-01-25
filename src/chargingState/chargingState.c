@@ -14,9 +14,10 @@
 #include <poll.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
-
+#include "utils/file.h"
 #include "utils/msleep.h"
 #include "utils/log.h"
+#include "system/device_model.h"
 #include "system/battery.h"
 #include "system/system.h"
 #include "system/display.h"
@@ -90,7 +91,9 @@ int main(void)
 
     char image_dir[STR_MAX];
     getImageDir(settings.theme, image_dir);
-
+     
+    getDeviceModel(); 
+     
     SDL_Init(SDL_INIT_VIDEO);
     SDL_ShowCursor(SDL_DISABLE);
     SDL_EnableKeyRepeat(300, 50);
@@ -234,14 +237,11 @@ int main(void)
         #ifdef PLATFORM_MIYOOMINI
         display_setScreen(false);
 
-    if (exists("/tmp/.deviceMM")) {
+   if (DEVICE_ID == MIYOO283){
         system("sync; reboot; sleep 10");
-    } else if (exists("/tmp/.deviceMMP")) {
+    } else if (DEVICE_ID == MIYOO353){
         system("poweroff");
-    }
-
-
-        
+    }    
         #endif
     }
     else {

@@ -6,6 +6,7 @@
 #include "utils/log.h"
 #include "utils/process.h"
 #include "system/system.h"
+#include "utils/file.h"
 
 static time_t battery_last_modified = 0;
 static bool battery_is_charging = false;
@@ -55,9 +56,10 @@ int battery_getPercentage(void)
 bool battery_isCharging(void)
 {
     #ifdef PLATFORM_MIYOOMINI
+    
     int charging = 0;
     
-    if (exists("/tmp/.deviceMM")) {
+   if (DEVICE_ID == MIYOO283){
         char cCharging = '0';
         int fd = open(GPIO_DIR2 "gpio59/value", O_RDONLY);
 
@@ -74,7 +76,7 @@ bool battery_isCharging(void)
             charging = (cCharging == '1');        
                     
         }  
-    } else if (exists("/tmp/.deviceMMP")) {
+    } else if (DEVICE_ID == MIYOO353){
         char *cmd = "cd /customer/app/ ; ./axp_test";  
         int batJsonSize = 100;
         char buf[batJsonSize];

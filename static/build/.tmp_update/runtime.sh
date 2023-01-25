@@ -9,13 +9,13 @@ main() {
     clear_logs
 
     # Start the battery monitor
-    if  [ -f /tmp/.deviceMM ] ; then
+    if [ $deviceModel = 283 ]; then 
         ./bin/batmon &
         if [ `cat /sys/devices/gpiochip0/gpio/gpio59/value` -eq 1 ]; then
             cd $sysdir
             ./bin/chargingState
         fi
-    elif [ -f /tmp/.deviceMMP ] ; then
+    elif [ $deviceModel = 353 ]; then 
         cd /customer/app/
         batteryStatus=`./axp_test`
         case $batteryStatus in
@@ -334,9 +334,13 @@ check_hide_expert() {
 
 check_device_model() {
     if [ ! -f /customer/app/axp_test ]; then
-        touch /tmp/.deviceMM
+        touch /tmp/deviceModel
+        printf "283" >> /tmp/deviceModel
+        deviceModel=283
     else
-        touch /tmp/.deviceMMP  
+        touch /tmp/deviceModel
+        printf "353" >> /tmp/deviceModel
+        deviceModel=353
     fi
 }
 
@@ -347,7 +351,7 @@ init_system() {
     
     /mnt/SDCARD/miyoo/app/audioserver &
 
-    if  [ -f /tmp/.deviceMM ] ; then
+    if [ $deviceModel -eq 283 ]; then 
         # init charger detection
         if [ ! -f /sys/devices/gpiochip0/gpio/gpio59/direction ]; then
             echo 59 > /sys/class/gpio/export
