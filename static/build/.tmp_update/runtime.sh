@@ -267,7 +267,7 @@ check_off_order() {
             reboot
         else
             # Allow the bootScreen to be displayed
-            sleep 1
+            sleep 2
             poweroff 
         fi
         sleep 10
