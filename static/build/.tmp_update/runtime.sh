@@ -15,6 +15,15 @@ main() {
             cd $sysdir
             ./bin/chargingState
         fi
+    elif [ -f /tmp/.deviceMMP ] ; then
+        cd /customer/app/
+        batteryStatus=`./axp_test`
+        case $batteryStatus in
+        *\"charging\":3* ) 
+            cd $sysdir
+            ./bin/chargingState
+            ;;
+        esac
     fi
     
     # Make sure MainUI doesn't show charging animation

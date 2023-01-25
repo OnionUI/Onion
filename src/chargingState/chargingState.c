@@ -233,7 +233,15 @@ int main(void)
     if (turn_off) {
         #ifdef PLATFORM_MIYOOMINI
         display_setScreen(false);
+
+    if (exists("/tmp/.deviceMM")) {
         system("sync; reboot; sleep 10");
+    } else if (exists("/tmp/.deviceMMP")) {
+        system("poweroff");
+    }
+
+
+        
         #endif
     }
     else {
