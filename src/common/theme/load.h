@@ -13,6 +13,7 @@
 #define FALLBACK_PATH "/mnt/SDCARD/miyoo/app/"
 #define SYSTEM_RESOURCES "/mnt/SDCARD/.tmp_update/res/"
 #define THEME_OVERRIDES "/mnt/SDCARD/Saves/CurrentProfile/theme"
+#define DEFAULT_THEME_PATH "/mnt/SDCARD/Themes/Silky by DiMo/"
 
 int theme_getImagePath(const char *theme_path, const char* name, char* out_path)
 {
@@ -66,7 +67,13 @@ TTF_Font* theme_loadFont(const char *theme_path, const char* font, int size)
 
 char* theme_getPath(char *theme_path)
 {
-    return file_parseKeyValue(SYSTEM_CONFIG, "theme", theme_path, ':', 0);
+    file_parseKeyValue(SYSTEM_CONFIG, "theme", theme_path, ':', 0);
+
+    if (strcmp(theme_path, "./") == 0) {
+        strcpy(theme_path, DEFAULT_THEME_PATH);
+    }
+
+    return theme_path;
 }
 
 #endif // THEME_LOAD_H__

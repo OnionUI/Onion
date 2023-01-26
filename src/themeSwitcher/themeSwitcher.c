@@ -26,7 +26,7 @@
 #endif
 
 // Max number of records in the DB
-#define NUMBER_OF_THEMES 100
+#define NUMBER_OF_THEMES 300
 #define MAX_THEME_NAME_SIZE 256
 #define SYSTEM_SKIN_DIR "/mnt/SDCARD/miyoo/app/skin"
 
