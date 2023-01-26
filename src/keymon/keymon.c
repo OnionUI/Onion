@@ -459,7 +459,7 @@ int main(void) {
                         if (settings.volume <= MAX_VOLUME-VOLUME_INCREMENTS) {
                             settings_setVolume(settings.volume + VOLUME_INCREMENTS, 0, true, true);
                             settings_sync();
-                        }     S
+                        }     
                     }    
                     break;
                 case HW_BTN_VOLUME_DOWN:
