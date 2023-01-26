@@ -160,6 +160,10 @@ int main(void)
                     repeat_power = 0;
                 }
                 else if (ev.value == RELEASED && power_pressed) {
+                    if (suspended) {
+                        acc_ticks = 0;
+                        last_ticks = SDL_GetTicks();
+                    }
                     suspend(!suspended, video);
                     power_pressed = false;
                 }
@@ -184,33 +188,33 @@ int main(void)
         if (quit)
             break;
 
-        if (suspended)
-            continue;
-
         uint32_t ticks = SDL_GetTicks();
-        acc_ticks += ticks - last_ticks;
-        last_ticks = ticks;
 
-        if (!suspended && ticks - display_timer >= DISPLAY_TIMEOUT) {
-            suspend(true, video);
-            continue;
-        }
-
-        if (acc_ticks >= frame_delay) {
-            // Clear screen
-            SDL_FillRect(screen, NULL, 0);
-
-            if (current_frame < frame_count) {
-                SDL_Surface *frame = frames[current_frame];
-                SDL_Rect frame_rect = {320 - frame->w / 2, 240 - frame->h / 2};
-                SDL_BlitSurface(frame, NULL, screen, &frame_rect);
-                current_frame = (current_frame + 1) % frame_count;
+        if (!suspended) {
+            if (ticks - display_timer >= DISPLAY_TIMEOUT) {
+                suspend(true, video);
+                continue;
             }
 
-            SDL_BlitSurface(screen, NULL, video, NULL);
-            SDL_Flip(video);
+            acc_ticks += ticks - last_ticks;
+            last_ticks = ticks;
 
-            acc_ticks -= frame_delay;
+            if (acc_ticks >= frame_delay) {
+                // Clear screen
+                SDL_FillRect(screen, NULL, 0);
+
+                if (current_frame < frame_count) {
+                    SDL_Surface *frame = frames[current_frame];
+                    SDL_Rect frame_rect = {320 - frame->w / 2, 240 - frame->h / 2};
+                    SDL_BlitSurface(frame, NULL, screen, &frame_rect);
+                    current_frame = (current_frame + 1) % frame_count;
+                }
+
+                SDL_BlitSurface(screen, NULL, video, NULL);
+                SDL_Flip(video);
+
+                acc_ticks -= frame_delay;
+            }
         }
         
         msleep(min_delay);
