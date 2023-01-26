@@ -38,6 +38,10 @@ void action_setAppShortcut(void *pt)
         strncat(sett_pt, tools_short_names[value], JSON_STRING_LEN - 6);
         return;
     }
+
+    if (item->action_id == 1) {
+        strcpy(sett_pt, "glo");
+    }
 }
 
 void action_setStartupAutoResume(void *pt)

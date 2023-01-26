@@ -32,6 +32,9 @@ int value_appShortcut(int button)
             if (strcmp(saved_value + 5, tools_short_names[i]) == 0)
                 return 1 + installed_apps_count + i;
     }
+    else if (button == 1 && strcmp(saved_value, "glo") == 0) {
+        return 1 + installed_apps_count + NUM_TOOLS;
+    }
 
     return 0;
 }

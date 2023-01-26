@@ -19,9 +19,10 @@ void formatter_appShortcut(void *pt, char *out_label)
 	ListItem *item = (ListItem*)pt;
 	int value = item->value;
 	char ***apps = getInstalledApps();
+	int max_value = installed_apps_count + NUM_TOOLS + item->action_id;
 
-	if (value <= 0 || value > installed_apps_count + NUM_TOOLS) {
-		strcpy(out_label, "Off");
+	if (value <= 0 || value > max_value) {
+		strcpy(out_label, item->action_id == 0 ? "B button" : "A button");
 		return;
 	}
 
@@ -37,6 +38,10 @@ void formatter_appShortcut(void *pt, char *out_label)
 	if (value < NUM_TOOLS) {
 		sprintf(out_label, "Tool: %s", tools_short_names[value]);
 		return;
+	}
+
+	if (item->action_id == 1) {
+		strcpy(out_label, "GLO");
 	}
 }
 

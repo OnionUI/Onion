@@ -6,5 +6,5 @@
     "ingame_long_press": 2,
     "ingame_double_press": 3,
     "mainui_button_x": "app:Search",
-    "mainui_button_y": ""
+    "mainui_button_y": "glo"
 }
