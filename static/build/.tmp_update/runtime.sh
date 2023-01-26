@@ -219,9 +219,9 @@ launch_game() {
 
     echo "cmd retval: $retval"
 
-    if [ $retval -ne 0 ]; then
+    if [ $retval -ge 128 ]; then
         cd $sysdir
-        ./bin/infoPanel --title "An error occurred" --message "The program exited unexpectedly.\n(Error code: $retval)" --auto
+        ./bin/infoPanel --title "Fatal error occurred" --message "The program exited unexpectedly.\n(Error code: $retval)" --auto
     fi
 
     if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
@@ -233,7 +233,7 @@ launch_game() {
         cd $sysdir
         ./bin/playActivity "$cmd"
         
-        echo "game" > /tmp/prev_state        
+        echo "game" > /tmp/prev_state
         check_off_order "End_Save"
     else
         echo "app" > /tmp/prev_state
