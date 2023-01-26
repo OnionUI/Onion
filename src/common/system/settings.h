@@ -9,10 +9,15 @@
 #include "display.h"
 
 #define MAX_BRIGHTNESS 10
+#define MAX_VOLUME 20
+#define VOLUME_INCREMENTS 2
 #define MAIN_UI_SETTINGS "/appconfigs/system.json"
 #define CMD_TO_RUN_PATH "/mnt/SDCARD/.tmp_update/cmd_to_run.sh"
 #define RETROARCH_CONFIG "/mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg"
 #define HISTORY_PATH "/mnt/SDCARD/Saves/CurrentProfile/lists/content_history.lpl"
+
+#define MI_AO_SETVOLUME 0x4008690b
+#define MI_AO_GETVOLUME 0xc008690c
 
 static struct settings_s
 {
@@ -274,5 +279,54 @@ void settings_setBrightness(uint32_t value, bool apply, bool save)
     }
 }
 
+// Increments between -60 and 0
+int setVolumeRaw(int volume, int add) {
+    int recent_volume = 0;
+    int fd = open("/dev/mi_ao", O_RDWR);
+    if (fd >= 0) {
+        int buf2[] = {0, 0};
+        uint64_t buf1[] = {sizeof(buf2), (uintptr_t)buf2};
+        ioctl(fd, MI_AO_GETVOLUME, buf1);
+        recent_volume = buf2[1];
+        if (add) {
+            buf2[1] += add;
+            if (buf2[1] > 0) buf2[1] = 0;
+            else if (buf2[1] < -60) buf2[1] = -60;
+        } else buf2[1] = volume;
+        if (buf2[1] != recent_volume) ioctl(fd, MI_AO_SETVOLUME, buf1);
+        close(fd);
+    }
+    return recent_volume;
+}
+
+// Increments between 0 and 20
+int setVolume(int volume, int add) {
+    int recent_volume = 0;
+    int rawVolumeValue=0;
+    int rawAdd=0;
+    
+    rawVolumeValue = (volume * 3) - 60;
+    rawAdd = (add * 3);
+    recent_volume = setVolumeRaw(rawVolumeValue, rawAdd);
+    return (int)(recent_volume/3);
+}
+
+void settings_setVolume(uint32_t value, int add, bool apply, bool save)
+{
+    settings.volume = value;
+
+    if (apply)
+        setVolume(value, add);
+
+    if (save) {
+        cJSON* request_json = json_load(MAIN_UI_SETTINGS);
+        cJSON* itemVolume = cJSON_GetObjectItem(request_json, "vol");
+        cJSON_SetNumberValue(itemVolume, settings.volume);
+        json_save(request_json, MAIN_UI_SETTINGS);
+        cJSON_free(request_json);
+        FILE *fp;
+        file_put_sync(fp, "/tmp/settings_changed", "%s", "");
+    }
+}
 
 #endif // SETTINGS_H__

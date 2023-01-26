@@ -24,6 +24,7 @@
 #include "system/system.h"
 #include "system/screenshot.h"
 #include "system/state.h"
+#include "system/device_model.h"
 
 #include "system/settings_sync.h"
 #include "./input_fd.h"
@@ -40,33 +41,8 @@
 
 uint32_t suspendpid[PIDMAX];
 
-//
-//    Set Volume (Raw)
-//
-#define MI_AO_SETVOLUME 0x4008690b
-#define MI_AO_GETVOLUME 0xc008690c
-
 const int KONAMI_CODE[] = { HW_BTN_UP, HW_BTN_UP, HW_BTN_DOWN, HW_BTN_DOWN, HW_BTN_LEFT, HW_BTN_RIGHT, HW_BTN_LEFT, HW_BTN_RIGHT, HW_BTN_B, HW_BTN_A };
 const int KONAMI_CODE_LENGTH = sizeof(KONAMI_CODE) / sizeof(KONAMI_CODE[0]);
-
-int setVolumeRaw(int volume, int add) {
-    int recent_volume = 0;
-    int fd = open("/dev/mi_ao", O_RDWR);
-    if (fd >= 0) {
-        int buf2[] = {0, 0};
-        uint64_t buf1[] = {sizeof(buf2), (uintptr_t)buf2};
-        ioctl(fd, MI_AO_GETVOLUME, buf1);
-        recent_volume = buf2[1];
-        if (add) {
-            buf2[1] += add;
-            if (buf2[1] > 0) buf2[1] = 0;
-            else if (buf2[1] < -60) buf2[1] = -60;
-        } else buf2[1] = volume;
-        if (buf2[1] != recent_volume) ioctl(fd, MI_AO_SETVOLUME, buf1);
-        close(fd);
-    }
-    return recent_volume;
-}
 
 //
 //    Suspend / Kill processes
@@ -185,7 +161,7 @@ void suspend_exec(int timeout) {
     system_clock_pause(true);
     suspend(0);
     rumble(0);
-    int recent_volume = setVolumeRaw(-60,0);
+    int recent_volume = setVolume(0,0);
     display_setBrightnessRaw(0);
     display_off();
     system_powersave_on();
@@ -231,7 +207,7 @@ void suspend_exec(int timeout) {
     if (killexit) { resume(); usleep(100000); suspend(2); usleep(400000); }
     display_on();
     display_setBrightness(settings.brightness);
-    setVolumeRaw(recent_volume, 0);
+    setVolume(recent_volume, 0);
     if (!killexit) {
         resume();
         system_clock_pause(false);
@@ -281,15 +257,20 @@ int main(void) {
     signal(SIGTERM, quit);
     signal(SIGSEGV, quit);
 
+    getDeviceModel(); 
     settings_init();
     printf_debug("Settings loaded. Brightness set to: %d\n", settings.brightness);
 
     // Set Initial Volume / Brightness
-    setVolumeRaw(0,0);
-    display_setBrightness(settings.brightness);
+    if (DEVICE_ID == MIYOO283){
+        setVolume(20,0);
+    } else if (DEVICE_ID == MIYOO353){
+        setVolume(settings.volume,0);
+    }
     
-    display_init();
+    display_setBrightness(settings.brightness);
 
+    display_init();
     // Prepare for Poll button input
     input_fd = open("/dev/input/event0", O_RDONLY);
     memset(&fds, 0, sizeof(fds));
@@ -414,7 +395,7 @@ int main(void) {
                         switch (button_flag & (SELECT|START)) {
                             case START:
                                 // SELECT + L2 : volume down / + R2 : reset
-                                setVolumeRaw(0, (button_flag & R2) ? 0 : -3);
+                                setVolume(0, (button_flag & R2) ? 0 : -1);
                                 break;
                             case SELECT:
                                 // START + L2 : brightness down
@@ -441,7 +422,7 @@ int main(void) {
                         switch (button_flag & (SELECT|START)) {
                         case START:
                             // SELECT + R2 : volume up / + L2 : reset
-                            setVolumeRaw(0, (button_flag & L2) ? 0 : +3);
+                            setVolume(0, (button_flag & L2) ? 0 : +1);
                             break;
                         case SELECT:
                             // START + R2 : brightness up
@@ -474,14 +455,24 @@ int main(void) {
                         temp_flag_set("launch_alt", false);
                     break;
                  case HW_BTN_VOLUME_UP:
-                    if ((val == PRESSED)||(val == REPEAT))
-                         setVolumeRaw(0,5);
+                    if ((val == PRESSED)||(val == REPEAT)){
+                        if (settings.volume <= MAX_VOLUME-VOLUME_INCREMENTS) {
+                            settings_setVolume(settings.volume + VOLUME_INCREMENTS, 0, true, true);
+                            settings_sync();
+                        }     S
+                    }    
                     break;
                 case HW_BTN_VOLUME_DOWN:
-                    if (val == PRESSED)
-                         setVolumeRaw(0,-5);
-                    else if (val == REPEAT)
-                        setVolumeRaw(-60,0);
+                    if (val == PRESSED){
+                        if (settings.volume >= MAX_VOLUME+VOLUME_INCREMENTS) {
+                            settings_setVolume(settings.volume - VOLUME_INCREMENTS, 0, true, true);
+                            settings_sync();
+                        }
+                    }
+                    else if (val == REPEAT){
+                        settings_setVolume(0, 0, true, true);
+                        settings_sync();
+                    }
                     break;
                 default:
                     break;
