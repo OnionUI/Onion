@@ -1,0 +1,6 @@
+{
+    "label":"Random Game",
+    "icon":"../../Icons/app/dice.png",
+    "launch":"launch.sh",
+    "description":"Launch random game (any system)"
+}
