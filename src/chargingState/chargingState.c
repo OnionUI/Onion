@@ -41,7 +41,6 @@ static struct pollfd fds[1];
 void getImageDir(const char *theme_path, char *image_dir)
 {
     char image0_path[STR_MAX * 2];
-
     sprintf(image0_path, "%s/skin/extra/chargingState0.png", THEME_OVERRIDES);
     if (exists(image0_path)) {
         sprintf(image_dir, "%s/skin/extra", THEME_OVERRIDES);

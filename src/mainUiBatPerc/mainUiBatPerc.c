@@ -21,13 +21,33 @@
 #include "theme/theme.h"
 #include "theme/background.h"
 
-void restoreRegularDisplay(void)
-{
-    char theme_path[STR_MAX];
-    theme_getPath(theme_path);
+#define SYSTEM_SKIN_DIR "/mnt/SDCARD/miyoo/app/skin/"
 
-    char icon_path[STR_MAX],
-         icon_backup[STR_MAX];
+void logMessage(char* Message) {
+	FILE *file = fopen("/mnt/SDCARD/log_PUI_Message.txt", "a");
+
+    char valLog[200];
+    sprintf(valLog, "%s %s", Message, "\n");
+    fputs(valLog, file);
+	fclose(file); 
+}
+
+void restoreRegularDisplay(void){    
+    char icon_path[STR_MAX+20],
+        icon_backup[STR_MAX],
+        theme_path[STR_MAX];     
+           
+    theme_getPath(theme_path);
+    
+    // Make sure the resource exists
+    sprintf(icon_path, "%sskin/%s.png", theme_path, ".batt-perc"); 
+    
+    if (!exists(icon_path)){
+        char system_image_path[STR_MAX];
+        sprintf(system_image_path, "%s%s.png", SYSTEM_SKIN_DIR, ".batt-perc");        
+        file_copy(system_image_path, icon_path);
+    }   
+    
     bool icon_exists = theme_getImagePath(theme_path, "power-full-icon", icon_path) == 1;
     bool backup_exists = theme_getImagePath(theme_path, "power-full-icon_back", icon_backup) == 1;
 
@@ -44,8 +64,8 @@ void drawBatteryPercentage(void)
     char theme_path[STR_MAX];
     theme_getPath(theme_path);
 
-    char icon_path[STR_MAX],
-         icon_backup[STR_MAX];
+    char icon_path[STR_MAX+20];
+   /*
     bool icon_location = theme_getImagePath(theme_path, "power-full-icon", icon_path);
     bool backup_location = theme_getImagePath(theme_path, "power-full-icon_back", icon_backup);
 
@@ -54,8 +74,10 @@ void drawBatteryPercentage(void)
         sprintf(icon_backup, "%s_back.png", file_removeExtension(icon_path));
         file_copy(icon_path, icon_backup);
     }
+    */
 
     TTF_Init();
+    sprintf(icon_path, "%sskin/%s.png", theme_path, ".batt-perc"); 
 
     int percentage = battery_getPercentage();
     SDL_Surface *image = theme_batterySurfaceWithBg(percentage, theme_background());
@@ -69,11 +91,12 @@ void drawBatteryPercentage(void)
     TTF_Quit();
 }
 
+
 int main(int argc, char *argv[])
 {
-    if (argc > 1 && strcmp(argv[1], "--restore") == 0)
+        // Repair themes modified with the previous logic
+        // and make sure the percentage resource exists
         restoreRegularDisplay();
-    else if (!battery_isCharging())
         drawBatteryPercentage();
     return 0;
 }

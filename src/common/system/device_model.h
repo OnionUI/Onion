@@ -1,6 +1,9 @@
 #ifndef DEVICE_MODEL_H__
 #define DEVICE_MODEL_H__
 
+#include <stdio.h>
+#include "utils/file.h"
+
 #define MIYOO283 283
 #define MIYOO353 353
 

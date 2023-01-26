@@ -65,8 +65,6 @@ void installFaultyImage(const char *theme_path, const char *image_name)
 
 void installTheme(Theme_s *theme)
 {
-    system("./bin/mainUiBatPerc --restore");
-
     // change theme setting
     strcpy(settings.theme, theme->path);
     settings_save();

@@ -7,6 +7,7 @@
 #include "utils/process.h"
 #include "system/system.h"
 #include "utils/file.h"
+#include "system/device_model.h"
 
 static time_t battery_last_modified = 0;
 static bool battery_is_charging = false;
@@ -36,7 +37,6 @@ int battery_getPercentage(void)
                 break;
             }
         }
-
         retry--;
         msleep(100);
     }
@@ -80,14 +80,14 @@ bool battery_isCharging(void)
         char *cmd = "cd /customer/app/ ; ./axp_test";  
         int batJsonSize = 100;
         char buf[batJsonSize];
+        int charge_number;
+
         FILE *fp;      
-        
         fp = popen(cmd, "r");
-        if (fgets(buf, batJsonSize, fp) != NULL) {
-            if(strstr(buf, "\"charging\":3") != NULL) {
-                  charging = 1; 
+            if (fgets(buf, batJsonSize, fp) != NULL) {
+               sscanf(buf,  "{\"battery\":%*d, \"voltage\":%*d, \"charging\":%d}", &charge_number);
+               charging = (charge_number==3);
             }
-        }
         pclose(fp);   
     }
 

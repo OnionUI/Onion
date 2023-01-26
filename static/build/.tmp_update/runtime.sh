@@ -7,10 +7,10 @@ main() {
     init_system
     update_time
     clear_logs
-
+    
+    ./bin/batmon &
     # Start the battery monitor
     if [ $deviceModel = 283 ]; then 
-        ./bin/batmon &
         if [ `cat /sys/devices/gpiochip0/gpio/gpio59/value` -eq 1 ]; then
             cd $sysdir
             ./bin/chargingState
@@ -270,13 +270,13 @@ check_off_order() {
 
         killall tee
         rm -f /mnt/SDCARD/update.log
-        
+                
         sync
-        if  [ -f /tmp/.deviceMM ] ; then  
+        if [ $deviceModel -eq 283 ]; then 
             reboot
         else
             # Allow the bootScreen to be displayed
-            sleep 2
+            sleep 1.5
             poweroff 
         fi
         sleep 10
@@ -314,18 +314,26 @@ expert_flag=/mnt/SDCARD/miyoo/app/.isExpert
 check_hide_expert() {
     if [ ! -f $sysdir/config/.showExpert ]; then
         # Should be clean
-        if [ ! -f $clean_flag ] || [ -f $expert_flag ]; then
+        if [ ! -f $clean_flag ] || [ -f $expert_flag ] || [ $is_device_model_changed ]; then
             rm /mnt/SDCARD/miyoo/app/MainUI
             rm -f $expert_flag
-	        cp $sysdir/bin/MainUI-clean /mnt/SDCARD/miyoo/app/MainUI
+	        if [ $deviceModel -eq 283 ]; then 
+                cp $sysdir/bin/MainUI-283-clean /mnt/SDCARD/miyoo/app/MainUI
+            elif [ $deviceModel = 353 ]; then 
+                cp $sysdir/bin/MainUI-353-clean /mnt/SDCARD/miyoo/app/MainUI
+            fi
             touch $clean_flag
         fi
     else
         # Should be expert
-        if [ ! -f $expert_flag ] || [ -f $clean_flag ]; then
+        if [ ! -f $expert_flag ] || [ -f $clean_flag ]|| [ $is_device_model_changed ]; then
             rm /mnt/SDCARD/miyoo/app/MainUI
             rm -f $clean_flag
-	        cp $sysdir/bin/MainUI-expert /mnt/SDCARD/miyoo/app/MainUI
+	        if [ $deviceModel -eq 283 ]; then 
+                cp $sysdir/bin/MainUI-283-expert /mnt/SDCARD/miyoo/app/MainUI
+            elif [ $deviceModel = 353 ]; then 
+                cp $sysdir/bin/MainUI-353-expert /mnt/SDCARD/miyoo/app/MainUI
+            fi
             touch $expert_flag
         fi
     fi
@@ -333,15 +341,30 @@ check_hide_expert() {
 }
 
 check_device_model() {
-    if [ ! -f /customer/app/axp_test ]; then
+    
+    if [ ! -f /customer/app/axp_test ]; then        
         touch /tmp/deviceModel
-        printf "283" >> /tmp/deviceModel
+        printf "283" > /tmp/deviceModel
         deviceModel=283
     else
         touch /tmp/deviceModel
-        printf "353" >> /tmp/deviceModel
+        printf "353" > /tmp/deviceModel
         deviceModel=353
     fi
+    
+    # Check if the SD is inserted in a different model
+    is_device_model_changed=0
+    if [ ! -f /mnt/SDCARD/miyoo/app/lastDeviceModel ]; then
+        cp /tmp/deviceModel /mnt/SDCARD/miyoo/app/lastDeviceModel
+        is_device_model_changed=1
+    else 
+        lastDeviceModel=`cat /mnt/SDCARD/miyoo/app/lastDeviceModel` 
+        if [ $lastDeviceModel -ne $deviceModel ]; then 
+            is_device_model_changed=1
+            rm /mnt/SDCARD/miyoo/app/lastDeviceModel
+            echo $deviceModel > /mnt/SDCARD/miyoo/app/lastDeviceModel
+        fi
+    fi    
 }
 
 init_system() {

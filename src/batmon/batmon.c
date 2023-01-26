@@ -1,7 +1,12 @@
+#include "system/device_model.h"
 #include "batmon.h"
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+     
 int main(int argc, char *argv[])
 {
+    getDeviceModel(); 
     FILE *fp;
     int old_percentage = -1,
         current_percentage,
@@ -25,8 +30,12 @@ int main(int argc, char *argv[])
         }
         else if (is_charging) {
             is_charging = false;
-            adc_value_g = updateADCValue(0);
-            current_percentage = batteryPercentage(adc_value_g);
+            if (DEVICE_ID == MIYOO283){
+                adc_value_g = updateADCValue(0);
+                current_percentage = batteryPercentage(adc_value_g);   
+            } else if (DEVICE_ID == MIYOO353){
+                current_percentage = getBatPercMMP();
+            }
             printf_debug("charging stopped: suspended = %d, perc = %d, warn = %d\n", is_suspended, current_percentage, warn_at);
         }
 
@@ -34,8 +43,12 @@ int main(int argc, char *argv[])
             config_get("battery/warnAt", "%d", &warn_at);
 
             if (ticks >= CHECK_BATTERY_TIMEOUT_S) {
-                adc_value_g = updateADCValue(adc_value_g);
-                current_percentage = batteryPercentage(adc_value_g);
+                if (DEVICE_ID == MIYOO283){
+                    adc_value_g = updateADCValue(adc_value_g);
+                    current_percentage = batteryPercentage(adc_value_g);
+                } else if (DEVICE_ID == MIYOO353){
+                    current_percentage = getBatPercMMP();
+                }
                 printf_debug("battery check: suspended = %d, perc = %d, warn = %d\n", is_suspended, current_percentage, warn_at);
                 ticks = -1;
             }
@@ -78,7 +91,9 @@ static void sigHandler(int sig)
             is_suspended = true;
             break;
         case SIGCONT:
-            adc_value_g = updateADCValue(0);
+            if (DEVICE_ID == MIYOO283){
+                adc_value_g = updateADCValue(0);
+            }
             is_suspended = false;
             break;
         default: break;
@@ -110,6 +125,21 @@ int updateADCValue(int value)
     else if (adcConfig.adc_value < value) value--;
 
     return value;
+}
+
+int getBatPercMMP() {
+    char *cmd = "cd /customer/app/ ; ./axp_test";  
+    int batJsonSize = 100;
+    char buf[batJsonSize];
+    int battery_number;
+
+    FILE *fp;      
+    fp = popen(cmd, "r");
+        if (fgets(buf, batJsonSize, fp) != NULL) {
+           sscanf(buf,  "{\"battery\":%d, \"voltage\":%*d, \"charging\":%*d}", &battery_number);
+        }
+    pclose(fp);   
+    return battery_number;
 }
 
 int batteryPercentage(int value)

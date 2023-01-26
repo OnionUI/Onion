@@ -46,6 +46,7 @@ static void sigHandler(int sig);
 void cleanup(void);
 bool isCharging(void);
 int updateADCValue(int);
+int getBatPercMMP(void);
 int batteryPercentage(int);
 static void* batteryWarning_thread(void* param);
 void batteryWarning_show(void);
