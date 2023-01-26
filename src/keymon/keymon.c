@@ -25,6 +25,7 @@
 #include "system/screenshot.h"
 #include "system/state.h"
 #include "system/device_model.h"
+#include "system/volume.h"
 
 #include "system/settings_sync.h"
 #include "./input_fd.h"
