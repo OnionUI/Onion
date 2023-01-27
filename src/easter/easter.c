@@ -154,7 +154,7 @@ int main(int argc, char* argv[]) {
             char gText[MAXCHARACTERSARRAY];
             int charIndex = 0;
             //Scroll position
-            int scrollY = 520;
+            int scrollY = 560;
 
             //Initialize SDL_ttf
             TTF_Init();
@@ -218,7 +218,7 @@ int main(int argc, char* argv[]) {
                             break;
                         }
                                 
-                        if (cptFrames > 200) {
+                        if (cptFrames > 100) {
                             animationStep = 2;
                             cptFrames = 0;
                         }
