@@ -457,7 +457,7 @@ int main(void) {
                     break;
                  case HW_BTN_VOLUME_UP:
                     if ((val == PRESSED)||(val == REPEAT)){
-                        if (settings.volume <= MAX_VOLUME-VOLUME_INCREMENTS) {
+                        if (settings.volume <= MAX_VOLUME - VOLUME_INCREMENTS) {
                             settings_setVolume(settings.volume + VOLUME_INCREMENTS, 0, true, true);
                             settings_sync();
                         }     
@@ -465,7 +465,7 @@ int main(void) {
                     break;
                 case HW_BTN_VOLUME_DOWN:
                     if (val == PRESSED){
-                        if (settings.volume >= MAX_VOLUME+VOLUME_INCREMENTS) {
+                        if (settings.volume >= VOLUME_INCREMENTS) {
                             settings_setVolume(settings.volume - VOLUME_INCREMENTS, 0, true, true);
                             settings_sync();
                         }
