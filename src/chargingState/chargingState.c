@@ -194,8 +194,15 @@ int main(void)
         last_ticks = ticks;
 
         if (!suspended && ticks - display_timer >= DISPLAY_TIMEOUT) {
-            suspend(true, video);
-            continue;
+            if (DEVICE_ID == MIYOO353){
+                quit = true;
+                turn_off = true;
+                break; 
+            }
+            else {
+                suspend(true, video);
+                continue;
+            }
         }
 
         if (acc_ticks >= frame_delay) {
