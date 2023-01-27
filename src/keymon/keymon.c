@@ -44,7 +44,7 @@ uint32_t suspendpid[PIDMAX];
 
 const int KONAMI_CODE[] = { HW_BTN_UP, HW_BTN_UP, HW_BTN_DOWN, HW_BTN_DOWN, HW_BTN_LEFT, HW_BTN_RIGHT, HW_BTN_LEFT, HW_BTN_RIGHT, HW_BTN_B, HW_BTN_A };
 const int KONAMI_CODE_LENGTH = sizeof(KONAMI_CODE) / sizeof(KONAMI_CODE[0]);
-
+uint32_t recent_volume;
 //
 //    Suspend / Kill processes
 //        mode: 0:STOP 1:TERM 2:KILL
@@ -162,7 +162,7 @@ void suspend_exec(int timeout) {
     system_clock_pause(true);
     suspend(0);
     rumble(0);
-    int recent_volume = setVolume(0,0);
+    setVolume(0,0);
     display_setBrightnessRaw(0);
     display_off();
     system_powersave_on();
@@ -264,9 +264,9 @@ int main(void) {
 
     // Set Initial Volume / Brightness
     if (DEVICE_ID == MIYOO283){
-        setVolume(20,0);
+        recent_volume=setVolume(20,0);
     } else if (DEVICE_ID == MIYOO353){
-        setVolume(settings.volume,0);
+        recent_volume=setVolume(settings.volume,0);
     }
     
     display_setBrightness(settings.brightness);
@@ -396,7 +396,7 @@ int main(void) {
                         switch (button_flag & (SELECT|START)) {
                             case START:
                                 // SELECT + L2 : volume down / + R2 : reset
-                                setVolume(0, (button_flag & R2) ? 0 : -1);
+                                recent_volume=setVolume(0, (button_flag & R2) ? 0 : -1);
                                 break;
                             case SELECT:
                                 // START + L2 : brightness down
@@ -423,7 +423,7 @@ int main(void) {
                         switch (button_flag & (SELECT|START)) {
                         case START:
                             // SELECT + R2 : volume up / + L2 : reset
-                            setVolume(0, (button_flag & L2) ? 0 : +1);
+                            recent_volume=setVolume(0, (button_flag & L2) ? 0 : +1);
                             break;
                         case SELECT:
                             // START + R2 : brightness up
@@ -458,7 +458,7 @@ int main(void) {
                  case HW_BTN_VOLUME_UP:
                     if ((val == PRESSED)||(val == REPEAT)){
                         if (settings.volume <= MAX_VOLUME - VOLUME_INCREMENTS) {
-                            settings_setVolume(settings.volume + VOLUME_INCREMENTS, 0, true, true);
+                            recent_volume = settings_setVolume(0, VOLUME_INCREMENTS, true, true);
                             settings_sync();
                         }     
                     }    
@@ -466,12 +466,12 @@ int main(void) {
                 case HW_BTN_VOLUME_DOWN:
                     if (val == PRESSED){
                         if (settings.volume >= VOLUME_INCREMENTS) {
-                            settings_setVolume(settings.volume - VOLUME_INCREMENTS, 0, true, true);
+                            recent_volume = settings_setVolume(0, - VOLUME_INCREMENTS, true, true);
                             settings_sync();
                         }
                     }
                     else if (val == REPEAT){
-                        settings_setVolume(0, 0, true, true);
+                        recent_volume = settings_setVolume(0, 0, true, true);
                         settings_sync();
                     }
                     break;

@@ -37,8 +37,9 @@ int setVolume(int volume, int add) {
     
     rawVolumeValue = (volume * 3) - 60;
     rawAdd = (add * 3);
+    
     recent_volume = setVolumeRaw(rawVolumeValue, rawAdd);
-    return (int)(recent_volume/3);
+    return (int)((recent_volume/3)+20);
 }
 
 #endif // VOLUME_H__

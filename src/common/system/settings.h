@@ -275,13 +275,13 @@ void settings_setBrightness(uint32_t value, bool apply, bool save)
     }
 }
 
-void settings_setVolume(uint32_t value, int add, bool apply, bool save)
+int settings_setVolume(uint32_t value, int add, bool apply, bool save)
 {
     settings.volume = value;
-
+    
     if (apply)
-        setVolume(value, add);
-
+        settings.volume = setVolume(value, add);
+ 
     if (save) {
         cJSON* request_json = json_load(MAIN_UI_SETTINGS);
         cJSON* itemVolume = cJSON_GetObjectItem(request_json, "vol");
@@ -291,6 +291,7 @@ void settings_setVolume(uint32_t value, int add, bool apply, bool save)
         FILE *fp;
         file_put_sync(fp, "/tmp/settings_changed", "%s", "");
     }
+    return settings.volume;
 }
 
 #endif // SETTINGS_H__
