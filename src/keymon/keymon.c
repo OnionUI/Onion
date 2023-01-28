@@ -287,6 +287,8 @@ int main(void) {
     bool b_BTN_Not_Menu_Pressed = false;
     bool b_BTN_Menu_Pressed = false;
     bool power_pressed = false;
+    bool volUp_pressed = false;
+    bool volDown_pressed = false;
     bool comboKey_menu = false;
     bool comboKey_select = false;
 
@@ -456,6 +458,7 @@ int main(void) {
                         temp_flag_set("launch_alt", false);
                     break;
                  case HW_BTN_VOLUME_UP:
+                    volUp_pressed = (val == PRESSED);
                     if ((val == PRESSED)||(val == REPEAT)){
                         if (settings.volume <= MAX_VOLUME - VOLUME_INCREMENTS) {
                             recent_volume = settings_setVolume(0, VOLUME_INCREMENTS, true, true);
@@ -464,6 +467,7 @@ int main(void) {
                     }    
                     break;
                 case HW_BTN_VOLUME_DOWN:
+                    volDown_pressed = (val == PRESSED);
                     if (val == PRESSED){
                         if (settings.volume >= VOLUME_INCREMENTS) {
                             recent_volume = settings_setVolume(0, - VOLUME_INCREMENTS, true, true);
@@ -478,7 +482,17 @@ int main(void) {
                 default:
                     break;
             }
-
+            
+            // Screenshot shortcut for the MMP
+            if ((volDown_pressed) && (volUp_pressed)){
+                    // screenshot
+                    super_short_pulse();
+                    screenshot_recent();
+                    display_setBrightnessRaw(0);
+                    usleep(100000);
+                    settings_setBrightness(settings.brightness, true, false);
+            }
+            
             if ((val == PRESSED) && (system_state == MODE_MAIN_UI)){
              // Check for Konami code    
                 if (ev.code == KONAMI_CODE[konamiCodeIndex]) {
