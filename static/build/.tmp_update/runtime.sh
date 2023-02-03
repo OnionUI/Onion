@@ -71,6 +71,7 @@ main() {
         check_switcher
         
         # Free memory
+        #/customer/app/sysmon freemma
         $sysdir/bin/freemma
     done
 }

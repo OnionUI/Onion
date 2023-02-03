@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-     
+ 
 int main(int argc, char *argv[])
 {
     getDeviceModel(); 
@@ -181,3 +181,4 @@ void batteryWarning_hide(void)
     display_drawFrame(0); // erase red frame
     adcthread_active = false;
 }
+

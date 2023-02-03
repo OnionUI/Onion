@@ -45,6 +45,9 @@ uint32_t suspendpid[PIDMAX];
 const int KONAMI_CODE[] = { HW_BTN_UP, HW_BTN_UP, HW_BTN_DOWN, HW_BTN_DOWN, HW_BTN_LEFT, HW_BTN_RIGHT, HW_BTN_LEFT, HW_BTN_RIGHT, HW_BTN_B, HW_BTN_A };
 const int KONAMI_CODE_LENGTH = sizeof(KONAMI_CODE) / sizeof(KONAMI_CODE[0]);
 uint32_t recent_volume;
+static pthread_t isf_pt;
+static bool isFramethread_active=false;
+
 //
 //    Suspend / Kill processes
 //        mode: 0:STOP 1:TERM 2:KILL
@@ -251,6 +254,37 @@ void deepsleep(void)
 }
 
 //
+//    Draw Onion interstate frame
+//
+static void* interstateFrame_thread(void* param)
+{
+    while (1) {
+        display_drawFrame(0x009061FF); // draw red frame
+        usleep(0x4000);
+    }
+    return 0;
+}
+
+void interstateFrame_show(void)
+{
+    if (isFramethread_active)
+        return;
+    pthread_create(&isf_pt, NULL, interstateFrame_thread, NULL);
+    isFramethread_active = true;
+}
+
+void interstateFrame_hide(void)
+{
+    if (!isFramethread_active)
+        return;
+    pthread_cancel(isf_pt);
+    pthread_join(isf_pt, NULL);
+    display_drawFrame(0); // erase red frame
+    isFramethread_active = false;
+}
+
+
+//
 //    Main
 //
 int main(void) {
@@ -441,8 +475,10 @@ int main(void) {
                     }
                     break;
                 case HW_BTN_MENU:
+                    interstateFrame_show();
                     system_state_update();
                     comboKey_menu = menuButtonAction(val, comboKey_menu);
+                    interstateFrame_hide();
                     break;
                 case HW_BTN_X:
                     if (val == PRESSED)
