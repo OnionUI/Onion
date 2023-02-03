@@ -320,7 +320,7 @@ change_core() {
         if [ -f "$romcfgpath" ]; then
             awk '!/core /' "$romcfgpath" > temp && mv temp "$romcfgpath"
         else
-            mkdir -p `dirname "$romcfgpath"`
+            mkdir -p "$(dirname "$romcfgpath")"
         fi
 
         echo "core = \"$new_core\"" >> "$romcfgpath"
@@ -330,7 +330,7 @@ change_core() {
 reset_core() {
     if [ -f "$romcfgpath" ]; then
         rm -f "$romcfgpath"
-        rm -d `dirname "$romcfgpath"`
+        rm -d "$(dirname "$romcfgpath")"
     fi
 }
 

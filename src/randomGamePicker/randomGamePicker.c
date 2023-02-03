@@ -129,8 +129,6 @@ int main(int argc, char *argv[])
 
     printf_debug("cmd_to_run: %s\n", cmd_to_run);
 
-    temp_flag_set("quick_switch", true);
-
     fflush(stdin);
     return EXIT_SUCCESS;
 }

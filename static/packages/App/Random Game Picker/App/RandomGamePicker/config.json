@@ -1,7 +1,0 @@
-{
-    "label":"Random Game Picker",
-    "icon":"../../Icons/app/dice.png",
-    "launch":"launch.sh",
-    "description":"Pick a random game for you!"
-}
-    

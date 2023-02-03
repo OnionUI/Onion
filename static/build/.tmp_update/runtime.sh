@@ -185,8 +185,16 @@ launch_game() {
         ./bin/playActivity "init"
 
         rompath=$(echo "$cmd" | awk '{ st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3)}')
+
+        if echo "$rompath" | grep -q ":"; then
+            rompath=$(echo "$rompath" | awk '{split($0,a,":"); print a[2]}')
+        fi
+
         romext=`echo "$(basename "$rompath")" | awk -F. '{print tolower($NF)}'`
         romcfgpath="$(dirname "$rompath")/.game_config/$(basename "$rompath" ".$romext").cfg"
+
+        echo "rompath: $rompath (ext: $romext)"
+        echo "romcfgpath: $romcfgpath"
     fi
 
     # GAME LAUNCH
@@ -219,6 +227,14 @@ launch_game() {
 
     # Launch the command
     $sysdir/cmd_to_run.sh
+    retval=$?
+
+    echo "cmd retval: $retval"
+
+    if [ $retval -ge 128 ]; then
+        cd $sysdir
+        ./bin/infoPanel --title "Fatal error occurred" --message "The program exited unexpectedly.\n(Error code: $retval)" --auto
+    fi
 
     if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
         echo "$cmd" | sed 's/ -c \"\/mnt\/SDCARD\/.tmp_update\/reset.cfg\"//g' > $sysdir/cmd_to_run.sh
@@ -229,7 +245,7 @@ launch_game() {
         cd $sysdir
         ./bin/playActivity "$cmd"
         
-        echo "game" > /tmp/prev_state        
+        echo "game" > /tmp/prev_state
         check_off_order "End_Save"
     else
         echo "app" > /tmp/prev_state
