@@ -28,8 +28,8 @@ bool readDatabase(const char *cache_path, const char *table_name) {
         sqlite3_close(db);
         return false;
     }
-    
-    const char *sql = sqlite3_mprintf("SELECT * FROM %q", table_name);
+
+    const char *sql = sqlite3_mprintf("SELECT * FROM %q WHERE type=0 ORDER BY RANDOM() LIMIT 1", table_name);
     printf_debug("query: %s\n", sql);
 
     rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);    
@@ -45,7 +45,7 @@ bool readDatabase(const char *cache_path, const char *table_name) {
         cJSON *games = cJSON_CreateObject();
         char *out;
 
-        cJSON_AddItemToObject(games, "rompath", cJSON_CreateString(sqlite3_column_text(res, 2)));
+        cJSON_AddItemToObject(games, "rompath", cJSON_CreateString((const char *)sqlite3_column_text(res, 2)));
         out = cJSON_Print(games);
 
         JsonGameEntry jsonGameEntry = JsonGameEntry_fromJson(out);
@@ -70,19 +70,21 @@ void readConfigFile(const char *emuname) {
         
         JsonGameEntry config = JsonGameEntry_fromJson(config_str);
         
-        char cache_path[STR_MAX * 3];
-        snprintf(cache_path, STR_MAX * 3 - 1, "%s/%s/%s/%s_cache2.db", "/mnt/SDCARD/Emu", emuname, config.rompath, basename(config.rompath));
+        if (strncmp(config.rompath, "../../App/", 10) != 0) {
+            char cache_path[STR_MAX * 3];
+            snprintf(cache_path, STR_MAX * 3 - 1, "%s/%s/%s/%s_cache2.db", "/mnt/SDCARD/Emu", emuname, config.rompath, basename(config.rompath));
 
-        char table_name[STR_MAX];
-        char *last = strrchr(config.rompath, '/');
-        if (last != NULL) {                    
-            snprintf(table_name, STR_MAX, "%s_roms", last+1);
-            printf_debug("table_name: '%s'\n", table_name);
-        }       
-        
-        printf_debug("cache_path: %s\n", cache_path);
+            char table_name[STR_MAX];
+            char *last = strrchr(config.rompath, '/');
+            if (last != NULL) {                    
+                snprintf(table_name, STR_MAX, "%s_roms", last+1);
+                printf_debug("table_name: '%s'\n", table_name);
+            }       
+            
+            printf_debug("cache_path: %s\n", cache_path);
 
-        readDatabase(cache_path, table_name);
+            readDatabase(cache_path, table_name);
+        }
     }
 }
 
@@ -126,8 +128,6 @@ int main(int argc, char *argv[])
     file_put_sync(fp, "/mnt/SDCARD/.tmp_update/cmd_to_run.sh", "%s", cmd_to_run);
 
     printf_debug("cmd_to_run: %s\n", cmd_to_run);
-
-    temp_flag_set("quick_switch", true);
 
     fflush(stdin);
     return EXIT_SUCCESS;

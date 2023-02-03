@@ -1,0 +1,6 @@
+device_keyboard sdl
+device_video sdl
+display_flipx yes
+display_flipy yes
+display_mode sdl_320x200
+ti99_4a/input_map[key_2] 

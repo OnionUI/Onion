@@ -1,8 +1,8 @@
 ###########################################################
 
 TARGET=Onion
-VERSION=4.1.0-alpha
-RA_SUBVERSION=0.1.8
+VERSION=4.1.0-alpha6
+RA_SUBVERSION=1.14.0.0
 
 ###########################################################
 
@@ -71,6 +71,7 @@ $(CACHE)/.setup:
 		$(SRC_DIR)/themeSwitcher \
 		$(SRC_DIR)/tweaks \
 		$(SRC_DIR)/randomGamePicker \
+		$(SRC_DIR)/easter \
 		-depth -type d -name res -exec cp -r {}/. $(BUILD_DIR)/.tmp_update/res/ \;
 	@find $(SRC_DIR)/installUI -depth -type d -name res -exec cp -r {}/. $(INSTALLER_DIR)/res/ \;
 # Download themes from theme repo
@@ -103,6 +104,8 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/infoPanel && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/prompt && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/batmon && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/easter && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/read_uuid && BUILD_DIR=$(BIN_DIR) make
 # Build dependencies for installer
 	@mkdir -p $(DIST_DIR)/miyoo/app/.tmp_update/bin
 	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(INSTALLER_DIR)/bin/ make

@@ -13,6 +13,7 @@
 #define CMD_TO_RUN_PATH "/mnt/SDCARD/.tmp_update/cmd_to_run.sh"
 #define RETROARCH_CONFIG "/mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg"
 #define HISTORY_PATH "/mnt/SDCARD/Saves/CurrentProfile/lists/content_history.lpl"
+#define DEFAULT_THEME_PATH "/mnt/SDCARD/Themes/Silky by DiMo/"
 
 static struct settings_s
 {
@@ -68,7 +69,7 @@ void _settings_reset(void)
     settings.hue = 10;
     settings.saturation = 10;
     settings.contrast = 10;
-    strcpy(settings.theme, "/mnt/SDCARD/Themes/Silky by DiMo/");
+    strcpy(settings.theme, DEFAULT_THEME_PATH);
     settings.fontsize = 24;
     settings.audiofix = 1;
     // Onion settings
@@ -135,6 +136,10 @@ void _settings_load_mainui(void)
     json_getString(json_root, "keymap", settings.keymap);
     json_getString(json_root, "language", settings.language);
     json_getString(json_root, "theme", settings.theme);
+
+    if (strcmp(settings.theme, "./") == 0) {
+        strcpy(settings.theme, DEFAULT_THEME_PATH);
+    }
 
     cJSON_free(json_root);
 }

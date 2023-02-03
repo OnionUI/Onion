@@ -205,7 +205,8 @@ bool checkAppInstalled(const char *basePath, int base_len, int level, bool compl
             continue;
 
         // Ignore other dirs
-        if (level == 0 && strcmp(dp->d_name, "Emu") > 0 && strcmp(dp->d_name, "App") > 0 && strcmp(dp->d_name, "RApp") > 0)
+        if ((level == 0 && strcmp(dp->d_name, "Emu") > 0 && strcmp(dp->d_name, "App") > 0 && strcmp(dp->d_name, "RApp") > 0) ||
+            (level == 1 && strcmp(dp->d_name, "romscripts") == 0))
             continue;
 
         // Construct new path from our base path
