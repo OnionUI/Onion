@@ -475,10 +475,10 @@ int main(void) {
                     }
                     break;
                 case HW_BTN_MENU:
-                    interstateFrame_show();
+                    //interstateFrame_show();
                     system_state_update();
                     comboKey_menu = menuButtonAction(val, comboKey_menu);
-                    interstateFrame_hide();
+                    //interstateFrame_hide();
                     break;
                 case HW_BTN_X:
                     if (val == PRESSED)
