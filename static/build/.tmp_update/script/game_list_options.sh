@@ -208,8 +208,8 @@ get_info_value() {
 }
 
 reset_game() {
-    cat $radir/retroarch.cfg | sed 's/savestate_auto_load = "true"/savestate_auto_load = "false"/' > $sysdir/reset.cfg
-    echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v -c \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+    echo -e "savestate_auto_load = \"false\"\nconfig_save_on_exit = \"false\"\n" > $sysdir/reset.cfg
+    echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v --appendconfig \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
     exit 0
 }
 
@@ -320,7 +320,7 @@ change_core() {
         if [ -f "$romcfgpath" ]; then
             awk '!/core /' "$romcfgpath" > temp && mv temp "$romcfgpath"
         else
-            mkdir -p "$(dirname "$romcfgpath")"
+            mkdir -p `dirname "$romcfgpath"`
         fi
 
         echo "core = \"$new_core\"" >> "$romcfgpath"
@@ -330,7 +330,7 @@ change_core() {
 reset_core() {
     if [ -f "$romcfgpath" ]; then
         rm -f "$romcfgpath"
-        rm -d "$(dirname "$romcfgpath")"
+        rm -d `dirname "$romcfgpath"`
     fi
 }
 
