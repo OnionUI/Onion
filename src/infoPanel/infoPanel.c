@@ -24,6 +24,7 @@ static char **g_images_paths;
 static char **g_images_titles;
 static int g_images_paths_count = 0;
 static int g_image_index = -1;
+static bool g_show_theme_controls = false;
 
 static bool loadImagesPathsFromJson(const char* config_path, char ***images_paths, int *images_paths_count,
     char ***images_titles)
@@ -125,6 +126,15 @@ static const char *getFilename(const char *full_path) {
     return slash + 1;
 }
 
+const SDL_Rect* getControlsAwareFrame(const SDL_Rect* frame)
+{
+	if (g_show_theme_controls)
+	{
+		return frame;
+	}
+	return NULL;
+}
+
 int main(int argc, char *argv[])
 {
     char title_str[STR_MAX] = "";
@@ -134,7 +144,6 @@ int main(int argc, char *argv[])
     char images_dir_path[STR_MAX] = "";
     bool wait_confirm = true;
     bool is_persistent = false;
-    bool show_theme_controls = false;
     bool info_panel_mode = false;
 
     for (int i = 1; i < argc; i++)
@@ -152,7 +161,7 @@ int main(int argc, char *argv[])
             else if (strcmp(argv[i], "-d") == 0 || strcmp(argv[i], "--directory") == 0)
                 strncpy(images_dir_path, argv[++i], STR_MAX-1);
             else if (strcmp(argv[i], "-s") == 0 || strcmp(argv[i], "--show-theme-controls") == 0)
-                show_theme_controls = true;
+                g_show_theme_controls = true;
             else if (strcmp(argv[i], "-a") == 0 || strcmp(argv[i], "--auto") == 0)
                 wait_confirm = false;
             else if (strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "--persistent") == 0) {
@@ -177,6 +186,9 @@ int main(int argc, char *argv[])
     uint32_t time_step = 1000 / FRAMES_PER_SECOND;
 
     bool cache_used = false;
+
+	const SDL_Rect themedFrame = {theme()->frame.border_left, 0, 640 - theme()->frame.border_right, 480};
+
     if (exists(image_path))
     {
         g_images_paths_count = 1;
@@ -184,14 +196,15 @@ int main(int argc, char *argv[])
         SDL_BlitSurface(theme_background(), NULL, screen, NULL);
         drawImage(image_path, screen);
     }
-    else if(exists(images_json_path))
+    else if (exists(images_json_path))
     {
         if (loadImagesPathsFromJson(images_json_path, &g_images_paths, &g_images_paths_count, &g_images_titles)
             && g_images_paths_count > 0)
         {
             g_image_index = 0;
             SDL_BlitSurface(theme_background(), NULL, screen, NULL);
-            drawImageByIndex(0, g_image_index, g_images_paths, g_images_paths_count, screen, &cache_used);
+            drawImageByIndex(0, g_image_index, g_images_paths, g_images_paths_count, screen, getControlsAwareFrame(&themedFrame),
+				&cache_used);
         }
         else
         {
@@ -206,7 +219,8 @@ int main(int argc, char *argv[])
         {
             g_image_index = 0;
             SDL_BlitSurface(theme_background(), NULL, screen, NULL);
-            drawImageByIndex(0, g_image_index, g_images_paths, g_images_paths_count, screen, &cache_used);
+            drawImageByIndex(0, g_image_index, g_images_paths, g_images_paths_count, screen, getControlsAwareFrame(&themedFrame),
+				&cache_used);
         }
         else
         {
@@ -217,7 +231,7 @@ int main(int argc, char *argv[])
     else if (strlen(title_str) > 0 && strlen(message_str) > 0)
     {
         info_panel_mode = true;
-        show_theme_controls = true;
+        g_show_theme_controls = true;
     }
     else
     {
@@ -240,6 +254,7 @@ int main(int argc, char *argv[])
                 bool navigation_pressed = true;
                 bool navigating_forward = true;
                 const SDLKey key_pressed = event.key.keysym.sym;
+
                 switch(key_pressed) {
                 case SW_BTN_A:
                 case SW_BTN_RIGHT:
@@ -254,9 +269,10 @@ int main(int argc, char *argv[])
                     continue;
                     break;
                 case SW_BTN_Y:
-                    show_theme_controls = !show_theme_controls;
+                    g_show_theme_controls = !g_show_theme_controls;
                     SDL_BlitSurface(theme_background(), NULL, screen, NULL);
-                    drawImageByIndex(g_image_index, g_image_index, g_images_paths, g_images_paths_count, screen, &cache_used);
+                    drawImageByIndex(g_image_index, g_image_index, g_images_paths, g_images_paths_count, screen,
+						getControlsAwareFrame(&themedFrame), &cache_used);
                     all_changed = true;
                     continue;
                     break;
@@ -264,7 +280,7 @@ int main(int argc, char *argv[])
                     navigation_pressed = false;
                     break;
                 }
-                
+				            
                 if (!navigation_pressed) 
                 {
                     continue;
@@ -285,12 +301,13 @@ int main(int argc, char *argv[])
                 const int current_index = g_image_index;
                 navigating_forward ? g_image_index++ : g_image_index--;
                 SDL_BlitSurface(theme_background(), NULL, screen, NULL);
-                drawImageByIndex(g_image_index, current_index, g_images_paths, g_images_paths_count, screen, &cache_used);
+                drawImageByIndex(g_image_index, current_index, g_images_paths, g_images_paths_count, screen,
+					getControlsAwareFrame(&themedFrame), &cache_used);
                 all_changed = true;
             }
         }
 
-        if (show_theme_controls && all_changed) {
+        if (g_show_theme_controls && all_changed) {
             header_changed = true;
             footer_changed = true;
             battery_changed = true;
@@ -299,11 +316,11 @@ int main(int argc, char *argv[])
         if (quit)
             break;
 
-        if (show_theme_controls)
+        if (g_show_theme_controls)
         {
             if (battery_hasChanged(ticks, &battery_percentage))
                 battery_changed = true;
-        
+		      
             if (acc_ticks >= time_step)
             {
                 if (header_changed || battery_changed)
@@ -329,7 +346,7 @@ int main(int argc, char *argv[])
                         theme_renderHeader(screen, filename, !filename);
                     }
                 }
-                
+				            
                 if (footer_changed)
                 {
                     theme_renderFooter(screen);

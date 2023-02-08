@@ -8,7 +8,7 @@ extern "C" {
 struct SDL_Surface;
 
 char* drawImageByIndex(const int index, const int image_index, char **images_paths,
-    const int images_paths_count, SDL_Surface *screen, bool *cache_used);
+    const int images_paths_count, SDL_Surface *screen, const SDL_Rect *frame, bool *cache_used);
 void cleanImagesCache();
 
 #ifdef __cplusplus
