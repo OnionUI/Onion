@@ -13,16 +13,40 @@ static SDL_Surface *g_image_cache_next = NULL;
 # define DEBUG_PRINT(x) do {} while (0)
 #endif
 
-static void drawImage(SDL_Surface *image_to_draw, SDL_Surface *screen)
+static void drawImage(SDL_Surface *image_to_draw, SDL_Surface *screen, const SDL_Rect *frame)
 {
-	if (image_to_draw) {
-		SDL_Rect image_rect = {(int16_t)(320 - image_to_draw->w / 2), (int16_t)(240 - image_to_draw->h / 2)};
-		SDL_BlitSurface(image_to_draw, NULL, screen, &image_rect);
+	if (!image_to_draw)
+		return;
+
+	DEBUG_PRINT(("frame %p\n", frame));
+	int border_left = 0;
+	SDL_Rect new_frame = {0, 0};
+	if (frame != NULL)
+	{
+		DEBUG_PRINT(("x-%d y-%d\n", frame->x, frame->y));
+		new_frame = *frame;
+		border_left = new_frame.x;
 	}
+	DEBUG_PRINT(("border_left %d\n", border_left));
+	int16_t image_x = 320 - (int16_t)(image_to_draw->w / 2);
+	if (image_x < border_left)
+	{
+		image_x = border_left;
+	}
+	else
+	{
+		new_frame.x -= border_left;
+	}
+	SDL_Rect image_rect = {image_x, (int16_t)(240 - image_to_draw->h / 2)};
+	DEBUG_PRINT(("image_rect x-%d y-%d\n", image_rect.x, image_rect.y));
+	if (frame != NULL)
+		SDL_BlitSurface(image_to_draw, &new_frame, screen, &image_rect);
+	else
+		SDL_BlitSurface(image_to_draw, NULL, screen, &image_rect);
 }
 
 char* drawImageByIndex(const int new_image_index, const int image_index, char **images_paths,
-    const int images_paths_count, SDL_Surface *screen, bool *cache_used)
+    const int images_paths_count, SDL_Surface *screen, SDL_Rect *frame, bool *cache_used)
 {
 	DEBUG_PRINT(("image_index: %d, new_image_index: %d\n", image_index, new_image_index));
 
@@ -43,7 +67,7 @@ char* drawImageByIndex(const int new_image_index, const int image_index, char **
 			g_image_cache_current = IMG_Load(images_paths[new_image_index]);
 			g_image_cache_next = new_image_index == images_paths_count - 1 ? NULL : IMG_Load(images_paths[new_image_index + 1]);
 			
-			drawImage(g_image_cache_current, screen);
+			drawImage(g_image_cache_current, screen, frame);
 			
 			*cache_used = false;
 			return image_path_to_draw;
@@ -105,7 +129,7 @@ char* drawImageByIndex(const int new_image_index, const int image_index, char **
 		*cache_used = true;
 	}
 
-	drawImage(g_image_cache_current, screen);
+	drawImage(g_image_cache_current, screen, frame);
 	
 	return image_path_to_draw;
 }
