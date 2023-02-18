@@ -40,8 +40,26 @@ void theme_renderHeader(SDL_Surface* screen, const char *title_str, bool show_lo
     }
 
     if (title_str) {
-        SDL_Surface *title = TTF_RenderUTF8_Blended(resource_getFont(TITLE), title_str, theme()->title.color);
+        SDL_Surface *one_letter = TTF_RenderUTF8_Blended(resource_getFont(TITLE), "W", theme()->title.color);
+        const int letter_width = one_letter->w;
+        SDL_FreeSurface(one_letter);
+        const int title_letters_count = strlen(title_str);
+        char new_title_str[256];
+        strcpy(new_title_str, title_str);
+        const int max_title_length = 600/letter_width;
+        const char* dots = "...";
+        if (title_letters_count > max_title_length)
+        {
+            char *dots_pos = new_title_str + max_title_length/2-2;
+            strncpy(dots_pos, dots, 3);
+            strcpy(dots_pos + 3,
+                new_title_str + title_letters_count - max_title_length/2);
+            new_title_str[max_title_length]  = '\0';
+        }
+
+        SDL_Surface *title = TTF_RenderUTF8_Blended(resource_getFont(TITLE), new_title_str, theme()->title.color);
         if (title) {
+            const int title_width = title->w;
             SDL_Rect title_rect = {320 - title->w / 2, 29 - title->h / 2};
             SDL_Rect title_bg = {title_rect.x - 10, 0, title->w + 20, 60};
             SDL_BlitSurface(theme_background(), &title_bg, screen, &title_bg);
