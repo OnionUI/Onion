@@ -2,6 +2,7 @@
 #define RENDER_HEADER_H__
 
 #include "utils/surfaceSetAlpha.h"
+#include "utils/log.h"
 #include "theme/config.h"
 #include "theme/resources.h"
 #include "theme/background.h"
@@ -42,12 +43,15 @@ void theme_renderHeader(SDL_Surface* screen, const char *title_str, bool show_lo
     if (title_str) {
         SDL_Surface *one_letter = TTF_RenderUTF8_Blended(resource_getFont(TITLE), "W", theme()->title.color);
         const int letter_width = one_letter->w;
+        printf_debug("letter_width: %d", letter_width);
         SDL_FreeSurface(one_letter);
         const int title_letters_count = strlen(title_str);
         char new_title_str[256];
         strcpy(new_title_str, title_str);
         const int max_title_length = 600/letter_width;
         const char* dots = "...";
+        printf_debug("title_letters_count: %d", title_letters_count);
+        printf_debug("max_title_length: %d", max_title_length);
         if (title_letters_count > max_title_length)
         {
             char *dots_pos = new_title_str + max_title_length/2-2;
