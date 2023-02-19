@@ -17,6 +17,7 @@
 #define MAXBACKUPFILES 80
 #define INIT_TIMER_PATH "/tmp/initTimer"
 #define PLAY_ACTIVITY_DB_PATH "/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db"
+#define PLAY_ACTIVITY_DB_TMP_PATH "/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity_tmp.db"
 #define PLAY_ACTIVITY_BACKUP_DIR "/mnt/SDCARD/Saves/CurrentProfile/saves/PlayActivityBackup"
 #define PLAY_ACTIVITY_BACKUP_NUM(num) "/mnt/SDCARD/Saves/CurrentProfile/saves/PlayActivityBackup/playActivityBackup" num ".db"
 
@@ -28,14 +29,17 @@ static struct rom_s
 }
 rom_list[MAXVALUES];
 static int rom_list_len = 0;
+static int total_time_played = 0;
 
-int readRomDB(void)
+int readRomDB(const char *filePath)
 {
+    total_time_played = 0;
+    
 	// Check to avoid corruption
-	if (!exists(PLAY_ACTIVITY_DB_PATH))
+	if (!exists(filePath))
         return 1;
 
-    FILE * file = fopen(PLAY_ACTIVITY_DB_PATH, "rb");
+    FILE * file = fopen(filePath, "rb");
 
     if (file == NULL)
         // The file exists but could not be opened
@@ -47,8 +51,11 @@ int readRomDB(void)
     int i;
     
     for (i = 0; i < MAXVALUES; i++) {
-        if (strlen(rom_list[i].name) > 0)
+        if (strlen(rom_list[i].name) > 0){
             rom_list_len = i + 1;
+            total_time_played += rom_list[i].playTime;
+        }
+            
     }
 
     fclose(file);
@@ -56,19 +63,35 @@ int readRomDB(void)
 }
 
 void writeRomDB(void)
-{
+{     
 	FILE *fp;
-
     if (rom_list_len == 0)
 		return;
-  
-	remove(PLAY_ACTIVITY_DB_PATH);
 
-	if ((fp = fopen(PLAY_ACTIVITY_DB_PATH, "wb")) != NULL) {
+    // Write db in a temporary file
+	remove(PLAY_ACTIVITY_DB_TMP_PATH);
+
+	if ((fp = fopen(PLAY_ACTIVITY_DB_TMP_PATH, "wb")) != NULL) {
 		fwrite(rom_list, sizeof(rom_list), 1, fp);
 		fclose(fp);
 		system("sync");
 	}
+    
+    // Read the new database
+    int total_time_played_tmp = total_time_played;
+    readRomDB(PLAY_ACTIVITY_DB_TMP_PATH);
+    
+    // Check for file corruption
+    if (total_time_played_tmp <= total_time_played){
+        // The test passed, the db seems to show valid times
+        remove(PLAY_ACTIVITY_DB_PATH);
+        char command[250];
+        sprintf(command, "mv " PLAY_ACTIVITY_DB_TMP_PATH " %s", PLAY_ACTIVITY_DB_PATH);
+        system(command);
+        system("sync");
+    }
+    
+    
 }
 
 
@@ -169,62 +192,28 @@ void registerTimerEnd(const char *gameName)
 	sprintf(cTempsDeJeuSession, "%d", iTempsDeJeuSession);
 
 	// Loading DB
-	if (readRomDB() == -1){
+	if (readRomDB(PLAY_ACTIVITY_DB_PATH) == -1){
 		free(baseTime);
 		// To avoid a DB overwrite
 		return;
 	}
 		
 	//Addition of the new time
-	int totalPlayTime;
 	int searchPosition = searchRomDB(gameName);
 	if (searchPosition>=0) {
 		// Game found
 		rom_list[searchPosition].playTime += iTempsDeJeuSession;
-		totalPlayTime = rom_list[searchPosition].playTime;
 	}
 	else {
 		// Game inexistant, add to the DB    
 		if (rom_list_len < MAXVALUES - 1) {
 			rom_list[rom_list_len].playTime = iTempsDeJeuSession;
-			totalPlayTime = iTempsDeJeuSession;
 			strcpy(rom_list[rom_list_len].name, gameName);    
 			rom_list_len++;
 		}
-		else {
-			totalPlayTime = -1;
-		}    
 	}
 		
-	// Write total current time for the onion launcher                     
-	char cTotalTimePlayed[50];         
-	remove("currentTotalTime");
-
-	int totalTime_fd = open("currentTotalTime", O_CREAT | O_WRONLY);
-
-	if (totalTime_fd > 0) {
-		if (totalPlayTime >=  0) {                
-			int h = (totalPlayTime/3600);
-			int m = (totalPlayTime -(3600*h))/60;    
-			sprintf(cTotalTimePlayed, "%d:%02d", h,m);
-				
-		}
-		else {
-			if (totalPlayTime == -1) {
-				// DB full, needs to be cleaned
-				strcpy(cTotalTimePlayed,"DB:FU");
-			}
-			else{
-				strcpy(cTotalTimePlayed,"ERROR");
-			}
-		}
-
-		write(totalTime_fd, cTotalTimePlayed, strlen(cTotalTimePlayed));
-		close(totalTime_fd);        
-		system("sync");
-	}
-
-	printf("Timer ended (%s): session = %d, total = %s\n", gameName, iTempsDeJeuSession, cTotalTimePlayed);
+	printf("Timer ended (%s): session = %d\n", gameName, iTempsDeJeuSession);
 	
 	// DB Backup
 	backupDB();
