@@ -79,10 +79,10 @@ void writeRomDB(void)
     
     // Read the new database
     int total_time_played_tmp = total_time_played;
-    readRomDB(PLAY_ACTIVITY_DB_TMP_PATH);
+    int nReadSuccess = readRomDB(PLAY_ACTIVITY_DB_TMP_PATH);
     
     // Check for file corruption
-    if (total_time_played_tmp <= total_time_played){
+    if ((nReadSuccess != -1) && (total_time_played_tmp <= total_time_played)){
         // The test passed, the db seems to show valid times
         remove(PLAY_ACTIVITY_DB_PATH);
         char command[250];
