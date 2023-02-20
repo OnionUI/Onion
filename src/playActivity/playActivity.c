@@ -15,6 +15,7 @@
 // Max number of records in the DB
 #define MAXVALUES 1000
 #define MAXBACKUPFILES 80
+#define NEW_GAME_MINIMAL_PLAYTIME 60
 #define INIT_TIMER_PATH "/tmp/initTimer"
 #define PLAY_ACTIVITY_DB_PATH "/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db"
 #define PLAY_ACTIVITY_DB_TMP_PATH "/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity_tmp.db"
@@ -205,12 +206,15 @@ void registerTimerEnd(const char *gameName)
 		rom_list[searchPosition].playTime += iTempsDeJeuSession;
 	}
 	else {
-		// Game inexistant, add to the DB    
-		if (rom_list_len < MAXVALUES - 1) {
-			rom_list[rom_list_len].playTime = iTempsDeJeuSession;
-			strcpy(rom_list[rom_list_len].name, gameName);    
-			rom_list_len++;
-		}
+        // A new game must be used more than 
+		if (iTempsDeJeuSession > NEW_GAME_MINIMAL_PLAYTIME){
+            // Game inexistant, add to the DB    
+            if (rom_list_len < MAXVALUES - 1) {
+                rom_list[rom_list_len].playTime = iTempsDeJeuSession;
+                strcpy(rom_list[rom_list_len].name, gameName);    
+                rom_list_len++;
+            }  
+        }
 	}
 		
 	printf("Timer ended (%s): session = %d\n", gameName, iTempsDeJeuSession);
