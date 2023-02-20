@@ -239,10 +239,14 @@ int main(void)
     SDL_BlitSurface(screen, NULL, video, NULL);
     SDL_Flip(video);
 
-    bool changed = true;
+    bool changed;
     KeyState keystate[320] = {(KeyState)0};
 
 	while (!quit) {
+        
+        msleep(20);
+        changed = false;
+        
         if (updateKeystate(keystate, &quit, true, NULL)) {
             if (keystate[SW_BTN_B] == PRESSED)
                 quit = true;
