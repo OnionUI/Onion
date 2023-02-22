@@ -38,7 +38,7 @@ int readRomDB(const char *filePath)
     
 	// Check to avoid corruption
 	if (!exists(filePath))
-        return 1;
+        return -1;
 
     FILE * file = fopen(filePath, "rb");
 
@@ -58,7 +58,9 @@ int readRomDB(const char *filePath)
         }
             
     }
-
+    if (total_time_played == 0)
+        return -1;
+    
     fclose(file);
 	return 0;
 }
