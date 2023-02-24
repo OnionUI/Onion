@@ -68,6 +68,7 @@ int readRomDB(const char *filePath)
 void writeRomDB(void)
 {     
 	FILE *fp;
+    char command[250];
     if (rom_list_len == 0)
 		return;
 
@@ -88,13 +89,10 @@ void writeRomDB(void)
     if ((nReadSuccess != -1) && (total_time_played_tmp <= total_time_played)){
         // The test passed, the db seems to show valid times
         remove(PLAY_ACTIVITY_DB_PATH);
-        char command[250];
         sprintf(command, "mv " PLAY_ACTIVITY_DB_TMP_PATH " %s", PLAY_ACTIVITY_DB_PATH);
         system(command);
         system("sync");
     }
-    
-    
 }
 
 
