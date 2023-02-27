@@ -38,6 +38,7 @@ typedef enum theme_images
     RIGHT_ARROW_WB,
     POP_BG,
     EMPTY_BG,
+    PREVIEW_BG,
     BRIGHTNESS_0,
     BRIGHTNESS_1,
     BRIGHTNESS_2,
@@ -128,6 +129,7 @@ SDL_Surface* _loadImage(ThemeImages request)
         case RIGHT_ARROW_WB: return theme_loadImage(t->path, "extra/arrowRight");
         case POP_BG: return theme_loadImage(t->path, "pop-bg");
         case EMPTY_BG: return theme_loadImage(t->path, "Empty");
+        case PREVIEW_BG: return theme_loadImage(t->path, "preview-bg");
         case BRIGHTNESS_0: return theme_loadImage(t->path, "extra/lum0");
         case BRIGHTNESS_1: return theme_loadImage(t->path, "extra/lum1");
         case BRIGHTNESS_2: return theme_loadImage(t->path, "extra/lum2");

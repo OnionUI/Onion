@@ -20,6 +20,7 @@
 #include "system/settings.h"
 #include "system/keymap_sw.h"
 #include "theme/config.h"
+#include "utils/apply_icons.h"
 
 #ifndef DT_DIR
 #define DT_DIR 4
@@ -208,6 +209,13 @@ int main(int argc, char *argv[])
                 // Install theme
                 installTheme(&theme);
                 printf_debug("Theme installed: %s\n", themes[current_page]);
+
+                char icon_pack_path[STR_MAX+32];
+                snprintf(icon_pack_path, STR_MAX+32 - 1, "%sicons", theme.path);
+
+                if (is_dir(icon_pack_path))
+                    apply_iconPack(icon_pack_path);
+
                 quit = true;
             }
             else {

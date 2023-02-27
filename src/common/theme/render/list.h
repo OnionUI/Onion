@@ -53,6 +53,8 @@ void theme_renderList(SDL_Surface *screen, List *list)
     if (last_item > list->item_count)
         last_item = list->item_count;
 
+    ListItem *active_preview = NULL;
+
     for (int i = list->scroll_pos; i < last_item; i++) {
         ListItem *item = &list->items[i];
         item_bg_rect.y = menu_pos_y + (i - list->scroll_pos) * item_height;
@@ -60,8 +62,16 @@ void theme_renderList(SDL_Surface *screen, List *list)
         SDL_BlitSurface(resource_getSurface(HORIZONTAL_DIVIDER), &item_div_size, screen, &item_bg_rect);
         item_bg_rect.y += item_padding;
 
-        if (i == list->active_pos)
+        if (i == list->active_pos) {
             SDL_BlitSurface(item_bg, &item_bg_size, screen, &item_bg_rect);
+
+            if (item->preview_ptr == NULL && strlen(item->preview_path) > 0 && is_file(item->preview_path)) {
+                item->preview_ptr = (void*)IMG_Load(item->preview_path);
+            }
+            
+            if (item->preview_ptr != NULL)
+                active_preview = item;
+        }
 
         int item_center_y = item_bg_rect.y + item_bg_size.h / 2;
         static int multivalue_width = 226;
@@ -107,6 +117,26 @@ void theme_renderList(SDL_Surface *screen, List *list)
         if (!list_small && strlen(item->description)) {
             theme_renderListLabel(screen, item->description, theme()->grid.color, offset_x, item_bg_rect.y + 62, list->active_pos == i, label_end);
         }
+    }
+
+    if (active_preview != NULL) {
+        SDL_Surface *preview_bg = resource_getSurface(PREVIEW_BG);
+        SDL_Rect preview_bg_rect = {640 - preview_bg->w, 60};
+        SDL_BlitSurface(preview_bg, NULL, screen, &preview_bg_rect);
+
+        SDL_Surface *preview = (SDL_Surface*)active_preview->preview_ptr;
+        bool free_after = false;
+
+        if (preview->w > 250) {
+            preview = rotozoomSurface(preview, 0.0, 250.0 / (double)preview->w, 0);
+            free_after = true;
+        }
+
+        SDL_Rect preview_rect = {640 - preview_bg->w + 125 - preview->w / 2, 240 - preview->h / 2};
+        SDL_BlitSurface(preview, NULL, screen, &preview_rect);
+
+        if (free_after)
+            SDL_FreeSurface(preview);
     }
 }
 

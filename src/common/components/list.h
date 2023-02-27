@@ -2,6 +2,7 @@
 #define MENU_H__
 
 #include <string.h>
+#include <strings.h>
 #include <stdlib.h>
 
 #define MAX_NUM_VALUES 100
@@ -16,6 +17,7 @@ typedef struct ListItem
 	char label[STR_MAX];
 	char description[STR_MAX];
 	char payload[STR_MAX];
+	void *payload_ptr;
 	int value;
 	int value_max;
 	char value_labels[MAX_NUM_VALUES][STR_MAX];
@@ -24,6 +26,8 @@ typedef struct ListItem
 	int action_id;
 	int _reset_value;
 	void *icon_ptr;
+	void *preview_ptr;
+	char preview_path[STR_MAX];
 } ListItem;
 
 typedef struct List
@@ -250,9 +254,21 @@ void list_free(List *list)
 		ListItem *item = &list->items[i];
 		if (item->icon_ptr != NULL)
 			SDL_FreeSurface((SDL_Surface*)item->icon_ptr);
+		if (item->preview_ptr != NULL)
+			SDL_FreeSurface((SDL_Surface*)item->preview_ptr);
 	}
 	free(list->items);
 	list->_created = false;
+}
+
+int _list_comp_labels(const void *a, const void *b)
+{
+    return strcasecmp(((ListItem*)a)->label, ((ListItem*)b)->label);
+}
+
+void list_sortByLabel(List *list)
+{
+	qsort(list->items, list->item_count, sizeof(ListItem), _list_comp_labels);
 }
 
 #endif // MENU_H__
