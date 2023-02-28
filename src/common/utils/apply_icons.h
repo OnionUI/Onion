@@ -39,15 +39,15 @@ void _saveConfigFile(const char *config_path, const char *content)
     fprintf(config_file, "%s", content);
     fflush(config_file);
     fclose(config_file);
+
+    if (strcmp(SEARCH_CONFIG_SRC, config_path) == 0 && is_file(SEARCH_CONFIG))
+        system("cp \"" SEARCH_CONFIG_SRC "\" \"" SEARCH_CONFIG "\"");
 }
 
 bool apply_singleIconByFullPath(const char *config_path, const char *icon_path)
 {
     if (!is_file(config_path) || !is_file(icon_path))
         return false;
-
-    if (strcmp(SEARCH_CONFIG_SRC, config_path) == 0 && is_file(SEARCH_CONFIG))
-        apply_singleIconByFullPath(SEARCH_CONFIG, icon_path);
 
     char temp_path[STR_MAX];
     strncpy(temp_path, icon_path, STR_MAX - 1);
