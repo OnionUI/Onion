@@ -106,6 +106,7 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/keymon && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/playActivity && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/themeSwitcher && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/iconSwitcher && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/tweaks && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/packageManager && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/sendkeys && BUILD_DIR=$(BIN_DIR) make
@@ -135,7 +136,7 @@ apps: $(CACHE)/.setup
 	@cp -a "$(PACKAGES_APP_DEST)/Quick Guide/." $(BUILD_DIR)/
 	@cp -a "$(PACKAGES_APP_DEST)/RetroArch (Shortcut)/." $(BUILD_DIR)/
 	@cp -a "$(PACKAGES_APP_DEST)/Tweaks/." $(BUILD_DIR)/
-	@cp -a "$(PACKAGES_APP_DEST)/Themes (Change theme)/." $(BUILD_DIR)/
+	@cp -a "$(PACKAGES_APP_DEST)/ThemeSwitcher/." $(BUILD_DIR)/
 
 external: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
