@@ -203,7 +203,6 @@ $(CACHE)/.docker:
 	$(createfile) $(CACHE)/.docker
 
 toolchain: $(CACHE)/.docker
-	@echo "$(ROOT_DIR)"
 	docker run -it --rm -v "$(ROOT_DIR)":/root/workspace $(TOOLCHAIN) /bin/bash
 
 with-toolchain: $(CACHE)/.docker
