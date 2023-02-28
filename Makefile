@@ -12,8 +12,18 @@ endif
 
 RELEASE_NAME := $(TARGET)-v$(VERSION)
 
+ifdef OS
+	current_dir := $(shell cd)
+	ROOT_DIR := $(subst \,/,$(current_dir))
+	makedir := mkdir
+	createfile := echo.>
+else
+	ROOT_DIR := $(shell pwd)
+	makedir := mkdir -p
+	createfile := touch
+endif
+
 # Directories
-ROOT_DIR            := $(shell pwd -P)
 SRC_DIR             := $(ROOT_DIR)/src
 THIRD_PARTY_DIR     := $(ROOT_DIR)/third-party
 BUILD_DIR           := $(ROOT_DIR)/build
@@ -36,7 +46,7 @@ ifeq (,$(GTEST_INCLUDE_DIR))
 GTEST_INCLUDE_DIR = /usr/include/
 endif
 
-TOOLCHAIN := ghcr.io/onionui/miyoomini-toolchain:latest
+TOOLCHAIN := mholdg16/miyoomini-toolchain:latest
 
 include ./src/common/commands.mk
 
@@ -184,10 +194,13 @@ git-clean:
 git-submodules:
 	@git submodule update --init --recursive
 
+pwd:
+	@echo $(ROOT_DIR)
+
 $(CACHE)/.docker:
 	docker pull $(TOOLCHAIN)
-	mkdir -p cache
-	touch $(CACHE)/.docker
+	$(makedir) cache
+	$(createfile) $(CACHE)/.docker
 
 toolchain: $(CACHE)/.docker
 	docker run -it --rm -v "$(ROOT_DIR)":/root/workspace $(TOOLCHAIN) /bin/bash
