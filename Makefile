@@ -12,8 +12,18 @@ endif
 
 RELEASE_NAME := $(TARGET)-v$(VERSION)
 
+ifdef OS
+	current_dir := $(shell cd)
+	ROOT_DIR := $(subst \,/,$(current_dir))
+	makedir := mkdir
+	createfile := echo.>
+else
+	ROOT_DIR := $(shell pwd)
+	makedir := mkdir -p
+	createfile := touch
+endif
+
 # Directories
-ROOT_DIR            := $(shell pwd -P)
 SRC_DIR             := $(ROOT_DIR)/src
 THIRD_PARTY_DIR     := $(ROOT_DIR)/third-party
 BUILD_DIR           := $(ROOT_DIR)/build
@@ -36,7 +46,7 @@ ifeq (,$(GTEST_INCLUDE_DIR))
 GTEST_INCLUDE_DIR = /usr/include/
 endif
 
-TOOLCHAIN := ghcr.io/onionui/miyoomini-toolchain:latest
+TOOLCHAIN := mholdg16/miyoomini-toolchain:latest
 
 include ./src/common/commands.mk
 
@@ -96,7 +106,6 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/keymon && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/playActivity && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/themeSwitcher && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/iconSwitcher && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/tweaks && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/packageManager && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/sendkeys && BUILD_DIR=$(BIN_DIR) make
@@ -127,7 +136,6 @@ apps: $(CACHE)/.setup
 	@cp -a "$(PACKAGES_APP_DEST)/RetroArch (Shortcut)/." $(BUILD_DIR)/
 	@cp -a "$(PACKAGES_APP_DEST)/Tweaks/." $(BUILD_DIR)/
 	@cp -a "$(PACKAGES_APP_DEST)/Themes (Change theme)/." $(BUILD_DIR)/
-	@cp -a "$(PACKAGES_APP_DEST)/Icons (Change icons)/." $(BUILD_DIR)/
 
 external: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
@@ -186,12 +194,16 @@ git-clean:
 git-submodules:
 	@git submodule update --init --recursive
 
+pwd:
+	@echo $(ROOT_DIR)
+
 $(CACHE)/.docker:
 	docker pull $(TOOLCHAIN)
-	mkdir -p cache
-	touch $(CACHE)/.docker
+	$(makedir) cache
+	$(createfile) $(CACHE)/.docker
 
 toolchain: $(CACHE)/.docker
+	@echo "$(ROOT_DIR)"
 	docker run -it --rm -v "$(ROOT_DIR)":/root/workspace $(TOOLCHAIN) /bin/bash
 
 with-toolchain: $(CACHE)/.docker
