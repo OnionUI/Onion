@@ -1,7 +1,7 @@
 {
 "label":"fba2012",
-"icon":"fba2012.png",
-"iconsel":"",
+"icon":"../../Icons/rapp/fba2012.png",
+"iconsel":"../../Icons/rapp/fba2012.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/FBA2012",
 "imgpath":"../../Roms/FBA2012/Imgs",

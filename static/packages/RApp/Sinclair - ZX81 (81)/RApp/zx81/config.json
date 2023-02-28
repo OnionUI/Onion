@@ -1,7 +1,7 @@
 {
 "label":"zx81",
-"icon":"zx81.png",
-"iconsel":"",
+"icon":"../../Icons/rapp/zx81.png",
+"iconsel":"../../Icons/rapp/zx81.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/ZXEIGHTYONE",
 "imgpath":"../../Roms/ZXEIGHTYONE/Imgs",

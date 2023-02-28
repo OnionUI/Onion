@@ -1,7 +1,7 @@
 {
 "label":"lutro",
-"icon":"lutro.png",
-"iconsel":"",
+"icon":"../../Icons/rapp/lutro.png",
+"iconsel":"../../Icons/rapp/lutro.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/LUTRO",
 "imgpath":"../../Roms/LUTRO/Imgs",

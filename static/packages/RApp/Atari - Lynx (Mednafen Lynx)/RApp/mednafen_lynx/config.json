@@ -1,7 +1,7 @@
 {
 "label":"mednafen_lynx",
-"icon":"mednafen_lynx.png",
-"iconsel":"",
+"icon":"../../Icons/rapp/mednafen_lynx.png",
+"iconsel":"../../Icons/rapp/mednafen_lynx.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/LYNX",
 "imgpath":"../../Roms/LYNX/Imgs",

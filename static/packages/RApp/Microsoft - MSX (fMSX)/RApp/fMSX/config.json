@@ -1,7 +1,7 @@
 {
 "label":"fMSX",
-"icon":"fMSX.png",
-"iconsel":"",
+"icon":"../../Icons/rapp/fMSX.png",
+"iconsel":"../../Icons/rapp/fMSX.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/MSX",
 "imgpath":"../../Roms/MSX/Imgs",

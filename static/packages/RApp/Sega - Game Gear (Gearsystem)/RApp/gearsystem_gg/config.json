@@ -1,7 +1,7 @@
 {
 "label":"gearsystem_gg",
-"icon":"gearsystem.png",
-"iconsel":"",
+"icon":"../../Icons/rapp/gearsystem.png",
+"iconsel":"../../Icons/rapp/gearsystem.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/GG",
 "imgpath":"../../Roms/GG/Imgs",

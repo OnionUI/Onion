@@ -1,7 +1,7 @@
 {
 "label":"uzem",
-"icon":"uzem.png",
-"iconsel":"",
+"icon":"../../Icons/rapp/uzem.png",
+"iconsel":"../../Icons/rapp/uzem.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/UZEBOX",
 "imgpath":"../../Roms/UZEBOX/Imgs",

@@ -1,7 +1,7 @@
 {
 "label":"OpenBOR",
-"icon":"icon.png",
-"iconsel":"icon.png",
+"icon":"../../Icons/rapp/openbor.png",
+"iconsel":"../../Icons/rapp/openbor.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/OPENBOR",
 "imgpath":"../../Imgs/OPENBOR",

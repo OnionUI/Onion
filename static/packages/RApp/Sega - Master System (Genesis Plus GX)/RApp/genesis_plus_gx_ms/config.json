@@ -1,7 +1,7 @@
 {
 "label":"gen_plus_gx_ms",
-"icon":"genesis_plus_gx.png",
-"iconsel":"",
+"icon":"../../Icons/rapp/genesis_plus_gx_ms.png",
+"iconsel":"../../Icons/rapp/genesis_plus_gx_ms.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/MS",
 "imgpath":"../../Roms/MS/Imgs",

@@ -1,7 +1,7 @@
 {
 "label":"snes9x",
-"icon":"snes9x.png",
-"iconsel":"",
+"icon":"../../Icons/rapp/snes9x.png",
+"iconsel":"../../Icons/rapp/snes9x.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/SFC",
 "imgpath":"../../Roms/SFC/Imgs",

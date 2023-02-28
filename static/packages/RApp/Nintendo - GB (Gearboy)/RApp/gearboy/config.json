@@ -1,7 +1,7 @@
 {
 "label":"gearboy_gb",
-"icon":"gearboy.png",
-"iconsel":"",
+"icon":"../../Icons/rapp/gearboy.png",
+"iconsel":"../../Icons/rapp/gearboy.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/GB",
 "imgpath":"../../Roms/GB/Imgs",

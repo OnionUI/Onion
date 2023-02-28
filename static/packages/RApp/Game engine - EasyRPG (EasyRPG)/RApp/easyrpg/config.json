@@ -1,7 +1,7 @@
 {
 "label":"easyrpg",
-"icon":"easyrpg.png",
-"iconsel":"",
+"icon":"../../Icons/rapp/easyrpg.png",
+"iconsel":"../../Icons/rapp/easyrpg.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/EASYRPG",
 "imgpath":"../../Roms/EASYRPG/Imgs",

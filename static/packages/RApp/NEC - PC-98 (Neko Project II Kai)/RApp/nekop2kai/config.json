@@ -1,7 +1,7 @@
 {
 "label":"Neko Project II Kai",
-"icon":"nekop2kai.png",
-"iconsel":"",
+"icon":"../../Icons/rapp/nekop2kai.png",
+"iconsel":"../../Icons/rapp/nekop2kai.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/PCNINETYEIGHT",
 "imgpath":"../../Roms/PCNINETYEIGHT/Imgs",

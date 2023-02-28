@@ -1,7 +1,7 @@
 {
 "label":"chailove",
-"icon":"chai.png",
-"iconsel":"",
+"icon":"../../Icons/rapp/chai.png",
+"iconsel":"../../Icons/rapp/chai.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/CHAI",
 "imgpath":"../../Roms/CHAI/Imgs",

@@ -1,7 +1,7 @@
 {
 "label":"mu",
-"icon":"mu.png",
-"iconsel":"",
+"icon":"../../Icons/rapp/mu.png",
+"iconsel":"../../Icons/rapp/mu.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/PALM",
 "imgpath":"../../Roms/PALM/Imgs",
