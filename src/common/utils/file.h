@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <unistd.h>
 #include <time.h>
 
 #define file_get(fp, path, format, dest) { if ((fp = fopen(path, "r"))) { fscanf(fp, format, dest); fclose(fp); } }

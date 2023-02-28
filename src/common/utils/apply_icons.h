@@ -2,17 +2,36 @@
 #define UTILS_APPLY_ICONS_H__
 
 #include <libgen.h>
+#include <dirent.h>
+#include <sys/types.h>
 #include <sys/file.h>
 
 #include "utils/str.h"
+#include "utils/file.h"
 #include "utils/log.h"
 #include "utils/json.h"
 
 #define CONFIG_EMU_PATH "/mnt/SDCARD/Emu"
 #define CONFIG_APP_PATH "/mnt/SDCARD/App"
+#define CONFIG_RAPP_PATH "/mnt/SDCARD/RApp"
 #define ACTIVE_ICON_PACK "/mnt/SDCARD/.tmp_update/config/active_icon_pack"
 #define SEARCH_CONFIG_SRC "/mnt/SDCARD/.tmp_update/res/search_config.json"
 #define SEARCH_CONFIG "/mnt/SDCARD/Emu/SEARCH/config.json"
+
+typedef enum IconMode {
+    ICON_MODE_EMU,
+    ICON_MODE_APP,
+    ICON_MODE_RAPP
+} IconMode_e;
+
+IconMode_e icons_getIconMode(const char *config_path)
+{
+    if (strncmp(CONFIG_APP_PATH, config_path, strlen(CONFIG_APP_PATH)) == 0)
+        return ICON_MODE_APP;
+    if (strncmp(CONFIG_RAPP_PATH, config_path, strlen(CONFIG_RAPP_PATH)) == 0)
+        return ICON_MODE_RAPP;
+    return ICON_MODE_EMU;
+}
 
 void _saveConfigFile(const char *config_path, const char *content)
 {
@@ -50,6 +69,39 @@ bool apply_singleIconByFullPath(const char *config_path, const char *icon_path)
     return true;
 }
 
+const char * icons_getIconNameFormat(IconMode_e mode)
+{
+    switch (mode) {
+        case ICON_MODE_APP: return "app/%s";
+        case ICON_MODE_RAPP: return "rapp/%s";
+        default: break;
+    }
+
+    return "%s";
+}
+
+const char * icons_getIconPathFormat(IconMode_e mode)
+{
+    switch (mode) {
+        case ICON_MODE_APP: return "%s/app/%s.png";
+        case ICON_MODE_RAPP: return "%s/rapp/%s.png";
+        default: break;
+    }
+
+    return "%s/%s.png";
+}
+
+const char * icons_getSelectedIconPathFormat(IconMode_e mode)
+{
+    switch (mode) {
+        case ICON_MODE_APP: return "%s/app/%s.png";
+        case ICON_MODE_RAPP: return "%s/rapp/%s.png";
+        default: break;
+    }
+
+    return "%s/%s.png";
+}
+
 bool _apply_singleIconFromPack(const char *config_path, const char *icon_pack_path)
 {
     cJSON *config = json_load(config_path);
@@ -61,16 +113,16 @@ bool _apply_singleIconFromPack(const char *config_path, const char *icon_pack_pa
     strncpy(icon_name, file_removeExtension(basename(temp_path)), 55);
 	str_split(icon_name, "-");
 
-    int mode = strncmp(CONFIG_APP_PATH, config_path, strlen(CONFIG_APP_PATH)) == 0 ? 1 : 0;
+    IconMode_e mode = icons_getIconMode(config_path);
 
     char icon_path[STR_MAX];
-    sprintf(icon_path, mode == 0 ? "%s/%s.png" : "%s/app/%s.png", icon_pack_path, icon_name);
+    sprintf(icon_path, icons_getIconPathFormat(mode), icon_pack_path, icon_name);
 
     if (!is_file(icon_path))
         return false;
 
     char sel_path[STR_MAX];
-    sprintf(sel_path, mode == 0 ? "%s/sel/%s.png" : "%s/sel/app/%s.png", icon_pack_path, icon_name);
+    sprintf(sel_path, icons_getSelectedIconPathFormat(mode), icon_pack_path, icon_name);
 
     if (!is_file(sel_path))
         strcpy(sel_path, icon_path);
@@ -84,6 +136,24 @@ bool _apply_singleIconFromPack(const char *config_path, const char *icon_pack_pa
     printf_debug("Applied icon to %s\nicon:    %s\niconsel: %s\n", config_path, icon_path, sel_path);
 
     return true;
+}
+
+bool apply_singleIcon(const char *config_path)
+{
+    char icon_pack_path[STR_MAX];
+    strncpy(icon_pack_path, file_read(ACTIVE_ICON_PACK), STR_MAX - 1);
+
+    printf_debug("Icon pack: '%s'\n", icon_pack_path);
+
+    if (!is_dir(icon_pack_path)) {
+        memset(icon_pack_path, 0, STR_MAX);
+        strcpy(icon_pack_path, "/mnt/SDCARD/Icons");
+    }
+
+    if (is_dir(icon_pack_path))
+        return _apply_singleIconFromPack(config_path, icon_pack_path);
+    
+    return false;
 }
 
 int _apply_iconPackOnConfigs(const char *path, const char *icon_pack_path)
@@ -125,6 +195,7 @@ int apply_iconPack(const char *icon_pack_path)
 
 	count += _apply_iconPackOnConfigs(CONFIG_EMU_PATH, icon_pack_path);
 	count += _apply_iconPackOnConfigs(CONFIG_APP_PATH, icon_pack_path);
+	count += _apply_iconPackOnConfigs(CONFIG_RAPP_PATH, icon_pack_path);
 
     if (_apply_singleIconFromPack(SEARCH_CONFIG_SRC, icon_pack_path))
         count++;

@@ -1,3 +1,4 @@
+INCLUDE_CJSON=1
 include ../common/config.mk
 
 TARGET = packageManager

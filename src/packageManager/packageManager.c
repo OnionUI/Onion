@@ -22,6 +22,7 @@
 #include "utils/msleep.h"
 #include "utils/keystate.h"
 #include "utils/surfaceSetAlpha.h"
+#include "utils/apply_icons.h"
 
 #ifndef DT_DIR
 #define DT_DIR 4
@@ -61,9 +62,7 @@ static SDL_Surface *video = NULL,
                    *surfaceTableau = NULL,
                    *surfaceScroller = NULL,
                    *surfaceCheck = NULL,
-                   *surfaceCross = NULL,
-                   *surfaceArrowLeft = NULL,
-                   *surfaceArrowRight = NULL;
+                   *surfaceCross = NULL;
 
 static TTF_Font *font18 = NULL;
 static TTF_Font *font25 = NULL;
@@ -442,16 +441,8 @@ void renderTabName(const char *name, int center_x, bool active)
 void renderCurrentTab(void)
 {
     renderTabName(layer_names[nTab], 320, true);
-    if (nTab > 0) {
-        renderTabName(layer_names[nTab == 0 ? 2 : nTab - 1], 116, false);
-        static SDL_Rect arrow_left_rect = {14 + 204, 60};
-        SDL_BlitSurface(surfaceArrowLeft, NULL, screen, &arrow_left_rect);
-    }
-    if (nTab < 2) {
-        renderTabName(layer_names[nTab == 2 ? 0 : nTab + 1], 524, false);
-        static SDL_Rect arrow_right_rect = {640 - 14 - 204 - 24, 60};
-        SDL_BlitSurface(surfaceArrowRight, NULL, screen, &arrow_right_rect);
-    }
+    renderTabName(layer_names[nTab == 0 ? 2 : nTab - 1], 116, false);
+    renderTabName(layer_names[nTab == 2 ? 0 : nTab + 1], 524, false);
 }
 
 bool getPackageMainPath(char *out_path, const char *data_path, const char *package_name)
@@ -486,6 +477,12 @@ void callPackageInstaller(const char *data_path, const char *package_name, bool 
     char main_path[STR_MAX], cmd[STR_MAX];
 
     if (getPackageMainPath(main_path, data_path, package_name)) {
+        char config_path[STR_MAX+32];
+        snprintf(config_path, STR_MAX+32 - 1, "%s/config.json", main_path);
+
+        if (install && is_file(config_path))
+            apply_singleIcon(config_path);
+
         char installer_path[STR_MAX + 32];
         concat(installer_path, main_path, install ? "/install.sh" : "/uninstall.sh");
         if (is_file(installer_path)) {
@@ -526,8 +523,6 @@ int main(int argc, char *argv[])
 	surfaceScroller = IMG_Load("res/scroller.png");
 	surfaceCheck = IMG_Load("/mnt/SDCARD/.tmp_update/res/toggle-on.png");
 	surfaceCross = IMG_Load("/mnt/SDCARD/.tmp_update/res/toggle-off.png");
-	surfaceArrowLeft = IMG_Load("/mnt/SDCARD/.tmp_update/res/arrowLeft.png");
-	surfaceArrowRight = IMG_Load("/mnt/SDCARD/.tmp_update/res/arrowRight.png");
 
     font18 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 18);
     font25 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 25);
@@ -554,7 +549,7 @@ int main(int argc, char *argv[])
 
     while (!quit) {
         if (updateKeystate(keystate, &quit, true, NULL)) {
-            if (keystate[SW_BTN_RIGHT] >= PRESSED) {
+            if (keystate[SW_BTN_R1] >= PRESSED) {
                 if (nTab < 2)
                     nTab++;
                 else nTab = 0;
@@ -562,7 +557,7 @@ int main(int argc, char *argv[])
                 nListPosition = 0;
                 state_changed = true;
             }
-            if (keystate[SW_BTN_LEFT] >= PRESSED) {
+            if (keystate[SW_BTN_L1] >= PRESSED) {
                 if (nTab > 0)
                     nTab--;
                 else nTab = 2;
@@ -637,30 +632,41 @@ int main(int argc, char *argv[])
                 state_changed = true;
             }
 
-            if (keystate[SW_BTN_A] == PRESSED && package_count[nTab] > 0) {
-                int pos = nListPosition + nSelection;
-                if (pos < package_count[nTab]) {
-                    Package *package = &packages[nTab][pos];
-                    package->changed = !package->changed;
+            if (package_count[nTab] > 0) {
+                if (keystate[SW_BTN_A] == PRESSED || keystate[SW_BTN_LEFT] == PRESSED || keystate[SW_BTN_RIGHT] == PRESSED) {
+                    int pos = nListPosition + nSelection;
+                    if (pos < package_count[nTab]) {
+                        Package *package = &packages[nTab][pos];
+                        bool prev_value = package->changed;
 
-                    if (package->installed) {
-                        changes_removals[nTab] += package->changed ? 1 : -1;
-                        if (!package->complete)
-                            changes_installs[nTab] += package->changed ? -1 : 1;
+                        if (keystate[SW_BTN_A] == PRESSED)
+                            package->changed = !package->changed;
+                        else if (keystate[SW_BTN_LEFT] == PRESSED)
+                            package->changed = package->installed;
+                        else if (keystate[SW_BTN_RIGHT] == PRESSED)
+                            package->changed = !package->installed;
+
+                        if (package->changed != prev_value) {
+                            if (package->installed) {
+                                changes_removals[nTab] += package->changed ? 1 : -1;
+                                if (!package->complete)
+                                    changes_installs[nTab] += package->changed ? -1 : 1;
+                            }
+                            else changes_installs[nTab] += package->changed ? 1 : -1;
+                            state_changed = true;
+                        }
                     }
-                    else changes_installs[nTab] += package->changed ? 1 : -1;
+                }
+
+                if (keystate[SW_BTN_X] == PRESSED) {
+                    layerToggleAll(nTab);
                     state_changed = true;
                 }
-            }
 
-            if (keystate[SW_BTN_X] == PRESSED && package_count[nTab] > 0) {
-                layerToggleAll(nTab);
-                state_changed = true;
-            }
-
-            if (keystate[SW_BTN_Y] == PRESSED && package_count[nTab] > 0) {
-                layerReset(nTab);
-                state_changed = true;
+                if (keystate[SW_BTN_Y] == PRESSED) {
+                    layerReset(nTab);
+                    state_changed = true;
+                }
             }
         }
 
@@ -670,9 +676,14 @@ int main(int argc, char *argv[])
         if (state_changed) {
             rectSelection.y = 83 + nSelection * 47;
 
+            SDL_FillRect(screen, NULL, 0);
             SDL_BlitSurface(surfaceBackground, NULL, screen, NULL);
             SDL_BlitSurface(surfaceTableau, NULL, screen, NULL);
-            SDL_BlitSurface(surfaceSelection, NULL, screen, &rectSelection);
+
+            if (surfaceSelection == NULL)
+                SDL_FillRect(screen, &rectSelection, 0xFF333333);
+            else
+                SDL_BlitSurface(surfaceSelection, NULL, screen, &rectSelection);
 
             renderCurrentTab();
 
@@ -717,7 +728,7 @@ int main(int argc, char *argv[])
     if (apply_changes) {
         // installation
         char data_path[STR_MAX];
-        char cmd[STR_MAX * 2 + 50];
+        char cmd[STR_MAX * 2 + 100];
 
         SDL_Surface* surfaceBackground = IMG_Load("/mnt/SDCARD/.tmp_update/res/waitingBG.png");
         SDL_Surface* surfaceMessage;
@@ -755,7 +766,7 @@ int main(int argc, char *argv[])
                     SDL_BlitSurface(screen, NULL, video, NULL);
                     SDL_Flip(video);
 
-                    sprintf(cmd, "./install.sh \"%s\" \"%s\"", data_path, package->name);
+                    sprintf(cmd, "/mnt/SDCARD/.tmp_update/script/pacman_install.sh \"%s\" \"%s\"", data_path, package->name);
                     system(cmd);
                     
                     callPackageInstaller(data_path, package->name, true);
@@ -782,8 +793,6 @@ int main(int argc, char *argv[])
     TTF_CloseFont(font35);
     TTF_Quit();
     SDL_FreeSurface(reinstall_surface);
-    SDL_FreeSurface(surfaceArrowLeft);
-    SDL_FreeSurface(surfaceArrowRight);
     SDL_FreeSurface(surfaceCheck);
     SDL_FreeSurface(surfaceCross);
     SDL_FreeSurface(surfaceBackground);

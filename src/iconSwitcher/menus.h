@@ -28,6 +28,7 @@ static List _menu_main;
 static List _menu_icon_packs;
 static List _menu_console_icons;
 static List _menu_app_icons;
+static List _menu_expert_icons;
 static List _menu_temp;
 
 void menu_free_all(void)
@@ -36,6 +37,7 @@ void menu_free_all(void)
 	list_free(&_menu_icon_packs);
 	list_free(&_menu_console_icons);
 	list_free(&_menu_app_icons);
+	list_free(&_menu_expert_icons);
 	list_free(&_menu_temp);
 }
 
@@ -74,7 +76,7 @@ int _add_icon_alts(const char *pack_dir, const char *pack_name, const char *icon
 	return count;
 }
 
-int _add_icon_packs(const char *path, List *list, void (*action)(void *), int mode, const char *required_icon)
+int _add_icon_packs(const char *path, List *list, void (*action)(void *), bool is_theme, const char *required_icon)
 {
 	DIR *dp;
 	struct dirent *ep;
@@ -89,7 +91,7 @@ int _add_icon_packs(const char *path, List *list, void (*action)(void *), int mo
 			if (ep->d_name[0] == '.') continue;
 			if (strcmp("icons", ep->d_name) == 0) continue;
 			
-            snprintf(icon_pack_path, STR_MAX * 2 - 1, mode == 0 ? "%s/%s" : "%s/%s/icons", path, ep->d_name);
+            snprintf(icon_pack_path, STR_MAX * 2 - 1, is_theme ? "%s/%s/icons" : "%s/%s", path, ep->d_name);
 
 			if (required_icon != NULL) {
             	snprintf(preview_path, STR_MAX * 2 + 31, "%s/%s.png", icon_pack_path, required_icon);
@@ -197,8 +199,8 @@ void menu_icon_packs(void *_)
 			.preview_path = "/mnt/SDCARD/Icons/gba.png"
 		});
 
-		_add_icon_packs("/mnt/SDCARD/Themes/icons", &_menu_icon_packs, _action_apply_icon_pack, 0, NULL);
-		_add_icon_packs("/mnt/SDCARD/Themes", &_menu_icon_packs, _action_apply_icon_pack, 1, NULL);
+		_add_icon_packs("/mnt/SDCARD/Themes/icons", &_menu_icon_packs, _action_apply_icon_pack, false, NULL);
+		_add_icon_packs("/mnt/SDCARD/Themes", &_menu_icon_packs, _action_apply_icon_pack, true, NULL);
 
 		list_sortByLabel(&_menu_icon_packs);
 
@@ -227,7 +229,7 @@ bool _add_config_icon(const char *path, const char *name, const char *config_pat
 	char icon_name[56];
 	char icon_path[STR_MAX];
 	char preview_path[STR_MAX*2+32];
-	int mode = strncmp(CONFIG_APP_PATH, config_path, strlen(CONFIG_APP_PATH)) == 0 ? 1 : 0;
+	IconMode_e mode = icons_getIconMode(config_path);
 	
 	cJSON *config = json_load(config_path);
 			
@@ -258,7 +260,7 @@ bool _add_config_icon(const char *path, const char *name, const char *config_pat
 	str_trim(short_label, 55, label, false);
 	short_label[56] = 0;
 
-	if (mode == 0)
+	if (mode != ICON_MODE_APP)
 		snprintf(item.label, STR_MAX - 1, "%s (%s)", short_label, icon_name);
 	else {
 		strncpy(item.label, short_label, STR_MAX - 1);
@@ -271,7 +273,7 @@ bool _add_config_icon(const char *path, const char *name, const char *config_pat
 	strncpy(info->config_path, config_path, STR_MAX - 1);
 	item.payload_ptr = (void*)info;
 
-	if (mode == 0)
+	if (mode != ICON_MODE_APP)
 		strncpy(item.preview_path, preview_path, STR_MAX - 1);
 	else
 		item.icon_ptr = (void*)IMG_Load(preview_path);
@@ -317,7 +319,7 @@ void _menu_temp_action(void *_item)
 {
 	ListItem *item = _item;
 	IconInfo_t *info = temp_action_item->payload_ptr;
-	int mode = strncmp(CONFIG_APP_PATH, info->config_path, strlen(CONFIG_APP_PATH)) == 0 ? 1 : 0;
+	IconMode_e mode = icons_getIconMode(info->config_path);
 
 	if (strcmp(info->path, item->preview_path) != 0) {
 		keys_enabled = false;
@@ -325,7 +327,7 @@ void _menu_temp_action(void *_item)
 		apply_singleIconByFullPath(info->config_path, item->preview_path);
 		strcpy(info->path, item->preview_path);
 
-		if (mode == 0) {
+		if (mode != ICON_MODE_APP) {
 			strcpy(temp_action_item->preview_path, item->preview_path);
 			if (temp_action_item->preview_ptr != NULL) {
 				SDL_FreeSurface(temp_action_item->preview_ptr);
@@ -350,7 +352,7 @@ void _menu_temp_action(void *_item)
 	all_changed = true;
 }
 
-void _menu_change_icon(ListItem *item, int mode)
+void _menu_change_icon(ListItem *item, IconMode_e mode)
 {
 	if (_menu_temp._created)
 		list_free(&_menu_temp);
@@ -361,7 +363,7 @@ void _menu_change_icon(ListItem *item, int mode)
 	IconInfo_t *info = item->payload_ptr;
 
 	char required_icon[STR_MAX];
-	snprintf(required_icon, STR_MAX - 1, mode == 0 ? "%s" : "app/%s", info->name);
+	snprintf(required_icon, STR_MAX - 1, icons_getIconNameFormat(mode), info->name);
 	
 	char default_icon[STR_MAX+32];
 	snprintf(default_icon, STR_MAX+32 - 1, "/mnt/SDCARD/Icons/%s.png", required_icon);
@@ -376,8 +378,8 @@ void _menu_change_icon(ListItem *item, int mode)
 		list_addItem(&_menu_temp, default_item);
 	}
 	
-	_add_icon_packs("/mnt/SDCARD/Themes/icons", &_menu_temp, _menu_temp_action, 0, required_icon);
-	_add_icon_packs("/mnt/SDCARD/Themes", &_menu_temp, _menu_temp_action, 1, required_icon);
+	_add_icon_packs("/mnt/SDCARD/Themes/icons", &_menu_temp, _menu_temp_action, false, required_icon);
+	_add_icon_packs("/mnt/SDCARD/Themes", &_menu_temp, _menu_temp_action, true, required_icon);
 
 	list_sortByLabel(&_menu_temp);
 
@@ -404,7 +406,7 @@ void _menu_change_icon(ListItem *item, int mode)
 
 void menu_change_console_icon(void *item)
 {
-	_menu_change_icon((ListItem*)item, 0);
+	_menu_change_icon((ListItem*)item, ICON_MODE_EMU);
 }
 
 void menu_console_icons(void *_)
@@ -424,7 +426,7 @@ void menu_console_icons(void *_)
 
 void menu_change_app_icon(void *item)
 {
-	_menu_change_icon((ListItem*)item, 1);
+	_menu_change_icon((ListItem*)item, ICON_MODE_APP);
 }
 
 void menu_app_icons(void *_)
@@ -438,6 +440,25 @@ void menu_app_icons(void *_)
 		list_sortByLabel(&_menu_app_icons);
 	}
 	menu_stack[++menu_level] = &_menu_app_icons;
+	header_changed = true;
+}
+
+void menu_change_expert_icon(void *item)
+{
+	_menu_change_icon((ListItem*)item, ICON_MODE_RAPP);
+}
+
+void menu_expert_icons(void *_)
+{
+	if (!_menu_expert_icons._created) {
+		_menu_expert_icons = list_create(200, LIST_SMALL);
+		strcpy(_menu_expert_icons.title, "Expert icons");
+
+		_add_config_icons(CONFIG_RAPP_PATH, &_menu_expert_icons, menu_change_expert_icon);
+
+		list_sortByLabel(&_menu_expert_icons);
+	}
+	menu_stack[++menu_level] = &_menu_expert_icons;
 	header_changed = true;
 }
 
@@ -457,6 +478,10 @@ void menu_main(void)
 		list_addItem(&_menu_main, (ListItem){
 			.label = "Edit app icon...",
 			.action = menu_app_icons
+		});
+		list_addItem(&_menu_main, (ListItem){
+			.label = "Edit expert icon...",
+			.action = menu_expert_icons
 		});
 	}
 	menu_level = 0;
