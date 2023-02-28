@@ -1,7 +1,7 @@
 {
 "label":"mednafen_gba",
-"icon":"../../Icons/rapp/mednafen_gba.png",
-"iconsel":"../../Icons/rapp/mednafen_gba.png",
+"icon":"../../Icons/Default/rapp/mednafen_gba.png",
+"iconsel":"../../Icons/Default/rapp/mednafen_gba.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/GBA",
 "imgpath":"../../Roms/GBA/Imgs",

@@ -1,7 +1,7 @@
 {
 "label":"X68000",
-"icon":"../../Icons/rapp/X68000.png",
-"iconsel":"../../Icons/rapp/X68000.png",
+"icon":"../../Icons/Default/rapp/X68000.png",
+"iconsel":"../../Icons/Default/rapp/X68000.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/X68000",
 "imgpath":"../../Roms/X68000/Imgs",

@@ -1,6 +1,6 @@
 {
 "label":"Video Player",
-"icon":"../../Icons/app/ffplay.png",
+"icon":"../../Icons/Default/app/ffplay.png",
 "iconsel":"",
 "launch":"launch.sh",
 "description":"FFplay"

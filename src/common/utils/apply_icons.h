@@ -147,7 +147,7 @@ bool apply_singleIcon(const char *config_path)
 
     if (!is_dir(icon_pack_path)) {
         memset(icon_pack_path, 0, STR_MAX);
-        strcpy(icon_pack_path, "/mnt/SDCARD/Icons");
+        strcpy(icon_pack_path, "/mnt/SDCARD/Icons/Default");
     }
 
     if (is_dir(icon_pack_path))

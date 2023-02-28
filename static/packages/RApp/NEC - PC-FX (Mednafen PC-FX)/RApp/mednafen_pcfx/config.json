@@ -1,7 +1,7 @@
 {
 "label":"mednafen_pcfx",
-"icon":"../../Icons/rapp/mednafen_pcfx.png",
-"iconsel":"../../Icons/rapp/mednafen_pcfx.png",
+"icon":"../../Icons/Default/rapp/mednafen_pcfx.png",
+"iconsel":"../../Icons/Default/rapp/mednafen_pcfx.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/PCFX",
 "imgpath":"../../Roms/PCFX/Imgs",

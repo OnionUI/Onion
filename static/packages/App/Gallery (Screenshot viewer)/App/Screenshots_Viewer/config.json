@@ -1,6 +1,6 @@
 {
 "label":"Gallery",
-"icon":"../../Icons/app/gallery.png",
+"icon":"../../Icons/Default/app/gallery.png",
 "launch":"launch.sh",
 "description":"Screenshot viewer"
 }

@@ -1,7 +1,7 @@
 {
 "label":"theodore",
-"icon":"../../Icons/rapp/theodore.png",
-"iconsel":"../../Icons/rapp/theodore.png",
+"icon":"../../Icons/Default/rapp/theodore.png",
+"iconsel":"../../Icons/Default/rapp/theodore.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/THOMSON",
 "imgpath":"../../Roms/THOMSON/Imgs",

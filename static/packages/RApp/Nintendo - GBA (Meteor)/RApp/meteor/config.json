@@ -1,7 +1,7 @@
 {
 "label":"meteor",
-"icon":"../../Icons/rapp/meteor.png",
-"iconsel":"../../Icons/rapp/meteor.png",
+"icon":"../../Icons/Default/rapp/meteor.png",
+"iconsel":"../../Icons/Default/rapp/meteor.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/GBA",
 "imgpath":"../../Roms/GBA/Imgs",

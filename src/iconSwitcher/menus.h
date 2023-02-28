@@ -89,6 +89,8 @@ int _add_icon_packs(const char *path, List *list, void (*action)(void *), bool i
         while ((ep = readdir(dp))) {
             if (ep->d_type != DT_DIR) continue;
 			if (ep->d_name[0] == '.') continue;
+			if (strcmp("app", ep->d_name) == 0) continue;
+			if (strcmp("rapp", ep->d_name) == 0) continue;
 			if (strcmp("icons", ep->d_name) == 0) continue;
 			
             snprintf(icon_pack_path, STR_MAX * 2 - 1, is_theme ? "%s/%s/icons" : "%s/%s", path, ep->d_name);
@@ -192,20 +194,13 @@ void menu_icon_packs(void *_)
 		_menu_icon_packs = list_create(200, LIST_SMALL);
 		strcpy(_menu_icon_packs.title, "Icon packs");
 
-		list_addItem(&_menu_icon_packs, (ListItem){
-			.action = _action_apply_icon_pack,
-			.label = "Default",
-			.payload = "/mnt/SDCARD/Icons",
-			.preview_path = "/mnt/SDCARD/Icons/gba.png"
-		});
-
-		_add_icon_packs("/mnt/SDCARD/Themes/icons", &_menu_icon_packs, _action_apply_icon_pack, false, NULL);
+		_add_icon_packs("/mnt/SDCARD/Icons", &_menu_icon_packs, _action_apply_icon_pack, false, NULL);
 		_add_icon_packs("/mnt/SDCARD/Themes", &_menu_icon_packs, _action_apply_icon_pack, true, NULL);
 
 		list_sortByLabel(&_menu_icon_packs);
 
 		char selected_path[STR_MAX];
-		realpath(is_dir(active_icon_pack) ? active_icon_pack : "/mnt/SDCARD/Icons", selected_path);
+		realpath(is_dir(active_icon_pack) ? active_icon_pack : "/mnt/SDCARD/Icons/Default", selected_path);
 
 		for (int i = 0; i < _menu_icon_packs.item_count; i++) {
 			ListItem *current_item = &_menu_icon_packs.items[i];
@@ -365,20 +360,7 @@ void _menu_change_icon(ListItem *item, IconMode_e mode)
 	char required_icon[STR_MAX];
 	snprintf(required_icon, STR_MAX - 1, icons_getIconNameFormat(mode), info->name);
 	
-	char default_icon[STR_MAX+32];
-	snprintf(default_icon, STR_MAX+32 - 1, "/mnt/SDCARD/Icons/%s.png", required_icon);
-
-	if (is_file(default_icon)) {
-		ListItem default_item = {
-			.label = "Default",
-			.payload = "/mnt/SDCARD/Icons",
-			.action = _menu_temp_action
-		};
-		strncpy(default_item.preview_path, default_icon, STR_MAX - 1);
-		list_addItem(&_menu_temp, default_item);
-	}
-	
-	_add_icon_packs("/mnt/SDCARD/Themes/icons", &_menu_temp, _menu_temp_action, false, required_icon);
+	_add_icon_packs("/mnt/SDCARD/Icons", &_menu_temp, _menu_temp_action, false, required_icon);
 	_add_icon_packs("/mnt/SDCARD/Themes", &_menu_temp, _menu_temp_action, true, required_icon);
 
 	list_sortByLabel(&_menu_temp);

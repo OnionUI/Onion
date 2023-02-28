@@ -1,7 +1,7 @@
 {
 "label":"quasi88",
-"icon":"../../Icons/rapp/quasi88.png",
-"iconsel":"../../Icons/rapp/quasi88.png",
+"icon":"../../Icons/Default/rapp/quasi88.png",
+"iconsel":"../../Icons/Default/rapp/quasi88.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/PCEIGHTYEIGHT",
 "imgpath":"../../Roms/PCEIGHTYEIGHT/Imgs",

@@ -1,7 +1,7 @@
 {
 "label":"advancemame",
-"icon":"../../Icons/rapp/advancemame.png",
-"iconsel":"../../Icons/rapp/advancemame.png",
+"icon":"../../Icons/Default/rapp/advancemame.png",
+"iconsel":"../../Icons/Default/rapp/advancemame.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/ADVMAME",
 "imgpath":"../../Roms/ADVMAME/snap",

@@ -1,7 +1,7 @@
 {
 "label":"nekop2",
-"icon":"../../Icons/rapp/nekop2.png",
-"iconsel":"../../Icons/rapp/nekop2.png",
+"icon":"../../Icons/Default/rapp/nekop2.png",
+"iconsel":"../../Icons/Default/rapp/nekop2.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/PCNINETYEIGHT",
 "imgpath":"../../Roms/PCNINETYEIGHT/Imgs",

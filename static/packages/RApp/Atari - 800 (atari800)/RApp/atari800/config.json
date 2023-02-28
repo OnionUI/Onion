@@ -1,7 +1,7 @@
 {
 "label":"atari800",
-"icon":"../../Icons/rapp/atari800.png",
-"iconsel":"../../Icons/rapp/atari800.png",
+"icon":"../../Icons/Default/rapp/atari800.png",
+"iconsel":"../../Icons/Default/rapp/atari800.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/EIGHTHUNDRED",
 "imgpath":"../../Roms/EIGHTHUNDRED/Imgs",

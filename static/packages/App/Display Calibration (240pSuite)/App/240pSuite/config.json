@@ -1,6 +1,6 @@
 {
 "label":"Display Calibration",
-"icon":"../../Icons/app/display.png",
+"icon":"../../Icons/Default/app/display.png",
 "launch":"launch.sh",
 "description":"Tools for display calibration"
 }

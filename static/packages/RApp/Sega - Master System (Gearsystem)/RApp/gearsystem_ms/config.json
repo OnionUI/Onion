@@ -1,7 +1,7 @@
 {
 "label":"gearsystem_ms",
-"icon":"../../Icons/rapp/gearsystem.png",
-"iconsel":"../../Icons/rapp/gearsystem.png",
+"icon":"../../Icons/Default/rapp/gearsystem.png",
+"iconsel":"../../Icons/Default/rapp/gearsystem.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/MS",
 "imgpath":"../../Roms/MS/Imgs",

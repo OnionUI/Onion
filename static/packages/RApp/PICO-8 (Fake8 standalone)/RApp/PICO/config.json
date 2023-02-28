@@ -1,7 +1,7 @@
 {
 "label":"PICO-8 standalone",
-"icon":"../../Icons/rapp/FAKE08.png",
-"iconsel":"../../Icons/rapp/FAKE08.png",
+"icon":"../../Icons/Default/rapp/FAKE08.png",
+"iconsel":"../../Icons/Default/rapp/FAKE08.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/PICO",
 "imgpath":"../../Roms/PICO",

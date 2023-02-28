@@ -1,7 +1,7 @@
 {
 "label":"SuperGfx",
-"icon":"../../Icons/sgfx.png",
-"iconsel":"../../Icons/sgfx.png",
+"icon":"../../Icons/Default/sgfx.png",
+"iconsel":"../../Icons/Default/sgfx.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/SGFX",
 "imgpath":"../../Roms/SGFX/Imgs",

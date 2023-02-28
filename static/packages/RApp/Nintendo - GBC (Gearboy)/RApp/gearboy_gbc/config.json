@@ -1,7 +1,7 @@
 {
 "label":"gearboy_gbc",
-"icon":"../../Icons/rapp/gearboygbc.png",
-"iconsel":"../../Icons/rapp/gearboygbc.png",
+"icon":"../../Icons/Default/rapp/gearboygbc.png",
+"iconsel":"../../Icons/Default/rapp/gearboygbc.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/GBC",
 "imgpath":"../../Roms/GBC/Imgs",

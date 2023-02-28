@@ -1,7 +1,7 @@
 {
 "label":"vbam",
-"icon":"../../Icons/rapp/vbam.png",
-"iconsel":"../../Icons/rapp/vbam.png",
+"icon":"../../Icons/Default/rapp/vbam.png",
+"iconsel":"../../Icons/Default/rapp/vbam.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/GBA",
 "imgpath":"../../Roms/GBA/Imgs",

@@ -1,7 +1,7 @@
 {
 "label":"vba_next",
-"icon":"../../Icons/rapp/vba_next.png",
-"iconsel":"../../Icons/rapp/vba_next.png",
+"icon":"../../Icons/Default/rapp/vba_next.png",
+"iconsel":"../../Icons/Default/rapp/vba_next.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/GBA",
 "imgpath":"../../Roms/GBA/Imgs",

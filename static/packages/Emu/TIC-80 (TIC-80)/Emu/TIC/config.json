@@ -1,7 +1,7 @@
 {
 "label":"TIC-80",
-"icon":"../../Icons/tic.png",
-"iconsel":"../../Icons/tic.png",
+"icon":"../../Icons/Default/tic.png",
+"iconsel":"../../Icons/Default/tic.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/TIC",
 "imgpath":"../../Roms/TIC/Imgs",
