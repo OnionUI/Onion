@@ -456,6 +456,24 @@ void menu_tools(void *_)
 	header_changed = true;
 }
 
+void * _get_menu_icon(const char *name)
+{
+	char path[STR_MAX * 2] = { 0 };
+	const char *config_path = "/mnt/SDCARD/App/Tweaks/config.json";
+
+	if (is_file(config_path)) {
+		cJSON *config = json_load(config_path);
+		char icon_path[STR_MAX];
+		if (json_getString(config, "icon", icon_path))
+			snprintf(path, STR_MAX * 2 - 1, "%s/%s.png", dirname(icon_path), name);
+	}
+
+	if (!is_file(path))
+		snprintf(path, STR_MAX * 2 - 1, "res/%s.png", name);
+
+	return (void*)IMG_Load(path);
+}
+
 void menu_main(void)
 {
 	if (!_menu_main._created) {
@@ -465,31 +483,31 @@ void menu_main(void)
 			.label = "System",
 			.description = "Startup, save and exit, vibration",
 			.action = menu_system,
-			.icon_ptr = (void*)IMG_Load("res/tweaks_system.png")
+			.icon_ptr = _get_menu_icon("tweaks_system")
 		});
 		list_addItem(&_menu_main, (ListItem){
 			.label = "Button shortcuts",
 			.description = "Customize global button actions",
 			.action = menu_buttonAction,
-			.icon_ptr = (void*)IMG_Load("res/tweaks_menu_button.png")
+			.icon_ptr = _get_menu_icon("tweaks_menu_button")
 		});
 		list_addItem(&_menu_main, (ListItem){
 			.label = "User interface",
 			.description = "Extra menus, low batt. warn., theme",
 			.action = menu_userInterface,
-			.icon_ptr = (void*)IMG_Load("res/tweaks_user_interface.png")
+			.icon_ptr = _get_menu_icon("tweaks_user_interface")
 		});
 		list_addItem(&_menu_main, (ListItem){
 			.label = "Advanced",
 			.description = "Emulator tweaks, reset settings",
 			.action = menu_advanced,
-			.icon_ptr = (void*)IMG_Load("res/tweaks_advanced.png")
+			.icon_ptr = _get_menu_icon("tweaks_advanced")
 		});
 		list_addItem(&_menu_main, (ListItem){
 			.label = "Tools",
 			.description = "Favorites, clean files",
 			.action = menu_tools,
-			.icon_ptr = (void*)IMG_Load("res/tweaks_tools.png")
+			.icon_ptr = _get_menu_icon("tweaks_tools")
 		});
 	}
 	menu_level = 0;

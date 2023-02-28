@@ -203,7 +203,7 @@ void menu_icon_packs(void *_)
 		list_sortByLabel(&_menu_icon_packs);
 
 		char selected_path[STR_MAX];
-		realpath(active_icon_pack != NULL ? active_icon_pack : "/mnt/SDCARD/Icons", selected_path);
+		realpath(is_dir(active_icon_pack) ? active_icon_pack : "/mnt/SDCARD/Icons", selected_path);
 
 		for (int i = 0; i < _menu_icon_packs.item_count; i++) {
 			ListItem *current_item = &_menu_icon_packs.items[i];
