@@ -549,7 +549,7 @@ int main(int argc, char *argv[])
 
     while (!quit) {
         if (updateKeystate(keystate, &quit, true, NULL)) {
-            if (keystate[SW_BTN_R1] >= PRESSED) {
+            if (keystate[SW_BTN_R2] >= PRESSED) {
                 if (nTab < 2)
                     nTab++;
                 else nTab = 0;
@@ -557,7 +557,7 @@ int main(int argc, char *argv[])
                 nListPosition = 0;
                 state_changed = true;
             }
-            if (keystate[SW_BTN_L1] >= PRESSED) {
+            if (keystate[SW_BTN_L2] >= PRESSED) {
                 if (nTab > 0)
                     nTab--;
                 else nTab = 2;
