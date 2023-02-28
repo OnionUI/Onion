@@ -1,5 +1,5 @@
-#ifndef MENUS_H__
-#define MENUS_H__
+#ifndef TWEAKS_ICONS_H__
+#define TWEAKS_ICONS_H__
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,8 +10,12 @@
 #include <SDL/SDL_image.h>
 
 #include "components/list.h"
+#include "theme/sound.h"
+#include "theme/render/dialog.h"
 #include "utils/json.h"
 #include "utils/apply_icons.h"
+#include "utils/keystate.h"
+#include "system/keymap_sw.h"
 
 #include "./appstate.h"
 
@@ -24,16 +28,16 @@ typedef struct IconInfo {
 static IconInfo_t icon_infos[500];
 static int icon_infos_len = 0;
 
-static List _menu_main;
+static List _menu_icons;
 static List _menu_icon_packs;
 static List _menu_console_icons;
 static List _menu_app_icons;
 static List _menu_expert_icons;
 static List _menu_temp;
 
-void menu_free_all(void)
+void menu_icons_free_all(void)
 {
-	list_free(&_menu_main);
+	list_free(&_menu_icons);
 	list_free(&_menu_icon_packs);
 	list_free(&_menu_console_icons);
 	list_free(&_menu_app_icons);
@@ -135,7 +139,7 @@ int _add_icon_packs(const char *path, List *list, void (*action)(void *), bool i
 
 void _action_apply_icon_pack(void *_item)
 {
-	ListItem *item = _item;
+	ListItem *item = (ListItem*)_item;
 
     bool apply = false;
     bool confirm_quit = false;
@@ -180,6 +184,8 @@ void _action_apply_icon_pack(void *_item)
 		SDL_BlitSurface(screen, NULL, video, NULL);
 		SDL_Flip(video);
 		msleep(1000);
+
+        reset_menus = true;
 	}
     
     SDL_FreeSurface(background_cache);
@@ -313,8 +319,8 @@ static ListItem *temp_action_item = NULL;
 
 void _menu_temp_action(void *_item)
 {
-	ListItem *item = _item;
-	IconInfo_t *info = temp_action_item->payload_ptr;
+	ListItem *item = (ListItem*)_item;
+	IconInfo_t *info = (IconInfo_t*)temp_action_item->payload_ptr;
 	IconMode_e mode = icons_getIconMode(info->config_path);
 
 	if (strcmp(info->path, item->preview_path) != 0) {
@@ -326,13 +332,13 @@ void _menu_temp_action(void *_item)
 		if (mode != ICON_MODE_APP) {
 			strcpy(temp_action_item->preview_path, item->preview_path);
 			if (temp_action_item->preview_ptr != NULL) {
-				SDL_FreeSurface(temp_action_item->preview_ptr);
+				SDL_FreeSurface((SDL_Surface*)temp_action_item->preview_ptr);
 				temp_action_item->preview_ptr = NULL;
 			}
 		}
 		else {
 			if (temp_action_item->icon_ptr != NULL)
-				SDL_FreeSurface(temp_action_item->icon_ptr);
+				SDL_FreeSurface((SDL_Surface*)temp_action_item->icon_ptr);
 			temp_action_item->icon_ptr = (void*)IMG_Load(item->preview_path);
 		}
 		
@@ -340,6 +346,8 @@ void _menu_temp_action(void *_item)
 		SDL_BlitSurface(screen, NULL, video, NULL);
 		SDL_Flip(video);
 		msleep(500);
+
+        reset_menus = true;
 	}
 
 	menu_stack[menu_level] = NULL;
@@ -356,7 +364,7 @@ void _menu_change_icon(ListItem *item, IconMode_e mode)
 	_menu_temp = list_create(200, LIST_SMALL);
 	strncpy(_menu_temp.title, item->label, STR_MAX - 1);
 
-	IconInfo_t *info = item->payload_ptr;
+	IconInfo_t *info = (IconInfo_t*)item->payload_ptr;
 
 	char required_icon[STR_MAX];
 	snprintf(required_icon, STR_MAX - 1, icons_getIconNameFormat(mode), info->name);
@@ -445,31 +453,30 @@ void menu_expert_icons(void *_)
 	header_changed = true;
 }
 
-void menu_main(void)
+void menu_icons(void *_)
 {
-	if (!_menu_main._created) {
-		_menu_main = list_create(5, LIST_SMALL);
-		strcpy(_menu_main.title, "Icons");
-		list_addItem(&_menu_main, (ListItem){
+	if (!_menu_icons._created) {
+		_menu_icons = list_create(5, LIST_SMALL);
+		strcpy(_menu_icons.title, "Icons");
+		list_addItem(&_menu_icons, (ListItem){
 			.label = "Apply icon pack...",
 			.action = menu_icon_packs
 		});
-		list_addItem(&_menu_main, (ListItem){
+		list_addItem(&_menu_icons, (ListItem){
 			.label = "Edit console icon...",
 			.action = menu_console_icons
 		});
-		list_addItem(&_menu_main, (ListItem){
+		list_addItem(&_menu_icons, (ListItem){
 			.label = "Edit app icon...",
 			.action = menu_app_icons
 		});
-		list_addItem(&_menu_main, (ListItem){
+		list_addItem(&_menu_icons, (ListItem){
 			.label = "Edit expert icon...",
 			.action = menu_expert_icons
 		});
 	}
-	menu_level = 0;
-	menu_stack[0] = &_menu_main;
+	menu_stack[++menu_level] = &_menu_icons;
 	header_changed = true;
 }
 
-#endif // MENUS_H__
+#endif // TWEAKS_ICONS_H__

@@ -16,6 +16,7 @@
 #include "./actions.h"
 #include "./tools.h"
 #include "./reset.h"
+#include "./icons.h"
 
 static List _menu_main;
 static List _menu_system;
@@ -44,6 +45,8 @@ void menu_free_all(void)
 	list_free(&_menu_advanced);
 	list_free(&_menu_reset_settings);
 	list_free(&_menu_tools);
+
+	menu_icons_free_all();
 }
 
 void menu_systemStartup(void *_)
@@ -477,7 +480,7 @@ void * _get_menu_icon(const char *name)
 void menu_main(void)
 {
 	if (!_menu_main._created) {
-		_menu_main = list_create(5, LIST_LARGE);
+		_menu_main = list_create(6, LIST_LARGE);
 		strcpy(_menu_main.title, "Tweaks");
 		list_addItem(&_menu_main, (ListItem){
 			.label = "System",
@@ -508,6 +511,12 @@ void menu_main(void)
 			.description = "Favorites, clean files",
 			.action = menu_tools,
 			.icon_ptr = _get_menu_icon("tweaks_tools")
+		});
+		list_addItem(&_menu_main, (ListItem){
+			.label = "Icons",
+			.description = "Change system icons",
+			.action = menu_icons,
+			.icon_ptr = _get_menu_icon("tweaks_icons")
 		});
 	}
 	menu_level = 0;
