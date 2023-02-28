@@ -89,6 +89,7 @@ int _add_icon_packs(const char *path, List *list, void (*action)(void *), bool i
         while ((ep = readdir(dp))) {
             if (ep->d_type != DT_DIR) continue;
 			if (ep->d_name[0] == '.') continue;
+			if (strcmp("sel", ep->d_name) == 0) continue;
 			if (strcmp("app", ep->d_name) == 0) continue;
 			if (strcmp("rapp", ep->d_name) == 0) continue;
 			if (strcmp("icons", ep->d_name) == 0) continue;

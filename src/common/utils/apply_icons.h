@@ -94,12 +94,12 @@ const char * icons_getIconPathFormat(IconMode_e mode)
 const char * icons_getSelectedIconPathFormat(IconMode_e mode)
 {
     switch (mode) {
-        case ICON_MODE_APP: return "%s/app/%s.png";
-        case ICON_MODE_RAPP: return "%s/rapp/%s.png";
+        case ICON_MODE_APP: return "%s/app/sel/%s.png";
+        case ICON_MODE_RAPP: return "%s/rapp/sel/%s.png";
         default: break;
     }
 
-    return "%s/%s.png";
+    return "%s/sel/%s.png";
 }
 
 bool _apply_singleIconFromPack(const char *config_path, const char *icon_pack_path)
