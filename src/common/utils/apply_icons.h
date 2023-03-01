@@ -143,7 +143,6 @@ bool _apply_singleIconFromPack(const char *config_path, const char *icon_pack_pa
     char sel_path[STR_MAX];
     sprintf(sel_path, icons_getSelectedIconPathFormat(mode), icon_pack_path, icon_name);
 
-
     if (is_file(sel_path))
         json_forceSetString(config, "iconsel", sel_path);
     else
@@ -164,17 +163,20 @@ bool apply_singleIcon(const char *config_path)
     char icon_pack_path[STR_MAX];
     strncpy(icon_pack_path, file_read(ACTIVE_ICON_PACK), STR_MAX - 1);
 
-    printf_debug("Icon pack: '%s'\n", icon_pack_path);
-
     if (!is_dir(icon_pack_path)) {
         memset(icon_pack_path, 0, STR_MAX);
         strcpy(icon_pack_path, "/mnt/SDCARD/Icons/Default");
     }
 
-    if (is_dir(icon_pack_path))
-        return _apply_singleIconFromPack(config_path, icon_pack_path);
-    
-    return false;
+    if (!is_dir(icon_pack_path))
+        return false;
+
+    if (strcmp(GUEST_CONFIG, config_path) == 0) {
+        _apply_singleIconFromPack(GUEST_OFF_CONFIG, icon_pack_path);
+        _apply_singleIconFromPack(GUEST_ON_CONFIG, icon_pack_path);
+    }
+
+    return _apply_singleIconFromPack(config_path, icon_pack_path);
 }
 
 int _apply_iconPackOnConfigs(const char *path, const char *icon_pack_path)

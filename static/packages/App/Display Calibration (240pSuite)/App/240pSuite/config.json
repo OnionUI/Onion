@@ -2,5 +2,5 @@
 "label":"Display Calibration",
 "icon":"../../Icons/Default/app/display.png",
 "launch":"launch.sh",
-"description":"Tools for display calibration"
+"description":"240pSuite (Menu+Select to exit)"
 }
