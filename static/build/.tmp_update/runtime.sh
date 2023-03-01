@@ -7,9 +7,13 @@ main() {
     init_system
     update_time
     clear_logs
-    
-    ./bin/batmon &
+	
     # Start the battery monitor
+    ./bin/batmon &
+    
+	# Reapply theme
+    ./bin/themeSwitcher --reapply
+	
     if [ $deviceModel = 283 ]; then 
         if [ `cat /sys/devices/gpiochip0/gpio/gpio59/value` -eq 1 ]; then
             cd $sysdir
