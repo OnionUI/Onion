@@ -212,6 +212,7 @@ int main(void)
 
     for (int i = 0 ; i < 4 ; i++) {
         sprintf(cPosition, "%d", i+1);
+               
         h = rom_list[i].playTime / 3600;
         m = (rom_list[i].playTime - 3600 * h) / 60;
 
@@ -229,9 +230,12 @@ int main(void)
         SDL_Rect rectRomNames = { 78, 104 + 90 * i, 600, 40};
 
         SDL_BlitSurface(imageRomPosition, NULL, screen, &rectPosition);
-        SDL_BlitSurface(imageRomPlayTime, NULL, screen, &rectRomPlayTime);
-        SDL_BlitSurface(imageRomName, NULL, screen, &rectRomNames);
-    }
+        
+        if (rom_list_len > i){
+            SDL_BlitSurface(imageRomPlayTime, NULL, screen, &rectRomPlayTime);
+            SDL_BlitSurface(imageRomName, NULL, screen, &rectRomNames);
+        }
+  }
 
     SDL_BlitSurface(imagePages, NULL, screen, &rectPages);
     SDL_BlitSurface(imageMileage, NULL, screen, &rectMileage);
@@ -298,8 +302,10 @@ int main(void)
             SDL_Rect rectRomNames = { 78, 104 + 90 * i, 600, 40};
 
             SDL_BlitSurface(imageRomPosition, NULL, screen, &rectPosition);
-            SDL_BlitSurface(imageRomPlayTime, NULL, screen, &rectRomPlayTime);
-            SDL_BlitSurface(imageRomName, NULL, screen, &rectRomNames);
+            if (rom_list_len > (nCurrentPage * 4 + i)){
+                SDL_BlitSurface(imageRomPlayTime, NULL, screen, &rectRomPlayTime);
+                SDL_BlitSurface(imageRomName, NULL, screen, &rectRomNames);
+            }         
         }
 
         SDL_BlitSurface(screen, NULL, video, NULL);
