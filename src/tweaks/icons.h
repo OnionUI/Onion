@@ -232,6 +232,9 @@ bool _add_config_icon(const char *path, const char *name, const char *config_pat
 	char icon_path[STR_MAX];
 	char preview_path[STR_MAX*2+32];
 	IconMode_e mode = icons_getIconMode(config_path);
+
+	if (!is_file(config_path))
+		return false;
 	
 	cJSON *config = json_load(config_path);
 			
@@ -301,6 +304,8 @@ int _add_config_icons(const char *path, List *list, void (*action)(void *))
 			snprintf(config_path, STR_MAX*2 - 1, "%s/%s/config.json", path, ep->d_name);
 
 			if (strcmp(SEARCH_CONFIG, config_path) == 0)
+				continue;
+			if (strcmp(GUEST_CONFIG, config_path) == 0)
 				continue;
 
 			if (!is_file(config_path))
@@ -427,6 +432,8 @@ void menu_app_icons(void *_)
 		strcpy(_menu_app_icons.title, "App icons");
 
 		_add_config_icons(CONFIG_APP_PATH, &_menu_app_icons, menu_change_app_icon);
+		_add_config_icon(CONFIG_APP_PATH, "Guest_Mode", GUEST_OFF_CONFIG, &_menu_app_icons, menu_change_app_icon);
+		_add_config_icon(CONFIG_APP_PATH, "Guest_Mode", GUEST_ON_CONFIG, &_menu_app_icons, menu_change_app_icon);
 
 		list_sortByLabel(&_menu_app_icons);
 	}

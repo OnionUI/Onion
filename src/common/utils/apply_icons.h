@@ -18,6 +18,11 @@
 #define SEARCH_CONFIG_SRC "/mnt/SDCARD/.tmp_update/res/search_config.json"
 #define SEARCH_CONFIG "/mnt/SDCARD/Emu/SEARCH/config.json"
 
+#define GUEST_DIR "/mnt/SDCARD/Saves/GuestProfile"
+#define GUEST_CONFIG "/mnt/SDCARD/App/Guest_Mode/config.json"
+#define GUEST_ON_CONFIG "/mnt/SDCARD/App/Guest_Mode/data/configON.json"
+#define GUEST_OFF_CONFIG "/mnt/SDCARD/App/Guest_Mode/data/configOFF.json"
+
 typedef enum IconMode {
     ICON_MODE_EMU,
     ICON_MODE_APP,
@@ -42,6 +47,14 @@ void _saveConfigFile(const char *config_path, const char *content)
 
     if (strcmp(SEARCH_CONFIG_SRC, config_path) == 0 && is_file(SEARCH_CONFIG))
         system("cp \"" SEARCH_CONFIG_SRC "\" \"" SEARCH_CONFIG "\"");
+    else if (strcmp(GUEST_OFF_CONFIG, config_path) == 0) {
+        if (is_dir(GUEST_DIR)) // main profile
+            system("cp \"" GUEST_OFF_CONFIG "\" \"" GUEST_CONFIG "\"");
+    }
+    else if (strcmp(GUEST_ON_CONFIG, config_path) == 0) {
+        if (!is_dir(GUEST_DIR)) // guest profile
+            system("cp \"" GUEST_ON_CONFIG "\" \"" GUEST_CONFIG "\"");
+    }
 }
 
 bool apply_singleIconByFullPath(const char *config_path, const char *icon_path)
@@ -60,8 +73,11 @@ bool apply_singleIconByFullPath(const char *config_path, const char *icon_path)
     char sel_path[STR_MAX];
     sprintf(sel_path, "%s/sel/%s", dir_path, file_name);
 
-    json_setString(config, "icon", icon_path);
-    json_setString(config, "iconsel", is_file(sel_path) ? sel_path : icon_path);
+    if (!is_file(sel_path))
+        strcpy(sel_path, icon_path);
+
+    json_forceSetString(config, "icon", icon_path);
+    json_forceSetString(config, "iconsel", sel_path);
 
     _saveConfigFile(config_path, cJSON_Print(config));
     cJSON_free(config);
@@ -104,6 +120,9 @@ const char * icons_getSelectedIconPathFormat(IconMode_e mode)
 
 bool _apply_singleIconFromPack(const char *config_path, const char *icon_pack_path)
 {
+    if (!is_file(config_path))
+        return false;
+
     cJSON *config = json_load(config_path);
     char temp_path[STR_MAX];
     if (!json_getString(config, "icon", temp_path))
@@ -124,11 +143,13 @@ bool _apply_singleIconFromPack(const char *config_path, const char *icon_pack_pa
     char sel_path[STR_MAX];
     sprintf(sel_path, icons_getSelectedIconPathFormat(mode), icon_pack_path, icon_name);
 
-    if (!is_file(sel_path))
-        strcpy(sel_path, icon_path);
 
-    json_setString(config, "icon", icon_path);
-    json_setString(config, "iconsel", sel_path);
+    if (is_file(sel_path))
+        json_forceSetString(config, "iconsel", sel_path);
+    else
+        cJSON_DeleteItemFromObject(config, "iconsel");
+
+    json_forceSetString(config, "icon", icon_path);
 
     _saveConfigFile(config_path, cJSON_Print(config));
     cJSON_free(config);
@@ -173,6 +194,8 @@ int _apply_iconPackOnConfigs(const char *path, const char *icon_pack_path)
 
 			if (strcmp(SEARCH_CONFIG, config_path) == 0)
 				continue;
+			if (strcmp(GUEST_CONFIG, config_path) == 0)
+				continue;
 
 			if (!is_file(config_path))
 				continue;
@@ -198,6 +221,10 @@ int apply_iconPack(const char *icon_pack_path)
 	count += _apply_iconPackOnConfigs(CONFIG_RAPP_PATH, icon_pack_path);
 
     if (_apply_singleIconFromPack(SEARCH_CONFIG_SRC, icon_pack_path))
+        count++;
+    if (_apply_singleIconFromPack(GUEST_ON_CONFIG, icon_pack_path))
+        count++;
+    if (_apply_singleIconFromPack(GUEST_OFF_CONFIG, icon_pack_path))
         count++;
 
     return count;

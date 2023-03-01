@@ -68,6 +68,18 @@ bool json_setString(cJSON *object, const char *key, const char *value)
     return false;
 }
 
+bool json_forceSetString(cJSON *object, const char *key, const char *value)
+{
+    cJSON *json_object = cJSON_GetObjectItem(object, key);
+
+    if (json_object) {
+        cJSON_SetValuestring(json_object, value);
+        return true;
+    }
+
+    return cJSON_AddStringToObject(object, key, value);
+}
+
 /**
  * @brief Loads and parses a json file.
  * 
