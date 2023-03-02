@@ -19,16 +19,16 @@ ThemeImages _getBatteryRequest(int percentage)
     return BATTERY_100;
 }
 
-SDL_Surface* theme_batterySurfaceWithBg(int percentage, SDL_Surface *background)
+SDL_Surface *theme_batterySurfaceWithBg(int percentage, SDL_Surface *background)
 {
-    BatteryPercentage_s* style = &theme()->batteryPercentage;
+    BatteryPercentage_s *style = &theme()->batteryPercentage;
     bool visible = style->visible;
 
     // Currently charging, hide text
     if (percentage == 500)
         visible = false;
 
-    TTF_Font* font = resource_getFont(BATTERY);
+    TTF_Font *font = resource_getFont(BATTERY);
     int offsetY = style->offsetY;
 
     // Correct Exo 2 font offset
@@ -57,17 +57,23 @@ SDL_Surface* theme_batterySurfaceWithBg(int percentage, SDL_Surface *background)
         img_height = icon->h;
     }
 
-    if (img_width % 2 != 0) img_width += 1;
-    if (img_height % 2 != 0) img_height += 1;
+    if (img_width % 2 != 0)
+        img_width += 1;
+    if (img_height % 2 != 0)
+        img_height += 1;
 
-    if (img_width < 48) img_width = 48;
-    if (img_height < 48) img_height = 48;
+    if (img_width < 48)
+        img_width = 48;
+    if (img_height < 48)
+        img_height = 48;
 
-    SDL_Surface *image = SDL_CreateRGBSurface(0, img_width, img_height, 32,
-        0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000); /* important */
+    SDL_Surface *image = SDL_CreateRGBSurface(
+        0, img_width, img_height, 32, 0x00FF0000, 0x0000FF00, 0x000000FF,
+        0xFF000000); /* important */
 
     SDL_Rect rect_icon = {0, (img_height - icon->h) / 2};
-    SDL_Rect rect_text = {icon->w + SPACER + style->offsetX, (img_height - text->h) / 2 + offsetY};
+    SDL_Rect rect_text = {icon->w + SPACER + style->offsetX,
+                          (img_height - text->h) / 2 + offsetY};
 
     if (visible && style->onleft) {
         rect_text.x = style->offsetX;
@@ -86,15 +92,18 @@ SDL_Surface* theme_batterySurfaceWithBg(int percentage, SDL_Surface *background)
         SDL_Surface *bg = SDL_ConvertSurface(background, image->format, 0);
         SDL_SetAlpha(bg, 0, SDL_ALPHA_TRANSPARENT);
 
-        SDL_Surface *bg_title = SDL_ConvertSurface(resource_getSurface(BG_TITLE), image->format, 0);
+        SDL_Surface *bg_title =
+            SDL_ConvertSurface(resource_getSurface(BG_TITLE), image->format, 0);
         SDL_SetAlpha(bg_title, SDL_SRCALPHA, SDL_ALPHA_TRANSPARENT);
         SDL_BlitSurface(bg_title, NULL, bg, NULL);
 
         SDL_Rect bg_crop = {572, 6, 48, 48};
         SDL_Rect bg_pos = {(img_width - 48) / 2, (img_height - 48) / 2};
-        
-        rect_icon.x += bg_crop.x - bg_pos.x; rect_icon.y += bg_crop.y - bg_pos.y;
-        rect_text.x += bg_crop.x - bg_pos.x; rect_text.y += bg_crop.y - bg_pos.y;
+
+        rect_icon.x += bg_crop.x - bg_pos.x;
+        rect_icon.y += bg_crop.y - bg_pos.y;
+        rect_text.x += bg_crop.x - bg_pos.x;
+        rect_text.y += bg_crop.y - bg_pos.y;
 
         SDL_SetAlpha(icon, SDL_SRCALPHA, SDL_ALPHA_TRANSPARENT);
         SDL_SetAlpha(text, SDL_SRCALPHA, SDL_ALPHA_TRANSPARENT);
@@ -104,7 +113,7 @@ SDL_Surface* theme_batterySurfaceWithBg(int percentage, SDL_Surface *background)
             SDL_BlitSurface(text, NULL, bg, &rect_text);
 
         SDL_BlitSurface(bg, &bg_crop, image, &bg_pos);
-        
+
         SDL_FreeSurface(bg);
         SDL_FreeSurface(bg_title);
     }
@@ -115,7 +124,7 @@ SDL_Surface* theme_batterySurfaceWithBg(int percentage, SDL_Surface *background)
     return image;
 }
 
-SDL_Surface* theme_batterySurface(int percentage)
+SDL_Surface *theme_batterySurface(int percentage)
 {
     return theme_batterySurfaceWithBg(percentage, NULL);
 }

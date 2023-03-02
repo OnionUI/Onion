@@ -1,15 +1,15 @@
 #ifndef UTILS_APPLY_ICONS_H__
 #define UTILS_APPLY_ICONS_H__
 
-#include <libgen.h>
 #include <dirent.h>
-#include <sys/types.h>
+#include <libgen.h>
 #include <sys/file.h>
+#include <sys/types.h>
 
-#include "utils/str.h"
 #include "utils/file.h"
-#include "utils/log.h"
 #include "utils/json.h"
+#include "utils/log.h"
+#include "utils/str.h"
 
 #define CONFIG_EMU_PATH "/mnt/SDCARD/Emu"
 #define CONFIG_APP_PATH "/mnt/SDCARD/App"
@@ -85,40 +85,50 @@ bool apply_singleIconByFullPath(const char *config_path, const char *icon_path)
     return true;
 }
 
-const char * icons_getIconNameFormat(IconMode_e mode)
+const char *icons_getIconNameFormat(IconMode_e mode)
 {
     switch (mode) {
-        case ICON_MODE_APP: return "app/%s";
-        case ICON_MODE_RAPP: return "rapp/%s";
-        default: break;
+    case ICON_MODE_APP:
+        return "app/%s";
+    case ICON_MODE_RAPP:
+        return "rapp/%s";
+    default:
+        break;
     }
 
     return "%s";
 }
 
-const char * icons_getIconPathFormat(IconMode_e mode)
+const char *icons_getIconPathFormat(IconMode_e mode)
 {
     switch (mode) {
-        case ICON_MODE_APP: return "%s/app/%s.png";
-        case ICON_MODE_RAPP: return "%s/rapp/%s.png";
-        default: break;
+    case ICON_MODE_APP:
+        return "%s/app/%s.png";
+    case ICON_MODE_RAPP:
+        return "%s/rapp/%s.png";
+    default:
+        break;
     }
 
     return "%s/%s.png";
 }
 
-const char * icons_getSelectedIconPathFormat(IconMode_e mode)
+const char *icons_getSelectedIconPathFormat(IconMode_e mode)
 {
     switch (mode) {
-        case ICON_MODE_APP: return "%s/app/sel/%s.png";
-        case ICON_MODE_RAPP: return "%s/rapp/sel/%s.png";
-        default: break;
+    case ICON_MODE_APP:
+        return "%s/app/sel/%s.png";
+    case ICON_MODE_RAPP:
+        return "%s/rapp/sel/%s.png";
+    default:
+        break;
     }
 
     return "%s/sel/%s.png";
 }
 
-bool _apply_singleIconFromPack(const char *config_path, const char *icon_pack_path)
+bool _apply_singleIconFromPack(const char *config_path,
+                               const char *icon_pack_path)
 {
     if (!is_file(config_path))
         return false;
@@ -130,18 +140,20 @@ bool _apply_singleIconFromPack(const char *config_path, const char *icon_pack_pa
 
     char icon_name[56];
     strncpy(icon_name, file_removeExtension(basename(temp_path)), 55);
-	str_split(icon_name, "-");
+    str_split(icon_name, "-");
 
     IconMode_e mode = icons_getIconMode(config_path);
 
     char icon_path[STR_MAX];
-    sprintf(icon_path, icons_getIconPathFormat(mode), icon_pack_path, icon_name);
+    sprintf(icon_path, icons_getIconPathFormat(mode), icon_pack_path,
+            icon_name);
 
     if (!is_file(icon_path))
         return false;
 
     char sel_path[STR_MAX];
-    sprintf(sel_path, icons_getSelectedIconPathFormat(mode), icon_pack_path, icon_name);
+    sprintf(sel_path, icons_getSelectedIconPathFormat(mode), icon_pack_path,
+            icon_name);
 
     if (is_file(sel_path))
         json_forceSetString(config, "iconsel", sel_path);
@@ -153,7 +165,8 @@ bool _apply_singleIconFromPack(const char *config_path, const char *icon_pack_pa
     _saveConfigFile(config_path, cJSON_Print(config));
     cJSON_free(config);
 
-    printf_debug("Applied icon to %s\nicon:    %s\niconsel: %s\n", config_path, icon_path, sel_path);
+    printf_debug("Applied icon to %s\nicon:    %s\niconsel: %s\n", config_path,
+                 icon_path, sel_path);
 
     return true;
 }
@@ -182,25 +195,29 @@ bool apply_singleIcon(const char *config_path)
 int _apply_iconPackOnConfigs(const char *path, const char *icon_pack_path)
 {
     DIR *dp;
-	struct dirent *ep;
-	char config_path[STR_MAX*2];
-	int count = 0;
+    struct dirent *ep;
+    char config_path[STR_MAX * 2];
+    int count = 0;
 
     if ((dp = opendir(path)) != NULL) {
         while ((ep = readdir(dp))) {
-            if (ep->d_type != DT_DIR) continue;
-			if (ep->d_name[0] == '.') continue;
-			if (strcmp("romscripts", ep->d_name) == 0) continue;
+            if (ep->d_type != DT_DIR)
+                continue;
+            if (ep->d_name[0] == '.')
+                continue;
+            if (strcmp("romscripts", ep->d_name) == 0)
+                continue;
 
-			snprintf(config_path, STR_MAX*2 - 1, "%s/%s/config.json", path, ep->d_name);
+            snprintf(config_path, STR_MAX * 2 - 1, "%s/%s/config.json", path,
+                     ep->d_name);
 
-			if (strcmp(SEARCH_CONFIG, config_path) == 0)
-				continue;
-			if (strcmp(GUEST_CONFIG, config_path) == 0)
-				continue;
+            if (strcmp(SEARCH_CONFIG, config_path) == 0)
+                continue;
+            if (strcmp(GUEST_CONFIG, config_path) == 0)
+                continue;
 
-			if (!is_file(config_path))
-				continue;
+            if (!is_file(config_path))
+                continue;
 
             if (_apply_singleIconFromPack(config_path, icon_pack_path))
                 count++;
@@ -216,11 +233,11 @@ int apply_iconPack(const char *icon_pack_path)
     FILE *fp;
     file_put_sync(fp, ACTIVE_ICON_PACK, "%s", icon_pack_path);
 
-	int count = 0;
+    int count = 0;
 
-	count += _apply_iconPackOnConfigs(CONFIG_EMU_PATH, icon_pack_path);
-	count += _apply_iconPackOnConfigs(CONFIG_APP_PATH, icon_pack_path);
-	count += _apply_iconPackOnConfigs(CONFIG_RAPP_PATH, icon_pack_path);
+    count += _apply_iconPackOnConfigs(CONFIG_EMU_PATH, icon_pack_path);
+    count += _apply_iconPackOnConfigs(CONFIG_APP_PATH, icon_pack_path);
+    count += _apply_iconPackOnConfigs(CONFIG_RAPP_PATH, icon_pack_path);
 
     if (_apply_singleIconFromPack(SEARCH_CONFIG_SRC, icon_pack_path))
         count++;
