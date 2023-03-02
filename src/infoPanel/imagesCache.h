@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-struct SDL_Surface;
+#include <SDL/SDL.h>
 
 char *drawImageByIndex(const int index, const int image_index,
                        char **images_paths, const int images_paths_count,

@@ -8,6 +8,7 @@
 #include "utils/msleep.h"
 
 #include "./appstate.h"
+#include "./formatters.h"
 #include "./tools.h"
 
 static int stored_value_frame_throttle = 0;
