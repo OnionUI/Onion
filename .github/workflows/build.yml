@@ -1,4 +1,4 @@
-name: Check build
+name: Enforce formatting + check build
 on:
   push:
     branches-ignore:
@@ -21,10 +21,9 @@ jobs:
           # that's what will get formatted (i.e. the most recent commit)
           fetch-depth: 2
       # format the latest commit
-      - uses: purduesigbots/clang-format-action@1
-        # use one of clang-format's supported styles or leave this out to use the style in your .clang-format file
-        with:
-          style: file
+      - run: |
+          sudo apt install clang-format
+          make format
       # commit the changes (if there are any)
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4.1.2
