@@ -19,12 +19,12 @@ extern struct fb_var_screeninfo vinfo;
 
 //	enum for Flipflags, default value is defined in gfx.c
 //	GFX_BLOCKING	: limit to 60fps but never skips frames
-//			:  in case of clearing all buffers by GFX_Flip()x3, needs to
-//use BLOCKING (or GFX_FlipForce())
+//			:  in case of clearing all buffers by GFX_Flip()x3, needs
+//to use BLOCKING (or GFX_FlipForce())
 //	GFX_FLIPWAIT	: wait until Blit is done when flip
 //			:  when NOWAIT, do not clear/write source surface
-//immediately after Flip 			:  if absolutely necessary, use GFX_WaitAllDone()
-//before write (or GFX_FlipWait())
+// immediately after Flip 			:  if absolutely necessary, use
+// GFX_WaitAllDone() before write (or GFX_FlipWait())
 enum { GFX_BLOCKING = 1, GFX_FLIPWAIT = 2 };
 
 //	GFX Init	Init, call after SDL_Init()
@@ -35,12 +35,12 @@ void GFX_Quit(void);
 
 //	SetVideomode / in place of SDL_SetVideoMode
 //		if flags == SDL_HWSURFACE & non SDL_DOUBLEBUF, change to direct
-//draw mode (no Flip needed) 		 otherwise, same as GFX_CreateRGBSurface
+// draw mode (no Flip needed) 		 otherwise, same as GFX_CreateRGBSurface
 SDL_Surface *GFX_SetVideoMode(int width, int height, int bpp, uint32_t flags);
 
 //	Create GFX Surface / in place of SDL_CreateRGBSurface
 //		supports 16/32bpp only / flags has no meaning, fixed to
-//SWSURFACE
+// SWSURFACE
 SDL_Surface *GFX_CreateRGBSurface(uint32_t flags, int width, int height,
                                   int depth, uint32_t Rmask, uint32_t Gmask,
                                   uint32_t Bmask, uint32_t Amask);
@@ -62,7 +62,7 @@ SDL_Surface *GFX_DuplicateSurface(SDL_Surface *surface);
 //	GFX Flip / in place of SDL_Flip
 //		with Rotate180/bppConvert/Scaling
 //		*Note* blit from entire surface(or clip_rect if specified) to
-//entire framebuffer
+// entire framebuffer
 void GFX_Flip(SDL_Surface *surface);
 //		with GFX_FLIPWAIT
 void GFX_FlipWait(SDL_Surface *surface);
@@ -74,7 +74,7 @@ void GFX_FlipForce(SDL_Surface *surface);
 //	GFX UpdateRect / in place of SDL_UpdateRect
 //		Flip after setting the update area
 //		*Note* blit from entire screen(or clip_rect if specified) to
-//framebuffer rect
+// framebuffer rect
 void GFX_UpdateRect(SDL_Surface *screen, int x, int y, int w, int h);
 //		followings are same as GFX_Flip
 void GFX_UpdateRectWait(SDL_Surface *screen, int x, int y, int w, int h);
@@ -100,7 +100,7 @@ void GFX_WaitAllDone(void);
 
 //	GFX FillRect (MI_SYS ver) / in place of SDL_FillRect
 //		*Note* color : in case of RGB565 : 2 pixel color values used
-//alternately
+// alternately
 void GFX_FillRectSYS(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color);
 
 //	GFX FillRect (MI_GFX ver) / in place of SDL_FillRect

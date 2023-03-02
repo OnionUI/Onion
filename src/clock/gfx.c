@@ -15,15 +15,15 @@
 //	FREEMMA		: force free all allocated MMAs when init & quit
 #define FREEMMA
 //	GFX_BLOCKING	: limit to 60fps but never skips frames
-//			:  in case of clearing all buffers by GFX_Flip()x3, needs to
-//use BLOCKING (or GFX_FlipForce())
+//			:  in case of clearing all buffers by GFX_Flip()x3, needs
+//to use BLOCKING (or GFX_FlipForce())
 //	GFX_FLIPWAIT	: wait until Blit is done when flip
 //			:  when NOWAIT, do not clear/write source surface
-//immediately after Flip 			:  if absolutely necessary, use GFX_WaitAllDone()
-//before write (or GFX_FlipWait())
+// immediately after Flip 			:  if absolutely necessary, use
+// GFX_WaitAllDone() before write (or GFX_FlipWait())
 enum { GFX_BLOCKING = 1, GFX_FLIPWAIT = 2 };
-//#define	DEFAULTFLIPFLAGS	(GFX_BLOCKING | GFX_FLIPWAIT)		//
-//low performance with blocking #define	DEFAULTFLIPFLAGS (GFX_FLIPWAIT)
+//#define	DEFAULTFLIPFLAGS	(GFX_BLOCKING | GFX_FLIPWAIT)
+//// low performance with blocking #define	DEFAULTFLIPFLAGS (GFX_FLIPWAIT)
 //// middle performance nonblock, recommended for most cases
 #define DEFAULTFLIPFLAGS 0 // high performance but with the above precautions
 
@@ -190,8 +190,9 @@ static inline void FlushCacheNeeded(void *pixels, uint32_t pitch, uint32_t y,
 //
 //	GFX Flip / in place of SDL_Flip
 //		HW Blit : surface -> FB(backbuffer) with
-//Rotate180/bppConvert/Scaling 			and Request Flip 		*Note* blit from entire
-//surface(or clip_rect if specified) to entire framebuffer(or sHWsurface)
+// Rotate180/bppConvert/Scaling 			and Request Flip 		*Note*
+// blit from entire surface(or clip_rect if specified) to entire framebuffer(or
+// sHWsurface)
 //
 void GFX_FlipExec(SDL_Surface *surface, uint32_t flags)
 {
@@ -369,8 +370,8 @@ void freemma(void)
 //
 //	Create GFX Surface / in place of SDL_CreateRGBSurface
 //		supports 16/32bpp only / flags has no meaning, fixed to
-//SWSURFACE 		Additional return value : surface->unused1 = Physical address of
-//surface
+// SWSURFACE 		Additional return value : surface->unused1 = Physical
+// address of surface
 //
 SDL_Surface *GFX_CreateRGBSurface(uint32_t flags, int width, int height,
                                   int depth, uint32_t Rmask, uint32_t Gmask,
@@ -575,7 +576,7 @@ void GFX_Quit(void)
 //
 //	SetVideomode / in place of SDL_SetVideoMode
 //		if flags == SDL_HWSURFACE & non SDL_DOUBLEBUF, change to direct
-//draw mode 		 otherwise, same as GFX_CreateRGBSurface
+// draw mode 		 otherwise, same as GFX_CreateRGBSurface
 //
 SDL_Surface *GFX_SetVideoMode(int width, int height, int bpp, uint32_t flags)
 {
@@ -757,7 +758,7 @@ SDL_Surface *GFX_DuplicateSurface(SDL_Surface *src)
 //	GFX UpdateRect / in place of SDL_UpdateRect
 //		Flip after setting the update area
 //		*Note* blit from entire screen(or clip_rect if specified) to
-//framebuffer(or sHWsurface) rect
+// framebuffer(or sHWsurface) rect
 //
 void GFX_UpdateRectExec(SDL_Surface *screen, int x, int y, int w, int h,
                         uint32_t flags)
@@ -859,7 +860,7 @@ SDL_Rect *CheckRect(SDL_Surface *dst, SDL_Rect *dstrect)
 //
 //	GFX FillRect (MI_SYS ver) / in place of SDL_FillRect
 //		*Note* color : in case of RGB565 : 2 pixel color values used
-//alternately
+// alternately
 //
 void GFX_FillRectSYS(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color)
 {
