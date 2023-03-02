@@ -2,8 +2,8 @@
 #include <pthread.h>
 #include <stdbool.h>
 
-#include "utils/log.h"
 #include "imageCache.h"
+#include "utils/log.h"
 
 #define IMAGECACHE_MAXSIZE 50
 
@@ -14,17 +14,14 @@ static const int image_cache_len = IMAGECACHE_MAXSIZE;
 static SDL_Surface *image_cache[IMAGECACHE_MAXSIZE] = {NULL};
 static int image_cache_offset = -1;
 
-static SDL_Surface* (*load_image)(int) = NULL;
+static SDL_Surface *(*load_image)(int) = NULL;
 static int images_total = 0;
 
-int modulo(int x, int n)
-{
-    return (x % n + n) % n;
-}
+int modulo(int x, int n) { return (x % n + n) % n; }
 
-static void* _imageCacheThread(void *param)
+static void *_imageCacheThread(void *param)
 {
-    int offset = *((int*)param) - image_cache_len / 2;
+    int offset = *((int *)param) - image_cache_len / 2;
     int start = image_cache_offset - image_cache_len + 1;
     int end = image_cache_offset;
 
@@ -57,7 +54,7 @@ static void* _imageCacheThread(void *param)
     return 0;
 }
 
-void imageCache_load(int *offset, SDL_Surface* (*_load_image)(int), int total)
+void imageCache_load(int *offset, SDL_Surface *(*_load_image)(int), int total)
 {
     if (thread_active)
         return;
@@ -83,7 +80,8 @@ void imageCache_removeItem(int image_index)
         image_cache[idx] = NULL;
     }
 
-    int num_images = (images_total < image_cache_len ? images_total : image_cache_len) - 1;
+    int num_images =
+        (images_total < image_cache_len ? images_total : image_cache_len) - 1;
     for (int i = 0; i < num_images; i++) {
         int curr = modulo(image_index + i, image_cache_len);
         int next = modulo(image_index + i + 1, image_cache_len);
@@ -94,17 +92,14 @@ void imageCache_removeItem(int image_index)
     image_cache_offset = image_index + image_cache_len - 2;
 }
 
-SDL_Surface* imageCache_getItem(int *index)
+SDL_Surface *imageCache_getItem(int *index)
 {
     imageCache_load(index, load_image, images_total);
     int idx = modulo(*index, image_cache_len);
     return image_cache[idx];
 }
 
-bool imageCache_isActive(void)
-{
-    return thread_active;
-}
+bool imageCache_isActive(void) { return thread_active; }
 
 void imageCache_freeAll(void)
 {

@@ -1,27 +1,27 @@
-#include <stdio.h>
-#include <unistd.h>
-#include <stdint.h>
-#include <string.h>
-#include <stdbool.h>  
-#include <sys/stat.h>
-#include <dirent.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
+#include <dirent.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
-#include "utils/str.h"
-#include "utils/file.h"
-#include "utils/msleep.h"
-#include "utils/log.h"
-#include "utils/imageCache.h"
-#include "utils/config.h"
 #include "system/keymap_sw.h"
+#include "utils/config.h"
+#include "utils/file.h"
+#include "utils/imageCache.h"
+#include "utils/log.h"
+#include "utils/msleep.h"
+#include "utils/str.h"
 
 #define TIMEOUT_M 10
 #define CHECK_TIMEOUT 300
 #define SLIDE_TIMEOUT 10000
 
-SDL_Surface* _loadSlide(int index)
+SDL_Surface *_loadSlide(int index)
 {
     char image_path[STR_MAX];
     sprintf(image_path, "res/installSlide%d.png", index);
@@ -41,8 +41,8 @@ int nextSlide(int current_slide, int num_slides, int direction)
 
         if (next_slide < -1)
             next_slide = num_slides - 1;
-    }
-    while (imageCache_getItem(&next_slide) == NULL && next_slide != current_slide && next_slide != -1);
+    } while (imageCache_getItem(&next_slide) == NULL &&
+             next_slide != current_slide && next_slide != -1);
     return next_slide;
 }
 
@@ -61,8 +61,9 @@ int main(int argc, char *argv[])
             start_at = atoi(argv[++i]);
         else if (strcmp(argv[i], "-t") == 0 || strcmp(argv[i], "--total") == 0)
             total_offset = atoi(argv[++i]);
-        else if (strcmp(argv[i], "-m") == 0 || strcmp(argv[i], "--message") == 0)
-            strncpy(message_str, argv[++i], STR_MAX-1);
+        else if (strcmp(argv[i], "-m") == 0 ||
+                 strcmp(argv[i], "--message") == 0)
+            strncpy(message_str, argv[++i], STR_MAX - 1);
         else {
             printf_debug("Error: Unknown argument '%s'\n", argv[i]);
             exit(1);
@@ -74,8 +75,9 @@ int main(int argc, char *argv[])
     TTF_Init();
 
     SDL_Surface *video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
-    SDL_Surface *screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
-    
+    SDL_Surface *screen =
+        SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
+
     SDL_Surface *waiting_bg = IMG_Load("res/waitingBG.png");
     SDL_Surface *progress_stripes = IMG_Load("res/progress_stripes.png");
 
@@ -104,10 +106,9 @@ int main(int argc, char *argv[])
 
     SDL_Event event;
 
-    uint32_t acc_ticks = 0,
-             last_ticks = SDL_GetTicks(),
+    uint32_t acc_ticks = 0, last_ticks = SDL_GetTicks(),
              time_step = 1000 / 24, // 12 fps
-             check_timer = 0;
+        check_timer = 0;
 
     uint32_t slide_timer = last_ticks;
 
@@ -121,20 +122,20 @@ int main(int argc, char *argv[])
                 quit = true;
             else if (event.type == SDL_KEYUP) {
                 switch (event.key.keysym.sym) {
-                    case SW_BTN_LEFT:
-                        current_slide = nextSlide(current_slide, num_slides, -1);
-                        slide_timer = ticks;
-                        break;
-                    case SW_BTN_RIGHT:
-                        current_slide = nextSlide(current_slide, num_slides, 1);
-                        slide_timer = ticks;
-                        break;
-                    case SW_BTN_A:
-                        if (exists(".waitConfirm"))
-                            quit = true;
-                        break;
-                    default:
-                        break;
+                case SW_BTN_LEFT:
+                    current_slide = nextSlide(current_slide, num_slides, -1);
+                    slide_timer = ticks;
+                    break;
+                case SW_BTN_RIGHT:
+                    current_slide = nextSlide(current_slide, num_slides, 1);
+                    slide_timer = ticks;
+                    break;
+                case SW_BTN_A:
+                    if (exists(".waitConfirm"))
+                        quit = true;
+                    break;
+                default:
+                    break;
                 }
             }
         }
@@ -143,13 +144,13 @@ int main(int argc, char *argv[])
             current_slide = nextSlide(current_slide, num_slides, 1);
             slide_timer = ticks;
         }
-        
+
         if (exists(".installed") || exists(".waitConfirm")) {
             progress = 100;
             if (!exists(".waitConfirm"))
                 quit = true;
         }
-        
+
         if (exists(".installFailed")) {
             sprintf(message_str, "Installation failed");
             progress = 100;
@@ -165,7 +166,8 @@ int main(int argc, char *argv[])
                     progress = (int)(start_at + n / progress_div);
                 check_timer = ticks; // reset timeout
             }
-            else if (!quit && ticks - check_timer > TIMEOUT_M * 60 * 1000 && !exists(".waitConfirm")) {
+            else if (!quit && ticks - check_timer > TIMEOUT_M * 60 * 1000 &&
+                     !exists(".waitConfirm")) {
                 sprintf(message_str, "The installation timed out, exiting...");
                 progress = 100;
                 failed = true;
@@ -177,7 +179,8 @@ int main(int argc, char *argv[])
             break;
 
         if (acc_ticks >= time_step) {
-            SDL_Surface *slide = current_slide == -1 ? NULL : imageCache_getItem(&current_slide);
+            SDL_Surface *slide =
+                current_slide == -1 ? NULL : imageCache_getItem(&current_slide);
             if (slide == NULL)
                 SDL_BlitSurface(waiting_bg, NULL, screen, NULL);
             else
@@ -185,27 +188,31 @@ int main(int argc, char *argv[])
 
             rectProgress.w = 640;
             SDL_FillRect(screen, &rectProgress, progress_bg);
-            
+
             // spinner
             if (progress < 100) {
                 stripes_frame.x = spinner_tick;
-                SDL_BlitSurface(progress_stripes, &stripes_frame, screen, &stripes_pos);
+                SDL_BlitSurface(progress_stripes, &stripes_frame, screen,
+                                &stripes_pos);
             }
 
             if (progress > 0) {
                 rectProgress.w = (Uint16)(6.4 * progress);
-                SDL_FillRect(screen, &rectProgress, failed ? failed_color : progress_color);
+                SDL_FillRect(screen, &rectProgress,
+                             failed ? failed_color : progress_color);
             }
-            
-            SDL_Surface *message = TTF_RenderUTF8_Blended(font, message_str, fg_color);        
+
+            SDL_Surface *message =
+                TTF_RenderUTF8_Blended(font, message_str, fg_color);
             SDL_BlitSurface(message, NULL, screen, &rectMessage);
             SDL_FreeSurface(message);
-        
-            SDL_BlitSurface(screen, NULL, video, NULL); 
+
+            SDL_BlitSurface(screen, NULL, video, NULL);
             SDL_Flip(video);
 
             spinner_tick += 4;
-            if (spinner_tick >= 16) spinner_tick = 0;
+            if (spinner_tick >= 16)
+                spinner_tick = 0;
 
             acc_ticks -= time_step;
         }
@@ -220,12 +227,12 @@ int main(int argc, char *argv[])
     }
 
     config_setNumber("currentSlide", current_slide);
-    
+
     imageCache_freeAll();
     SDL_FreeSurface(waiting_bg);
-	SDL_FreeSurface(screen);
-	SDL_FreeSurface(video);
+    SDL_FreeSurface(screen);
+    SDL_FreeSurface(video);
     SDL_Quit();
-    
+
     return EXIT_SUCCESS;
 }

@@ -1,22 +1,20 @@
 #ifndef RUMBLE_H__
 #define RUMBLE_H__
 
-#include <unistd.h>
 #include <fcntl.h>
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <unistd.h>
 
+#include "settings.h"
 #include "utils/file.h"
 #include "utils/msleep.h"
-#include "settings.h"
-
 
 #define SHORT_PULSE_MS 100
 #define SUPER_SHORT_PULSE_MS 50
 
-static int super_short_timings[] = {0, 25,  50,  75};
-static int short_timings[]       = {0, 50, 100, 150};
-
+static int super_short_timings[] = {0, 25, 50, 75};
+static int short_timings[] = {0, 50, 100, 150};
 
 void rumble(bool enabled)
 {
@@ -27,10 +25,12 @@ void rumble(bool enabled)
 
 /**
  * @brief Turns on vibration for 100ms
- * 
+ *
  */
-void short_pulse(void) {
-    if (settings.vibration == 0) return;
+void short_pulse(void)
+{
+    if (settings.vibration == 0)
+        return;
     rumble(true);
     msleep(short_timings[settings.vibration]);
     rumble(false);
@@ -38,10 +38,12 @@ void short_pulse(void) {
 
 /**
  * @brief Turns on vibration for 50ms
- * 
+ *
  */
-void super_short_pulse(void) {
-    if (settings.vibration == 0) return;
+void super_short_pulse(void)
+{
+    if (settings.vibration == 0)
+        return;
     rumble(true);
     msleep(super_short_timings[settings.vibration]);
     rumble(false);
@@ -49,10 +51,12 @@ void super_short_pulse(void) {
 
 /**
  * @brief Turns on vibration for 50ms
- * 
+ *
  */
-void menu_short_pulse(void) {
-    if (settings.vibration == 0 || !settings.menu_button_haptics) return;
+void menu_short_pulse(void)
+{
+    if (settings.vibration == 0 || !settings.menu_button_haptics)
+        return;
     rumble(true);
     msleep(short_timings[settings.vibration]);
     rumble(false);
@@ -60,10 +64,12 @@ void menu_short_pulse(void) {
 
 /**
  * @brief Turns on vibration for 50ms
- * 
+ *
  */
-void menu_super_short_pulse(void) {
-    if (settings.vibration == 0 || !settings.menu_button_haptics) return;
+void menu_super_short_pulse(void)
+{
+    if (settings.vibration == 0 || !settings.menu_button_haptics)
+        return;
     rumble(true);
     msleep(super_short_timings[settings.vibration]);
     rumble(false);
