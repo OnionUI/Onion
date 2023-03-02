@@ -8,13 +8,12 @@
 
 #ifdef LOG_DEBUG
 #define print_debug(message) log_debug(__FILE__, __LINE__, LOG_MESSAGE, message)
-#define printf_debug(format_str, ...)                                          \
-    log_debug(__FILE__, __LINE__, format_str, __VA_ARGS__)
+#define printf_debug(format_str, ...) log_debug(__FILE__, __LINE__, format_str, __VA_ARGS__)
 #else
 #define print_debug(message)
 #define printf_debug(format_str, ...)
 #endif
 
-void log_debug(const char *filename, int line, const char *format_str, ...);
+void log_debug(const char *filename, int line, const char *format_str,...);
 
 #endif // LOG_H__

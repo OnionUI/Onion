@@ -3,11 +3,11 @@
 
 #include <stdbool.h>
 
-#include "./settings.h"
 #include "utils/file.h"
+#include "utils/str.h"
 #include "utils/json.h"
 #include "utils/log.h"
-#include "utils/str.h"
+#include "./settings.h"
 
 #ifndef DT_REG
 #define DT_REG 8
@@ -24,7 +24,7 @@ void lang_removeIconLabels(bool remove_icon_labels, bool remove_hints)
     DIR *dp;
     struct dirent *ep;
 
-    if ((dp = opendir(LANG_DIR)) == NULL)
+	if ((dp = opendir(LANG_DIR)) == NULL)
         return;
 
     if (!remove_icon_labels || !remove_hints) {
@@ -57,24 +57,22 @@ void lang_removeIconLabels(bool remove_icon_labels, bool remove_hints)
         if (!root)
             continue;
 
-        printf_debug("Lang: %s (%s)\n",
-                     cJSON_GetStringValue(cJSON_GetObjectItem(root, "lang")),
-                     ep->d_name);
+        printf_debug("Lang: %s (%s)\n", cJSON_GetStringValue(cJSON_GetObjectItem(root, "lang")), ep->d_name);
 
         if (remove_icon_labels) {
-            json_setString(root, "0", " ");   // Expert
-            json_setString(root, "1", " ");   // Favorites
-            json_setString(root, "2", " ");   // Games
-            json_setString(root, "15", " ");  // Settings
-            json_setString(root, "18", " ");  // Recents
+            json_setString(root, "0", " "); // Expert
+            json_setString(root, "1", " "); // Favorites
+            json_setString(root, "2", " "); // Games
+            json_setString(root, "15", " "); // Settings
+            json_setString(root, "18", " "); // Recents
             json_setString(root, "107", " "); // Apps
         }
 
         if (remove_hints) {
-            json_setString(root, "45", " ");  // CANCEL
-            json_setString(root, "46", " ");  // OK
-            json_setString(root, "88", " ");  // SELECT
-            json_setString(root, "89", " ");  // BACK
+            json_setString(root, "45", " "); // CANCEL
+            json_setString(root, "46", " "); // OK
+            json_setString(root, "88", " "); // SELECT
+            json_setString(root, "89", " "); // BACK
             json_setString(root, "111", " "); // EXIT
             json_setString(root, "112", " "); // SAVE AND EXIT
             json_setString(root, "131", " "); // NEXT
@@ -88,7 +86,8 @@ void lang_removeIconLabels(bool remove_icon_labels, bool remove_hints)
 
 static char **lang_list = NULL;
 
-typedef enum {
+typedef enum
+{
     LANG_EXPERT_TAB,
     LANG_FAVORITES_TAB,
     LANG_GAMES_TAB,
@@ -127,11 +126,10 @@ bool lang_load(void)
 
     char lang_path[STR_MAX];
 
-    if (!lang_getFilePath(settings.language, lang_path) &&
-        !lang_getFilePath(LANG_DEFAULT, lang_path))
+    if (!lang_getFilePath(settings.language, lang_path) && !lang_getFilePath(LANG_DEFAULT, lang_path))
         return false;
 
-    lang_list = (char **)malloc(LANG_MAX * sizeof(char *));
+    lang_list = (char**)malloc(LANG_MAX * sizeof(char*));
 
     cJSON *lang_file = json_load(lang_path);
 
@@ -140,19 +138,22 @@ bool lang_load(void)
     for (int i = 0; i < LANG_MAX; i++) {
         sprintf(key, "%d", i);
         if (json_getString(lang_file, key, value)) {
-            lang_list[i] = (char *)malloc(STR_MAX * sizeof(char));
+            lang_list[i] = (char*)malloc(STR_MAX * sizeof(char));
             strcpy(lang_list[i], value);
         }
     }
 
     cJSON_free(lang_file);
-
+    
     return true;
 }
 
-void lang_free(void) { free(lang_list); }
+void lang_free(void)
+{
+    free(lang_list);
+}
 
-char *lang_get(lang_hash key)
+char* lang_get(lang_hash key)
 {
     if (lang_list && lang_list[key])
         return lang_list[key];

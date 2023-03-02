@@ -2,7 +2,7 @@
 #define THEME_H__
 
 #include "config.h"
-#include "render.h"
 #include "resources.h"
+#include "render.h"
 
 #endif // THEME_H__

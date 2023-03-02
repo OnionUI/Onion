@@ -3,14 +3,15 @@
 
 #include <unistd.h>
 
-#include "./display.h"
-#include "./settings.h"
+#include "utils/str.h"
 #include "utils/file.h"
 #include "utils/flags.h"
 #include "utils/process.h"
-#include "utils/str.h"
+#include "./settings.h"
+#include "./display.h"
 
-typedef enum system_state_e {
+typedef enum system_state_e
+{
     MODE_UNKNOWN,
     MODE_MAIN_UI,
     MODE_SWITCHER,
@@ -25,12 +26,9 @@ bool check_isRetroArch(void)
     if (!exists(CMD_TO_RUN_PATH))
         return false;
     const char *cmd = file_read(CMD_TO_RUN_PATH);
-    if (strstr(cmd, "retroarch") != NULL ||
-        strstr(cmd, "/mnt/SDCARD/Emu/") != NULL ||
-        strstr(cmd, "/mnt/SDCARD/RApp/") != NULL) {
+    if (strstr(cmd, "retroarch") != NULL || strstr(cmd, "/mnt/SDCARD/Emu/") != NULL || strstr(cmd, "/mnt/SDCARD/RApp/") != NULL) {
         pid_t pid;
-        if ((pid = process_searchpid("retroarch")) != 0 ||
-            (pid = process_searchpid("ra32")) != 0) {
+        if ((pid = process_searchpid("retroarch")) != 0 || (pid = process_searchpid("ra32")) != 0) {
             system_state_pid = pid;
             return true;
         }
@@ -51,8 +49,7 @@ bool check_isMainUI(void)
 bool check_isGameSwitcher(void)
 {
     pid_t pid;
-    if (exists("/mnt/SDCARD/.tmp_update/.runGameSwitcher") &&
-        (pid = process_searchpid("gameSwitcher")) != 0) {
+    if (exists("/mnt/SDCARD/.tmp_update/.runGameSwitcher") && (pid = process_searchpid("gameSwitcher")) != 0) {
         system_state_pid = pid;
         return true;
     }
@@ -67,48 +64,36 @@ void system_state_update(void)
         system_state = MODE_GAME;
     else if (check_isMainUI())
         system_state = MODE_MAIN_UI;
-    else
-        system_state = MODE_APPS;
+    else system_state = MODE_APPS;
 
-#ifdef LOG_DEBUG
+    #ifdef LOG_DEBUG
     switch (system_state) {
-    case MODE_MAIN_UI:
-        print_debug("System state: Main UI");
-        break;
-    case MODE_SWITCHER:
-        print_debug("System state: Game Switcher");
-        break;
-    case MODE_GAME:
-        print_debug("System state: RetroArch");
-        break;
-    case MODE_APPS:
-        print_debug("System state: Apps");
-        break;
-    default:
-        print_debug("System state: Unknown");
-        break;
+        case MODE_MAIN_UI: print_debug("System state: Main UI"); break;
+        case MODE_SWITCHER: print_debug("System state: Game Switcher"); break;
+        case MODE_GAME: print_debug("System state: RetroArch"); break;
+        case MODE_APPS: print_debug("System state: Apps"); break;
+        default: print_debug("System state: Unknown"); break;
     }
-#endif
+    #endif
 }
 
 size_t state_getAppName(char *out, const char *str)
 {
     char *end;
     size_t out_size;
-
+    
     str += 19;
     end = strchr(str, ';');
-
-    out_size = (end - str) < STR_MAX - 1 ? (end - str) : STR_MAX - 1;
+    
+    out_size = (end - str) < STR_MAX-1 ? (end - str) : STR_MAX-1;
     memcpy(out, str, out_size);
     out[out_size] = 0;
-
+    
     return out_size;
 }
 
 //
-//    [onion] Check retroarch running & savestate_auto_save in retroarch.cfg is
-//    true
+//    [onion] Check retroarch running & savestate_auto_save in retroarch.cfg is true
 //
 int check_autosave(void)
 {
@@ -134,8 +119,7 @@ static char ***_installed_apps;
 static int installed_apps_count = 0;
 static bool installed_apps_loaded = false;
 
-bool _getAppDirAndConfig(const char *app_dir_name, char *out_app_dir,
-                         char *out_config_path)
+bool _getAppDirAndConfig(const char *app_dir_name, char *out_app_dir, char *out_config_path)
 {
     memset(out_app_dir, 0, STR_MAX * sizeof(char));
     memset(out_config_path, 0, STR_MAX * sizeof(char));
@@ -155,7 +139,7 @@ bool _getAppDirAndConfig(const char *app_dir_name, char *out_app_dir,
     return true;
 }
 
-char ***getInstalledApps()
+char*** getInstalledApps()
 {
     DIR *dp;
     struct dirent *ep;
@@ -165,27 +149,24 @@ char ***getInstalledApps()
         if ((dp = opendir("/mnt/SDCARD/App")) == NULL)
             return false;
 
-        _installed_apps = (char ***)malloc(100 * sizeof(char **));
+        _installed_apps = (char***)malloc(100 * sizeof(char**));
 
         while ((ep = readdir(dp))) {
-            if (ep->d_type != DT_DIR || strcmp(ep->d_name, ".") == 0 ||
-                strcmp(ep->d_name, "..") == 0)
+            if (ep->d_type != DT_DIR || strcmp(ep->d_name, ".") == 0 || strcmp(ep->d_name, "..") == 0)
                 continue;
             int i = installed_apps_count;
-
+    
             if (!_getAppDirAndConfig(ep->d_name, app_dir, config_path))
                 continue;
 
-            _installed_apps[i] = (char **)malloc(2 * sizeof(char *));
-            _installed_apps[i][0] = (char *)malloc(STR_MAX * sizeof(char));
-            _installed_apps[i][1] = (char *)malloc(STR_MAX * sizeof(char));
+            _installed_apps[i] = (char**)malloc(2 * sizeof(char*));
+            _installed_apps[i][0] = (char*)malloc(STR_MAX * sizeof(char));
+            _installed_apps[i][1] = (char*)malloc(STR_MAX * sizeof(char));
 
             strncpy(_installed_apps[i][0], ep->d_name, STR_MAX - 1);
-            file_parseKeyValue(config_path, "label", _installed_apps[i][1], ':',
-                               0);
+            file_parseKeyValue(config_path, "label", _installed_apps[i][1], ':', 0);
 
-            printf_debug("app %d: %s (%s)\n", i, _installed_apps[i][0],
-                         _installed_apps[i][1]);
+            printf_debug("app %d: %s (%s)\n", i, _installed_apps[i][0], _installed_apps[i][1]);
 
             installed_apps_count++;
         }
@@ -221,7 +202,7 @@ bool getAppPosition(const char *app_dir_name, int *currpos, int *total)
 void run_app(const char *app_dir_name)
 {
     char app_dir[STR_MAX], config_path[STR_MAX];
-
+    
     if (!_getAppDirAndConfig(app_dir_name, app_dir, config_path))
         return;
 
@@ -233,14 +214,12 @@ void run_app(const char *app_dir_name)
 
     FILE *fp;
     char cmd[STR_MAX * 4];
-    snprintf(cmd, STR_MAX * 4 - 1,
-             "cd %s; chmod a+x ./%s; "
-             "LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so ./%s",
-             app_dir, launch, launch);
+    snprintf(cmd, STR_MAX * 4 - 1, "cd %s; chmod a+x ./%s; LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so ./%s", app_dir, launch, launch);
     file_put_sync(fp, "/tmp/cmd_to_run.sh", "%s", cmd);
 }
 
-typedef enum mainui_states {
+typedef enum mainui_states
+{
     MAIN_MENU,
     RECENTS,
     FAVORITES,
@@ -253,43 +232,23 @@ void write_mainui_state(MainUIState state, int currpos, int total)
 {
     FILE *fp;
     char state_str[STR_MAX];
-    int title_num = 0, page_type = 0, page_size = 6, page_start = 0, page_end,
-        main_currpos = 0, main_page_start = 0, main_page_end;
+    int title_num = 0,
+        page_type = 0,
+        page_size = 6,
+        page_start = 0,
+        page_end,
+        main_currpos = 0,
+        main_page_start = 0,
+        main_page_end;
 
     switch (state) {
-    case MAIN_MENU:
-        remove("/tmp/state.json");
-        return;
-    case RECENTS:
-        title_num = 18;
-        page_type = 10;
-        main_currpos = 0;
-        break;
-    case FAVORITES:
-        title_num = 1;
-        page_type = 2;
-        main_currpos = 1;
-        break;
-    case GAMES:
-        title_num = 2;
-        page_type = 1;
-        page_size = 8;
-        main_currpos = 2;
-        break;
-    case EXPERT:
-        title_num = 0;
-        page_type = 16;
-        page_size = 9;
-        main_currpos = 3;
-        break;
-    case APPS:
-        title_num = 107;
-        page_type = 3;
-        page_size = 4;
-        main_currpos = 4;
-        break;
-    default:
-        return;
+        case MAIN_MENU: remove("/tmp/state.json"); return;
+        case RECENTS: title_num = 18; page_type = 10; main_currpos = 0; break;
+        case FAVORITES: title_num = 1; page_type = 2; main_currpos = 1; break;
+        case GAMES: title_num = 2; page_type = 1; page_size = 8; main_currpos = 2; break;
+        case EXPERT: title_num = 0; page_type = 16; page_size = 9; main_currpos = 3; break;
+        case APPS: title_num = 107; page_type = 3; page_size = 4; main_currpos = 4; break;
+        default: return;
     }
 
     int main_total = 6;
@@ -314,12 +273,7 @@ void write_mainui_state(MainUIState state, int currpos, int total)
         page_start = currpos;
     page_end = page_start + page_size - 1;
 
-    sprintf(state_str,
-            "{\"list\":[{\"title\":132,\"type\":0,\"currpos\":%d,\"pagestart\":"
-            "%d,\"pageend\":%d},{\"title\":%d,\"type\":%d,\"currpos\":%d,"
-            "\"pagestart\":%d,\"pageend\":%d}]}",
-            main_currpos, main_page_start, main_page_end, title_num, page_type,
-            currpos, page_start, page_end);
+    sprintf(state_str, "{\"list\":[{\"title\":132,\"type\":0,\"currpos\":%d,\"pagestart\":%d,\"pageend\":%d},{\"title\":%d,\"type\":%d,\"currpos\":%d,\"pagestart\":%d,\"pageend\":%d}]}", main_currpos, main_page_start, main_page_end, title_num, page_type, currpos, page_start, page_end);
 
     file_put_sync(fp, "/tmp/state.json", "%s", state_str);
 }
@@ -327,30 +281,23 @@ void write_mainui_state(MainUIState state, int currpos, int total)
 //
 //    [onion] get recent filename from content_history.lpl
 //
-char *history_getRecentPath(char *filename)
-{
+char* history_getRecentPath(char *filename) {
     file_parseKeyValue(HISTORY_PATH, "path", filename, ':', 0);
-    if (*filename == 0)
-        return NULL;
+    if (*filename == 0) return NULL;
     return filename;
 }
 
-char *history_getRecentCommand(char *RACommand, int index)
-{
-    char rom_path[STR_MAX], core_path[STR_MAX];
-
+char* history_getRecentCommand(char *RACommand, int index) {
+    char rom_path[STR_MAX],
+         core_path[STR_MAX];
+    
     file_parseKeyValue(HISTORY_PATH, "path", rom_path, ':', index);
-    if (*rom_path == 0)
-        return NULL;
+    if (*rom_path == 0) return NULL;
 
     file_parseKeyValue(HISTORY_PATH, "core_path", core_path, ':', index);
-    if (*core_path == 0)
-        return NULL;
+    if (*core_path == 0) return NULL;
 
-    snprintf(RACommand, STR_MAX * 3,
-             "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v -L "
-             "\"%s\" \"%s\"",
-             core_path, rom_path);
+    snprintf(RACommand, STR_MAX * 3, "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v -L \"%s\" \"%s\"", core_path, rom_path);
 
     return RACommand;
 }

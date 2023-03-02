@@ -1,13 +1,13 @@
 #include <stdio.h>
 
 #ifdef PLATFORM_MIYOOMINI
-#include "mi_common_datatype.h"
 #include "mi_sys.h"
+#include "mi_common_datatype.h"
 #endif
 
 int main(void)
 {
-#ifdef PLATFORM_MIYOOMINI
+    #ifdef PLATFORM_MIYOOMINI
 
     MI_U64 u64Uuid;
     MI_S32 s32Ret = MI_ERR_SYS_FAILED;
@@ -15,7 +15,7 @@ int main(void)
     if (!(s32Ret = MI_SYS_ReadUuid(&u64Uuid)))
         printf("%llx\n", u64Uuid);
 
-#endif
+    #endif
 
     return 0;
 }

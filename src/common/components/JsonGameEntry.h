@@ -1,15 +1,16 @@
 #ifndef JSON_GAME_ENTRY_H__
 #define JSON_GAME_ENTRY_H__
 
-#include "utils/file.h"
 #include "utils/json.h"
 #include "utils/str.h"
+#include "utils/file.h"
 
 #define RECENTLIST_PATH "/mnt/SDCARD/Roms/recentlist.json"
 #define RECENTLIST_HIDDEN_PATH "/mnt/SDCARD/Roms/recentlist-hidden.json"
 #define FAVORITES_PATH "/mnt/SDCARD/Roms/favourite.json"
 
-typedef struct json_game_entry_s {
+typedef struct json_game_entry_s
+{
     char label[STR_MAX];
     char launch[STR_MAX];
     int type;
@@ -20,12 +21,14 @@ typedef struct json_game_entry_s {
 
 JsonGameEntry JsonGameEntry_fromJson(const char *json_str)
 {
-    JsonGameEntry entry = {.label = "",
-                           .launch = "",
-                           .type = 5,
-                           .rompath = "",
-                           .imgpath = "",
-                           .emupath = ""};
+    JsonGameEntry entry = {
+        .label = "",
+        .launch = "",
+        .type = 5,
+        .rompath = "",
+        .imgpath = "",
+        .emupath = ""
+    };
 
     cJSON *root = cJSON_Parse(json_str);
     json_getString(root, "label", entry.label);
@@ -51,5 +54,6 @@ void JsonGameEntry_toJson(char dest[STR_MAX * 6], JsonGameEntry *entry)
     sprintf(dest + strlen(dest), "\"rompath\":\"%s\"", entry->rompath);
     strcat(dest, "}");
 }
+
 
 #endif // JSON_GAME_ENTRY_H__

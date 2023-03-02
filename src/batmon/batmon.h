@@ -1,31 +1,31 @@
 #ifndef ADC_H__
 #define ADC_H__
 
-#include <fcntl.h>
-#include <pthread.h>
-#include <signal.h>
-#include <stdbool.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <sys/file.h>
-#include <sys/ioctl.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <sys/file.h>
+#include <pthread.h>
+#include <signal.h>
 
 #ifdef PLATFORM_MIYOOMINI
 #include "shmvar/shmvar.h"
 #endif
 
-#include "system/battery.h"
-#include "system/display.h"
 #include "system/system.h"
+#include "system/display.h"
+#include "system/battery.h"
+#include "utils/flags.h"
 #include "utils/config.h"
 #include "utils/file.h"
-#include "utils/flags.h"
 #include "utils/log.h"
 
-#define CHECK_BATTERY_TIMEOUT_S 15 // s - check battery percentage every 15s
+#define CHECK_BATTERY_TIMEOUT_S 15 //s - check battery percentage every 15s
 
 // for reading battery
 #define SARADC_IOC_MAGIC 'a'
@@ -47,7 +47,7 @@ void cleanup(void);
 bool isCharging(void);
 int updateADCValue(int);
 int batteryPercentage(int);
-static void *batteryWarning_thread(void *param);
+static void* batteryWarning_thread(void* param);
 void batteryWarning_show(void);
 void batteryWarning_hide(void);
 

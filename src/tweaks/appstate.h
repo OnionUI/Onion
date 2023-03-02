@@ -3,9 +3,9 @@
 
 #include <signal.h>
 
-#include "components/list.h"
-#include "utils/keystate.h"
 #include "utils/sdl_init.h"
+#include "utils/keystate.h"
+#include "components/list.h"
 
 static int menu_level = 0;
 static List *menu_stack[5];
@@ -24,12 +24,11 @@ static bool skip_next_change = false;
 static void sigHandler(int sig)
 {
     switch (sig) {
-    case SIGINT:
-    case SIGTERM:
-        quit = true;
-        break;
-    default:
-        break;
+        case SIGINT:
+        case SIGTERM:
+            quit = true;
+            break;
+        default: break;
     }
 }
 

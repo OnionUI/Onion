@@ -5,18 +5,18 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "./file.h"
 #include "cjson/cJSON.h"
+#include "./file.h"
 
 #define JSON_STRING_LEN 256
-#define JSON_FORMAT_NUMBER "    \"%s\": %d,\n"
+#define JSON_FORMAT_NUMBER    "    \"%s\": %d,\n"
 #define JSON_FORMAT_NUMBER_NC "    \"%s\": %d\n"
-#define JSON_FORMAT_STRING "    \"%s\": \"%s\",\n"
+#define JSON_FORMAT_STRING    "    \"%s\": \"%s\",\n"
 #define JSON_FORMAT_STRING_NC "    \"%s\": \"%s\"\n"
-#define JSON_FORMAT_TAB_NUMBER "	\"%s\":	%d,\n"
-#define JSON_FORMAT_TAB_NUMBER_NC "	\"%s\":	%d\n"
-#define JSON_FORMAT_TAB_STRING "	\"%s\":	\"%s\",\n"
-#define JSON_FORMAT_TAB_STRING_NC "	\"%s\":	\"%s\"\n"
+#define JSON_FORMAT_TAB_NUMBER     "	\"%s\":	%d,\n"
+#define JSON_FORMAT_TAB_NUMBER_NC  "	\"%s\":	%d\n"
+#define JSON_FORMAT_TAB_STRING     "	\"%s\":	\"%s\",\n"
+#define JSON_FORMAT_TAB_STRING_NC  "	\"%s\":	\"%s\"\n"
 
 bool json_getString(cJSON *object, const char *key, char *dest)
 {
@@ -82,17 +82,16 @@ bool json_forceSetString(cJSON *object, const char *key, const char *value)
 
 /**
  * @brief Loads and parses a json file.
- *
- * @param file_path
+ * 
+ * @param file_path 
  * @return cJSON* Root json object. Remember to cJSON_free the result.
  */
-cJSON *json_load(const char *file_path)
+cJSON* json_load(const char *file_path)
 {
     return cJSON_Parse(file_read(file_path));
 }
 
-void json_save(cJSON *object, char *file_path)
-{
+void json_save(cJSON *object, char *file_path) {
     if (object == NULL || file_path == NULL)
         return;
 
@@ -102,7 +101,7 @@ void json_save(cJSON *object, char *file_path)
     if ((fp = fopen(file_path, "w+")) != NULL) {
         fwrite(output, strlen(output), 1, fp);
         fclose(fp);
-    }
+	}
 
     if (output != NULL)
         cJSON_free(output);

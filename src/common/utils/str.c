@@ -1,47 +1,44 @@
 #include "./str.h"
 
-#include <ctype.h>
-#include <stdbool.h>
-#include <stdint.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
+#include <string.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <ctype.h>
 
-bool str_getLastNumber(char *str, long *out_val)
+bool str_getLastNumber(char* str, long* out_val)
 {
-    char *p = str;
-    long val = -1;
+	char *p = str;
+	long val = -1;
 
     while (*p) {
         if (isdigit(*p))
             val = strtol(p, &p, 10);
-        else
-            p++;
+		else p++;
     }
 
-    if (val != -1)
-        *out_val = val;
+	if (val != -1)
+		*out_val = val;
 
-    return val != -1;
+	return val != -1;
 }
 
-char *str_split(char *str, const char *delim)
+char* str_split(char *str, const char *delim)
 {
     char *p = strstr(str, delim);
-    if (p == NULL)
-        return NULL;          // delimiter not found
-    *p = '\0';                // terminate string after head
-    return p + strlen(delim); // return tail substring
+    if (p == NULL) return NULL;     // delimiter not found
+    *p = '\0';                      // terminate string after head
+    return p + strlen(delim);       // return tail substring
 }
 
-char *str_replace(char *orig, char *rep, char *with)
-{
-    char *ins;     // the next insert point
-    char *tmp;     // varies
-    int len_rep;   // length of rep (the string to remove)
-    int len_with;  // length of with (the string to replace rep with)
+char* str_replace(char *orig, char *rep, char *with) {
+    char *ins;    // the next insert point
+    char *tmp;    // varies
+    int len_rep;  // length of rep (the string to remove)
+    int len_with; // length of with (the string to replace rep with)
     int len_front; // distance between rep and end of last rep
-    int count;     // number of replacements
+    int count;    // number of replacements
 
     // sanity checks and initialization
     if (!orig || !rep)
@@ -58,8 +55,7 @@ char *str_replace(char *orig, char *rep, char *with)
     for (count = 0; (tmp = strstr(ins, rep)); ++count)
         ins = tmp + len_rep;
 
-    char *result =
-        (char *)malloc(strlen(orig) + (len_with - len_rep) * count + 1);
+    char *result = (char*)malloc(strlen(orig) + (len_with - len_rep) * count + 1);
     tmp = result;
 
     if (!result)
@@ -86,7 +82,7 @@ char *str_replace(char *orig, char *rep, char *with)
 // truncated.
 size_t str_trim(char *out, size_t len, const char *str, bool first)
 {
-    if (len == 0)
+    if(len == 0)
         return 0;
 
     const char *end;
@@ -94,19 +90,16 @@ size_t str_trim(char *out, size_t len, const char *str, bool first)
     bool is_string = false;
 
     // Trim leading space
-    while (strchr("\r\n\t {},", (unsigned char)*str) != NULL)
-        str++;
-
+    while(strchr("\r\n\t {},", (unsigned char)*str) != NULL) str++;
+    
     end = str + 1;
-
+    
     if ((unsigned char)*str == '"') {
-        is_string = true;
-        str++;
-        while (strchr("\r\n\"", (unsigned char)*end) == NULL)
-            end++;
+        is_string = true; str++;
+        while(strchr("\r\n\"", (unsigned char)*end) == NULL) end++;
     }
 
-    if (*str == 0) // All spaces?
+    if(*str == 0)  // All spaces?
     {
         *out = 0;
         return 1;
@@ -114,21 +107,18 @@ size_t str_trim(char *out, size_t len, const char *str, bool first)
 
     // Trim trailing space
     if (first)
-        while (strchr("\r\n\t {},", (unsigned char)*end) == NULL)
-            end++;
+        while(strchr("\r\n\t {},", (unsigned char)*end) == NULL) end++;
     else {
         end = str + strlen(str) - 1;
-        while (end > str && strchr("\r\n\t {},", (unsigned char)*end) != NULL)
-            end--;
+        while(end > str && strchr("\r\n\t {},", (unsigned char)*end) != NULL) end--;
         end++;
     }
 
-    if (is_string && (unsigned char)*(end - 1) == '"')
+    if (is_string && (unsigned char)*(end-1) == '"')
         end--;
 
-    // Set output size to minimum of trimmed string length and buffer size minus
-    // 1
-    out_size = (end - str) < len - 1 ? (end - str) : len - 1;
+    // Set output size to minimum of trimmed string length and buffer size minus 1
+    out_size = (end - str) < len-1 ? (end - str) : len-1;
 
     // Copy trimmed string and add null terminator
     memcpy(out, str, out_size);
@@ -143,7 +133,7 @@ int str_endsWith(const char *str, const char *suffix)
         return 0;
     size_t lenstr = strlen(str);
     size_t lensuffix = strlen(suffix);
-    if (lensuffix > lenstr)
+    if (lensuffix >  lenstr)
         return 0;
     return strncmp(str + lenstr - lensuffix, suffix, lensuffix) == 0;
 }
