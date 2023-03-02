@@ -20,7 +20,7 @@ extern struct fb_var_screeninfo vinfo;
 //	enum for Flipflags, default value is defined in gfx.c
 //	GFX_BLOCKING	: limit to 60fps but never skips frames
 //			:  in case of clearing all buffers by GFX_Flip()x3,
-//needs to use BLOCKING (or GFX_FlipForce())
+// needs to use BLOCKING (or GFX_FlipForce())
 //	GFX_FLIPWAIT	: wait until Blit is done when flip
 //			:  when NOWAIT, do not clear/write source surface
 // immediately after Flip 			:  if absolutely necessary, use
