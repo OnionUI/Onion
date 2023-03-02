@@ -15,8 +15,8 @@
 //	FREEMMA		: force free all allocated MMAs when init & quit
 #define FREEMMA
 //	GFX_BLOCKING	: limit to 60fps but never skips frames
-//			:  in case of clearing all buffers by GFX_Flip()x3, needs
-//to use BLOCKING (or GFX_FlipForce())
+//			:  in case of clearing all buffers by GFX_Flip()x3,
+//needs to use BLOCKING (or GFX_FlipForce())
 //	GFX_FLIPWAIT	: wait until Blit is done when flip
 //			:  when NOWAIT, do not clear/write source surface
 // immediately after Flip 			:  if absolutely necessary, use
@@ -190,9 +190,9 @@ static inline void FlushCacheNeeded(void *pixels, uint32_t pitch, uint32_t y,
 //
 //	GFX Flip / in place of SDL_Flip
 //		HW Blit : surface -> FB(backbuffer) with
-// Rotate180/bppConvert/Scaling 			and Request Flip 		*Note*
-// blit from entire surface(or clip_rect if specified) to entire framebuffer(or
-// sHWsurface)
+// Rotate180/bppConvert/Scaling 			and Request Flip
+// *Note* blit from entire surface(or clip_rect if specified) to entire
+// framebuffer(or sHWsurface)
 //
 void GFX_FlipExec(SDL_Surface *surface, uint32_t flags)
 {
