@@ -1,13 +1,14 @@
 #include "log.h"
 
-#include <stdio.h>
 #include <stdarg.h>
+#include <stdio.h>
 
 #include "./str.h"
 
-void log_debug(const char *filename, int line, const char *format_str,...) {
+void log_debug(const char *filename, int line, const char *format_str, ...)
+{
     char log_message[512], cmd[512];
-    
+
     va_list valist;
     va_start(valist, format_str);
     sprintf(log_message, "%s:%d>\t", filename, line);

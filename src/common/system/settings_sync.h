@@ -12,7 +12,7 @@ static KeyShmInfo shminfo;
 
 void settings_sync(void)
 {
-    #ifdef PLATFORM_MIYOOMINI
+#ifdef PLATFORM_MIYOOMINI
     SetKeyShm(&shminfo, MONITOR_VOLUME, settings.volume);
     SetKeyShm(&shminfo, MONITOR_BRIGHTNESS, settings.brightness);
     SetKeyShm(&shminfo, MONITOR_KEYMAP, 0);
@@ -25,21 +25,20 @@ void settings_sync(void)
     SetKeyShm(&shminfo, MONITOR_SATURATION, settings.saturation);
     SetKeyShm(&shminfo, MONITOR_CONTRAST, settings.contrast);
     SetKeyShm(&shminfo, MONITOR_AUDIOFIX, settings.audiofix);
-    #endif
+#endif
 }
 
 void settings_init(void)
 {
-    #ifdef PLATFORM_MIYOOMINI
+#ifdef PLATFORM_MIYOOMINI
     InitKeyShm(&shminfo);
 
     // Disable MainUI battery monitor
     SetKeyShm(&shminfo, MONITOR_ADC_VALUE, 640);
-    #endif
+#endif
 
     settings_load();
     settings_sync();
 }
-
 
 #endif // SETTINGS_SYNC_H__
