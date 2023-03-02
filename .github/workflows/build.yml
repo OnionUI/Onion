@@ -20,10 +20,10 @@ jobs:
           # make sure the parent commit is grabbed as well, because
           # that's what will get formatted (i.e. the most recent commit)
           fetch-depth: 2
+      # Get latest clang-format
+      - run: sudo apt install clang-format
       # format the latest commit
-      - run: |
-          sudo apt install clang-format
-          make format
+      - run: make format
       # commit the changes (if there are any)
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4.1.2
