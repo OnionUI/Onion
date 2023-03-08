@@ -1,0 +1,24 @@
+#!/bin/sh
+# Standalone Ports Script Template
+
+# main configuration :
+GameName="Duke Nuclear Winter (PORT - eduke32)"
+GameDir="Duke nukem 3D (eduke32)"
+GameExecutable="eduke32"
+GameDataFile="nwinter.grp"
+
+# additional configuration
+KillAudioserver=1
+PerformanceMode=0
+
+# specific to this port :
+Arguments="-usecwd -gamegrp nwinter.grp"
+pkill -9 keymon
+
+# running command line :
+/mnt/SDCARD/Emu/PORTS/launch_standalone.sh "$GameName" "$GameDir" "$GameExecutable" "$Arguments" "$GameDataFile" "$KillAudioserver" "$PerformanceMode"
+
+/mnt/SDCARD/.tmp_update/bin/keymon &
+
+
+

@@ -1,0 +1,25 @@
+#!/bin/sh
+# Retroarch Ports Script Template
+
+# main configuration :
+GameName="Doom Sigil (Port - PrBoom)"
+Core="prboom"
+RomDir="Doom (PrBoom)"
+RomFile="SIGIL_v1_21.wad"
+KillAudioserver=0
+PerformanceMode=0
+
+# additional configuration
+KillAudioserver=0
+PerformanceMode=0
+
+# specific to this port :
+Arguments=""
+
+# running command line :
+/mnt/SDCARD/Emu/PORTS/launch_retroarch.sh "$GameName" "$Core" "$RomDir" "$RomFile" "$Arguments" "$KillAudioserver" "$PerformanceMode"
+
+
+
+
+

@@ -1,0 +1,20 @@
+#!/bin/sh
+# Standalone Ports Script Template
+
+# main configuration :
+GameName="C-Dogs (Port)"
+GameDir="C-Dogs"
+GameExecutable="cdogs-sdl"
+GameDataFile=""
+
+# additional configuration
+KillAudioserver=0
+PerformanceMode=1
+
+# specific to this port :
+Arguments=""
+ParasytePath="/mnt/SDCARD/.tmp_update/lib/parasyte"
+export LD_LIBRARY_PATH="$ParasytePath:$LD_LIBRARY_PATH"
+
+# running command line :
+/mnt/SDCARD/Emu/PORTS/launch_standalone.sh "$GameName" "$GameDir" "$GameExecutable" "$Arguments" "$GameDataFile" "$KillAudioserver" "$PerformanceMode"

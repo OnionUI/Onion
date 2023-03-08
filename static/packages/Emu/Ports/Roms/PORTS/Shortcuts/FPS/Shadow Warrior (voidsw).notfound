@@ -1,0 +1,22 @@
+#!/bin/sh
+# Standalone Ports Script Template
+
+# main configuration :
+GameName="Shadow Warrior (Port - voidsw)"
+GameDir="Shadow Warrior (voidsw)"
+GameExecutable="voidsw"
+GameDataFile="SW.GRP"
+
+# additional configuration
+KillAudioserver=1
+PerformanceMode=0
+
+# specific to this port :
+Arguments="-usecwd -addon0"
+pkill -9 keymon
+
+# running command line :
+/mnt/SDCARD/Emu/PORTS/launch_standalone.sh "$GameName" "$GameDir" "$GameExecutable" "$Arguments" "$GameDataFile" "$KillAudioserver" "$PerformanceMode"
+
+/mnt/SDCARD/.tmp_update/bin/keymon &
+

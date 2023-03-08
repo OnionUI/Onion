@@ -1,0 +1,19 @@
+#!/bin/sh
+# Standalone Ports Script Template
+
+# main configuration :
+GameName="Hydra Castle Labyrinth (Port)"
+GameDir="Hydra Castle Labyrinth"
+GameExecutable="hcl"
+GameDataFile=""
+
+# additional configuration
+KillAudioserver=0
+PerformanceMode=0
+
+# specific to this port :
+Arguments=""
+
+# running command line :
+/mnt/SDCARD/Emu/PORTS/launch_standalone.sh "$GameName" "$GameDir" "$GameExecutable" "$Arguments" "$GameDataFile" "$KillAudioserver" "$PerformanceMode"
+
