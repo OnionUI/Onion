@@ -1,7 +1,7 @@
 {
 "label":"PSX",
-"icon":"../../Icons/ps.png",
-"iconsel":"../../Icons/ps.png",
+"icon":"../../Icons/Default/ps.png",
+"iconsel":"../../Icons/Default/ps.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/PS",
 "imgpath":"../../Roms/PS/Imgs",

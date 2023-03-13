@@ -1,6 +1,6 @@
 {
 "label":"Jaguar",
-"icon":"../../Icons/rapp/jaguar.png",
+"icon":"../../Icons/Default/rapp/jaguar.png",
 "iconsel":"",
 "launch":"launch.sh",
 "rompath":"../../Roms/JAGUAR",

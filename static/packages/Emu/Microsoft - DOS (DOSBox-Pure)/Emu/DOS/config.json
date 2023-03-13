@@ -1,7 +1,7 @@
 {
 "label":"MS-DOS",
-"icon":"../../Icons/dos.png",
-"iconsel":"../../Icons/dos.png",
+"icon":"../../Icons/Default/dos.png",
+"iconsel":"../../Icons/Default/dos.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/DOS",
 "imgpath":"../../Roms/DOS/Imgs",

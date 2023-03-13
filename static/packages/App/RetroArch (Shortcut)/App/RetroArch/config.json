@@ -1,6 +1,6 @@
 {
 "label":"RetroArch",
-"icon":"../../Icons/app/retroarch.png",
+"icon":"../../Icons/Default/app/retroarch.png",
 "launch":"launch.sh",
 "description":"Advanced emulator settings"
 }

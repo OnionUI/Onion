@@ -1,7 +1,7 @@
 {
 "label":"gen_plus_gx_hacks",
-"icon":"genesis_plus_gx.png",
-"iconsel":"",
+"icon":"../../Icons/Default/rapp/genesis_plus_gx_hacks.png",
+"iconsel":"../../Icons/Default/rapp/genesis_plus_gx_hacks.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/MDHACKS",
 "imgpath":"../../Roms/MDHACKS/Imgs",

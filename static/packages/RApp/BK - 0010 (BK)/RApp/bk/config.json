@@ -1,7 +1,7 @@
 {
 "label":"elektronikabk",
-"icon":"bk.png",
-"iconsel":"",
+"icon":"../../Icons/Default/rapp/bk.png",
+"iconsel":"../../Icons/Default/rapp/bk.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/EBK",
 "imgpath":"../../Roms/EBK/Imgs",

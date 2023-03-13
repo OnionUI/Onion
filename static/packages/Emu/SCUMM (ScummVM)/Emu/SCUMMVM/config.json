@@ -1,7 +1,7 @@
 {
 "label":"ScummVM",
-"icon":"../../Icons/scummvm.png",
-"iconsel":"../../Icons/scummvm.png",
+"icon":"../../Icons/Default/scummvm.png",
+"iconsel":"../../Icons/Default/scummvm.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/SCUMMVM/Shortcuts",
 "imgpath":"../../Roms/SCUMMVM/Imgs",

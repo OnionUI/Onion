@@ -11,8 +11,8 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "utils/str.h"
 #include "utils/file.h"
+#include "utils/str.h"
 
 #define CLOCK_SAVE_FILE "/mnt/SDCARD/Saves/CurrentProfile/saves/currentTime.txt"
 
@@ -22,7 +22,8 @@ static bool clock_paused = false;
 //
 //    Read Clock (system)
 //
-void system_clock_get(void) {
+void system_clock_get(void)
+{
     struct timeval tod;
     gettimeofday(&tod, NULL);
     gmtime_r(&tod.tv_sec, &clk);
@@ -31,19 +32,22 @@ void system_clock_get(void) {
 //
 //    Read Clock (RTC)
 //
-void system_rtc_get(void) {
+void system_rtc_get(void)
+{
     int cfd;
     if ((cfd = open("/dev/rtc0", O_RDONLY)) > 0) {
         ioctl(cfd, RTC_RD_TIME, &clk);
         close(cfd);
     }
-    else system_clock_get();
+    else
+        system_clock_get();
 }
 
 //
 //    Write Clock (system)
 //
-void system_clock_set(void) {
+void system_clock_set(void)
+{
     struct timeval tod;
     gettimeofday(&tod, NULL);
     tod.tv_sec = mktime(&clk);
@@ -53,7 +57,8 @@ void system_clock_set(void) {
 //
 //    Write Clock (RTC & system)
 //
-void system_rtc_set(void) {
+void system_rtc_set(void)
+{
     int cfd;
     if ((cfd = open("/dev/rtc0", O_WRONLY)) >= 0) {
         ioctl(cfd, RTC_SET_TIME, &clk);
@@ -67,7 +72,7 @@ void system_rtc_set(void) {
 //
 void system_clock_save(void)
 {
-    FILE* fp;
+    FILE *fp;
     if (clock_paused)
         return;
     system_clock_get();
@@ -79,7 +84,7 @@ void system_clock_save(void)
 //
 void system_clock_load(void)
 {
-    FILE* fp;
+    FILE *fp;
     struct timeval tod;
     gettimeofday(&tod, NULL);
     file_get(fp, CLOCK_SAVE_FILE, "%ld", &tod.tv_sec);
@@ -88,7 +93,7 @@ void system_clock_load(void)
 
 //
 //    [onion] suspend/resume PlayActivity timer
-// 
+//
 void system_clock_pause(bool enabled)
 {
     if (enabled)
@@ -103,7 +108,7 @@ void system_clock_pause(bool enabled)
 
 /**
  * @brief Get current time in milliseconds (uses CLOCK_MONOTONIC_RAW)
- * 
+ *
  * @return int Milliseconds
  */
 int getMilliseconds(void)
@@ -116,7 +121,7 @@ int getMilliseconds(void)
 
 /**
  * @brief Get current time in seconds (uses CLOCK_MONOTONIC_COARSE)
- * 
+ *
  * @return int Seconds
  */
 int getSeconds(void)

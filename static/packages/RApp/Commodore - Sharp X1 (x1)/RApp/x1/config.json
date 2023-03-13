@@ -1,7 +1,7 @@
 {
 "label":"x1",
-"icon":"x1.png",
-"iconsel":"",
+"icon":"../../Icons/Default/rapp/x1.png",
+"iconsel":"../../Icons/Default/rapp/x1.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/XONE",
 "imgpath":"../../Roms/XONE/Imgs",

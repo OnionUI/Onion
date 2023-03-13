@@ -1,7 +1,7 @@
 {
 "label":"TG-CD",
-"icon":"../../Icons/pcecd.png",
-"iconsel":"../../Icons/pcecd.png",
+"icon":"../../Icons/Default/pcecd.png",
+"iconsel":"../../Icons/Default/pcecd.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/PCECD",
 "imgpath":"../../Roms/PCECD/Imgs",

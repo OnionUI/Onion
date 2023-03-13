@@ -1,13 +1,13 @@
 #ifndef PROCESS_H__
 #define PROCESS_H__
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
 #include <dirent.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #ifndef DT_DIR
 #define DT_DIR 4
@@ -30,13 +30,16 @@ pid_t process_searchpid(const char *commname)
     while ((dir = readdir(procdp))) {
         if (dir->d_type == DT_DIR) {
             pid = atoi(dir->d_name);
-            if ( pid > 2 ) {
+            if (pid > 2) {
                 sprintf(fname, "/proc/%d/comm", pid);
                 FILE *fp = fopen(fname, "r");
                 if (fp) {
                     fscanf(fp, "%127s", comm);
                     fclose(fp);
-                    if (!strncmp(comm, commname, commlen)) { ret = pid; break; }
+                    if (!strncmp(comm, commname, commlen)) {
+                        ret = pid;
+                        break;
+                    }
                 }
             }
         }
@@ -65,21 +68,25 @@ void process_killall(const char *commname)
         kill(pid, SIGKILL);
 }
 
-bool process_start(const char *pname, const char *args, const char *home, bool await)
+bool process_start(const char *pname, const char *args, const char *home,
+                   bool await)
 {
-    char filename[256]; sprintf(filename, "%s/bin/%s", home != NULL ? home : ".", pname);
-    if (!exists(filename)) sprintf(filename, "%s/%s", home != NULL ? home : ".", pname);
-    if (!exists(filename)) sprintf(filename, "/mnt/SDCARD/.tmp_update/bin/%s", pname);
-    if (!exists(filename)) sprintf(filename, "/mnt/SDCARD/.tmp_update/%s", pname);
-    if (!exists(filename)) sprintf(filename, "/mnt/SDCARD/miyoo/app/%s", pname);
-    if (!exists(filename)) return false;
+    char filename[256];
+    sprintf(filename, "%s/bin/%s", home != NULL ? home : ".", pname);
+    if (!exists(filename))
+        sprintf(filename, "%s/%s", home != NULL ? home : ".", pname);
+    if (!exists(filename))
+        sprintf(filename, "/mnt/SDCARD/.tmp_update/bin/%s", pname);
+    if (!exists(filename))
+        sprintf(filename, "/mnt/SDCARD/.tmp_update/%s", pname);
+    if (!exists(filename))
+        sprintf(filename, "/mnt/SDCARD/miyoo/app/%s", pname);
+    if (!exists(filename))
+        return false;
 
     char cmd[512];
-    sprintf(cmd, "cd \"%s\"; %s %s %s",
-        home != NULL ? home : ".",
-        filename,
-        args != NULL ? args : "",
-        await ? "" : "&");
+    sprintf(cmd, "cd \"%s\"; %s %s %s", home != NULL ? home : ".", filename,
+            args != NULL ? args : "", await ? "" : "&");
     system(cmd);
 
     return true;
