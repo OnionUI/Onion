@@ -13,12 +13,12 @@ PerformanceMode=0
 
 # specific to this port :
 Arguments="-usecwd  -addon1"
-pkill -9 keymon
+touch /tmp/disable_menu_button
 
 # running command line :
 /mnt/SDCARD/Emu/PORTS/launch_standalone.sh "$GameName" "$GameDir" "$GameExecutable" "$Arguments" "$GameDataFile" "$KillAudioserver" "$PerformanceMode"
 ec=$?
 
-/mnt/SDCARD/.tmp_update/bin/keymon &
+rm -f /tmp/disable_menu_button
 
 exit $ec

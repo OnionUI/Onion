@@ -284,8 +284,9 @@ bool menuButtonAction(uint32_t val, bool comboKey)
             menu_super_short_pulse();
 
         while (1) {
-            if (poll(fds, 1, 300 - (getMilliseconds() - menu_last_pressed)) >
-                0) {
+            if (settings.ingame_double_press != 0 &&
+                poll(fds, 1, 300 - (getMilliseconds() - menu_last_pressed)) >
+                    0) {
                 if (!keyinput_isValid())
                     continue;
 
