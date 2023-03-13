@@ -1,0 +1,19 @@
+#!/bin/sh
+# Standalone Ports Script Template
+
+# main configuration :
+GameName="Redneck Rampage (Port - rednukem)"
+GameDir="Redneck Rampage (rednukem)"
+GameExecutable="rednukem"
+GameDataFile="REDNECK.GRP"
+
+# additional configuration
+KillAudioserver=1
+PerformanceMode=0
+
+# specific to this port :
+Arguments=""
+
+# running command line :
+/mnt/SDCARD/Emu/PORTS/launch_standalone.sh "$GameName" "$GameDir" "$GameExecutable" "$Arguments" "$GameDataFile" "$KillAudioserver" "$PerformanceMode"
+

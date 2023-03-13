@@ -1,0 +1,18 @@
+#!/bin/sh
+# Standalone Ports Script Template
+
+# main configuration :
+GameName="Street of Rage Remake (Port)"
+GameDir="Street of Rage Remake"
+GameExecutable="libs/bgdi"
+GameDataFile="SorR.dat"
+
+# additional configuration
+KillAudioserver=0
+PerformanceMode=0
+
+# specific to this port :
+Arguments="./SorR.dat"
+
+# running command line :
+/mnt/SDCARD/Emu/PORTS/launch_standalone.sh "$GameName" "$GameDir" "$GameExecutable" "$Arguments" "$GameDataFile" "$KillAudioserver" "$PerformanceMode"
