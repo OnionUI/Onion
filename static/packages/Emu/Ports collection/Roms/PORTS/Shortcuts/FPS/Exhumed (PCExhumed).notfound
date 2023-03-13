@@ -5,7 +5,7 @@
 GameName="Exhumed (Port - PCExhumed)"
 GameDir="Exhumed (PCExhumed)"
 GameExecutable="pcexhumed"
-GameDataFile=
+GameDataFile="STUFF.DAT"
 
 # additional configuration
 KillAudioserver=1

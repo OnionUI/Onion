@@ -2,21 +2,17 @@
 # Standalone Ports Script Template
 
 # main configuration :
-GameName="Shadow Warrior - Twin Dragon (Port - voidsw)"
-GameDir="Shadow Warrior (voidsw)"
-GameExecutable="voidsw"
-GameDataFile="TD.GRP"
+GameName="Street of Rage Remake (Port)"
+GameDir="Street of Rage Remake"
+GameExecutable="libs/bgdi"
+GameDataFile="SorR.dat"
 
 # additional configuration
-KillAudioserver=1
+KillAudioserver=0
 PerformanceMode=0
 
 # specific to this port :
-Arguments="-usecwd  -addon2"
-pkill -9 keymon
+Arguments="./SorR.dat"
 
 # running command line :
 /mnt/SDCARD/Emu/PORTS/launch_standalone.sh "$GameName" "$GameDir" "$GameExecutable" "$Arguments" "$GameDataFile" "$KillAudioserver" "$PerformanceMode"
-
-/mnt/SDCARD/.tmp_update/bin/keymon &
-

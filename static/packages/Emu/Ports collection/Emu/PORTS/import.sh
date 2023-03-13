@@ -1,7 +1,10 @@
 #!/bin/sh
 # Ports import script
+sysdir=/mnt/SDCARD/.tmp_update
 
 ShortcutsDir="/mnt/SDCARD/Roms/PORTS/Shortcuts"
+
+$sysdir/bin/infoPanel -t "Ports import" -m "Scanning..." --persistent &
 
 OIFS="$IFS"
 IFS=$'\n'
@@ -61,7 +64,7 @@ do
 	filename=$(basename "$file")
 	extension="${filename##*.}"
 	
-	find "${GameDir}" -maxdepth 1 -type f -iname "${GameDataFile}" | grep .
+	find "${GameDir}" -maxdepth 2 -type f -iname "${GameDataFile}" | grep .
 	if [ $? -eq 0 ]; then
 		echo "Presence -------- :  OK"
 		if [ "$extension" != "port" ]; then
@@ -82,8 +85,4 @@ IFS="$OIFS"
 sed -i "/\"pageend\":/s/:.*,/:   5,/" "/tmp/state.json"   # Little trick which allows to displays all the new items in the game list of MainUI
 rm "$ShortcutsDir/Shortcuts_cache2.db"
 
-
-
-
-
-
+touch /tmp/dismiss_info_panel

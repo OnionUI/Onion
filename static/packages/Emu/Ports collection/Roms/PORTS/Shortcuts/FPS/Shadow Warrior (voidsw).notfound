@@ -2,23 +2,23 @@
 # Standalone Ports Script Template
 
 # main configuration :
-GameName="Duke!ZONE II (PORT - eduke32)"
-GameDir="Duke nukem 3D (eduke32)"
-GameExecutable="eduke32"
-GameDataFile=""
+GameName="Shadow Warrior (Port - voidsw)"
+GameDir="Shadow Warrior (voidsw)"
+GameExecutable="voidsw"
+GameDataFile="SW.GRP"
 
 # additional configuration
 KillAudioserver=1
 PerformanceMode=0
 
 # specific to this port :
-Arguments="-usecwd -jDZ2PP -gamegrp DUKE!ZON.GRP"
+Arguments="-usecwd -addon0"
 pkill -9 keymon
 
 # running command line :
 /mnt/SDCARD/Emu/PORTS/launch_standalone.sh "$GameName" "$GameDir" "$GameExecutable" "$Arguments" "$GameDataFile" "$KillAudioserver" "$PerformanceMode"
+ec=$?
 
 /mnt/SDCARD/.tmp_update/bin/keymon &
 
-
-
+exit $ec

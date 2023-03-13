@@ -27,8 +27,8 @@ echo GameDataFile ------ : $GameDataFile
 echo KillAudioserver --- : $KillAudioserver
 echo PerformanceMode --- : $PerformanceMode
 
-echo find "$GameDir" -maxdepth 1 -type f -iname "$GameDataFile" | grep .
-find "$GameDir" -maxdepth 1 -type f -iname "$GameDataFile" | grep .
+echo find "$GameDir" -maxdepth 2 -type f -iname "$GameDataFile" | grep .
+find "$GameDir" -maxdepth 2 -type f -iname "$GameDataFile" | grep .
 if [ ! $? -eq 0 ]; then
 	echo "$GameDataFile is missing in\nRoms/PORTS/Games/$2.">/tmp/MissingPortFile.tmp
 	exit 66

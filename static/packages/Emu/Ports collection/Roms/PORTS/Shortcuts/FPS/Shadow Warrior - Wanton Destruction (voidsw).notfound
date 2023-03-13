@@ -2,23 +2,23 @@
 # Standalone Ports Script Template
 
 # main configuration :
-GameName="Duke Nuclear Winter (PORT - eduke32)"
-GameDir="Duke nukem 3D (eduke32)"
-GameExecutable="eduke32"
-GameDataFile="nwinter.grp"
+GameName="Shadow Warrior - Wanton Destruction (Port - voidsw)"
+GameDir="Shadow Warrior (voidsw)"
+GameExecutable="voidsw"
+GameDataFile="WT.GRP"
 
 # additional configuration
 KillAudioserver=1
 PerformanceMode=0
 
 # specific to this port :
-Arguments="-usecwd -gamegrp nwinter.grp"
+Arguments="-usecwd  -addon1"
 pkill -9 keymon
 
 # running command line :
 /mnt/SDCARD/Emu/PORTS/launch_standalone.sh "$GameName" "$GameDir" "$GameExecutable" "$Arguments" "$GameDataFile" "$KillAudioserver" "$PerformanceMode"
+ec=$?
 
 /mnt/SDCARD/.tmp_update/bin/keymon &
 
-
-
+exit $ec

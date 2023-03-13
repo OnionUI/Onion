@@ -17,8 +17,8 @@ pkill -9 keymon
 
 # running command line :
 /mnt/SDCARD/Emu/PORTS/launch_standalone.sh "$GameName" "$GameDir" "$GameExecutable" "$Arguments" "$GameDataFile" "$KillAudioserver" "$PerformanceMode"
+ec=$?
 
 /mnt/SDCARD/.tmp_update/bin/keymon &
 
-
-
+exit $ec
