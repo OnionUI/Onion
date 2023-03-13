@@ -42,6 +42,9 @@ echo --------------------------------------------------------------------
 if [ "$KillAudioserver" = "1" ]; then pkill -9 -f audioserver; fi
 if [ "$PerformanceMode" = "1" ]; then echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor; fi
 
+romcfgpath="$(dirname "$RomFullPath")/.game_config/$(basename "$RomFullPath").name"
+mkdir -p "$(dirname "$RomFullPath")/.game_config"
+echo "$GameName" > "$romcfgpath"
 
 echo --------------------------------------------------------------------
 echo ":: RUNNING THE PORT"

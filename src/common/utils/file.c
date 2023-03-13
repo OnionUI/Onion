@@ -163,6 +163,9 @@ char *file_parseKeyValue(const char *file_path, const char *key_in,
 {
     FILE *fp;
     int f;
+    char *line = NULL;
+    size_t len = 0;
+    ssize_t read;
     char key[256], val[256];
     char key_search[STR_MAX];
     char search_str[STR_MAX];
@@ -173,8 +176,8 @@ char *file_parseKeyValue(const char *file_path, const char *key_in,
     if ((fp = fopen(file_path, "r"))) {
         key[0] = 0;
         val[0] = 0;
-        while ((f = fscanf(fp, search_str, key, val)) != EOF) {
-            if (!f) {
+        while ((read = getline(&line, &len, fp)) != -1) {
+            if (!(f = sscanf(line, search_str, key, val))) {
                 if (fscanf(fp, "%*[^\n]\n") == EOF)
                     break;
                 else

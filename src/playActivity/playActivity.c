@@ -10,6 +10,7 @@
 
 #include "cjson/cJSON.h"
 #include "utils/file.h"
+#include "utils/log.h"
 #include "utils/str.h"
 
 // Max number of records in the DB
@@ -259,12 +260,52 @@ int main(int argc, char *argv[])
         return EXIT_SUCCESS;
     }
 
-    char *gameName = (char *)basename(argv[1]);
-    gameName[99] = '\0';
-    char *lastc = gameName + strlen(gameName) - 1;
-    if ((unsigned char)*lastc == '"')
-        *lastc = 0;
-    registerTimerEnd(file_removeExtension(gameName));
+    char cmd[STR_MAX];
+    strncpy(cmd, argv[1], STR_MAX - 1);
+
+    char gameName[STR_MAX];
+    memset(gameName, 0, STR_MAX);
+
+    if (strstr(cmd, "Roms/PORTS/Shortcuts") != NULL) {
+        char *path =
+            str_split(cmd, "/mnt/SDCARD/Emu/PORTS/../../Roms/PORTS/Shortcuts");
+
+        if (path != NULL) {
+            path[strlen(path) - 1] = 0;
+            char full_path[STR_MAX];
+            snprintf(full_path, STR_MAX - 1,
+                     "/mnt/SDCARD/Roms/PORTS/Shortcuts%s", path);
+
+            if (is_file(full_path)) {
+                file_parseKeyValue(full_path, "GameName", gameName, '=', 0);
+            }
+        }
+    }
+    else if (strstr(cmd, "/mnt/SDCARD/Roms") != NULL) {
+        char *path = str_split(cmd, "/mnt/SDCARD/Roms");
+
+        if (path != NULL) {
+            path[strlen(path) - 1] = 0;
+            char full_path[STR_MAX];
+            snprintf(full_path, STR_MAX - 1, "/mnt/SDCARD/Roms%s", path);
+
+            char name_path[STR_MAX];
+            sprintf(name_path, "%s/.game_config/%s.name", dirname(full_path),
+                    basename(full_path));
+
+            if (is_file(name_path)) {
+                FILE *fp;
+                file_get(fp, name_path, "%[^\n]", gameName);
+            }
+        }
+    }
+
+    if (strlen(gameName) == 0) {
+        strcpy(gameName, file_removeExtension(basename(argv[1])));
+    }
+
+    printf_debug("register end: '%s'\n", gameName);
+    registerTimerEnd(gameName);
 
     return EXIT_SUCCESS;
 }
