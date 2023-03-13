@@ -20,7 +20,7 @@ else
 	find "$RomDir" -maxdepth 1 -type f -iname "$RomFile" | grep .
 	if [ ! $? -eq 0 ]; then
 		echo "$GameDataFile is missing in\nRoms/PORTS/Games/$2.">/tmp/MissingPortFile.tmp
-		exit 66
+		exit
 	fi
 	RomFullPath="$RomDir/$RomFile"
 fi
