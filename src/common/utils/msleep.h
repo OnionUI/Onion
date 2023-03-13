@@ -1,8 +1,8 @@
 #ifndef MSLEEP_H__
 #define MSLEEP_H__
 
-#include <time.h>
 #include <errno.h>
+#include <time.h>
 
 static int msleep_interrupt = 0;
 

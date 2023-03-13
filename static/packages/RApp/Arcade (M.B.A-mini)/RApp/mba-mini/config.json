@@ -1,7 +1,7 @@
 {
 "label":"M.B.A-mini",
-"icon":"mbamini.png",
-"iconsel":"",
+"icon":"../../Icons/Default/rapp/mbamini.png",
+"iconsel":"../../Icons/Default/rapp/mbamini.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/MBA",
 "imgpath":"../../Roms/MBA/Imgs",

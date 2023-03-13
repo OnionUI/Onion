@@ -1,7 +1,7 @@
 {
 "label":"SGB",
-"icon":"../../Icons/sgb.png",
-"iconsel":"../../Icons/sgb.png",
+"icon":"../../Icons/Default/sgb.png",
+"iconsel":"../../Icons/Default/sgb.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/SGB",
 "imgpath":"../../Roms/SGB/Imgs",

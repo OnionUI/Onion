@@ -3,20 +3,20 @@
 
 #include <stdbool.h>
 
+#include "display.h"
+#include "utils/config.h"
 #include "utils/file.h"
 #include "utils/json.h"
-#include "utils/config.h"
-#include "display.h"
 
 #define MAX_BRIGHTNESS 10
 #define MAIN_UI_SETTINGS "/appconfigs/system.json"
 #define CMD_TO_RUN_PATH "/mnt/SDCARD/.tmp_update/cmd_to_run.sh"
 #define RETROARCH_CONFIG "/mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg"
-#define HISTORY_PATH "/mnt/SDCARD/Saves/CurrentProfile/lists/content_history.lpl"
+#define HISTORY_PATH                                                           \
+    "/mnt/SDCARD/Saves/CurrentProfile/lists/content_history.lpl"
 #define DEFAULT_THEME_PATH "/mnt/SDCARD/Themes/Silky by DiMo/"
 
-static struct settings_s
-{
+static struct settings_s {
     int volume;
     char keymap[JSON_STRING_LEN];
     int mute;
@@ -50,8 +50,7 @@ static struct settings_s
     int ingame_double_press;
     char mainui_button_x[JSON_STRING_LEN];
     char mainui_button_y[JSON_STRING_LEN];
-}
-settings;
+} settings;
 
 static bool settings_loaded = false;
 
@@ -116,15 +115,15 @@ void _settings_load_mainui(void)
 {
     const char *json_str = NULL;
 
-	if (!(json_str = file_read(MAIN_UI_SETTINGS)))
-		return;
+    if (!(json_str = file_read(MAIN_UI_SETTINGS)))
+        return;
 
-	cJSON* json_root = cJSON_Parse(json_str);
+    cJSON *json_root = cJSON_Parse(json_str);
 
     json_getInt(json_root, "vol", &settings.volume);
     json_getInt(json_root, "mute", &settings.mute);
     json_getInt(json_root, "bgmvol", &settings.bgm_volume);
-    json_getInt(json_root, "brightness",&settings.brightness);
+    json_getInt(json_root, "brightness", &settings.brightness);
     json_getInt(json_root, "hibernate", &settings.sleep_timer);
     json_getInt(json_root, "lumination", &settings.lumination);
     json_getInt(json_root, "hue", &settings.hue);
@@ -154,10 +153,12 @@ void settings_load(void)
     settings.show_expert = config_flag_get(".showExpert");
     settings.low_battery_autosave = !config_flag_get(".noLowBatteryAutoSave");
 
-    if (config_flag_get(".noBatteryWarning")) // flag is deprecated, but keep compatibility
+    if (config_flag_get(
+            ".noBatteryWarning")) // flag is deprecated, but keep compatibility
         settings.low_battery_warn_at = 0;
 
-    if (config_flag_get(".noVibration")) // flag is deprecated, but keep compatibility
+    if (config_flag_get(
+            ".noVibration")) // flag is deprecated, but keep compatibility
         settings.vibration = 0;
 
     config_get("battery/warnAt", "%d", &settings.low_battery_warn_at);
@@ -166,12 +167,14 @@ void settings_load(void)
     config_get("vibration", "%d", &settings.vibration);
     config_get("startup/tab", "%d", &settings.startup_tab);
 
-    if (config_flag_get(".menuInverted")) { // flag is deprecated, but keep compatibility
+    if (config_flag_get(
+            ".menuInverted")) { // flag is deprecated, but keep compatibility
         settings.ingame_single_press = 2;
         settings.ingame_long_press = 1;
     }
 
-    if (config_flag_get(".noGameSwitcher")) { // flag is deprecated, but keep compatibility
+    if (config_flag_get(
+            ".noGameSwitcher")) { // flag is deprecated, but keep compatibility
         settings.mainui_single_press = 0;
         settings.ingame_single_press = 2;
         settings.ingame_long_press = 0;
@@ -191,14 +194,22 @@ void _settings_save_keymap(void)
         return;
 
     fprintf(fp, "{\n");
-    fprintf(fp, JSON_FORMAT_NUMBER, "mainui_single_press", settings.mainui_single_press);
-    fprintf(fp, JSON_FORMAT_NUMBER, "mainui_long_press", settings.mainui_long_press);
-    fprintf(fp, JSON_FORMAT_NUMBER, "mainui_double_press", settings.mainui_double_press);
-    fprintf(fp, JSON_FORMAT_NUMBER, "ingame_single_press", settings.ingame_single_press);
-    fprintf(fp, JSON_FORMAT_NUMBER, "ingame_long_press", settings.ingame_long_press);
-    fprintf(fp, JSON_FORMAT_NUMBER, "ingame_double_press", settings.ingame_double_press);
-    fprintf(fp, JSON_FORMAT_STRING, "mainui_button_x", settings.mainui_button_x);
-    fprintf(fp, JSON_FORMAT_STRING_NC, "mainui_button_y", settings.mainui_button_y);
+    fprintf(fp, JSON_FORMAT_NUMBER, "mainui_single_press",
+            settings.mainui_single_press);
+    fprintf(fp, JSON_FORMAT_NUMBER, "mainui_long_press",
+            settings.mainui_long_press);
+    fprintf(fp, JSON_FORMAT_NUMBER, "mainui_double_press",
+            settings.mainui_double_press);
+    fprintf(fp, JSON_FORMAT_NUMBER, "ingame_single_press",
+            settings.ingame_single_press);
+    fprintf(fp, JSON_FORMAT_NUMBER, "ingame_long_press",
+            settings.ingame_long_press);
+    fprintf(fp, JSON_FORMAT_NUMBER, "ingame_double_press",
+            settings.ingame_double_press);
+    fprintf(fp, JSON_FORMAT_STRING, "mainui_button_x",
+            settings.mainui_button_x);
+    fprintf(fp, JSON_FORMAT_STRING_NC, "mainui_button_y",
+            settings.mainui_button_y);
     fprintf(fp, "}\n");
 
     fflush(fp);
@@ -269,8 +280,8 @@ void settings_setBrightness(uint32_t value, bool apply, bool save)
         display_setBrightness(value);
 
     if (save) {
-        cJSON* request_json = json_load(MAIN_UI_SETTINGS);
-        cJSON* itemBrightness = cJSON_GetObjectItem(request_json, "brightness");
+        cJSON *request_json = json_load(MAIN_UI_SETTINGS);
+        cJSON *itemBrightness = cJSON_GetObjectItem(request_json, "brightness");
         cJSON_SetNumberValue(itemBrightness, settings.brightness);
         json_save(request_json, MAIN_UI_SETTINGS);
         cJSON_free(request_json);
@@ -278,6 +289,5 @@ void settings_setBrightness(uint32_t value, bool apply, bool save)
         file_put_sync(fp, "/tmp/settings_changed", "%s", "");
     }
 }
-
 
 #endif // SETTINGS_H__

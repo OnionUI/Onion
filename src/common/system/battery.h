@@ -1,18 +1,18 @@
 #ifndef BATTERY_H__
 #define BATTERY_H__
 
-#include "utils/msleep.h"
+#include "system/system.h"
 #include "utils/file.h"
 #include "utils/log.h"
+#include "utils/msleep.h"
 #include "utils/process.h"
-#include "system/system.h"
 
 static time_t battery_last_modified = 0;
 static bool battery_is_charging = false;
 
 /**
  * @brief Retrieve the current battery percentage as reported by batmon
- * 
+ *
  * @return int : Battery percentage (0-100) or 500 if charging
  */
 int battery_getPercentage(void)
@@ -39,11 +39,11 @@ int battery_getPercentage(void)
         msleep(100);
     }
 
-    #ifndef PLATFORM_MIYOOMINI
-    #ifdef LOG_DEBUG
+#ifndef PLATFORM_MIYOOMINI
+#ifdef LOG_DEBUG
     return 78;
-    #endif
-    #endif
+#endif
+#endif
 
     if (percentage == -1)
         percentage = 0; // show zero when percBat not found
@@ -53,7 +53,7 @@ int battery_getPercentage(void)
 
 bool battery_isCharging(void)
 {
-    #ifdef PLATFORM_MIYOOMINI
+#ifdef PLATFORM_MIYOOMINI
     char charging = 0;
     int fd = open(GPIO_DIR2 "gpio59/value", O_RDONLY);
 
@@ -66,13 +66,13 @@ bool battery_isCharging(void)
 
     if (fd >= 0) {
         read(fd, &charging, 1);
-        close(fd);        
+        close(fd);
     }
 
     return charging == '1';
-    #else
+#else
     return true;
-    #endif
+#endif
 }
 
 bool battery_hasChanged(int ticks, int *out_percentage)

@@ -1,7 +1,7 @@
 {
 "label":"Sega MS",
-"icon":"../../Icons/ms.png",
-"iconsel":"../../Icons/ms.png",
+"icon":"../../Icons/Default/ms.png",
+"iconsel":"../../Icons/Default/ms.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/MS",
 "imgpath":"../../Roms/MS/Imgs",

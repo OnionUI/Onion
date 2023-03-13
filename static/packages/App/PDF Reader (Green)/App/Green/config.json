@@ -1,6 +1,6 @@
 {
 "label":"PDF Reader",
-"icon":"../../Icons/app/pdf.png",
+"icon":"../../Icons/Default/app/pdf.png",
 "iconsel":"",
 "launch":"launch.sh",
 "description":"Green"

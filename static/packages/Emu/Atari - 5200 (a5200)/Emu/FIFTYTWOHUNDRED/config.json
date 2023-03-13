@@ -1,7 +1,7 @@
 {
 "label":"Atari 5200",
-"icon":"../../Icons/5200.png",
-"iconsel":"../../Icons/5200.png",
+"icon":"../../Icons/Default/5200.png",
+"iconsel":"../../Icons/Default/5200.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/FIFTYTWOHUNDRED",
 "imgpath":"../../Roms/FIFTYTWOHUNDRED/Imgs",

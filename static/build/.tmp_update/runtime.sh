@@ -9,6 +9,9 @@ main() {
 
     # Start the battery monitor
     ./bin/batmon &
+
+    # Reapply theme
+    ./bin/themeSwitcher --reapply
     
     if [ `cat /sys/devices/gpiochip0/gpio/gpio59/value` -eq 1 ]; then
         cd $sysdir

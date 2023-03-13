@@ -1,0 +1,9 @@
+# Set the default behavior, in case people don't have core.autocrlf set.
+*		text=auto
+*.sh	text eol=lf
+
+static/build/.tmp_update/updater				text eol=lf
+static/build/miyoo/app/audioserver				text eol=lf
+static/dist/.tmp_update/updater					text eol=lf
+static/dist/miyoo/app/.tmp_update/updater		text eol=lf
+static/dist/miyoo/app/MainUI					text eol=lf

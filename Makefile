@@ -1,7 +1,7 @@
 ###########################################################
 
 TARGET=Onion
-VERSION=4.1.0-alpha6
+VERSION=4.1.0-beta
 RA_SUBVERSION=1.14.0.0
 
 ###########################################################
@@ -12,8 +12,18 @@ endif
 
 RELEASE_NAME := $(TARGET)-v$(VERSION)
 
+ifdef OS
+	current_dir := $(shell cd)
+	ROOT_DIR := $(subst \,/,$(current_dir))
+	makedir := mkdir
+	createfile := echo.>
+else
+	ROOT_DIR := $(shell pwd)
+	makedir := mkdir -p
+	createfile := touch
+endif
+
 # Directories
-ROOT_DIR            := $(shell pwd -P)
 SRC_DIR             := $(ROOT_DIR)/src
 THIRD_PARTY_DIR     := $(ROOT_DIR)/third-party
 BUILD_DIR           := $(ROOT_DIR)/build
@@ -36,7 +46,7 @@ ifeq (,$(GTEST_INCLUDE_DIR))
 GTEST_INCLUDE_DIR = /usr/include/
 endif
 
-TOOLCHAIN := ghcr.io/onionui/miyoomini-toolchain:latest
+TOOLCHAIN := mholdg16/miyoomini-toolchain:latest
 
 include ./src/common/commands.mk
 
@@ -125,7 +135,7 @@ apps: $(CACHE)/.setup
 	@cp -a "$(PACKAGES_APP_DEST)/Quick Guide/." $(BUILD_DIR)/
 	@cp -a "$(PACKAGES_APP_DEST)/RetroArch (Shortcut)/." $(BUILD_DIR)/
 	@cp -a "$(PACKAGES_APP_DEST)/Tweaks/." $(BUILD_DIR)/
-	@cp -a "$(PACKAGES_APP_DEST)/Themes (Change theme)/." $(BUILD_DIR)/
+	@cp -a "$(PACKAGES_APP_DEST)/ThemeSwitcher/." $(BUILD_DIR)/
 
 external: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
@@ -184,10 +194,13 @@ git-clean:
 git-submodules:
 	@git submodule update --init --recursive
 
+pwd:
+	@echo $(ROOT_DIR)
+
 $(CACHE)/.docker:
 	docker pull $(TOOLCHAIN)
-	mkdir -p cache
-	touch $(CACHE)/.docker
+	$(makedir) cache
+	$(createfile) $(CACHE)/.docker
 
 toolchain: $(CACHE)/.docker
 	docker run -it --rm -v "$(ROOT_DIR)":/root/workspace $(TOOLCHAIN) /bin/bash
@@ -206,3 +219,6 @@ test:
 	@mkdir -p $(BUILD_TEST_DIR)/infoPanel_test_data && cd $(TEST_SRC_DIR) && BUILD_DIR=$(BUILD_TEST_DIR)/ make dev
 	@cp -R $(TEST_SRC_DIR)/infoPanel_test_data $(BUILD_TEST_DIR)/
 	cd $(BUILD_TEST_DIR) && ./test
+
+format:
+	@find ./src -regex '.*\.\(c\|h\|cpp\|hpp\)' -exec clang-format -style=file -i {} \;

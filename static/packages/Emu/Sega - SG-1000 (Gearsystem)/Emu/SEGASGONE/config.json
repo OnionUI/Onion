@@ -1,7 +1,7 @@
 {
 "label":"SG-1000",
-"icon":"../../Icons/segasgone.png",
-"iconsel":"../../Icons/segasgone.png",
+"icon":"../../Icons/Default/segasgone.png",
+"iconsel":"../../Icons/Default/segasgone.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/SEGASGONE",
 "imgpath":"../../Roms/SEGASGONE/Imgs",

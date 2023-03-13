@@ -427,7 +427,8 @@ debloat_apps() {
         Onion_Manual \
         PlayActivity \
         SearchFilter \
-        ThemeSwitcher
+        ThemeSwitcher \
+        IconThemer
         
     rm -rf /mnt/SDCARD/Emu/SEARCH
 
