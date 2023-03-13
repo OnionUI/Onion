@@ -200,7 +200,7 @@ launch_game() {
 
         if [ -f "$corepath" ]; then
             if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
-                echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v -c \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+                echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v --appendconfig \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
             else
                 echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
             fi
@@ -228,7 +228,7 @@ launch_game() {
     fi
 
     if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
-        echo "$cmd" | sed 's/ -c \"\/mnt\/SDCARD\/.tmp_update\/reset.cfg\"//g' > $sysdir/cmd_to_run.sh
+        echo "$cmd" | sed 's/ --appendconfig \"\/mnt\/SDCARD\/.tmp_update\/reset.cfg\"//g' > $sysdir/cmd_to_run.sh
     fi
 
     # TIMER END + SHUTDOWN CHECK
