@@ -2,6 +2,7 @@
 
 
 echo -ne "\n\n"
+echo "==================================================================="
 echo --------------------------------------------------------------------
 echo ":: MAIN SCRIPT PORT LAUNCH"
 echo --------------------------------------------------------------------
@@ -15,13 +16,20 @@ cd "`dirname "$1"`"
 chmod a+x "$1"
 
 # Launch port file
-"$1"
+"$1" 
 
 retcode=$?
 
-if [ $retcode -eq 66 ]; then
-	echo "Game Data File not found "
-    cd /mnt/SDCARD/.tmp_update
+echo "==================================================================="
+
+if [ -f "/tmp/MissingPortFile.tmp" ]; then
 	MissingPortFile=`cat /tmp/MissingPortFile.tmp`
-    ./bin/infoPanel --title "Port Launching Error"  --message "Port files not found :\n$MissingPortFile"
+	echo "Game Data File not found "
+	echo -ne  "===================================================================\n\n"
+	rm "/tmp/MissingPortFile.tmp"
+    cd /mnt/SDCARD/.tmp_update
+	    ./bin/infoPanel --title "Port Launching Error"  --message "Port files not found :\n$MissingPortFile"
+	
 fi
+
+
