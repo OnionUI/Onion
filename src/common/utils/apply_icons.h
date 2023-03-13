@@ -174,10 +174,11 @@ bool _apply_singleIconFromPack(const char *config_path,
 bool apply_singleIcon(const char *config_path)
 {
     char icon_pack_path[STR_MAX];
-    strncpy(icon_pack_path, file_read(ACTIVE_ICON_PACK), STR_MAX - 1);
+    const char *active_icon_pack = file_read(ACTIVE_ICON_PACK);
 
-    if (!is_dir(icon_pack_path)) {
-        memset(icon_pack_path, 0, STR_MAX);
+    if (active_icon_pack != NULL && is_dir(active_icon_pack))
+        strncpy(icon_pack_path, active_icon_pack, STR_MAX - 1);
+    else {
         strcpy(icon_pack_path, "/mnt/SDCARD/Icons/Default");
     }
 

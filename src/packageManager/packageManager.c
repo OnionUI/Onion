@@ -816,6 +816,7 @@ int main(int argc, char *argv[])
                             "\"%s\" \"%s\"",
                             data_path, package->name);
                     system(cmd);
+                    sync();
 
                     callPackageInstaller(data_path, package->name, true);
                 }
@@ -823,7 +824,7 @@ int main(int argc, char *argv[])
                     printf_debug("Removing %s...\n", package->name);
                     callPackageInstaller(data_path, package->name, false);
 
-                    // app uninstallation
+                    // app removal
                     char pathAppUninstall[1000];
                     sprintf(pathAppUninstall, "%s/%s", data_path,
                             package->name);
