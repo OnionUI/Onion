@@ -228,7 +228,7 @@ change_core() {
             if [ "$ext" == "zip" ]; then
                 zip_files=`unzip -l "$rompath" | sed '1,3d;$d' | sed '$d' | sort -n -r`
             else
-                zip_files=`./bin/7zz l -ba "$rompath" | awk '{$1="";$2="";$3="";print $0;}' | sort -n -r`
+                zip_files=`./bin/7z l -ba "$rompath" | awk '{$1="";$2="";$3="";print $0;}' | sort -n -r`
             fi
 
             echo "zip/7z output:"

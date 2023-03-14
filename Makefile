@@ -83,6 +83,10 @@ $(CACHE)/.setup:
 		$(SRC_DIR)/randomGamePicker \
 		$(SRC_DIR)/easter \
 		-depth -type d -name res -exec cp -r {}/. $(BUILD_DIR)/.tmp_update/res/ \;
+	@find \
+		$(SRC_DIR)/packageManager \
+		$(SRC_DIR)/themeSwitcher \
+		-depth -type d -name script -exec cp -r {}/. $(BUILD_DIR)/.tmp_update/script/ \;
 	@find $(SRC_DIR)/installUI -depth -type d -name res -exec cp -r {}/. $(INSTALLER_DIR)/res/ \;
 # Download themes from theme repo
 	@chmod a+x $(ROOT_DIR)/.github/get_themes.sh && $(ROOT_DIR)/.github/get_themes.sh

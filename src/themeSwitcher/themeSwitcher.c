@@ -2,7 +2,6 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
-#include <dirent.h>
 #include <fcntl.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -14,89 +13,22 @@
 #include "system/keymap_sw.h"
 #include "system/lang.h"
 #include "system/settings.h"
-#include "theme/config.h"
-#include "utils/apply_icons.h"
-#include "utils/file.h"
-#include "utils/json.h"
-#include "utils/log.h"
 #include "utils/msleep.h"
 
-#ifndef DT_DIR
-#define DT_DIR 4
-#endif
-
-// Max number of records in the DB
-#define NUMBER_OF_THEMES 300
-#define MAX_THEME_NAME_SIZE 256
-#define SYSTEM_SKIN_DIR "/mnt/SDCARD/miyoo/app/skin"
+#include "installTheme.h"
 
 static bool quit = false;
 
-void installFaultyImage(const char *theme_path, const char *image_name)
-{
-    char override_image_path[256], theme_image_path[256],
-        system_image_path[256], system_image_backup[256];
-
-    sprintf(override_image_path, "%sskin/%s.png", THEME_OVERRIDES, image_name);
-    sprintf(theme_image_path, "%sskin/%s.png", theme_path, image_name);
-    sprintf(system_image_path, SYSTEM_SKIN_DIR "/%s.png", image_name);
-    sprintf(system_image_backup, SYSTEM_SKIN_DIR "/%s_back.png", image_name);
-
-    // backup system skin
-    if (!exists(system_image_backup))
-        file_copy(system_image_path, system_image_backup);
-
-    if (exists(override_image_path)) {
-        // apply override image
-        file_copy(override_image_path, system_image_path);
-    }
-    else if (exists(theme_image_path)) {
-        // apply theme image
-        file_copy(theme_image_path, system_image_path);
-    }
-    else {
-        // restore system skin
-        file_copy(system_image_backup, system_image_path);
-        remove(system_image_backup);
-    }
-}
-
-void installTheme(Theme_s *theme)
-{
-    system("./bin/mainUiBatPerc --restore");
-
-    // change theme setting
-    strcpy(settings.theme, theme->path);
-    settings_save();
-
-    Theme_s with_overrides = theme_loadFromPath(theme->path, true);
-
-    lang_removeIconLabels(with_overrides.hideLabels.icons,
-                          with_overrides.hideLabels.hints);
-
-    installFaultyImage(settings.theme, "bg-io-testing");
-    installFaultyImage(settings.theme, "ic-MENU+A");
-}
-
 int main(int argc, char *argv[])
 {
-    DIR *dp;
-    struct dirent *ep;
-
-    int themes_count = 0;
-    char themes[NUMBER_OF_THEMES][MAX_THEME_NAME_SIZE];
-    char theme_path[512];
-    int current_page = 0;
-
     settings_load();
-    char *installed_theme = basename(settings.theme);
-    int installed_page = 0;
+    const char *installed_theme = basename(settings.theme);
 
     const char reapply_flag[] = "--reapply";
     if (argc == 2 &&
         strncmp(argv[1], reapply_flag, sizeof(reapply_flag)) == 0) {
         if (!is_dir(settings.theme)) {
-            strcpy(settings.theme, "/mnt/SDCARD/Themes/Silky by DiMo/");
+            strcpy(settings.theme, DEFAULT_THEME_PATH);
             settings_save();
         }
         Theme_s current_theme = theme_loadFromPath(settings.theme, true);
@@ -105,26 +37,10 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    if ((dp = opendir("/mnt/SDCARD/Themes")) != NULL) {
-        while ((ep = readdir(dp))) {
-            if (ep->d_type != DT_DIR)
-                continue;
-
-            sprintf(theme_path, "/mnt/SDCARD/Themes/%s/config.json",
-                    ep->d_name);
-
-            if (exists(theme_path)) {
-                strcpy(themes[themes_count], ep->d_name);
-                if (strcmp(ep->d_name, installed_theme) == 0)
-                    current_page = installed_page = themes_count;
-                themes_count++;
-            }
-        }
-        closedir(dp);
-    }
-    else {
-        perror("Couldn't open the Themes directory");
-    }
+    char themes[NUMBER_OF_THEMES][STR_MAX];
+    int installed_page = 0;
+    int themes_count = listAllThemes(themes, installed_theme, &installed_page);
+    int current_page = installed_page;
 
     SDL_Init(SDL_INIT_VIDEO);
     SDL_ShowCursor(SDL_DISABLE);
@@ -134,6 +50,7 @@ int main(int argc, char *argv[])
     SDL_Surface *video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
     SDL_Surface *screen =
         SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
+
     TTF_Font *font40 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 40);
     TTF_Font *font21 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 21);
     TTF_Font *font30 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 30);
@@ -166,11 +83,18 @@ int main(int argc, char *argv[])
     SDL_BlitSurface(loading, NULL, screen, &loadingRect);
     SDL_FreeSurface(loading);
 
+    char preview_path[STR_MAX * 2];
     SDL_Surface *previews[themes_count];
     for (int i = 0; i < themes_count; i++) {
-        sprintf(theme_path, "/mnt/SDCARD/Themes/%s/preview.png", themes[i]);
-        previews[i] = IMG_Load(exists(theme_path) ? theme_path
-                                                  : "res/noThemePreview.png");
+        snprintf(preview_path, STR_MAX * 2 - 1, THEMES_DIR "/%s/preview.png",
+                 themes[i]);
+
+        if (!is_file(preview_path))
+            snprintf(preview_path, STR_MAX * 2 - 1,
+                     THEMES_DIR "/.previews/%s/preview.png", themes[i]);
+
+        previews[i] = IMG_Load(
+            is_file(preview_path) ? preview_path : "res/noThemePreview.png");
     }
 
     char cPages[25];
@@ -179,8 +103,9 @@ int main(int argc, char *argv[])
     Uint8 keystate[320] = {0};
     bool changed = true;
 
-    sprintf(theme_path, "/mnt/SDCARD/Themes/%s/", themes[current_page]);
-    Theme_s theme = theme_loadFromPath(theme_path, false);
+    Theme_s theme;
+    loadTheme(themes[current_page], &theme);
+
     bool page_changed = false;
 
     while (!quit) {
@@ -251,8 +176,7 @@ int main(int argc, char *argv[])
             break;
 
         if (page_changed) {
-            sprintf(theme_path, "/mnt/SDCARD/Themes/%s/", themes[current_page]);
-            theme = theme_loadFromPath(theme_path, false);
+            loadTheme(themes[current_page], &theme);
             page_changed = false;
         }
 
@@ -276,7 +200,8 @@ int main(int argc, char *argv[])
             SDL_FreeSurface(imagePages);
 
             char title[STR_MAX + 13];
-            if (current_page == installed_page)
+            if (current_page == installed_page &&
+                strstr(theme.path, "/.previews/") == NULL)
                 snprintf(title, STR_MAX + 12, "%s - Installed", theme.name);
             else
                 strcpy(title, theme.name);
