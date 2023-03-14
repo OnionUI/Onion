@@ -1,0 +1,20 @@
+#!/bin/sh
+# Standalone Ports Script Template
+
+# main configuration :
+GameName="OpenTyrian"
+GameDir="OpenTyrian"
+GameExecutable="opentyrian"
+GameDataFile="tyrian.shp"
+
+# additional configuration
+KillAudioserver=1
+PerformanceMode=0
+
+# specific to this port :
+Arguments=
+
+# running command line :
+/mnt/SDCARD/Emu/PORTS/launch_standalone.sh "$GameName" "$GameDir" "$GameExecutable" "$Arguments" "$GameDataFile" "$KillAudioserver" "$PerformanceMode"
+
+
