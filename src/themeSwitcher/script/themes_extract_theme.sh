@@ -18,25 +18,27 @@ echo "theme: $theme_name"
 echo "path: $theme_path"
 
 # extract theme from compressed file
-7z x -aoa -bd -o"$theme_dir" "$theme_path" "$theme_name/*" > /dev/null
+7z x -aoa -bd -o"$theme_dir" "$theme_path" "$theme_name/*"
+sync
 
 if [ -d "$theme_dir/$theme_name" ]; then
     rm -rf "$theme_dir/.previews/$theme_name"
     
-    output=`7z l -slt "$theme_path" "*/config.json" | grep -oP "(?<=Path = ).+" | tail -n +2 | awk -v prefix="$theme_dir/" '$0=prefix $0'`
+    output=`7z l -slt "$theme_path" "*/config.json" | grep '^Path = ' | sed 's/^Path = //g' | tail -n +2 | awk -v prefix="$theme_dir/" '$0=prefix $0'`
 
-    do_remove=1
+    touch /tmp/remove_theme_archive
 
-    while IFS= read -r line
-    do
+    echo "$output" | while read line; do
         output_dir="$(dirname "$line")"
         if [ ! -d "$output_dir" ]; then
-            do_remove=0
+            rm -f /tmp/remove_theme_archive
             break
         fi
-    done < <(printf '%s\n' "$output")
+    done
 
-    if [ $do_remove -eq 1 ]; then
+    if [ -f /tmp/remove_theme_archive ]; then
+        echo "deleting: $theme_path"
         rm -f "$theme_path"
+        rm -f /tmp/remove_theme_archive
     fi
 fi

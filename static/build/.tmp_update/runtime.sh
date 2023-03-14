@@ -1,6 +1,7 @@
 #!/bin/sh
 sysdir=/mnt/SDCARD/.tmp_update
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$sysdir/lib:$sysdir/lib/parasyte"
+export PATH="$sysdir/bin:$PATH"
 
 main() {
     init_system

@@ -35,23 +35,35 @@ int _comp_themes(const void *a, const void *b)
 }
 
 void loadThemeDirectory(const char *theme_dir,
-                        char themes_out[NUMBER_OF_THEMES][STR_MAX], int *count)
+                        char themes_out[NUMBER_OF_THEMES][STR_MAX], int *count,
+                        bool delete_preview)
 {
     DIR *dp;
     struct dirent *ep;
-    char config_path[STR_MAX * 2];
+    char path[STR_MAX * 2];
 
     if ((dp = opendir(theme_dir)) != NULL) {
         while ((ep = readdir(dp))) {
             if (ep->d_type != DT_DIR)
                 continue;
 
-            snprintf(config_path, STR_MAX * 2 - 1, "%s/%s/config.json",
-                     theme_dir, ep->d_name);
+            snprintf(path, STR_MAX * 2 - 1, "%s/%s/config.json", theme_dir,
+                     ep->d_name);
 
-            if (exists(config_path)) {
+            if (is_file(path)) {
                 strcpy(themes_out[*count], ep->d_name);
                 *count += 1;
+
+                if (delete_preview) {
+                    snprintf(path, STR_MAX * 2 - 1, THEMES_DIR "/.previews/%s",
+                             ep->d_name);
+
+                    if (is_dir(path)) {
+                        char cmd[STR_MAX * 3];
+                        sprintf(cmd, "rm -rf \"%s\"", path);
+                        system(cmd);
+                    }
+                }
             }
         }
         closedir(dp);
@@ -69,8 +81,8 @@ int listAllThemes(char themes_out[NUMBER_OF_THEMES][STR_MAX],
     system(SCRIPT_DIR "/themes_extract_previews.sh");
     sync();
 
-    loadThemeDirectory(THEMES_DIR, themes_out, &count);
-    loadThemeDirectory(THEMES_DIR "/.previews", themes_out, &count);
+    loadThemeDirectory(THEMES_DIR, themes_out, &count, true);
+    loadThemeDirectory(THEMES_DIR "/.previews", themes_out, &count, false);
 
     qsort(themes_out, count, sizeof(char) * STR_MAX, _comp_themes);
 
@@ -135,15 +147,10 @@ void installTheme(Theme_s *theme)
         snprintf(cmd, STR_MAX * 2 - 1,
                  SCRIPT_DIR "/themes_extract_theme.sh \"%s\"", theme->path);
 
+        sprintf(theme->path, THEMES_DIR "/%s/", basename(theme->path));
+
         system(cmd);
         sync();
-
-        sprintf(theme->path, THEMES_DIR "/%s", basename(theme->path));
-    }
-
-    if (!is_dir(theme->path)) {
-        printf_debug("not found: %s\n", theme->path);
-        return;
     }
 
     // change theme setting
