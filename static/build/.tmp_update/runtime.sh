@@ -32,6 +32,15 @@ main() {
     rm /tmp/.offOrder
     HOME=/mnt/SDCARD/RetroArch/
 
+    detectKey 1
+    menu_pressed=$?
+
+    if [ $menu_pressed -eq 0 ]; then
+        if [ -f "./cmd_to_run.sh" ]; then
+            rm -f "./cmd_to_run.sh"
+        fi
+    fi
+
     # Auto launch
     if [ ! -f $sysdir/config/.noAutoStart ]; then
         state_change

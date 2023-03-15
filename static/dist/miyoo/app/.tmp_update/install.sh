@@ -59,12 +59,21 @@ main() {
         cleanup
         return
     fi
-    
+
     # Start the battery monitor
     cd $sysdir
     ./bin/batmon 2>&1 > ./logs/batmon.log &
 
-    prompt_update
+    ./bin/detectKey 1
+    menu_pressed=$?
+
+    if [ $menu_pressed -eq 0 ]; then
+        prompt_update
+        cleanup
+        return
+    fi
+    
+    run_installation 0 0
     cleanup
 }
 

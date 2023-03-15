@@ -120,11 +120,13 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/batmon && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/easter && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/read_uuid && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/detectKey && BUILD_DIR=$(BIN_DIR) make
 # Build dependencies for installer
-	@mkdir -p $(DIST_DIR)/miyoo/app/.tmp_update/bin
+	@mkdir -p $(INSTALLER_DIR)/bin
 	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(INSTALLER_DIR)/bin/ make
 	@cp $(BIN_DIR)/prompt $(INSTALLER_DIR)/bin/
 	@cp $(BIN_DIR)/batmon $(INSTALLER_DIR)/bin/
+	@cp $(BIN_DIR)/detectKey $(INSTALLER_DIR)/bin/
 	@cp $(BIN_DIR)/infoPanel $(INSTALLER_DIR)/bin/
 
 apps: $(CACHE)/.setup
