@@ -504,8 +504,10 @@ int main(void)
                 }
                 break;
             case HW_BTN_MENU:
-                system_state_update();
-                comboKey_menu = menuButtonAction(val, comboKey_menu);
+                if (!temp_flag_get("disable_menu_button")) {
+                    system_state_update();
+                    comboKey_menu = menuButtonAction(val, comboKey_menu);
+                }
                 break;
             case HW_BTN_X:
                 if (val == PRESSED)

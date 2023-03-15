@@ -11,6 +11,8 @@
 #include "utils/log.h"
 #include "utils/str.h"
 
+#define ICON_PACK_DEFAULT "/mnt/SDCARD/Icons/Default"
+
 #define CONFIG_EMU_PATH "/mnt/SDCARD/Emu"
 #define CONFIG_APP_PATH "/mnt/SDCARD/App"
 #define CONFIG_RAPP_PATH "/mnt/SDCARD/RApp"
