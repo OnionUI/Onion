@@ -367,8 +367,6 @@ int main(void)
         acc_ticks += ticks - last_ticks;
         last_ticks = ticks;
 
-        brightness_changed = false;
-
         if (show_legend && ticks - start > legend_timeout) {
             show_legend = false;
             config_flag_set("gameSwitcher/hideLegend", true);
@@ -419,6 +417,10 @@ int main(void)
                 quit = true;
                 break;
             }
+
+            if (keystate[changed_key] == PRESSED && changed_key != SW_BTN_UP &&
+                changed_key != SW_BTN_DOWN)
+                brightness_changed = false;
 
             if (keystate[SW_BTN_UP] >= PRESSED) {
                 // Change brightness
