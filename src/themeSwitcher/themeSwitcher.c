@@ -262,10 +262,14 @@ int main(int argc, char *argv[])
                 printf_debug("Theme installed: %s\n", themes[current_page]);
 
                 if (apply_icons) {
-                    if (has_icons)
+                    snprintf(icon_pack_path, STR_MAX + 32 - 1, "%sicons",
+                             theme.path);
+                    if (is_dir(icon_pack_path)) {
                         apply_iconPack(icon_pack_path);
-                    else
+                    }
+                    else {
                         apply_iconPack(ICON_PACK_DEFAULT);
+                    }
                 }
 
                 quit = true;
