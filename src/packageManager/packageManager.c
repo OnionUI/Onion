@@ -60,7 +60,7 @@ static SDL_Surface *video = NULL, *screen = NULL, *surfaceBackground = NULL,
                    *surfaceCross = NULL;
 
 static TTF_Font *font18 = NULL;
-static TTF_Font *font25 = NULL;
+static TTF_Font *font21 = NULL;
 static TTF_Font *font35 = NULL;
 
 static SDL_Color color_white = {255, 255, 255};
@@ -334,7 +334,7 @@ SDL_Surface *createLabelSurface(Package *package)
     }
 
     SDL_Surface *label_surface =
-        TTF_RenderUTF8_Blended(font25, label_text, color_white);
+        TTF_RenderUTF8_Blended(font21, label_text, color_white);
     SDL_SetAlpha(label_surface, 0, 0); /* important */
     SDL_Rect label_pos = {0, 0};
     SDL_BlitSurface(label_surface, NULL, textbox, &label_pos);
@@ -346,7 +346,7 @@ SDL_Surface *createLabelSurface(Package *package)
 
     if (strlen(parens) > 0) {
         SDL_Surface *parens_surface =
-            TTF_RenderUTF8_Blended(font25, parens, color_white);
+            TTF_RenderUTF8_Blended(font21, parens, color_white);
         SDL_SetAlpha(parens_surface, 0, 0); /* important */
         surfaceSetAlpha(parens_surface, 120);
         SDL_Rect parens_pos = {label_surface->w, 0};
@@ -361,7 +361,7 @@ SDL_Surface *createLabelSurface(Package *package)
 
 void displayLayersNames(void)
 {
-    SDL_Rect rectResName = {35, 92, 80, 20};
+    SDL_Rect rectResName = {30, 92, 80, 20};
     SDL_Surface *surfaceResName;
     for (int i = 0; i < 7; i++) {
         if ((i + nListPosition) < package_count[nTab]) {
@@ -381,7 +381,7 @@ void displayLayersInstall(void)
     for (int i = 0; i < 7; i++) {
         if ((i + nListPosition) < package_count[nTab]) {
             Package *package = &packages[nTab][i + nListPosition];
-            rectInstall.y = 108 - surfaceCheck->h / 2 + i * 47;
+            rectInstall.y = 107 - surfaceCheck->h / 2 + i * 47;
             if (package->installed != package->changed)
                 SDL_BlitSurface(surfaceCheck, NULL, screen, &rectInstall);
             else
@@ -437,13 +437,18 @@ bool confirmDoNothing(KeyState *keystate)
     return confirm;
 }
 
-void renderTabName(const char *name, int center_x, bool active)
+void renderTabName(const char *name, int center_x, bool active,
+                   bool has_changes)
 {
-    SDL_Surface *tab_name = TTF_RenderUTF8_Blended(font18, name, color_white);
-    SDL_Rect tab_rect = {center_x - tab_name->w / 2, 60};
+    char name_str[STR_MAX];
+    snprintf(name_str, STR_MAX - 1, has_changes ? "%s*" : "%s", name);
+
+    SDL_Surface *tab_name =
+        TTF_RenderUTF8_Blended(active ? font21 : font18, name_str, color_white);
+    SDL_Rect tab_rect = {center_x - tab_name->w / 2, 58 - tab_name->h / 2};
 
     if (!active)
-        surfaceSetAlpha(tab_name, 120);
+        surfaceSetAlpha(tab_name, 100);
 
     SDL_BlitSurface(tab_name, NULL, screen, &tab_rect);
     SDL_FreeSurface(tab_name);
@@ -451,9 +456,13 @@ void renderTabName(const char *name, int center_x, bool active)
 
 void renderCurrentTab(void)
 {
-    renderTabName(layer_names[nTab], 320, true);
-    renderTabName(layer_names[nTab == 0 ? 2 : nTab - 1], 116, false);
-    renderTabName(layer_names[nTab == 2 ? 0 : nTab + 1], 524, false);
+    int lTab = nTab == 0 ? 2 : nTab - 1, rTab = nTab == 2 ? 0 : nTab + 1;
+    renderTabName(layer_names[nTab], 320, true,
+                  changes_installs[nTab] > 0 || changes_removals[nTab] > 0);
+    renderTabName(layer_names[lTab], 117, false,
+                  changes_installs[lTab] > 0 || changes_removals[lTab] > 0);
+    renderTabName(layer_names[rTab], 523, false,
+                  changes_installs[rTab] > 0 || changes_removals[rTab] > 0);
 }
 
 bool getPackageMainPath(char *out_path, const char *data_path,
@@ -542,7 +551,7 @@ int main(int argc, char *argv[])
     surfaceCross = IMG_Load("/mnt/SDCARD/.tmp_update/res/toggle-off.png");
 
     font18 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 18);
-    font25 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 25);
+    font21 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 21);
     font35 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 35);
 
     SDL_Surface *loadingScreen = IMG_Load("res/loading.png");
@@ -552,6 +561,9 @@ int main(int argc, char *argv[])
     SDL_FreeSurface(loadingScreen);
 
     loadResources(reapply_all);
+
+    if (reapply_all)
+        apply_singleIcon("/mnt/SDCARD/App/PackageManager/config.json");
 
     SDL_Rect rectSelection = {14, 84, 593, 49};
 
@@ -744,8 +756,8 @@ int main(int argc, char *argv[])
                     sprintf(status_str + len, " −%d", removals_count);
                 }
                 SDL_Surface *status =
-                    TTF_RenderUTF8_Blended(font25, status_str, color_white);
-                SDL_Rect status_rect = {620 - status->w, 30 - status->h / 2};
+                    TTF_RenderUTF8_Blended(font21, status_str, color_white);
+                SDL_Rect status_rect = {620 - status->w, 20 - status->h / 2};
                 SDL_BlitSurface(status, NULL, screen, &status_rect);
                 SDL_FreeSurface(status);
             }
@@ -839,7 +851,7 @@ int main(int argc, char *argv[])
 #endif
 
     TTF_CloseFont(font18);
-    TTF_CloseFont(font25);
+    TTF_CloseFont(font21);
     TTF_CloseFont(font35);
     TTF_Quit();
     SDL_FreeSurface(reinstall_surface);
