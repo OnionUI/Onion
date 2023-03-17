@@ -60,7 +60,7 @@ static SDL_Surface *video = NULL, *screen = NULL, *surfaceBackground = NULL,
                    *surfaceCross = NULL;
 
 static TTF_Font *font18 = NULL;
-static TTF_Font *font21 = NULL;
+static TTF_Font *font25 = NULL;
 static TTF_Font *font35 = NULL;
 
 static SDL_Color color_white = {255, 255, 255};
@@ -334,7 +334,7 @@ SDL_Surface *createLabelSurface(Package *package)
     }
 
     SDL_Surface *label_surface =
-        TTF_RenderUTF8_Blended(font21, label_text, color_white);
+        TTF_RenderUTF8_Blended(font25, label_text, color_white);
     SDL_SetAlpha(label_surface, 0, 0); /* important */
     SDL_Rect label_pos = {0, 0};
     SDL_BlitSurface(label_surface, NULL, textbox, &label_pos);
@@ -346,7 +346,7 @@ SDL_Surface *createLabelSurface(Package *package)
 
     if (strlen(parens) > 0) {
         SDL_Surface *parens_surface =
-            TTF_RenderUTF8_Blended(font21, parens, color_white);
+            TTF_RenderUTF8_Blended(font25, parens, color_white);
         SDL_SetAlpha(parens_surface, 0, 0); /* important */
         surfaceSetAlpha(parens_surface, 120);
         SDL_Rect parens_pos = {label_surface->w, 0};
@@ -444,11 +444,9 @@ void renderTabName(const char *name, int center_x, bool active,
     snprintf(name_str, STR_MAX - 1, has_changes ? "%s*" : "%s", name);
 
     SDL_Surface *tab_name =
-        TTF_RenderUTF8_Blended(active ? font21 : font18, name_str, color_white);
-    SDL_Rect tab_rect = {center_x - tab_name->w / 2, 58 - tab_name->h / 2};
-
-    if (!active)
-        surfaceSetAlpha(tab_name, 100);
+        TTF_RenderUTF8_Blended(active ? font25 : font18, name_str, color_white);
+    SDL_Rect tab_rect = {center_x - tab_name->w / 2,
+                         (active ? 53 : 56) - 2 - tab_name->h / 2};
 
     SDL_BlitSurface(tab_name, NULL, screen, &tab_rect);
     SDL_FreeSurface(tab_name);
@@ -551,7 +549,7 @@ int main(int argc, char *argv[])
     surfaceCross = IMG_Load("/mnt/SDCARD/.tmp_update/res/toggle-off.png");
 
     font18 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 18);
-    font21 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 21);
+    font25 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 25);
     font35 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 35);
 
     SDL_Surface *loadingScreen = IMG_Load("res/loading.png");
@@ -756,8 +754,8 @@ int main(int argc, char *argv[])
                     sprintf(status_str + len, " −%d", removals_count);
                 }
                 SDL_Surface *status =
-                    TTF_RenderUTF8_Blended(font21, status_str, color_white);
-                SDL_Rect status_rect = {620 - status->w, 20 - status->h / 2};
+                    TTF_RenderUTF8_Blended(font18, status_str, color_white);
+                SDL_Rect status_rect = {620 - status->w, 16 - status->h / 2};
                 SDL_BlitSurface(status, NULL, screen, &status_rect);
                 SDL_FreeSurface(status);
             }
@@ -851,7 +849,7 @@ int main(int argc, char *argv[])
 #endif
 
     TTF_CloseFont(font18);
-    TTF_CloseFont(font21);
+    TTF_CloseFont(font25);
     TTF_CloseFont(font35);
     TTF_Quit();
     SDL_FreeSurface(reinstall_surface);
