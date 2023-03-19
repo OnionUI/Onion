@@ -454,6 +454,10 @@ debloat_apps() {
     if [ -d /mnt/SDCARD/miyoo/packages ]; then
         rm -rf /mnt/SDCARD/miyoo/packages
     fi
+
+    if [ -d /mnt/SDCARD/App/PackageManager/data ]; then
+        rm -rf /mnt/SDCARD/App/PackageManager/data
+    fi
 }
 
 move_ports_collection() {
