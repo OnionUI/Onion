@@ -134,8 +134,8 @@ check_device_model() {
         deviceModel=283
     else
         touch /tmp/deviceModel
-        printf "353" > /tmp/deviceModel
-        deviceModel=353
+        printf "354" > /tmp/deviceModel
+        deviceModel=354
     fi
     
     # Check if the SD is inserted in a different model

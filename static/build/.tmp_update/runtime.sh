@@ -19,7 +19,7 @@ main() {
             cd $sysdir
             ./bin/chargingState
         fi
-    elif [ $deviceModel = 353 ]; then 
+    elif [ $deviceModel = 354 ]; then 
         cd /customer/app/
         batteryStatus=`./axp_test`
         case $batteryStatus in
@@ -340,8 +340,8 @@ check_hide_expert() {
             rm -f $expert_flag
 	        if [ $deviceModel -eq 283 ]; then 
                 cp $sysdir/bin/MainUI-283-clean /mnt/SDCARD/miyoo/app/MainUI
-            elif [ $deviceModel = 353 ]; then 
-                cp $sysdir/bin/MainUI-353-clean /mnt/SDCARD/miyoo/app/MainUI
+            elif [ $deviceModel = 354 ]; then 
+                cp $sysdir/bin/MainUI-354-clean /mnt/SDCARD/miyoo/app/MainUI
             fi
             touch $clean_flag
         fi
@@ -352,8 +352,8 @@ check_hide_expert() {
             rm -f $clean_flag
 	        if [ $deviceModel -eq 283 ]; then 
                 cp $sysdir/bin/MainUI-283-expert /mnt/SDCARD/miyoo/app/MainUI
-            elif [ $deviceModel = 353 ]; then 
-                cp $sysdir/bin/MainUI-353-expert /mnt/SDCARD/miyoo/app/MainUI
+            elif [ $deviceModel = 354 ]; then 
+                cp $sysdir/bin/MainUI-354-expert /mnt/SDCARD/miyoo/app/MainUI
             fi
             touch $expert_flag
         fi
@@ -369,8 +369,8 @@ check_device_model() {
         deviceModel=283
     else
         touch /tmp/deviceModel
-        printf "353" > /tmp/deviceModel
-        deviceModel=353
+        printf "354" > /tmp/deviceModel
+        deviceModel=354
     fi
     
     # Check if the SD is inserted in a different model

@@ -152,7 +152,7 @@ void shutdown(void) {
     sync();
     if (DEVICE_ID == MIYOO283){
         reboot(RB_AUTOBOOT);
-    } else if (DEVICE_ID == MIYOO353){
+    } else if (DEVICE_ID == MIYOO354){
         system("poweroff");
     }
       
@@ -304,7 +304,7 @@ int main(void) {
     // Set Initial Volume / Brightness
     if (DEVICE_ID == MIYOO283){
         recent_volume=setVolume(20,0);
-    } else if (DEVICE_ID == MIYOO353){
+    } else if (DEVICE_ID == MIYOO354){
         recent_volume=setVolume(settings.volume,0);
     }
     

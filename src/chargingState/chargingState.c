@@ -194,7 +194,7 @@ int main(void)
 
         if (!suspended) {
             if (ticks - display_timer >= DISPLAY_TIMEOUT) {
-                if (DEVICE_ID == MIYOO353){
+                if (DEVICE_ID == MIYOO354){
                     quit = true;
                     turn_off = true;
                     break; 
@@ -249,7 +249,7 @@ int main(void)
 
    if (DEVICE_ID == MIYOO283){
         system("sync; reboot; sleep 10");
-    } else if (DEVICE_ID == MIYOO353){
+    } else if (DEVICE_ID == MIYOO354){
         system("poweroff");
     }    
         #endif

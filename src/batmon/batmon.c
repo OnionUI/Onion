@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
             if (DEVICE_ID == MIYOO283){
                 adc_value_g = updateADCValue(0);
                 current_percentage = batteryPercentage(adc_value_g);   
-            } else if (DEVICE_ID == MIYOO353){
+            } else if (DEVICE_ID == MIYOO354){
                 current_percentage = getBatPercMMP();
             }
             printf_debug("charging stopped: suspended = %d, perc = %d, warn = %d\n", is_suspended, current_percentage, warn_at);
@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
                 if (DEVICE_ID == MIYOO283){
                     adc_value_g = updateADCValue(adc_value_g);
                     current_percentage = batteryPercentage(adc_value_g);
-                } else if (DEVICE_ID == MIYOO353){
+                } else if (DEVICE_ID == MIYOO354){
                     current_percentage = getBatPercMMP();
                 }
                 printf_debug("battery check: suspended = %d, perc = %d, warn = %d\n", is_suspended, current_percentage, warn_at);
