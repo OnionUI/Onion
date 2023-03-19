@@ -510,12 +510,14 @@ int main(void)
                 }
                 break;
             case HW_BTN_X:
+                if (val == PRESSED && system_state == MODE_MAIN_UI)
+                    temp_flag_set("launch_alt", false);
                 if (val == PRESSED)
                     applyExtraButtonShortcut(0);
                 break;
             case HW_BTN_Y:
-                if (val == PRESSED && system_state == MODE_MAIN_UI)
-                    temp_flag_set("launch_alt", true);
+                if (val == PRESSED)
+                    applyExtraButtonShortcut(1);
                 break;
             case HW_BTN_A:
             case HW_BTN_B:
