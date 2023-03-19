@@ -5,7 +5,7 @@
 #include "utils/file.h"
 
 #define MIYOO283 283
-#define MIYOO353 353
+#define MIYOO354 354
 
 static int DEVICE_ID;
 
