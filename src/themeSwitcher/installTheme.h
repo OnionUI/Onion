@@ -159,7 +159,7 @@ void installNonDynamicElement(const char *theme_path, const char *image_name)
     }
 }
 
-void installTheme(Theme_s *theme)
+void installTheme(Theme_s *theme, bool apply_icons)
 {
     system("/mnt/SDCARD/.tmp_update/bin/mainUiBatPerc --restore");
 
@@ -178,6 +178,10 @@ void installTheme(Theme_s *theme)
     strcpy(settings.theme, theme->path);
     settings_save();
 
+    FILE *fp;
+    file_put_sync(fp, "/mnt/SDCARD/.tmp_update/config/active_theme", "%s",
+                  theme->path);
+
     Theme_s with_overrides = theme_loadFromPath(theme->path, true);
 
     lang_removeIconLabels(with_overrides.hideLabels.icons,
@@ -186,6 +190,13 @@ void installTheme(Theme_s *theme)
     installNonDynamicElement(settings.theme, "bg-io-testing");
     installNonDynamicElement(settings.theme, "ic-MENU+A");
     installNonDynamicElement(settings.theme, "progress-dot");
+
+    if (apply_icons) {
+        char icon_pack_path[STR_MAX + 32];
+        snprintf(icon_pack_path, STR_MAX + 32 - 1, "%sicons", theme->path);
+        apply_iconPack(is_dir(icon_pack_path) ? icon_pack_path
+                                              : ICON_PACK_DEFAULT);
+    }
 }
 
 #endif // THEME_SWITCHER_INSTALL_THEME_H__

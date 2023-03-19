@@ -12,7 +12,10 @@ main() {
     ./bin/batmon &
 
     # Reapply theme
-    ./bin/themeSwitcher --reapply
+    theme="$(/customer/app/jsonval theme)"
+    if [ "$theme" == "./" ] || [ "$theme" != "$(cat ./config/active_theme)" ]; then
+        ./bin/themeSwitcher --reapply_icons
+    fi
     
     if [ `cat /sys/devices/gpiochip0/gpio/gpio59/value` -eq 1 ]; then
         cd $sysdir
