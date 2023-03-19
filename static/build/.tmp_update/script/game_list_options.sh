@@ -223,7 +223,7 @@ change_core() {
     ext="$romext"
 
     if [ "$ext" == "zip" ] || [ "$ext" == "7z" ]; then
-        if ! cat "$emupath/config.json" | grep -q "\"shortname\" *: *1"; then
+        if ! cat "$emupath/config.json" | grep -q "\"shortname\"\s*:\s*1"; then
 
             if [ "$ext" == "zip" ]; then
                 zip_files=`unzip -l "$rompath" | sed '1,3d;$d' | sed '$d' | sort -n -r`
