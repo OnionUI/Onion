@@ -161,6 +161,9 @@ void tool_patchRAConfig(void *_)
     file_changeKeyValue(RETROARCH_CONFIG, "menu_ticker_speed =",
                         "menu_ticker_speed = \"4.800000\"");
 
+    file_changeKeyValue(RETROARCH_CONFIG,
+                        "menu_show_overlay =", "menu_show_overlay = \"true\"");
+
     file_changeKeyValue(RETROARCH_CONFIG, "input_overlay_opacity =",
                         "input_overlay_opacity = \"1.000000\"");
 
