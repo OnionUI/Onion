@@ -232,7 +232,7 @@ launch_game() {
 
     echo "cmd retval: $retval"
 
-    if [ $retval -ge 128 ]; then
+    if [ $retval -ge 128 ] && [ $retval -ne 143 ]; then
         cd $sysdir
         ./bin/infoPanel --title "Fatal error occurred" --message "The program exited unexpectedly.\n(Error code: $retval)" --auto
     fi
