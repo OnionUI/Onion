@@ -508,7 +508,6 @@ int main(void)
     bool changed = true;
     bool current_game_changed = true;
     bool brightness_changed = false;
-    bool image_drawn = false;
 
     KeyState keystate[320] = {(KeyState)0};
     bool menu_pressed = false;
@@ -529,7 +528,7 @@ int main(void)
 
     uint32_t acc_ticks = 0, last_ticks = SDL_GetTicks(), time_step = 1000 / 30;
 
-    uint32_t start = last_ticks;
+    uint32_t legend_start = last_ticks;
     uint32_t legend_timeout = 5000;
 
     char header_path[STR_MAX], footer_path[STR_MAX];
@@ -558,9 +557,10 @@ int main(void)
         acc_ticks += ticks - last_ticks;
         last_ticks = ticks;
 
-        if (show_legend && ticks - start > legend_timeout) {
+        if (show_legend && ticks - legend_start > legend_timeout) {
             show_legend = false;
             config_flag_set("gameSwitcher/hideLegend", true);
+            changed = true;
         }
 
         if (updateKeystate(keystate, &quit, true, &changed_key)) {
@@ -647,16 +647,19 @@ int main(void)
                     select_pressed = true;
                 if (keystate[SW_BTN_SELECT] == RELEASED) {
                     if (!select_combo_key) {
-                        show_legend = !show_legend;
-                        legend_timeout = 0;
+                        show_legend = true;
+                        legend_start = last_ticks;
+
                         if (!show_time && !show_total)
                             show_time = true, show_total = false;
                         else if (show_time && !show_total)
                             show_time = true, show_total = true;
                         else
                             show_time = false, show_total = false;
+
                         config_flag_set("gameSwitcher/showTime", show_time);
                         config_flag_set("gameSwitcher/hideTotal", !show_total);
+
                         changed = true;
                     }
                     select_pressed = false;
@@ -721,7 +724,7 @@ int main(void)
         if (battery_hasChanged(ticks, &battery_percentage))
             changed = true;
 
-        if (!changed && image_drawn && brightness_changed == false &&
+        if (!changed && !brightness_changed &&
             (surfaceGameName == NULL ||
              surfaceGameName->w <= game_name_max_width))
             continue;
@@ -733,7 +736,6 @@ int main(void)
                 SDL_Surface *empty = resource_getSurface(EMPTY_BG);
                 SDL_Rect empty_rect = {320 - empty->w / 2, 240 - empty->h / 2};
                 SDL_BlitSurface(empty, NULL, screen, &empty_rect);
-                image_drawn = true;
             }
             else {
                 SDL_Surface *imageBackgroundGame = loadRomScreen(current_game);
