@@ -14,12 +14,12 @@ main() {
 	# Reapply theme
     ./bin/themeSwitcher --reapply
 	
-    if [ $deviceModel = 283 ]; then 
+    if [ $deviceModel -eq 283 ]; then 
         if [ `cat /sys/devices/gpiochip0/gpio/gpio59/value` -eq 1 ]; then
             cd $sysdir
             ./bin/chargingState
         fi
-    elif [ $deviceModel = 354 ]; then 
+    elif [ $deviceModel -eq 354 ]; then 
         cd /customer/app/
         batteryStatus=`./axp_test`
         case $batteryStatus in
@@ -60,7 +60,6 @@ main() {
 
     state_change
     check_switcher
-
     set_startup_tab
 
     # Main runtime loop
@@ -340,7 +339,7 @@ check_hide_expert() {
             rm -f $expert_flag
 	        if [ $deviceModel -eq 283 ]; then 
                 cp $sysdir/bin/MainUI-283-clean /mnt/SDCARD/miyoo/app/MainUI
-            elif [ $deviceModel = 354 ]; then 
+            elif [ $deviceModel -eq 354 ]; then 
                 cp $sysdir/bin/MainUI-354-clean /mnt/SDCARD/miyoo/app/MainUI
             fi
             touch $clean_flag
@@ -352,7 +351,7 @@ check_hide_expert() {
             rm -f $clean_flag
 	        if [ $deviceModel -eq 283 ]; then 
                 cp $sysdir/bin/MainUI-283-expert /mnt/SDCARD/miyoo/app/MainUI
-            elif [ $deviceModel = 354 ]; then 
+            elif [ $deviceModel -eq 354 ]; then 
                 cp $sysdir/bin/MainUI-354-expert /mnt/SDCARD/miyoo/app/MainUI
             fi
             touch $expert_flag
@@ -387,6 +386,7 @@ check_device_model() {
         fi
     fi    
 }
+
 
 init_system() {
     # init_lcd
