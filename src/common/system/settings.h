@@ -7,6 +7,9 @@
 #include "utils/config.h"
 #include "utils/file.h"
 #include "utils/json.h"
+#include "utils/config.h"
+#include "display.h"
+#include "system/volume.h"
 
 #define MAX_BRIGHTNESS 10
 #define MAIN_UI_SETTINGS "/appconfigs/system.json"
@@ -288,6 +291,25 @@ void settings_setBrightness(uint32_t value, bool apply, bool save)
         FILE *fp;
         file_put_sync(fp, "/tmp/settings_changed", "%s", "");
     }
+}
+
+int settings_setVolume(uint32_t value, int add, bool apply, bool save)
+{
+    settings.volume = value;
+    
+    if (apply)
+        settings.volume = setVolume(value, add);
+ 
+    if (save) {
+        cJSON* request_json = json_load(MAIN_UI_SETTINGS);
+        cJSON* itemVolume = cJSON_GetObjectItem(request_json, "vol");
+        cJSON_SetNumberValue(itemVolume, settings.volume);
+        json_save(request_json, MAIN_UI_SETTINGS);
+        cJSON_free(request_json);
+        FILE *fp;
+        file_put_sync(fp, "/tmp/settings_changed", "%s", "");
+    }
+    return settings.volume;
 }
 
 #endif // SETTINGS_H__

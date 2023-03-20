@@ -6,6 +6,9 @@
 #include "utils/log.h"
 #include "utils/msleep.h"
 #include "utils/process.h"
+#include "system/system.h"
+#include "utils/file.h"
+#include "system/device_model.h"
 
 static time_t battery_last_modified = 0;
 static bool battery_is_charging = false;
@@ -15,6 +18,7 @@ static bool battery_is_charging = false;
  *
  * @return int : Battery percentage (0-100) or 500 if charging
  */
+ 
 int battery_getPercentage(void)
 {
     FILE *fp;
@@ -34,7 +38,6 @@ int battery_getPercentage(void)
                 break;
             }
         }
-
         retry--;
         msleep(100);
     }
@@ -53,24 +56,45 @@ int battery_getPercentage(void)
 
 bool battery_isCharging(void)
 {
-#ifdef PLATFORM_MIYOOMINI
-    char charging = 0;
-    int fd = open(GPIO_DIR2 "gpio59/value", O_RDONLY);
+    #ifdef PLATFORM_MIYOOMINI
+    
+    int charging = 0;
+    
+   if (DEVICE_ID == MIYOO283){
+        char cCharging = '0';
+        int fd = open(GPIO_DIR2 "gpio59/value", O_RDONLY);
 
-    if (fd < 0) {
-        // export gpio59, direction: in
-        file_write(GPIO_DIR1 "export", "59", 2);
-        file_write(GPIO_DIR2 "gpio59/direction", "in", 2);
-        fd = open(GPIO_DIR2 "gpio59/value", O_RDONLY);
+        if (fd < 0) {
+            // export gpio59, direction: in
+            file_write(GPIO_DIR1 "export", "59", 2);
+            file_write(GPIO_DIR2 "gpio59/direction", "in", 2);
+            fd = open(GPIO_DIR2 "gpio59/value", O_RDONLY);
+        }
+
+        if (fd >= 0) {
+            read(fd, &cCharging, 1);
+            close(fd);
+            charging = (cCharging == '1');        
+                    
+        }  
+    } else if (DEVICE_ID == MIYOO354){
+        char *cmd = "cd /customer/app/ ; ./axp_test";  
+        int batJsonSize = 100;
+        char buf[batJsonSize];
+        int charge_number;
+
+        FILE *fp;      
+        fp = popen(cmd, "r");
+            if (fgets(buf, batJsonSize, fp) != NULL) {
+               sscanf(buf,  "{\"battery\":%*d, \"voltage\":%*d, \"charging\":%d}", &charge_number);
+               charging = (charge_number==3);
+            }
+        pclose(fp);   
     }
 
-    if (fd >= 0) {
-        read(fd, &charging, 1);
-        close(fd);
-    }
-
-    return charging == '1';
-#else
+    return charging;
+        
+    #else
     return true;
 #endif
 }

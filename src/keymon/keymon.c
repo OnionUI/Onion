@@ -24,6 +24,8 @@
 #include "utils/log.h"
 #include "utils/process.h"
 #include "utils/str.h"
+#include "system/device_model.h"
+#include "system/volume.h"
 
 #include "./input_fd.h"
 #include "./menuButtonAction.h"
@@ -192,9 +194,13 @@ void shutdown(void)
     system_clock_get();
     system_clock_save();
     sync();
-    reboot(RB_AUTOBOOT);
-    while (1)
-        pause();
+    if (DEVICE_ID == MIYOO283){
+        reboot(RB_AUTOBOOT);
+    } else if (DEVICE_ID == MIYOO354){
+        system("poweroff");
+    }
+      
+while(1) pause();
     exit(0);
 }
 
@@ -209,7 +215,7 @@ void suspend_exec(int timeout)
     system_clock_pause(true);
     suspend(0);
     rumble(0);
-    int recent_volume = setVolumeRaw(-60, 0);
+    setVolume(0,0);
     display_setBrightnessRaw(0);
     display_off();
     system_powersave_on();
@@ -267,7 +273,7 @@ void suspend_exec(int timeout)
     }
     display_on();
     display_setBrightness(settings.brightness);
-    setVolumeRaw(recent_volume, 0);
+    setVolume(recent_volume, 0);
     if (!killexit) {
         resume();
         system_clock_pause(false);
@@ -308,6 +314,37 @@ void deepsleep(void)
 }
 
 //
+//    Draw Onion interstate frame
+//
+static void* interstateFrame_thread(void* param)
+{
+    while (1) {
+        display_drawFrame(0x009061FF); // draw red frame
+        usleep(0x4000);
+    }
+    return 0;
+}
+
+void interstateFrame_show(void)
+{
+    if (isFramethread_active)
+        return;
+    pthread_create(&isf_pt, NULL, interstateFrame_thread, NULL);
+    isFramethread_active = true;
+}
+
+void interstateFrame_hide(void)
+{
+    if (!isFramethread_active)
+        return;
+    pthread_cancel(isf_pt);
+    pthread_join(isf_pt, NULL);
+    display_drawFrame(0); // erase red frame
+    isFramethread_active = false;
+}
+
+
+//
 //    Main
 //
 int main(void)
@@ -316,16 +353,21 @@ int main(void)
     signal(SIGTERM, quit);
     signal(SIGSEGV, quit);
 
+    getDeviceModel(); 
     settings_init();
     printf_debug("Settings loaded. Brightness set to: %d\n",
                  settings.brightness);
 
     // Set Initial Volume / Brightness
-    setVolumeRaw(0, 0);
+    if (DEVICE_ID == MIYOO283){
+        recent_volume=setVolume(20,0);
+    } else if (DEVICE_ID == MIYOO354){
+        recent_volume=setVolume(settings.volume,0);
+    }
+    
     display_setBrightness(settings.brightness);
 
     display_init();
-
     // Prepare for Poll button input
     input_fd = open("/dev/input/event0", O_RDONLY);
     memset(&fds, 0, sizeof(fds));
@@ -341,6 +383,8 @@ int main(void)
     bool b_BTN_Not_Menu_Pressed = false;
     bool b_BTN_Menu_Pressed = false;
     bool power_pressed = false;
+    bool volUp_pressed = false;
+    bool volDown_pressed = false;
     bool comboKey_menu = false;
     bool comboKey_select = false;
 
@@ -378,6 +422,7 @@ int main(void)
             }
 
             if (val != REPEAT) {
+
                 if (ev.code == HW_BTN_MENU)
                     b_BTN_Menu_Pressed = val == PRESSED;
                 else
@@ -432,104 +477,117 @@ int main(void)
                         keyinput_send(HW_BTN_MENU, PRESSED);
                         keyinput_send(HW_BTN_MENU, RELEASED);
                     }
-                }
-                if (val != REPEAT)
-                    button_flag =
-                        (button_flag & (~SELECT)) | (val << SELECT_BIT);
-                if (val == RELEASED)
-                    comboKey_select = false;
-                break;
-            case HW_BTN_START:
-                if (val != REPEAT)
-                    button_flag = (button_flag & (~START)) | (val << START_BIT);
-                break;
-            case HW_BTN_L2:
-                if (val == REPEAT) {
-                    // Adjust repeat speed to 1/2
-                    val = repeat_LR;
-                    repeat_LR ^= PRESSED;
-                }
-                else {
-                    button_flag = (button_flag & (~L2)) | (val << L2_BIT);
-                    repeat_LR = 0;
-                }
-                if (val == PRESSED) {
-                    switch (button_flag & (SELECT | START)) {
-                    case START:
-                        // SELECT + L2 : volume down / + R2 : reset
-                        setVolumeRaw(0, (button_flag & R2) ? 0 : -3);
-                        break;
-                    case SELECT:
-                        // START + L2 : brightness down
-                        if (settings.brightness > 0) {
-                            settings_setBrightness(settings.brightness - 1,
-                                                   true, true);
-                            settings_sync();
+                    if (val == PRESSED) {
+                        switch (button_flag & (SELECT|START)) {
+                            case START:
+                                // SELECT + L2 : volume down / + R2 : reset
+                                recent_volume=setVolume(0, (button_flag & R2) ? 0 : -1);
+                                break;
+                            case SELECT:
+                                // START + L2 : brightness down
+                                if (settings.brightness > 0) {
+                                    settings_setBrightness(settings.brightness - 1, true, true);
+                                    settings_sync();
+                                }
+                                comboKey_select = true;
+                                break;
+                            default: break;
                         }
                         comboKey_select = true;
                         break;
                     default:
                         break;
                     }
-                }
-                break;
-            case HW_BTN_R2:
-                if (val == REPEAT) {
-                    // Adjust repeat speed to 1/2
-                    val = repeat_LR;
-                    repeat_LR ^= PRESSED;
-                }
-                else {
-                    button_flag = (button_flag & (~R2)) | (val << R2_BIT);
-                    repeat_LR = 0;
-                }
-                if (val == PRESSED) {
-                    switch (button_flag & (SELECT | START)) {
-                    case START:
-                        // SELECT + R2 : volume up / + L2 : reset
-                        setVolumeRaw(0, (button_flag & L2) ? 0 : +3);
-                        break;
-                    case SELECT:
-                        // START + R2 : brightness up
-                        if (settings.brightness < MAX_BRIGHTNESS) {
-                            settings_setBrightness(settings.brightness + 1,
-                                                   true, true);
-                            settings_sync();
+                    break;
+                case HW_BTN_R2:
+                    if ( val == REPEAT ) {
+                        // Adjust repeat speed to 1/2
+                        val = repeat_LR;
+                        repeat_LR ^= PRESSED;
+                    } else {
+                        button_flag = (button_flag & (~R2)) | (val<<R2_BIT);
+                        repeat_LR = 0;
+                    }
+                    if ( val == PRESSED ) {
+                        switch (button_flag & (SELECT|START)) {
+                        case START:
+                            // SELECT + R2 : volume up / + L2 : reset
+                            recent_volume=setVolume(0, (button_flag & L2) ? 0 : +1);
+                            break;
+                        case SELECT:
+                            // START + R2 : brightness up
+                            if (settings.brightness < MAX_BRIGHTNESS) {
+                                settings_setBrightness(settings.brightness + 1, true, true);
+                                settings_sync();
+                            }
+                            comboKey_select = true;
+                            break;
+                        default:
+                            break;
                         }
                         comboKey_select = true;
                         break;
                     default:
                         break;
                     }
-                }
-                break;
-            case HW_BTN_MENU:
-                if (!temp_flag_get("disable_menu_button")) {
+                    break;
+                case HW_BTN_MENU:
+                    //interstateFrame_show();
                     system_state_update();
                     comboKey_menu = menuButtonAction(val, comboKey_menu);
-                }
-                break;
-            case HW_BTN_X:
-                if (val == PRESSED && system_state == MODE_MAIN_UI)
-                    temp_flag_set("launch_alt", false);
-                if (val == PRESSED)
-                    applyExtraButtonShortcut(0);
-                break;
-            case HW_BTN_Y:
-                if (val == PRESSED)
-                    applyExtraButtonShortcut(1);
-                break;
-            case HW_BTN_A:
-            case HW_BTN_B:
-                if (val == PRESSED && system_state == MODE_MAIN_UI)
-                    temp_flag_set("launch_alt", false);
-                break;
-            default:
-                break;
+                    //interstateFrame_hide();
+                    break;
+                case HW_BTN_X:
+                    if (val == PRESSED)
+                        applyExtraButtonShortcut(0);
+                    break;
+                case HW_BTN_Y:
+                    if (val == PRESSED && system_state == MODE_MAIN_UI)
+                        temp_flag_set("launch_alt", true);
+                    break;
+                case HW_BTN_A:
+                case HW_BTN_B:
+                    if (val == PRESSED && system_state == MODE_MAIN_UI)
+                        temp_flag_set("launch_alt", false);
+                    break;
+                 case HW_BTN_VOLUME_UP:
+                    volUp_pressed = (val == PRESSED);
+                    if ((val == PRESSED)||(val == REPEAT)){
+                        if (settings.volume <= MAX_VOLUME - VOLUME_INCREMENTS) {
+                            recent_volume = settings_setVolume(0, VOLUME_INCREMENTS, true, true);
+                            settings_sync();
+                        }     
+                    }    
+                    break;
+                case HW_BTN_VOLUME_DOWN:
+                    volDown_pressed = (val == PRESSED);
+                    if (val == PRESSED){
+                        if (settings.volume >= VOLUME_INCREMENTS) {
+                            recent_volume = settings_setVolume(0, - VOLUME_INCREMENTS, true, true);
+                            settings_sync();
+                        }
+                    }
+                    else if (val == REPEAT){
+                        recent_volume = settings_setVolume(0, 0, true, true);
+                        settings_sync();
+                    }
+                    break;
+                default:
+                    break;
             }
-
-            if ((val == PRESSED) && (system_state == MODE_MAIN_UI)) {
-                // Check for Konami code
+            
+            // Screenshot shortcut for the MMP
+            if ((volDown_pressed) && (volUp_pressed)){
+                    // screenshot
+                    super_short_pulse();
+                    screenshot_recent();
+                    display_setBrightnessRaw(0);
+                    usleep(100000);
+                    settings_setBrightness(settings.brightness, true, false);
+            }
+            
+            if ((val == PRESSED) && (system_state == MODE_MAIN_UI)){
+             // Check for Konami code    
                 if (ev.code == KONAMI_CODE[konamiCodeIndex]) {
                     ++konamiCodeIndex;
                     if (konamiCodeIndex == KONAMI_CODE_LENGTH) {

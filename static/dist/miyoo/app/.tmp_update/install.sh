@@ -36,13 +36,20 @@ main() {
     cat /proc/ls
     sleep 0.25
     
-    # init charger detection
-    gpiodir=/sys/devices/gpiochip0/gpio
-    if [ ! -f $gpiodir/gpio59/direction ]; then
-        echo 59 > /sys/class/gpio/export
-        echo "in" > $gpiodir/gpio59/direction
+    check_device_model
+    
+    # Start the battery monitor
+    if [ $deviceModel = 283 ]; then 
+        if [ `cat /sys/devices/gpiochip0/gpio/gpio59/value` -eq 1 ]; then
+            # init charger detection
+            gpiodir=/sys/devices/gpiochip0/gpio
+            if [ ! -f $gpiodir/gpio59/direction ]; then
+                echo 59 > /sys/class/gpio/export
+                echo "in" > $gpiodir/gpio59/direction
+            fi
+        fi
     fi
-
+    
     # init backlight
     pwmdir=/sys/class/pwm/pwmchip0
     echo 0  	> $pwmdir/export
@@ -127,6 +134,34 @@ cleanup() {
     rm -f $ra_zipfile
     rm -f $ra_package_version_file
 }
+
+check_device_model() {
+    
+    if [ ! -f /customer/app/axp_test ]; then        
+        touch /tmp/deviceModel
+        printf "283" > /tmp/deviceModel
+        deviceModel=283
+    else
+        touch /tmp/deviceModel
+        printf "354" > /tmp/deviceModel
+        deviceModel=354
+    fi
+    
+    # Check if the SD is inserted in a different model
+    is_device_model_changed=0
+    if [ ! -f /mnt/SDCARD/miyoo/app/lastDeviceModel ]; then
+        cp /tmp/deviceModel /mnt/SDCARD/miyoo/app/lastDeviceModel
+        is_device_model_changed=1
+    else 
+        lastDeviceModel=`cat /mnt/SDCARD/miyoo/app/lastDeviceModel` 
+        if [ $lastDeviceModel -ne $deviceModel ]; then 
+            is_device_model_changed=1
+            rm /mnt/SDCARD/miyoo/app/lastDeviceModel
+            echo $deviceModel > /mnt/SDCARD/miyoo/app/lastDeviceModel
+        fi
+    fi    
+}
+
 
 get_install_stats() {
     total_core=$(zip_total "$core_zipfile")

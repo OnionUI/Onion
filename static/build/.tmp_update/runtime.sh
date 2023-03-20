@@ -4,10 +4,11 @@ export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$sysdir/lib:$sysdir/lib/parasyte"
 export PATH="$sysdir/bin:$PATH"
 
 main() {
+    check_device_model
     init_system
     update_time
     clear_logs
-
+	
     # Start the battery monitor
     ./bin/batmon &
 
@@ -17,11 +18,25 @@ main() {
         ./bin/themeSwitcher --reapply_icons
     fi
     
-    if [ `cat /sys/devices/gpiochip0/gpio/gpio59/value` -eq 1 ]; then
-        cd $sysdir
-        ./bin/chargingState
+	# Reapply theme
+    ./bin/themeSwitcher --reapply
+	
+    if [ $deviceModel -eq 283 ]; then 
+        if [ `cat /sys/devices/gpiochip0/gpio/gpio59/value` -eq 1 ]; then
+            cd $sysdir
+            ./bin/chargingState
+        fi
+    elif [ $deviceModel -eq 354 ]; then 
+        cd /customer/app/
+        batteryStatus=`./axp_test`
+        case $batteryStatus in
+        *\"charging\":3* ) 
+            cd $sysdir
+            ./bin/chargingState
+            ;;
+        esac
     fi
-
+    
     # Make sure MainUI doesn't show charging animation
     touch /tmp/no_charging_ui
 
@@ -61,7 +76,6 @@ main() {
 
     state_change
     check_switcher
-
     set_startup_tab
 
     # Main runtime loop
@@ -76,6 +90,7 @@ main() {
         check_switcher
         
         # Free memory
+        #/customer/app/sysmon freemma
         $sysdir/bin/freemma
     done
 }
@@ -291,9 +306,15 @@ check_off_order() {
 
         killall tee
         rm -f /mnt/SDCARD/update.log
-        
+                
         sync
-        reboot
+        if [ $deviceModel -eq 283 ]; then 
+            reboot
+        else
+            # Allow the bootScreen to be displayed
+            sleep 1.5
+            poweroff 
+        fi
         sleep 10
     fi
 }
@@ -329,23 +350,59 @@ expert_flag=/mnt/SDCARD/miyoo/app/.isExpert
 check_hide_expert() {
     if [ ! -f $sysdir/config/.showExpert ]; then
         # Should be clean
-        if [ ! -f $clean_flag ] || [ -f $expert_flag ]; then
+        if [ ! -f $clean_flag ] || [ -f $expert_flag ] || [ $is_device_model_changed ]; then
             rm /mnt/SDCARD/miyoo/app/MainUI
             rm -f $expert_flag
-	        cp $sysdir/bin/MainUI-clean /mnt/SDCARD/miyoo/app/MainUI
+	        if [ $deviceModel -eq 283 ]; then 
+                cp $sysdir/bin/MainUI-283-clean /mnt/SDCARD/miyoo/app/MainUI
+            elif [ $deviceModel -eq 354 ]; then 
+                cp $sysdir/bin/MainUI-354-clean /mnt/SDCARD/miyoo/app/MainUI
+            fi
             touch $clean_flag
         fi
     else
         # Should be expert
-        if [ ! -f $expert_flag ] || [ -f $clean_flag ]; then
+        if [ ! -f $expert_flag ] || [ -f $clean_flag ]|| [ $is_device_model_changed ]; then
             rm /mnt/SDCARD/miyoo/app/MainUI
             rm -f $clean_flag
-	        cp $sysdir/bin/MainUI-expert /mnt/SDCARD/miyoo/app/MainUI
+	        if [ $deviceModel -eq 283 ]; then 
+                cp $sysdir/bin/MainUI-283-expert /mnt/SDCARD/miyoo/app/MainUI
+            elif [ $deviceModel -eq 354 ]; then 
+                cp $sysdir/bin/MainUI-354-expert /mnt/SDCARD/miyoo/app/MainUI
+            fi
             touch $expert_flag
         fi
     fi
     sync
 }
+
+check_device_model() {
+    
+    if [ ! -f /customer/app/axp_test ]; then        
+        touch /tmp/deviceModel
+        printf "283" > /tmp/deviceModel
+        deviceModel=283
+    else
+        touch /tmp/deviceModel
+        printf "354" > /tmp/deviceModel
+        deviceModel=354
+    fi
+    
+    # Check if the SD is inserted in a different model
+    is_device_model_changed=0
+    if [ ! -f /mnt/SDCARD/miyoo/app/lastDeviceModel ]; then
+        cp /tmp/deviceModel /mnt/SDCARD/miyoo/app/lastDeviceModel
+        is_device_model_changed=1
+    else 
+        lastDeviceModel=`cat /mnt/SDCARD/miyoo/app/lastDeviceModel` 
+        if [ $lastDeviceModel -ne $deviceModel ]; then 
+            is_device_model_changed=1
+            rm /mnt/SDCARD/miyoo/app/lastDeviceModel
+            echo $deviceModel > /mnt/SDCARD/miyoo/app/lastDeviceModel
+        fi
+    fi    
+}
+
 
 init_system() {
     # init_lcd
@@ -354,10 +411,12 @@ init_system() {
     
     /mnt/SDCARD/miyoo/app/audioserver &
 
-    # init charger detection
-    if [ ! -f /sys/devices/gpiochip0/gpio/gpio59/direction ]; then
-        echo 59 > /sys/class/gpio/export
-        echo in > /sys/devices/gpiochip0/gpio/gpio59/direction
+    if [ $deviceModel -eq 283 ]; then 
+        # init charger detection
+        if [ ! -f /sys/devices/gpiochip0/gpio/gpio59/direction ]; then
+            echo 59 > /sys/class/gpio/export
+            echo in > /sys/devices/gpiochip0/gpio/gpio59/direction
+        fi
     fi
 
     # init backlight

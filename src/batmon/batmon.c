@@ -1,7 +1,12 @@
+#include "system/device_model.h"
 #include "batmon.h"
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+ 
 int main(int argc, char *argv[])
 {
+    getDeviceModel(); 
     FILE *fp;
     int old_percentage = -1, current_percentage, warn_at = 15;
 
@@ -23,22 +28,26 @@ int main(int argc, char *argv[])
         }
         else if (is_charging) {
             is_charging = false;
-            adc_value_g = updateADCValue(0);
-            current_percentage = batteryPercentage(adc_value_g);
-            printf_debug(
-                "charging stopped: suspended = %d, perc = %d, warn = %d\n",
-                is_suspended, current_percentage, warn_at);
+            if (DEVICE_ID == MIYOO283){
+                adc_value_g = updateADCValue(0);
+                current_percentage = batteryPercentage(adc_value_g);   
+            } else if (DEVICE_ID == MIYOO354){
+                current_percentage = getBatPercMMP();
+            }
+            printf_debug("charging stopped: suspended = %d, perc = %d, warn = %d\n", is_suspended, current_percentage, warn_at);
         }
 
         if (!is_suspended) {
             config_get("battery/warnAt", "%d", &warn_at);
 
             if (ticks >= CHECK_BATTERY_TIMEOUT_S) {
-                adc_value_g = updateADCValue(adc_value_g);
-                current_percentage = batteryPercentage(adc_value_g);
-                printf_debug(
-                    "battery check: suspended = %d, perc = %d, warn = %d\n",
-                    is_suspended, current_percentage, warn_at);
+                if (DEVICE_ID == MIYOO283){
+                    adc_value_g = updateADCValue(adc_value_g);
+                    current_percentage = batteryPercentage(adc_value_g);
+                } else if (DEVICE_ID == MIYOO354){
+                    current_percentage = getBatPercMMP();
+                }
+                printf_debug("battery check: suspended = %d, perc = %d, warn = %d\n", is_suspended, current_percentage, warn_at);
                 ticks = -1;
             }
 
@@ -74,20 +83,21 @@ int main(int argc, char *argv[])
 static void sigHandler(int sig)
 {
     switch (sig) {
-    case SIGINT:
-    case SIGTERM:
-        quit = true;
-        msleep_interrupt = 1;
-        break;
-    case SIGSTOP:
-        is_suspended = true;
-        break;
-    case SIGCONT:
-        adc_value_g = updateADCValue(0);
-        is_suspended = false;
-        break;
-    default:
-        break;
+        case SIGINT:
+        case SIGTERM:
+            quit = true;
+            msleep_interrupt = 1;
+            break;
+        case SIGSTOP:
+            is_suspended = true;
+            break;
+        case SIGCONT:
+            if (DEVICE_ID == MIYOO283){
+                adc_value_g = updateADCValue(0);
+            }
+            is_suspended = false;
+            break;
+        default: break;
     }
 }
 
@@ -119,6 +129,21 @@ int updateADCValue(int value)
         value--;
 
     return value;
+}
+
+int getBatPercMMP() {
+    char *cmd = "cd /customer/app/ ; ./axp_test";  
+    int batJsonSize = 100;
+    char buf[batJsonSize];
+    int battery_number;
+
+    FILE *fp;      
+    fp = popen(cmd, "r");
+        if (fgets(buf, batJsonSize, fp) != NULL) {
+           sscanf(buf,  "{\"battery\":%d, \"voltage\":%*d, \"charging\":%*d}", &battery_number);
+        }
+    pclose(fp);   
+    return battery_number;
 }
 
 int batteryPercentage(int value)
@@ -165,3 +190,4 @@ void batteryWarning_hide(void)
     display_drawFrame(0); // erase red frame
     adcthread_active = false;
 }
+

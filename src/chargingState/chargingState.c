@@ -1,29 +1,30 @@
-#include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
-#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <unistd.h>
+#include <stdint.h>
+#include <pthread.h>
+#include <string.h>
 #include <fcntl.h>
+#include <assert.h>
+#include <time.h>
+#include <sys/ioctl.h>
 #include <linux/fb.h>
 #include <linux/input.h>
 #include <poll.h>
-#include <pthread.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/ioctl.h>
-#include <time.h>
-#include <unistd.h>
-
+#include <SDL/SDL.h>
+#include <SDL/SDL_image.h>
+#include "utils/file.h"
+#include "utils/msleep.h"
+#include "utils/log.h"
+#include "system/device_model.h"
 #include "system/battery.h"
+#include "system/system.h"
 #include "system/display.h"
+#include "system/settings.h"
 #include "system/keymap_hw.h"
 #include "system/rumble.h"
-#include "system/settings.h"
-#include "system/system.h"
 #include "theme/config.h"
-#include "utils/log.h"
-#include "utils/msleep.h"
 
 #define RELEASED 0
 #define PRESSED 1
@@ -40,7 +41,6 @@ static struct pollfd fds[1];
 void getImageDir(const char *theme_path, char *image_dir)
 {
     char image0_path[STR_MAX * 2];
-
     sprintf(image0_path, "%s/skin/extra/chargingState0.png", THEME_OVERRIDES);
     if (exists(image0_path)) {
         sprintf(image_dir, "%s/skin/extra", THEME_OVERRIDES);
@@ -91,7 +91,9 @@ int main(void)
 
     char image_dir[STR_MAX];
     getImageDir(settings.theme, image_dir);
-
+     
+    getDeviceModel(); 
+     
     SDL_Init(SDL_INIT_VIDEO);
     SDL_ShowCursor(SDL_DISABLE);
     SDL_EnableKeyRepeat(300, 50);
@@ -196,8 +198,15 @@ int main(void)
 
         if (!suspended) {
             if (ticks - display_timer >= DISPLAY_TIMEOUT) {
-                suspend(true, video);
-                continue;
+                if (DEVICE_ID == MIYOO354){
+                    quit = true;
+                    turn_off = true;
+                    break; 
+                }
+                else {
+                    suspend(true, video);
+                    continue;
+                }
             }
 
             acc_ticks += ticks - last_ticks;
@@ -242,8 +251,13 @@ int main(void)
     if (turn_off) {
 #ifdef PLATFORM_MIYOOMINI
         display_setScreen(false);
+
+   if (DEVICE_ID == MIYOO283){
         system("sync; reboot; sleep 10");
-#endif
+    } else if (DEVICE_ID == MIYOO354){
+        system("poweroff");
+    }    
+        #endif
     }
     else {
 #ifdef PLATFORM_MIYOOMINI

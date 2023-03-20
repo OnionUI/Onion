@@ -1,0 +1,7 @@
+{
+"label":"FTP Server",
+"icon":"ftp.png",
+"iconsel":"",
+"launch":"launch.sh",
+"description":"Bftpd Server"
+}
