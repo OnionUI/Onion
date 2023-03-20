@@ -36,7 +36,7 @@
 #include "utils/str.h"
 #include "utils/surfaceSetAlpha.h"
 
-#define MAXHISTORY 50
+#define MAXHISTORY 100
 #define MAXHROMNAMESIZE 250
 #define MAXHROMPATHSIZE 150
 
@@ -199,15 +199,8 @@ SDL_Surface *loadRomScreen(int index)
             sprintf(currPicture, ROM_SCREENS_DIR "/%s.png",
                     file_removeExtension(game->name));
 
-        if (exists(currPicture)) {
+        if (exists(currPicture))
             game->romScreen = IMG_Load(currPicture);
-            printf_debug("Loaded rom screen: index=%d, path=%s\n", index,
-                         currPicture);
-        }
-        else {
-            printf_debug("Rom screen not found: index=%d, path=%s\n", index,
-                         currPicture);
-        }
     }
 
     return game->romScreen;
@@ -366,7 +359,7 @@ void readHistory()
         cJSON *subitem = cJSON_GetArrayItem(json_items, nbGame);
 
         if (subitem == NULL)
-            continue;
+            break;
 
         if (!json_getString(subitem, "path", path) ||
             !json_getString(subitem, "core_path", core_path))
@@ -451,7 +444,7 @@ void removeCurrentItem()
                 other->is_duplicate -= 1;
         }
     }
-    
+
     if (json_items != NULL)
         cJSON_DeleteItemFromArray(json_items, game->jsonIndex);
 
