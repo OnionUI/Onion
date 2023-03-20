@@ -451,6 +451,11 @@ void removeCurrentItem()
                 other->is_duplicate -= 1;
         }
     }
+    
+    if (json_items != NULL)
+        cJSON_DeleteItemFromArray(json_items, game->jsonIndex);
+
+    json_save(json_root, HISTORY_PATH);
 
     // Copy next element value to current element
     for (int i = current_game; i < game_list_len - 1; i++) {
@@ -458,12 +463,6 @@ void removeCurrentItem()
     }
 
     game_list_len--;
-
-    if (json_items != NULL)
-        cJSON_DeleteItemFromArray(json_items, game->jsonIndex);
-
-    json_save(json_root, HISTORY_PATH);
-    printf_debug("game list len: %d\n", game_list_len);
 }
 
 int checkQuitAction(void)
