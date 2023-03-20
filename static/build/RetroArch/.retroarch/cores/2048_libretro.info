@@ -14,7 +14,9 @@ systemid = "2048"
 manufacturer = "N/A"
 
 # Libretro Features
+database = "2048"
 supports_no_game = "true"
+single_purpose = "true"
 savestate = "true"
 savestate_features = "serialized"
 cheats = "false"

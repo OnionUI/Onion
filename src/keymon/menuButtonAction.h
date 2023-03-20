@@ -52,7 +52,10 @@ void applyExtraButtonShortcut(int button)
         button == 0 ? settings.mainui_button_x : settings.mainui_button_y;
     char ***apps = getInstalledApps();
 
-    if (strncmp(action, "app:", 4) == 0) {
+    if (button == 1 && strcmp(action, "glo") == 0) {
+        temp_flag_set("launch_alt", true);
+    }
+    else if (strncmp(action, "app:", 4) == 0) {
         for (i = 0; i < installed_apps_count; i++)
             if (strcmp(action + 4, apps[i][0]) == 0) {
                 _action_runApp(apps[i][0]);

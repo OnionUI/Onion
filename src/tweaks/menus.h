@@ -205,15 +205,15 @@ void menu_buttonAction(void *_)
                                 .value_formatter = formatter_appShortcut,
                                 .action_id = 0,
                                 .action = action_setAppShortcut});
-        // list_addItem(&_menu_button_action, (ListItem){
-        // 	.label = "MainUI: Y button",
-        // 	.item_type = MULTIVALUE,
-        // 	.value_max = installed_apps_count + NUM_TOOLS + 1,
-        // 	.value = value_appShortcut(1),
-        // 	.value_formatter = formatter_appShortcut,
-        // 	.action_id = 1,
-        // 	.action = action_setAppShortcut
-        // });
+        list_addItem(
+            &_menu_button_action,
+            (ListItem){.label = "MainUI: Y button",
+                       .item_type = MULTIVALUE,
+                       .value_max = installed_apps_count + NUM_TOOLS + 1,
+                       .value = value_appShortcut(1),
+                       .value_formatter = formatter_appShortcut,
+                       .action_id = 1,
+                       .action = action_setAppShortcut});
     }
     menu_stack[++menu_level] = &_menu_button_action;
     header_changed = true;

@@ -36,34 +36,34 @@ int _comp_themes(const void *a, const void *b)
 
 void loadThemeDirectory(const char *theme_dir,
                         char themes_out[NUMBER_OF_THEMES][STR_MAX], int *count,
-                        bool delete_preview)
+                        bool check_preview)
 {
     DIR *dp;
     struct dirent *ep;
-    char path[STR_MAX * 2];
+    char config_path[STR_MAX * 2];
+    char preview_path[STR_MAX * 2];
 
     if ((dp = opendir(theme_dir)) != NULL) {
         while ((ep = readdir(dp))) {
             if (ep->d_type != DT_DIR)
                 continue;
+            if (ep->d_name[0] == '.')
+                continue;
 
-            snprintf(path, STR_MAX * 2 - 1, "%s/%s/config.json", theme_dir,
-                     ep->d_name);
+            snprintf(config_path, STR_MAX * 2 - 1, "%s/%s/config.json",
+                     theme_dir, ep->d_name);
 
-            if (is_file(path)) {
+            if (check_preview) {
+                snprintf(preview_path, STR_MAX * 2 - 1,
+                         THEMES_DIR "/.previews/%s/config.json", ep->d_name);
+
+                if (is_file(preview_path))
+                    continue;
+            }
+
+            if (is_file(config_path)) {
                 strcpy(themes_out[*count], ep->d_name);
                 *count += 1;
-
-                if (delete_preview) {
-                    snprintf(path, STR_MAX * 2 - 1, THEMES_DIR "/.previews/%s",
-                             ep->d_name);
-
-                    if (is_dir(path)) {
-                        char cmd[STR_MAX * 3];
-                        sprintf(cmd, "rm -rf \"%s\"", path);
-                        system(cmd);
-                    }
-                }
             }
         }
         closedir(dp);
@@ -96,14 +96,35 @@ int listAllThemes(char themes_out[NUMBER_OF_THEMES][STR_MAX],
     return count;
 }
 
+bool checkPreview(const char *preview_path)
+{
+    if (!is_dir(preview_path))
+        return false;
+
+    char source_path[STR_MAX * 2];
+    snprintf(source_path, STR_MAX * 2 - 1, "%s/source", preview_path);
+
+    if (!is_file(source_path))
+        return false;
+
+    FILE *fp;
+    char archive_path[STR_MAX * 2];
+    file_get(fp, source_path, "%[^\n]", archive_path);
+
+    if (!is_file(archive_path))
+        return false;
+
+    return true;
+}
+
 void loadTheme(const char *theme_name, Theme_s *theme_out)
 {
     char theme_path[STR_MAX * 2];
-    snprintf(theme_path, STR_MAX * 2 - 1, THEMES_DIR "/%s/", theme_name);
+    snprintf(theme_path, STR_MAX * 2 - 1, THEMES_DIR "/.previews/%s/",
+             theme_name);
 
-    if (!is_dir(theme_path))
-        snprintf(theme_path, STR_MAX * 2 - 1, THEMES_DIR "/.previews/%s/",
-                 theme_name);
+    if (!checkPreview(theme_path))
+        snprintf(theme_path, STR_MAX * 2 - 1, THEMES_DIR "/%s/", theme_name);
 
     if (is_dir(theme_path))
         *theme_out = theme_loadFromPath(theme_path, false);
@@ -138,7 +159,7 @@ void installNonDynamicElement(const char *theme_path, const char *image_name)
     }
 }
 
-void installTheme(Theme_s *theme)
+void installTheme(Theme_s *theme, bool apply_icons)
 {
     system("/mnt/SDCARD/.tmp_update/bin/mainUiBatPerc --restore");
 
@@ -157,6 +178,10 @@ void installTheme(Theme_s *theme)
     strcpy(settings.theme, theme->path);
     settings_save();
 
+    FILE *fp;
+    file_put_sync(fp, "/mnt/SDCARD/.tmp_update/config/active_theme", "%s",
+                  theme->path);
+
     Theme_s with_overrides = theme_loadFromPath(theme->path, true);
 
     lang_removeIconLabels(with_overrides.hideLabels.icons,
@@ -165,6 +190,13 @@ void installTheme(Theme_s *theme)
     installNonDynamicElement(settings.theme, "bg-io-testing");
     installNonDynamicElement(settings.theme, "ic-MENU+A");
     installNonDynamicElement(settings.theme, "progress-dot");
+
+    if (apply_icons) {
+        char icon_pack_path[STR_MAX + 32];
+        snprintf(icon_pack_path, STR_MAX + 32 - 1, "%sicons", theme->path);
+        apply_iconPack(is_dir(icon_pack_path) ? icon_pack_path
+                                              : ICON_PACK_DEFAULT);
+    }
 }
 
 #endif // THEME_SWITCHER_INSTALL_THEME_H__

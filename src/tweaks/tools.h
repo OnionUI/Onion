@@ -161,8 +161,14 @@ void tool_patchRAConfig(void *_)
     file_changeKeyValue(RETROARCH_CONFIG, "menu_ticker_speed =",
                         "menu_ticker_speed = \"4.800000\"");
 
+    file_changeKeyValue(RETROARCH_CONFIG, "menu_show_overlays =",
+                        "menu_show_overlays = \"true\"");
+
     file_changeKeyValue(RETROARCH_CONFIG, "input_overlay_opacity =",
                         "input_overlay_opacity = \"1.000000\"");
+
+    file_changeKeyValue(RETROARCH_CONFIG, "input_toggle_fullscreen_btn =",
+                        "input_toggle_fullscreen_btn = \"3\"");
 
     file_changeKeyValue(RETROARCH_CONFIG, "notification_show_autoconfig =",
                         "notification_show_autoconfig = \"false\"");

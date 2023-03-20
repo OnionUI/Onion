@@ -1,7 +1,7 @@
 ###########################################################
 
 TARGET=Onion
-VERSION=4.1.0-rc
+VERSION=4.1.0
 RA_SUBVERSION=1.14.0.0
 
 ###########################################################
@@ -38,7 +38,7 @@ STATIC_DIST         := $(ROOT_DIR)/static/dist
 STATIC_CONFIGS      := $(ROOT_DIR)/static/configs
 CACHE               := $(ROOT_DIR)/cache
 STATIC_PACKAGES     := $(ROOT_DIR)/static/packages
-PACKAGES_DIR        := $(ROOT_DIR)/build/miyoo/packages
+PACKAGES_DIR        := $(ROOT_DIR)/build/App/PackageManager/data
 PACKAGES_EMU_DEST   := $(PACKAGES_DIR)/Emu
 PACKAGES_APP_DEST   := $(PACKAGES_DIR)/App
 PACKAGES_RAPP_DEST  := $(PACKAGES_DIR)/RApp
@@ -120,11 +120,13 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/batmon && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/easter && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/read_uuid && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/detectKey && BUILD_DIR=$(BIN_DIR) make
 # Build dependencies for installer
-	@mkdir -p $(DIST_DIR)/miyoo/app/.tmp_update/bin
+	@mkdir -p $(INSTALLER_DIR)/bin
 	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(INSTALLER_DIR)/bin/ make
 	@cp $(BIN_DIR)/prompt $(INSTALLER_DIR)/bin/
 	@cp $(BIN_DIR)/batmon $(INSTALLER_DIR)/bin/
+	@cp $(BIN_DIR)/detectKey $(INSTALLER_DIR)/bin/
 	@cp $(BIN_DIR)/infoPanel $(INSTALLER_DIR)/bin/
 
 apps: $(CACHE)/.setup

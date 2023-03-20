@@ -111,16 +111,19 @@ int main(int argc, char *argv[])
     const char *installed_theme = basename(settings.theme);
 
     const char reapply_flag[] = "--reapply";
-    if (argc == 2 &&
-        strncmp(argv[1], reapply_flag, sizeof(reapply_flag)) == 0) {
-        if (!is_dir(settings.theme)) {
-            strcpy(settings.theme, DEFAULT_THEME_PATH);
-            settings_save();
+    const char reapply_icons_flag[] = "--reapply_icons";
+    if (argc == 2) {
+        bool reapply_icons = strcmp(argv[1], reapply_icons_flag) == 0;
+        if (reapply_icons || strcmp(argv[1], reapply_flag) == 0) {
+            if (!is_dir(settings.theme)) {
+                strcpy(settings.theme, DEFAULT_THEME_PATH);
+                settings_save();
+            }
+            Theme_s current_theme = theme_loadFromPath(settings.theme, true);
+            installTheme(&current_theme, reapply_icons);
+            printf_debug("Reapplied: \"%s\"\n", installed_theme);
+            return 0;
         }
-        Theme_s current_theme = theme_loadFromPath(settings.theme, true);
-        installTheme(&current_theme);
-        printf_debug("Reapplied: \"%s\"\n", installed_theme);
-        return 0;
     }
 
     SDL_Init(SDL_INIT_VIDEO);
@@ -258,15 +261,8 @@ int main(int argc, char *argv[])
                                     color_white);
 
                 // Install theme
-                installTheme(&theme);
+                installTheme(&theme, apply_icons);
                 printf_debug("Theme installed: %s\n", themes[current_page]);
-
-                if (apply_icons) {
-                    if (has_icons)
-                        apply_iconPack(icon_pack_path);
-                    else
-                        apply_iconPack(ICON_PACK_DEFAULT);
-                }
 
                 quit = true;
             }

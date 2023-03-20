@@ -4,6 +4,7 @@
 #include <linux/fb.h>
 #include <linux/input.h>
 #include <sys/ioctl.h>
+#include <sys/poll.h>
 
 #include "utils/msleep.h"
 

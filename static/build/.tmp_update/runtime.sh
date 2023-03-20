@@ -12,7 +12,10 @@ main() {
     ./bin/batmon &
 
     # Reapply theme
-    ./bin/themeSwitcher --reapply
+    theme="$(/customer/app/jsonval theme)"
+    if [ "$theme" == "./" ] || [ "$theme" != "$(cat ./config/active_theme)" ]; then
+        ./bin/themeSwitcher --reapply_icons
+    fi
     
     if [ `cat /sys/devices/gpiochip0/gpio/gpio59/value` -eq 1 ]; then
         cd $sysdir
@@ -31,6 +34,15 @@ main() {
     # Init
     rm /tmp/.offOrder
     HOME=/mnt/SDCARD/RetroArch/
+
+    detectKey 1
+    menu_pressed=$?
+
+    if [ $menu_pressed -eq 0 ]; then
+        if [ -f "./cmd_to_run.sh" ]; then
+            rm -f "./cmd_to_run.sh"
+        fi
+    fi
 
     # Auto launch
     if [ ! -f $sysdir/config/.noAutoStart ]; then
@@ -223,7 +235,7 @@ launch_game() {
 
     echo "cmd retval: $retval"
 
-    if [ $retval -ge 128 ]; then
+    if [ $retval -ge 128 ] && [ $retval -ne 143 ]; then
         cd $sysdir
         ./bin/infoPanel --title "Fatal error occurred" --message "The program exited unexpectedly.\n(Error code: $retval)" --auto
     fi

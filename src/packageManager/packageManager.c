@@ -5,6 +5,7 @@
 #include <dirent.h>
 #include <fcntl.h>
 #include <libgen.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -27,10 +28,7 @@
 #define DT_DIR 4
 #endif
 
-#define PACKAGE_DIR "/mnt/SDCARD/miyoo/packages/"
-#define PACKAGE_LAYER_1 PACKAGE_DIR "Emu"
-#define PACKAGE_LAYER_2 PACKAGE_DIR "App"
-#define PACKAGE_LAYER_3 PACKAGE_DIR "RApp"
+#define PACKAGE_DIR "/mnt/SDCARD/App/PackageManager/data/"
 
 // Max number of records in the DB
 #define LAYER_ITEM_COUNT 200
@@ -44,20 +42,33 @@ typedef struct package_s {
     bool complete;
 } Package;
 
-static char layer_names[][STR_MAX] = {"VERIFIED", "APPS", "EXPERT"};
-static Package packages[3][LAYER_ITEM_COUNT];
-static int package_count[3];
-static int package_installed_count[] = {0, 0, 0};
+static char layer_names[][STR_MAX] = {"VERIFIED", "APPS", "EXPERT", "SUMMARY"};
+static char layer_dirs[][STR_MAX] = {PACKAGE_DIR "Emu", PACKAGE_DIR "App",
+                                     PACKAGE_DIR "RApp", ""};
+static const int tab_count = 4;
+static const int summary_tab = tab_count - 1;
+
+static Package packages[4][LAYER_ITEM_COUNT];
+static int package_count[] = {0, 0, 0, 0};
+static int package_installed_count[] = {0, 0, 0, 0};
 static int nSelection = 0;
 static int nListPosition = 0;
 static int nTab = 0;
-static int changes_installs[] = {0, 0, 0};
-static int changes_removals[] = {0, 0, 0};
+static int changes_installs[] = {0, 0, 0, 0};
+static int changes_removals[] = {0, 0, 0, 0};
 
 static SDL_Surface *video = NULL, *screen = NULL, *surfaceBackground = NULL,
                    *surfaceSelection = NULL, *surfaceTableau = NULL,
-                   *surfaceScroller = NULL, *surfaceCheck = NULL,
-                   *surfaceCross = NULL;
+                   *surfaceScroller = NULL, *surfaceMarker = NULL,
+                   *surfaceCheck = NULL, *surfaceCross = NULL,
+                   *surfaceDotActive = NULL, *surfaceDotNeutral = NULL,
+                   *surfaceDotApplyActive = NULL,
+                   *surfaceDotApplyNeutral = NULL;
+
+static SDL_Rect rectSummaryPos = {30, 83};
+static SDL_Surface *surfaceSummary = NULL;
+static int summaryScrollY = 0;
+static int scrollSpeed = 28;
 
 static TTF_Font *font18 = NULL;
 static TTF_Font *font25 = NULL;
@@ -68,7 +79,7 @@ static SDL_Color color_white = {255, 255, 255};
 int changesInstalls(void)
 {
     int total = 0;
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < tab_count; i++)
         total += changes_installs[i];
     return total;
 }
@@ -76,7 +87,7 @@ int changesInstalls(void)
 int changesRemovals(void)
 {
     int total = 0;
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < tab_count; i++)
         total += changes_removals[i];
     return total;
 }
@@ -86,7 +97,7 @@ int changesTotal(void) { return changesInstalls() + changesRemovals(); }
 int totalInstalls(void)
 {
     int total = 0;
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < tab_count; i++)
         total += package_installed_count[i];
     return total;
 }
@@ -236,25 +247,12 @@ void loadResources(bool reapply_all)
     struct dirent *ep;
     char basePath[1000];
 
-    for (int nT = 0; nT < 3; nT++) {
-        char data_path[200];
+    for (int nT = 0; nT < tab_count; nT++) {
+        const char *data_path = layer_dirs[nT];
         package_count[nT] = 0;
 
-        switch (nT) {
-        case 0:
-            sprintf(data_path, "%s", PACKAGE_LAYER_1);
-            break;
-        case 1:
-            sprintf(data_path, "%s", PACKAGE_LAYER_2);
-            break;
-        case 2:
-            sprintf(data_path, "%s", PACKAGE_LAYER_3);
-            break;
-        default:
-            break;
-        }
-
-        if (!exists(data_path) || (dp = opendir(data_path)) == NULL)
+        if (strlen(data_path) == 0 || !exists(data_path) ||
+            (dp = opendir(data_path)) == NULL)
             continue;
 
         while ((ep = readdir(dp)) && package_count[nT] < LAYER_ITEM_COUNT) {
@@ -297,7 +295,7 @@ void loadResources(bool reapply_all)
     Package temp;
 
     // Sort function
-    for (int nT = 0; nT < 3; nT++) {
+    for (int nT = 0; nT < tab_count; nT++) {
         bool found = true;
 
         while (found) {
@@ -361,17 +359,27 @@ SDL_Surface *createLabelSurface(Package *package)
 
 void displayLayersNames(void)
 {
-    SDL_Rect rectResName = {35, 92, 80, 20};
+    SDL_Rect rectResName = {30, 92, 80, 20};
     SDL_Surface *surfaceResName;
     for (int i = 0; i < 7; i++) {
         if ((i + nListPosition) < package_count[nTab]) {
             Package *package = &packages[nTab][i + nListPosition];
             surfaceResName = createLabelSurface(package);
-            rectResName.y = 92 + i * 47;
+            rectResName.y = 90 + i * 47;
             SDL_BlitSurface(surfaceResName, NULL, screen, &rectResName);
             SDL_FreeSurface(surfaceResName);
         }
     }
+}
+
+void renderFooter(const char *footer_str)
+{
+    SDL_Surface *footer =
+        TTF_RenderUTF8_Blended(font18, footer_str, color_white);
+    surfaceSetAlpha(footer, 120);
+    SDL_Rect footer_rect = {320 - footer->w / 2, 414};
+    SDL_BlitSurface(footer, NULL, screen, &footer_rect);
+    SDL_FreeSurface(footer);
 }
 
 void displayLayersInstall(void)
@@ -381,7 +389,7 @@ void displayLayersInstall(void)
     for (int i = 0; i < 7; i++) {
         if ((i + nListPosition) < package_count[nTab]) {
             Package *package = &packages[nTab][i + nListPosition];
-            rectInstall.y = 108 - surfaceCheck->h / 2 + i * 47;
+            rectInstall.y = 107 - surfaceCheck->h / 2 + i * 47;
             if (package->installed != package->changed)
                 SDL_BlitSurface(surfaceCheck, NULL, screen, &rectInstall);
             else
@@ -393,21 +401,66 @@ void displayLayersInstall(void)
     sprintf(footer_str, "%d added  |  %d removed  |  %d installed  |  %d total",
             changes_installs[nTab], changes_removals[nTab],
             package_installed_count[nTab], package_count[nTab]);
-    SDL_Surface *footer =
-        TTF_RenderUTF8_Blended(font18, footer_str, color_white);
-    surfaceSetAlpha(footer, 120);
-    SDL_Rect footer_rect = {320 - footer->w / 2, 414};
-    SDL_BlitSurface(footer, NULL, screen, &footer_rect);
-    SDL_FreeSurface(footer);
+    renderFooter(footer_str);
 }
 
 void showScroller(void)
 {
-    int shiftY = 0;
-    if (package_count[nTab] - 7 > 0)
-        shiftY = (int)(nListPosition * 311 / (package_count[nTab] - 7));
-    SDL_Rect rectSroller = {607, 85 + shiftY, 16, 16};
-    SDL_BlitSurface(surfaceScroller, NULL, screen, &rectSroller);
+    SDL_Rect rectMarker = {614, 87};
+    SDL_Rect rectScroller = {611, 87};
+    int scrollerHeight = 323;
+
+    if (nTab == summary_tab) {
+        if (surfaceSummary == NULL || surfaceSummary->h <= 323)
+            return;
+
+        scrollerHeight = round(323.0 * 323.0 / (float)(surfaceSummary->h));
+        float scroll = (float)summaryScrollY / (float)(surfaceSummary->h - 323);
+        rectScroller.y += round(scroll * (float)(323 - scrollerHeight));
+    }
+    else if (package_count[nTab] - 7 > 0) {
+        scrollerHeight = round(323.0 * 7.0 / (float)package_count[nTab]);
+
+        if (scrollerHeight < 10)
+            scrollerHeight = 10;
+
+        float scroll = (float)nListPosition / (float)(package_count[nTab] - 7);
+        rectScroller.y += round(scroll * (float)(323 - scrollerHeight));
+    }
+
+    float markerSlice = 323.0 / (float)(package_count[nTab]);
+    float markerOffset = 0.5 * markerSlice - (float)surfaceMarker->h / 2;
+
+    for (int i = 0; i < package_count[nTab]; i++) {
+        Package *package = &packages[nTab][i];
+
+        if (package->installed == package->changed)
+            continue;
+
+        rectMarker.y = 87 + round((float)i * markerSlice + markerOffset);
+        SDL_BlitSurface(surfaceMarker, NULL, screen, &rectMarker);
+    }
+
+    static SDL_Rect rectScrollerTop = {0, 0, 10, 5};
+    static SDL_Rect rectScrollerMiddle = {0, 5, 10, 10};
+    static SDL_Rect rectScrollerBottom = {0, 15, 10, 5};
+
+    SDL_BlitSurface(surfaceScroller, &rectScrollerTop, screen, &rectScroller);
+    rectScroller.y += 5;
+
+    int scrollerMiddle = scrollerHeight - 10;
+
+    while (scrollerMiddle > 0) {
+        int h = scrollerMiddle > 10 ? 10 : scrollerMiddle;
+        rectScrollerMiddle.h = h;
+        SDL_BlitSurface(surfaceScroller, &rectScrollerMiddle, screen,
+                        &rectScroller);
+        rectScroller.y += h;
+        scrollerMiddle -= h;
+    }
+
+    SDL_BlitSurface(surfaceScroller, &rectScrollerBottom, screen,
+                    &rectScroller);
 }
 
 bool confirmDoNothing(KeyState *keystate)
@@ -437,13 +490,32 @@ bool confirmDoNothing(KeyState *keystate)
     return confirm;
 }
 
-void renderTabName(const char *name, int center_x, bool active)
-{
-    SDL_Surface *tab_name = TTF_RenderUTF8_Blended(font18, name, color_white);
-    SDL_Rect tab_rect = {center_x - tab_name->w / 2, 60};
+typedef enum Alignment { ALIGN_START, ALIGN_CENTER, ALIGN_END } alignment_e;
 
-    if (!active)
-        surfaceSetAlpha(tab_name, 120);
+int alignCoord(int n, int size, alignment_e alignment)
+{
+    switch (alignment) {
+    case ALIGN_START:
+        return n;
+    case ALIGN_CENTER:
+        return n - size / 2;
+    case ALIGN_END:
+        return n - size;
+    default:
+        return n;
+    }
+}
+
+void renderTabName(const char *name, int x, alignment_e alignment, bool active,
+                   bool has_changes)
+{
+    char name_str[STR_MAX];
+    snprintf(name_str, STR_MAX - 1, has_changes ? "%s*" : "%s", name);
+
+    SDL_Surface *tab_name =
+        TTF_RenderUTF8_Blended(active ? font25 : font18, name_str, color_white);
+    SDL_Rect tab_rect = {alignCoord(x, tab_name->w, alignment),
+                         (active ? 53 : 56) - 2 - tab_name->h / 2};
 
     SDL_BlitSurface(tab_name, NULL, screen, &tab_rect);
     SDL_FreeSurface(tab_name);
@@ -451,9 +523,148 @@ void renderTabName(const char *name, int center_x, bool active)
 
 void renderCurrentTab(void)
 {
-    renderTabName(layer_names[nTab], 320, true);
-    renderTabName(layer_names[nTab == 0 ? 2 : nTab - 1], 116, false);
-    renderTabName(layer_names[nTab == 2 ? 0 : nTab + 1], 524, false);
+    int lTab = nTab == 0 ? tab_count - 1 : nTab - 1,
+        rTab = nTab == tab_count - 1 ? 0 : nTab + 1;
+
+    renderTabName(layer_names[lTab], 50, ALIGN_START, false,
+                  changes_installs[lTab] > 0 || changes_removals[lTab] > 0);
+    renderTabName(layer_names[rTab], 590, ALIGN_END, false,
+                  changes_installs[rTab] > 0 || changes_removals[rTab] > 0);
+    renderTabName(layer_names[nTab], 320, ALIGN_CENTER, true,
+                  changes_installs[nTab] > 0 || changes_removals[nTab] > 0);
+
+    int tab_dots_width =
+        (tab_count - 1) * surfaceDotNeutral->w + surfaceDotActive->w;
+    SDL_Rect rectTabDot = {320 - tab_dots_width / 2, 14};
+
+    for (int i = 0; i < tab_count; i++) {
+        SDL_Surface *current_dot;
+
+        if (i != summary_tab)
+            current_dot = i == nTab ? surfaceDotActive : surfaceDotNeutral;
+        else
+            current_dot =
+                i == nTab ? surfaceDotApplyActive : surfaceDotApplyNeutral;
+
+        rectTabDot.y = 14 - current_dot->h / 2;
+
+        SDL_BlitSurface(current_dot, NULL, screen, &rectTabDot);
+        rectTabDot.x += current_dot->w;
+    }
+}
+
+int renderSummaryLine(SDL_Surface *surfaceTemp, int pos_y, const char *line_str,
+                      int alpha)
+{
+    SDL_Surface *surfaceLine =
+        TTF_RenderUTF8_Blended(font18, line_str, color_white);
+    SDL_Rect rectLine = {0, pos_y};
+    int h = surfaceLine->h;
+    printf_debug("h: %d\n", h);
+
+    SDL_SetAlpha(surfaceLine, 0, 0); /* important */
+    surfaceSetAlpha(surfaceLine, alpha);
+
+    SDL_BlitSurface(surfaceLine, NULL, surfaceTemp, &rectLine);
+    SDL_FreeSurface(surfaceLine);
+
+    return h;
+}
+
+void renderSummary()
+{
+    SDL_Rect rectSummaryFrame = {0, summaryScrollY, 593, 327};
+
+    if (surfaceSummary == NULL) {
+        SDL_Surface *surfaceTemp =
+            SDL_CreateRGBSurface(0, 593, 4096, 32, 0x00FF0000, 0x0000FF00,
+                                 0x000000FF, 0xFF000000); /* important */
+        SDL_SetAlpha(surfaceTemp, 0, 0);                  /* important */
+
+        int pos_y = 0;
+
+        for (int nT = 0; nT < tab_count; nT++) {
+            const char *data_path = layer_dirs[nT];
+
+            if (strlen(data_path) == 0 || !exists(data_path))
+                continue;
+
+            if (changes_installs[nT] + changes_removals[nT] == 0)
+                continue;
+
+            pos_y += 10;
+
+            char line_str[STR_MAX * 2];
+            sprintf(line_str, "%s:", layer_names[nT]);
+
+            if (changes_installs[nT] > 0)
+                sprintf(line_str + strlen(line_str), " %d added",
+                        changes_installs[nT]);
+
+            if (changes_removals[nT] > 0) {
+                int len = strlen(line_str);
+                if (changes_installs[nT] > 0) {
+                    strcpy(line_str + len, ",");
+                    len += 1;
+                }
+                sprintf(line_str + len, " %d removed", changes_removals[nT]);
+            }
+
+            pos_y += renderSummaryLine(surfaceTemp, pos_y, line_str, 255) + 5;
+
+            for (int i = 0; i < package_count[nT]; i++) {
+                Package *package = &packages[nT][i];
+
+                if (!package->changed &&
+                    (!package->installed || package->complete))
+                    continue;
+
+                memset(line_str, 0, STR_MAX * 2);
+
+                bool is_removed = package->changed && package->installed;
+                sprintf(line_str, "[%s]  %s", is_removed ? "−" : "+",
+                        package->name);
+
+                pos_y +=
+                    renderSummaryLine(surfaceTemp, pos_y, line_str, 120) + 5;
+            }
+        }
+
+        surfaceSummary =
+            SDL_CreateRGBSurface(0, 593, pos_y, 32, 0x00FF0000, 0x0000FF00,
+                                 0x000000FF, 0xFF000000); /* important */
+        SDL_FillRect(surfaceSummary, NULL, 0x000000FF);
+        SDL_BlitSurface(surfaceTemp, NULL, surfaceSummary, NULL);
+    }
+
+    SDL_BlitSurface(surfaceSummary, &rectSummaryFrame, screen, &rectSummaryPos);
+}
+
+void refreshSummary()
+{
+    if (surfaceSummary != NULL)
+        SDL_FreeSurface(surfaceSummary);
+    surfaceSummary = NULL;
+    summaryScrollY = 0;
+}
+
+bool summaryScrollBy(int offset)
+{
+    bool changed = false;
+    int y_max = surfaceSummary->h - 323;
+
+    if ((offset > 0 && summaryScrollY < y_max) ||
+        (offset < 0 && summaryScrollY > 0)) {
+        summaryScrollY += offset;
+        changed = true;
+    }
+
+    if (summaryScrollY > y_max)
+        summaryScrollY = y_max;
+    else if (summaryScrollY < 0)
+        summaryScrollY = 0;
+
+    return changed;
 }
 
 bool getPackageMainPath(char *out_path, const char *data_path,
@@ -538,6 +749,11 @@ int main(int argc, char *argv[])
     surfaceSelection = IMG_Load("res/selection.png");
     surfaceTableau = IMG_Load("res/tableau.png");
     surfaceScroller = IMG_Load("res/scroller.png");
+    surfaceMarker = IMG_Load("res/marker.png");
+    surfaceDotActive = IMG_Load("res/dot-a.png");
+    surfaceDotNeutral = IMG_Load("res/dot-n.png");
+    surfaceDotApplyActive = IMG_Load("res/dot-apply-a.png");
+    surfaceDotApplyNeutral = IMG_Load("res/dot-apply-n.png");
     surfaceCheck = IMG_Load("/mnt/SDCARD/.tmp_update/res/toggle-on.png");
     surfaceCross = IMG_Load("/mnt/SDCARD/.tmp_update/res/toggle-off.png");
 
@@ -553,6 +769,9 @@ int main(int argc, char *argv[])
 
     loadResources(reapply_all);
 
+    if (reapply_all)
+        apply_singleIcon("/mnt/SDCARD/App/PackageManager/config.json");
+
     SDL_Rect rectSelection = {14, 84, 593, 49};
 
     bool quit = false;
@@ -567,7 +786,7 @@ int main(int argc, char *argv[])
     while (!quit) {
         if (updateKeystate(keystate, &quit, true, NULL)) {
             if (keystate[SW_BTN_R2] >= PRESSED) {
-                if (nTab < 2)
+                if (nTab < tab_count - 1)
                     nTab++;
                 else
                     nTab = 0;
@@ -579,79 +798,116 @@ int main(int argc, char *argv[])
                 if (nTab > 0)
                     nTab--;
                 else
-                    nTab = 2;
+                    nTab = tab_count - 1;
                 nSelection = 0;
                 nListPosition = 0;
                 state_changed = true;
             }
 
-            if (keystate[SW_BTN_R1] >= PRESSED && package_count[nTab] > 0) {
-                if ((nListPosition + 14) < package_count[nTab]) {
-                    nListPosition += 7;
+            if (nTab == summary_tab && surfaceSummary != NULL) {
+                if (keystate[SW_BTN_R1] >= PRESSED) {
+                    if (summaryScrollBy(323))
+                        state_changed = true;
                 }
-                else if ((nListPosition + 7) < package_count[nTab]) {
-                    nListPosition = package_count[nTab] - 7;
-                    nSelection = 6;
+
+                if (keystate[SW_BTN_L1] >= PRESSED) {
+                    if (summaryScrollBy(-323))
+                        state_changed = true;
                 }
-                state_changed = true;
+
+                if (keystate[SW_BTN_DOWN] >= PRESSED) {
+                    if (summaryScrollBy(scrollSpeed))
+                        state_changed = true;
+                }
+
+                if (keystate[SW_BTN_UP] >= PRESSED) {
+                    if (summaryScrollBy(-scrollSpeed))
+                        state_changed = true;
+                }
+            }
+            else if (package_count[nTab] > 0) {
+                if (keystate[SW_BTN_R1] >= PRESSED) {
+                    if ((nListPosition + 14) < package_count[nTab]) {
+                        nListPosition += 7;
+                    }
+                    else if ((nListPosition + 7) < package_count[nTab]) {
+                        nListPosition = package_count[nTab] - 7;
+                        nSelection = 6;
+                    }
+                    state_changed = true;
+                }
+
+                if (keystate[SW_BTN_L1] >= PRESSED) {
+                    if ((nListPosition - 7) > 0) {
+                        nListPosition -= 7;
+                    }
+                    else {
+                        nListPosition = 0;
+                        nSelection = 0;
+                    }
+                    state_changed = true;
+                }
+
+                if (keystate[SW_BTN_DOWN] >= PRESSED) {
+                    if (nSelection < 6) {
+                        nSelection++;
+                    }
+                    else if (nSelection + nListPosition <
+                             package_count[nTab] - 1) {
+                        nListPosition++;
+                    }
+                    else if (keystate[SW_BTN_DOWN] == PRESSED &&
+                             nSelection + nListPosition >=
+                                 package_count[nTab] - 1) {
+                        nSelection = nListPosition = 0;
+                    }
+                    state_changed = true;
+                }
+
+                if (keystate[SW_BTN_UP] >= PRESSED) {
+                    if (nSelection > 0) {
+                        nSelection--;
+                    }
+                    else if (nListPosition > 0) {
+                        nListPosition--;
+                    }
+                    else if (keystate[SW_BTN_UP] == PRESSED) {
+                        nSelection = 6;
+                        nListPosition = package_count[nTab] - 7;
+                    }
+                    state_changed = true;
+                }
             }
 
-            if (keystate[SW_BTN_L1] >= PRESSED && package_count[nTab] > 0) {
-                if ((nListPosition - 7) > 0) {
-                    nListPosition -= 7;
+            bool back_pressed = keystate[SW_BTN_B] == PRESSED;
+            bool apply_pressed =
+                keystate[SW_BTN_START] == PRESSED ||
+                (keystate[SW_BTN_A] == PRESSED && nTab == summary_tab);
+
+            if (back_pressed || apply_pressed) {
+                if (apply_pressed && nTab != summary_tab) {
+                    nTab = summary_tab;
+                    nSelection = 0;
+                    nListPosition = 0;
                 }
                 else {
-                    nListPosition = 0;
-                    nSelection = 0;
-                }
-                state_changed = true;
-            }
+                    if (apply_pressed)
+                        apply_changes = true;
 
-            if (keystate[SW_BTN_DOWN] >= PRESSED && package_count[nTab] > 0) {
-                if (nSelection < 6) {
-                    nSelection++;
-                }
-                else if (nSelection + nListPosition < package_count[nTab] - 1) {
-                    nListPosition++;
-                }
-                else if (keystate[SW_BTN_DOWN] == PRESSED &&
-                         nSelection + nListPosition >=
-                             package_count[nTab] - 1) {
-                    nSelection = nListPosition = 0;
-                }
-                state_changed = true;
-            }
-            if (keystate[SW_BTN_UP] >= PRESSED && package_count[nTab] > 0) {
-                if (nSelection > 0) {
-                    nSelection--;
-                }
-                else if (nListPosition > 0) {
-                    nListPosition--;
-                }
-                else if (keystate[SW_BTN_UP] == PRESSED) {
-                    nSelection = 6;
-                    nListPosition = package_count[nTab] - 7;
-                }
-                state_changed = true;
-            }
-
-            if (keystate[SW_BTN_B] == PRESSED ||
-                keystate[SW_BTN_START] == PRESSED) {
-                if (keystate[SW_BTN_START] == PRESSED)
-                    apply_changes = true;
-
-                if (show_confirm) {
-                    if (apply_changes) {
-                        if (changesTotal() > 0 ||
-                            (reapply_all && package_installed_count[0] > 0) ||
-                            confirmDoNothing(keystate))
+                    if (show_confirm) {
+                        if (apply_changes) {
+                            if (changesTotal() > 0 ||
+                                (reapply_all &&
+                                 package_installed_count[0] > 0) ||
+                                confirmDoNothing(keystate))
+                                quit = true;
+                        }
+                        else if (confirmDoNothing(keystate))
                             quit = true;
                     }
-                    else if (confirmDoNothing(keystate))
+                    else
                         quit = true;
                 }
-                else
-                    quit = true;
                 state_changed = true;
             }
 
@@ -679,9 +935,11 @@ int main(int argc, char *argv[])
                                     changes_installs[nTab] +=
                                         package->changed ? -1 : 1;
                             }
-                            else
+                            else {
                                 changes_installs[nTab] +=
                                     package->changed ? 1 : -1;
+                            }
+                            refreshSummary();
                             state_changed = true;
                         }
                     }
@@ -689,11 +947,13 @@ int main(int argc, char *argv[])
 
                 if (keystate[SW_BTN_X] == PRESSED) {
                     layerToggleAll(nTab);
+                    refreshSummary();
                     state_changed = true;
                 }
 
                 if (keystate[SW_BTN_Y] == PRESSED) {
                     layerReset(nTab);
+                    refreshSummary();
                     state_changed = true;
                 }
             }
@@ -709,14 +969,58 @@ int main(int argc, char *argv[])
             SDL_BlitSurface(surfaceBackground, NULL, screen, NULL);
             SDL_BlitSurface(surfaceTableau, NULL, screen, NULL);
 
-            if (surfaceSelection == NULL)
-                SDL_FillRect(screen, &rectSelection, 0xFF333333);
-            else
-                SDL_BlitSurface(surfaceSelection, NULL, screen, &rectSelection);
+            int changes_total = changesTotal();
+
+            if (changes_total > 0) {
+                int installs_count = changesInstalls();
+                int removals_count = changesRemovals();
+                char status_str[STR_MAX] = "";
+
+                if (installs_count > 0)
+                    sprintf(status_str, "+%d", installs_count);
+
+                if (removals_count > 0) {
+                    int len = strlen(status_str);
+                    if (len > 0) {
+                        strcpy(status_str + len, "  ");
+                        len += 2;
+                    }
+                    sprintf(status_str + len, " −%d", removals_count);
+                }
+
+                SDL_Surface *status =
+                    TTF_RenderUTF8_Blended(font18, status_str, color_white);
+                SDL_Rect status_rect = {620 - status->w, 16 - status->h / 2};
+                SDL_BlitSurface(status, NULL, screen, &status_rect);
+                SDL_FreeSurface(status);
+            }
 
             renderCurrentTab();
 
-            if (package_count[nTab] > 0) {
+            if (nTab == summary_tab) {
+                if (changes_total > 0) {
+                    renderSummary();
+                    showScroller();
+                    renderFooter("Press A or START to apply changes");
+                }
+                else {
+                    SDL_Surface *status = TTF_RenderUTF8_Blended(
+                        font35, "NO CHANGES", color_white);
+                    SDL_Rect status_rect = {
+                        alignCoord(320, status->w, ALIGN_CENTER),
+                        alignCoord(247, status->h, ALIGN_CENTER)};
+                    SDL_BlitSurface(status, NULL, screen, &status_rect);
+                    SDL_FreeSurface(status);
+                    renderFooter("Press A or START to exit");
+                }
+            }
+            else if (package_count[nTab] > 0) {
+                if (surfaceSelection == NULL)
+                    SDL_FillRect(screen, &rectSelection, 0xFF333333);
+                else
+                    SDL_BlitSurface(surfaceSelection, NULL, screen,
+                                    &rectSelection);
+
                 displayLayersNames();
                 showScroller();
                 displayLayersInstall();
@@ -729,27 +1033,6 @@ int main(int argc, char *argv[])
                                 &reinstall_rect);
             }
 
-            if (changesTotal() > 0) {
-                int installs_count = changesInstalls();
-                int removals_count = changesRemovals();
-                char status_str[STR_MAX] = "";
-                if (installs_count > 0)
-                    sprintf(status_str, "+%d", installs_count);
-                if (removals_count > 0) {
-                    int len = strlen(status_str);
-                    if (len > 0) {
-                        strcpy(status_str + len, "  ");
-                        len += 2;
-                    }
-                    sprintf(status_str + len, " −%d", removals_count);
-                }
-                SDL_Surface *status =
-                    TTF_RenderUTF8_Blended(font25, status_str, color_white);
-                SDL_Rect status_rect = {620 - status->w, 30 - status->h / 2};
-                SDL_BlitSurface(status, NULL, screen, &status_rect);
-                SDL_FreeSurface(status);
-            }
-
             SDL_BlitSurface(screen, NULL, video, NULL);
             SDL_Flip(video);
 
@@ -759,29 +1042,16 @@ int main(int argc, char *argv[])
 
     if (apply_changes) {
         // installation
-        char data_path[STR_MAX];
         char cmd[STR_MAX * 2 + 100];
 
         SDL_Surface *surfaceBackground =
             IMG_Load("/mnt/SDCARD/.tmp_update/res/waitingBG.png");
         SDL_Surface *surfaceMessage;
 
-        for (int nT = 0; nT < 3; nT++) {
-            switch (nT) {
-            case 0:
-                sprintf(data_path, "%s", PACKAGE_LAYER_1);
-                break;
-            case 1:
-                sprintf(data_path, "%s", PACKAGE_LAYER_2);
-                break;
-            case 2:
-                sprintf(data_path, "%s", PACKAGE_LAYER_3);
-                break;
-            default:
-                break;
-            }
+        for (int nT = 0; nT < tab_count; nT++) {
+            const char *data_path = layer_dirs[nT];
 
-            if (!exists(data_path))
+            if (strlen(data_path) == 0 || !exists(data_path))
                 continue;
 
             SDL_Rect rectMessage = {10, 420, 603, 48};
@@ -849,6 +1119,11 @@ int main(int argc, char *argv[])
     SDL_FreeSurface(surfaceTableau);
     SDL_FreeSurface(surfaceSelection);
     SDL_FreeSurface(surfaceScroller);
+    SDL_FreeSurface(surfaceMarker);
+    SDL_FreeSurface(surfaceDotActive);
+    SDL_FreeSurface(surfaceDotNeutral);
+    SDL_FreeSurface(surfaceDotApplyActive);
+    SDL_FreeSurface(surfaceDotApplyNeutral);
     SDL_Quit();
 
     return EXIT_SUCCESS;
