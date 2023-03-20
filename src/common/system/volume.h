@@ -10,7 +10,8 @@
 #define MI_AO_GETVOLUME 0xc008690c
 
 // Increments between -60 and 0
-int setVolumeRaw(int volume, int add) {
+int setVolumeRaw(int volume, int add)
+{
     int recent_volume = 0;
     int fd = open("/dev/mi_ao", O_RDWR);
     if (fd >= 0) {
@@ -20,26 +21,32 @@ int setVolumeRaw(int volume, int add) {
         recent_volume = buf2[1];
         if (add) {
             buf2[1] += add;
-            if (buf2[1] > 0) buf2[1] = 0;
-            else if (buf2[1] < -60) buf2[1] = -60;
-        } else buf2[1] = volume;
-        if (buf2[1] != recent_volume) ioctl(fd, MI_AO_SETVOLUME, buf1);
+            if (buf2[1] > 0)
+                buf2[1] = 0;
+            else if (buf2[1] < -60)
+                buf2[1] = -60;
+        }
+        else
+            buf2[1] = volume;
+        if (buf2[1] != recent_volume)
+            ioctl(fd, MI_AO_SETVOLUME, buf1);
         close(fd);
     }
     return recent_volume;
 }
 
 // Increments between 0 and 20
-int setVolume(int volume, int add) {
+int setVolume(int volume, int add)
+{
     int recent_volume = 0;
-    int rawVolumeValue=0;
-    int rawAdd=0;
-    
+    int rawVolumeValue = 0;
+    int rawAdd = 0;
+
     rawVolumeValue = (volume * 3) - 60;
     rawAdd = (add * 3);
-    
+
     recent_volume = setVolumeRaw(rawVolumeValue, rawAdd);
-    return (int)((recent_volume/3)+20);
+    return (int)((recent_volume / 3) + 20);
 }
 
 #endif // VOLUME_H__

@@ -1,30 +1,30 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <unistd.h>
-#include <stdint.h>
-#include <pthread.h>
-#include <string.h>
-#include <fcntl.h>
+#include "system/battery.h"
+#include "system/device_model.h"
+#include "system/display.h"
+#include "system/keymap_hw.h"
+#include "system/rumble.h"
+#include "system/settings.h"
+#include "system/system.h"
+#include "theme/config.h"
+#include "utils/file.h"
+#include "utils/log.h"
+#include "utils/msleep.h"
+#include <SDL/SDL.h>
+#include <SDL/SDL_image.h>
 #include <assert.h>
-#include <time.h>
-#include <sys/ioctl.h>
+#include <fcntl.h>
 #include <linux/fb.h>
 #include <linux/input.h>
 #include <poll.h>
-#include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
-#include "utils/file.h"
-#include "utils/msleep.h"
-#include "utils/log.h"
-#include "system/device_model.h"
-#include "system/battery.h"
-#include "system/system.h"
-#include "system/display.h"
-#include "system/settings.h"
-#include "system/keymap_hw.h"
-#include "system/rumble.h"
-#include "theme/config.h"
+#include <pthread.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <time.h>
+#include <unistd.h>
 
 #define RELEASED 0
 #define PRESSED 1
@@ -91,9 +91,9 @@ int main(void)
 
     char image_dir[STR_MAX];
     getImageDir(settings.theme, image_dir);
-     
-    getDeviceModel(); 
-     
+
+    getDeviceModel();
+
     SDL_Init(SDL_INIT_VIDEO);
     SDL_ShowCursor(SDL_DISABLE);
     SDL_EnableKeyRepeat(300, 50);
@@ -198,10 +198,10 @@ int main(void)
 
         if (!suspended) {
             if (ticks - display_timer >= DISPLAY_TIMEOUT) {
-                if (DEVICE_ID == MIYOO354){
+                if (DEVICE_ID == MIYOO354) {
                     quit = true;
                     turn_off = true;
-                    break; 
+                    break;
                 }
                 else {
                     suspend(true, video);
@@ -252,12 +252,13 @@ int main(void)
 #ifdef PLATFORM_MIYOOMINI
         display_setScreen(false);
 
-   if (DEVICE_ID == MIYOO283){
-        system("sync; reboot; sleep 10");
-    } else if (DEVICE_ID == MIYOO354){
-        system("poweroff");
-    }    
-        #endif
+        if (DEVICE_ID == MIYOO283) {
+            system("sync; reboot; sleep 10");
+        }
+        else if (DEVICE_ID == MIYOO354) {
+            system("poweroff");
+        }
+#endif
     }
     else {
 #ifdef PLATFORM_MIYOOMINI

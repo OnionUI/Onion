@@ -33,7 +33,7 @@ void settings_init(void)
 #ifdef PLATFORM_MIYOOMINI
     InitKeyShm(&shminfo);
 
-    //Disable MainUI battery monitor
+    // Disable MainUI battery monitor
     SetKeyShm(&shminfo, MONITOR_ADC_VALUE, 640);
 #endif
 

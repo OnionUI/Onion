@@ -11,6 +11,7 @@
 #include <unistd.h>
 
 #include "system/battery.h"
+#include "system/device_model.h"
 #include "system/keymap_hw.h"
 #include "system/rumble.h"
 #include "system/screenshot.h"
@@ -18,14 +19,13 @@
 #include "system/settings_sync.h"
 #include "system/state.h"
 #include "system/system.h"
+#include "system/volume.h"
 #include "utils/config.h"
 #include "utils/file.h"
 #include "utils/flags.h"
 #include "utils/log.h"
 #include "utils/process.h"
 #include "utils/str.h"
-#include "system/device_model.h"
-#include "system/volume.h"
 
 #include "./input_fd.h"
 #include "./menuButtonAction.h"
@@ -194,13 +194,15 @@ void shutdown(void)
     system_clock_get();
     system_clock_save();
     sync();
-    if (DEVICE_ID == MIYOO283){
+    if (DEVICE_ID == MIYOO283) {
         reboot(RB_AUTOBOOT);
-    } else if (DEVICE_ID == MIYOO354){
+    }
+    else if (DEVICE_ID == MIYOO354) {
         system("poweroff");
     }
-      
-while(1) pause();
+
+    while (1)
+        pause();
     exit(0);
 }
 
@@ -215,7 +217,7 @@ void suspend_exec(int timeout)
     system_clock_pause(true);
     suspend(0);
     rumble(0);
-    setVolume(0,0);
+    setVolume(0, 0);
     display_setBrightnessRaw(0);
     display_off();
     system_powersave_on();
@@ -316,7 +318,7 @@ void deepsleep(void)
 //
 //    Draw Onion interstate frame
 //
-static void* interstateFrame_thread(void* param)
+static void *interstateFrame_thread(void *param)
 {
     while (1) {
         display_drawFrame(0x009061FF); // draw red frame
@@ -343,7 +345,6 @@ void interstateFrame_hide(void)
     isFramethread_active = false;
 }
 
-
 //
 //    Main
 //
@@ -353,18 +354,19 @@ int main(void)
     signal(SIGTERM, quit);
     signal(SIGSEGV, quit);
 
-    getDeviceModel(); 
+    getDeviceModel();
     settings_init();
     printf_debug("Settings loaded. Brightness set to: %d\n",
                  settings.brightness);
 
     // Set Initial Volume / Brightness
-    if (DEVICE_ID == MIYOO283){
-        recent_volume=setVolume(20,0);
-    } else if (DEVICE_ID == MIYOO354){
-        recent_volume=setVolume(settings.volume,0);
+    if (DEVICE_ID == MIYOO283) {
+        recent_volume = setVolume(20, 0);
     }
-    
+    else if (DEVICE_ID == MIYOO354) {
+        recent_volume = setVolume(settings.volume, 0);
+    }
+
     display_setBrightness(settings.brightness);
 
     display_init();
@@ -478,20 +480,23 @@ int main(void)
                         keyinput_send(HW_BTN_MENU, RELEASED);
                     }
                     if (val == PRESSED) {
-                        switch (button_flag & (SELECT|START)) {
-                            case START:
-                                // SELECT + L2 : volume down / + R2 : reset
-                                recent_volume=setVolume(0, (button_flag & R2) ? 0 : -1);
-                                break;
-                            case SELECT:
-                                // START + L2 : brightness down
-                                if (settings.brightness > 0) {
-                                    settings_setBrightness(settings.brightness - 1, true, true);
-                                    settings_sync();
-                                }
-                                comboKey_select = true;
-                                break;
-                            default: break;
+                        switch (button_flag & (SELECT | START)) {
+                        case START:
+                            // SELECT + L2 : volume down / + R2 : reset
+                            recent_volume =
+                                setVolume(0, (button_flag & R2) ? 0 : -1);
+                            break;
+                        case SELECT:
+                            // START + L2 : brightness down
+                            if (settings.brightness > 0) {
+                                settings_setBrightness(settings.brightness - 1,
+                                                       true, true);
+                                settings_sync();
+                            }
+                            comboKey_select = true;
+                            break;
+                        default:
+                            break;
                         }
                         comboKey_select = true;
                         break;
@@ -500,24 +505,27 @@ int main(void)
                     }
                     break;
                 case HW_BTN_R2:
-                    if ( val == REPEAT ) {
+                    if (val == REPEAT) {
                         // Adjust repeat speed to 1/2
                         val = repeat_LR;
                         repeat_LR ^= PRESSED;
-                    } else {
-                        button_flag = (button_flag & (~R2)) | (val<<R2_BIT);
+                    }
+                    else {
+                        button_flag = (button_flag & (~R2)) | (val << R2_BIT);
                         repeat_LR = 0;
                     }
-                    if ( val == PRESSED ) {
-                        switch (button_flag & (SELECT|START)) {
+                    if (val == PRESSED) {
+                        switch (button_flag & (SELECT | START)) {
                         case START:
                             // SELECT + R2 : volume up / + L2 : reset
-                            recent_volume=setVolume(0, (button_flag & L2) ? 0 : +1);
+                            recent_volume =
+                                setVolume(0, (button_flag & L2) ? 0 : +1);
                             break;
                         case SELECT:
                             // START + R2 : brightness up
                             if (settings.brightness < MAX_BRIGHTNESS) {
-                                settings_setBrightness(settings.brightness + 1, true, true);
+                                settings_setBrightness(settings.brightness + 1,
+                                                       true, true);
                                 settings_sync();
                             }
                             comboKey_select = true;
@@ -532,10 +540,10 @@ int main(void)
                     }
                     break;
                 case HW_BTN_MENU:
-                    //interstateFrame_show();
+                    // interstateFrame_show();
                     system_state_update();
                     comboKey_menu = menuButtonAction(val, comboKey_menu);
-                    //interstateFrame_hide();
+                    // interstateFrame_hide();
                     break;
                 case HW_BTN_X:
                     if (val == PRESSED)
@@ -550,103 +558,106 @@ int main(void)
                     if (val == PRESSED && system_state == MODE_MAIN_UI)
                         temp_flag_set("launch_alt", false);
                     break;
-                 case HW_BTN_VOLUME_UP:
+                case HW_BTN_VOLUME_UP:
                     volUp_pressed = (val == PRESSED);
-                    if ((val == PRESSED)||(val == REPEAT)){
+                    if ((val == PRESSED) || (val == REPEAT)) {
                         if (settings.volume <= MAX_VOLUME - VOLUME_INCREMENTS) {
-                            recent_volume = settings_setVolume(0, VOLUME_INCREMENTS, true, true);
-                            settings_sync();
-                        }     
-                    }    
-                    break;
-                case HW_BTN_VOLUME_DOWN:
-                    volDown_pressed = (val == PRESSED);
-                    if (val == PRESSED){
-                        if (settings.volume >= VOLUME_INCREMENTS) {
-                            recent_volume = settings_setVolume(0, - VOLUME_INCREMENTS, true, true);
+                            recent_volume = settings_setVolume(
+                                0, VOLUME_INCREMENTS, true, true);
                             settings_sync();
                         }
                     }
-                    else if (val == REPEAT){
+                    break;
+                case HW_BTN_VOLUME_DOWN:
+                    volDown_pressed = (val == PRESSED);
+                    if (val == PRESSED) {
+                        if (settings.volume >= VOLUME_INCREMENTS) {
+                            recent_volume = settings_setVolume(
+                                0, -VOLUME_INCREMENTS, true, true);
+                            settings_sync();
+                        }
+                    }
+                    else if (val == REPEAT) {
                         recent_volume = settings_setVolume(0, 0, true, true);
                         settings_sync();
                     }
                     break;
                 default:
                     break;
-            }
-            
-            // Screenshot shortcut for the MMP
-            if ((volDown_pressed) && (volUp_pressed)){
+                }
+
+                // Screenshot shortcut for the MMP
+                if ((volDown_pressed) && (volUp_pressed)) {
                     // screenshot
                     super_short_pulse();
                     screenshot_recent();
                     display_setBrightnessRaw(0);
                     usleep(100000);
                     settings_setBrightness(settings.brightness, true, false);
-            }
-            
-            if ((val == PRESSED) && (system_state == MODE_MAIN_UI)){
-             // Check for Konami code    
-                if (ev.code == KONAMI_CODE[konamiCodeIndex]) {
-                    ++konamiCodeIndex;
-                    if (konamiCodeIndex == KONAMI_CODE_LENGTH) {
-                        // The entire Konami code was entered!
-                        FILE *file =
-                            fopen("/mnt/SDCARD/.tmp_update/cmd_to_run.sh", "w");
-                        fputs("cd /mnt/SDCARD/.tmp_update/bin; ./easter", file);
-                        fclose(file);
+                }
 
-                        konamiCodeIndex = 0;
-                        kill_mainUI();
+                if ((val == PRESSED) && (system_state == MODE_MAIN_UI)) {
+                    // Check for Konami code
+                    if (ev.code == KONAMI_CODE[konamiCodeIndex]) {
+                        ++konamiCodeIndex;
+                        if (konamiCodeIndex == KONAMI_CODE_LENGTH) {
+                            // The entire Konami code was entered!
+                            FILE *file = fopen(
+                                "/mnt/SDCARD/.tmp_update/cmd_to_run.sh", "w");
+                            fputs("cd /mnt/SDCARD/.tmp_update/bin; ./easter",
+                                  file);
+                            fclose(file);
+
+                            konamiCodeIndex = 0;
+                            kill_mainUI();
+                        }
+                    }
+                    else {
+                        konamiCodeIndex = (ev.code == HW_BTN_UP);
                     }
                 }
-                else {
-                    konamiCodeIndex = (ev.code == HW_BTN_UP);
+
+                hibernate_start = getMilliseconds();
+                elapsed_sec = (hibernate_start - ticks) / 1000;
+                if (elapsed_sec < CHECK_SEC)
+                    continue;
+            }
+
+            // Comes here every CHECK_SEC(def:15) seconds interval
+
+            if (delete_flag) {
+                if (exists("/tmp/state_changed")) {
+                    system_state_update();
+                    remove("/tmp/state_changed");
+                    sync();
+                }
+                delete_flag = false;
+            }
+            else {
+                delete_flag = true;
+            }
+
+            // Update ticks
+            ticks = getMilliseconds();
+
+            // Check Hibernate
+            if (battery_isCharging())
+                hibernate_time = 0;
+            else
+                hibernate_time = settings.sleep_timer;
+
+            if (hibernate_time && !temp_flag_get("stay_awake")) {
+                if (ticks - hibernate_start > hibernate_time * 60 * 1000) {
+                    suspend_exec(SHUTDOWN_MIN * 60000);
+                    hibernate_start = ticks;
                 }
             }
 
-            hibernate_start = getMilliseconds();
-            elapsed_sec = (hibernate_start - ticks) / 1000;
-            if (elapsed_sec < CHECK_SEC)
-                continue;
+            // Quit RetroArch / auto-save when battery too low
+            if (battery_getPercentage() <= 4 && settings.low_battery_autosave &&
+                check_autosave())
+                terminate_retroarch();
+
+            elapsed_sec = 0;
         }
-
-        // Comes here every CHECK_SEC(def:15) seconds interval
-
-        if (delete_flag) {
-            if (exists("/tmp/state_changed")) {
-                system_state_update();
-                remove("/tmp/state_changed");
-                sync();
-            }
-            delete_flag = false;
-        }
-        else {
-            delete_flag = true;
-        }
-
-        // Update ticks
-        ticks = getMilliseconds();
-
-        // Check Hibernate
-        if (battery_isCharging())
-            hibernate_time = 0;
-        else
-            hibernate_time = settings.sleep_timer;
-
-        if (hibernate_time && !temp_flag_get("stay_awake")) {
-            if (ticks - hibernate_start > hibernate_time * 60 * 1000) {
-                suspend_exec(SHUTDOWN_MIN * 60000);
-                hibernate_start = ticks;
-            }
-        }
-
-        // Quit RetroArch / auto-save when battery too low
-        if (battery_getPercentage() <= 4 && settings.low_battery_autosave &&
-            check_autosave())
-            terminate_retroarch();
-
-        elapsed_sec = 0;
     }
-}

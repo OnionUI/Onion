@@ -23,8 +23,9 @@
 
 #define SYSTEM_SKIN_DIR "/mnt/SDCARD/miyoo/app/skin/"
 
-void logMessage(char* Message) {
-	FILE *file = fopen("/mnt/SDCARD/log_PUI_Message.txt", "a");
+void logMessage(char *Message)
+{
+    FILE *file = fopen("/mnt/SDCARD/log_PUI_Message.txt", "a");
 
     char icon_path[STR_MAX], icon_backup[STR_MAX];
     bool icon_exists =
@@ -56,10 +57,10 @@ void drawBatteryPercentage(void)
         sprintf(icon_backup, "%s_back.png", file_removeExtension(icon_path));
         file_copy(icon_path, icon_backup);
     }
-    */
+    * /
 
-    TTF_Init();
-    sprintf(icon_path, "%sskin/%s.png", theme_path, ".batt-perc"); 
+        TTF_Init();
+    sprintf(icon_path, "%sskin/%s.png", theme_path, ".batt-perc");
 
     int percentage = battery_getPercentage();
     SDL_Surface *image =
@@ -74,12 +75,11 @@ void drawBatteryPercentage(void)
     TTF_Quit();
 }
 
-
 int main(int argc, char *argv[])
 {
-        // Repair themes modified with the previous logic
-        // and make sure the percentage resource exists
-        restoreRegularDisplay();
-        drawBatteryPercentage();
+    // Repair themes modified with the previous logic
+    // and make sure the percentage resource exists
+    restoreRegularDisplay();
+    drawBatteryPercentage();
     return 0;
 }
