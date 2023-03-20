@@ -75,6 +75,8 @@ static TTF_Font *font25 = NULL;
 static TTF_Font *font35 = NULL;
 
 static SDL_Color color_white = {255, 255, 255};
+static SDL_Color color_red = {247, 145, 145};
+static SDL_Color color_green = {154, 247, 145};
 
 int changesInstalls(void)
 {
@@ -554,10 +556,9 @@ void renderCurrentTab(void)
 }
 
 int renderSummaryLine(SDL_Surface *surfaceTemp, int pos_y, const char *line_str,
-                      int alpha)
+                      int alpha, SDL_Color color)
 {
-    SDL_Surface *surfaceLine =
-        TTF_RenderUTF8_Blended(font18, line_str, color_white);
+    SDL_Surface *surfaceLine = TTF_RenderUTF8_Blended(font18, line_str, color);
     SDL_Rect rectLine = {0, pos_y};
     int h = surfaceLine->h;
     printf_debug("h: %d\n", h);
@@ -610,7 +611,9 @@ void renderSummary()
                 sprintf(line_str + len, " %d removed", changes_removals[nT]);
             }
 
-            pos_y += renderSummaryLine(surfaceTemp, pos_y, line_str, 255) + 5;
+            pos_y += renderSummaryLine(surfaceTemp, pos_y, line_str, 255,
+                                       color_white) +
+                     5;
 
             for (int i = 0; i < package_count[nT]; i++) {
                 Package *package = &packages[nT][i];
@@ -626,7 +629,9 @@ void renderSummary()
                         package->name);
 
                 pos_y +=
-                    renderSummaryLine(surfaceTemp, pos_y, line_str, 120) + 5;
+                    renderSummaryLine(surfaceTemp, pos_y, line_str, 120,
+                                      is_removed ? color_red : color_green) +
+                    5;
             }
         }
 
