@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
     SDL_Rect stripes_frame = {0, 0, 640, 10};
 
     int current_slide = -1;
-    int num_slides = 8;
+    int num_slides = 9;
     config_get("currentSlide", "%d", &current_slide);
     imageCache_load(&current_slide, _loadSlide, num_slides);
 
