@@ -460,6 +460,7 @@ void removeCurrentItem()
     // Copy next element value to current element
     for (int i = current_game; i < game_list_len - 1; i++) {
         game_list[i] = game_list[i + 1];
+        game_list[i].jsonIndex -= 1;
     }
 
     game_list_len--;
