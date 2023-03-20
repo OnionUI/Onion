@@ -1,28 +1,28 @@
-#include <stdio.h>
-#include <unistd.h>
-#include <stdint.h>
-#include <string.h>
-#include <stdbool.h>  
-#include <sys/stat.h>
-#include <dirent.h>
-#include <linux/input.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
+#include <dirent.h>
+#include <linux/input.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
-#include "utils/sdl_init.h"
-#include "utils/log.h"
-#include "utils/keystate.h"
+#include "components/list.h"
 #include "system/battery.h"
-#include "system/settings.h"
 #include "system/display.h"
 #include "system/keymap_hw.h"
 #include "system/keymap_sw.h"
 #include "system/lang.h"
-#include "theme/theme.h"
+#include "system/settings.h"
 #include "theme/background.h"
 #include "theme/sound.h"
-#include "components/list.h"
+#include "theme/theme.h"
+#include "utils/keystate.h"
+#include "utils/log.h"
+#include "utils/sdl_init.h"
 
 #define FRAMES_PER_SECOND 60
 #define SHUTDOWN_TIMEOUT 500
@@ -35,246 +35,253 @@ static KeyState keystate[320] = {(KeyState)0};
 static void sigHandler(int sig)
 {
     switch (sig) {
-        case SIGINT:
-        case SIGTERM:
-            quit = true;
-            break;
-        default: break;
+    case SIGINT:
+    case SIGTERM:
+        quit = true;
+        break;
+    default:
+        break;
     }
 }
 
 int main(int argc, char *argv[])
 {
-	print_debug("Debug logging enabled, prompt v2!");
-	
+    print_debug("Debug logging enabled, prompt v2!");
+
     signal(SIGINT, sigHandler);
     signal(SIGTERM, sigHandler);
 
-	int pargc = 0;
-	char **pargs = NULL;
-	char title_str[STR_MAX] = "";
-	char message_str[STR_MAX] = "";
-	bool required = false;
-	int selected = 0;
+    int pargc = 0;
+    char **pargs = NULL;
+    char title_str[STR_MAX] = "";
+    char message_str[STR_MAX] = "";
+    bool required = false;
+    int selected = 0;
 
-	pargs = malloc(MAX_ELEMENTS * sizeof(char*));
+    pargs = malloc(MAX_ELEMENTS * sizeof(char *));
 
-	int i;
-	for (i = 1; i < argc; i++) {
-		if (argv[i][0] == '-') {
-			if (strcmp(argv[i], "-t") == 0 || strcmp(argv[i], "--title") == 0) {
-				strncpy(title_str, argv[++i], STR_MAX-1);
-				continue;
-			}
-			if (strcmp(argv[i], "-m") == 0 || strcmp(argv[i], "--message") == 0) {
-				strncpy(message_str, argv[++i], STR_MAX-1);
-				continue;
-			}
-			if (strcmp(argv[i], "-r") == 0 || strcmp(argv[i], "--required") == 0) {
-				required = true;
-				continue;
-			}
-			if (strcmp(argv[i], "-s") == 0 || strcmp(argv[i], "--selected") == 0) {
-				selected = atoi(argv[++i]);
-				continue;
-			}
-		}
-		if (pargc < MAX_ELEMENTS) {
-			pargs[pargc] = malloc((STR_MAX + 1) * sizeof(char));
-			strncpy(pargs[pargc], argv[i], STR_MAX);
-			pargc++;
-		}
-	}
+    int i;
+    for (i = 1; i < argc; i++) {
+        if (argv[i][0] == '-') {
+            if (strcmp(argv[i], "-t") == 0 || strcmp(argv[i], "--title") == 0) {
+                strncpy(title_str, argv[++i], STR_MAX - 1);
+                continue;
+            }
+            if (strcmp(argv[i], "-m") == 0 ||
+                strcmp(argv[i], "--message") == 0) {
+                strncpy(message_str, argv[++i], STR_MAX - 1);
+                continue;
+            }
+            if (strcmp(argv[i], "-r") == 0 ||
+                strcmp(argv[i], "--required") == 0) {
+                required = true;
+                continue;
+            }
+            if (strcmp(argv[i], "-s") == 0 ||
+                strcmp(argv[i], "--selected") == 0) {
+                selected = atoi(argv[++i]);
+                continue;
+            }
+        }
+        if (pargc < MAX_ELEMENTS) {
+            pargs[pargc] = malloc((STR_MAX + 1) * sizeof(char));
+            strncpy(pargs[pargc], argv[i], STR_MAX);
+            pargc++;
+        }
+    }
 
-	printf_debug(LOG_SUCCESS, "parsed command line arguments");
+    printf_debug(LOG_SUCCESS, "parsed command line arguments");
 
-	SDL_InitDefault(true);
+    SDL_InitDefault(true);
 
-	settings_load();
-	lang_load();
+    settings_load();
+    lang_load();
 
     int battery_percentage = battery_getPercentage();
 
-	if (pargc == 0) {
-		pargs[pargc++] = lang_get(LANG_OK);
-		pargs[pargc++] = lang_get(LANG_CANCEL);
-	}
+    if (pargc == 0) {
+        pargs[pargc++] = lang_get(LANG_OK);
+        pargs[pargc++] = lang_get(LANG_CANCEL);
+    }
 
-	List list = list_create(pargc, LIST_SMALL);
+    List list = list_create(pargc, LIST_SMALL);
 
-	for (i = 0; i < pargc; i++) {
-		ListItem item = {
-			.action_id = i,
-			.action = NULL
-		};
-		strncpy(item.label, pargs[i], STR_MAX - 1);
-		printf_debug("Adding list item: %s (%d)\n", item.label, item.action_id);
-		list_addItem(&list, item);
-	}
+    for (i = 0; i < pargc; i++) {
+        ListItem item = {.action_id = i, .action = NULL};
+        strncpy(item.label, pargs[i], STR_MAX - 1);
+        printf_debug("Adding list item: %s (%d)\n", item.label, item.action_id);
+        list_addItem(&list, item);
+    }
 
-	list_scrollTo(&list, selected);
+    list_scrollTo(&list, selected);
 
-	bool has_title = strlen(title_str) > 0;
+    bool has_title = strlen(title_str) > 0;
 
-	SDL_Surface *message = NULL;
-	SDL_Rect message_rect;
-	bool has_message = strlen(message_str) > 0;
+    SDL_Surface *message = NULL;
+    SDL_Rect message_rect;
+    bool has_message = strlen(message_str) > 0;
 
-	if (has_message) {
-		char *str = str_replace(message_str, "\\n", "\n");
-		printf_debug("Message: %s\n", str);
-		message = theme_textboxSurface(str, resource_getFont(TITLE), theme()->grid.color, ALIGN_CENTER);
-		list.scroll_height = 3;
-		message_rect.x = 320 - message->w / 2;
-		message_rect.y = 60 + (6 - list.scroll_height) * 30 - message->h / 2;
-		free(str);
-	}
+    if (has_message) {
+        char *str = str_replace(message_str, "\\n", "\n");
+        printf_debug("Message: %s\n", str);
+        message = theme_textboxSurface(str, resource_getFont(TITLE),
+                                       theme()->grid.color, ALIGN_CENTER);
+        list.scroll_height = 3;
+        message_rect.x = 320 - message->w / 2;
+        message_rect.y = 60 + (6 - list.scroll_height) * 30 - message->h / 2;
+        free(str);
+    }
 
-	bool list_changed = true;
-	bool header_changed = true;
-	bool footer_changed = true;
-	bool battery_changed = true;
+    bool list_changed = true;
+    bool header_changed = true;
+    bool footer_changed = true;
+    bool battery_changed = true;
 
-	SDLKey changed_key;
-	bool key_changed = false;
+    SDLKey changed_key;
+    bool key_changed = false;
 
-	#ifdef PLATFORM_MIYOOMINI
-	bool first_draw = true;
-	int	input_fd;
-	input_fd = open("/dev/input/event0", O_RDONLY);
-	struct input_event ev;
-	uint32_t shutdown_timer = 0;
-	#endif
-	
-	int return_code = -1;
+#ifdef PLATFORM_MIYOOMINI
+    bool first_draw = true;
+    int input_fd;
+    input_fd = open("/dev/input/event0", O_RDONLY);
+    struct input_event ev;
+    uint32_t shutdown_timer = 0;
+#endif
 
-	uint32_t acc_ticks = 0,
-			 last_ticks = SDL_GetTicks(),
-			 time_step = 1000 / FRAMES_PER_SECOND;
+    int return_code = -1;
 
-	while (!quit) {
-		uint32_t ticks = SDL_GetTicks();
-		acc_ticks += ticks - last_ticks;
-		last_ticks = ticks;
+    uint32_t acc_ticks = 0, last_ticks = SDL_GetTicks(),
+             time_step = 1000 / FRAMES_PER_SECOND;
 
-		#ifdef PLATFORM_MIYOOMINI
-		if (!first_draw) {
-			read(input_fd, &ev, sizeof(ev));
-			int val = ev.value;
+    while (!quit) {
+        uint32_t ticks = SDL_GetTicks();
+        acc_ticks += ticks - last_ticks;
+        last_ticks = ticks;
 
-			if (ev.type == EV_KEY && val <= 2 && ev.code == HW_BTN_POWER) {
-				if (val == 2 && (ticks - shutdown_timer) > SHUTDOWN_TIMEOUT)
-					quit = true;
-				else if (val == 1)
-					shutdown_timer = ticks;
-			}
-		}
-		#endif
+#ifdef PLATFORM_MIYOOMINI
+        if (!first_draw) {
+            read(input_fd, &ev, sizeof(ev));
+            int val = ev.value;
 
-		if (updateKeystate(keystate, &quit, true, &changed_key)) {
-			if (keystate[SW_BTN_DOWN] >= PRESSED) {
-				key_changed = list_keyDown(&list, keystate[SW_BTN_DOWN] == REPEATING);
-				list_changed = true;
-			}
-			else if (keystate[SW_BTN_UP] >= PRESSED) {
-				key_changed = list_keyUp(&list, keystate[SW_BTN_UP] == REPEATING);
-				list_changed = true;
-			}
+            if (ev.type == EV_KEY && val <= 2 && ev.code == HW_BTN_POWER) {
+                if (val == 2 && (ticks - shutdown_timer) > SHUTDOWN_TIMEOUT)
+                    quit = true;
+                else if (val == 1)
+                    shutdown_timer = ticks;
+            }
+        }
+#endif
 
-			if (changed_key == SW_BTN_A && keystate[SW_BTN_A] == RELEASED) {
-				return_code = list_currentItem(&list)->action_id;
-				quit = true;
-			}
+        if (updateKeystate(keystate, &quit, true, &changed_key)) {
+            if (keystate[SW_BTN_DOWN] >= PRESSED) {
+                key_changed =
+                    list_keyDown(&list, keystate[SW_BTN_DOWN] == REPEATING);
+                list_changed = true;
+            }
+            else if (keystate[SW_BTN_UP] >= PRESSED) {
+                key_changed =
+                    list_keyUp(&list, keystate[SW_BTN_UP] == REPEATING);
+                list_changed = true;
+            }
 
-			if (!required && changed_key == SW_BTN_B && keystate[SW_BTN_B] == RELEASED) {
-				quit = true;
-			}
-		}
+            if (changed_key == SW_BTN_A && keystate[SW_BTN_A] == RELEASED) {
+                return_code = list_currentItem(&list)->action_id;
+                quit = true;
+            }
 
-		if (key_changed || quit) {
-			sound_change();
-			key_changed = false;
-		}
+            if (!required && changed_key == SW_BTN_B &&
+                keystate[SW_BTN_B] == RELEASED) {
+                quit = true;
+            }
+        }
 
-		if (quit)
-			break;
+        if (key_changed || quit) {
+            sound_change();
+            key_changed = false;
+        }
 
-		if (battery_hasChanged(ticks, &battery_percentage))
-			battery_changed = true;
+        if (quit)
+            break;
 
-		if (acc_ticks >= time_step) {
-			if (header_changed || battery_changed) {
-				theme_renderHeader(screen, has_title ? title_str : NULL, !has_title);
-			}
-			if (list_changed) {
-				theme_renderList(screen, &list);
+        if (battery_hasChanged(ticks, &battery_percentage))
+            battery_changed = true;
 
-				if (has_message)
-					SDL_BlitSurface(message, NULL, screen, &message_rect);
-			}
-			
-			if (footer_changed) {
-				theme_renderFooter(screen);
-				theme_renderStandardHint(screen, lang_get(LANG_SELECT), required ? NULL : lang_get(LANG_BACK));
-			}
+        if (acc_ticks >= time_step) {
+            if (header_changed || battery_changed) {
+                theme_renderHeader(screen, has_title ? title_str : NULL,
+                                   !has_title);
+            }
+            if (list_changed) {
+                theme_renderList(screen, &list);
 
-			if (footer_changed || list_changed)
-				theme_renderFooterStatus(screen, list.active_pos + 1, list.item_count);
+                if (has_message)
+                    SDL_BlitSurface(message, NULL, screen, &message_rect);
+            }
 
-			if (header_changed || battery_changed)
-				theme_renderHeaderBattery(screen, battery_getPercentage());
+            if (footer_changed) {
+                theme_renderFooter(screen);
+                theme_renderStandardHint(screen, lang_get(LANG_SELECT),
+                                         required ? NULL : lang_get(LANG_BACK));
+            }
 
-			footer_changed = false;
-			header_changed = false;
-			list_changed = false;
-			battery_changed = false;
-			
-			#ifdef PLATFORM_MIYOOMINI
-			first_draw = false;
-			#endif
+            if (footer_changed || list_changed)
+                theme_renderFooterStatus(screen, list.active_pos + 1,
+                                         list.item_count);
 
-			SDL_BlitSurface(screen, NULL, video, NULL); 
-			SDL_Flip(video);
+            if (header_changed || battery_changed)
+                theme_renderHeaderBattery(screen, battery_getPercentage());
 
-			acc_ticks -= time_step;
-		}
-	}
+            footer_changed = false;
+            header_changed = false;
+            list_changed = false;
+            battery_changed = false;
 
-	// Clear the screen when exiting
-	SDL_FillRect(video, NULL, 0);
-	SDL_Flip(video);
+#ifdef PLATFORM_MIYOOMINI
+            first_draw = false;
+#endif
 
-	lang_free();
+            SDL_BlitSurface(screen, NULL, video, NULL);
+            SDL_Flip(video);
 
-	if (pargs != NULL) {
-		for (i = 0; i < pargc; i++) {
-			free(pargs[i]);
-		}
-		free(pargs);
-	}
+            acc_ticks -= time_step;
+        }
+    }
 
-	#ifdef PLATFORM_MIYOOMINI
-	close(input_fd);
-	#endif
-	
-	print_debug("Freeing list...");
-	list_free(&list);
-	printf_debug(LOG_SUCCESS, "freed list");
+    // Clear the screen when exiting
+    SDL_FillRect(video, NULL, 0);
+    SDL_Flip(video);
 
-	if (has_message)
-		SDL_FreeSurface(message);
+    lang_free();
 
-	Mix_CloseAudio();
-	
-	resources_free();
-   	SDL_FreeSurface(screen);
-   	SDL_FreeSurface(video);
+    if (pargs != NULL) {
+        for (i = 0; i < pargc; i++) {
+            free(pargs[i]);
+        }
+        free(pargs);
+    }
 
-	#ifndef PLATFORM_MIYOOMINI
-	msleep(200); // to clear SDL input on quit
-	#endif
+#ifdef PLATFORM_MIYOOMINI
+    close(input_fd);
+#endif
+
+    print_debug("Freeing list...");
+    list_free(&list);
+    printf_debug(LOG_SUCCESS, "freed list");
+
+    if (has_message)
+        SDL_FreeSurface(message);
+
+    Mix_CloseAudio();
+
+    resources_free();
+    SDL_FreeSurface(screen);
+    SDL_FreeSurface(video);
+
+#ifndef PLATFORM_MIYOOMINI
+    msleep(200); // to clear SDL input on quit
+#endif
 
     SDL_Quit();
-	
+
     return return_code;
 }

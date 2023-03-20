@@ -1,7 +1,7 @@
 {
 "label":"vemulator",
-"icon":"vemulator.png",
-"iconsel":"",
+"icon":"../../Icons/Default/rapp/vemulator.png",
+"iconsel":"../../Icons/Default/rapp/vemulator.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/VMU",
 "imgpath":"../../Roms/VMU/Imgs",

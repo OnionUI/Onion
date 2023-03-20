@@ -208,8 +208,8 @@ get_info_value() {
 }
 
 reset_game() {
-    cat $radir/retroarch.cfg | sed 's/savestate_auto_load = "true"/savestate_auto_load = "false"/' > $sysdir/reset.cfg
-    echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v -c \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+    echo -e "savestate_auto_load = \"false\"\nconfig_save_on_exit = \"false\"\n" > $sysdir/reset.cfg
+    echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v --appendconfig \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
     exit 0
 }
 
@@ -223,12 +223,12 @@ change_core() {
     ext="$romext"
 
     if [ "$ext" == "zip" ] || [ "$ext" == "7z" ]; then
-        if ! cat "$emupath/config.json" | grep -q "\"shortname\" *: *1"; then
+        if ! cat "$emupath/config.json" | grep -q "\"shortname\"\s*:\s*1"; then
 
             if [ "$ext" == "zip" ]; then
                 zip_files=`unzip -l "$rompath" | sed '1,3d;$d' | sed '$d' | sort -n -r`
             else
-                zip_files=`./bin/7zz l -ba "$rompath" | awk '{$1="";$2="";$3="";print $0;}' | sort -n -r`
+                zip_files=`./bin/7z l -ba "$rompath" | awk '{$1="";$2="";$3="";print $0;}' | sort -n -r`
             fi
 
             echo "zip/7z output:"

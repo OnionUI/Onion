@@ -55,7 +55,7 @@ TEST(test_infoPanel, cacheTest)
         const TestItem& test_item = test_data[i];
         bool cache_used = false;
         drawn_image_path = drawImageByIndex(test_item.new_index, test_item.initial_index,
-            images_paths, images_paths_count, screen, &cache_used);
+            images_paths, images_paths_count, screen, NULL, &cache_used);
 
         if (drawn_image_path != NULL)
         {

@@ -1,7 +1,7 @@
 {
 "label":"squirreljme",
-"icon":"squirreljme.png",
-"iconsel":"",
+"icon":"../../Icons/Default/rapp/squirreljme.png",
+"iconsel":"../../Icons/Default/rapp/squirreljme.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/JAVA",
 "imgpath":"../../Roms/JAVA/Imgs",

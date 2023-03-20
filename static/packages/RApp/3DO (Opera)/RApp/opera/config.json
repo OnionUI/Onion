@@ -1,7 +1,7 @@
 {
 "label":"opera",
-"icon":"opera.png",
-"iconsel":"",
+"icon":"../../Icons/Default/rapp/opera.png",
+"iconsel":"../../Icons/Default/rapp/opera.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/PANASONIC",
 "imgpath":"../../Roms/PANASONIC/Imgs",

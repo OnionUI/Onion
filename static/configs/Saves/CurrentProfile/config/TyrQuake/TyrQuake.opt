@@ -1,0 +1,6 @@
+tyrquake_analog_deadzone = "15"
+tyrquake_colored_lighting = "disabled"
+tyrquake_framerate = "auto"
+tyrquake_invert_y_axis = "disabled"
+tyrquake_resolution = "320x200"
+tyrquake_rumble = "disabled"

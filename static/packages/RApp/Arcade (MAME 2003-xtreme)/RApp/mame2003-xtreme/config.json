@@ -1,7 +1,7 @@
 {
 "label":"mame2003-xtreme",
-"icon":"mame2003-xtreme.png",
-"iconsel":"",
+"icon":"../../Icons/Default/rapp/mame2003-xtreme.png",
+"iconsel":"../../Icons/Default/rapp/mame2003-xtreme.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/ARCADE",
 "imgpath":"../../Roms/ARCADE/Imgs",

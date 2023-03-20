@@ -1,33 +1,33 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <unistd.h>
-#include <stdint.h>
-#include <pthread.h>
-#include <string.h>
-#include <fcntl.h>
+#include "system/battery.h"
+#include "system/device_model.h"
+#include "system/display.h"
+#include "system/keymap_hw.h"
+#include "system/rumble.h"
+#include "system/settings.h"
+#include "system/system.h"
+#include "theme/config.h"
+#include "utils/file.h"
+#include "utils/log.h"
+#include "utils/msleep.h"
+#include <SDL/SDL.h>
+#include <SDL/SDL_image.h>
 #include <assert.h>
-#include <time.h>
-#include <sys/ioctl.h>
+#include <fcntl.h>
 #include <linux/fb.h>
 #include <linux/input.h>
 #include <poll.h>
-#include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
-#include "utils/file.h"
-#include "utils/msleep.h"
-#include "utils/log.h"
-#include "system/device_model.h"
-#include "system/battery.h"
-#include "system/system.h"
-#include "system/display.h"
-#include "system/settings.h"
-#include "system/keymap_hw.h"
-#include "system/rumble.h"
-#include "theme/config.h"
+#include <pthread.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <time.h>
+#include <unistd.h>
 
-#define RELEASED  0
-#define PRESSED   1
+#define RELEASED 0
+#define PRESSED 1
 #define REPEATING 2
 
 #define DISPLAY_TIMEOUT 10000
@@ -52,7 +52,7 @@ void getImageDir(const char *theme_path, char *image_dir)
         sprintf(image_dir, "%sskin/extra", theme_path);
         return;
     }
-    
+
     strcpy(image_dir, "res");
 }
 
@@ -70,11 +70,12 @@ void suspend(bool enabled, SDL_Surface *video)
 static void sigHandler(int sig)
 {
     switch (sig) {
-        case SIGINT:
-        case SIGTERM:
-            quit = true;
-            break;
-        default: break;
+    case SIGINT:
+    case SIGTERM:
+        quit = true;
+        break;
+    default:
+        break;
     }
 }
 
@@ -90,15 +91,16 @@ int main(void)
 
     char image_dir[STR_MAX];
     getImageDir(settings.theme, image_dir);
-     
-    getDeviceModel(); 
-     
+
+    getDeviceModel();
+
     SDL_Init(SDL_INIT_VIDEO);
     SDL_ShowCursor(SDL_DISABLE);
     SDL_EnableKeyRepeat(300, 50);
 
-    SDL_Surface* video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
-    SDL_Surface* screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
+    SDL_Surface *video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
+    SDL_Surface *screen =
+        SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
 
     int min_delay = 15;
     int frame_delay = 80;
@@ -109,7 +111,8 @@ int main(void)
 
     for (int i = 0; i < 24; i++) {
         char image_path[STR_MAX + 50];
-        snprintf(image_path, STR_MAX + 49, "%s/chargingState%d.png", image_dir, i);
+        snprintf(image_path, STR_MAX + 49, "%s/chargingState%d.png", image_dir,
+                 i);
         if ((image = IMG_Load(image_path)))
             frames[frame_count++] = image;
     }
@@ -119,7 +122,8 @@ int main(void)
     if (is_file(json_path)) {
         int value;
         char json_value[STR_MAX];
-        if (file_parseKeyValue(json_path, "frame_delay", json_value, ':', 0) != NULL) {
+        if (file_parseKeyValue(json_path, "frame_delay", json_value, ':', 0) !=
+            NULL) {
             value = atoi(json_value);
             // accept both microseconds and milliseconds
             frame_delay = value >= 10000 ? value / 1000 : value;
@@ -146,15 +150,15 @@ int main(void)
     // Set the CPU to powersave (charges faster?)
     system_powersave_on();
 
-    uint32_t acc_ticks = 0,
-             last_ticks = SDL_GetTicks(),
+    uint32_t acc_ticks = 0, last_ticks = SDL_GetTicks(),
              display_timer = last_ticks;
 
     while (!quit) {
         while (poll(fds, 1, suspended ? 1000 - min_delay : 0)) {
             read(input_fd, &ev, sizeof(ev));
 
-            if (ev.type != EV_KEY || ev.value > REPEATING) continue;
+            if (ev.type != EV_KEY || ev.value > REPEATING)
+                continue;
 
             if (ev.code == HW_BTN_POWER) {
                 if (ev.value == PRESSED) {
@@ -177,7 +181,7 @@ int main(void)
                     repeat_power++;
                 }
             }
-            
+
             display_timer = SDL_GetTicks();
         }
 
@@ -194,10 +198,10 @@ int main(void)
 
         if (!suspended) {
             if (ticks - display_timer >= DISPLAY_TIMEOUT) {
-                if (DEVICE_ID == MIYOO354){
+                if (DEVICE_ID == MIYOO354) {
                     quit = true;
                     turn_off = true;
-                    break; 
+                    break;
                 }
                 else {
                     suspend(true, video);
@@ -214,7 +218,8 @@ int main(void)
 
                 if (current_frame < frame_count) {
                     SDL_Surface *frame = frames[current_frame];
-                    SDL_Rect frame_rect = {320 - frame->w / 2, 240 - frame->h / 2};
+                    SDL_Rect frame_rect = {320 - frame->w / 2,
+                                           240 - frame->h / 2};
                     SDL_BlitSurface(frame, NULL, screen, &frame_rect);
                     current_frame = (current_frame + 1) % frame_count;
                 }
@@ -225,7 +230,7 @@ int main(void)
                 acc_ticks -= frame_delay;
             }
         }
-        
+
         msleep(min_delay);
     }
 
@@ -233,9 +238,9 @@ int main(void)
     SDL_FillRect(video, NULL, 0);
     SDL_Flip(video);
 
-    #ifndef PLATFORM_MIYOOMINI
+#ifndef PLATFORM_MIYOOMINI
     msleep(100);
-    #endif
+#endif
 
     for (int i = 0; i < frame_count; i++)
         SDL_FreeSurface(frames[i]);
@@ -244,21 +249,22 @@ int main(void)
     SDL_Quit();
 
     if (turn_off) {
-        #ifdef PLATFORM_MIYOOMINI
+#ifdef PLATFORM_MIYOOMINI
         display_setScreen(false);
 
-   if (DEVICE_ID == MIYOO283){
-        system("sync; reboot; sleep 10");
-    } else if (DEVICE_ID == MIYOO354){
-        system("poweroff");
-    }    
-        #endif
+        if (DEVICE_ID == MIYOO283) {
+            system("sync; reboot; sleep 10");
+        }
+        else if (DEVICE_ID == MIYOO354) {
+            system("poweroff");
+        }
+#endif
     }
     else {
-        #ifdef PLATFORM_MIYOOMINI
+#ifdef PLATFORM_MIYOOMINI
         display_setScreen(true);
         short_pulse();
-        #endif
+#endif
     }
 
     // restore CPU performance mode

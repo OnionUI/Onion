@@ -26,6 +26,12 @@ do
         echo "-- downloading theme: $element"
         wget -O "$zipfile" "https://github.com/OnionUI/Themes/blob/main/release/$element.zip?raw=true" -q --show-progress
     fi
-    echo "-- extracting theme: $element"
-    unzip -oq "$zipfile" -d ../dist/Themes
+
+    if [ "$element" == "Silky by DiMo" ]; then
+        echo "-- extracting theme: $element"
+        unzip -oq "$zipfile" -d ../dist/Themes
+    else
+        echo "-- copying theme: $element"
+        cp "$zipfile" ../dist/Themes
+    fi
 done

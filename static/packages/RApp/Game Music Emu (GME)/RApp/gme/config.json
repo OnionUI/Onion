@@ -1,7 +1,7 @@
 {
 "label":"Game Music Emu",
-"icon":"gme.png",
-"iconsel":"",
+"icon":"../../Icons/Default/rapp/gme.png",
+"iconsel":"../../Icons/Default/rapp/gme.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/GME",
 "imgpath":"../../Roms/GME/Imgs",

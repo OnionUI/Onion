@@ -66,12 +66,21 @@ main() {
         cleanup
         return
     fi
-    
+
     # Start the battery monitor
     cd $sysdir
     ./bin/batmon 2>&1 > ./logs/batmon.log &
 
-    prompt_update
+    ./bin/detectKey 1
+    menu_pressed=$?
+
+    if [ $menu_pressed -eq 0 ]; then
+        prompt_update
+        cleanup
+        return
+    fi
+    
+    run_installation 0 0
     cleanup
 }
 
@@ -404,6 +413,11 @@ install_configs() {
         # Extract config files without overwriting any existing files
         unzip -nq $zipfile
     fi
+
+    # Set Y button keymap to GLO if empty
+    sed 's/"mainui_button_y": "glo"/"mainui_button_y": ""/g' /mnt/SDCARD/.tmp_update/config/ke
+ymap.json > ./temp_keymap.json
+    mv -f ./temp_keymap.json /mnt/SDCARD/.tmp_update/config/keymap.json
 }
 
 check_firmware() {
@@ -462,7 +476,8 @@ debloat_apps() {
         Onion_Manual \
         PlayActivity \
         SearchFilter \
-        ThemeSwitcher
+        ThemeSwitcher \
+        IconThemer
         
     rm -rf /mnt/SDCARD/Emu/SEARCH
 
@@ -478,6 +493,10 @@ debloat_apps() {
 
     if [ -d /mnt/SDCARD/miyoo/packages ]; then
         rm -rf /mnt/SDCARD/miyoo/packages
+    fi
+
+    if [ -d /mnt/SDCARD/App/PackageManager/data ]; then
+        rm -rf /mnt/SDCARD/App/PackageManager/data
     fi
 }
 

@@ -1,26 +1,27 @@
 #ifndef KEYMON_INPUT_FD_H__
 #define KEYMON_INPUT_FD_H__
 
-#include <sys/ioctl.h>
 #include <linux/fb.h>
 #include <linux/input.h>
+#include <sys/ioctl.h>
+#include <sys/poll.h>
 
 #include "utils/msleep.h"
 
 // for ev.value
 #define RELEASED 0
-#define PRESSED  1
-#define REPEAT   2
+#define PRESSED 1
+#define REPEAT 2
 
 // for button_flag
 #define SELECT_BIT 0
-#define START_BIT  1
-#define L2_BIT     2
-#define R2_BIT     3
-#define SELECT     (1<<SELECT_BIT)
-#define START      (1<<START_BIT)
-#define L2         (1<<L2_BIT)
-#define R2         (1<<R2_BIT)
+#define START_BIT 1
+#define L2_BIT 2
+#define R2_BIT 3
+#define SELECT (1 << SELECT_BIT)
+#define START (1 << START_BIT)
+#define L2 (1 << L2_BIT)
+#define R2 (1 << R2_BIT)
 
 #define QUEUE_MAX 10
 
@@ -34,8 +35,9 @@ static int ignore_queue_count = 0;
 
 void _ignoreQueue_remove(int index)
 {
-    printf_debug("Removing from ignore queue: code=%d, value=%d\n", ignore_queue[index][0], ignore_queue[index][1]);
-    for(int i = index; i < ignore_queue_count - 1; i++) {
+    printf_debug("Removing from ignore queue: code=%d, value=%d\n",
+                 ignore_queue[index][0], ignore_queue[index][1]);
+    for (int i = index; i < ignore_queue_count - 1; i++) {
         ignore_queue[i][0] = ignore_queue[i + 1][0];
         ignore_queue[i][1] = ignore_queue[i + 1][1];
     }
@@ -102,26 +104,30 @@ void keyinput_sendMulti(int n, int code_value_pairs[n][2])
 
 /**
  * @brief stop input event for other processes
- * 
+ *
  */
 void keyinput_disable(void)
 {
     if (keyinput_disabled)
         return;
-    while (ioctl(input_fd, EVIOCGRAB, 1) < 0) { usleep(100000); }
+    while (ioctl(input_fd, EVIOCGRAB, 1) < 0) {
+        usleep(100000);
+    }
     keyinput_disabled = true;
     print_debug("Keyinput disabled");
 }
 
 /**
  * @brief restart input event for other processes
- * 
+ *
  */
 void keyinput_enable(void)
 {
     if (!keyinput_disabled)
         return;
-    while (ioctl(input_fd, EVIOCGRAB, 0) < 0) { usleep(100000); }
+    while (ioctl(input_fd, EVIOCGRAB, 0) < 0) {
+        usleep(100000);
+    }
     keyinput_disabled = false;
     print_debug("Keyinput enabled");
 }

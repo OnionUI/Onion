@@ -1,6 +1,7 @@
 #!/bin/sh
 sysdir=/mnt/SDCARD/.tmp_update
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$sysdir/lib:$sysdir/lib/parasyte"
+export PATH="$sysdir/bin:$PATH"
 
 main() {
     check_device_model
@@ -10,6 +11,12 @@ main() {
 	
     # Start the battery monitor
     ./bin/batmon &
+
+    # Reapply theme
+    theme="$(/customer/app/jsonval theme)"
+    if [ "$theme" == "./" ] || [ "$theme" != "$(cat ./config/active_theme)" ]; then
+        ./bin/themeSwitcher --reapply_icons
+    fi
     
 	# Reapply theme
     ./bin/themeSwitcher --reapply
@@ -42,6 +49,15 @@ main() {
     # Init
     rm /tmp/.offOrder
     HOME=/mnt/SDCARD/RetroArch/
+
+    detectKey 1
+    menu_pressed=$?
+
+    if [ $menu_pressed -eq 0 ]; then
+        if [ -f "./cmd_to_run.sh" ]; then
+            rm -f "./cmd_to_run.sh"
+        fi
+    fi
 
     # Auto launch
     if [ ! -f $sysdir/config/.noAutoStart ]; then
@@ -212,7 +228,7 @@ launch_game() {
 
         if [ -f "$corepath" ]; then
             if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
-                echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v -c \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+                echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v --appendconfig \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
             else
                 echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
             fi
@@ -234,13 +250,13 @@ launch_game() {
 
     echo "cmd retval: $retval"
 
-    if [ $retval -ge 128 ]; then
+    if [ $retval -ge 128 ] && [ $retval -ne 143 ]; then
         cd $sysdir
         ./bin/infoPanel --title "Fatal error occurred" --message "The program exited unexpectedly.\n(Error code: $retval)" --auto
     fi
 
     if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
-        echo "$cmd" | sed 's/ -c \"\/mnt\/SDCARD\/.tmp_update\/reset.cfg\"//g' > $sysdir/cmd_to_run.sh
+        echo "$cmd" | sed 's/ --appendconfig \"\/mnt\/SDCARD\/.tmp_update\/reset.cfg\"//g' > $sysdir/cmd_to_run.sh
     fi
 
     # TIMER END + SHUTDOWN CHECK

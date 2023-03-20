@@ -1,7 +1,7 @@
 {
 "label":"ARCADE FB",
-"icon":"../../Icons/arcade.png",
-"iconsel":"../../Icons/arcade_sel.png",
+"icon":"../../Icons/Default/arcade.png",
+"iconsel":"../../Icons/Default/arcade.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/FBALPHA",
 "imgpath":"../../Roms/FBALPHA/Imgs",
