@@ -4,7 +4,7 @@
 #include "utils/file.h"
 
 #define MAX_VOLUME 20
-#define VOLUME_INCREMENTS 2
+#define VOLUME_INCREMENTS 1
 
 #define MI_AO_SETVOLUME 0x4008690b
 #define MI_AO_GETVOLUME 0xc008690c
