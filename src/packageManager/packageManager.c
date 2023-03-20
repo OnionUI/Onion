@@ -65,7 +65,7 @@ static SDL_Surface *video = NULL, *screen = NULL, *surfaceBackground = NULL,
                    *surfaceDotApplyActive = NULL,
                    *surfaceDotApplyNeutral = NULL;
 
-static SDL_Rect rectSummaryPos = {30, 83};
+static SDL_Rect rectSummaryPos = {30, 85};
 static SDL_Surface *surfaceSummary = NULL;
 static int summaryScrollY = 0;
 static int scrollSpeed = 28;
@@ -561,7 +561,6 @@ int renderSummaryLine(SDL_Surface *surfaceTemp, int pos_y, const char *line_str,
     SDL_Surface *surfaceLine = TTF_RenderUTF8_Blended(font18, line_str, color);
     SDL_Rect rectLine = {0, pos_y};
     int h = surfaceLine->h;
-    printf_debug("h: %d\n", h);
 
     SDL_SetAlpha(surfaceLine, 0, 0); /* important */
     surfaceSetAlpha(surfaceLine, alpha);
