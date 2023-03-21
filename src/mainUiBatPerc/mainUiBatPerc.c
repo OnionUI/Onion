@@ -44,11 +44,11 @@ void restoreRegularDisplay(void)
 
 void logMessage(char *Message)
 {
-    FILE *file = fopen("/mnt/SDCARD/log_PUI_Message.txt", "a");
+    //FILE *file = fopen("/mnt/SDCARD/log_PUI_Message.txt", "a");
 
     char theme_path[STR_MAX];
     theme_getPath(theme_path);
-    
+
     char icon_path[STR_MAX], icon_backup[STR_MAX];
     bool icon_exists =
         theme_getImagePath(theme_path, "power-full-icon", icon_path) == 1;
@@ -79,10 +79,10 @@ void drawBatteryPercentage(void)
         sprintf(icon_backup, "%s_back.png", file_removeExtension(icon_path));
         file_copy(icon_path, icon_backup);
     }
-    * / 
 
-        TTF_Init();
-    //sprintf(icon_path, "%sskin/%s.png", theme_path, ".batt-perc");
+
+    TTF_Init();
+    sprintf(icon_path, "%sskin/%s.png", theme_path, ".batt-perc");
 
     int percentage = battery_getPercentage();
     SDL_Surface *image =
