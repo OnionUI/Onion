@@ -46,6 +46,9 @@ void logMessage(char *Message)
 {
     FILE *file = fopen("/mnt/SDCARD/log_PUI_Message.txt", "a");
 
+    char theme_path[STR_MAX];
+    theme_getPath(theme_path);
+    
     char icon_path[STR_MAX], icon_backup[STR_MAX];
     bool icon_exists =
         theme_getImagePath(theme_path, "power-full-icon", icon_path) == 1;
