@@ -130,7 +130,13 @@ void run_gameSwitcher(void)
     flag_set("/mnt/SDCARD/.tmp_update/", ".runGameSwitcher", true);
 }
 
-static char ***_installed_apps;
+typedef struct {
+    char dirName[STR_MAX];
+    char label[STR_MAX];
+    bool is_duplicate;
+    int dup_id;
+} InstalledApp;
+static InstalledApp _installed_apps[100];
 static int installed_apps_count = 0;
 static bool installed_apps_loaded = false;
 
@@ -155,7 +161,12 @@ bool _getAppDirAndConfig(const char *app_dir_name, char *out_app_dir,
     return true;
 }
 
-char ***getInstalledApps()
+int _comp_installed_apps(const void *a, const void *b)
+{
+    return strcasecmp(((InstalledApp *)a)->label, ((InstalledApp *)b)->label);
+}
+
+InstalledApp *getInstalledApps()
 {
     DIR *dp;
     struct dirent *ep;
@@ -163,9 +174,7 @@ char ***getInstalledApps()
 
     if (!installed_apps_loaded) {
         if ((dp = opendir("/mnt/SDCARD/App")) == NULL)
-            return false;
-
-        _installed_apps = (char ***)malloc(100 * sizeof(char **));
+            return NULL;
 
         while ((ep = readdir(dp))) {
             if (ep->d_type != DT_DIR || strcmp(ep->d_name, ".") == 0 ||
@@ -176,19 +185,29 @@ char ***getInstalledApps()
             if (!_getAppDirAndConfig(ep->d_name, app_dir, config_path))
                 continue;
 
-            _installed_apps[i] = (char **)malloc(2 * sizeof(char *));
-            _installed_apps[i][0] = (char *)malloc(STR_MAX * sizeof(char));
-            _installed_apps[i][1] = (char *)malloc(STR_MAX * sizeof(char));
+            InstalledApp *app = &_installed_apps[i];
 
-            strncpy(_installed_apps[i][0], ep->d_name, STR_MAX - 1);
-            file_parseKeyValue(config_path, "label", _installed_apps[i][1], ':',
-                               0);
+            strncpy(app->dirName, ep->d_name, STR_MAX - 1);
+            file_parseKeyValue(config_path, "label", app->label, ':', 0);
+            app->is_duplicate = false;
+            app->dup_id = 0;
 
-            printf_debug("app %d: %s (%s)\n", i, _installed_apps[i][0],
-                         _installed_apps[i][1]);
+            // Check for duplicate labels
+            for (int i = installed_apps_count - 1; i >= 0; i--) {
+                InstalledApp *other = &_installed_apps[i];
+                if (strcmp(other->label, app->label) == 0) {
+                    other->is_duplicate = app->is_duplicate = true;
+                    app->dup_id = other->dup_id + 1;
+                    break;
+                }
+            }
 
+            printf_debug("app %d: %s (%s)\n", i, app->dirName, app->label);
             installed_apps_count++;
         }
+
+        qsort(_installed_apps, installed_apps_count, sizeof(InstalledApp),
+              _comp_installed_apps);
 
         installed_apps_loaded = true;
     }
@@ -205,7 +224,8 @@ bool getAppPosition(const char *app_dir_name, int *currpos, int *total)
     getInstalledApps();
 
     for (int i = 0; i < installed_apps_count; i++) {
-        if (strncmp(app_dir_name, _installed_apps[i][0], STR_MAX) == 0) {
+        InstalledApp *app = &_installed_apps[i];
+        if (strncmp(app_dir_name, app->dirName, STR_MAX) == 0) {
             *currpos = i;
             found = true;
             break;
