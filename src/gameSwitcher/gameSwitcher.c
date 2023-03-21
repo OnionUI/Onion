@@ -318,6 +318,8 @@ void getGameName(const char *rom_path, char *name_out)
         snprintf(gamelist_path, STR_MAX * 2 - 1, "%s/miyoogamelist.xml",
                  cache_dir);
 
+        moveToParentDir(cache_dir);
+
         if (!is_file(cache_path))
             continue;
 
@@ -327,8 +329,6 @@ void getGameName(const char *rom_path, char *name_out)
 
         if (getGameNameFromCache(cache_path, rom_path, name_out))
             return;
-
-        moveToParentDir(cache_dir);
     } while (strcmp("/mnt/SDCARD/Roms", cache_dir) > 0 &&
              strlen(cache_dir) > 16);
 
@@ -363,6 +363,9 @@ void readHistory()
 
         if (!json_getString(subitem, "path", path) ||
             !json_getString(subitem, "core_path", core_path))
+            continue;
+
+        if (strncmp("/mnt/SDCARD/App", path, 15) == 0)
             continue;
 
         if (!exists(core_path) || !exists(path))
