@@ -92,6 +92,7 @@ typedef struct {
     int jsonIndex;
     int is_duplicate;
     SDL_Surface *romScreen;
+    char romScreenPath[STR_MAX * 2];
 } Game_s;
 static Game_s game_list[MAXHISTORY];
 
@@ -204,8 +205,10 @@ SDL_Surface *loadRomScreen(int index)
             sprintf(currPicture, ROM_SCREENS_DIR "/%s.png",
                     file_removeExtension(game->name));
 
-        if (exists(currPicture))
+        if (exists(currPicture)) {
             game->romScreen = IMG_Load(currPicture);
+            strcpy(game->romScreenPath, currPicture);
+        }
     }
 
     return game->romScreen;
@@ -459,6 +462,9 @@ void removeCurrentItem()
         cJSON_DeleteItemFromArray(json_items, game->jsonIndex);
 
     json_save(json_root, HISTORY_PATH);
+
+    if (strlen(game->romScreenPath) > 0 && is_file(game->romScreenPath))
+        remove(game->romScreenPath);
 
     // Copy next element value to current element
     for (int i = current_game; i < game_list_len - 1; i++) {
