@@ -36,7 +36,7 @@
 #include "utils/str.h"
 #include "utils/surfaceSetAlpha.h"
 
-#define MAXHISTORY 50
+#define MAXHISTORY 100
 #define MAXHROMNAMESIZE 250
 #define MAXHROMPATHSIZE 150
 
@@ -328,6 +328,7 @@ void getGameName(const char *rom_path, char *name_out)
         if (!is_file(cache_path))
             continue;
 
+        moveToParentDir(cache_dir);
         // Only check cache if miyoogamelist exists
         if (!is_file(gamelist_path))
             break;
@@ -335,7 +336,7 @@ void getGameName(const char *rom_path, char *name_out)
         if (getGameNameFromCache(cache_path, rom_path, name_out))
             return;
 
-        moveToParentDir(cache_dir);
+        
     } while (strcmp("/mnt/SDCARD/Roms", cache_dir) > 0 &&
              strlen(cache_dir) > 16);
 
@@ -366,10 +367,13 @@ void readHistory()
         cJSON *subitem = cJSON_GetArrayItem(json_items, nbGame);
 
         if (subitem == NULL)
-            continue;
+            break;
 
         if (!json_getString(subitem, "path", path) ||
             !json_getString(subitem, "core_path", core_path))
+            continue;
+
+        if (strncmp("/mnt/SDCARD/App", path, 15) == 0)
             continue;
 
         if (!exists(core_path) || !exists(path))
@@ -397,7 +401,9 @@ void readHistory()
         strcpy(game->shortname, shortname);
 
         // Rom name
-        int nTimePosition = searchRomDB(game->name);
+        char dbRomName[100];
+        strncpy(dbRomName, game->name, 99);
+        int nTimePosition = searchRomDB(dbRomName);
         int nTime = nTimePosition >= 0 ? rom_list[nTimePosition].playTime : 0;
         if (nTime >= 0) {
             int h = nTime / 3600;
@@ -762,12 +768,12 @@ int main(void)
                         *((Uint32 *)screen->pixels + y * screen->pitch / 4 +
                           639) = black;
                     }
-                    image_drawn = true;
+                    //image_drawn = true;
                 }
-                else {
-                    if (imageCache_isActive())
-                        image_drawn = false;
-                }
+                //else {
+                //    if (imageCache_isActive())
+                //        image_drawn = false;
+                //}
             }
 
             Game_s *game = &game_list[current_game];

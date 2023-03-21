@@ -36,7 +36,8 @@ char *getrecent_png(char *filename)
 
     system_state_update();
 
-    if (system_state == MODE_GAME) {
+    if (system_state == MODE_GAME && ((process_searchpid("retroarch")) != 0 ||
+                                      (process_searchpid("ra32")) != 0)) {
         char file_path[STR_MAX];
         if (history_getRecentPath(file_path) != NULL)
             strcat(filename, file_removeExtension(basename(file_path)));
@@ -45,10 +46,22 @@ char *getrecent_png(char *filename)
         strcat(filename, "GameSwitcher");
     else if (system_state == MODE_MAIN_UI)
         strcat(filename, "MainUI");
-    else if (system_state == MODE_APPS && exists(CMD_TO_RUN_PATH)) {
-        const char *cmd = file_read(CMD_TO_RUN_PATH);
+    else if ((system_state == MODE_GAME || system_state == MODE_APPS) &&
+             exists(CMD_TO_RUN_PATH)) {
+        FILE *fp;
+        char cmd[STR_MAX];
+        file_get(fp, CMD_TO_RUN_PATH, "%[^\n]", cmd);
+        printf_debug("cmd: '%s'\n", cmd);
+
         char app_name[STR_MAX];
-        state_getAppName(app_name, cmd);
+
+        if (strstr(cmd, "; chmod") != NULL)
+            state_getAppName(app_name, cmd);
+        else {
+            strcpy(app_name, file_removeExtension(basename(cmd)));
+        }
+        printf_debug("app: '%s'\n", app_name);
+
         strcat(filename, app_name);
     }
 
