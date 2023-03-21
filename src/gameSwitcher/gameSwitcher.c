@@ -393,7 +393,9 @@ void readHistory()
         strcpy(game->shortname, shortname);
 
         // Rom name
-        int nTimePosition = searchRomDB(game->name);
+        char dbRomName[100];
+        strncpy(dbRomName, game->name, 99);
+        int nTimePosition = searchRomDB(dbRomName);
         int nTime = nTimePosition >= 0 ? rom_list[nTimePosition].playTime : 0;
         if (nTime >= 0) {
             int h = nTime / 3600;

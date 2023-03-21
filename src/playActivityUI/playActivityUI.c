@@ -84,20 +84,6 @@ void displayRomDB(void)
 #endif
 }
 
-int searchRomDB(char *romName)
-{
-    int position = -1;
-
-    for (int i = 0; i < rom_list_len; i++) {
-        if (strcmp(rom_list[i].name, romName) == 0) {
-            position = i;
-            break;
-        }
-    }
-
-    return position;
-}
-
 static bool quit = false;
 
 static void sigHandler(int sig)
