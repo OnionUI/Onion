@@ -192,8 +192,13 @@ SDL_Surface *loadRomScreen(int index)
     Game_s *game = &game_list[index];
 
     if (game->romScreen == NULL) {
-        char currPicture[STR_MAX];
-        sprintf(currPicture, ROM_SCREENS_DIR "/%" PRIu32 ".png", game->hash);
+        char currPicture[STR_MAX * 2];
+        sprintf(currPicture, ROM_SCREENS_DIR "/%" PRIu32 "_%s.png", game->hash,
+                game->core);
+
+        if (!exists(currPicture))
+            sprintf(currPicture, ROM_SCREENS_DIR "/%" PRIu32 ".png",
+                    game->hash);
 
         if (!exists(currPicture))
             sprintf(currPicture, ROM_SCREENS_DIR "/%s.png",
@@ -529,6 +534,9 @@ int main(void)
     uint32_t legend_start = last_ticks;
     uint32_t legend_timeout = 5000;
 
+    uint32_t brightness_start = last_ticks;
+    uint32_t brightness_timeout = 2000;
+
     char header_path[STR_MAX], footer_path[STR_MAX];
     bool use_custom_header =
         theme_getImagePath(theme()->path, "extra/gs-top-bar", header_path);
@@ -558,6 +566,12 @@ int main(void)
         if (show_legend && ticks - legend_start > legend_timeout) {
             show_legend = false;
             config_flag_set("gameSwitcher/hideLegend", true);
+            changed = true;
+        }
+
+        if (brightness_changed &&
+            ticks - brightness_start > brightness_timeout) {
+            brightness_changed = false;
             changed = true;
         }
 
@@ -619,6 +633,7 @@ int main(void)
                     settings_setBrightness(settings.brightness + 1, true, true);
                 }
                 brightness_changed = true;
+                brightness_start = last_ticks;
                 changed = true;
             }
 
@@ -628,6 +643,7 @@ int main(void)
                     settings_setBrightness(settings.brightness - 1, true, true);
                 }
                 brightness_changed = true;
+                brightness_start = last_ticks;
                 changed = true;
             }
 
@@ -637,6 +653,7 @@ int main(void)
                                     keystate[SW_BTN_R2] == RELEASED))) {
                 settings_load();
                 brightness_changed = true;
+                brightness_start = last_ticks;
                 changed = true;
             }
 

@@ -15,12 +15,22 @@
 //
 //    [onion] get recent filename from content_history.lpl
 //
-char *getrecent_onion(char *filename)
+char *getrecent_onion(char *filename_out)
 {
-    if (history_getRecentPath(filename) != NULL)
-        sprintf(filename, "%" PRIu32,
-                FNV1A_Pippip_Yurii(filename, strlen(filename)));
-    return filename;
+    char file_path[STR_MAX];
+    char core_path[STR_MAX];
+
+    if (history_getRecentPath(file_path) != NULL)
+        sprintf(filename_out, "%" PRIu32,
+                FNV1A_Pippip_Yurii(file_path, strlen(file_path)));
+
+    if (history_getRecentCorePath(core_path) != NULL) {
+        strcat(filename_out, "_");
+        strcat(filename_out, basename(core_path));
+        str_split(filename_out, "_libretro");
+    }
+
+    return filename_out;
 }
 
 //
