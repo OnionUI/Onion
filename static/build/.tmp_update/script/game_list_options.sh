@@ -46,7 +46,7 @@ main() {
         exit 1
     fi
 
-    emupath="$(dirname $(echo "$cmd" | awk '{ gsub(/"/, "", $2); print $2 }'))"
+    emupath="$(dirname $(echo "$cmd" | awk '{ gsub(/"/, "", $2); st = index($2,".."); if (st) { print substr($2,0,st) } else { print $2 } }'))"
     romext=`echo "$(basename "$rompath")" | awk -F. '{print tolower($NF)}'`
 
     echo "emupath: $emupath"
