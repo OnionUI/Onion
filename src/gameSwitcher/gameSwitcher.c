@@ -325,10 +325,11 @@ void getGameName(const char *rom_path, char *name_out)
         snprintf(gamelist_path, STR_MAX * 2 - 1, "%s/miyoogamelist.xml",
                  cache_dir);
 
+        moveToParentDir(cache_dir);
+
         if (!is_file(cache_path))
             continue;
-
-        moveToParentDir(cache_dir);
+        
         // Only check cache if miyoogamelist exists
         if (!is_file(gamelist_path))
             break;
@@ -753,27 +754,8 @@ int main(void)
                     else
                         SDL_BlitSurface(imageBackgroundGame, NULL, screen,
                                         NULL);
-
-                    Uint32 black = SDL_MapRGB(screen->format, 0, 0, 0);
-
-                    for (int x = 0; x < 640; x++) {
-                        *((Uint32 *)screen->pixels + 0 * screen->pitch / 4 +
-                          x) = black;
-                        *((Uint32 *)screen->pixels + 479 * screen->pitch / 4 +
-                          x) = black;
                     }
-                    for (int y = 0; y < 480; y++) {
-                        *((Uint32 *)screen->pixels + y * screen->pitch / 4 +
-                          0) = black;
-                        *((Uint32 *)screen->pixels + y * screen->pitch / 4 +
-                          639) = black;
-                    }
-                    //image_drawn = true;
                 }
-                //else {
-                //    if (imageCache_isActive())
-                //        image_drawn = false;
-                //}
             }
 
             Game_s *game = &game_list[current_game];
