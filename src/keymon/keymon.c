@@ -46,13 +46,10 @@ uint32_t suspendpid[PIDMAX];
 //    Set Volume (Raw)
 //
 
-
 const int KONAMI_CODE[] = {HW_BTN_UP,   HW_BTN_UP,    HW_BTN_DOWN, HW_BTN_DOWN,
                            HW_BTN_LEFT, HW_BTN_RIGHT, HW_BTN_LEFT, HW_BTN_RIGHT,
                            HW_BTN_B,    HW_BTN_A};
 const int KONAMI_CODE_LENGTH = sizeof(KONAMI_CODE) / sizeof(KONAMI_CODE[0]);
-
-
 
 //
 //    Suspend / Kill processes
@@ -291,7 +288,6 @@ void deepsleep(void)
     }
 }
 
-
 /*
 //
 //    Draw Onion interstate frame
@@ -337,7 +333,6 @@ int main(void)
     printf_debug("Settings loaded. Brightness set to: %d\n",
                  settings.brightness);
 
-    
     // Set Initial Volume / Brightness
     if (DEVICE_ID == MIYOO283) {
         setVolume(20, 0);
@@ -510,7 +505,6 @@ int main(void)
                         }
                         comboKey_select = true;
                         break;
-
                     }
                     break;
                 case HW_BTN_MENU:
@@ -536,8 +530,8 @@ int main(void)
                     volUp_pressed = (val == PRESSED);
                     if ((val == PRESSED) || (val == REPEAT)) {
                         if (settings.volume <= MAX_VOLUME - VOLUME_INCREMENTS) {
-                            settings_setVolume(
-                                0, VOLUME_INCREMENTS, true, true);
+                            settings_setVolume(0, VOLUME_INCREMENTS, true,
+                                               true);
                             settings_sync();
                         }
                     }
@@ -546,8 +540,8 @@ int main(void)
                     volDown_pressed = (val == PRESSED);
                     if (val == PRESSED) {
                         if (settings.volume >= VOLUME_INCREMENTS) {
-                            settings_setVolume(
-                                0, -VOLUME_INCREMENTS, true, true);
+                            settings_setVolume(0, -VOLUME_INCREMENTS, true,
+                                               true);
                             settings_sync();
                         }
                     }

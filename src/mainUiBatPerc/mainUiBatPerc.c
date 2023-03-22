@@ -41,7 +41,7 @@ void restoreRegularDisplay(void)
         remove(icon_backup);
     }
 }
-    
+
 void drawBatteryPercentage(void)
 {
     char theme_path[STR_MAX];
@@ -58,7 +58,6 @@ void drawBatteryPercentage(void)
         sprintf(icon_backup, "%s_back.png", file_removeExtension(icon_path));
         file_copy(icon_path, icon_backup);
     }
-
 
     TTF_Init();
     sprintf(icon_path, "%sskin/%s.png", theme_path, ".batt-perc");
@@ -79,14 +78,11 @@ void drawBatteryPercentage(void)
 int main(int argc, char *argv[])
 {
 
-    //TODO : we need to do different things here depending on the device
+    // TODO : we need to do different things here depending on the device
 
     if (argc > 1 && strcmp(argv[1], "--restore") == 0)
         restoreRegularDisplay();
     else if (!battery_isCharging())
         drawBatteryPercentage();
     return 0;
-
 }
-
-
