@@ -414,9 +414,11 @@ install_configs() {
         unzip -nq $zipfile
     fi
 
-    # Set Y button keymap to GLO if empty
-    sed 's/"mainui_button_y": "glo"/"mainui_button_y": ""/g' /mnt/SDCARD/.tmp_update/config/ke
-ymap.json > ./temp_keymap.json
+    # Set X and Y button keymaps if empty
+    cat /mnt/SDCARD/.tmp_update/config/keymap.json \
+        | sed 's/"mainui_button_x"\s*:\s*""/"mainui_button_x": "app:Search"/g' \
+        | sed 's/"mainui_button_y"\s*:\s*""/"mainui_button_y": "glo"/g' \
+        > ./temp_keymap.json
     mv -f ./temp_keymap.json /mnt/SDCARD/.tmp_update/config/keymap.json
 }
 

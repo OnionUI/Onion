@@ -220,7 +220,7 @@ void registerTimerEnd(const char *identifier)
             // Game inexistant, add to the DB
             if (rom_list_len < MAXVALUES - 1) {
                 rom_list[rom_list_len].playTime = iTempsDeJeuSession;
-                strncpy(rom_list[rom_list_len].name, 99, gameName);
+                strncpy(rom_list[rom_list_len].name, gameName, 99);
                 rom_list_len++;
             }
         }

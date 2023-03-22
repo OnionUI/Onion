@@ -46,7 +46,7 @@ main() {
         exit 1
     fi
 
-    emupath=`echo "$rompath" | awk '{st = index($0,"/../../"); print substr($0,0,st-1)}'`
+    emupath="$(dirname $(echo "$cmd" | awk '{ gsub(/"/, "", $2); st = index($2,".."); if (st) { print substr($2,0,st) } else { print $2 } }'))"
     romext=`echo "$(basename "$rompath")" | awk -F. '{print tolower($NF)}'`
 
     echo "emupath: $emupath"
@@ -221,10 +221,12 @@ open_manual() {
 
 change_core() {
     ext="$romext"
+    is_archive=""
 
     if [ "$ext" == "zip" ] || [ "$ext" == "7z" ]; then
-        if ! cat "$emupath/config.json" | grep -q "\"shortname\"\s*:\s*1"; then
+        is_archive="$ext"
 
+        if ! cat "$emupath/config.json" | grep -q "\"shortname\"\s*:\s*1"; then
             if [ "$ext" == "zip" ]; then
                 zip_files=`unzip -l "$rompath" | sed '1,3d;$d' | sed '$d' | sort -n -r`
             else
@@ -253,46 +255,55 @@ change_core() {
     is_valid=0
     selected_index=0
 
-    single_ext_cache_path="$radir/cores/cache/ext_cores_$ext.cache"
+    while [ $is_valid -eq 0 ]; do
+        single_ext_cache_path="$radir/cores/cache/ext_cores_$ext.cache"
 
-    if [ ! -f "$single_ext_cache_path" ]; then
+        if [ ! -f "$single_ext_cache_path" ]; then
+            while read entry; do
+                tmp_extensions=`echo "$entry" | awk '{split($0,a,";"); print a[3]}'`
+
+                if ! echo "$tmp_extensions" | tr '|' '\n' | grep -q "$ext"; then
+                    continue
+                fi
+
+                echo "$entry" >> $single_ext_cache_path
+            done < $ext_cache_path
+        fi
+
+        if [ "$default_core" == "" ]; then
+            is_valid=1
+        fi
+        
         while read entry; do
-            tmp_extensions=`echo "$entry" | awk '{split($0,a,";"); print a[3]}'`
+            tmp_corename=`echo "$entry" | awk '{split($0,a,";"); print a[1]}'`
+            tmp_core=`echo "$entry" | awk '{split($0,a,";"); print a[2]}'`
 
-            if ! echo "$tmp_extensions" | tr '|' '\n' | grep -q "$ext"; then
-                continue
+            if [ "$tmp_core" == "$default_core" ]; then
+                is_valid=1
+                tmp_corename="$tmp_corename (Default)"
             fi
 
-            echo "$entry" >> $single_ext_cache_path
-        done < $ext_cache_path
-    fi
+            if [ "$tmp_core" == "$retroarch_core" ]; then
+                selected_index=$count
+            fi
 
-    if [ "$default_core" == "" ]; then
-        is_valid=1
-    fi
+            count=$(($count + 1))
 
-    while read entry; do
-        tmp_corename=`echo "$entry" | awk '{split($0,a,";"); print a[1]}'`
-        tmp_core=`echo "$entry" | awk '{split($0,a,";"); print a[2]}'`
+            if [ $count -ge 100 ]; then
+                break
+            fi
 
-        if [ "$tmp_core" == "$default_core" ]; then
-            is_valid=1
-            tmp_corename="$tmp_corename (Default)"
-        fi
+            available_cores="$available_cores $tmp_core"
+            available_corenames="$available_corenames \"$tmp_corename\""
+        done < $single_ext_cache_path
 
-        if [ "$tmp_core" == "$retroarch_core" ]; then
-            selected_index=$count
-        fi
-
-        count=$(($count + 1))
-
-        if [ $count -ge 100 ]; then
+        if [ "$is_archive" == "" ]; then
             break
         fi
-
-        available_cores="$available_cores $tmp_core"
-        available_corenames="$available_corenames \"$tmp_corename\""
-    done < $single_ext_cache_path
+        
+        ext="$is_archive"
+        is_archive=""
+    done
 
     echo "cores: $available_cores"
     echo "corenames: $available_corenames"
