@@ -36,7 +36,7 @@
 #include "utils/str.h"
 #include "utils/surfaceSetAlpha.h"
 
-#define MAXHISTORY 50
+#define MAXHISTORY 100
 #define MAXHROMNAMESIZE 250
 #define MAXHROMPATHSIZE 150
 
@@ -92,6 +92,7 @@ typedef struct {
     int jsonIndex;
     int is_duplicate;
     SDL_Surface *romScreen;
+    char romScreenPath[STR_MAX * 2];
 } Game_s;
 static Game_s game_list[MAXHISTORY];
 
@@ -192,8 +193,13 @@ SDL_Surface *loadRomScreen(int index)
     Game_s *game = &game_list[index];
 
     if (game->romScreen == NULL) {
-        char currPicture[STR_MAX];
-        sprintf(currPicture, ROM_SCREENS_DIR "/%" PRIu32 ".png", game->hash);
+        char currPicture[STR_MAX * 2];
+        sprintf(currPicture, ROM_SCREENS_DIR "/%" PRIu32 "_%s.png", game->hash,
+                game->core);
+
+        if (!exists(currPicture))
+            sprintf(currPicture, ROM_SCREENS_DIR "/%" PRIu32 ".png",
+                    game->hash);
 
         if (!exists(currPicture))
             sprintf(currPicture, ROM_SCREENS_DIR "/%s.png",
@@ -201,12 +207,7 @@ SDL_Surface *loadRomScreen(int index)
 
         if (exists(currPicture)) {
             game->romScreen = IMG_Load(currPicture);
-            printf_debug("Loaded rom screen: index=%d, path=%s\n", index,
-                         currPicture);
-        }
-        else {
-            printf_debug("Rom screen not found: index=%d, path=%s\n", index,
-                         currPicture);
+            strcpy(game->romScreenPath, currPicture);
         }
     }
 
@@ -325,6 +326,8 @@ void getGameName(const char *rom_path, char *name_out)
         snprintf(gamelist_path, STR_MAX * 2 - 1, "%s/miyoogamelist.xml",
                  cache_dir);
 
+        moveToParentDir(cache_dir);
+
         if (!is_file(cache_path))
             continue;
 
@@ -334,8 +337,6 @@ void getGameName(const char *rom_path, char *name_out)
 
         if (getGameNameFromCache(cache_path, rom_path, name_out))
             return;
-
-        moveToParentDir(cache_dir);
     } while (strcmp("/mnt/SDCARD/Roms", cache_dir) > 0 &&
              strlen(cache_dir) > 16);
 
@@ -366,10 +367,13 @@ void readHistory()
         cJSON *subitem = cJSON_GetArrayItem(json_items, nbGame);
 
         if (subitem == NULL)
-            continue;
+            break;
 
         if (!json_getString(subitem, "path", path) ||
             !json_getString(subitem, "core_path", core_path))
+            continue;
+
+        if (strncmp("/mnt/SDCARD/App", path, 15) == 0)
             continue;
 
         if (!exists(core_path) || !exists(path))
@@ -397,7 +401,9 @@ void readHistory()
         strcpy(game->shortname, shortname);
 
         // Rom name
-        int nTimePosition = searchRomDB(game->name);
+        char dbRomName[100];
+        strncpy(dbRomName, game->name, 99);
+        int nTimePosition = searchRomDB(dbRomName);
         int nTime = nTimePosition >= 0 ? rom_list[nTimePosition].playTime : 0;
         if (nTime >= 0) {
             int h = nTime / 3600;
@@ -456,6 +462,9 @@ void removeCurrentItem()
         cJSON_DeleteItemFromArray(json_items, game->jsonIndex);
 
     json_save(json_root, HISTORY_PATH);
+
+    if (strlen(game->romScreenPath) > 0 && is_file(game->romScreenPath))
+        remove(game->romScreenPath);
 
     // Copy next element value to current element
     for (int i = current_game; i < game_list_len - 1; i++) {
@@ -531,6 +540,9 @@ int main(void)
     uint32_t legend_start = last_ticks;
     uint32_t legend_timeout = 5000;
 
+    uint32_t brightness_start = last_ticks;
+    uint32_t brightness_timeout = 2000;
+
     char header_path[STR_MAX], footer_path[STR_MAX];
     bool use_custom_header =
         theme_getImagePath(theme()->path, "extra/gs-top-bar", header_path);
@@ -560,6 +572,12 @@ int main(void)
         if (show_legend && ticks - legend_start > legend_timeout) {
             show_legend = false;
             config_flag_set("gameSwitcher/hideLegend", true);
+            changed = true;
+        }
+
+        if (brightness_changed &&
+            ticks - brightness_start > brightness_timeout) {
+            brightness_changed = false;
             changed = true;
         }
 
@@ -621,6 +639,7 @@ int main(void)
                     settings_setBrightness(settings.brightness + 1, true, true);
                 }
                 brightness_changed = true;
+                brightness_start = last_ticks;
                 changed = true;
             }
 
@@ -630,6 +649,7 @@ int main(void)
                     settings_setBrightness(settings.brightness - 1, true, true);
                 }
                 brightness_changed = true;
+                brightness_start = last_ticks;
                 changed = true;
             }
 
@@ -639,6 +659,7 @@ int main(void)
                                     keystate[SW_BTN_R2] == RELEASED))) {
                 settings_load();
                 brightness_changed = true;
+                brightness_start = last_ticks;
                 changed = true;
             }
 
@@ -747,26 +768,6 @@ int main(void)
                     else
                         SDL_BlitSurface(imageBackgroundGame, NULL, screen,
                                         NULL);
-
-                    Uint32 black = SDL_MapRGB(screen->format, 0, 0, 0);
-
-                    for (int x = 0; x < 640; x++) {
-                        *((Uint32 *)screen->pixels + 0 * screen->pitch / 4 +
-                          x) = black;
-                        *((Uint32 *)screen->pixels + 479 * screen->pitch / 4 +
-                          x) = black;
-                    }
-                    for (int y = 0; y < 480; y++) {
-                        *((Uint32 *)screen->pixels + y * screen->pitch / 4 +
-                          0) = black;
-                        *((Uint32 *)screen->pixels + y * screen->pitch / 4 +
-                          639) = black;
-                    }
-                    image_drawn = true;
-                }
-                else {
-                    if (imageCache_isActive())
-                        image_drawn = false;
                 }
             }
 
