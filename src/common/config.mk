@@ -2,6 +2,10 @@ ifeq (,$(BUILD_DIR))
 BUILD_DIR=$(shell pwd -P)
 endif
 
+ifeq (,$(VERSION))
+VERSION="4.x.x-dev-test"
+endif
+
 PLATFORM ?= $(UNION_PLATFORM)
 ifeq (,$(PLATFORM))
 PLATFORM=linux
@@ -27,7 +31,7 @@ CFILES := $(CFILES) $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.c))
 CPPFILES := $(CPPFILES) $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.cpp))
 OFILES = $(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
 
-CFLAGS := -I../../include -I../common -DPLATFORM_$(shell echo $(PLATFORM) | tr a-z A-Z) -Wall
+CFLAGS := -I../../include -I../common -DPLATFORM_$(shell echo $(PLATFORM) | tr a-z A-Z) -DONION_VERSION="\"$(VERSION)\"" -Wall
 
 ifeq ($(DEBUG),1)
 CFLAGS := $(CFLAGS) -DLOG_DEBUG -g
