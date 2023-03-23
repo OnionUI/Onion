@@ -1,20 +1,15 @@
 #!/bin/sh
-sysdir=/mnt/SDCARD/.tmp_update
 romdir=/mnt/SDCARD/Roms/SCUMMVM
 scandir=/mnt/SDCARD/Roms/SCUMMVM/Shortcuts
-scummdir=/mnt/SDCARD/BIOS/scummvm
 
 ScummvmCfgPath=/mnt/SDCARD/BIOS/scummvm.ini
-i=0
+count=0
 
 
 echo "Running scummVM Scan ============================================================="
-$sysdir/bin/infoPanel -t "ScummVM import" -m "Please wait..." --persistent &
+infoPanel -t "ScummVM import" -m "Please wait..." --persistent &
 
-cp $ScummvmCfgPath $scummdir/standalone/.config/scummvm/scummvm.ini
-export HOME=$scummdir/standalone
-$scummdir/standalone/scummvm  -p "$romdir" --add --recursive
-cp $scummdir/standalone/.config/scummvm/scummvm.ini $ScummvmCfgPath
+scummvm -c "$ScummvmCfgPath" -p "$romdir" --add --recursive
 
 
 # removing all the old shortcuts
@@ -45,17 +40,17 @@ cat $ScummvmCfgPath | sed -n 's/^[ \t]*\[\(.*\)\].*/\1/p' | (
 		
 		echo ${target} > "$scandir/$FullName.target"
 		
-		let i++;
+		let count++;
 	done
 
 	sleep 1
 	touch /tmp/dismiss_info_panel
 
-	if [ "$i" -eq 0 ] 
+	if [ "$count" -eq 0 ] 
 	then
-		$sysdir/bin/infoPanel -t "ScummVM Script" -m "Import done.\n\nNo games detected." --auto
+		infoPanel -t "ScummVM Script" -m "Import done.\n\nNo games detected." --auto
 	else
-		$sysdir/bin/infoPanel -t "ScummVM Script" -m "Done.\n\n$i game(s) detected." --auto
+		infoPanel -t "ScummVM Script" -m "Done.\n\n$count game(s) detected." --auto
 	fi
 
 	sed -i "/\"pageend\":/s/:.*,/:   6,/" "/tmp/state.json"   # Little trick which allows to displays all the new items in the game list of MainUI
