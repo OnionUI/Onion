@@ -190,7 +190,7 @@ void suspend_exec(int timeout)
     system_clock_pause(true);
     suspend(0);
     rumble(0);
-    int recent_volume = setVolumeRaw(-60, 0);
+    int recent_volume = setVolume(0, 0);
     display_setBrightnessRaw(0);
     display_off();
     system_powersave_on();
@@ -532,6 +532,7 @@ int main(void)
                         if (settings.volume <= MAX_VOLUME - VOLUME_INCREMENTS) {
                             settings_setVolume(0, VOLUME_INCREMENTS, true,
                                                true);
+                            settings_setBGMVolFromSharedMemory();
                             settings_sync();
                         }
                     }
@@ -542,11 +543,13 @@ int main(void)
                         if (settings.volume >= VOLUME_INCREMENTS) {
                             settings_setVolume(0, -VOLUME_INCREMENTS, true,
                                                true);
+                            settings_setBGMVolFromSharedMemory();
                             settings_sync();
                         }
                     }
                     else if (val == REPEAT) {
                         settings_setVolume(0, 0, true, true);
+                        settings_setBGMVolFromSharedMemory();
                         settings_sync();
                     }
                     break;

@@ -9,6 +9,7 @@
 #include "utils/flags.h"
 #include "utils/process.h"
 #include "utils/str.h"
+#include "settings_sync.h"
 
 typedef enum system_state_e {
     MODE_UNKNOWN,
@@ -120,6 +121,7 @@ int check_autosave(void)
 void kill_mainUI(void)
 {
     if (system_state == MODE_MAIN_UI) {
+        settings_setBGMVolFromSharedMemory();
         kill(system_state_pid, SIGKILL);
         display_reset();
     }
