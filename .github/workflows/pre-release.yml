@@ -22,12 +22,14 @@ jobs:
       with:
         submodules: recursive
     - name: Get version
-      run: echo "BUILD_VERSION=$(make version)" >> $GITHUB_ENV
+      run: |
+        echo "BUILD_VERSION=$(make version)" >> $GITHUB_ENV
+        echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
     - name: Build release
       shell: bash
       run: |
         source /root/.bashrc
-        VERSION_OVERRIDE=${{ env.BUILD_VERSION }}-dev make release
+        VERSION_OVERRIDE=${{ env.BUILD_VERSION }}-dev-${{ env.SHA_SHORT }} make release
     - uses: marvinpinto/action-automatic-releases@latest
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -35,4 +37,4 @@ jobs:
         prerelease: true
         title: "Development Build"
         files: |
-          release/Onion-v${{ env.BUILD_VERSION }}-dev.zip
+          release/Onion-v${{ env.BUILD_VERSION }}-dev-${{ env.SHA_SHORT }}.zip
