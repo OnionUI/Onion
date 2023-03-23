@@ -17,6 +17,10 @@
 #include "utils/msleep.h"
 #include "utils/str.h"
 
+#ifndef ONION_VERSION
+#define ONION_VERSION "4.x.x-dev-test"
+#endif
+
 #define TIMEOUT_M 10
 #define CHECK_TIMEOUT 300
 #define SLIDE_TIMEOUT 10000
@@ -55,6 +59,11 @@ int main(int argc, char *argv[])
     // The initial message - if `/tmp/.update_msg` isn't found
     char message_str[STR_MAX] = " ";
 
+    if (argc == 2 && strcmp("--version", argv[1]) == 0) {
+        printf("%s\n", ONION_VERSION);
+        return EXIT_SUCCESS;
+    }
+
     int i;
     for (i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-b") == 0 || strcmp(argv[i], "--begin") == 0)
@@ -66,7 +75,7 @@ int main(int argc, char *argv[])
             strncpy(message_str, argv[++i], STR_MAX - 1);
         else {
             printf_debug("Error: Unknown argument '%s'\n", argv[i]);
-            exit(1);
+            exit(EXIT_FAILURE);
         }
     }
 
@@ -82,7 +91,16 @@ int main(int argc, char *argv[])
     SDL_Surface *progress_stripes = IMG_Load("res/progress_stripes.png");
 
     TTF_Font *font = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 36);
+    TTF_Font *font_small =
+        TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 18);
     SDL_Color fg_color = {255, 255, 255, 0};
+
+    char version_str[STR_MAX];
+    sprintf(version_str, "v%s", ONION_VERSION);
+
+    SDL_Surface *surface_version =
+        TTF_RenderUTF8_Blended(font_small, version_str, fg_color);
+    SDL_Rect rect_version = {10, 10};
 
     Uint32 progress_bg = SDL_MapRGB(video->format, 29, 30, 37);
     Uint32 progress_color = SDL_MapRGB(video->format, 114, 71, 194);
@@ -186,6 +204,9 @@ int main(int argc, char *argv[])
             else
                 SDL_BlitSurface(slide, NULL, screen, NULL);
 
+            if (surface_version)
+                SDL_BlitSurface(surface_version, NULL, screen, &rect_version);
+
             rectProgress.w = 640;
             SDL_FillRect(screen, &rectProgress, progress_bg);
 
@@ -228,8 +249,13 @@ int main(int argc, char *argv[])
 
     config_setNumber("currentSlide", current_slide);
 
+    TTF_CloseFont(font);
+    TTF_CloseFont(font_small);
+    TTF_Quit();
+
     imageCache_freeAll();
     SDL_FreeSurface(waiting_bg);
+    SDL_FreeSurface(surface_version);
     SDL_FreeSurface(screen);
     SDL_FreeSurface(video);
     SDL_Quit();

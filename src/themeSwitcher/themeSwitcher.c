@@ -110,20 +110,27 @@ int main(int argc, char *argv[])
     settings_load();
     const char *installed_theme = basename(settings.theme);
 
-    const char reapply_flag[] = "--reapply";
-    const char reapply_icons_flag[] = "--reapply_icons";
-    if (argc == 2) {
-        bool reapply_icons = strcmp(argv[1], reapply_icons_flag) == 0;
-        if (reapply_icons || strcmp(argv[1], reapply_flag) == 0) {
-            if (!is_dir(settings.theme)) {
-                strcpy(settings.theme, DEFAULT_THEME_PATH);
-                settings_save();
-            }
-            Theme_s current_theme = theme_loadFromPath(settings.theme, true);
-            installTheme(&current_theme, reapply_icons);
-            printf_debug("Reapplied: \"%s\"\n", installed_theme);
-            return 0;
+    bool reapply = false;
+    bool reapply_icons = false;
+    bool update_previews = false;
+
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--reapply") == 0) {
+            reapply = true;
         }
+        else if (strcmp(argv[i], "--reapply_icons") == 0) {
+            reapply = true;
+            reapply_icons = true;
+        }
+        else if (strcmp(argv[i], "--update") == 0) {
+            reapply = true;
+            update_previews = true;
+        }
+    }
+
+    if (reapply) {
+        reinstallTheme(installed_theme, reapply_icons, update_previews);
+        return 0;
     }
 
     SDL_Init(SDL_INIT_VIDEO);
@@ -261,7 +268,7 @@ int main(int argc, char *argv[])
                                     color_white);
 
                 // Install theme
-                installTheme(&theme, apply_icons);
+                installTheme(theme.path, apply_icons);
                 printf_debug("Theme installed: %s\n", themes[current_page]);
 
                 quit = true;

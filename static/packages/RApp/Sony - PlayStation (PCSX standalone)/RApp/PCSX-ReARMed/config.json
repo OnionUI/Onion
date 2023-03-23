@@ -1,12 +1,12 @@
 {
-"label":"PCSX-ReARMed",
-"icon":"../../Icons/Default/rapp/pcsx_rearmed.png",
-"iconsel":"../../Icons/Default/rapp/pcsx_rearmed.png",
-"launch":"launch.sh",
-"rompath":"../../Roms/PS",
-"imgpath":"../../Roms/PS/Imgs",
-"useswap":0,
-"shortname":0,
-"hidebios":1,
-"extlist":"cue|mdf|pbp|toc|cbn|m3u|ccd|chd"
+    "label": "PCSX-ReARMed",
+    "icon": "../../Icons/Default/rapp/pcsx_rearmed.png",
+    "iconsel": "../../Icons/Default/rapp/pcsx_rearmed.png",
+    "launch": "launch.sh",
+    "rompath": "../../Roms/PS",
+    "imgpath": "../../Roms/PS/Imgs",
+    "useswap": 0,
+    "shortname": 0,
+    "hidebios": 1,
+    "extlist": "cue|img|mdf|pbp|toc|cbn|m3u|ccd|chd"
 }

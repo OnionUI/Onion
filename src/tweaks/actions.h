@@ -17,7 +17,7 @@ void action_setAppShortcut(void *pt)
     int value = item->value;
     char *sett_pt = item->action_id == 0 ? settings.mainui_button_x
                                          : settings.mainui_button_y;
-    char ***apps = getInstalledApps();
+    InstalledApp *apps = getInstalledApps();
 
     memset(sett_pt, 0, JSON_STRING_LEN * sizeof(char));
 
@@ -28,7 +28,7 @@ void action_setAppShortcut(void *pt)
 
     if (value < installed_apps_count) {
         strcpy(sett_pt, "app:");
-        strncat(sett_pt, apps[value][0], JSON_STRING_LEN - 5);
+        strncat(sett_pt, apps[value].dirName, JSON_STRING_LEN - 5);
         return;
     }
 

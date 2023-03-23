@@ -9,27 +9,29 @@ main() {
     clear_logs
 
     # Start the battery monitor
-    ./bin/batmon &
+    batmon &
 
     # Reapply theme
-    theme="$(/customer/app/jsonval theme)"
-    if [ "$theme" == "./" ] || [ "$theme" != "$(cat ./config/active_theme)" ]; then
-        ./bin/themeSwitcher --reapply_icons
+    system_theme="$(/customer/app/jsonval theme)"
+    active_theme="$(cat ./config/active_theme)"
+
+    if [ "$system_theme" == "./" ] || [ "$system_theme" != "$active_theme" ] || [ ! -d "$system_theme" ]; then
+        themeSwitcher --reapply_icons
     fi
     
     if [ `cat /sys/devices/gpiochip0/gpio/gpio59/value` -eq 1 ]; then
         cd $sysdir
-        ./bin/chargingState
+        chargingState
     fi
 
     # Make sure MainUI doesn't show charging animation
     touch /tmp/no_charging_ui
 
     cd $sysdir
-    ./bin/bootScreen "Boot"
+    bootScreen "Boot"
 
     # Start the key monitor
-    ./bin/keymon &
+    keymon &
 
     # Init
     rm /tmp/.offOrder
@@ -104,7 +106,7 @@ check_main_ui() {
 
 launch_main_ui() {
     cd $sysdir
-    ./bin/mainUiBatPerc
+    mainUiBatPerc
 
     check_hide_recents
     check_hide_expert
@@ -186,7 +188,7 @@ launch_game() {
     # TIMER BEGIN
     if [ $is_game -eq 1 ]; then
         cd $sysdir
-        ./bin/playActivity "init"
+        playActivity "init"
 
         rompath=$(echo "$cmd" | awk '{ st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3)}')
 
@@ -237,7 +239,7 @@ launch_game() {
 
     if [ $retval -ge 128 ] && [ $retval -ne 143 ]; then
         cd $sysdir
-        ./bin/infoPanel --title "Fatal error occurred" --message "The program exited unexpectedly.\n(Error code: $retval)" --auto
+        infoPanel --title "Fatal error occurred" --message "The program exited unexpectedly.\n(Error code: $retval)" --auto
     fi
 
     if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
@@ -247,7 +249,7 @@ launch_game() {
     # TIMER END + SHUTDOWN CHECK
     if [ $is_game -eq 1 ]; then
         cd $sysdir
-        ./bin/playActivity "$cmd"
+        playActivity "$cmd"
         
         echo "game" > /tmp/prev_state
         check_off_order "End_Save"
@@ -278,7 +280,7 @@ check_switcher() {
 
 launch_switcher() {
     cd $sysdir
-    LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./bin/gameSwitcher
+    LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" gameSwitcher
     rm $sysdir/.runGameSwitcher
     echo "switcher" > /tmp/prev_state
     sync
@@ -287,7 +289,7 @@ launch_switcher() {
 check_off_order() {
     if  [ -f /tmp/.offOrder ] ; then
         cd $sysdir
-        ./bin/bootScreen "$1"
+        bootScreen "$1"
 
         killall tee
         rm -f /mnt/SDCARD/update.log
@@ -391,7 +393,7 @@ set_startup_tab() {
     fi
     
     cd $sysdir
-    ./bin/setState "$startup_tab"
+    setState "$startup_tab"
 }
 
 main
