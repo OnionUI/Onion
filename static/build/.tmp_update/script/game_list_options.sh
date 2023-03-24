@@ -6,15 +6,17 @@ ext_cache_path=$radir/cores/cache/core_extensions.cache
 mkdir -p $radir/cores/cache
 
 cd $sysdir
-if [ ! -f $sysdir/cmd_to_run.sh ]; then
+
+if [ ! -f ./cmd_to_run.sh ]; then
     echo "cmd_to_run.sh not found"
     exit 1
 fi
 
-cmd=`cat $sysdir/cmd_to_run.sh`
+cmd=`cat ./cmd_to_run.sh`
 rompath=""
 emupath=""
 romext=""
+romroot=""
 romcfgpath=""
 default_core=""
 retroarch_core=""
@@ -27,10 +29,7 @@ manpath=""
 globalscriptdir=/mnt/SDCARD/App/romscripts
 
 main() {
-    rm -f $sysdir/cmd_to_run.sh
-
-    echo "cmd: $cmd"
-    # example: LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so "/mnt/SDCARD/Emu/GBATEST/../../.tmp_update/proxy.sh" "/mnt/SDCARD/Emu/GBATEST/../../Roms/GBATEST/mGBA/Final Fantasy IV Advance (U).zip"
+    rm -f ./cmd_to_run.sh
 
     rompath=$(echo "$cmd" | awk '{ st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3) }')
 
@@ -38,67 +37,77 @@ main() {
         rompath=$(echo "$rompath" | awk '{st = index($0,":"); print substr($0,st+1)}')
     fi
 
-    echo "rompath: $rompath"
-    # example: "/mnt/SDCARD/Emu/GBATEST/../../Roms/GBATEST/mGBA/Final Fantasy IV Advance (U).zip"
-
-    if [ ! -f "$rompath" ]; then
-        echo "rom file not found"
-        exit 1
-    fi
-
     emupath="$(dirname $(echo "$cmd" | awk '{ gsub(/"/, "", $2); st = index($2,".."); if (st) { print substr($2,0,st) } else { print $2 } }'))"
     romext=`echo "$(basename "$rompath")" | awk -F. '{print tolower($NF)}'`
+
+    emu_config_json=`cat "$emupath/config.json"`
+    romroot="$emupath/$(get_json_value "$emu_config_json" "rompath")"
+
+    echo "cmd: $cmd"
+    # example: LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so "/mnt/SDCARD/Emu/GBATEST/../../.tmp_update/proxy.sh" "/mnt/SDCARD/Emu/GBATEST/../../Roms/GBATEST/mGBA/Final Fantasy IV Advance (U).zip"
+    echo "rompath: $rompath"
+    # example: "/mnt/SDCARD/Emu/GBATEST/../../Roms/GBATEST/mGBA/Final Fantasy IV Advance (U).zip"
 
     echo "emupath: $emupath"
     echo "extension: $romext"
 
+    echo "romroot: $romroot"
+
+    skip_game_options=0
+
+    if [ ! -f "$rompath" ] || [ "$romext" == "miyoocmd" ]; then
+        skip_game_options=1
+    fi
+
     menu_options=""
     menu_option_labels=""
 
-    get_core_info
+    if [ $skip_game_options -eq 0 ]; then
+        get_core_info
 
-    game_core_label="Game core"
+        game_core_label="Game core"
 
-    if [ ! -f "$radir/cores/$default_core.so" ]; then
-        default_core=""
-    fi
-
-    add_reset_core=0
-
-    if [ -f "$corepath" ] && [ -f "$coreinfopath" ]; then
-        coreinfo=`cat "$coreinfopath"`
-        corename=`get_info_value "$coreinfo" corename`
-
-        game_core_label="Game core: $corename"
-
-        if [ "$retroarch_core" == "$default_core" ]; then
-            game_core_label="$game_core_label (Default)"
-        else
-            add_reset_core=1
+        if [ ! -f "$radir/cores/$default_core.so" ]; then
+            default_core=""
         fi
 
-        menu_options="$menu_options reset_game"
-        menu_option_labels="$menu_option_labels \"Reset game\""
-    fi
+        add_reset_core=0
 
-    romdirname=`echo "$rompath" | sed "s/^.*Roms\///g" | cut -d "/" -f1`
-    manpath="/mnt/SDCARD/Roms/$romdirname/Manuals/$(basename "$rompath" ".$romext").pdf"
+        if [ -f "$corepath" ] && [ -f "$coreinfopath" ]; then
+            coreinfo=`cat "$coreinfopath"`
+            corename=`get_info_value "$coreinfo" corename`
 
-    echo "romdir: '$romdirname'"
-    echo "manual: $manpath"
+            game_core_label="Game core: $corename"
 
-    if [ -f "$manpath" ]; then
-        menu_options="$menu_options open_manual"
-        menu_option_labels="$menu_option_labels \"Game manual\""
-    fi
+            if [ "$retroarch_core" == "$default_core" ]; then
+                game_core_label="$game_core_label (Default)"
+            else
+                add_reset_core=1
+            fi
 
-    menu_options="$menu_options change_core"
-    menu_option_labels="$menu_option_labels \"$game_core_label\""
+            menu_options="$menu_options reset_game"
+            menu_option_labels="$menu_option_labels \"Reset game\""
+        fi
 
-    if [ $add_reset_core -eq 1 ]; then
-        menu_options="$menu_options reset_core"
-        menu_option_labels="$menu_option_labels \"Restore default core\""
-    fi
+        romdirname=`echo "$rompath" | sed "s/^.*Roms\///g" | cut -d "/" -f1`
+        manpath="/mnt/SDCARD/Roms/$romdirname/Manuals/$(basename "$rompath" ".$romext").pdf"
+
+        echo "romdir: '$romdirname'"
+        echo "manual: $manpath"
+
+        if [ -f "$manpath" ]; then
+            menu_options="$menu_options open_manual"
+            menu_option_labels="$menu_option_labels \"Game manual\""
+        fi
+
+        menu_options="$menu_options change_core"
+        menu_option_labels="$menu_option_labels \"$game_core_label\""
+
+        if [ $add_reset_core -eq 1 ]; then
+            menu_options="$menu_options reset_core"
+            menu_option_labels="$menu_option_labels \"Restore default core\""
+        fi
+    fi # skip_game_options
 
     if [ -f "$emupath/active_filter" ]; then
         filter_kw=`cat "$emupath/active_filter"`
@@ -205,6 +214,10 @@ get_core_info() {
 
 get_info_value() {
     echo "$1" | grep "$2\b" | awk '{split($0,a,"="); print a[2]}' | awk -F'"' '{print $2}' | tr -d '\n'
+}
+
+get_json_value() {
+    echo "$1" | grep "\"$2\"\s*:" | awk '{split($0,a,":"); print a[2]}' | awk -F'"' '{print $2}' | tr -d '\n'
 }
 
 reset_game() {
@@ -398,19 +411,20 @@ rename_rom() {
 clear_filter() {
     echo ":: clear filter"
     echo "./bin/filter clear_filter \"$emupath\""
-    ./bin/filter clear_filter "$emupath"
+    filter clear_filter "$emupath"
 }
 
 filter_roms() {
     echo ":: filter roms"
     echo "./bin/filter filter \"$emupath\""
-    ./bin/filter filter "$emupath"
+    filter filter "$emupath"
 }
 
 refresh_roms() {
     echo ":: refresh roms"
     echo "./bin/filter refresh \"$emupath\""
-    ./bin/filter refresh "$emupath"
+    filter refresh "$emupath"
+    ./script/reset_list.sh "$romroot"
 }
 
 main
