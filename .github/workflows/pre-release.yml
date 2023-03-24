@@ -8,6 +8,7 @@ on:
       - '.github/**'
       - 'test/**'
       - '**/README.md'
+  workflow_dispatch:
 
 jobs:
   pre-release:
