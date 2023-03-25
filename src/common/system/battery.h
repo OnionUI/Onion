@@ -6,6 +6,7 @@
 #include "utils/log.h"
 #include "utils/msleep.h"
 #include "utils/process.h"
+#include "system/device_model.h"
 #include "system/system.h"
 
 static time_t battery_last_modified = 0;
@@ -57,7 +58,7 @@ bool battery_isCharging(void)
 #ifdef PLATFORM_MIYOOMINI
     if(DEVICE_ID == MIYOO283){
         char charging = 0;
-        nt fd = open(GPIO_DIR2 "gpio59/value", O_RDONLY);
+        int fd = open(GPIO_DIR2 "gpio59/value", O_RDONLY);
 
         if (fd < 0) {
             // export gpio59, direction: in

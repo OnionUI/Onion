@@ -18,6 +18,7 @@
 #include "system/settings_sync.h"
 #include "system/state.h"
 #include "system/system.h"
+#include "system/volume.h"
 #include "utils/config.h"
 #include "utils/file.h"
 #include "utils/flags.h"
@@ -29,7 +30,7 @@
 
 #include "./input_fd.h"
 #include "./menuButtonAction.h"
-#include "system/settings_sync.h"
+
 
 // for proc_stat flags
 #define PF_KTHREAD 0x00200000
@@ -42,12 +43,6 @@
 
 uint32_t suspendpid[PIDMAX];
 
-//
-//    Set Volume (Raw)
-//
-#define MI_AO_SETVOLUME 0x4008690b
-#define MI_AO_GETVOLUME 0xc008690c
-
 const int KONAMI_CODE[] = {HW_BTN_UP,   HW_BTN_UP,    HW_BTN_DOWN, HW_BTN_DOWN,
                            HW_BTN_LEFT, HW_BTN_RIGHT, HW_BTN_LEFT, HW_BTN_RIGHT,
                            HW_BTN_B,    HW_BTN_A};
@@ -56,30 +51,7 @@ uint32_t recent_volume;
 static pthread_t isf_pt;
 static bool isFramethread_active=false;
 
-int setVolumeRaw(int volume, int add)
-{
-    int recent_volume = 0;
-    int fd = open("/dev/mi_ao", O_RDWR);
-    if (fd >= 0) {
-        int buf2[] = {0, 0};
-        uint64_t buf1[] = {sizeof(buf2), (uintptr_t)buf2};
-        ioctl(fd, MI_AO_GETVOLUME, buf1);
-        recent_volume = buf2[1];
-        if (add) {
-            buf2[1] += add;
-            if (buf2[1] > 30)
-                buf2[1] = 30;
-            else if (buf2[1] < -30)
-                buf2[1] = -30;
-        }
-        else
-            buf2[1] = volume;
-        if (buf2[1] != recent_volume)
-            ioctl(fd, MI_AO_SETVOLUME, buf1);
-        close(fd);
-    }
-    return recent_volume;
-}
+
 
 //
 //    Suspend / Kill processes
@@ -579,6 +551,7 @@ int main(void)
                 if ((val == PRESSED)||(val == REPEAT)){
                     if (settings.volume <= MAX_VOLUME - VOLUME_INCREMENTS) {
                         recent_volume = settings_setVolume(0, VOLUME_INCREMENTS, true, true);
+                        settings_setBGMVolFromSharedMemory();
                         settings_sync();
                     }     
                 }    
@@ -588,11 +561,13 @@ int main(void)
                 if (val == PRESSED){
                     if (settings.volume >= VOLUME_INCREMENTS) {
                         recent_volume = settings_setVolume(0, - VOLUME_INCREMENTS, true, true);
+                        settings_setBGMVolFromSharedMemory();
                         settings_sync();
                     }
                 }
                 else if (val == REPEAT){
                     recent_volume = settings_setVolume(0, 0, true, true);
+                    settings_setBGMVolFromSharedMemory();
                     settings_sync();
                 }
                 break;

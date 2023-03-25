@@ -28,6 +28,16 @@ void settings_sync(void)
 #endif
 }
 
+void settings_setBGMVolFromSharedMemory(void)
+{
+#ifdef PLATFORM_MIYOOMINI
+
+    int bgmVolume = GetKeyShm(&shminfo, MONITOR_BGM_VOLUME);
+    settings_SetBGMVolume(bgmVolume);
+
+#endif
+}
+
 void settings_init(void)
 {
 #ifdef PLATFORM_MIYOOMINI
