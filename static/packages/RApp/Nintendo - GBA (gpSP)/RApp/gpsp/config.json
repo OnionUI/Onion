@@ -1,7 +1,7 @@
 {
 "label":"gpsp",
-"icon":"gpsp.png",
-"iconsel":"",
+"icon":"../../Icons/Default/rapp/gpsp.png",
+"iconsel":"../../Icons/Default/rapp/gpsp.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/GBA",
 "imgpath":"../../Roms/GBA/Imgs",

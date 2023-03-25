@@ -1,7 +1,7 @@
 {
 "label":"uae4arm",
-"icon":"uae4arm.png",
-"iconsel":"",
+"icon":"../../Icons/Default/rapp/uae4arm.png",
+"iconsel":"../../Icons/Default/rapp/uae4arm.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/AMIGA",
 "imgpath":"../../Roms/AMIGA/Imgs",

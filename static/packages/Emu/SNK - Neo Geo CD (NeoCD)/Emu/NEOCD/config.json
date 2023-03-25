@@ -1,7 +1,7 @@
 {
 "label":"NeoGeo CD",
-"icon":"../../Icons/neocd.png",
-"iconsel":"../../Icons/neocd.png",
+"icon":"../../Icons/Default/neocd.png",
+"iconsel":"../../Icons/Default/neocd.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/NEOCD",
 "imgpath":"../../Roms/NEOCD/Imgs",

@@ -1,7 +1,7 @@
 {
 "label":"WndrSwan",
-"icon":"../../Icons/ws.png",
-"iconsel":"../../Icons/ws.png",
+"icon":"../../Icons/Default/ws.png",
+"iconsel":"../../Icons/Default/ws.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/WS",
 "imgpath":"../../Roms/WS/Imgs",

@@ -1,12 +1,12 @@
 {
-"label":"gearsystem_gg",
-"icon":"gearsystem.png",
-"iconsel":"",
-"launch":"launch.sh",
-"rompath":"../../Roms/GG",
-"imgpath":"../../Roms/GG/Imgs",
-"useswap":0,
-"shortname":0,
-"hidebios":1,
-"extlist":""
+    "label": "gearsystem_gg",
+    "icon": "../../Icons/Default/rapp/gearsystem_gg.png",
+    "iconsel": "../../Icons/Default/rapp/gearsystem_gg.png",
+    "launch": "launch.sh",
+    "rompath": "../../Roms/GG",
+    "imgpath": "../../Roms/GG/Imgs",
+    "useswap": 0,
+    "shortname": 0,
+    "hidebios": 1,
+    "extlist": ""
 }

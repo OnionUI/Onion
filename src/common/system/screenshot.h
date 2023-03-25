@@ -1,30 +1,43 @@
 #ifndef SCREENSHOT_H__
 #define SCREENSHOT_H__
 
-#include <stdio.h>
 #include <png/png.h>
+#include <stdio.h>
 
-#include "utils/str.h"
-#include "utils/file.h"
-#include "utils/process.h"
-#include "utils/hash.h"
-#include "utils/log.h"
 #include "./display.h"
 #include "./state.h"
+#include "utils/file.h"
+#include "utils/hash.h"
+#include "utils/log.h"
+#include "utils/process.h"
+#include "utils/str.h"
 
 //
 //    [onion] get recent filename from content_history.lpl
 //
-char* getrecent_onion(char *filename) {
-    if (history_getRecentPath(filename) != NULL)
-        sprintf(filename, "%"PRIu32, FNV1A_Pippip_Yurii(filename, strlen(filename)));
-    return filename;
+char *getrecent_onion(char *filename_out)
+{
+    char file_path[STR_MAX];
+    char core_path[STR_MAX];
+
+    if (history_getRecentPath(file_path) != NULL)
+        sprintf(filename_out, "%" PRIu32,
+                FNV1A_Pippip_Yurii(file_path, strlen(file_path)));
+
+    if (history_getRecentCorePath(core_path) != NULL) {
+        strcat(filename_out, "_");
+        strcat(filename_out, basename(core_path));
+        str_split(filename_out, "_libretro");
+    }
+
+    return filename_out;
 }
 
 //
 //    Get most recent file name for screenshot
 //
-char* getrecent_png(char *filename) {
+char *getrecent_png(char *filename)
+{
     char *fnptr;
     uint32_t i;
 
@@ -33,7 +46,8 @@ char* getrecent_png(char *filename) {
 
     system_state_update();
 
-    if (system_state == MODE_GAME) {
+    if (system_state == MODE_GAME && ((process_searchpid("retroarch")) != 0 ||
+                                      (process_searchpid("ra32")) != 0)) {
         char file_path[STR_MAX];
         if (history_getRecentPath(file_path) != NULL)
             strcat(filename, file_removeExtension(basename(file_path)));
@@ -42,10 +56,22 @@ char* getrecent_png(char *filename) {
         strcat(filename, "GameSwitcher");
     else if (system_state == MODE_MAIN_UI)
         strcat(filename, "MainUI");
-    else if (system_state == MODE_APPS && exists(CMD_TO_RUN_PATH)) {
-        const char *cmd = file_read(CMD_TO_RUN_PATH);
+    else if ((system_state == MODE_GAME || system_state == MODE_APPS) &&
+             exists(CMD_TO_RUN_PATH)) {
+        FILE *fp;
+        char cmd[STR_MAX];
+        file_get(fp, CMD_TO_RUN_PATH, "%[^\n]", cmd);
+        printf_debug("cmd: '%s'\n", cmd);
+
         char app_name[STR_MAX];
-        state_getAppName(app_name, cmd);
+
+        if (strstr(cmd, "; chmod") != NULL)
+            state_getAppName(app_name, cmd);
+        else {
+            strcpy(app_name, file_removeExtension(basename(cmd)));
+        }
+        printf_debug("app: '%s'\n", app_name);
+
         strcat(filename, app_name);
     }
 
@@ -53,9 +79,10 @@ char* getrecent_png(char *filename) {
         strcat(filename, "Screenshot");
 
     fnptr = filename + strlen(filename);
-    for (i=0; i<1000; i++) {
+    for (i = 0; i < 1000; i++) {
         sprintf(fnptr, "_%03d.png", i);
-        if (!exists(filename)) break;
+        if (!exists(filename))
+            break;
     }
     if (i > 999)
         return NULL;
@@ -65,39 +92,40 @@ char* getrecent_png(char *filename) {
 //
 //    Screenshot (640x480x32bpp only, rotate180, png)
 //
-void screenshot(const char *screenshot_path) {
-    #ifdef PLATFORM_MIYOOMINI
-    uint32_t    *buffer;
-    uint32_t    *src;
-    uint32_t    linebuffer[DISPLAY_WIDTH], x, y, pix;
-    FILE        *fp;
+void screenshot(const char *screenshot_path)
+{
+#ifdef PLATFORM_MIYOOMINI
+    uint32_t *buffer;
+    uint32_t *src;
+    uint32_t linebuffer[DISPLAY_WIDTH], x, y, pix;
+    FILE *fp;
     png_structp png_ptr;
-    png_infop   info_ptr;
+    png_infop info_ptr;
 
     ioctl(fb_fd, FBIOGET_VSCREENINFO, &vinfo);
-    buffer = fb_addr + DISPLAY_WIDTH*vinfo.yoffset;
-    #endif
+    buffer = fb_addr + DISPLAY_WIDTH * vinfo.yoffset;
+#endif
 
     char screenshot_dir[STR_MAX];
     strcpy(screenshot_dir, screenshot_path);
     mkdirs(dirname(screenshot_dir));
 
-    #ifdef PLATFORM_MIYOOMINI
+#ifdef PLATFORM_MIYOOMINI
     if ((fp = fopen(screenshot_path, "wb"))) {
         png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
         info_ptr = png_create_info_struct(png_ptr);
         png_init_io(png_ptr, fp);
         png_set_IHDR(png_ptr, info_ptr, DISPLAY_WIDTH, DISPLAY_HEIGHT, 8,
-            PNG_COLOR_TYPE_RGBA,
-            PNG_INTERLACE_NONE,
-            PNG_COMPRESSION_TYPE_DEFAULT,
-            PNG_FILTER_TYPE_DEFAULT);
+                     PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE,
+                     PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
         png_write_info(png_ptr, info_ptr);
         src = buffer + DISPLAY_WIDTH * DISPLAY_HEIGHT;
         for (y = 0; y < DISPLAY_HEIGHT; y++) {
-            for (x = 0; x < DISPLAY_WIDTH; x++){
+            for (x = 0; x < DISPLAY_WIDTH; x++) {
                 pix = *--src;
-                linebuffer[x] = 0xFF000000 | (pix & 0x0000FF00) | (pix & 0x00FF0000)>>16 | (pix & 0x000000FF)<<16;
+                linebuffer[x] = 0xFF000000 | (pix & 0x0000FF00) |
+                                (pix & 0x00FF0000) >> 16 |
+                                (pix & 0x000000FF) << 16;
             }
             png_write_row(png_ptr, (png_bytep)linebuffer);
         }
@@ -107,20 +135,25 @@ void screenshot(const char *screenshot_path) {
         fsync(fileno(fp));
         fclose(fp);
     }
-    #endif
+#endif
 }
 
-void screenshot_recent(void) {
+void screenshot_recent(void)
+{
     char screenshot_path[512];
-    if (getrecent_png(screenshot_path) == NULL) return;
+    if (getrecent_png(screenshot_path) == NULL)
+        return;
     screenshot(screenshot_path);
 }
 
-void screenshot_system(void) {
-    char screenshot_path[512],
-         screenshot_name[256];
-    if (getrecent_onion(screenshot_name) == NULL) return;
-    sprintf(screenshot_path, "/mnt/SDCARD/Saves/CurrentProfile/romScreens/%s.png", screenshot_name);
+void screenshot_system(void)
+{
+    char screenshot_path[512], screenshot_name[256];
+    if (getrecent_onion(screenshot_name) == NULL)
+        return;
+    sprintf(screenshot_path,
+            "/mnt/SDCARD/Saves/CurrentProfile/romScreens/%s.png",
+            screenshot_name);
     screenshot(screenshot_path);
 }
 

@@ -1,4 +1,4 @@
-name: Check build
+name: Enforce formatting + check build
 on:
   push:
     branches-ignore:
@@ -10,6 +10,26 @@ on:
       - '**/README.md'
 
 jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          # check out HEAD on the branch
+          ref: ${{ github.head_ref }}
+          # make sure the parent commit is grabbed as well, because
+          # that's what will get formatted (i.e. the most recent commit)
+          fetch-depth: 2
+      # Get latest clang-format
+      - run: sudo apt install clang-format
+      # format the latest commit
+      - run: make format
+      # commit the changes (if there are any)
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v4.1.2
+        with:
+          commit_message: 🎨 apply clang-format changes
+          branch: ${{ github.head_ref }}
   build:
     name: Check build
     runs-on: ubuntu-latest

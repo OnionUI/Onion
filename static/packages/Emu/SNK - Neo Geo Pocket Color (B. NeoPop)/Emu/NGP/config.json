@@ -1,7 +1,7 @@
 {
 "label":"NG Pocket",
-"icon":"../../Icons/ngp.png",
-"iconsel":"../../Icons/ngp.png",
+"icon":"../../Icons/Default/ngp.png",
+"iconsel":"../../Icons/Default/ngp.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/NGP",
 "imgpath":"../../Roms/NGP/Imgs",

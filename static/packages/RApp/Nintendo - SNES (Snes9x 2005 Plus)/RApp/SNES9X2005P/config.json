@@ -1,7 +1,7 @@
 {
 "label":"snes9x2005plus",
-"icon":"snes9x2005plus.png",
-"iconsel":"",
+"icon":"../../Icons/Default/rapp/snes9x2005plus.png",
+"iconsel":"../../Icons/Default/rapp/snes9x2005plus.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/SFC",
 "imgpath":"../../Roms/SFC/Imgs",

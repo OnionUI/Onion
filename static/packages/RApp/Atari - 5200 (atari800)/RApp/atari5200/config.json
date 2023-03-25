@@ -1,7 +1,7 @@
 {
 "label":"atari800_5200",
-"icon":"atari5200.png",
-"iconsel":"",
+"icon":"../../Icons/Default/5200.png",
+"iconsel":"../../Icons/Default/5200.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/FIFTYTWOHUNDRED",
 "imgpath":"../../Roms/FIFTYTWOHUNDRED/Imgs",

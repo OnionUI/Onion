@@ -1,7 +1,7 @@
 ###########################################################
 
 TARGET=Onion
-VERSION=4.1.0-alpha6
+VERSION=4.1.2
 RA_SUBVERSION=1.14.0.0
 
 ###########################################################
@@ -38,7 +38,7 @@ STATIC_DIST         := $(ROOT_DIR)/static/dist
 STATIC_CONFIGS      := $(ROOT_DIR)/static/configs
 CACHE               := $(ROOT_DIR)/cache
 STATIC_PACKAGES     := $(ROOT_DIR)/static/packages
-PACKAGES_DIR        := $(ROOT_DIR)/build/miyoo/packages
+PACKAGES_DIR        := $(ROOT_DIR)/build/App/PackageManager/data
 PACKAGES_EMU_DEST   := $(PACKAGES_DIR)/Emu
 PACKAGES_APP_DEST   := $(PACKAGES_DIR)/App
 PACKAGES_RAPP_DEST  := $(PACKAGES_DIR)/RApp
@@ -83,6 +83,10 @@ $(CACHE)/.setup:
 		$(SRC_DIR)/randomGamePicker \
 		$(SRC_DIR)/easter \
 		-depth -type d -name res -exec cp -r {}/. $(BUILD_DIR)/.tmp_update/res/ \;
+	@find \
+		$(SRC_DIR)/packageManager \
+		$(SRC_DIR)/themeSwitcher \
+		-depth -type d -name script -exec cp -r {}/. $(BUILD_DIR)/.tmp_update/script/ \;
 	@find $(SRC_DIR)/installUI -depth -type d -name res -exec cp -r {}/. $(INSTALLER_DIR)/res/ \;
 # Download themes from theme repo
 	@chmod a+x $(ROOT_DIR)/.github/get_themes.sh && $(ROOT_DIR)/.github/get_themes.sh
@@ -116,11 +120,13 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/batmon && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/easter && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/read_uuid && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/detectKey && BUILD_DIR=$(BIN_DIR) make
 # Build dependencies for installer
-	@mkdir -p $(DIST_DIR)/miyoo/app/.tmp_update/bin
-	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(INSTALLER_DIR)/bin/ make
+	@mkdir -p $(INSTALLER_DIR)/bin
+	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(INSTALLER_DIR)/bin/ VERSION=$(VERSION) make
 	@cp $(BIN_DIR)/prompt $(INSTALLER_DIR)/bin/
 	@cp $(BIN_DIR)/batmon $(INSTALLER_DIR)/bin/
+	@cp $(BIN_DIR)/detectKey $(INSTALLER_DIR)/bin/
 	@cp $(BIN_DIR)/infoPanel $(INSTALLER_DIR)/bin/
 
 apps: $(CACHE)/.setup
@@ -135,7 +141,7 @@ apps: $(CACHE)/.setup
 	@cp -a "$(PACKAGES_APP_DEST)/Quick Guide/." $(BUILD_DIR)/
 	@cp -a "$(PACKAGES_APP_DEST)/RetroArch (Shortcut)/." $(BUILD_DIR)/
 	@cp -a "$(PACKAGES_APP_DEST)/Tweaks/." $(BUILD_DIR)/
-	@cp -a "$(PACKAGES_APP_DEST)/Themes (Change theme)/." $(BUILD_DIR)/
+	@cp -a "$(PACKAGES_APP_DEST)/ThemeSwitcher/." $(BUILD_DIR)/
 
 external: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
@@ -219,3 +225,6 @@ test:
 	@mkdir -p $(BUILD_TEST_DIR)/infoPanel_test_data && cd $(TEST_SRC_DIR) && BUILD_DIR=$(BUILD_TEST_DIR)/ make dev
 	@cp -R $(TEST_SRC_DIR)/infoPanel_test_data $(BUILD_TEST_DIR)/
 	cd $(BUILD_TEST_DIR) && ./test
+
+format:
+	@find ./src -regex '.*\.\(c\|h\|cpp\|hpp\)' -exec clang-format -style=file -i {} \;

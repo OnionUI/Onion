@@ -1,7 +1,7 @@
 {
 "label":"Atari 2600",
-"icon":"../../Icons/atari.png",
-"iconsel":"../../Icons/atari.png",
+"icon":"../../Icons/Default/atari.png",
+"iconsel":"../../Icons/Default/atari.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/ATARI",
 "imgpath":"../../Roms/ATARI/Imgs",

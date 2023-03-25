@@ -1,4 +1,4 @@
-RetroArch 1.10.3 (dingux build) for miyoomini
+RetroArch 1.14.0 (dingux build) for miyoomini
 
 Based on the dingux version of RetroArch, with video/audio/input driver customized for miyoomini
 Specific differences from the dingux version are described below
@@ -37,9 +37,18 @@ Turn ON if the audio driver is sdl/oss and judder is a concern
 Settings > Video > Output > Video Rotation is activated from 220430 version
 To display this option, Settings > User Interface > Show Advanced Settings must be turned on
 
-Allows VideoFilter to be added later, Normal3x / LCD2x / LCD3x are included as samples (sources are in gfx/video_filters)
+Allows VideoFilter to be added later, Normal3x / LCD2x / LCD3x / Vertical3x4 are included as samples (sources are in gfx/video_filters)
 LCD filters should always be used with Integer:ON Aspect:ON on emulators
  up to 320pixels width for 2x (for gba,ws,etc.) and up to 213pixels width for 3x (for gb,gg,ngp,etc.)
+Vertical3x4 filter displays vertical arcade games on 3:4 screen, should be used with Aspect:OFF
+
+Settings > On-Screen Display > On-Screen Overlay is activated from 230110 version
+The functionality of overlay is limited, only 4 options are valid: Display Overlay, Hide Overlay in Menu, Overlay Preset, Overlay Opacity
+The position and scale of the overlay screen cannot be adjusted, if an image other than 640x480 is used, it will be enlarged to full screen
+Support for Opacity is also limited, setting is not reflected in frame areas outside of the game screen, which are displayed at the equivalent of 1.0(100%)
+
+Allows scaling options to be changed with hotkeys set in Settings > Input > Hotkeys > Fullscreen (toggle), from 230114 version
+.. -> [Integer:OFF,Aspect:OFF] -> [Integer:OFF,Aspect:ON] -> [Integer:ON,Aspect:OFF] -> [Integer:ON,Aspect:ON] -> ..(loop)
 
 ---- Audio ----
 
@@ -54,7 +63,7 @@ oss:	Modified OSS driver exclusively for miyoomini
 	However, using audioserver with latency_reduction(described below), the latency becomes almost imperceptible
 
 sdl:	customSDL is used when AudioFix:OFF, stockSDL is used when AudioFix:ON
-	latancy changes from a minimum of 21 ms in increments of about 10 ms
+	latancy changes from a minimum of 10 ms in increments of about 5 ms
 	Timing is a little rough, that makes judder a bit but slightly faster
 	Recommended to turn ON the VSync setting for Video (reduces judder)
 
@@ -80,3 +89,8 @@ Settings > Input > Haptic Feedback/Vibration > Vibration Strength
 
 Vibration strength varies greatly depending on the production lot of the miyoomini,
 for devices that vibrate to the maximum, a setting of about 20% seems optimal
+
+---- Multilingual support ----
+
+If you want to make it multilingual, modify launch.sh or rename the executable to use retroarch_multilang
+But it is about 4MB larger, so it will consume more memory and increase startup time

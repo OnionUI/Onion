@@ -1,6 +1,6 @@
 {
 "label":"Nestopia",
-"icon":"../../Icons/fc.png",
+"icon":"../../Icons/Default/fc.png",
 "iconsel":"",
 "launch":"launch.sh",
 "rompath":"../../Roms/FC",

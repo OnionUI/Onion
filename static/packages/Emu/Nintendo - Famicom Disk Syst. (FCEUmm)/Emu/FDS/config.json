@@ -1,7 +1,7 @@
 {
 "label":"FDS",
-"icon":"../../Icons/fds.png",
-"iconsel":"../../Icons/fds.png",
+"icon":"../../Icons/Default/fds.png",
+"iconsel":"../../Icons/Default/fds.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/FDS",
 "imgpath":"../../Roms/FDS/Imgs",

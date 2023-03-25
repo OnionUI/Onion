@@ -8,9 +8,7 @@ int main(int argc, char *argv[])
 {
     getDeviceModel(); 
     FILE *fp;
-    int old_percentage = -1,
-        current_percentage,
-        warn_at = 15;
+    int old_percentage = -1, current_percentage, warn_at = 15;
 
     atexit(cleanup);
     signal(SIGINT, sigHandler);
@@ -52,9 +50,11 @@ int main(int argc, char *argv[])
                 printf_debug("battery check: suspended = %d, perc = %d, warn = %d\n", is_suspended, current_percentage, warn_at);
                 ticks = -1;
             }
-            
+
             if (current_percentage != old_percentage) {
-                printf_debug("saving percBat: suspended = %d, perc = %d, warn = %d\n", is_suspended, current_percentage, warn_at);
+                printf_debug(
+                    "saving percBat: suspended = %d, perc = %d, warn = %d\n",
+                    is_suspended, current_percentage, warn_at);
                 old_percentage = current_percentage;
                 file_put_sync(fp, "/tmp/percBat", "%d", current_percentage);
             }
@@ -63,14 +63,15 @@ int main(int argc, char *argv[])
             ticks = -1;
         }
 
-        #ifdef PLATFORM_MIYOOMINI
+#ifdef PLATFORM_MIYOOMINI
         if (is_suspended || current_percentage == 500)
             batteryWarning_hide();
-        else if (current_percentage < warn_at && !config_flag_get(".noBatteryWarning"))
+        else if (current_percentage < warn_at &&
+                 !config_flag_get(".noBatteryWarning"))
             batteryWarning_show();
         else
             batteryWarning_hide();
-        #endif
+#endif
 
         ticks++;
         sleep(1);
@@ -108,7 +109,7 @@ void cleanup(void)
 }
 
 int updateADCValue(int value)
-{    
+{
     if (battery_isCharging())
         return 100;
 
@@ -120,9 +121,12 @@ int updateADCValue(int value)
     static SAR_ADC_CONFIG_READ adcConfig;
     ioctl(sar_fd, IOCTL_SAR_SET_CHANNEL_READ_VALUE, &adcConfig);
 
-    if (value <= 100) value = adcConfig.adc_value;
-    else if (adcConfig.adc_value > value) value++;
-    else if (adcConfig.adc_value < value) value--;
+    if (value <= 100)
+        value = adcConfig.adc_value;
+    else if (adcConfig.adc_value > value)
+        value++;
+    else if (adcConfig.adc_value < value)
+        value--;
 
     return value;
 }
@@ -144,18 +148,23 @@ int getBatPercMMP() {
 
 int batteryPercentage(int value)
 {
-    if (value == 100) return 500;
-    if (value >= 578) return 100;
-    if (value >= 528) return value - 478;
-    if (value >= 512) return (int)(value * 2.125 - 1068);
-    if (value >= 480) return (int)(value * 0.51613 - 243.742);
+    if (value == 100)
+        return 500;
+    if (value >= 578)
+        return 100;
+    if (value >= 528)
+        return value - 478;
+    if (value >= 512)
+        return (int)(value * 2.125 - 1068);
+    if (value >= 480)
+        return (int)(value * 0.51613 - 243.742);
     return 0;
 }
 
 //
 //    Draw Battery warning thread
 //
-static void* batteryWarning_thread(void* param)
+static void *batteryWarning_thread(void *param)
 {
     while (1) {
         display_drawFrame(0x00FF0000); // draw red frame

@@ -10,8 +10,8 @@
 // system directories
 #define GPIO_DIR1 "/sys/class/gpio/"
 #define GPIO_DIR2 "/sys/devices/gpiochip0/gpio/"
-#define PWM_DIR   "/sys/devices/soc0/soc/1f003400.pwm/pwm/pwmchip0/"
-#define CPU_DIR   "/sys/devices/system/cpu/cpufreq/policy0/"
+#define PWM_DIR "/sys/devices/soc0/soc/1f003400.pwm/pwm/pwmchip0/"
+#define CPU_DIR "/sys/devices/system/cpu/cpufreq/policy0/"
 
 #define CPU_SCALING_MIN_FREQ CPU_DIR "scaling_min_freq"
 #define CPU_SCALING_GOVERNOR CPU_DIR "scaling_governor"
@@ -22,9 +22,10 @@
 /**
  * @brief Creates the file `/tmp/.offOrder`,
  * which is used by `runtime.sh` for knowing when to show shutdown screen.
- * 
+ *
  */
-void system_shutdown(void) {
+void system_shutdown(void)
+{
     temp_flag_set(".offOrder", true);
     system_clock_get();
     system_clock_save();
@@ -33,13 +34,14 @@ void system_shutdown(void) {
 
 /**
  * @brief Toggle powersave mode
- * 
+ *
  * @param enabled true: turn on powersave, false: turn off powersave
  */
-void system_powersave(bool enabled) {
+void system_powersave(bool enabled)
+{
     static uint32_t saved_min_freq;
     static char saved_governor[16];
-    FILE* fp;
+    FILE *fp;
 
     if (enabled) {
         // save values for restoring later

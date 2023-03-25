@@ -1,7 +1,7 @@
 {
 "label":"Commodore",
-"icon":"../../Icons/c64.png",
-"iconsel":"../../Icons/c64.png",
+"icon":"../../Icons/Default/c64.png",
+"iconsel":"../../Icons/Default/c64.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/COMMODORE",
 "imgpath":"../../Roms/COMMODORE/Imgs",
