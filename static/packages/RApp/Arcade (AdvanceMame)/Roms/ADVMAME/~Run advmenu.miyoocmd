@@ -1,0 +1,4 @@
+#!/bin/sh
+cd /mnt/SDCARD/RApp/advancemame
+
+./run_advmenu.sh
