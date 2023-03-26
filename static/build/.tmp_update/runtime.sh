@@ -130,27 +130,19 @@ check_game_menu() {
     if [ ! -f $sysdir/cmd_to_run.sh ]; then
         return
     fi
-
-    romfile=`cat $sysdir/cmd_to_run.sh`
-    check_is_game "$romfile"
-    is_game=$?
-
-    if [ $is_game -eq 0 ]; then
-        return
-    fi
     
     launch_game_menu
 }
 
 launch_game_menu() {
     cd $sysdir
-    echo "launch game menu" >> ./logs/game_list_options.log
+    echo -e "\n\n:: GLO\n\n"
     sync
 
-    $sysdir/script/game_list_options.sh 2>&1 >> ./logs/game_list_options.log
+    $sysdir/script/game_list_options.sh | tee -a ./logs/game_list_options.log
 
-    if [ "$?" -ne "0" ]; then
-        echo "back to MainUI" >> ./logs/game_list_options.log
+    if [ $? -ne 0 ]; then
+        echo -e "\n\n< Back to MainUI\n\n"
         rm -f $sysdir/cmd_to_run.sh
         check_off_order "End"
     fi
