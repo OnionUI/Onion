@@ -30,7 +30,7 @@ cmd=`cat ./cmd_to_run.sh`
 rompath=""
 emupath=""
 emulabel=""
-launch_script=""
+launch_path=""
 romtype=$ROM_TYPE_UNKNOWN
 romext=""
 romroot=""
@@ -64,7 +64,7 @@ main() {
         exit
     fi
 
-    rm -f ./cmd_to_run.sh
+    rm -f ./cmd_to_run.sh 2> /dev/null
 
     emupath=`dirname $(echo "$cmd" | awk '{ gsub(/"/, "", $2); st = index($2,".."); if (st) { print substr($2,0,st) } else { print $2 } }')`
 
@@ -86,7 +86,7 @@ main() {
         emu_config_json=`cat "$emupath/config.json"`
         romroot="$emupath/$(get_json_value "$emu_config_json" "rompath")"
         emulabel="$(get_json_value "$emu_config_json" "label" | sed -e 's/^\s*//g' -e 's/\s*$//g')"
-        launch_script="$emupath/launch.sh"
+        launch_path="$emupath/launch.sh"
     fi
 
     if [ $current_tab -eq $TAB_FAVORITES ]; then
@@ -100,11 +100,13 @@ main() {
     echo "romtype: $romtype"
     echo "rompath: $rompath"
     # example: "/mnt/SDCARD/Emu/GBATEST/../../Roms/GBATEST/mGBA/Final Fantasy IV Advance (U).zip"
+    echo "romext: $romext"
 
     echo "emupath: $emupath"
-    echo "extension: $romext"
+    echo "emulabel: $emulabel"
 
     echo "romroot: $romroot"
+    echo "launch: $launch_path"
 
     skip_game_options=0
 
@@ -141,8 +143,8 @@ main() {
         romdirname=`echo "$rompath" | sed "s/^.*Roms\///g" | cut -d "/" -f1`
         manpath="/mnt/SDCARD/Roms/$romdirname/Manuals/$(basename "$rompath" ".$romext").pdf"
 
-        echo "romdir: '$romdirname'"
-        echo "manual: $manpath"
+        echo "romdirname: $romdirname"
+        echo "manpath: $manpath"
 
         if [ -f "$manpath" ]; then
             add_menu_option open_manual "Game manual"
@@ -172,15 +174,17 @@ main() {
     add_script_files "$globalscriptdir"
 
     if [ $current_tab -eq $TAB_GAMES ]; then
-        add_script_files "$emupath/romscripts"
+        add_script_files "$globalscriptdir/emu"
+    elif [ $current_tab -eq $TAB_EXPERT ]; then
+        add_script_files "$globalscriptdir/rapp"
+    elif [ $current_tab -eq $TAB_FAVORITES ]; then
+        add_script_files "$globalscriptdir/favorites"
+    elif [ $current_tab -eq $TAB_RECENTS ]; then
+        add_script_files "$globalscriptdir/recents"
     fi
 
-    if [ $current_tab -eq $TAB_FAVORITES ]; then
-        add_menu_option tools_favsort "Sort favorites (A-Z)"
-        add_menu_option tools_favsort2 "Sort favorites (by system)"
-        add_menu_option tools_favfix "Repair favorites"
-    elif [ $current_tab -eq $TAB_RECENTS ]; then
-        add_menu_option tools_recents "Clean recents (remove apps)"
+    if [ $current_tab -eq $TAB_GAMES ] || [ $current_tab -eq $TAB_EXPERT ]; then
+        add_script_files "$emupath/romscripts"
     fi
 
     # Show GLO menu
@@ -217,8 +221,16 @@ add_script_files() {
                 continue
             fi
 
-            script_name=`basename "$entry" .sh | sed "s/%LIST%/$emulabel/g"`
-            add_menu_option run_script "$script_name" "$entry"
+            scriptlabel=`get_info_value "$(cat "$entry")" scriptlabel`
+
+            if [ "$scriptlabel" == "" ]; then
+                scriptlabel=`basename "$entry" .sh`
+            fi
+
+            scriptlabel=`echo "$scriptlabel" | sed "s/%LIST%/$emulabel/g"`
+
+            echo "adding romscript: $scriptlabel"
+            add_menu_option run_script "$scriptlabel" "$entry"
         done
     fi
 }
@@ -257,7 +269,7 @@ get_core_info() {
         retroarch_core=`get_info_value "$romcfg" core`
     fi
 
-    default_core=`echo "$launch_script" | grep ".retroarch/cores/" | awk '{st = index($0,".retroarch/cores/"); s = substr($0,st+17); st2 = index(s,".so"); print substr(s,0,st2-1)}' | xargs`
+    default_core=`cat "$launch_path" | grep ".retroarch/cores/" | awk '{st = index($0,".retroarch/cores/"); s = substr($0,st+17); st2 = index(s,".so"); print substr(s,0,st2-1)}' | xargs`
 
     if [ "$retroarch_core" == "" ]; then
         retroarch_core="$default_core"
@@ -493,38 +505,13 @@ run_script() {
     echo ":: run_script $*"
     scriptpath="$1"
     if [ -f "$scriptpath" ]; then
-        runcmd="cd \"$emupath\"; chmod a+x \"$scriptpath\"; LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so \"$scriptpath\" \"$rompath\""
-        eval $runcmd
-        retcode=$?
-
-        exit $retcode
+        cd "$emupath"
+        chmod a+x "$scriptpath"
+        LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so "$scriptpath" "$rompath" "$emupath"
+        exit $?
     else
         infoPanel --title "SCRIPT NOT FOUND" --message "$(basename "$scriptpath")" --auto
     fi
-}
-
-tools_favsort() {
-    echo ":: tools_favsort $*"
-    tools favsort
-    exit 1
-}
-
-tools_favsort2() {
-    echo ":: tools_favsort2 $*"
-    tools favsort2
-    exit 1
-}
-
-tools_favfix() {
-    echo ":: tools_favfix $*"
-    tools favfix
-    exit 1
-}
-
-tools_recents() {
-    echo ":: tools_recents $*"
-    tools recents --clean_all
-    exit 1
 }
 
 main

@@ -6,6 +6,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#ifndef DT_UNKNOWN
 /** d_type value when the type is not known. */
 #define DT_UNKNOWN 0
 /** d_type value for a FIFO. */
@@ -23,6 +24,7 @@
 /** d_type value for a socket. */
 #define DT_SOCK 12
 #define DT_WHT 14
+#endif
 
 #define file_get(fp, path, format, dest)                                       \
     {                                                                          \

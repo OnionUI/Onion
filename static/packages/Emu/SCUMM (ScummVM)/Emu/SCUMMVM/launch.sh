@@ -2,15 +2,7 @@
 echo $0 $*
 progdir=`dirname "$0"`
 homedir=`dirname "$1"`
-
 rompath="$1"
-ext=`echo "$(basename "$rompath")" | awk -F. '{print tolower($NF)}'`
-
-if [ "$ext" = "miyoocmd" ]; then
-	chmod a+x "$rompath"
-	"$rompath"
-	exit
-fi
 
 echo "Running game : \"$rompath\""
 
