@@ -32,6 +32,10 @@ static bool loadImagesPathsFromJson(const char *config_path,
 {
     const char *json_str = NULL;
 
+    char temp_path[STR_MAX];
+    strncpy(temp_path, config_path, STR_MAX - 1);
+    dirname(temp_path);
+
     if (!(json_str = file_read(config_path))) {
         return false;
     }
@@ -44,7 +48,7 @@ static bool loadImagesPathsFromJson(const char *config_path,
     *images_titles = (char **)malloc(*images_paths_count * sizeof(char *));
 
     for (int i = 0; i < *images_paths_count; i++) {
-        (*images_paths)[i] = (char *)malloc(STR_MAX * sizeof(char));
+        (*images_paths)[i] = (char *)malloc((STR_MAX * 2 + 2) * sizeof(char));
         static const int g_title_max_length = 50;
         (*images_titles)[i] = (char *)malloc(g_title_max_length * sizeof(char));
 
@@ -60,7 +64,8 @@ static bool loadImagesPathsFromJson(const char *config_path,
             continue;
         }
         const char *image_path = cJSON_GetStringValue(json_image_path);
-        strncpy((*images_paths)[i], image_path, STR_MAX);
+        snprintf((*images_paths)[i], STR_MAX * 2 + 1, "%s/%s", temp_path,
+                 image_path);
 
         cJSON *json_image_title = cJSON_GetObjectItem(json_image_item, "title");
         if (!json_image_title) {
@@ -222,6 +227,17 @@ int main(int argc, char *argv[])
         info_panel_mode = true;
         g_show_theme_controls = true;
     }
+    else if (is_persistent) {
+        // Clear the screen when exiting
+        SDL_FillRect(video, NULL, 0);
+        SDL_Flip(video);
+        while (!temp_flag_get("dismiss_info_panel")) {
+            msleep(15);
+        }
+        temp_flag_set("dismiss_info_panel", false);
+        sdlQuit(screen, video);
+        return EXIT_SUCCESS;
+    }
     else {
         sdlQuit(screen, video);
         return EXIT_FAILURE;
@@ -256,20 +272,19 @@ int main(int argc, char *argv[])
                     break;
                 case SW_BTN_Y:
                     g_show_theme_controls = !g_show_theme_controls;
+                    SDL_BlitSurface(theme_background(), NULL, screen, NULL);
+
                     if (g_images_paths) {
-                        SDL_BlitSurface(theme_background(), NULL, screen, NULL);
                         drawImageByIndex(
                             g_image_index, g_image_index, g_images_paths,
                             g_images_paths_count, screen,
                             getControlsAwareFrame(&themedFrame), &cache_used);
                     }
                     else if (exists(image_path)) {
-                        SDL_BlitSurface(theme_background(), NULL, screen, NULL);
                         drawImage(image_path, screen);
                     }
                     else {
                         g_show_theme_controls = true;
-                        continue;
                     }
                     all_changed = true;
                     continue;
@@ -315,10 +330,13 @@ int main(int argc, char *argv[])
         }
 
         if (g_show_theme_controls && all_changed) {
-            SDL_BlitSurface(theme_background(), NULL, screen, NULL);
             header_changed = true;
             footer_changed = true;
             battery_changed = true;
+
+            if (strlen(message_str) > 0) {
+                SDL_BlitSurface(theme_background(), NULL, screen, NULL);
+            }
         }
 
         if (quit)
