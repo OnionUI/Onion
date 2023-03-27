@@ -292,6 +292,8 @@ check_switcher() {
 }
 
 launch_switcher() {
+	pkill -9 wpa_supplicant
+	pkill -9 udhcpc
     cd $sysdir
     LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./bin/gameSwitcher
     rm $sysdir/.runGameSwitcher
