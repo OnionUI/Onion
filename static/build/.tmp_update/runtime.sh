@@ -162,6 +162,7 @@ launch_game() {
 
     is_game=0
     rompath=""
+    romext=""
     romcfgpath=""
     retroarch_core=""
 
@@ -232,7 +233,7 @@ launch_game() {
 
     echo "cmd retval: $retval"
 
-    if [ $retval -ge 128 ] && [ $retval -ne 143 ]; then
+    if [ $retval -ge 128 ] && [ $retval -ne 143 ] && [ $retval -ne 255 ]; then
         cd $sysdir
         infoPanel --title "Fatal error occurred" --message "The program exited unexpectedly.\n(Error code: $retval)" --auto
     fi
