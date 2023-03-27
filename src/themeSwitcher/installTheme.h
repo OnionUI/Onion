@@ -23,10 +23,6 @@
 #define THEMES_DIR "/mnt/SDCARD/Themes"
 #define ACTIVE_THEME "/mnt/SDCARD/.tmp_update/config/active_theme"
 
-#ifndef DT_DIR
-#define DT_DIR 4
-#endif
-
 // Max number of records in the DB
 #define NUMBER_OF_THEMES 500
 

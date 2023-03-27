@@ -7,7 +7,7 @@
 
 void log_debug(const char *filename, int line, const char *format_str, ...)
 {
-    char log_message[512], cmd[512];
+    char log_message[512], cmd[1024];
 
     va_list valist;
     va_start(valist, format_str);
@@ -15,9 +15,7 @@ void log_debug(const char *filename, int line, const char *format_str, ...)
     vsprintf(log_message + strlen(log_message), format_str, valist);
     va_end(valist);
 
-    concat(cmd, "echo -n \"", str_replace(log_message, "\"", "\\\""));
-    int i = strlen(cmd);
-    cmd[i++] = '"';
-    cmd[i++] = '\0';
+    snprintf(cmd, 1023, "echo -n \"%s\" >/dev/stderr",
+             str_replace(log_message, "\"", "\\\""));
     system(cmd);
 }

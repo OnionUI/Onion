@@ -6,6 +6,26 @@
 #include <time.h>
 #include <unistd.h>
 
+#ifndef DT_UNKNOWN
+/** d_type value when the type is not known. */
+#define DT_UNKNOWN 0
+/** d_type value for a FIFO. */
+#define DT_FIFO 1
+/** d_type value for a character device. */
+#define DT_CHR 2
+/** d_type value for a directory. */
+#define DT_DIR 4
+/** d_type value for a block device. */
+#define DT_BLK 6
+/** d_type value for a regular file. */
+#define DT_REG 8
+/** d_type value for a symbolic link. */
+#define DT_LNK 10
+/** d_type value for a socket. */
+#define DT_SOCK 12
+#define DT_WHT 14
+#endif
+
 #define file_get(fp, path, format, dest)                                       \
     {                                                                          \
         if ((fp = fopen(path, "r"))) {                                         \
