@@ -248,7 +248,7 @@ void suspend_exec(int timeout)
     }
     display_on();
     display_setBrightness(settings.brightness);
-    setVolume(recent_volume, 0);
+    setVolumeRaw(recent_volume, 0);
     if (!killexit) {
         resume();
         system_clock_pause(false);
