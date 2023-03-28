@@ -51,6 +51,7 @@ sound_foreground_key none
 sound_foreground_start none
 sound_foreground_stop none
 sound_volume -26
+preview_default "preview.png"
 ui_bar_font "/mnt/SDCARD/miyoo/app/Exo-2-Bold-Italic_Universal.ttf"
 #ui_clip none
 ui_color help ffffff 000000
