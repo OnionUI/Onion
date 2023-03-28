@@ -130,7 +130,7 @@ const char *icons_getSelectedIconPathFormat(IconMode_e mode)
 }
 
 bool _apply_singleIconFromPack(const char *config_path,
-                               const char *icon_pack_path)
+                               const char *icon_pack_path, bool reset_default)
 {
     if (!is_file(config_path))
         return false;
@@ -150,8 +150,15 @@ bool _apply_singleIconFromPack(const char *config_path,
     sprintf(icon_path, icons_getIconPathFormat(mode), icon_pack_path,
             icon_name);
 
-    if (!is_file(icon_path))
-        return false;
+    if (!is_file(icon_path)) {
+        if (reset_default) {
+            sprintf(icon_path, icons_getIconPathFormat(mode), ICON_PACK_DEFAULT,
+                    icon_name);
+        }
+        else {
+            return false;
+        }
+    }
 
     char sel_path[STR_MAX];
     sprintf(sel_path, icons_getSelectedIconPathFormat(mode), icon_pack_path,
@@ -188,14 +195,15 @@ bool apply_singleIcon(const char *config_path)
         return false;
 
     if (strcmp(GUEST_CONFIG, config_path) == 0) {
-        _apply_singleIconFromPack(GUEST_OFF_CONFIG, icon_pack_path);
-        _apply_singleIconFromPack(GUEST_ON_CONFIG, icon_pack_path);
+        _apply_singleIconFromPack(GUEST_OFF_CONFIG, icon_pack_path, false);
+        _apply_singleIconFromPack(GUEST_ON_CONFIG, icon_pack_path, false);
     }
 
-    return _apply_singleIconFromPack(config_path, icon_pack_path);
+    return _apply_singleIconFromPack(config_path, icon_pack_path, false);
 }
 
-int _apply_iconPackOnConfigs(const char *path, const char *icon_pack_path)
+int _apply_iconPackOnConfigs(const char *path, const char *icon_pack_path,
+                             bool reset_default)
 {
     DIR *dp;
     struct dirent *ep;
@@ -222,7 +230,8 @@ int _apply_iconPackOnConfigs(const char *path, const char *icon_pack_path)
             if (!is_file(config_path))
                 continue;
 
-            if (_apply_singleIconFromPack(config_path, icon_pack_path))
+            if (_apply_singleIconFromPack(config_path, icon_pack_path,
+                                          reset_default))
                 count++;
         }
         closedir(dp);
@@ -231,22 +240,28 @@ int _apply_iconPackOnConfigs(const char *path, const char *icon_pack_path)
     return count;
 }
 
-int apply_iconPack(const char *icon_pack_path)
+int apply_iconPack(const char *icon_pack_path, bool reset_default)
 {
     FILE *fp;
     file_put_sync(fp, ACTIVE_ICON_PACK, "%s", icon_pack_path);
 
     int count = 0;
 
-    count += _apply_iconPackOnConfigs(CONFIG_EMU_PATH, icon_pack_path);
-    count += _apply_iconPackOnConfigs(CONFIG_APP_PATH, icon_pack_path);
-    count += _apply_iconPackOnConfigs(CONFIG_RAPP_PATH, icon_pack_path);
+    count += _apply_iconPackOnConfigs(CONFIG_EMU_PATH, icon_pack_path,
+                                      reset_default);
+    count += _apply_iconPackOnConfigs(CONFIG_APP_PATH, icon_pack_path,
+                                      reset_default);
+    count += _apply_iconPackOnConfigs(CONFIG_RAPP_PATH, icon_pack_path,
+                                      reset_default);
 
-    if (_apply_singleIconFromPack(SEARCH_CONFIG_SRC, icon_pack_path))
+    if (_apply_singleIconFromPack(SEARCH_CONFIG_SRC, icon_pack_path,
+                                  reset_default))
         count++;
-    if (_apply_singleIconFromPack(GUEST_ON_CONFIG, icon_pack_path))
+    if (_apply_singleIconFromPack(GUEST_ON_CONFIG, icon_pack_path,
+                                  reset_default))
         count++;
-    if (_apply_singleIconFromPack(GUEST_OFF_CONFIG, icon_pack_path))
+    if (_apply_singleIconFromPack(GUEST_OFF_CONFIG, icon_pack_path,
+                                  reset_default))
         count++;
 
     return count;

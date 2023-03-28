@@ -190,7 +190,7 @@ void _action_apply_icon_pack(void *_item)
 
     if (apply) {
         char message_done[STR_MAX];
-        int applied = apply_iconPack(item->payload);
+        int applied = apply_iconPack(item->payload, false);
 
         sprintf(message_done, "Applied %d icons", applied);
 

@@ -306,7 +306,8 @@ int main(int argc, char *argv[])
         if (page_changed) {
             loadTheme(themes[current_page], &theme);
             snprintf(icon_pack_path, STR_MAX + 32 - 1, "%sicons", theme.path);
-            apply_icons = has_icons = is_dir(icon_pack_path);
+            apply_icons = true;
+            has_icons = is_dir(icon_pack_path);
 
             if (strstr(theme.path, "/.previews/") != NULL) {
                 is_preview = true;
