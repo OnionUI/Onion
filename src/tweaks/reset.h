@@ -175,6 +175,7 @@ void action_resetAll(void *pt)
     action_resetMainUI(pt);
     action_resetRAMain(pt);
     action_resetRACores(pt);
+    action_resetAdvanceMENU(pt);
     _disable_confirm = false;
     reset_menus = true;
     settings_load();
