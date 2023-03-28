@@ -95,6 +95,8 @@ $(CACHE)/.setup:
 	@rsync -a --exclude='.gitkeep' $(STATIC_PACKAGES)/App/ $(PACKAGES_APP_DEST)
 	@rsync -a --exclude='.gitkeep' $(STATIC_PACKAGES)/Emu/ $(PACKAGES_EMU_DEST)
 	@rsync -a --exclude='.gitkeep' $(STATIC_PACKAGES)/RApp/ $(PACKAGES_RAPP_DEST)
+	@$(STATIC_PACKAGES)/common/apply.sh "$(PACKAGES_EMU_DEST)"
+	@$(STATIC_PACKAGES)/common/apply.sh "$(PACKAGES_RAPP_DEST)"
 # Set flag: finished setup
 	@touch $(CACHE)/.setup
 

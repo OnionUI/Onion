@@ -299,6 +299,11 @@ void deepsleep(void)
             terminate_retroarch();
         }
     }
+    else if (system_state == MODE_ADVMENU) {
+        short_pulse();
+        system_shutdown();
+        kill(system_state_pid, SIGTERM);
+    }
     else if (system_state == MODE_APPS) {
         short_pulse();
         remove(CMD_TO_RUN_PATH);

@@ -34,29 +34,36 @@ main() {
     keymon &
 
     # Init
-    rm /tmp/.offOrder
+    rm /tmp/.offOrder 2> /dev/null
     HOME=/mnt/SDCARD/RetroArch/
 
     detectKey 1
     menu_pressed=$?
 
     if [ $menu_pressed -eq 0 ]; then
-        rm -f "./cmd_to_run.sh" 2> /dev/null
+        rm -f "$sysdir/cmd_to_run.sh" 2> /dev/null
     fi
 
     # Auto launch
     if [ ! -f $sysdir/config/.noAutoStart ]; then
         state_change
         check_game
+    else
+        rm -f "$sysdir/cmd_to_run.sh" 2> /dev/null
     fi
 
     startup_app=`cat $sysdir/config/startup/app`
 
     if [ $startup_app -eq 1 ]; then
+        echo -e "\n\n:: STARTUP APP: GameSwitcher\n\n"
         touch $sysdir/.runGameSwitcher
     elif [ $startup_app -eq 2 ]; then
-        cd /mnt/SDCARD/RetroArch/
-        LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v
+        echo -e "\n\n:: STARTUP APP: RetroArch\n\n"
+        echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v" > $sysdir/cmd_to_run.sh
+        touch /tmp/quick_switch
+    elif [ $startup_app -eq 3 ]; then
+        echo -e "\n\n:: STARTUP APP: AdvanceMENU\n\n"
+        touch /tmp/run_advmenu
     fi
 
     state_change
@@ -97,7 +104,13 @@ clear_logs() {
 
 check_main_ui() {
     if [ ! -f $sysdir/cmd_to_run.sh ] ; then
-        launch_main_ui
+        if [ -f /tmp/run_advmenu ]; then
+            rm /tmp/run_advmenu
+            $sysdir/bin/adv/run_advmenu.sh
+        else
+            launch_main_ui
+        fi
+
         check_off_order "End"
     fi
 }
@@ -154,7 +167,7 @@ check_game() {
 }
 
 check_is_game() {
-    echo "$1" | grep -q "retroarch" || echo "$1" | grep -q "/../../Roms/"
+    echo "$1" | grep -q "retroarch/cores" || echo "$1" | grep -q "/../../Roms/"
 }
 
 launch_game() {
@@ -210,6 +223,9 @@ launch_game() {
         playActivity "init"
     fi
 
+    # Prevent quick switch loop
+    rm -f /tmp/quick_switch 2> /dev/null
+
     echo "----- COMMAND:"
     cat $sysdir/cmd_to_run.sh
 
@@ -237,6 +253,12 @@ launch_game() {
         cd $sysdir
         infoPanel --title "Fatal error occurred" --message "The program exited unexpectedly.\n(Error code: $retval)" --auto
     fi
+
+    # Reset CPU frequency
+    echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+
+    # Free memory
+    $sysdir/bin/freemma
 
     # TIMER END + SHUTDOWN CHECK
     if [ $is_game -eq 1 ]; then
