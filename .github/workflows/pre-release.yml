@@ -36,6 +36,6 @@ jobs:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         automatic_release_tag: latest
         prerelease: true
-        title: "Onion V${{ env.BUILD_VERSION }}-dev (Development Build)"
+        title: "Onion V${{ env.BUILD_VERSION }}-dev"
         files: |
           release/Onion-v${{ env.BUILD_VERSION }}-dev-${{ env.SHA_SHORT }}.zip
