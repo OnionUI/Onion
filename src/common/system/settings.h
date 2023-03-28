@@ -60,7 +60,7 @@ void _settings_reset(void)
     // MainUI settings
     settings.volume = 20;
     strcpy(settings.keymap, "L2,L,R2,R,X,A,B,Y");
-    settings.mute = 1;
+    settings.mute = 0;
     settings.bgm_volume = 20;
     settings.brightness = 7;
     strcpy(settings.language, "en.lang");
@@ -284,6 +284,24 @@ void settings_setBrightness(uint32_t value, bool apply, bool save)
         cJSON *request_json = json_load(MAIN_UI_SETTINGS);
         cJSON *itemBrightness = cJSON_GetObjectItem(request_json, "brightness");
         cJSON_SetNumberValue(itemBrightness, settings.brightness);
+        json_save(request_json, MAIN_UI_SETTINGS);
+        cJSON_free(request_json);
+        FILE *fp;
+        file_put_sync(fp, "/tmp/settings_changed", "%s", "");
+    }
+}
+
+void settings_setMute(bool mute, bool apply, bool save)
+{
+    settings.mute = mute;
+
+    if (apply)
+        setMute(mute);
+
+    if (save) {
+        cJSON *request_json = json_load(MAIN_UI_SETTINGS);
+        cJSON *itemMute = cJSON_GetObjectItem(request_json, "mute");
+        cJSON_SetNumberValue(itemMute, settings.mute);
         json_save(request_json, MAIN_UI_SETTINGS);
         cJSON_free(request_json);
         FILE *fp;

@@ -191,6 +191,8 @@ void suspend_exec(int timeout)
     suspend(0);
     rumble(0);
     int recent_volume = setVolumeRaw(-60, 0);
+    if (DEVICE_ID == MIYOO354)
+        setMute(true);
     display_setBrightnessRaw(0);
     display_off();
     system_powersave_on();
@@ -249,6 +251,8 @@ void suspend_exec(int timeout)
     display_on();
     display_setBrightness(settings.brightness);
     setVolumeRaw(recent_volume, 0);
+    if (DEVICE_ID == MIYOO354)
+        setMute(settings.mute);
     if (!killexit) {
         resume();
         system_clock_pause(false);
@@ -338,6 +342,7 @@ int main(void)
         setVolume(20, 0);
     }
     else if (DEVICE_ID == MIYOO354) {
+        setMute(settings.mute);
         setVolume(settings.volume, 0);
     }
 
@@ -532,22 +537,22 @@ int main(void)
                         if (settings.volume <= MAX_VOLUME - VOLUME_INCREMENTS) {
                             settings_setVolume(0, VOLUME_INCREMENTS, true,
                                                true);
+                            settings_setMute(false, true, true);
                             settings_sync();
                         }
                     }
                     break;
                 case HW_BTN_VOLUME_DOWN:
                     volDown_pressed = (val == PRESSED);
-                    if (val == PRESSED) {
+                    if (comboKey_menu && val == PRESSED)
+                        settings_setMute(!settings.mute, true, true);
+                    else if ((val == PRESSED) || (val == REPEAT)) {
                         if (settings.volume >= VOLUME_INCREMENTS) {
                             settings_setVolume(0, -VOLUME_INCREMENTS, true,
                                                true);
+                            settings_setMute(settings.volume == 0, true, true);
                             settings_sync();
                         }
-                    }
-                    else if (val == REPEAT) {
-                        settings_setVolume(0, 0, true, true);
-                        settings_sync();
                     }
                     break;
                 default:
