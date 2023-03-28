@@ -7,7 +7,7 @@ if [ ! -d "$progdir/$dir_name" ] || [ ! -d "$targetdir" ]; then
     exit
 fi
 
-echo "applying common scripts to: $targetdir"
+echo "-- Copying common scripts to: $targetdir"
 
 find "$targetdir" -name config.json -type f -exec dirname {} \; | (
     while read target ; do

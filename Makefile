@@ -42,6 +42,7 @@ PACKAGES_DIR        := $(ROOT_DIR)/build/App/PackageManager/data
 PACKAGES_EMU_DEST   := $(PACKAGES_DIR)/Emu
 PACKAGES_APP_DEST   := $(PACKAGES_DIR)/App
 PACKAGES_RAPP_DEST  := $(PACKAGES_DIR)/RApp
+TEMP_DIR            := $(ROOT_DIR)/cache/temp
 ifeq (,$(GTEST_INCLUDE_DIR))
 GTEST_INCLUDE_DIR = /usr/include/
 endif
@@ -90,6 +91,9 @@ $(CACHE)/.setup:
 	@find $(SRC_DIR)/installUI -depth -type d -name res -exec cp -r {}/. $(INSTALLER_DIR)/res/ \;
 # Download themes from theme repo
 	@chmod a+x $(ROOT_DIR)/.github/get_themes.sh && $(ROOT_DIR)/.github/get_themes.sh
+# Copy static configs
+	@mkdir -p $(TEMP_DIR)/configs $(BUILD_DIR)/.tmp_update/config
+	@rsync -a --exclude='.gitkeep' $(STATIC_CONFIGS)/ $(TEMP_DIR)/configs
 # Copy static packages
 	@mkdir -p $(PACKAGES_APP_DEST) $(PACKAGES_EMU_DEST) $(PACKAGES_RAPP_DEST)
 	@rsync -a --exclude='.gitkeep' $(STATIC_PACKAGES)/App/ $(PACKAGES_APP_DEST)
@@ -97,10 +101,13 @@ $(CACHE)/.setup:
 	@rsync -a --exclude='.gitkeep' $(STATIC_PACKAGES)/RApp/ $(PACKAGES_RAPP_DEST)
 	@$(STATIC_PACKAGES)/common/apply.sh "$(PACKAGES_EMU_DEST)"
 	@$(STATIC_PACKAGES)/common/apply.sh "$(PACKAGES_RAPP_DEST)"
+	@$(STATIC_PACKAGES)/common/auto_advmenu_rc.sh "$(PACKAGES_EMU_DEST)" "$(TEMP_DIR)/configs/BIOS/.advance/advmenu.rc"
+	@$(STATIC_PACKAGES)/common/auto_advmenu_rc.sh "$(PACKAGES_RAPP_DEST)" "$(TEMP_DIR)/configs/BIOS/.advance/advmenu.rc"
 # Set flag: finished setup
 	@touch $(CACHE)/.setup
 
 build: core apps external
+	@$(ECHO) "\n-> [BUILD READY!]"
 
 core: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
@@ -148,42 +155,46 @@ apps: $(CACHE)/.setup
 external: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
 # RetroArch
+	@$(ECHO) "\n-- Build RetroArch"
 	@cd $(THIRD_PARTY_DIR)/RetroArch && make && cp retroarch $(BUILD_DIR)/RetroArch/
 	@echo $(RA_SUBVERSION) > $(BUILD_DIR)/RetroArch/onion_ra_version.txt
 # SearchFilter
+	@$(ECHO) "\n-- Build SearchFilter"
 	@cd $(THIRD_PARTY_DIR)/SearchFilter && make build && cp -a build/. $(BUILD_DIR)
 	@mkdir -p "$(PACKAGES_APP_DEST)/Search (Find your games)/App/Search" "$(PACKAGES_APP_DEST)/List shortcuts (Filter+Refresh)/App"
 	@cp -a $(BUILD_DIR)/App/Search/. "$(PACKAGES_APP_DEST)/Search (Find your games)/App/Search"
 	@mv $(BUILD_DIR)/App/Filter "$(PACKAGES_APP_DEST)/List shortcuts (Filter+Refresh)/App/Filter"
 # Other
+	@$(ECHO) "\n-- Build Terminal"
 	@cd $(THIRD_PARTY_DIR)/Terminal && make && cp ./st "$(BIN_DIR)"
+	@$(ECHO) "\n-- Build DinguxCommander"
 	@cd $(THIRD_PARTY_DIR)/DinguxCommander && make && cp ./output/DinguxCommander "$(PACKAGES_APP_DEST)/File Explorer (DinguxCommander)/App/Commander_Italic"
 
 dist: build
 	@$(ECHO) $(PRINT_RECIPE)
+# Package configs
+	@cp -R $(TEMP_DIR)/configs/Saves/CurrentProfile/ $(TEMP_DIR)/configs/Saves/GuestProfile
+	@cd $(TEMP_DIR)/configs && zip -rq $(BUILD_DIR)/.tmp_update/config/configs.pak .
+	@rm -rf $(TEMP_DIR)/configs
+	@rmdir $(TEMP_DIR)
 # Package RetroArch separately
 	@cd $(BUILD_DIR) && zip -rq retroarch.pak RetroArch
 	@mkdir -p $(DIST_DIR)/RetroArch
 	@mv $(BUILD_DIR)/retroarch.pak $(DIST_DIR)/RetroArch/
 	@echo $(RA_SUBVERSION) > $(DIST_DIR)/RetroArch/ra_package_version.txt
-# Package configs
-	@mkdir -p $(ROOT_DIR)/temp/configs $(BUILD_DIR)/.tmp_update/config
-	@rsync -a --exclude='.gitkeep' $(STATIC_CONFIGS)/ $(ROOT_DIR)/temp/configs
-	@cp -R $(ROOT_DIR)/temp/configs/Saves/CurrentProfile/ $(ROOT_DIR)/temp/configs/Saves/GuestProfile
-	@cd $(ROOT_DIR)/temp/configs && zip -rq $(BUILD_DIR)/.tmp_update/config/configs.pak .
-	@rm -rf $(ROOT_DIR)/temp/configs
-	@rmdir $(ROOT_DIR)/temp
 # Package Onion core
 	@cd $(BUILD_DIR) && zip -rq $(DIST_DIR)/miyoo/app/.tmp_update/onion.pak . -x RetroArch RetroArch/\*
+	@$(ECHO) "\n-> [DIST READY!]"
 
 release: dist
 	@$(ECHO) $(PRINT_RECIPE)
 	@rm -f $(RELEASE_DIR)/$(RELEASE_NAME).zip
 	@cd $(DIST_DIR) && zip -rq $(RELEASE_DIR)/$(RELEASE_NAME).zip .
+	@$(ECHO) "\n-> [RELEASE READY!]"
 
 clean:
 	@$(ECHO) $(PRINT_RECIPE)
-	@rm -rf $(BUILD_DIR) $(BUILD_TEST_DIR) $(ROOT_DIR)/dist $(ROOT_DIR)/temp/configs
+	@rm -rf $(BUILD_DIR) $(BUILD_TEST_DIR) $(ROOT_DIR)/dist $(TEMP_DIR)/configs
 	@rm -f $(CACHE)/.setup
 	@find include src -type f -name *.o -exec rm -f {} \;
 

@@ -343,7 +343,7 @@ void menu_userInterface(void *_)
 void menu_resetSettings(void *_)
 {
     if (!_menu_reset_settings._created) {
-        _menu_reset_settings = list_create(6, LIST_SMALL);
+        _menu_reset_settings = list_create(7, LIST_SMALL);
         strcpy(_menu_reset_settings.title, "Reset settings");
         list_addItem(
             &_menu_reset_settings,
