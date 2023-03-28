@@ -4,7 +4,7 @@
 
 #  Define the folders to be compared
 $RomsFolder = (get-location).Drive.Name + ":\Roms\ADVMAME"
-$SnapFolder = (get-location).Drive.Name + ":\Roms\ADVMAME\snap" 
+$SnapFolder = (get-location).Drive.Name + ":\Roms\ADVMAME\Snaps" 
 $MovedFolder = (get-location).Drive.Name + ":\Roms\ADVMAME\_RomsWithoutPreview"
 
 New-Item -ItemType Directory -Path $MovedFolder -Force
@@ -17,7 +17,7 @@ foreach ($file in $RomsFolder_files) {
     # Retrieve preview file name without extension
     $file_name_without_ext = [System.IO.Path]::GetFileNameWithoutExtension($file.Name)
 
-    # Loop for each file in snap folder 
+    # Loop for each file in Snaps folder 
     $SnapFolder_files = Get-ChildItem $SnapFolder
     $file_found = $false
     foreach ($file2 in $SnapFolder_files) {

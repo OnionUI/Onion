@@ -7,8 +7,8 @@ device_video sdl
 dir_artwork /mnt/SDCARD/Roms/ADVMAME/Imgs
 dir_image /mnt/SDCARD/Roms/ADVMAME/Imgs
 dir_rom /mnt/SDCARD/Roms/ADVMAME
-dir_sample /mnt/SDCARD/RApp/advancemame/.advance/sample
-dir_snap /mnt/SDCARD/Roms/ADVMAME/snap
+dir_sample /mnt/SDCARD/BIOS/.advance/sample
+dir_snap /mnt/SDCARD/Roms/ADVMAME/Snaps
 display_flipx yes
 display_flipy yes
 display_magnify 1
@@ -326,8 +326,7 @@ sound_mode mono
 ui_color[interface] 7f7f7f 000000
 ui_color[select] ffffff ff0000
 ui_color[tag] 00ff00 000000
-ui_font /mnt/SDCARD/RApp/advancemame/.advance/BinggraeMelona.ttf
-#/mnt/SDCARD/RApp/advancemame/.advance/BinggraeMelona.ttf
+ui_font /mnt/SDCARD/BIOS/.advance/BinggraeMelona.ttf
 ui_fontsize 17
 ui_translucency 0.9
 device_alsa_device sdl

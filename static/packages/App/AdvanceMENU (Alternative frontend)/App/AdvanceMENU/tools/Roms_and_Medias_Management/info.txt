@@ -1,9 +1,9 @@
 "Roms_and_Medias_Management" is a set of scripts to manage AdvanceMenu / AdvanceMame roms and media.
-Credits : Schmurtz - Onion Team
+Credits: Schmurtz - Onion Team
 
 
-Usage instructions :
-====================
+Usage instructions
+==================
 All these scripts use relative path and can be launched directly from your Onion SD card. 
 To run it quickly open the folder of the script, type "powershell" and press Enter in the Explorer address bar.
 In the Powershell windows type ".\Name-Of-the-desired-script.ps1" and enter.
@@ -30,7 +30,7 @@ xml_to_lst_(info_files)
 =======================
 
 # xml and lst files are info rom files for advance menu, it allows to tier your roms by date, manufacturer, ... 
-# xml files are used for standard AdvanceMame emulator declaration in Advancemenu config file.
+# xml files are used for standard AdvanceMame emulator declaration in AdvanceMENU config file.
 # But on the Miyoo Mini AdvanceMame is declared as standard emulator and requires a converted .xml file to .lst file.
 # 2 binaries and scripts (for Windows and the Miyoo Mini) and scripts samples are provided, 
 " the updated xml and lst are already provided for the AdvanceMenu preconfigured in Onion.
@@ -39,7 +39,7 @@ move_incompatible_Roms
 ======================
 
 # This script moves incompatible AdvanceMame roms to "_not_compatible" Folder
-# It checks the presence of each rom in the file : RApp\advancemame\.advance\AdvanceMAME.xml
+# It checks the presence of each rom in the file: RApp\advancemame\.advance\AdvanceMAME.xml
 # It allows to filter a romset which have many incompatible roms for AdvanceMame.
 
 move_roms_without_preview

@@ -3,13 +3,13 @@
 # Credits : Schmurtz - Onion Team
 
 #  Define the folders for mng source and target directory
-$MngFolder = (get-location).Drive.Name + ":\Roms\ADVMAME\snap"
+$MngFolder = (get-location).Drive.Name + ":\Roms\ADVMAME\Snaps"
 $ImgFolder = (get-location).Drive.Name + ":\Roms\ADVMAME\Imgs_Generated" 
 
 
 New-Item -ItemType Directory -Path $ImgFolder -Force
 
-# Retrieve files in "SDCARD\Roms\ADVMAME\snap"
+# Retrieve files in "SDCARD\Roms\ADVMAME\Snaps"
 $MngFolder_files = Get-ChildItem $MngFolder -Filter *.mng
 
 Set-Location $ImgFolder

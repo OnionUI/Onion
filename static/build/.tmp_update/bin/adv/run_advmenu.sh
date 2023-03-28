@@ -11,7 +11,7 @@ cd $progdir
 
 HOME=$homedir ./advmenu
 
-(sleep 1 && echo 1 > /sys/class/pwm/pwmchip0/pwm0/enable) &
+(sleep 0.5 && echo 1 > /sys/class/pwm/pwmchip0/pwm0/enable) &
 
 if [ -f /tmp/quick_switch ]; then
     touch /tmp/run_advmenu

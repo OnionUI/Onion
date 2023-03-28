@@ -1,14 +1,16 @@
 #!/bin/sh
 echo $0 $*
-sysdir=/mnt/SDCARD/.tmp_update
 progdir=`dirname "$0"`
 rompath="$1"
 romname=`basename "$rompath"`
+sysdir=/mnt/SDCARD/.tmp_update
+homedir=/mnt/SDCARD/BIOS
 
-cd $progdir
+echo -e "\n\n:: [AdvanceMAME] Running game: ${romname%.*}\n\n"
 
-echo "Running game : \"$rompath\""
 # set CPU performance mode
-./cpufreq.sh
+$progdir/cpufreq.sh
+
 # Running advancemame
-HOME=$progdir ./advmame "${romname%.*}" 
+cd $sysdir/bin/adv
+HOME=$homedir ./advmame "${romname%.*}" 

@@ -4,7 +4,7 @@
 "iconsel":"../../Icons/Default/rapp/advancemame.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/ADVMAME",
-"imgpath":"../../Roms/ADVMAME/snap",
+"imgpath":"../../Roms/ADVMAME/Imgs",
 "gamelist":"../../Roms/ADVMAME/miyoogamelist.xml",
 "useswap":1,
 "shortname":1,

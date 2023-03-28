@@ -1,0 +1,166 @@
+This is a port of AdvanceMAME/MESS emulators and AdvanceMENU frontend for Onion / Miyoo Mini.
+
+Official documentation:
+https://www.advancemame.it/doc
+
+
+About this port:
+
+
+:: AdvanceMENU
+   ===========
+
+AdvanceMENU is an awesome frontend which has the particularity to displays animated thumbnails of games. The performances of this front end are impressive on low CPU devices like the Miyoo Mini but the animated thumbnails require a particular format: ".mng" files which are a kind of animated png file and a separated mp3 file.
+
+Fortunately AdvanceMAME offers a great collection of MNG files for arcade romset on this page:
+https://www.advancemame.it/download
+
+AdvanceMENU allows to add any other emulator as generic emulator thanks to the advmenu.rc configuration file.
+
+
+:: AdvanceMAME
+   ===========
+
+AdvanceMAME is based on MAME 0.106 and it requires a romset aligned to that MAME version. 
+Some recommendations about the right romset are given on this page: https://www.advancemame.it/download
+
+
+:: AdvanceMESS 
+   ===========
+
+AdvanceMESS is based on MESS 0.106 and it also requires a romset aligned to that MESS version.
+Some recommendations about the right romset are given on this page: https://www.advancemame.it/download
+
+
+:: About Onion configuration
+   =========================
+
+Initially ported by Trngaje and updated by Schmurtz from Onion Team, AdvanceMAME is a standalone emulator which offers better performances than Libretro MAME 2003 Plus on the Miyoo Mini.
+
+AdvanceMENU should include AdvanceMAME and AdvanceMESS with very few configuration but it can't be used as is due to a limitation of SDL on the Miyoo Mini: we can't run AdvanceMENU and AdvanceMAME simultaneously. It could be possible to modify AdvanceMENU source file to close it when an emulator is launched. So for now AdvanceMAME has been added like a "generic" emulator thanks to a script which close AdvanceMENU properly before running AdvanceMAME.
+
+AdvanceMAME and AdvanceMESS have their freshly generated info files (advmame.lst and advmess.lst, read info.txt in "Tools" folder for more information).
+
+AdvanceMAME roms can be launched from MainUI but not AdvanceMESS roms due to the requirement of a bios + a rom (however a more complex launch script could allow that).
+
+AdvanceMESS output video is configured. It is possible to run the included demos easily but as this emulator requires many configuration it hasn't been added by default.
+Example of command lines to run AdvanceMESS demos:
+	progdir="/mnt/SDCARD/RApp/advancemame"
+	HOME=$progdir ./advmess ti99_4a -sound_volume -3 -quiet
+	HOME=$progdir ./advmess ti99_4a -dev_cartridge alpiner=alpinerc.bin -dev_cartridge alpiner=alpinerg.bin -sound_volume -3 -quiet
+For ti99_4a system pressing Y displays virtual send key which is necessary to run games.
+AdvanceMESS cannot be easily use for now on Miyoo Mini because AdvanceMENU is required to generate the right launch command line (and using AdvanceMENU and AdvanceMESS simultanously is not possible).
+
+There's still a lot to tweak in AdvanceMAME and its utilities, have fun and share your improvements with the community ;)
+
+
+:: Description of files included in "BIOS/.advance" folder
+   =======================================================
+
+advmess.rc   -----------> Configuration file for AdvanceMESS. Also used by AdvanceMENU to find advmess roms path when this emulator is enabled in advmenu.rc as non generic.
+advmame.rc   -----------> Configuration file for AdvanceMAME. Also used by AdvanceMENU to find advmame roms path when this emulator is enabled in advmenu.rc as non generic.
+advmenu.rc   -----------> Configuration file for AdvanceMENU. Here you declare your emulators, rom paths, ...
+advmess.xml   ----------> This file seems to be generated each time AdvanceMESS is launched. It is an info file for compatible machines.
+cheat.dat    -----------> Used by AdvanceMAME, a lot of games have available cheats: press Select + Start -> Enable/Disable a cheat
+font.ttf     -----------> Font used by AdvanceMENU (configured in advmenu.rc)
+category.ini -----------> Type of games used by AdvanceMENU ("type_import" configured in advmenu.rc)
+history.dat  -----------> Games informations and history for AdvanceMAME, however seems not supported anymore since AdvanceMAME Version 0.100.0 so removed (see "history.7z" in "tools" folder to restore it)
+hiscore.dat  -----------> Highscore database for AdvanceMAME.
+event.dat    -----------> The Event and Safequit database.
+BinggraeMelona.ttf -----> Required font used by AdvanceMAME, can be replaced for Korean translation (see "tools" folder)
+advmame.lst  -----------> Infos file for AdvanceMAME, contains all the game infos. Generated with --listbare command, see "tools\Roms_and_Medias_Management\xml_to_lst_(info_files)\info.txt" for details.
+sysinfo.dat  -----------> MESS info database
+
+
+:: Configured Keymap
+   =================
+
+AdvanceMENU
+-----------
+A = validate
+B or menu = back or exit
+X = select sort mode for the game list (by name, emulator,type, year, size, manufacturer, play times...)
+Y = Select current item, useful for type filter menu.
+L/R = Prev/Next page
+L2/R2 = go to prev/next category (if you filter per type of game it goes to the next type)
+Start = display main menu
+Select = Change current display mode (Full, mixed, tile small, tile big, enormous...)
+
+
+AdvanceMAME
+-----------
+A (Space) = button 2
+B (lcontrol) = button 1
+X (lshift) = button 5
+Y (lalt) = button 4
+L1 (e) = button 3
+R1 (t) = button 6
+L2 (tab) = 
+R2 (backspace)= 
+Start (enter) = Configuration menu
+Select (rcontrol)= hotkey
+
+Select + Start = Config Menu
+Select + X = Toggle FPS
+Select + Y = "On Screen Display": little in game menu (volume, gamma, brightness & overclock)
+Select + L2/R2 = increase / decrease frameskip
+
+Start + UP = Pause
+Start + DOWN = reset game
+Start + B = start recording mng file , Start to stop
+
+
+:: To configure keymap of AdvanceMENU
+   ==================================
+
+Miyoo Mini corresponding keyboard keys: https://apuntes.eduardofilo.es/en/retro-emulacion/miyoo-mini.html#keys
+Avaible keys in AdvanceMENU: https://www.advancemame.it/doc-advmame#8.10.6
+Configuration of emulator (AdvanceMAME & AdvanceMESS) can be done directly with the in game menu (or in the same way than AdvanceMENU with config files)
+
+
+
+:: Tips
+   ====
+
+- You can transform AdvanceMENU into a nice mp3 player
+  - https://www.advancemame.it/doc-faq#3.2
+
+- It is possible to create mng file from a set of png files thanks to AdvanceSCAN / advmng utility
+  - https://www.advancemame.it/doc-advmng
+
+- You can capture a game preview in mng format directly from AdvanceMAME
+  - Press Start + B to start recording and Start to stop recording
+
+- Alternatively you can create the captures automatically thanks to a script
+  - https://www.advancemame.it/doc-faq#2.2
+
+- You can create mng captures directly from MAME
+  - https://wiki.hardedge.org/index.php?title=Mame_Video_Capturing
+
+- Irfanview allows to play mng files thanks to a plugin
+  - but not those from the download page packs
+
+- The Onion Team has created a set of Windows PowerShell scripts to manage AdvanceMENU / AdvanceMAME roms and media
+  - See details in "tools/Roms_and_Medias_Management/info.txt"
+  - This folder contains scripts to:
+	- move AdvanceMAME incompatible roms to "_not_compatible" folder
+	- move roms without AdvanceMENU preview in "_RomsWithoutPreview" folder
+	  - useful to remove roms without preview from your AdvanceMENU or to find which roms still have to be scraped
+	- convert mp4 video files into mng files usable in AdvanceMENU
+	  - can be useful to create missing animated previews
+	- create your thumbnails in Onion in addition to the previews of AdvanceMENU
+	  - it creates .png files from all the existing .mng files
+	- convert MAME rom info files for advance menu
+	  - it converts xml to lst
+- AdvanceMAME has been translated in korean thanks to Trngaje
+  - details in "tools/language Korean files/info.txt"
+- Press A during screensaver to play the current displayed game
+- To display only one type of game, press start to display the menu -> Listing -> Types, here unselect all types then press A on the type you want to display.
+
+
+:: Credits
+   =======
+
+AdvanceMAME by Andrea Mazzoleni
+Initial port to Miyoo Mini by Trngaje: https://github.com/trngaje/advancemame
+Updated and configured by Onion Team.
