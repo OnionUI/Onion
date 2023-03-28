@@ -14,4 +14,4 @@ pkill -9 wpa_supplicant
 pkill -9 udhcpc
 mkdir /var/empty
 
-/mnt/SDCARD/App/ssh/sshd -f /mnt/SDCARD/App/ssh/sshd_config
+/mnt/SDCARD/App/Ssh/sshd -f /mnt/SDCARD/App/Ssh/sshd_config
