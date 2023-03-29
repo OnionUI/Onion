@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #include "components/list.h"
+#include "utils/apps.h"
 
 #include "./actions.h"
 #include "./appstate.h"

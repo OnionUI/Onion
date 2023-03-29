@@ -88,7 +88,7 @@ bool battery_isCharging(void)
         pclose(fp);
         return charge_number == 3;
     }
-
+    return false;
 #else
     return true;
 #endif

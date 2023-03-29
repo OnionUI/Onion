@@ -58,7 +58,7 @@ void drawBatteryPercentage(void)
     }
 
     TTF_Init();
-    sprintf(icon_path, "%sskin/%s.png", theme_path, ".batt-perc");
+    // sprintf(icon_path, "%sskin/.batt-perc.png", theme_path);
 
     int percentage = battery_getPercentage();
     SDL_Surface *image =

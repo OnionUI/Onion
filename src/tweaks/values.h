@@ -4,6 +4,7 @@
 #include "components/list.h"
 #include "system/state.h"
 #include "theme/resources.h"
+#include "utils/apps.h"
 #include "utils/json.h"
 #include "utils/msleep.h"
 

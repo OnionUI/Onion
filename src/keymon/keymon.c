@@ -19,6 +19,7 @@
 #include "system/settings_sync.h"
 #include "system/state.h"
 #include "system/system.h"
+#include "system/system_utils.h"
 #include "system/volume.h"
 #include "utils/config.h"
 #include "utils/file.h"
@@ -620,5 +621,4 @@ int main(void)
 
         elapsed_sec = 0;
     }
-}
 }

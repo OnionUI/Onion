@@ -1,8 +1,10 @@
 #ifndef UTILS_FILE_H__
 #define UTILS_FILE_H__
 
+#include <dirent.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <time.h>
 #include <unistd.h>
 

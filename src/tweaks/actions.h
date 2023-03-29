@@ -6,6 +6,7 @@
 #include "system/settings.h"
 #include "theme/resources.h"
 #include "theme/sound.h"
+#include "utils/apps.h"
 #include "utils/msleep.h"
 
 #include "./appstate.h"

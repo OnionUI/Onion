@@ -160,8 +160,7 @@ void backupDB(void)
     system(command);
 }
 
-void registerTimerEnd(const char *identifier) void registerTimerEnd(
-    const char *identifier)
+void registerTimerEnd(const char *identifier)
 {
     FILE *fp;
     long lSize;
@@ -205,9 +204,6 @@ void registerTimerEnd(const char *identifier) void registerTimerEnd(
         // To avoid a DB overwrite
         return;
     }
-
-    char gameName[100];
-    strncpy(gameName, identifier, 99);
 
     char gameName[100];
     strncpy(gameName, identifier, 99);

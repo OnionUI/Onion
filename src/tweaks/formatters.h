@@ -5,6 +5,7 @@
 
 #include "components/list.h"
 #include "system/state.h"
+#include "utils/apps.h"
 #include "utils/str.h"
 
 #include "./tools.h"
