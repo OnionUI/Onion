@@ -1,35 +1,19 @@
 #!/bin/sh
-
-
-echo -ne "\n\n"
-echo "==================================================================="
-echo --------------------------------------------------------------------
-echo ":: MAIN SCRIPT PORT LAUNCH"
-echo --------------------------------------------------------------------
-
-
+echo -ne "\n\n==================================================================="
 echo ":: PORT_LAUNCH" $0 $*
-echo --------------------------------------------------------------------
-
-cd "`dirname "$1"`"
-
-chmod a+x "$1"
+echo "--------------------------------------------------------------------"
 
 # Launch port file
-"$1" 
-
-retcode=$?
+cd "`dirname "$1"`"
+chmod a+x "$1"
+"$1"
 
 echo "==================================================================="
 
 if [ -f "/tmp/MissingPortFile.tmp" ]; then
 	MissingPortFile=`cat /tmp/MissingPortFile.tmp`
-	echo "Game Data File not found "
+	echo "Game data not found: $MissingPortFile"
 	echo -ne  "===================================================================\n\n"
+	infoPanel --title "Port Launch Error"  --message "Port files not found:\n$MissingPortFile"
 	rm "/tmp/MissingPortFile.tmp"
-    cd /mnt/SDCARD/.tmp_update
-	    ./bin/infoPanel --title "Port Launching Error"  --message "Port files not found :\n$MissingPortFile"
-	
 fi
-
-

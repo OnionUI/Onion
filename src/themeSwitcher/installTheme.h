@@ -23,10 +23,6 @@
 #define THEMES_DIR "/mnt/SDCARD/Themes"
 #define ACTIVE_THEME "/mnt/SDCARD/.tmp_update/config/active_theme"
 
-#ifndef DT_DIR
-#define DT_DIR 4
-#endif
-
 // Max number of records in the DB
 #define NUMBER_OF_THEMES 500
 
@@ -210,8 +206,8 @@ void installTheme(char *theme_path, bool apply_icons)
     if (apply_icons) {
         char icon_pack_path[STR_MAX + 32];
         snprintf(icon_pack_path, STR_MAX + 32 - 1, "%sicons", theme_path);
-        apply_iconPack(is_dir(icon_pack_path) ? icon_pack_path
-                                              : ICON_PACK_DEFAULT);
+        apply_iconPack(
+            is_dir(icon_pack_path) ? icon_pack_path : ICON_PACK_DEFAULT, true);
     }
 }
 

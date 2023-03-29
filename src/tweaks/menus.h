@@ -59,14 +59,14 @@ void menu_systemStartup(void *_)
                                 .item_type = TOGGLE,
                                 .value = (int)settings.startup_auto_resume,
                                 .action = action_setStartupAutoResume});
-        list_addItem(
-            &_menu_system_startup,
-            (ListItem){.label = "Start application",
-                       .item_type = MULTIVALUE,
-                       .value_max = 2,
-                       .value_labels = {"MainUI", "GameSwitcher", "RetroArch"},
-                       .value = settings.startup_application,
-                       .action = action_setStartupApplication});
+        list_addItem(&_menu_system_startup,
+                     (ListItem){.label = "Start application",
+                                .item_type = MULTIVALUE,
+                                .value_max = 3,
+                                .value_labels = {"MainUI", "GameSwitcher",
+                                                 "RetroArch", "AdvanceMENU"},
+                                .value = settings.startup_application,
+                                .action = action_setStartupApplication});
         list_addItem(&_menu_system_startup,
                      (ListItem){.label = "MainUI: Start tab",
                                 .item_type = MULTIVALUE,
@@ -343,7 +343,7 @@ void menu_userInterface(void *_)
 void menu_resetSettings(void *_)
 {
     if (!_menu_reset_settings._created) {
-        _menu_reset_settings = list_create(6, LIST_SMALL);
+        _menu_reset_settings = list_create(7, LIST_SMALL);
         strcpy(_menu_reset_settings.title, "Reset settings");
         list_addItem(
             &_menu_reset_settings,
@@ -360,6 +360,9 @@ void menu_resetSettings(void *_)
         list_addItem(&_menu_reset_settings,
                      (ListItem){.label = "Reset all RetroArch core overrides",
                                 .action = action_resetRACores});
+        list_addItem(&_menu_reset_settings,
+                     (ListItem){.label = "Reset AdvanceMENU/MAME/MESS",
+                                .action = action_resetAdvanceMENU});
         list_addItem(
             &_menu_reset_settings,
             (ListItem){.label = "Reset everything", .action = action_resetAll});

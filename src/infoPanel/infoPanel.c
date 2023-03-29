@@ -32,6 +32,10 @@ static bool loadImagesPathsFromJson(const char *config_path,
 {
     const char *json_str = NULL;
 
+    char temp_path[STR_MAX];
+    strncpy(temp_path, config_path, STR_MAX - 1);
+    dirname(temp_path);
+
     if (!(json_str = file_read(config_path))) {
         return false;
     }
@@ -44,7 +48,7 @@ static bool loadImagesPathsFromJson(const char *config_path,
     *images_titles = (char **)malloc(*images_paths_count * sizeof(char *));
 
     for (int i = 0; i < *images_paths_count; i++) {
-        (*images_paths)[i] = (char *)malloc(STR_MAX * sizeof(char));
+        (*images_paths)[i] = (char *)malloc((STR_MAX * 2 + 2) * sizeof(char));
         static const int g_title_max_length = 50;
         (*images_titles)[i] = (char *)malloc(g_title_max_length * sizeof(char));
 
@@ -60,7 +64,8 @@ static bool loadImagesPathsFromJson(const char *config_path,
             continue;
         }
         const char *image_path = cJSON_GetStringValue(json_image_path);
-        strncpy((*images_paths)[i], image_path, STR_MAX);
+        snprintf((*images_paths)[i], STR_MAX * 2 + 1, "%s/%s", temp_path,
+                 image_path);
 
         cJSON *json_image_title = cJSON_GetObjectItem(json_image_item, "title");
         if (!json_image_title) {
@@ -112,15 +117,6 @@ static void sdlQuit(SDL_Surface *screen, SDL_Surface *video)
     SDL_FreeSurface(screen);
     SDL_FreeSurface(video);
     SDL_Quit();
-}
-
-static const char *getFilename(const char *full_path)
-{
-    const char *slash = strrchr(full_path, '/');
-    if (!slash || slash == full_path) {
-        return "";
-    }
-    return slash + 1;
 }
 
 const SDL_Rect *getControlsAwareFrame(const SDL_Rect *frame)
@@ -231,12 +227,24 @@ int main(int argc, char *argv[])
         info_panel_mode = true;
         g_show_theme_controls = true;
     }
+    else if (is_persistent) {
+        // Clear the screen when exiting
+        SDL_FillRect(video, NULL, 0);
+        SDL_Flip(video);
+        while (!temp_flag_get("dismiss_info_panel")) {
+            msleep(15);
+        }
+        temp_flag_set("dismiss_info_panel", false);
+        sdlQuit(screen, video);
+        return EXIT_SUCCESS;
+    }
     else {
         sdlQuit(screen, video);
         return EXIT_FAILURE;
     }
 
     SDL_Event event;
+    bool canceled = false;
 
     while (!quit) {
         uint32_t ticks = SDL_GetTicks();
@@ -265,10 +273,19 @@ int main(int argc, char *argv[])
                 case SW_BTN_Y:
                     g_show_theme_controls = !g_show_theme_controls;
                     SDL_BlitSurface(theme_background(), NULL, screen, NULL);
-                    drawImageByIndex(
-                        g_image_index, g_image_index, g_images_paths,
-                        g_images_paths_count, screen,
-                        getControlsAwareFrame(&themedFrame), &cache_used);
+
+                    if (g_images_paths) {
+                        drawImageByIndex(
+                            g_image_index, g_image_index, g_images_paths,
+                            g_images_paths_count, screen,
+                            getControlsAwareFrame(&themedFrame), &cache_used);
+                    }
+                    else if (exists(image_path)) {
+                        drawImage(image_path, screen);
+                    }
+                    else {
+                        g_show_theme_controls = true;
+                    }
                     all_changed = true;
                     continue;
                     break;
@@ -296,6 +313,8 @@ int main(int argc, char *argv[])
                         g_image_index == 0)) // or when navigating backwards
                                              // from the first image
                 {
+                    if (key_pressed == SW_BTN_B || key_pressed == SW_BTN_MENU)
+                        canceled = true;
                     quit = true;
                     continue;
                 }
@@ -314,6 +333,10 @@ int main(int argc, char *argv[])
             header_changed = true;
             footer_changed = true;
             battery_changed = true;
+
+            if (strlen(message_str) > 0) {
+                SDL_BlitSurface(theme_background(), NULL, screen, NULL);
+            }
         }
 
         if (quit)
@@ -325,8 +348,7 @@ int main(int argc, char *argv[])
 
             if (acc_ticks >= time_step) {
                 if (header_changed || battery_changed) {
-                    if (info_panel_mode) {
-                        SDL_BlitSurface(theme_background(), NULL, screen, NULL);
+                    if (strlen(title_str) > 0) {
                         drawInfoPanel(screen, video, title_str, message_str);
                     }
                     else if (g_images_titles) {
@@ -334,13 +356,15 @@ int main(int argc, char *argv[])
                         theme_renderHeader(screen, title, !title);
                     }
                     else {
-                        const char *current_image_path = image_path;
+                        char *current_image_path = image_path;
                         if (g_images_paths_count > 0 && g_images_paths &&
                             g_image_index >= 0) {
                             current_image_path = g_images_paths[g_image_index];
                         }
-                        const char *filename = getFilename(current_image_path);
-                        theme_renderHeader(screen, filename, !filename);
+                        theme_renderHeader(
+                            screen,
+                            file_removeExtension(basename(current_image_path)),
+                            false);
                     }
                 }
 
@@ -350,7 +374,7 @@ int main(int argc, char *argv[])
                     const char *b_btn_text = lang_get(LANG_BACK);
                     if (info_panel_mode || g_images_paths_count == 1) {
                         a_btn_text = lang_get(LANG_OK);
-                        b_btn_text = NULL;
+                        b_btn_text = lang_get(LANG_CANCEL);
                     }
                     else if (g_image_index == g_images_paths_count - 1) {
                         a_btn_text = lang_get(LANG_EXIT);
@@ -414,10 +438,6 @@ int main(int argc, char *argv[])
     else if (!wait_confirm)
         msleep(2000);
 
-    // Clear the screen when exiting
-    SDL_FillRect(video, NULL, 0);
-    SDL_Flip(video);
-
     cleanImagesCache();
 
     lang_free();
@@ -431,5 +451,5 @@ int main(int argc, char *argv[])
 
     SDL_Quit();
 
-    return EXIT_SUCCESS;
+    return canceled ? 255 : EXIT_SUCCESS;
 }

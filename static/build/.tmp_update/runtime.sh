@@ -45,31 +45,36 @@ main() {
     keymon &
 
     # Init
-    rm /tmp/.offOrder
+    rm /tmp/.offOrder 2> /dev/null
     HOME=/mnt/SDCARD/RetroArch/
 
     detectKey 1
     menu_pressed=$?
 
     if [ $menu_pressed -eq 0 ]; then
-        if [ -f "./cmd_to_run.sh" ]; then
-            rm -f "./cmd_to_run.sh"
-        fi
+        rm -f "$sysdir/cmd_to_run.sh" 2> /dev/null
     fi
 
     # Auto launch
     if [ ! -f $sysdir/config/.noAutoStart ]; then
         state_change
         check_game
+    else
+        rm -f "$sysdir/cmd_to_run.sh" 2> /dev/null
     fi
 
     startup_app=`cat $sysdir/config/startup/app`
 
     if [ $startup_app -eq 1 ]; then
+        echo -e "\n\n:: STARTUP APP: GameSwitcher\n\n"
         touch $sysdir/.runGameSwitcher
     elif [ $startup_app -eq 2 ]; then
-        cd /mnt/SDCARD/RetroArch/
-        LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v
+        echo -e "\n\n:: STARTUP APP: RetroArch\n\n"
+        echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v" > $sysdir/cmd_to_run.sh
+        touch /tmp/quick_switch
+    elif [ $startup_app -eq 3 ]; then
+        echo -e "\n\n:: STARTUP APP: AdvanceMENU\n\n"
+        touch /tmp/run_advmenu
     fi
 
     state_change
@@ -110,7 +115,13 @@ clear_logs() {
 
 check_main_ui() {
     if [ ! -f $sysdir/cmd_to_run.sh ] ; then
-        launch_main_ui
+        if [ -f /tmp/run_advmenu ]; then
+            rm /tmp/run_advmenu
+            $sysdir/bin/adv/run_advmenu.sh
+        else
+            launch_main_ui
+        fi
+
         check_off_order "End"
     fi
 }
@@ -144,28 +155,20 @@ check_game_menu() {
     if [ ! -f $sysdir/cmd_to_run.sh ]; then
         return
     fi
-
-    romfile=`cat $sysdir/cmd_to_run.sh`
-    check_is_game "$romfile"
-    is_game=$?
-
-    if [ $is_game -eq 0 ]; then
-        return
-    fi
     
     launch_game_menu
 }
 
 launch_game_menu() {
     cd $sysdir
-    echo "launch game menu" >> ./logs/game_list_options.log
+    echo -e "\n\n:: GLO\n\n"
     sync
 
-    $sysdir/script/game_list_options.sh 2>&1 >> ./logs/game_list_options.log
+    $sysdir/script/game_list_options.sh | tee -a ./logs/game_list_options.log
 
-    if [ "$?" -ne "0" ]; then
-        echo "back to MainUI" >> ./logs/game_list_options.log
-        rm -f $sysdir/cmd_to_run.sh
+    if [ $? -ne 0 ]; then
+        echo -e "\n\n< Back to MainUI\n\n"
+        rm -f $sysdir/cmd_to_run.sh 2> /dev/null
         check_off_order "End"
     fi
 }
@@ -178,32 +181,20 @@ check_game() {
 }
 
 check_is_game() {
-    romfile="$1"
-    is_game=0
-
-    if echo "$romfile" | grep -q "retroarch" || echo "$romfile" | grep -q "/../../Roms/"; then
-        echo "Game found:" $(basename "$romfile")
-        is_game=1
-    fi
-
-    return $is_game
+    echo "$1" | grep -q "retroarch/cores" || echo "$1" | grep -q "/../../Roms/"
 }
 
 launch_game() {
     cmd=`cat $sysdir/cmd_to_run.sh`
 
-    check_is_game "$cmd"
-    is_game=$?
-
+    is_game=0
     rompath=""
+    romext=""
     romcfgpath=""
     retroarch_core=""
 
     # TIMER BEGIN
-    if [ $is_game -eq 1 ]; then
-        cd $sysdir
-        playActivity "init"
-
+    if check_is_game "$cmd"; then
         rompath=$(echo "$cmd" | awk '{ st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3)}')
 
         if echo "$rompath" | grep -q ":"; then
@@ -213,55 +204,82 @@ launch_game() {
         romext=`echo "$(basename "$rompath")" | awk -F. '{print tolower($NF)}'`
         romcfgpath="$(dirname "$rompath")/.game_config/$(basename "$rompath" ".$romext").cfg"
 
-        echo "rompath: $rompath (ext: $romext)"
-        echo "romcfgpath: $romcfgpath"
-    fi
-
-    # GAME LAUNCH
-    cd /mnt/SDCARD/RetroArch/
-
-    if [ -f "$romcfgpath" ]; then
-        romcfg=`cat "$romcfgpath"`
-        retroarch_core=`get_info_value "$romcfg" core`
-        corepath=".retroarch/cores/$retroarch_core.so"
-
-        echo "per game core: $retroarch_core" >> $sysdir/logs/game_list_options.log
-
-        if [ -f "$corepath" ]; then
-            if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
-                echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v --appendconfig \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
-            else
-                echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
-            fi
+        if [ "$romext" != "miyoocmd" ]; then
+            echo "rompath: $rompath (ext: $romext)"
+            echo "romcfgpath: $romcfgpath"
+            is_game=1
         fi
     fi
 
-    # Handle dollar sign
-    if echo "$rompath" | grep -q "\$"; then
-        temp=`cat $sysdir/cmd_to_run.sh`
-        echo "$temp" | sed 's/\$/\\\$/g' > $sysdir/cmd_to_run.sh
+    if [ $is_game -eq 1 ]; then
+        if [ -f "$romcfgpath" ]; then
+            romcfg=`cat "$romcfgpath"`
+            retroarch_core=`get_info_value "$romcfg" core`
+            corepath=".retroarch/cores/$retroarch_core.so"
+
+            echo "per game core: $retroarch_core" >> $sysdir/logs/game_list_options.log
+
+            if [ -f "$corepath" ]; then
+                if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
+                    echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v --appendconfig \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+                else
+                    echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+                fi
+            fi
+        fi
+
+        # Handle dollar sign
+        if echo "$rompath" | grep -q "\$"; then
+            temp=`cat $sysdir/cmd_to_run.sh`
+            echo "$temp" | sed 's/\$/\\\$/g' > $sysdir/cmd_to_run.sh
+        fi
+
+        playActivity "init"
     fi
+
+    # Prevent quick switch loop
+    rm -f /tmp/quick_switch 2> /dev/null
 
     echo "----- COMMAND:"
     cat $sysdir/cmd_to_run.sh
 
-    # Launch the command
-    $sysdir/cmd_to_run.sh
-    retval=$?
+    if [ "$romext" == "miyoocmd" ]; then
+        if [ -f "$rompath" ]; then
+            emupath=`dirname $(echo "$cmd" | awk '{ gsub(/"/, "", $2); st = index($2,".."); if (st) { print substr($2,0,st) } else { print $2 } }')`
+            cd "$emupath"
+
+            chmod a+x "$rompath"
+            "$rompath" "$rompath" "$emupath"
+            retval=$?
+        else
+            retval=1
+        fi
+    else
+        # GAME LAUNCH
+        cd /mnt/SDCARD/RetroArch/
+        $sysdir/cmd_to_run.sh
+        retval=$?
+    fi
 
     echo "cmd retval: $retval"
 
-    if [ $retval -ge 128 ] && [ $retval -ne 143 ]; then
+    if [ $retval -ge 128 ] && [ $retval -ne 143 ] && [ $retval -ne 255 ]; then
         cd $sysdir
         infoPanel --title "Fatal error occurred" --message "The program exited unexpectedly.\n(Error code: $retval)" --auto
     fi
 
-    if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
-        echo "$cmd" | sed 's/ --appendconfig \"\/mnt\/SDCARD\/.tmp_update\/reset.cfg\"//g' > $sysdir/cmd_to_run.sh
-    fi
+    # Reset CPU frequency
+    echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+
+    # Free memory
+    $sysdir/bin/freemma
 
     # TIMER END + SHUTDOWN CHECK
     if [ $is_game -eq 1 ]; then
+        if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
+            echo "$cmd" | sed 's/ --appendconfig \"\/mnt\/SDCARD\/.tmp_update\/reset.cfg\"//g' > $sysdir/cmd_to_run.sh
+        fi
+
         cd $sysdir
         playActivity "$cmd"
         
@@ -285,7 +303,7 @@ check_switcher() {
         rm -f /tmp/quick_switch
     else
         # Return to MainUI
-        rm $sysdir/cmd_to_run.sh
+        rm $sysdir/cmd_to_run.sh 2> /dev/null
         sync
     fi
     

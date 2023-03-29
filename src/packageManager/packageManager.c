@@ -24,10 +24,6 @@
 #include "utils/str.h"
 #include "utils/surfaceSetAlpha.h"
 
-#ifndef DT_DIR
-#define DT_DIR 4
-#endif
-
 #define PACKAGE_DIR "/mnt/SDCARD/App/PackageManager/data/"
 
 // Max number of records in the DB

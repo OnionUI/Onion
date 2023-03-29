@@ -126,10 +126,25 @@ int main(int argc, char *argv[])
         printf_debug("Message: %s\n", str);
         message = theme_textboxSurface(str, resource_getFont(TITLE),
                                        theme()->grid.color, ALIGN_CENTER);
-        list.scroll_height = 3;
-        message_rect.x = 320 - message->w / 2;
-        message_rect.y = 60 + (6 - list.scroll_height) * 30 - message->h / 2;
         free(str);
+
+        if (message) {
+            int max_scroll_height = (360 - (message->h + 20)) / 60;
+            if (max_scroll_height == 0)
+                max_scroll_height = 1;
+            else if (max_scroll_height > 6)
+                max_scroll_height = 6;
+            if (list.item_count < max_scroll_height)
+                list.scroll_height = list.item_count;
+            else
+                list.scroll_height = max_scroll_height;
+            message_rect.x = 320 - message->w / 2;
+            message_rect.y =
+                60 + (6 - list.scroll_height) * 30 - message->h / 2;
+        }
+        else {
+            has_message = false;
+        }
     }
 
     bool list_changed = true;

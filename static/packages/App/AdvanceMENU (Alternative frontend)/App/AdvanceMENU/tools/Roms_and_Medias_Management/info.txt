@@ -1,0 +1,67 @@
+"Roms_and_Medias_Management" is a set of scripts to manage AdvanceMenu / AdvanceMame roms and media.
+Credits: Schmurtz - Onion Team
+
+
+Usage instructions
+==================
+All these scripts use relative path and can be launched directly from your Onion SD card. 
+To run it quickly open the folder of the script, type "powershell" and press Enter in the Explorer address bar.
+In the Powershell windows type ".\Name-Of-the-desired-script.ps1" and enter.
+
+----------------------------------------------------------------------------------------------------------------------------------------
+
+mng_to_png 
+==========
+
+# This script use a modified version of advmng.exe from AdvanceMame which allows to extract only the first PNG from MNG files (new -X option). 
+# Useful to create your thumbnails in Onion in addition to the previews of AdvanceMenu. A script is included to create .png files from all your .mng quicly.
+# Execute this script to generate png files from existing mng in SDCARD/Roms/ADVMAME/Imgs_Generated.
+# To avoid involuntary override, you'll have to copy manually the generated png in SDCARD/Roms/ADVMAME/Imgs.
+
+mp4_to_mng
+==========
+
+# This script convert each mp4 file in "videos" folder to an animated mng file. It also create the mp3 to have sound in AdvanceMenu
+# This script requires ffmpeg (which should be automatically downloaded at the first run) and use advmng.exe to generates the .mng file.
+# This allows to create mng files from any existing scraping.
+# Other video format should be supported (just check the script to change .mp4 filtering).
+
+xml_to_lst_(info_files)
+=======================
+
+# xml and lst files are info rom files for advance menu, it allows to tier your roms by date, manufacturer, ... 
+# xml files are used for standard AdvanceMame emulator declaration in AdvanceMENU config file.
+# But on the Miyoo Mini AdvanceMame is declared as standard emulator and requires a converted .xml file to .lst file.
+# 2 binaries and scripts (for Windows and the Miyoo Mini) and scripts samples are provided, 
+" the updated xml and lst are already provided for the AdvanceMenu preconfigured in Onion.
+
+move_incompatible_Roms
+======================
+
+# This script moves incompatible AdvanceMame roms to "_not_compatible" Folder
+# It checks the presence of each rom in the file: RApp\advancemame\.advance\AdvanceMAME.xml
+# It allows to filter a romset which have many incompatible roms for AdvanceMame.
+
+move_roms_without_preview
+=========================
+
+# This script moves roms withtout preview in "_RomsWithoutPreview" Folder
+# Use this script only on Non-Merged romsets ! Otherwise some required game files will be missing.
+# useful to remove roms without preview from your AdvanceMenu or to find which roms still have to be scraped
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------
+
+Tips: 
+=====
+ - "mp4_to_mng" script has been created to easily convert videos from standard scraping to AdvanceMenu particular video format (mng + mp3). It's a good way to import external systems such as GBA in your AdvanceMenu.
+ - It's probably better to run "move_incompatible_Roms" script first and then "move_roms_without_preview"  because it will avoid to try to scrap all the "_RomsWithoutPreview"   folder when it is not necessary for incompatible roms.
+
+
+
+
+
+
+
+

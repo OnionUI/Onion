@@ -1,8 +1,0 @@
-These files have were originally associated to the release from Trngaje : 
-https://github.com/trngaje/miyoo-mini/releases/tag/emul_advmame_v1
-
-It allows to translate games info and UI to Korean.
-
-advmame.lst -> game infos and titles
-BinggraeMelona.ttf -> font required to display the UI in Korean
-hangul.lng  -> UI translation
