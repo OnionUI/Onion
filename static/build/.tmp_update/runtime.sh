@@ -128,8 +128,11 @@ launch_main_ui() {
     cd /mnt/SDCARD/miyoo/app
     LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./MainUI 2>&1 > /dev/null
     
+    pkill -9 wpa_supplicant
+    pkill -9 udhcpc
+    
     mv -f /tmp/cmd_to_run.sh $sysdir/cmd_to_run.sh
-
+    
     echo "mainui" > /tmp/prev_state
 }
 
@@ -292,8 +295,6 @@ check_switcher() {
 }
 
 launch_switcher() {
-	pkill -9 wpa_supplicant
-	pkill -9 udhcpc
     cd $sysdir
     LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./bin/gameSwitcher
     rm $sysdir/.runGameSwitcher
