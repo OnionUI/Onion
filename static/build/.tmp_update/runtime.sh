@@ -369,7 +369,7 @@ expert_flag=/mnt/SDCARD/miyoo/app/.isExpert
 check_hide_expert() {
     if [ ! -f $sysdir/config/.showExpert ]; then
         # Should be clean
-        if [ ! -f $clean_flag ] || [ -f $expert_flag ] || [ $is_device_model_changed ]; then
+        if [ ! -f $clean_flag ] || [ -f $expert_flag ] || [ $is_device_model_changed -eq 1 ]; then
             rm /mnt/SDCARD/miyoo/app/MainUI
             rm -f $expert_flag
 	        if [ $deviceModel -eq 283 ]; then 
@@ -381,7 +381,7 @@ check_hide_expert() {
         fi
     else
         # Should be expert
-        if [ ! -f $expert_flag ] || [ -f $clean_flag ]|| [ $is_device_model_changed ]; then
+        if [ ! -f $expert_flag ] || [ -f $clean_flag ] || [ $is_device_model_changed -eq 1 ]; then
             rm /mnt/SDCARD/miyoo/app/MainUI
             rm -f $clean_flag
 	        if [ $deviceModel -eq 283 ]; then 
