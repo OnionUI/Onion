@@ -5,11 +5,11 @@
 
 #include "./display.h"
 #include "./settings.h"
+#include "settings_sync.h"
 #include "utils/file.h"
 #include "utils/flags.h"
 #include "utils/process.h"
 #include "utils/str.h"
-#include "settings_sync.h"
 
 typedef enum system_state_e {
     MODE_UNKNOWN,
