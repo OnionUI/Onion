@@ -55,11 +55,8 @@ int battery_getPercentage(void)
 bool battery_isCharging(void)
 {
 #ifdef PLATFORM_MIYOOMINI
-
-    int charging = 0;
-
     if (DEVICE_ID == MIYOO283) {
-        char cCharging = '0';
+        char charging = 0;
         int fd = open(GPIO_DIR2 "gpio59/value", O_RDONLY);
 
         if (fd < 0) {
@@ -70,10 +67,11 @@ bool battery_isCharging(void)
         }
 
         if (fd >= 0) {
-            read(fd, &cCharging, 1);
+            read(fd, &charging, 1);
             close(fd);
-            charging = (cCharging == '1');
         }
+
+        return charging == '1';
     }
     else if (DEVICE_ID == MIYOO354) {
         char *cmd = "cd /customer/app/ ; ./axp_test";
@@ -86,12 +84,10 @@ bool battery_isCharging(void)
         if (fgets(buf, batJsonSize, fp) != NULL) {
             sscanf(buf, "{\"battery\":%*d, \"voltage\":%*d, \"charging\":%d}",
                    &charge_number);
-            charging = (charge_number == 3);
         }
         pclose(fp);
+        return charge_number == 3;
     }
-
-    return charging;
 
 #else
     return true;

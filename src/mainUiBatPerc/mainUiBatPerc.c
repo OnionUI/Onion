@@ -21,8 +21,6 @@
 #include "utils/log.h"
 #include "utils/str.h"
 
-#define SYSTEM_SKIN_DIR "/mnt/SDCARD/miyoo/app/skin/"
-
 void restoreRegularDisplay(void)
 {
     char theme_path[STR_MAX];

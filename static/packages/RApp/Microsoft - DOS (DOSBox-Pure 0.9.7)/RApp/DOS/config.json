@@ -1,0 +1,13 @@
+{
+    "label": "DOSBox Pure",
+    "icon": "../../Icons/Default/rapp/dosbox_pure.png",
+    "iconsel": "../../Icons/Default/rapp/dosbox_pure.png",
+    "launch": "launch.sh",
+    "rompath": "../../Roms/DOS",
+    "imgpath": "../../Roms/DOS/Imgs",
+    "gamelist": "../../Roms/DOS/miyoogamelist.xml",
+    "useswap": 1,
+    "shortname": 0,
+    "hidebios": 1,
+    "extlist": "zip|dosz|exe|com|bat|iso|cue|ins|img|ima|vhd|jrc|tc|m3u|m3u8|conf"
+}
