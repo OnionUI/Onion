@@ -160,7 +160,8 @@ void backupDB(void)
     system(command);
 }
 
-void registerTimerEnd(const char *identifier)
+void registerTimerEnd(const char *identifier) void registerTimerEnd(
+    const char *identifier)
 {
     FILE *fp;
     long lSize;
@@ -208,6 +209,9 @@ void registerTimerEnd(const char *identifier)
     char gameName[100];
     strncpy(gameName, identifier, 99);
 
+    char gameName[100];
+    strncpy(gameName, identifier, 99);
+
     // Addition of the new time
     int searchPosition = searchRomDB(gameName);
     if (searchPosition >= 0) {
@@ -220,7 +224,7 @@ void registerTimerEnd(const char *identifier)
             // Game inexistant, add to the DB
             if (rom_list_len < MAXVALUES - 1) {
                 rom_list[rom_list_len].playTime = iTempsDeJeuSession;
-                strncpy(rom_list[rom_list_len].name, 99, gameName);
+                strncpy(rom_list[rom_list_len].name, gameName, 99);
                 rom_list_len++;
             }
         }

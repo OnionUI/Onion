@@ -21,6 +21,7 @@
 
 #define SYSTEM_SKIN_DIR "/mnt/SDCARD/miyoo/app/skin"
 #define THEMES_DIR "/mnt/SDCARD/Themes"
+#define ACTIVE_THEME "/mnt/SDCARD/.tmp_update/config/active_theme"
 
 #ifndef DT_DIR
 #define DT_DIR 4
@@ -73,13 +74,18 @@ void loadThemeDirectory(const char *theme_dir,
     }
 }
 
+void updatePreviews()
+{
+    system(SCRIPT_DIR "/themes_extract_previews.sh");
+    sync();
+}
+
 int listAllThemes(char themes_out[NUMBER_OF_THEMES][STR_MAX],
                   const char *installed_theme, int *installed_page)
 {
     int count = 0;
 
-    system(SCRIPT_DIR "/themes_extract_previews.sh");
-    sync();
+    updatePreviews();
 
     loadThemeDirectory(THEMES_DIR, themes_out, &count, true);
     loadThemeDirectory(THEMES_DIR "/.previews", themes_out, &count, false);
@@ -117,17 +123,28 @@ bool checkPreview(const char *preview_path)
     return true;
 }
 
-void loadTheme(const char *theme_name, Theme_s *theme_out)
+bool getThemePath(const char *theme_name, char *theme_path_out)
 {
-    char theme_path[STR_MAX * 2];
-    snprintf(theme_path, STR_MAX * 2 - 1, THEMES_DIR "/.previews/%s/",
+    snprintf(theme_path_out, STR_MAX * 2 - 1, THEMES_DIR "/.previews/%s/",
              theme_name);
 
-    if (!checkPreview(theme_path))
-        snprintf(theme_path, STR_MAX * 2 - 1, THEMES_DIR "/%s/", theme_name);
+    if (!checkPreview(theme_path_out))
+        snprintf(theme_path_out, STR_MAX * 2 - 1, THEMES_DIR "/%s/",
+                 theme_name);
 
-    if (is_dir(theme_path))
+    return is_dir(theme_path_out);
+}
+
+bool loadTheme(const char *theme_name, Theme_s *theme_out)
+{
+    char theme_path[STR_MAX * 2];
+
+    if (getThemePath(theme_name, theme_path)) {
         *theme_out = theme_loadFromPath(theme_path, false);
+        return true;
+    }
+
+    return false;
 }
 
 void installNonDynamicElement(const char *theme_path, const char *image_name)
@@ -159,30 +176,29 @@ void installNonDynamicElement(const char *theme_path, const char *image_name)
     }
 }
 
-void installTheme(Theme_s *theme, bool apply_icons)
+void installTheme(char *theme_path, bool apply_icons)
 {
     system("/mnt/SDCARD/.tmp_update/bin/mainUiBatPerc --restore");
 
-    if (strstr(theme->path, "/.previews/") != NULL) {
+    if (strstr(theme_path, "/.previews/") != NULL) {
         char cmd[STR_MAX * 2];
         snprintf(cmd, STR_MAX * 2 - 1,
-                 SCRIPT_DIR "/themes_extract_theme.sh \"%s\"", theme->path);
+                 SCRIPT_DIR "/themes_extract_theme.sh \"%s\"", theme_path);
 
-        sprintf(theme->path, THEMES_DIR "/%s/", basename(theme->path));
+        sprintf(theme_path, THEMES_DIR "/%s/", basename(theme_path));
 
         system(cmd);
         sync();
     }
 
     // change theme setting
-    strcpy(settings.theme, theme->path);
+    strcpy(settings.theme, theme_path);
     settings_save();
 
     FILE *fp;
-    file_put_sync(fp, "/mnt/SDCARD/.tmp_update/config/active_theme", "%s",
-                  theme->path);
+    file_put_sync(fp, ACTIVE_THEME, "%s", theme_path);
 
-    Theme_s with_overrides = theme_loadFromPath(theme->path, true);
+    Theme_s with_overrides = theme_loadFromPath(theme_path, true);
 
     lang_removeIconLabels(with_overrides.hideLabels.icons,
                           with_overrides.hideLabels.hints);
@@ -193,10 +209,58 @@ void installTheme(Theme_s *theme, bool apply_icons)
 
     if (apply_icons) {
         char icon_pack_path[STR_MAX + 32];
-        snprintf(icon_pack_path, STR_MAX + 32 - 1, "%sicons", theme->path);
+        snprintf(icon_pack_path, STR_MAX + 32 - 1, "%sicons", theme_path);
         apply_iconPack(is_dir(icon_pack_path) ? icon_pack_path
                                               : ICON_PACK_DEFAULT);
     }
+}
+
+bool checkAndSetDir(char *dest, const char *dir_path)
+{
+    strcpy(dest, dir_path);
+    return is_dir(dest);
+}
+
+bool checkActiveTheme(char *theme_path_out)
+{
+    if (!is_file(ACTIVE_THEME))
+        return false;
+
+    FILE *fp;
+    char active_theme_path[STR_MAX];
+    file_get(fp, ACTIVE_THEME, "%[^\n]", active_theme_path);
+
+    printf_debug("active theme: %s\n", active_theme_path);
+
+    return getThemePath(basename(active_theme_path), theme_path_out);
+}
+
+bool ensureThemePath(const char *theme_name, char *theme_path_out)
+{
+    if (getThemePath(theme_name, theme_path_out))
+        return true;
+    if (checkActiveTheme(theme_path_out))
+        return true;
+    if (checkAndSetDir(theme_path_out, DEFAULT_THEME_PATH))
+        return true;
+    if (checkAndSetDir(theme_path_out, "/mnt/SDCARD/miyoo/app"))
+        return true;
+    return checkAndSetDir(theme_path_out, "/customer/app");
+}
+
+void reinstallTheme(const char *theme_name, bool apply_icons,
+                    bool update_previews)
+{
+    char theme_path[STR_MAX * 2];
+
+    if (update_previews)
+        updatePreviews();
+
+    if (!ensureThemePath(theme_name, theme_path))
+        return;
+
+    installTheme(theme_path, apply_icons);
+    printf_debug("Reapplied: \"%s\"\n", theme_path);
 }
 
 #endif // THEME_SWITCHER_INSTALL_THEME_H__

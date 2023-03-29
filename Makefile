@@ -123,7 +123,7 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/detectKey && BUILD_DIR=$(BIN_DIR) make
 # Build dependencies for installer
 	@mkdir -p $(INSTALLER_DIR)/bin
-	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(INSTALLER_DIR)/bin/ make
+	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(INSTALLER_DIR)/bin/ VERSION=$(VERSION) make
 	@cp $(BIN_DIR)/prompt $(INSTALLER_DIR)/bin/
 	@cp $(BIN_DIR)/batmon $(INSTALLER_DIR)/bin/
 	@cp $(BIN_DIR)/detectKey $(INSTALLER_DIR)/bin/

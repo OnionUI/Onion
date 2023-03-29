@@ -4,6 +4,7 @@ core_zipfile="$sysdir/onion.pak"
 ra_zipfile="/mnt/SDCARD/RetroArch/retroarch.pak"
 ra_version_file="/mnt/SDCARD/RetroArch/onion_ra_version.txt"
 ra_package_version_file="/mnt/SDCARD/RetroArch/ra_package_version.txt"
+export PATH="$sysdir/bin:$PATH"
 
 install_ra=1
 
@@ -69,9 +70,9 @@ main() {
 
     # Start the battery monitor
     cd $sysdir
-    ./bin/batmon 2>&1 > ./logs/batmon.log &
+    batmon 2>&1 > ./logs/batmon.log &
 
-    ./bin/detectKey 1
+    detectKey 1
     menu_pressed=$?
 
     if [ $menu_pressed -eq 0 ]; then
@@ -86,7 +87,7 @@ main() {
 
 prompt_update() {
     # Prompt for update or fresh install
-    ./bin/prompt -r -m "Welcome to the Onion installer!\nPlease choose an action:" \
+    prompt -r -m "Welcome to the Onion installer!\nPlease choose an action:" \
         "Update (keep settings)" \
         "Reinstall (reset settings)" \
         "Update OS/RetroArch only"
@@ -96,7 +97,7 @@ prompt_update() {
         # Update (keep settings)
         run_installation 0 0
     elif [ $retcode -eq 1 ]; then
-        ./bin/prompt -r -m "Warning: Reinstall will reset everything,\nremoving any custom emus or apps." \
+        prompt -r -m "Warning: Reinstall will reset everything,\nremoving any custom emus or apps." \
             "Yes, reset my system" \
             "Cancel"
         retcode=$?
@@ -198,7 +199,7 @@ run_installation() {
 
     # Show installation progress
     cd $sysdir
-    ./bin/installUI &
+    installUI &
     sleep 1
 
     verb="Updating"
@@ -245,9 +246,7 @@ run_installation() {
 
         # Patch RA config
         cd $sysdir
-        if [ -f ./bin/tweaks ]; then
-            ./bin/tweaks --apply_tool "patch_ra_cfg" --no_display
-        fi
+        tweaks --apply_tool "patch_ra_cfg" --no_display
     fi
     install_configs $reset_configs
 
@@ -261,20 +260,30 @@ run_installation() {
 
         # Start the battery monitor
         cd $sysdir
-        ./bin/batmon 2>&1 > ./logs/batmon.log &
-        ./bin/themeSwitcher --reapply
+        batmon 2>&1 > ./logs/batmon.log &
 
+        # Reapply theme
+        system_theme="$(/customer/app/jsonval theme)"
+        active_theme="$(cat ./config/active_theme)"
+        
+        if [ -d "$(cat ./config/active_icon_pack)" ] && [ "$system_theme" == "$active_theme" ] && [ -d "$system_theme" ]; then
+            themeSwitcher --update
+        else
+            themeSwitcher --update --reapply_icons
+        fi
+
+        # Show quick guide
         if [ $reset_configs -eq 1 ]; then
             cd /mnt/SDCARD/App/Onion_Manual/
             ./launch.sh
         fi
 
-        # Launch layer manager
+        # Launch package manager
         cd /mnt/SDCARD/App/PackageManager/ 
         if [ $reset_configs -eq 1 ]; then
-            $sysdir/bin/packageManager --confirm
+            packageManager --confirm
         else
-            $sysdir/bin/packageManager --confirm --reapply
+            packageManager --confirm --reapply
         fi
         free_mma
 
@@ -282,7 +291,6 @@ run_installation() {
         # ./config/boot_mod.sh # disabled because of possible incompatibility with new firmware
 
         # Show installation complete
-        cd $sysdir
         rm -f .installed
     fi
 
@@ -291,7 +299,7 @@ run_installation() {
     touch $sysdir/.installed
     sync
 
-    ./bin/installUI &
+    installUI &
     sleep 1
 
     counter=10
@@ -306,7 +314,7 @@ run_installation() {
 
     rm -f $sysdir/config/currentSlide
 
-    ./bin/bootScreen "End"
+    bootScreen "End"
 }
 
 install_core() {
@@ -414,9 +422,11 @@ install_configs() {
         unzip -nq $zipfile
     fi
 
-    # Set Y button keymap to GLO if empty
-    sed 's/"mainui_button_y": "glo"/"mainui_button_y": ""/g' /mnt/SDCARD/.tmp_update/config/ke
-ymap.json > ./temp_keymap.json
+    # Set X and Y button keymaps if empty
+    cat /mnt/SDCARD/.tmp_update/config/keymap.json \
+        | sed 's/"mainui_button_x"\s*:\s*""/"mainui_button_x": "app:Search"/g' \
+        | sed 's/"mainui_button_y"\s*:\s*""/"mainui_button_y": "glo"/g' \
+        > ./temp_keymap.json
     mv -f ./temp_keymap.json /mnt/SDCARD/.tmp_update/config/keymap.json
 }
 
@@ -424,7 +434,7 @@ check_firmware() {
     echo ":: Check firmware"
     if [ ! -f /customer/lib/libpadsp.so ]; then
         cd $sysdir
-        ./bin/infoPanel -i "res/firmware.png"
+        infoPanel -i "res/firmware.png"
 
         rm -rf $sysdir
 
