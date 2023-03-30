@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 #include "components/list.h"
-#include "system/state.h"
+#include "utils/apps.h"
 #include "utils/str.h"
 
 #include "./tools.h"
@@ -27,7 +27,7 @@ void formatter_appShortcut(void *pt, char *out_label)
 {
     ListItem *item = (ListItem *)pt;
     int value = item->value;
-    InstalledApp *apps = getInstalledApps();
+    InstalledApp *apps = getInstalledApps(true);
     int max_value = installed_apps_count + NUM_TOOLS + item->action_id;
 
     if (value <= 0 || value > max_value) {

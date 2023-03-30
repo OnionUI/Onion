@@ -8,7 +8,7 @@
 #include "system/rumble.h"
 #include "system/screenshot.h"
 #include "system/settings.h"
-#include "system/state.h"
+#include "utils/apps.h"
 
 #include "./input_fd.h"
 
@@ -52,7 +52,7 @@ void applyExtraButtonShortcut(int button)
     int i;
     char *action =
         button == 0 ? settings.mainui_button_x : settings.mainui_button_y;
-    InstalledApp *apps = getInstalledApps();
+    InstalledApp *apps = getInstalledApps(false);
 
     if (button == 1 && strcmp(action, "glo") == 0) {
         temp_flag_set("launch_alt", true);

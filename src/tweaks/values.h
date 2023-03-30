@@ -2,8 +2,8 @@
 #define TWEAKS_VALUES_H__
 
 #include "components/list.h"
-#include "system/state.h"
 #include "theme/resources.h"
+#include "utils/apps.h"
 #include "utils/json.h"
 #include "utils/msleep.h"
 
@@ -22,7 +22,7 @@ int value_appShortcut(int button)
     int i;
     char *saved_value =
         button == 0 ? settings.mainui_button_x : settings.mainui_button_y;
-    InstalledApp *apps = getInstalledApps();
+    InstalledApp *apps = getInstalledApps(true);
 
     if (strncmp(saved_value, "app:", 4) == 0) {
         for (i = 0; i < installed_apps_count; i++)

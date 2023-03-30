@@ -196,7 +196,7 @@ void menu_buttonAction(void *_)
                      (ListItem){.label = "MainUI: Menu button...",
                                 .action = menu_buttonActionMainUIMenu});
 
-        getInstalledApps();
+        getInstalledApps(true);
         list_addItem(&_menu_button_action,
                      (ListItem){.label = "MainUI: X button",
                                 .item_type = MULTIVALUE,
