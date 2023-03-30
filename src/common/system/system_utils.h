@@ -21,10 +21,10 @@ void kill_mainUI(void)
 {
     if (system_state == MODE_MAIN_UI) {
         settings_shm_read();
+        temp_flag_set("mainui_killed", true);
+        sync();
         kill(system_state_pid, SIGKILL);
         display_reset();
-        process_killall("wpa_supplicant");
-        process_killall("udhcpc");
     }
 }
 

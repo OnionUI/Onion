@@ -136,6 +136,13 @@ launch_main_ui() {
     # MainUI launch
     cd /mnt/SDCARD/miyoo/app
     LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./MainUI 2>&1 > /dev/null
+
+    if [ $deviceModel -eq 354 ] && [ -f /tmp/mainui_killed ]; then
+        pkill -9 sshd
+        pkill -9 wpa_supplicant
+        pkill -9 udhcpc
+        rm /tmp/mainui_killed
+    fi
     
     mv -f /tmp/cmd_to_run.sh $sysdir/cmd_to_run.sh
     
