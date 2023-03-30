@@ -249,6 +249,10 @@ void _settings_save_mainui(void)
     fflush(fp);
     fsync(fileno(fp));
     fclose(fp);
+
+#ifdef LOG_DEBUG
+    printf_debug("%s\n", file_read(MAIN_UI_SETTINGS));
+#endif
 }
 
 void settings_save(void)
@@ -295,19 +299,6 @@ void settings_setBrightness(uint32_t value, bool apply, bool save)
     }
 }
 
-void settings_SetBGMVolume(int32_t value)
-{
-
-    settings.bgm_volume = value;
-    cJSON *request_json = json_load(MAIN_UI_SETTINGS);
-    cJSON *itemBgmVolume = cJSON_GetObjectItem(request_json, "bgmvol");
-    cJSON_SetNumberValue(itemBgmVolume, settings.bgm_volume);
-    json_save(request_json, MAIN_UI_SETTINGS);
-    cJSON_free(request_json);
-    FILE *fp;
-    file_put_sync(fp, "/tmp/settings_changed", "%s", "");
-}
-
 int settings_setVolume(uint32_t value, int add, bool apply, bool save)
 {
     settings.volume = value;
@@ -324,6 +315,7 @@ int settings_setVolume(uint32_t value, int add, bool apply, bool save)
         FILE *fp;
         file_put_sync(fp, "/tmp/settings_changed", "%s", "");
     }
+
     return settings.volume;
 }
 

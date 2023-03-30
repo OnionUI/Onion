@@ -20,11 +20,11 @@ int check_autosave(void)
 void kill_mainUI(void)
 {
     if (system_state == MODE_MAIN_UI) {
-        settings_setBGMVolFromSharedMemory();
+        settings_shm_read();
         kill(system_state_pid, SIGKILL);
+        display_reset();
         process_killall("wpa_supplicant");
         process_killall("udhcpc");
-        display_reset();
     }
 }
 

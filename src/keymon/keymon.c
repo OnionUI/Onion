@@ -47,8 +47,6 @@ const int KONAMI_CODE[] = {HW_BTN_UP,   HW_BTN_UP,    HW_BTN_DOWN, HW_BTN_DOWN,
                            HW_BTN_B,    HW_BTN_A};
 const int KONAMI_CODE_LENGTH = sizeof(KONAMI_CODE) / sizeof(KONAMI_CODE[0]);
 
-uint32_t recent_volume;
-
 //
 //    Suspend / Kill processes
 //        mode: 0:STOP 1:TERM 2:KILL
@@ -247,7 +245,7 @@ void suspend_exec(int timeout)
     }
     display_on();
     display_setBrightness(settings.brightness);
-    setVolume(recent_volume, 0);
+    setVolume(settings.volume, 0);
     if (!killexit) {
         resume();
         system_clock_pause(false);
@@ -282,7 +280,7 @@ void deepsleep(void)
     else if (system_state == MODE_ADVMENU) {
         short_pulse();
         system_shutdown();
-        kill(system_state_pid, SIGTERM);
+        kill(system_state_pid, SIGQUIT);
     }
     else if (system_state == MODE_APPS) {
         short_pulse();
@@ -305,18 +303,18 @@ int main(void)
     settings_init();
     printf_debug("Settings loaded. Brightness set to: %d\n",
                  settings.brightness);
+    display_setBrightness(settings.brightness);
 
     // Set Initial Volume / Brightness
     if (DEVICE_ID == MIYOO283) {
-        recent_volume = setVolume(20, 0);
+        setVolume(20, 0);
     }
     else if (DEVICE_ID == MIYOO354) {
-        recent_volume = setVolume(settings.volume, 0);
+        setVolume(settings.volume, 0);
     }
 
-    display_setBrightness(settings.brightness);
-
     display_init();
+
     // Prepare for Poll button input
     input_fd = open("/dev/input/event0", O_RDONLY);
     memset(&fds, 0, sizeof(fds));
@@ -458,7 +456,7 @@ int main(void)
                         if (settings.brightness > 0) {
                             settings_setBrightness(settings.brightness - 1,
                                                    true, true);
-                            settings_sync();
+                            settings_shm_write();
                         }
                         comboKey_select = true;
                         break;
@@ -488,7 +486,7 @@ int main(void)
                         if (settings.brightness < MAX_BRIGHTNESS) {
                             settings_setBrightness(settings.brightness + 1,
                                                    true, true);
-                            settings_sync();
+                            settings_shm_write();
                         }
                         comboKey_select = true;
                         break;
@@ -522,10 +520,12 @@ int main(void)
                 volUp_pressed = (val == PRESSED);
                 if ((val == PRESSED) || (val == REPEAT)) {
                     if (settings.volume <= MAX_VOLUME - VOLUME_INCREMENTS) {
-                        recent_volume = settings_setVolume(0, VOLUME_INCREMENTS,
-                                                           true, true);
-                        settings_setBGMVolFromSharedMemory();
-                        settings_sync();
+                        settings_setVolume(0, VOLUME_INCREMENTS, true, true);
+
+                        if (system_state == MODE_MAIN_UI) {
+                            settings_show_volume_change();
+                            settings_shm_write();
+                        }
                     }
                 }
                 break;
@@ -533,16 +533,21 @@ int main(void)
                 volDown_pressed = (val == PRESSED);
                 if (val == PRESSED) {
                     if (settings.volume >= VOLUME_INCREMENTS) {
-                        recent_volume = settings_setVolume(
-                            0, -VOLUME_INCREMENTS, true, true);
-                        settings_setBGMVolFromSharedMemory();
-                        settings_sync();
+                        settings_setVolume(0, -VOLUME_INCREMENTS, true, true);
+
+                        if (system_state == MODE_MAIN_UI) {
+                            settings_show_volume_change();
+                            settings_shm_write();
+                        }
                     }
                 }
                 else if (val == REPEAT) {
-                    recent_volume = settings_setVolume(0, 0, true, true);
-                    settings_setBGMVolFromSharedMemory();
-                    settings_sync();
+                    settings_setVolume(0, 0, true, true);
+
+                    if (system_state == MODE_MAIN_UI) {
+                        settings_show_volume_change();
+                        settings_shm_write();
+                    }
                 }
                 break;
             default:
@@ -578,6 +583,9 @@ int main(void)
                     konamiCodeIndex = (ev.code == HW_BTN_UP);
                 }
             }
+
+            if (system_state == MODE_MAIN_UI)
+                settings_shm_read();
 
             hibernate_start = getMilliseconds();
             elapsed_sec = (hibernate_start - ticks) / 1000;
