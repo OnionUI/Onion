@@ -155,9 +155,9 @@ bool _apply_singleIconFromPack(const char *config_path,
             sprintf(icon_path, icons_getIconPathFormat(mode), ICON_PACK_DEFAULT,
                     icon_name);
         }
-        else {
+
+        if (!is_file(icon_path))
             return false;
-        }
     }
 
     char sel_path[STR_MAX];
