@@ -3,6 +3,7 @@
 *.sh		text eol=lf
 *.port		text eol=lf
 *.notfound	text eol=lf
+*.conf		text eol=lf
 
 static/build/.tmp_update/updater				text eol=lf
 static/build/miyoo/app/audioserver				text eol=lf
