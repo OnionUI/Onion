@@ -22,6 +22,8 @@ void kill_mainUI(void)
     if (system_state == MODE_MAIN_UI) {
         settings_setBGMVolFromSharedMemory();
         kill(system_state_pid, SIGKILL);
+        process_killall("wpa_supplicant");
+        process_killall("udhcpc");
         display_reset();
     }
 }
