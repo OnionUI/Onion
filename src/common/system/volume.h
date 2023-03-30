@@ -8,6 +8,7 @@
 
 #define MI_AO_SETVOLUME 0x4008690b
 #define MI_AO_GETVOLUME 0xc008690c
+#define MI_AO_SETMUTE 0x4008690d
 
 int setVolumeRaw(int volume, int add)
 {
@@ -48,4 +49,15 @@ int setVolume(int volume, int add)
     return (int)((recent_volume / 3) + 20);
 }
 
+void setMute(bool mute)
+{
+    int fd = open("/dev/mi_ao", O_RDWR);
+    if (fd >= 0) {
+        int buf2[] = {0, mute};
+        uint64_t buf1[] = {sizeof(buf2), (uintptr_t)buf2};
+
+        ioctl(fd, MI_AO_SETMUTE, buf1);
+        close(fd);
+    }
+}
 #endif // VOLUME_H__
