@@ -165,6 +165,7 @@ void shutdown(void)
     system_clock_get();
     system_clock_save();
     sync();
+
     if (DEVICE_ID == MIYOO283) {
         reboot(RB_AUTOBOOT);
     }
@@ -264,7 +265,7 @@ void deepsleep(void)
     if (system_state == MODE_MAIN_UI) {
         short_pulse();
         system_shutdown();
-        kill(system_state_pid, SIGKILL);
+        kill_mainUI();
     }
     else if (system_state == MODE_SWITCHER) {
         short_pulse();
