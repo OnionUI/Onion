@@ -19,7 +19,7 @@ if ! [ -f "$savedir/MAME 2003-Plus/.mame2003plusTutorialDone" ]; then
 	
 	LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so /mnt/SDCARD/.tmp_update/bin/prompt -r \
 	-t "Arcade Save States Tutorial" \
-	-m "Watch a quick video to learn\nhow to use arcade save tates ?" \
+	-m "Watch a quick video to learn\nhow to use arcade save states ?" \
 	"Yes" \
 	"No"
 
