@@ -29,6 +29,7 @@ static struct settings_s {
     int hue;
     int saturation;
     int contrast;
+    int wifi_on;
     char theme[JSON_STRING_LEN];
     int fontsize;
     int audiofix;
@@ -72,6 +73,7 @@ void _settings_reset(void)
     strcpy(settings.theme, DEFAULT_THEME_PATH);
     settings.fontsize = 24;
     settings.audiofix = 1;
+    settings.wifi_on = 0;
     // Onion settings
     settings.show_recents = false;
     settings.show_expert = false;
@@ -132,6 +134,7 @@ void _settings_load_mainui(void)
     json_getInt(json_root, "contrast", &settings.contrast);
     json_getInt(json_root, "fontsize", &settings.fontsize);
     json_getInt(json_root, "audiofix", &settings.audiofix);
+    json_getInt(json_root, "wifi", &settings.wifi_on);
 
     json_getString(json_root, "keymap", settings.keymap);
     json_getString(json_root, "language", settings.language);
@@ -239,7 +242,8 @@ void _settings_save_mainui(void)
     fprintf(fp, JSON_FORMAT_TAB_NUMBER, "contrast", settings.contrast);
     fprintf(fp, JSON_FORMAT_TAB_STRING, "theme", settings.theme);
     fprintf(fp, JSON_FORMAT_TAB_NUMBER, "fontsize", settings.fontsize);
-    fprintf(fp, JSON_FORMAT_TAB_NUMBER_NC, "audiofix", settings.audiofix);
+    fprintf(fp, JSON_FORMAT_TAB_NUMBER, "audiofix", settings.audiofix);
+    fprintf(fp, JSON_FORMAT_TAB_NUMBER_NC, "wifi", settings.wifi_on);
     fprintf(fp, "}");
 
     fflush(fp);
