@@ -23,10 +23,9 @@
 
 void restoreRegularDisplay(void)
 {
-    char theme_path[STR_MAX];
+    char icon_path[STR_MAX + 20], icon_backup[STR_MAX], theme_path[STR_MAX];
     theme_getPath(theme_path);
 
-    char icon_path[STR_MAX], icon_backup[STR_MAX];
     bool icon_exists =
         theme_getImagePath(theme_path, "power-full-icon", icon_path) == 1;
     bool backup_exists = theme_getImagePath(theme_path, "power-full-icon_back",
@@ -45,20 +44,10 @@ void drawBatteryPercentage(void)
     char theme_path[STR_MAX];
     theme_getPath(theme_path);
 
-    char icon_path[STR_MAX], icon_backup[STR_MAX];
-    bool icon_location =
-        theme_getImagePath(theme_path, "power-full-icon", icon_path);
-    bool backup_location =
-        theme_getImagePath(theme_path, "power-full-icon_back", icon_backup);
-
-    // Backup old battery icon
-    if (icon_location != backup_location) {
-        sprintf(icon_backup, "%s_back.png", file_removeExtension(icon_path));
-        file_copy(icon_path, icon_backup);
-    }
+    char icon_path[STR_MAX + 20];
+    snprintf(icon_path, STR_MAX + 19, "%sskin/.batt-perc.png", theme_path);
 
     TTF_Init();
-    // sprintf(icon_path, "%sskin/.batt-perc.png", theme_path);
 
     int percentage = battery_getPercentage();
     SDL_Surface *image =
@@ -75,12 +64,9 @@ void drawBatteryPercentage(void)
 
 int main(int argc, char *argv[])
 {
-
-    // TODO : we need to do different things here depending on the device
-
-    if (argc > 1 && strcmp(argv[1], "--restore") == 0)
-        restoreRegularDisplay();
-    else if (!battery_isCharging())
-        drawBatteryPercentage();
+    // Repair themes modified with the previous logic
+    // and make sure the percentage resource exists
+    restoreRegularDisplay();
+    drawBatteryPercentage();
     return 0;
 }
