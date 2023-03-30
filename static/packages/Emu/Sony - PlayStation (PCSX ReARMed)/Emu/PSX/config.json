@@ -1,13 +1,13 @@
 {
-"label":"PSX",
-"icon":"../../Icons/Default/ps.png",
-"iconsel":"../../Icons/Default/ps.png",
-"launch":"launch.sh",
-"rompath":"../../Roms/PS",
-"imgpath":"../../Roms/PS/Imgs",
-"gamelist":"../../Roms/PS/miyoogamelist.xml",
-"useswap":1,
-"shortname":0,
-"hidebios":0,
-"extlist":"cue|mdf|pbp|toc|cbn|m3u|ccd|chd"
+    "label": "PSX",
+    "icon": "../../Icons/Default/ps.png",
+    "iconsel": "../../Icons/Default/ps.png",
+    "launch": "launch.sh",
+    "rompath": "../../Roms/PS",
+    "imgpath": "../../Roms/PS/Imgs",
+    "gamelist": "../../Roms/PS/miyoogamelist.xml",
+    "useswap": 1,
+    "shortname": 0,
+    "hidebios": 0,
+    "extlist": "cue|img|mdf|pbp|toc|cbn|m3u|ccd|chd"
 }

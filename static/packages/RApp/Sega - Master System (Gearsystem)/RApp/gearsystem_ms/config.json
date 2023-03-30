@@ -1,12 +1,12 @@
 {
-"label":"gearsystem_ms",
-"icon":"../../Icons/Default/rapp/gearsystem.png",
-"iconsel":"../../Icons/Default/rapp/gearsystem.png",
-"launch":"launch.sh",
-"rompath":"../../Roms/MS",
-"imgpath":"../../Roms/MS/Imgs",
-"useswap":0,
-"shortname":0,
-"hidebios":1,
-"extlist":""
+    "label": "gearsystem_ms",
+    "icon": "../../Icons/Default/rapp/gearsystem_ms.png",
+    "iconsel": "../../Icons/Default/rapp/gearsystem_ms.png",
+    "launch": "launch.sh",
+    "rompath": "../../Roms/MS",
+    "imgpath": "../../Roms/MS/Imgs",
+    "useswap": 0,
+    "shortname": 0,
+    "hidebios": 1,
+    "extlist": ""
 }

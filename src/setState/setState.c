@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "system/state.h"
+#include "utils/apps.h"
 
 int main(int argc, char *argv[])
 {

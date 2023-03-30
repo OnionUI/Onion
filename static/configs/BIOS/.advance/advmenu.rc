@@ -1,0 +1,103 @@
+#device_joystick auto
+device_keyboard sdl
+device_video sdl
+display_orientation mirror_x mirror_y
+display_resizeeffect none
+display_size 640x480
+display_restoreatgame no
+event_alpha no
+event_assign up up 
+event_assign down down 
+event_assign left left 
+event_assign right right 
+event_assign enter space
+event_assign esc esc or lcontrol
+event_assign space lalt
+event_assign home home
+event_assign end end
+event_assign pgup e
+event_assign pgdn  t
+event_assign del backspace
+event_assign ins tab
+event_assign exit esc
+event_assign shutdown none
+event_assign mode rcontrol
+event_assign calib plus_pad
+event_assign help f1
+event_assign group f2
+event_assign type f3
+event_assign exclude f4
+event_assign sort lshift
+event_assign setgroup f9
+event_assign settype none
+event_assign runclone f12
+event_assign command f8
+event_assign menu enter
+event_assign emulator f6
+event_assign rotate none
+event_assign lock none
+event_assign preview none
+event_assign mute period_pad
+event_assign volume none
+event_assign difficulty none
+misc_quiet yes
+mode tile_tiny
+Arcade/mode_skip full_mixed list_mixed title_enormous title_giant title_icon title_marquee
+sound_background_loop none
+sound_background_loop_dir none
+sound_foreground_begin none
+sound_foreground_end none
+sound_foreground_key none
+sound_foreground_start none
+sound_foreground_stop none
+sound_volume -26
+preview_default "preview.png"
+ui_bar_font "/mnt/SDCARD/miyoo/app/Exo-2-Bold-Italic_Universal.ttf"
+#ui_clip none
+ui_color help ffffff 000000
+ui_color help_tag 00ff00 000000
+ui_color submenu_bar ffffff 323232
+ui_color submenu_item ffffff 323232
+ui_color submenu_item_select ffffff 7247c2
+ui_color submenu_hidden a8a8a8 000000
+ui_color submenu_hidden_select ffffff 7247c2
+ui_color menu_item ffffff 000000
+ui_color menu_hidden ffffff 000000
+ui_color menu_tag ffffff 000000
+ui_color menu_item_select ffffff 7247c2
+ui_color menu_hidden_select ffffff 7247c2
+ui_color menu_tag_select ffffff 7247c2
+ui_color bar ffffff 000000
+ui_color bar_tag 7247c2 000000
+ui_color bar_hidden 3c3f50 000000
+ui_color grid 000000 000000
+ui_color overscan ffffff 000000
+ui_color backdrop 7247c2 000000
+ui_color icon ffffff ffffff
+ui_color cursor ffffff ffffff
+ui_outline no
+ui_menukey no
+ui_game snap
+ui_gamemsg "LOADING"
+ui_background bg.png
+ui_menu_font "/mnt/SDCARD/miyoo/app/Exo-2-Bold-Italic_Universal.ttf"
+ui_menu_size 20
+ui_text_font "/mnt/SDCARD/miyoo/app/wqy-microhei.ttc"
+ui_text_size 24
+
+#emulator "advmess" advmess "/mnt/SDCARD/App/advmenu/advmess.sh" "%p"
+
+#emulator "AdvanceMAME" advmame "/mnt/SDCARD/App/advmenu/advmame.sh" "%p"
+	
+#emulator "AdvanceMAME" advmame "advmame" "%o[,-ror,-flipx,-rol] %o[,,-flipy,]"
+#emulator_roms "AdvanceMAME" "/mnt/SDCARD/Roms/ARCADE"
+
+#emulator "advmess" advmess "/mnt/SDCARD/App/advmenu/advmess.sh" "%p"
+#emulator "advmess" advmess "advmess" "-quiet"
+
+emulator "advancemame" generic "/mnt/SDCARD/RApp/advancemame/advcommand.sh" "%p"
+emulator_roms "advancemame" "/mnt/SDCARD/Roms/ADVMAME"
+emulator_roms_filter "advancemame" "*.zip"
+emulator_altss "advancemame" "/mnt/SDCARD/Roms/ADVMAME/Snaps"
+emulator_flyers "advancemame" "/mnt/SDCARD/Roms/ADVMAME/Imgs"
+type_import catver "advancemame" "category.ini" "Category"

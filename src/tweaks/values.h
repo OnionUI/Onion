@@ -4,6 +4,7 @@
 #include "components/list.h"
 #include "system/state.h"
 #include "theme/resources.h"
+#include "utils/apps.h"
 #include "utils/json.h"
 #include "utils/msleep.h"
 
@@ -22,11 +23,11 @@ int value_appShortcut(int button)
     int i;
     char *saved_value =
         button == 0 ? settings.mainui_button_x : settings.mainui_button_y;
-    char ***apps = getInstalledApps();
+    InstalledApp *apps = getInstalledApps();
 
     if (strncmp(saved_value, "app:", 4) == 0) {
         for (i = 0; i < installed_apps_count; i++)
-            if (strcmp(saved_value + 4, apps[i][0]) == 0)
+            if (strcmp(saved_value + 4, apps[i].dirName) == 0)
                 return 1 + i;
     }
     else if (strncmp(saved_value, "tool:", 5) == 0) {

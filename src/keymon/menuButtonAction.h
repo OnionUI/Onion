@@ -4,9 +4,13 @@
 #include <time.h>
 
 #include "system/clock.h"
+#include "system/keymap_hw.h"
 #include "system/rumble.h"
+#include "system/screenshot.h"
 #include "system/settings.h"
 #include "system/state.h"
+#include "system/system_utils.h"
+#include "utils/apps.h"
 
 #include "./input_fd.h"
 
@@ -50,15 +54,15 @@ void applyExtraButtonShortcut(int button)
     int i;
     char *action =
         button == 0 ? settings.mainui_button_x : settings.mainui_button_y;
-    char ***apps = getInstalledApps();
+    InstalledApp *apps = getInstalledApps();
 
     if (button == 1 && strcmp(action, "glo") == 0) {
         temp_flag_set("launch_alt", true);
     }
     else if (strncmp(action, "app:", 4) == 0) {
         for (i = 0; i < installed_apps_count; i++)
-            if (strcmp(action + 4, apps[i][0]) == 0) {
-                _action_runApp(apps[i][0]);
+            if (strcmp(action + 4, apps[i].dirName) == 0) {
+                _action_runApp(apps[i].dirName);
                 return;
             }
     }

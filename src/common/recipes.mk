@@ -5,6 +5,8 @@ $(TARGET): $(OFILES)
 	fi
 	@-mv -f $(TARGET) "$(BUILD_DIR)/$(TARGET)"
 
+build: $(TARGET)
+
 %.o: %.c
 	@$(ECHO) $(PRINT_BUILD)
 	@$(ECHO) $(COMPILE_CC_OUT)

@@ -5,6 +5,7 @@
 
 #include "components/list.h"
 #include "system/state.h"
+#include "utils/apps.h"
 #include "utils/str.h"
 
 #include "./tools.h"
@@ -27,7 +28,7 @@ void formatter_appShortcut(void *pt, char *out_label)
 {
     ListItem *item = (ListItem *)pt;
     int value = item->value;
-    char ***apps = getInstalledApps();
+    InstalledApp *apps = getInstalledApps();
     int max_value = installed_apps_count + NUM_TOOLS + item->action_id;
 
     if (value <= 0 || value > max_value) {
@@ -38,7 +39,8 @@ void formatter_appShortcut(void *pt, char *out_label)
     // apps
     value -= 1;
     if (value < installed_apps_count) {
-        sprintf(out_label, "App: %s", apps[value][1]);
+        InstalledApp *app = &apps[value];
+        strcpy(out_label, app->is_duplicate ? app->dirName : app->label);
         return;
     }
 

@@ -1,8 +1,8 @@
 TARGET_NAME = $(shell basename "$(TARGET)")
 
 ECHO = echo
-PRINT_BUILD = "make[$(TARGET_NAME)]: Building $<"
-PRINT_RECIPE = "make[$(TARGET_NAME)]: $@"
+PRINT_BUILD = "\n-- [$(TARGET_NAME)] Building $<"
+PRINT_RECIPE = "\n:: $(TARGET_NAME) -> $@"
 
 COMPILE_CC = $(CC) $(CFLAGS) -std=gnu18 -c "$<" -o "$@"
 COMPILE_CXX = $(CXX) $(CXXFLAGS) -std=c++17 -c "$<" -o "$@"
@@ -27,7 +27,7 @@ COLOR_REP = sed \
 MAKE_DEV = DEBUG=1 COLORS=1 make --no-print-directory
 
 ifeq (1,$(COLORS))
-PRINT_BUILD = "\e[1;34mmake[$(TARGET_NAME)]: Building $<\e[0m"
-PRINT_RECIPE = "\e[1;34mmake[$(TARGET_NAME)]: $@\e[0m"
+PRINT_BUILD = "\e[1;34m-- [$(TARGET_NAME)] Building $<\e[0m"
+PRINT_RECIPE = "\e[1;34m:: $(TARGET_NAME) -> $@\e[0m"
 COMPILE_CC_OUT = "\e[1;30m> $(COMPILE_CC)\e[0m$$($(COMPILE_CC) -fdiagnostics-color=always 2>&1)"
 endif

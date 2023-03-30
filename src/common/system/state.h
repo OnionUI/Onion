@@ -15,7 +15,8 @@ typedef enum system_state_e {
     MODE_MAIN_UI,
     MODE_SWITCHER,
     MODE_GAME,
-    MODE_APPS
+    MODE_APPS,
+    MODE_ADVMENU
 } SystemState;
 static SystemState system_state = MODE_UNKNOWN;
 static pid_t system_state_pid = 0;
@@ -48,6 +49,16 @@ bool check_isMainUI(void)
     return false;
 }
 
+bool check_isAdvMenu(void)
+{
+    pid_t pid;
+    if (!exists(CMD_TO_RUN_PATH) && (pid = process_searchpid("advmenu")) != 0) {
+        system_state_pid = pid;
+        return true;
+    }
+    return false;
+}
+
 bool check_isGameSwitcher(void)
 {
     pid_t pid;
@@ -67,6 +78,8 @@ void system_state_update(void)
         system_state = MODE_GAME;
     else if (check_isMainUI())
         system_state = MODE_MAIN_UI;
+    else if (check_isAdvMenu())
+        system_state = MODE_ADVMENU;
     else
         system_state = MODE_APPS;
 
@@ -104,140 +117,6 @@ size_t state_getAppName(char *out, const char *str)
     out[out_size] = 0;
 
     return out_size;
-}
-
-//
-//    [onion] Check retroarch running & savestate_auto_save in retroarch.cfg is
-//    true
-//
-int check_autosave(void)
-{
-    char value[STR_MAX];
-    file_parseKeyValue(RETROARCH_CONFIG, "savestate_auto_save", value, '=', 0);
-    return strcmp(value, "true") == 0;
-}
-
-void kill_mainUI(void)
-{
-    if (system_state == MODE_MAIN_UI) {
-        kill(system_state_pid, SIGKILL);
-        display_reset();
-    }
-}
-
-void run_gameSwitcher(void)
-{
-    flag_set("/mnt/SDCARD/.tmp_update/", ".runGameSwitcher", true);
-}
-
-static char ***_installed_apps;
-static int installed_apps_count = 0;
-static bool installed_apps_loaded = false;
-
-bool _getAppDirAndConfig(const char *app_dir_name, char *out_app_dir,
-                         char *out_config_path)
-{
-    memset(out_app_dir, 0, STR_MAX * sizeof(char));
-    memset(out_config_path, 0, STR_MAX * sizeof(char));
-
-    strcpy(out_app_dir, "/mnt/SDCARD/App/");
-    strncat(out_app_dir, app_dir_name, 128);
-
-    if (!is_dir(out_app_dir))
-        return false;
-
-    strcpy(out_config_path, out_app_dir);
-    strcat(out_config_path, "/config.json");
-
-    if (!is_file(out_config_path))
-        return false;
-
-    return true;
-}
-
-char ***getInstalledApps()
-{
-    DIR *dp;
-    struct dirent *ep;
-    char app_dir[STR_MAX], config_path[STR_MAX];
-
-    if (!installed_apps_loaded) {
-        if ((dp = opendir("/mnt/SDCARD/App")) == NULL)
-            return false;
-
-        _installed_apps = (char ***)malloc(100 * sizeof(char **));
-
-        while ((ep = readdir(dp))) {
-            if (ep->d_type != DT_DIR || strcmp(ep->d_name, ".") == 0 ||
-                strcmp(ep->d_name, "..") == 0)
-                continue;
-            int i = installed_apps_count;
-
-            if (!_getAppDirAndConfig(ep->d_name, app_dir, config_path))
-                continue;
-
-            _installed_apps[i] = (char **)malloc(2 * sizeof(char *));
-            _installed_apps[i][0] = (char *)malloc(STR_MAX * sizeof(char));
-            _installed_apps[i][1] = (char *)malloc(STR_MAX * sizeof(char));
-
-            strncpy(_installed_apps[i][0], ep->d_name, STR_MAX - 1);
-            file_parseKeyValue(config_path, "label", _installed_apps[i][1], ':',
-                               0);
-
-            printf_debug("app %d: %s (%s)\n", i, _installed_apps[i][0],
-                         _installed_apps[i][1]);
-
-            installed_apps_count++;
-        }
-
-        installed_apps_loaded = true;
-    }
-
-    return _installed_apps;
-}
-
-bool getAppPosition(const char *app_dir_name, int *currpos, int *total)
-{
-    bool found = false;
-    *currpos = 0;
-    *total = 0;
-
-    getInstalledApps();
-
-    for (int i = 0; i < installed_apps_count; i++) {
-        if (strncmp(app_dir_name, _installed_apps[i][0], STR_MAX) == 0) {
-            *currpos = i;
-            found = true;
-            break;
-        }
-    }
-    *total = installed_apps_count;
-
-    printf_debug("app pos: %d (total: %d)\n", *currpos, *total);
-
-    return found;
-}
-
-void run_app(const char *app_dir_name)
-{
-    char app_dir[STR_MAX], config_path[STR_MAX];
-
-    if (!_getAppDirAndConfig(app_dir_name, app_dir, config_path))
-        return;
-
-    char launch[STR_MAX];
-    file_parseKeyValue(config_path, "launch", launch, ':', 0);
-
-    if (strlen(launch) == 0)
-        return;
-
-    FILE *fp;
-    char cmd[STR_MAX * 4];
-    snprintf(cmd, STR_MAX * 4 - 1,
-             "cd %s; chmod a+x ./%s; "
-             "LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so ./%s",
-             app_dir, launch, launch);
-    file_put_sync(fp, "/tmp/cmd_to_run.sh", "%s", cmd);
 }
 
 typedef enum mainui_states {
@@ -333,6 +212,17 @@ char *history_getRecentPath(char *filename)
     if (*filename == 0)
         return NULL;
     return filename;
+}
+
+//
+//    [onion] get recent core path from content_history.lpl
+//
+char *history_getRecentCorePath(char *core_path)
+{
+    file_parseKeyValue(HISTORY_PATH, "core_path", core_path, ':', 0);
+    if (*core_path == 0)
+        return NULL;
+    return core_path;
 }
 
 char *history_getRecentCommand(char *RACommand, int index)

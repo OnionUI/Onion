@@ -1,14 +1,3 @@
-#include "system/battery.h"
-#include "system/device_model.h"
-#include "system/display.h"
-#include "system/keymap_hw.h"
-#include "system/rumble.h"
-#include "system/settings.h"
-#include "system/system.h"
-#include "theme/config.h"
-#include "utils/file.h"
-#include "utils/log.h"
-#include "utils/msleep.h"
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 #include <assert.h>
@@ -25,6 +14,18 @@
 #include <sys/ioctl.h>
 #include <time.h>
 #include <unistd.h>
+
+#include "system/battery.h"
+#include "system/device_model.h"
+#include "system/display.h"
+#include "system/keymap_hw.h"
+#include "system/rumble.h"
+#include "system/settings.h"
+#include "system/system.h"
+#include "theme/config.h"
+#include "utils/file.h"
+#include "utils/log.h"
+#include "utils/msleep.h"
 
 #define RELEASED 0
 #define PRESSED 1

@@ -2,19 +2,38 @@
 sysdir=/mnt/SDCARD/.tmp_update
 radir=/mnt/SDCARD/RetroArch/.retroarch
 ext_cache_path=$radir/cores/cache/core_extensions.cache
+globalscriptdir=/mnt/SDCARD/App/romscripts
+
+UI_TITLE="OPTIONS"
 
 mkdir -p $radir/cores/cache
 
 cd $sysdir
-if [ ! -f $sysdir/cmd_to_run.sh ]; then
+
+if [ ! -f ./cmd_to_run.sh ]; then
     echo "cmd_to_run.sh not found"
     exit 1
 fi
 
-cmd=`cat $sysdir/cmd_to_run.sh`
+ROM_TYPE_UNKNOWN=0
+ROM_TYPE_GAME=1
+ROM_TYPE_APP=2
+
+TAB_GAMES=1
+TAB_FAVORITES=2
+TAB_APPS=3
+TAB_RECENTS=10
+TAB_EXPERT=16
+current_tab=$(cat /tmp/state.json | grep "\"type\":" | sed -e 's/^.*:\s*//g' | sed -e 's/\s*,$//g' | xargs | awk '{ print $2 }')
+
+cmd=`cat ./cmd_to_run.sh`
 rompath=""
 emupath=""
+emulabel=""
+launch_path=""
+romtype=$ROM_TYPE_UNKNOWN
 romext=""
+romroot=""
 romcfgpath=""
 default_core=""
 retroarch_core=""
@@ -24,163 +43,223 @@ coreinfo=""
 corename=""
 manpath=""
 
-globalscriptdir=/mnt/SDCARD/App/romscripts
+menu_options=""
+menu_option_labels=""
+menu_option_args=""
 
-main() {
-    rm -f $sysdir/cmd_to_run.sh
+main() {    
+    if [ $current_tab -eq $TAB_GAMES ]; then
+        echo "tab: games"
+    elif [ $current_tab -eq $TAB_FAVORITES ]; then
+        echo "tab: favorites"
+    elif [ $current_tab -eq $TAB_APPS ]; then
+        echo "tab: apps"
+    elif [ $current_tab -eq $TAB_RECENTS ]; then
+        echo "tab: recents"
+    elif [ $current_tab -eq $TAB_EXPERT ]; then
+        echo "tab: expert"
+    fi
+
+    if [ $current_tab -eq $TAB_APPS ]; then
+        exit
+    fi
+
+    rm -f ./cmd_to_run.sh 2> /dev/null
+
+    emupath=`dirname $(echo "$cmd" | awk '{ gsub(/"/, "", $2); st = index($2,".."); if (st) { print substr($2,0,st) } else { print $2 } }')`
+
+    if [ "$emupath" == "/mnt/SDCARD/App" ]; then
+        romtype=$ROM_TYPE_APP
+    else
+        rompath=$(echo "$cmd" | awk '{ st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3) }')
+
+        if echo "$rompath" | grep -q ":"; then
+            rompath=$(echo "$rompath" | awk '{st = index($0,":"); print substr($0,st+1)}')
+        fi
+
+        if check_is_game "$rompath"; then
+            romtype=$ROM_TYPE_GAME
+        fi
+
+        romext=`echo "$(basename "$rompath")" | awk -F. '{print tolower($NF)}'`
+
+        emu_config_json=`cat "$emupath/config.json"`
+        romroot="$emupath/$(get_json_value "$emu_config_json" "rompath")"
+        emulabel="$(get_json_value "$emu_config_json" "label" | sed -e 's/^\s*//g' -e 's/\s*$//g')"
+        launch_path="$emupath/launch.sh"
+    fi
+
+    if [ $current_tab -eq $TAB_FAVORITES ]; then
+        emulabel="Favorites"
+    elif [ $current_tab -eq $TAB_RECENTS ]; then
+        emulabel="Recents"
+    fi
 
     echo "cmd: $cmd"
     # example: LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so "/mnt/SDCARD/Emu/GBATEST/../../.tmp_update/proxy.sh" "/mnt/SDCARD/Emu/GBATEST/../../Roms/GBATEST/mGBA/Final Fantasy IV Advance (U).zip"
-
-    rompath=$(echo "$cmd" | awk '{ st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3) }')
-
-    if echo "$rompath" | grep -q ":"; then
-        rompath=$(echo "$rompath" | awk '{st = index($0,":"); print substr($0,st+1)}')
-    fi
-
+    echo "romtype: $romtype"
     echo "rompath: $rompath"
     # example: "/mnt/SDCARD/Emu/GBATEST/../../Roms/GBATEST/mGBA/Final Fantasy IV Advance (U).zip"
-
-    if [ ! -f "$rompath" ]; then
-        echo "rom file not found"
-        exit 1
-    fi
-
-    emupath=`echo "$rompath" | awk '{st = index($0,"/../../"); print substr($0,0,st-1)}'`
-    romext=`echo "$(basename "$rompath")" | awk -F. '{print tolower($NF)}'`
+    echo "romext: $romext"
 
     echo "emupath: $emupath"
-    echo "extension: $romext"
+    echo "emulabel: $emulabel"
 
-    menu_options=""
-    menu_option_labels=""
+    echo "romroot: $romroot"
+    echo "launch: $launch_path"
 
-    get_core_info
+    skip_game_options=0
 
-    game_core_label="Game core"
-
-    if [ ! -f "$radir/cores/$default_core.so" ]; then
-        default_core=""
+    if [ ! -f "$rompath" ] || [ "$romext" == "miyoocmd" ] || [ $romtype -ne $ROM_TYPE_GAME ]; then
+        skip_game_options=1
     fi
 
-    add_reset_core=0
+    if [ $skip_game_options -eq 0 ]; then
+        get_core_info
 
-    if [ -f "$corepath" ] && [ -f "$coreinfopath" ]; then
-        coreinfo=`cat "$coreinfopath"`
-        corename=`get_info_value "$coreinfo" corename`
+        game_core_label="Game core"
 
-        game_core_label="Game core: $corename"
-
-        if [ "$retroarch_core" == "$default_core" ]; then
-            game_core_label="$game_core_label (Default)"
-        else
-            add_reset_core=1
+        if [ ! -f "$radir/cores/$default_core.so" ]; then
+            default_core=""
         fi
 
-        menu_options="$menu_options reset_game"
-        menu_option_labels="$menu_option_labels \"Reset game\""
-    fi
+        add_reset_core=0
 
-    romdirname=`echo "$rompath" | sed "s/^.*Roms\///g" | cut -d "/" -f1`
-    manpath="/mnt/SDCARD/Roms/$romdirname/Manuals/$(basename "$rompath" ".$romext").pdf"
+        if [ -f "$corepath" ] && [ -f "$coreinfopath" ]; then
+            coreinfo=`cat "$coreinfopath"`
+            corename=`get_info_value "$coreinfo" corename`
 
-    echo "romdir: '$romdirname'"
-    echo "manual: $manpath"
+            game_core_label="Game core: $corename"
 
-    if [ -f "$manpath" ]; then
-        menu_options="$menu_options open_manual"
-        menu_option_labels="$menu_option_labels \"Game manual\""
-    fi
-
-    menu_options="$menu_options change_core"
-    menu_option_labels="$menu_option_labels \"$game_core_label\""
-
-    if [ $add_reset_core -eq 1 ]; then
-        menu_options="$menu_options reset_core"
-        menu_option_labels="$menu_option_labels \"Restore default core\""
-    fi
-
-    if [ -f "$emupath/active_filter" ]; then
-        filter_kw=`cat "$emupath/active_filter"`
-        menu_options="$menu_options clear_filter filter_roms"
-        menu_option_labels="$menu_option_labels \"Clear filter\" \"Filter: $filter_kw\""
-    else
-        menu_options="$menu_options filter_roms"
-        menu_option_labels="$menu_option_labels \"Filter list\""
-    fi
-
-    menu_options="$menu_options refresh_roms"
-    menu_option_labels="$menu_option_labels \"Refresh roms\""
-
-    if [ -d "$globalscriptdir" ]; then
-        for entry in "$globalscriptdir"/*.sh ; do
-            if [ ! -f "$entry" ]; then
-                continue
+            if [ "$retroarch_core" == "$default_core" ]; then
+                game_core_label="$game_core_label (Default)"
+            else
+                add_reset_core=1
             fi
 
-            script_name=`basename "$entry" .sh`
-            menu_options="$menu_options global_script"
-            menu_option_labels="$menu_option_labels \"$script_name\""
-        done
+            add_menu_option reset_game "Reset game"
+        fi
+
+        romdirname=`echo "$rompath" | sed "s/^.*Roms\///g" | cut -d "/" -f1`
+        manpath="/mnt/SDCARD/Roms/$romdirname/Manuals/$(basename "$rompath" ".$romext").pdf"
+
+        echo "romdirname: $romdirname"
+        echo "manpath: $manpath"
+
+        if [ -f "$manpath" ]; then
+            add_menu_option open_manual "Game manual"
+        fi
+
+        add_menu_option change_core "$game_core_label"
+
+        if [ $add_reset_core -eq 1 ]; then
+            add_menu_option reset_core "Restore default core"
+        fi
+    fi # skip_game_options
+
+    if [ $current_tab -eq $TAB_GAMES ]; then
+        if [ -f "$emupath/active_filter" ]; then
+            filter_kw=`cat "$emupath/active_filter"`
+            add_menu_option clear_filter "Clear filter"
+            add_menu_option filter_roms "Filter: $filter_kw"
+        else
+            add_menu_option filter_roms "Filter list"
+        fi
     fi
 
-    scriptdir="$emupath/romscripts"
+    if [ $current_tab -eq $TAB_GAMES ] || [ $current_tab -eq $TAB_EXPERT ]; then
+        add_menu_option refresh_roms "Refresh list"
+    fi
 
+    add_script_files "$globalscriptdir"
+
+    if [ $current_tab -eq $TAB_GAMES ]; then
+        add_script_files "$globalscriptdir/emu"
+    elif [ $current_tab -eq $TAB_EXPERT ]; then
+        add_script_files "$globalscriptdir/rapp"
+    elif [ $current_tab -eq $TAB_FAVORITES ]; then
+        add_script_files "$globalscriptdir/favorites"
+    elif [ $current_tab -eq $TAB_RECENTS ]; then
+        add_script_files "$globalscriptdir/recents"
+    fi
+
+    if [ $current_tab -eq $TAB_GAMES ] || [ $current_tab -eq $TAB_EXPERT ]; then
+        add_script_files "$emupath/romscripts"
+    fi
+
+    # Show GLO menu
+    runcmd="LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so prompt -t \"$UI_TITLE\" $(list_args "$menu_option_labels")"
+    echo -e "\n\n=================================================================================================="
+    echo -e "> $runcmd\n\n"
+    eval $runcmd
+    retcode=$?
+
+    echo -e "\n\n=================================================================================================="
+    echo "retcode: $retcode"
+
+    # Execute action
+    menu_action=`get_item "$menu_options" $retcode`
+    menu_arg=`get_item "$menu_option_args" $retcode`
+    runcmd="$menu_action $menu_arg"
+    echo -e "> $runcmd"
+    echo -e "\n\n==================================================================================================\n\n"
+    eval $runcmd
+    echo -e "\n\n=================================================================================================="
+
+    exit 1
+}
+
+check_is_game() {
+    echo "$1" | grep -q "retroarch" || echo "$1" | grep -q "/../../Roms/"
+}
+
+add_script_files() {
+    scriptdir="$1"
     if [ -d "$scriptdir" ]; then
         for entry in "$scriptdir"/*.sh ; do
             if [ ! -f "$entry" ]; then
                 continue
             fi
 
-            script_name=`basename "$entry" .sh`
-            menu_options="$menu_options emu_script"
-            menu_option_labels="$menu_option_labels \"$script_name\""
+            scriptlabel=`get_info_value "$(cat "$entry")" scriptlabel`
+
+            if [ "$scriptlabel" == "" ]; then
+                scriptlabel=`basename "$entry" .sh`
+            fi
+
+            scriptlabel=`echo "$scriptlabel" | sed "s/%LIST%/$emulabel/g"`
+
+            echo "adding romscript: $scriptlabel"
+            add_menu_option run_script "$scriptlabel" "$entry"
         done
     fi
+}
 
-    runcmd="LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./bin/prompt -t \"OPTIONS\" $menu_option_labels"
-    eval $runcmd
-    retcode=$?
-
-    echo "retcode: $retcode"
-
-    menu_action=`echo $menu_options | awk -v N=$((retcode+1)) '{print $N}'`
-
-    if [ "$menu_action" == "global_script" ] || [ "$menu_action" == "emu_script" ]; then
-        idx_n=$((retcode+1))
-        idx_double=$((idx_n*2))
-
-        menu_label="$(echo "$menu_option_labels" \
-            | awk -F'"' -v N=$idx_double '{print $N}' \
-            | sed 's/^"//g' \
-            | sed 's/"$//g')"
-
-        if [ "$menu_action" == "global_script" ]; then
-            scriptpath="$globalscriptdir/$menu_label.sh"
-        else
-            scriptpath="$scriptdir/$menu_label.sh"
-        fi
-
-        echo "running custom script: $scriptpath"
-
-        if [ -f "$scriptpath" ]; then
-            runcmd="chmod a+x \"$scriptpath\"; LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so \"$scriptpath\" \"$rompath\""
-            eval $runcmd
-            retcode=$?
-
-            exit $retcode
-        else
-            ./bin/infoPanel --title "SCRIPT NOT FOUND" --message "$scriptpath" --auto
-        fi
+add_menu_option() {
+    action="$1"
+    label="$2"
+    args="$3"
+    if [ "$menu_options" == "" ]; then
+        menu_options="$action"
+        menu_option_labels="$label"
+        menu_option_args="\"$args\""
     else
-        eval $menu_action
+        menu_options=`echo -e "$menu_options\n$action"`
+        menu_option_labels=`echo -e "$menu_option_labels\n$label"`
+        menu_option_args=`echo -e "$menu_option_args\n\"$args\""`
     fi
+}
 
-    exit 1
+list_args() {
+    echo "$1" | awk '{print "\\\""$0"\\\""}' | xargs echo
+}
+
+get_item() {
+    index=$2
+    echo "$1" | sed "$((index+1))q;d"
 }
 
 get_core_info() {
-    launch_script=`cat "$emupath/launch.sh"`
     retroarch_core=""
 
     romcfgpath="$(dirname "$rompath")/.game_config/$(basename "$rompath" ".$romext").cfg"
@@ -190,7 +269,7 @@ get_core_info() {
         retroarch_core=`get_info_value "$romcfg" core`
     fi
 
-    default_core=`echo "$launch_script" | grep ".retroarch/cores/" | awk '{st = index($0,".retroarch/cores/"); s = substr($0,st+17); st2 = index(s,".so"); print substr(s,0,st2-1)}' | xargs`
+    default_core=`cat "$launch_path" | grep ".retroarch/cores/" | awk '{st = index($0,".retroarch/cores/"); s = substr($0,st+17); st2 = index(s,".so"); print substr(s,0,st2-1)}' | xargs`
 
     if [ "$retroarch_core" == "" ]; then
         retroarch_core="$default_core"
@@ -207,24 +286,33 @@ get_info_value() {
     echo "$1" | grep "$2\b" | awk '{split($0,a,"="); print a[2]}' | awk -F'"' '{print $2}' | tr -d '\n'
 }
 
+get_json_value() {
+    echo "$1" | grep "\"$2\"\s*:" | awk '{split($0,a,":"); print a[2]}' | awk -F'"' '{print $2}' | tr -d '\n'
+}
+
 reset_game() {
+    echo ":: reset_game $*"
     echo -e "savestate_auto_load = \"false\"\nconfig_save_on_exit = \"false\"\n" > $sysdir/reset.cfg
     echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v --appendconfig \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
     exit 0
 }
 
 open_manual() {
+    echo ":: open_manual $*"
     if [ -f "$manpath" ]; then
         LD_LIBRARY_PATH="$sysdir/lib/parasyte:$LD_LIBRARY_PATH" $sysdir/bin/green/green "$manpath"
     fi
 }
 
 change_core() {
+    echo ":: change_core $*"
     ext="$romext"
+    is_archive=""
 
     if [ "$ext" == "zip" ] || [ "$ext" == "7z" ]; then
-        if ! cat "$emupath/config.json" | grep -q "\"shortname\"\s*:\s*1"; then
+        is_archive="$ext"
 
+        if ! cat "$emupath/config.json" | grep -q "\"shortname\"\s*:\s*1"; then
             if [ "$ext" == "zip" ]; then
                 zip_files=`unzip -l "$rompath" | sed '1,3d;$d' | sed '$d' | sort -n -r`
             else
@@ -253,52 +341,61 @@ change_core() {
     is_valid=0
     selected_index=0
 
-    single_ext_cache_path="$radir/cores/cache/ext_cores_$ext.cache"
+    while [ $is_valid -eq 0 ]; do
+        single_ext_cache_path="$radir/cores/cache/ext_cores_$ext.cache"
 
-    if [ ! -f "$single_ext_cache_path" ]; then
+        if [ ! -f "$single_ext_cache_path" ]; then
+            while read entry; do
+                tmp_extensions=`echo "$entry" | awk '{split($0,a,";"); print a[3]}'`
+
+                if ! echo "$tmp_extensions" | tr '|' '\n' | grep -q "$ext"; then
+                    continue
+                fi
+
+                echo "$entry" >> $single_ext_cache_path
+            done < $ext_cache_path
+        fi
+
+        if [ "$default_core" == "" ]; then
+            is_valid=1
+        fi
+        
         while read entry; do
-            tmp_extensions=`echo "$entry" | awk '{split($0,a,";"); print a[3]}'`
+            tmp_corename=`echo "$entry" | awk '{split($0,a,";"); print a[1]}'`
+            tmp_core=`echo "$entry" | awk '{split($0,a,";"); print a[2]}'`
 
-            if ! echo "$tmp_extensions" | tr '|' '\n' | grep -q "$ext"; then
-                continue
+            if [ "$tmp_core" == "$default_core" ]; then
+                is_valid=1
+                tmp_corename="$tmp_corename (Default)"
             fi
 
-            echo "$entry" >> $single_ext_cache_path
-        done < $ext_cache_path
-    fi
+            if [ "$tmp_core" == "$retroarch_core" ]; then
+                selected_index=$count
+            fi
 
-    if [ "$default_core" == "" ]; then
-        is_valid=1
-    fi
+            count=$(($count + 1))
 
-    while read entry; do
-        tmp_corename=`echo "$entry" | awk '{split($0,a,";"); print a[1]}'`
-        tmp_core=`echo "$entry" | awk '{split($0,a,";"); print a[2]}'`
+            if [ $count -ge 100 ]; then
+                break
+            fi
 
-        if [ "$tmp_core" == "$default_core" ]; then
-            is_valid=1
-            tmp_corename="$tmp_corename (Default)"
-        fi
+            available_cores="$available_cores $tmp_core"
+            available_corenames="$available_corenames \"$tmp_corename\""
+        done < $single_ext_cache_path
 
-        if [ "$tmp_core" == "$retroarch_core" ]; then
-            selected_index=$count
-        fi
-
-        count=$(($count + 1))
-
-        if [ $count -ge 100 ]; then
+        if [ "$is_archive" == "" ]; then
             break
         fi
-
-        available_cores="$available_cores $tmp_core"
-        available_corenames="$available_corenames \"$tmp_corename\""
-    done < $single_ext_cache_path
+        
+        ext="$is_archive"
+        is_archive=""
+    done
 
     echo "cores: $available_cores"
     echo "corenames: $available_corenames"
 
     if [ $is_valid -eq 0 ]; then
-        ./bin/infoPanel --title "GAME CORE" --message "Not available for this rom" --auto
+        infoPanel --title "GAME CORE" --message "Not available for this rom" --auto
         exit 1
     fi
 
@@ -361,6 +458,7 @@ get_core_extensions() {
 }
 
 rename_rom() {
+    echo ":: rename_rom $*"
     prev_name="$(basename "$rompath" ".$romext")"
     runcmd="LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./bin/kbinput -i \"$prev_name\" -t \"RENAME ROM\""
 
@@ -385,21 +483,35 @@ rename_rom() {
 }
 
 clear_filter() {
-    echo ":: clear filter"
+    echo ":: clear_filter $*"
     echo "./bin/filter clear_filter \"$emupath\""
-    ./bin/filter clear_filter "$emupath"
+    filter clear_filter "$emupath"
 }
 
 filter_roms() {
-    echo ":: filter roms"
+    echo ":: filter_roms $*"
     echo "./bin/filter filter \"$emupath\""
-    ./bin/filter filter "$emupath"
+    filter filter "$emupath"
 }
 
 refresh_roms() {
-    echo ":: refresh roms"
+    echo ":: refresh_roms $*"
     echo "./bin/filter refresh \"$emupath\""
-    ./bin/filter refresh "$emupath"
+    filter refresh "$emupath"
+    ./script/reset_list.sh "$romroot"
+}
+
+run_script() {
+    echo ":: run_script $*"
+    scriptpath="$1"
+    if [ -f "$scriptpath" ]; then
+        cd "$emupath"
+        chmod a+x "$scriptpath"
+        LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so "$scriptpath" "$rompath" "$emupath"
+        exit $?
+    else
+        infoPanel --title "SCRIPT NOT FOUND" --message "$(basename "$scriptpath")" --auto
+    fi
 }
 
 main

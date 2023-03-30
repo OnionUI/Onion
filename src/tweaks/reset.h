@@ -148,6 +148,21 @@ void action_resetRACores(void *pt)
         _notifyResetDone(title_str);
 }
 
+void action_resetAdvanceMENU(void *pt)
+{
+    const char title_str[] = "Reset AdvanceMENU/MAME/MESS";
+    if (!_disable_confirm &&
+        !_confirmReset(
+            title_str,
+            "Are you sure you want to\nreset AdvanceMENU/MAME/MESS?"))
+        return;
+    system("unzip -o " RESET_CONFIGS_PAK
+           " \"BIOS/.advance/*\" -d /mnt/SDCARD/");
+    reset_menus = true;
+    if (!_disable_confirm)
+        _notifyResetDone(title_str);
+}
+
 void action_resetAll(void *pt)
 {
     const char title_str[] = "Reset everything";
@@ -160,6 +175,7 @@ void action_resetAll(void *pt)
     action_resetMainUI(pt);
     action_resetRAMain(pt);
     action_resetRACores(pt);
+    action_resetAdvanceMENU(pt);
     _disable_confirm = false;
     reset_menus = true;
     settings_load();

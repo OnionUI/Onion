@@ -560,6 +560,7 @@ int main(void)
     if (footer_height == 1)
         footer_height = 0;
 
+    SDL_Surface *current_bg = NULL;
     SDL_Rect frame = {
         theme()->frame.border_left, 0,
         640 - theme()->frame.border_left - theme()->frame.border_right, 480};
@@ -745,29 +746,33 @@ int main(void)
         if (battery_hasChanged(ticks, &battery_percentage))
             changed = true;
 
-        if (!changed && !brightness_changed &&
-            (surfaceGameName == NULL ||
-             surfaceGameName->w <= game_name_max_width))
-            continue;
-
         if (acc_ticks >= time_step) {
-            SDL_BlitSurface(theme_background(), NULL, screen, NULL);
+            acc_ticks -= time_step;
 
-            if (game_list_len == 0) {
-                SDL_Surface *empty = resource_getSurface(EMPTY_BG);
-                SDL_Rect empty_rect = {320 - empty->w / 2, 240 - empty->h / 2};
-                SDL_BlitSurface(empty, NULL, screen, &empty_rect);
-            }
-            else {
-                SDL_Surface *imageBackgroundGame = loadRomScreen(current_game);
+            if (!changed && !brightness_changed &&
+                (surfaceGameName == NULL ||
+                 surfaceGameName->w <= game_name_max_width))
+                continue;
 
-                if (imageBackgroundGame != NULL) {
-                    if (view_mode == VIEW_NORMAL)
-                        SDL_BlitSurface(imageBackgroundGame, &frame, screen,
-                                        &frame);
-                    else
-                        SDL_BlitSurface(imageBackgroundGame, NULL, screen,
-                                        NULL);
+            if (changed) {
+                SDL_BlitSurface(theme_background(), NULL, screen, NULL);
+
+                if (game_list_len == 0) {
+                    current_bg = NULL;
+                    SDL_Surface *empty = resource_getSurface(EMPTY_BG);
+                    SDL_Rect empty_rect = {320 - empty->w / 2,
+                                           240 - empty->h / 2};
+                    SDL_BlitSurface(empty, NULL, screen, &empty_rect);
+                }
+                else {
+                    current_bg = loadRomScreen(current_game);
+
+                    if (current_bg != NULL) {
+                        if (view_mode == VIEW_NORMAL)
+                            SDL_BlitSurface(current_bg, &frame, screen, &frame);
+                        else
+                            SDL_BlitSurface(current_bg, NULL, screen, NULL);
+                    }
                 }
             }
 
@@ -784,8 +789,11 @@ int main(void)
                                            theme()->frame.border_right;
                 }
 
-                game_name_bg_pos.y =
+                game_name_bg_size.y = game_name_bg_pos.y =
                     view_mode == VIEW_NORMAL ? (480 - footer_height - 60) : 420;
+
+                SDL_BlitSurface(current_bg, &game_name_bg_size, screen,
+                                &game_name_bg_pos);
                 SDL_BlitSurface(transparent_bg, &game_name_bg_size, screen,
                                 &game_name_bg_pos);
 
@@ -848,6 +856,12 @@ int main(void)
                         gameNameScrollX =
                             -gameNameScrollStart * gameNameScrollSpeed;
                 }
+            }
+
+            if (!changed) {
+                SDL_BlitSurface(screen, NULL, video, NULL);
+                SDL_Flip(video);
+                continue;
             }
 
             if (view_mode == VIEW_NORMAL) {
@@ -931,7 +945,6 @@ int main(void)
 
             changed = false;
             current_game_changed = false;
-            acc_ticks -= time_step;
         }
     }
 

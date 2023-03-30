@@ -1,0 +1,6 @@
+{
+	"label": "AdvanceMENU",
+	"icon": "../../Icons/Default/app/advancemenu.png",
+	"launch": "launch.sh",
+	"description": "Advanced emulator frontend"
+}

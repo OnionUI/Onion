@@ -10,7 +10,6 @@
 #define MI_AO_GETVOLUME 0xc008690c
 #define MI_AO_SETMUTE 0x4008690d
 
-// Increments between -60 and 0
 int setVolumeRaw(int volume, int add)
 {
     int recent_volume = 0;

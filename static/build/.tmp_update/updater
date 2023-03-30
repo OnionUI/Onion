@@ -9,8 +9,13 @@ if [ -d $appdir/.tmp_update ] && fgrep -q "#!/bin/sh" "$appdir/MainUI"; then
     ./MainUI
 else
     cd $sysdir
-    mkdir -p logs
-    ./runtime.sh 2>&1 > /dev/null
+    mkdir -p ./logs
+
+    if [ -f ./config/.logging ]; then
+        ./runtime.sh | tee ./logs/runtime.log
+    else
+        ./runtime.sh 2>&1 > /dev/null
+    fi
 fi
 
 # Turn off if runtime exits

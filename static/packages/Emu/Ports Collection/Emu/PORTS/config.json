@@ -9,5 +9,5 @@
     "useswap": 1,
     "shortname": 1,
     "hidebios": 0,
-    "extlist": "port"
+    "extlist": "port|miyoocmd"
 }
