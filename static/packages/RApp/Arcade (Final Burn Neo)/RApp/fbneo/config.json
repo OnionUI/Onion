@@ -4,7 +4,7 @@
 "iconsel":"../../Icons/Default/rapp/fbneo.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/FBNEO",
-"imgpath":"../../Imgs/FBNEO",
+"imgpath":"../../Roms/FBNEO/Imgs",
 "useswap":1,
 "shortname":1,
 "hidebios":1,
