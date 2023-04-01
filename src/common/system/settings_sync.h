@@ -73,8 +73,8 @@ void settings_shm_read(void)
     if (_has_changed(GetKeyShm(&shminfo, MONITOR_BRIGHTNESS),
                      &settings.brightness))
         has_changes = true;
-    if (_has_changed(GetKeyShm(&shminfo, MONITOR_VOLUME), &settings.volume))
-        has_changes = true;
+    // if (_has_changed(GetKeyShm(&shminfo, MONITOR_VOLUME), &settings.volume))
+    //     has_changes = true;
     if (_has_changed(GetKeyShm(&shminfo, MONITOR_BGM_VOLUME),
                      &settings.bgm_volume))
         has_changes = true;

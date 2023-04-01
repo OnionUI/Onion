@@ -13,6 +13,7 @@
 #include "system/battery.h"
 #include "system/device_model.h"
 #include "system/keymap_hw.h"
+#include "system/osd.h"
 #include "system/rumble.h"
 #include "system/screenshot.h"
 #include "system/settings.h"
@@ -187,9 +188,7 @@ void suspend_exec(int timeout)
     system_clock_pause(true);
     suspend(0);
     rumble(0);
-    setVolume(0, 0);
-    if (DEVICE_ID == MIYOO354)
-        setMute(true);
+    setVolume(0);
     display_setBrightnessRaw(0);
     display_off();
     system_powersave_on();
@@ -247,9 +246,7 @@ void suspend_exec(int timeout)
     }
     display_on();
     display_setBrightness(settings.brightness);
-    setVolume(settings.volume, 0);
-    if (DEVICE_ID == MIYOO354)
-        setMute(settings.mute);
+    setVolume(settings.mute ? 0 : settings.volume);
     if (!killexit) {
         resume();
         system_clock_pause(false);
@@ -303,20 +300,16 @@ int main(void)
     signal(SIGTERM, quit);
     signal(SIGSEGV, quit);
 
+    log_setName("keymon");
+
     getDeviceModel();
     settings_init();
-    printf_debug("Settings loaded. Brightness set to: %d\n",
-                 settings.brightness);
-    display_setBrightness(settings.brightness);
 
     // Set Initial Volume / Brightness
-    if (DEVICE_ID == MIYOO283) {
-        setVolume(20, 0);
-    }
-    else if (DEVICE_ID == MIYOO354) {
-        setMute(settings.mute);
-        setVolume(settings.volume, 0);
-    }
+    setVolume(settings.mute ? 0 : settings.volume);
+    display_setBrightness(settings.brightness);
+    printf_debug("Settings loaded. Brightness set to: %d\n",
+                 settings.brightness);
 
     display_init();
 
@@ -330,6 +323,7 @@ int main(void)
     uint32_t button_flag = 0;
     uint32_t repeat_LR = 0;
     uint32_t repeat_power = 0;
+    uint32_t repeat_vol_down = 0;
     uint32_t val;
     int konamiCodeIndex = 0;
     bool b_BTN_Not_Menu_Pressed = false;
@@ -337,6 +331,7 @@ int main(void)
     bool power_pressed = false;
     bool volUp_pressed = false;
     bool volDown_pressed = false;
+    bool comboKey_volume = false;
     bool comboKey_menu = false;
     bool comboKey_select = false;
 
@@ -346,6 +341,7 @@ int main(void)
     int elapsed_sec = 0;
 
     bool delete_flag = false;
+    bool settings_changed = false;
 
     while (1) {
         if (poll(fds, 1, (CHECK_SEC - elapsed_sec) * 1000) > 0) {
@@ -371,7 +367,12 @@ int main(void)
                     sync();
                     delete_flag = false;
                 }
+
+                if (system_state == MODE_MAIN_UI)
+                    display_setBrightness(settings.brightness);
             }
+
+            settings_changed = false;
 
             if (val != REPEAT) {
 
@@ -407,8 +408,11 @@ int main(void)
                     // suspend
                     if (power_pressed && repeat_power < 7) {
                         if (comboKey_menu) {
-                            short_pulse();
+                            super_short_pulse();
+                            display_setBrightnessRaw(0);
                             screenshot_recent();
+                            settings_setBrightness(settings.brightness, true,
+                                                   false);
                         }
                         else {
                             suspend_exec(
@@ -453,16 +457,20 @@ int main(void)
                 if (val == PRESSED) {
                     switch (button_flag & (SELECT | START)) {
                     case START:
-                        // SELECT + L2 : volume down / + R2 : reset
-                        setVolume(0, (button_flag & R2) ? 0 : -1);
+                        // START + L2 : audio boost down / + R2 : reset volume
+                        if (button_flag & R2)
+                            setVolume(settings.volume);
+                        else
+                            setVolumeRaw(0, -3);
                         break;
                     case SELECT:
-                        // START + L2 : brightness down
+                        // SELECT + L2 : brightness down
                         if (settings.brightness > 0) {
                             settings_setBrightness(settings.brightness - 1,
-                                                   true, true);
-                            settings_shm_write();
+                                                   true, false);
+                            settings_changed = true;
                         }
+                        osd_showBar(settings.brightness, 10, false);
                         comboKey_select = true;
                         break;
                     default:
@@ -483,16 +491,20 @@ int main(void)
                 if (val == PRESSED) {
                     switch (button_flag & (SELECT | START)) {
                     case START:
-                        // SELECT + R2 : volume up / + L2 : reset
-                        setVolume(0, (button_flag & L2) ? 0 : +1);
+                        // START + R2 : audio boost up / + L2 : reset volume
+                        if (button_flag & L2)
+                            setVolume(settings.volume);
+                        else
+                            setVolumeRaw(0, +3);
                         break;
                     case SELECT:
-                        // START + R2 : brightness up
+                        // SELECT + R2 : brightness up
                         if (settings.brightness < MAX_BRIGHTNESS) {
                             settings_setBrightness(settings.brightness + 1,
-                                                   true, true);
-                            settings_shm_write();
+                                                   true, false);
+                            settings_changed = true;
                         }
+                        osd_showBar(settings.brightness, 10, false);
                         comboKey_select = true;
                         break;
                     default:
@@ -521,55 +533,73 @@ int main(void)
                 if (val == PRESSED && system_state == MODE_MAIN_UI)
                     temp_flag_set("launch_alt", false);
                 break;
-            case HW_BTN_VOLUME_UP:
-                volUp_pressed = (val == PRESSED);
-                if ((val == PRESSED) || (val == REPEAT)) {
-                    if (settings.volume <= MAX_VOLUME - VOLUME_INCREMENTS) {
-                        settings_setVolume(0, VOLUME_INCREMENTS, true, true);
-                        settings_setMute(false, true, true);
-
-                        if (system_state == MODE_MAIN_UI) {
-                            settings_show_volume_change();
-                            settings_shm_write();
-                        }
+            case HW_BTN_VOLUME_DOWN:
+                if (comboKey_menu) {
+                    // MENU + VOL DOWN : brightness down
+                    if (val != RELEASED && settings.brightness > 0) {
+                        settings_setBrightness(settings.brightness - 1, true,
+                                               false);
+                        settings_changed = true;
                     }
+                    osd_showBar(settings.brightness, 10, false);
+                    break;
+                }
+                if (val == REPEAT)
+                    repeat_vol_down++;
+                else
+                    repeat_vol_down = 0;
+                volDown_pressed = val != RELEASED;
+                if (!comboKey_volume && (val == RELEASED || val == REPEAT)) {
+                    if (repeat_vol_down >= 1 && settings_setMute(1, true)) {
+                        settings_changed = true;
+                        comboKey_volume = true;
+                    }
+                    else if (settings_setVolume(settings.volume - 1, true))
+                        settings_changed = true;
+
+                    osd_showBar(settings.volume, 20, settings.mute);
                 }
                 break;
-            case HW_BTN_VOLUME_DOWN:
-                volDown_pressed = (val == PRESSED);
-                if (val == PRESSED) {
-                    if (settings.volume >= VOLUME_INCREMENTS) {
-                        settings_setVolume(0, -VOLUME_INCREMENTS, true, true);
-                        settings_setMute(settings.volume == 0, true, true);
-
-                        if (system_state == MODE_MAIN_UI) {
-                            settings_show_volume_change();
-                            settings_shm_write();
-                        }
+            case HW_BTN_VOLUME_UP:
+                if (comboKey_menu) {
+                    // MENU + VOL UP : brightness up
+                    if (val != RELEASED &&
+                        settings.brightness < MAX_BRIGHTNESS) {
+                        settings_setBrightness(settings.brightness + 1, true,
+                                               false);
+                        settings_changed = true;
                     }
+                    osd_showBar(settings.brightness, 10, false);
+                    break;
                 }
-                else if (val == REPEAT) {
-                    settings_setVolume(0, 0, true, true);
-                    settings_setMute(true, true, true);
-
-                    if (system_state == MODE_MAIN_UI) {
-                        settings_show_volume_change();
-                        settings_shm_write();
+                volUp_pressed = val != RELEASED;
+                if (!comboKey_volume && (val == RELEASED || val == REPEAT)) {
+                    if (settings_setMute(0, true)) {
+                        settings_changed = true;
                     }
+                    else if (settings_setVolume(settings.volume + 1, true))
+                        settings_changed = true;
+
+                    osd_showBar(settings.volume, 20, false);
                 }
                 break;
             default:
                 break;
             }
 
-            // Screenshot shortcut for the MMP
-            if ((volDown_pressed) && (volUp_pressed)) {
-                // screenshot
-                super_short_pulse();
-                screenshot_recent();
-                display_setBrightnessRaw(0);
-                usleep(100000);
-                settings_setBrightness(settings.brightness, true, false);
+            // Mute toggle
+            if (volDown_pressed && volUp_pressed) {
+                if (settings_setMute(!settings.mute, true))
+                    settings_changed = true;
+                osd_showBar(settings.volume, 20, settings.mute);
+                comboKey_volume = true;
+            }
+            else if (!volDown_pressed && !volUp_pressed)
+                comboKey_volume = false;
+
+            if (settings_changed) {
+                settings_shm_write();
+                _settings_save_mainui();
             }
 
             if ((val == PRESSED) && (system_state == MODE_MAIN_UI)) {
@@ -592,8 +622,10 @@ int main(void)
                 }
             }
 
-            if (system_state == MODE_MAIN_UI)
+            if (system_state == MODE_MAIN_UI) {
                 settings_shm_read();
+                display_setBrightness(settings.brightness);
+            }
 
             hibernate_start = getMilliseconds();
             elapsed_sec = (hibernate_start - ticks) / 1000;

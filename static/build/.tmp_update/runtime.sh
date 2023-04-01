@@ -39,7 +39,7 @@ main() {
     touch /tmp/no_charging_ui
 
     cd $sysdir
-    bootScreen "Boot"
+    bootScreen "Boot" &
 
     # Start the key monitor
     keymon &
@@ -110,7 +110,9 @@ clear_logs() {
     rm -f \
         ./logs/MainUI.log \
         ./logs/gameSwitcher.log \
-        ./logs/game_list_options.log
+        ./logs/keymon.log \
+        ./logs/game_list_options.log \
+        2>&1 > /dev/null
 }
 
 check_main_ui() {
@@ -324,8 +326,12 @@ launch_switcher() {
 
 check_off_order() {
     if  [ -f /tmp/.offOrder ] ; then
+        pkill -9 sshd
+        pkill -9 wpa_supplicant
+        pkill -9 udhcpc
+
         cd $sysdir
-        bootScreen "$1"
+        bootScreen "$1" &
 
         killall tee
         rm -f /mnt/SDCARD/update.log
@@ -442,10 +448,14 @@ init_system() {
         fi
     fi
 
+    brightness=`/customer/app/jsonval brightness`
+    brightness_raw=`awk "BEGIN { print int(3 * exp(0.350656 * $brightness) + 0.5) }"`
+    echo "brightness: $brightness -> $brightness_raw"
+
     # init backlight
     echo 0 > /sys/class/pwm/pwmchip0/export
     echo 800 > /sys/class/pwm/pwmchip0/pwm0/period
-    echo 80 > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
+    echo $brightness_raw > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
     echo 1 > /sys/class/pwm/pwmchip0/pwm0/enable
 }
 

@@ -225,7 +225,7 @@ void _settings_save_mainui(void)
 {
     FILE *fp;
 
-    if ((fp = fopen(MAIN_UI_SETTINGS, "w+")) == 0)
+    if ((fp = fopen(MAIN_UI_SETTINGS, "w+")) == NULL)
         return;
 
     fprintf(fp, "{\n");
@@ -249,10 +249,6 @@ void _settings_save_mainui(void)
     fflush(fp);
     fsync(fileno(fp));
     fclose(fp);
-
-#ifdef LOG_DEBUG
-    printf_debug("%s\n", file_read(MAIN_UI_SETTINGS));
-#endif
 }
 
 void settings_save(void)
@@ -277,8 +273,23 @@ void settings_save(void)
     _settings_save_keymap();
     _settings_save_mainui();
 
-    FILE *fp;
-    file_put_sync(fp, "/tmp/settings_changed", "%s", "");
+    temp_flag_set("settings_changed", true);
+}
+
+bool settings_saveSystemProperty(const char *prop_name, int value)
+{
+    cJSON *json_root = json_load(MAIN_UI_SETTINGS);
+    cJSON *prop = cJSON_GetObjectItem(json_root, prop_name);
+
+    if (cJSON_GetNumberValue(prop) == value)
+        return false;
+
+    cJSON_SetNumberValue(prop, value);
+    json_save(json_root, MAIN_UI_SETTINGS);
+    cJSON_free(json_root);
+    temp_flag_set("settings_changed", true);
+
+    return true;
 }
 
 void settings_setBrightness(uint32_t value, bool apply, bool save)
@@ -286,55 +297,45 @@ void settings_setBrightness(uint32_t value, bool apply, bool save)
     settings.brightness = value;
 
     if (apply)
-        display_setBrightness(value);
+        display_setBrightness(settings.brightness);
 
-    if (save) {
-        cJSON *request_json = json_load(MAIN_UI_SETTINGS);
-        cJSON *itemBrightness = cJSON_GetObjectItem(request_json, "brightness");
-        cJSON_SetNumberValue(itemBrightness, settings.brightness);
-        json_save(request_json, MAIN_UI_SETTINGS);
-        cJSON_free(request_json);
-        FILE *fp;
-        file_put_sync(fp, "/tmp/settings_changed", "%s", "");
-    }
+    if (save)
+        settings_saveSystemProperty("brightness", settings.brightness);
 }
 
-void settings_setMute(bool mute, bool apply, bool save)
+bool settings_setVolume(int value, bool apply)
 {
-    settings.mute = mute;
+    bool changed = false;
+
+    if (value > 20)
+        value = 20;
+    else if (value < 0)
+        value = 0;
+
+    if (settings.volume != value) {
+        settings.volume = value;
+        changed = true;
+    }
 
     if (apply)
-        setMute(mute);
+        setVolume(settings.mute ? 0 : settings.volume);
 
-    if (save) {
-        cJSON *request_json = json_load(MAIN_UI_SETTINGS);
-        cJSON *itemMute = cJSON_GetObjectItem(request_json, "mute");
-        cJSON_SetNumberValue(itemMute, settings.mute);
-        json_save(request_json, MAIN_UI_SETTINGS);
-        cJSON_free(request_json);
-        FILE *fp;
-        file_put_sync(fp, "/tmp/settings_changed", "%s", "");
-    }
+    return changed;
 }
 
-int settings_setVolume(uint32_t value, int add, bool apply, bool save)
+bool settings_setMute(uint32_t value, bool apply)
 {
-    settings.volume = value;
+    bool changed = false;
 
-    if (apply)
-        settings.volume = setVolume(value, add);
-
-    if (save) {
-        cJSON *request_json = json_load(MAIN_UI_SETTINGS);
-        cJSON *itemVolume = cJSON_GetObjectItem(request_json, "vol");
-        cJSON_SetNumberValue(itemVolume, settings.volume);
-        json_save(request_json, MAIN_UI_SETTINGS);
-        cJSON_free(request_json);
-        FILE *fp;
-        file_put_sync(fp, "/tmp/settings_changed", "%s", "");
+    if (settings.mute != value) {
+        settings.mute = value;
+        changed = true;
     }
 
-    return settings.volume;
+    if (apply)
+        setVolume(settings.mute ? 0 : settings.volume);
+
+    return changed;
 }
 
 #endif // SETTINGS_H__
