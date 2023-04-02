@@ -596,7 +596,7 @@ int main(void)
                 break;
             }
 
-            if (!osd_bar_activated) {
+            if (val == PRESSED && !osd_bar_activated) {
                 osd_hideBar();
             }
 
