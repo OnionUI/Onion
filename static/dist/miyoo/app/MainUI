@@ -3,6 +3,13 @@ echo $0 $*
 appdir=`cd -- "$(dirname "$0")" >/dev/null 2>&1; pwd -P`
 sysdir=/mnt/SDCARD/.tmp_update
 
+if [ ! -d "$appdir/.tmp_update" ] || [ ! -f "$appdir/.tmp_update/install.sh" ] || [ ! -f "$appdir/.tmp_update/onion.pak" ]; then
+    # Cancel installation if files are missing
+    rm -- "$0"
+    reboot
+    sleep 10
+fi
+
 if [ -d $sysdir ]; then
     cd $sysdir
 

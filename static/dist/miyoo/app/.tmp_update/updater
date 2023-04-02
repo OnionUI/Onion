@@ -5,5 +5,7 @@ cd $sysdir
 mkdir -p logs
 LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$sysdir/lib" ./install.sh 2>&1 > ./logs/install.log
 
+echo "Install script exited unexpectedly"
+
 # Turn off after update
 reboot

@@ -39,7 +39,7 @@ main() {
     touch /tmp/no_charging_ui
 
     cd $sysdir
-    bootScreen "Boot" &
+    bootScreen "Boot"
 
     # Start the key monitor
     keymon &
@@ -329,21 +329,20 @@ check_off_order() {
         pkill -9 sshd
         pkill -9 wpa_supplicant
         pkill -9 udhcpc
+        sync
 
         cd $sysdir
         bootScreen "$1" &
 
-        killall tee
-        rm -f /mnt/SDCARD/update.log
-                
-        sync
+        # Allow the bootScreen to be displayed
+        sleep 1.5
+
         if [ $deviceModel -eq 283 ]; then 
             reboot
         else
-            # Allow the bootScreen to be displayed
-            sleep 1.5
-            poweroff 
+            poweroff
         fi
+
         sleep 10
     fi
 }
@@ -441,6 +440,15 @@ init_system() {
         if [ ! -f /sys/devices/gpiochip0/gpio/gpio59/direction ]; then
             echo 59 > /sys/class/gpio/export
             echo in > /sys/devices/gpiochip0/gpio/gpio59/direction
+        fi
+
+        if [ $(/customer/app/jsonval vol) -ne 20 ] || [ $(/customer/app/jsonval mute) -ne 0 ]; then
+            # Force volume and mute settings
+            cat /appconfigs/system.json \
+                | sed 's/^\s*"vol":\s*[0-9][0-9]*/\t"vol":\t20/g' \
+                | sed 's/^\s*"mute":\s*[0-9][0-9]*/\t"mute":\t0/g' \
+                > temp
+            mv -f temp /appconfigs/system.json
         fi
     fi
 

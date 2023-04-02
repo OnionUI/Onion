@@ -18,6 +18,8 @@ else
     fi
 fi
 
+echo "Runtime exited unexpectedly"
+
 # Turn off if runtime exits
 reboot
 sleep 10

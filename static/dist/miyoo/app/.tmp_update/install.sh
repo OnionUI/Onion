@@ -40,14 +40,12 @@ main() {
     check_device_model
     
     # Start the battery monitor
-    if [ $deviceModel = 283 ]; then 
-        if [ `cat /sys/devices/gpiochip0/gpio/gpio59/value` -eq 1 ]; then
-            # init charger detection
-            gpiodir=/sys/devices/gpiochip0/gpio
-            if [ ! -f $gpiodir/gpio59/direction ]; then
-                echo 59 > /sys/class/gpio/export
-                echo "in" > $gpiodir/gpio59/direction
-            fi
+    if [ $deviceModel -eq 283 ]; then
+        # init charger detection
+        gpiodir=/sys/devices/gpiochip0/gpio
+        if [ ! -f $gpiodir/gpio59/direction ]; then
+            echo 59 > /sys/class/gpio/export
+            echo "in" > $gpiodir/gpio59/direction
         fi
     fi
     
@@ -134,6 +132,9 @@ cleanup() {
     rm -f $core_zipfile
     rm -f $ra_zipfile
     rm -f $ra_package_version_file
+
+    # Remove update trigger script
+    rm -f /mnt/SDCARD/miyoo/app/MainUI
 }
 
 
@@ -183,7 +184,8 @@ run_installation() {
 
     get_install_stats
 
-    rm -f /tmp/.update_msg
+    rm -f /tmp/.update_msg 2>&1 > /dev/null
+    rm -f $sysdir/config/currentSlide 2>&1 > /dev/null
 
     # Show installation progress
     cd $sysdir
@@ -229,6 +231,7 @@ run_installation() {
         rm -f $ra_package_version_file
     fi
 
+    echo "Finishing up..." >> /tmp/.update_msg
     if [ $reset_configs -eq 0 ]; then
         restore_ra_config
 
@@ -239,11 +242,8 @@ run_installation() {
     install_configs $reset_configs
 
     if [ $system_only -ne 1 ]; then
-        touch $sysdir/.installed
-        sync
-
         if [ $reset_configs -eq 1 ]; then
-            cp -f $sysdir/config/system.json /appconfigs/system.json
+            cp -f $sysdir/res/miyoo${deviceModel}_system.json /appconfigs/system.json
         fi
 
         # Start the battery monitor
@@ -259,6 +259,9 @@ run_installation() {
         else
             themeSwitcher --update --reapply_icons
         fi
+
+        touch $sysdir/.installed
+        sync
 
         # Show quick guide
         if [ $reset_configs -eq 1 ]; then
@@ -284,13 +287,12 @@ run_installation() {
 
     if [ $deviceModel -eq 283 ]; then
         echo "$verb2 complete!" >> /tmp/.update_msg
+        touch $sysdir/.waitConfirm
+        touch $sysdir/.installed
+        sync
     else
-        echo "$verb2 complete! Rebooting..." >> /tmp/.update_msg
+        echo "$verb2 complete!  -  Rebooting..." >> /tmp/.update_msg
     fi
-
-    touch $sysdir/.waitConfirm
-    touch $sysdir/.installed
-    sync
 
     installUI &
     sleep 1
@@ -305,12 +307,13 @@ run_installation() {
         done
 
         killall installUI
-        rm -f $sysdir/config/currentSlide
-
         bootScreen "End"
+    else
+        touch $sysdir/.installed
     fi
 
-    rm -f $sysdir/config/currentSlide
+    rm -f $sysdir/config/currentSlide 2>&1 > /dev/null
+    sync
 }
 
 install_core() {
