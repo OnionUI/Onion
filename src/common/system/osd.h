@@ -117,6 +117,7 @@ void print_value(uint32_t value, uint32_t color)
     }
 }
 
+static bool osd_bar_activated = false;
 static int _bar_timer = 0;
 static int _bar_value = 0;
 static int _bar_max = 0;
@@ -200,6 +201,7 @@ void osd_showBar(int value, int value_max, bool alt_color)
     _bar_value = value;
     _bar_max = value_max;
     _bar_color = alt_color ? 0x00FF0000 : 0x00FFFFFF;
+    osd_bar_activated = true;
 
     if (osd_thread_active)
         return;
@@ -211,6 +213,7 @@ void osd_showBar(int value, int value_max, bool alt_color)
 
 void osd_hideBar(void)
 {
+    osd_bar_activated = false;
     if (!osd_thread_active)
         return;
     pthread_cancel(osd_pt);
