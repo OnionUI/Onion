@@ -338,7 +338,6 @@ int main(void)
     uint32_t button_flag = 0;
     uint32_t repeat_LR = 0;
     uint32_t repeat_power = 0;
-    uint32_t repeat_vol_down = 0;
     uint32_t val;
     int konamiCodeIndex = 0;
     bool b_BTN_Not_Menu_Pressed = false;
@@ -346,7 +345,6 @@ int main(void)
     bool power_pressed = false;
     bool volUp_pressed = false;
     bool volDown_pressed = false;
-    bool volDown_held = false;
     bool comboKey_volume = false;
     bool comboKey_menu = false;
     bool comboKey_select = false;
@@ -476,7 +474,7 @@ int main(void)
                                                    true, false);
                             settings_changed = true;
                         }
-                        osd_showBar(settings.brightness, 10, false);
+                        osd_showBrightnessBar(settings.brightness);
                         comboKey_select = true;
                         break;
                     default:
@@ -510,7 +508,7 @@ int main(void)
                                                    true, false);
                             settings_changed = true;
                         }
-                        osd_showBar(settings.brightness, 10, false);
+                        osd_showBrightnessBar(settings.brightness);
                         comboKey_select = true;
                         break;
                     default:
@@ -547,26 +545,17 @@ int main(void)
                                                false);
                         settings_changed = true;
                     }
-                    osd_showBar(settings.brightness, 10, false);
+                    osd_showBrightnessBar(settings.brightness);
                     break;
                 }
-                if (val == REPEAT)
-                    repeat_vol_down++;
-                else
-                    repeat_vol_down = 0;
                 volDown_pressed = val;
                 if (comboKey_volume)
                     break;
-                if ((val == RELEASED || val == REPEAT) && !volDown_held) {
-                    if (repeat_vol_down >= 3 && settings_setMute(1, true)) {
-                        settings_changed = true;
-                        volDown_held = true;
-                    }
-                    else if ((repeat_vol_down >= 3 || val == RELEASED) &&
-                             settings_setVolume(settings.volume - 1, true))
+                if (val == RELEASED || val == REPEAT) {
+                    if (settings_setVolume(settings.volume - 1, true))
                         settings_changed = true;
                 }
-                osd_showBar(settings.volume, 20, settings.mute);
+                osd_showVolumeBar(settings.volume, settings.mute);
                 break;
             case HW_BTN_VOLUME_UP:
                 if (comboKey_menu) {
@@ -577,7 +566,7 @@ int main(void)
                                                false);
                         settings_changed = true;
                     }
-                    osd_showBar(settings.brightness, 10, false);
+                    osd_showBrightnessBar(settings.brightness);
                     break;
                 }
                 volUp_pressed = val;
@@ -590,7 +579,7 @@ int main(void)
                     else if (settings_setVolume(settings.volume + 1, true))
                         settings_changed = true;
                 }
-                osd_showBar(settings.volume, 20, false);
+                osd_showVolumeBar(settings.volume, settings.mute);
                 break;
             default:
                 break;
@@ -603,11 +592,13 @@ int main(void)
             // Mute toggle
             if (volDown_pressed != RELEASED && volUp_pressed != RELEASED &&
                 !comboKey_volume) {
-                takeScreenshot();
                 comboKey_volume = true;
+                if (settings_setMute(!settings.mute, true))
+                    settings_changed = true;
+                osd_showVolumeBar(settings.volume, settings.mute);
             }
             else if (volDown_pressed == RELEASED && volUp_pressed == RELEASED)
-                comboKey_volume = volDown_held = false;
+                comboKey_volume = false;
 
             if (settings_changed) {
                 settings_shm_write();

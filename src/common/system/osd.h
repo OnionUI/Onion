@@ -12,6 +12,16 @@
 #define CHR_WIDTH (3 * 4 + 4)
 #define CHR_HEIGHT (5 * 4)
 
+#define OSD_COLOR_WHITE 0x00FFFFFF
+#define OSD_COLOR_RED 0x00F80355
+#define OSD_COLOR_GREEN 0x001CD577
+#define OSD_COLOR_CYAN 0x0000ffD7
+#define OSD_COLOR_YELLOW 0x00DCFF62
+
+#define OSD_BRIGHTNESS_COLOR OSD_COLOR_WHITE
+#define OSD_VOLUME_COLOR OSD_COLOR_GREEN
+#define OSD_MUTE_ON_COLOR OSD_COLOR_RED
+
 static bool osd_thread_active = false;
 static pthread_t osd_pt;
 
@@ -145,6 +155,7 @@ void _bar_restoreBufferBehind(void)
     _bar_value = 0;
     _bar_max = 0;
     _bar_color = 0;
+    _print_bar();
     if (_bar_savebuf) {
         uint32_t i, *ofs = fb_addr, *ofss = _bar_savebuf;
         ofs += DISPLAY_WIDTH - 4;
@@ -159,8 +170,6 @@ void _bar_restoreBufferBehind(void)
         free(_bar_savebuf);
         _bar_savebuf = NULL;
     }
-    else
-        _print_bar();
 }
 
 void _bar_saveBufferBehind(void)
@@ -195,12 +204,19 @@ static void *_osd_thread(void *_)
     return 0;
 }
 
-void osd_showBar(int value, int value_max, bool alt_color)
+/**
+ * @brief Show OSD percentage bar
+ * 
+ * @param value 
+ * @param value_max 
+ * @param color 
+ */
+void osd_showBar(int value, int value_max, uint32_t color)
 {
     _bar_timer = getMilliseconds();
     _bar_value = value;
     _bar_max = value_max;
-    _bar_color = alt_color ? 0x00FF0000 : 0x00FFFFFF;
+    _bar_color = color;
     osd_bar_activated = true;
 
     if (osd_thread_active)
@@ -220,6 +236,16 @@ void osd_hideBar(void)
     pthread_join(osd_pt, NULL);
     _bar_restoreBufferBehind();
     osd_thread_active = false;
+}
+
+void osd_showVolumeBar(int volume, bool mute)
+{
+    osd_showBar(volume, 20, mute ? OSD_MUTE_ON_COLOR : OSD_VOLUME_COLOR);
+}
+
+void osd_showBrightnessBar(int brightness)
+{
+    osd_showBar(brightness, 10, OSD_BRIGHTNESS_COLOR);
 }
 
 #endif // SYSTEM_OSD_H__
