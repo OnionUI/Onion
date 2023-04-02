@@ -373,40 +373,37 @@ check_hide_recents() {
     sync
 }
 
+mainui_target=/mnt/SDCARD/miyoo/app/MainUI
 clean_flag=/mnt/SDCARD/miyoo/app/.isClean
 expert_flag=/mnt/SDCARD/miyoo/app/.isExpert
 
 check_hide_expert() {
     if [ ! -f $sysdir/config/.showExpert ]; then
         # Should be clean
-        if [ ! -f $clean_flag ] || [ -f $expert_flag ] || [ $is_device_model_changed -eq 1 ]; then
-            rm /mnt/SDCARD/miyoo/app/MainUI
-            rm -f $expert_flag
-	        if [ $deviceModel -eq 283 ]; then 
-                cp $sysdir/bin/MainUI-283-clean /mnt/SDCARD/miyoo/app/MainUI
-            elif [ $deviceModel -eq 354 ]; then 
-                cp $sysdir/bin/MainUI-354-clean /mnt/SDCARD/miyoo/app/MainUI
-            fi
+        if [ ! -f $clean_flag ] || [ -f $expert_flag ] || [ $is_device_model_changed -eq 1 ] || [ ! -f $mainui_target ]; then
+            rm -f $mainui_target 2>&1 > /dev/null
+            rm -f $expert_flag 2>&1 > /dev/null
+            cp "$sysdir/bin/MainUI-$deviceModel-clean" $mainui_target
             touch $clean_flag
         fi
     else
         # Should be expert
-        if [ ! -f $expert_flag ] || [ -f $clean_flag ] || [ $is_device_model_changed -eq 1 ]; then
-            rm /mnt/SDCARD/miyoo/app/MainUI
-            rm -f $clean_flag
-	        if [ $deviceModel -eq 283 ]; then 
-                cp $sysdir/bin/MainUI-283-expert /mnt/SDCARD/miyoo/app/MainUI
-            elif [ $deviceModel -eq 354 ]; then 
-                cp $sysdir/bin/MainUI-354-expert /mnt/SDCARD/miyoo/app/MainUI
-            fi
+        if [ ! -f $expert_flag ] || [ -f $clean_flag ] || [ $is_device_model_changed -eq 1 ] || [ ! -f $mainui_target ]; then
+            rm -f $mainui_target 2>&1 > /dev/null
+            rm -f $clean_flag 2>&1 > /dev/null
+            cp "$sysdir/bin/MainUI-$deviceModel-expert" $mainui_target
             touch $expert_flag
         fi
     fi
     sync
 }
 
+
+deviceModel=0
+last_device_model=/mnt/SDCARD/miyoo/app/lastDeviceModel
+is_device_model_changed=0
+
 check_device_model() {
-    
     if [ ! -f /customer/app/axp_test ]; then        
         touch /tmp/deviceModel
         printf "283" > /tmp/deviceModel
@@ -419,15 +416,14 @@ check_device_model() {
     
     # Check if the SD is inserted in a different model
     is_device_model_changed=0
-    if [ ! -f /mnt/SDCARD/miyoo/app/lastDeviceModel ]; then
-        cp /tmp/deviceModel /mnt/SDCARD/miyoo/app/lastDeviceModel
+    if [ ! -f $last_device_model ]; then
+        cp /tmp/deviceModel $last_device_model
         is_device_model_changed=1
     else 
-        lastDeviceModel=`cat /mnt/SDCARD/miyoo/app/lastDeviceModel` 
+        lastDeviceModel=`cat $last_device_model` 
         if [ $lastDeviceModel -ne $deviceModel ]; then 
             is_device_model_changed=1
-            rm /mnt/SDCARD/miyoo/app/lastDeviceModel
-            echo $deviceModel > /mnt/SDCARD/miyoo/app/lastDeviceModel
+            echo $deviceModel > $last_device_model
         fi
     fi    
 }

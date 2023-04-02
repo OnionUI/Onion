@@ -136,8 +136,10 @@ cleanup() {
     rm -f $ra_package_version_file
 }
 
+
+deviceModel=0
+
 check_device_model() {
-    
     if [ ! -f /customer/app/axp_test ]; then        
         touch /tmp/deviceModel
         printf "283" > /tmp/deviceModel
@@ -147,20 +149,6 @@ check_device_model() {
         printf "354" > /tmp/deviceModel
         deviceModel=354
     fi
-    
-    # Check if the SD is inserted in a different model
-    is_device_model_changed=0
-    if [ ! -f /mnt/SDCARD/miyoo/app/lastDeviceModel ]; then
-        cp /tmp/deviceModel /mnt/SDCARD/miyoo/app/lastDeviceModel
-        is_device_model_changed=1
-    else 
-        lastDeviceModel=`cat /mnt/SDCARD/miyoo/app/lastDeviceModel` 
-        if [ $lastDeviceModel -ne $deviceModel ]; then 
-            is_device_model_changed=1
-            rm /mnt/SDCARD/miyoo/app/lastDeviceModel
-            echo $deviceModel > /mnt/SDCARD/miyoo/app/lastDeviceModel
-        fi
-    fi    
 }
 
 
@@ -294,7 +282,12 @@ run_installation() {
         rm -f .installed
     fi
 
-    echo "$verb2 complete!" >> /tmp/.update_msg
+    if [ $deviceModel -eq 283 ]; then
+        echo "$verb2 complete!" >> /tmp/.update_msg
+    else
+        echo "$verb2 complete! Rebooting..." >> /tmp/.update_msg
+    fi
+
     touch $sysdir/.waitConfirm
     touch $sysdir/.installed
     sync
@@ -302,19 +295,22 @@ run_installation() {
     installUI &
     sleep 1
 
-    counter=10
+    if [ $deviceModel -eq 283 ]; then
+        counter=10
 
-    while [ -f $sysdir/.waitConfirm ] && [ $counter -ge 0 ]; do
-        echo "Press A to turn off (""$counter""s)" >> /tmp/.update_msg
-        counter=$(( counter - 1 ))
-        sleep 1
-    done
+        while [ -f $sysdir/.waitConfirm ] && [ $counter -ge 0 ]; do
+            echo "Press A to turn off (""$counter""s)" >> /tmp/.update_msg
+            counter=$(( counter - 1 ))
+            sleep 1
+        done
 
-    killall installUI
+        killall installUI
+        rm -f $sysdir/config/currentSlide
+
+        bootScreen "End"
+    fi
 
     rm -f $sysdir/config/currentSlide
-
-    bootScreen "End"
 }
 
 install_core() {
