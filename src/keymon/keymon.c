@@ -48,6 +48,15 @@ const int KONAMI_CODE[] = {HW_BTN_UP,   HW_BTN_UP,    HW_BTN_DOWN, HW_BTN_DOWN,
                            HW_BTN_B,    HW_BTN_A};
 const int KONAMI_CODE_LENGTH = sizeof(KONAMI_CODE) / sizeof(KONAMI_CODE[0]);
 
+void takeScreenshot(void)
+{
+    super_short_pulse();
+    display_setBrightnessRaw(0);
+    osd_hideBar();
+    screenshot_recent();
+    settings_setBrightness(settings.brightness, true, false);
+}
+
 //
 //    Suspend / Kill processes
 //        mode: 0:STOP 1:TERM 2:KILL
@@ -219,10 +228,9 @@ void suspend_exec(int timeout)
             else if (ev.value == RELEASED) {
                 if (ev.code == HW_BTN_MENU) {
                     // screenshot
-                    super_short_pulse();
                     system_powersave_off();
                     display_on();
-                    screenshot_recent();
+                    takeScreenshot();
                     break;
                 }
             }
@@ -289,6 +297,13 @@ void deepsleep(void)
         system_shutdown();
         suspend(1);
     }
+}
+
+void turnOffScreen(void)
+{
+    int timeout = (settings.sleep_timer + SHUTDOWN_MIN) * 60000;
+    bool stay_awake = settings.sleep_timer == 0 || temp_flag_get("stay_awake");
+    suspend_exec(stay_awake ? -1 : timeout);
 }
 
 //
@@ -407,21 +422,10 @@ int main(void)
                 if (val == RELEASED) {
                     // suspend
                     if (power_pressed && repeat_power < 7) {
-                        if (comboKey_menu) {
-                            super_short_pulse();
-                            display_setBrightnessRaw(0);
-                            screenshot_recent();
-                            settings_setBrightness(settings.brightness, true,
-                                                   false);
-                        }
-                        else {
-                            suspend_exec(
-                                settings.sleep_timer == 0 ||
-                                        temp_flag_get("stay_awake")
-                                    ? -1
-                                    : (settings.sleep_timer + SHUTDOWN_MIN) *
-                                          60000);
-                        }
+                        if (comboKey_menu)
+                            takeScreenshot();
+                        else
+                            turnOffScreen();
                     }
                     power_pressed = false;
                 }
@@ -548,13 +552,14 @@ int main(void)
                     repeat_vol_down++;
                 else
                     repeat_vol_down = 0;
-                volDown_pressed = val != RELEASED;
+                volDown_pressed = val;
                 if (!comboKey_volume && (val == RELEASED || val == REPEAT)) {
-                    if (repeat_vol_down >= 1 && settings_setMute(1, true)) {
+                    if (repeat_vol_down >= 3 && settings_setMute(1, true)) {
                         settings_changed = true;
                         comboKey_volume = true;
                     }
-                    else if (settings_setVolume(settings.volume - 1, true))
+                    else if ((repeat_vol_down >= 3 || val == RELEASED) &&
+                             settings_setVolume(settings.volume - 1, true))
                         settings_changed = true;
 
                     osd_showBar(settings.volume, 20, settings.mute);
@@ -572,7 +577,7 @@ int main(void)
                     osd_showBar(settings.brightness, 10, false);
                     break;
                 }
-                volUp_pressed = val != RELEASED;
+                volUp_pressed = val;
                 if (!comboKey_volume && (val == RELEASED || val == REPEAT)) {
                     if (settings_setMute(0, true)) {
                         settings_changed = true;
@@ -588,13 +593,12 @@ int main(void)
             }
 
             // Mute toggle
-            if (volDown_pressed && volUp_pressed) {
-                if (settings_setMute(!settings.mute, true))
-                    settings_changed = true;
-                osd_showBar(settings.volume, 20, settings.mute);
+            if (volDown_pressed != RELEASED && volUp_pressed != RELEASED &&
+                !comboKey_volume) {
+                takeScreenshot();
                 comboKey_volume = true;
             }
-            else if (!volDown_pressed && !volUp_pressed)
+            else if (volDown_pressed == RELEASED && volUp_pressed == RELEASED)
                 comboKey_volume = false;
 
             if (settings_changed) {

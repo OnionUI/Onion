@@ -121,16 +121,17 @@ static int _bar_timer = 0;
 static int _bar_value = 0;
 static int _bar_max = 0;
 static uint32_t _bar_color = 0x00FFFFFF;
+static uint32_t *_bar_savebuf;
 
 void _print_bar(void)
 {
     uint32_t *ofs = fb_addr;
     uint32_t i, curr,
-        percentage = _bar_max > 0 ? _bar_value * 480 / _bar_max : 0;
+        percentage = _bar_max > 0 ? _bar_value * DISPLAY_HEIGHT / _bar_max : 0;
 
-    ofs = fb_addr + 636;
-    for (i = 0; i < 480 * 3 - 1; i++, ofs += 640) {
-        curr = (i % 480) < percentage ? _bar_color : 0;
+    ofs += DISPLAY_WIDTH - 4;
+    for (i = 0; i < DISPLAY_HEIGHT * 3; i++, ofs += DISPLAY_WIDTH) {
+        curr = (i % DISPLAY_HEIGHT) < percentage ? _bar_color : 0;
         ofs[0] = curr;
         ofs[1] = curr;
         ofs[2] = curr;
@@ -138,12 +139,45 @@ void _print_bar(void)
     }
 }
 
-void _remove_bar(void)
+void _bar_restoreBufferBehind(void)
 {
     _bar_value = 0;
     _bar_max = 0;
     _bar_color = 0;
-    _print_bar();
+    if (_bar_savebuf) {
+        uint32_t i, *ofs = fb_addr, *ofss = _bar_savebuf;
+        ofs += DISPLAY_WIDTH - 4;
+        ofss += DISPLAY_WIDTH - 4;
+        for (i = 0; i < DISPLAY_HEIGHT;
+             i++, ofs += DISPLAY_WIDTH, ofss += DISPLAY_WIDTH) {
+            ofs[0] = ofss[0];
+            ofs[1] = ofss[1];
+            ofs[2] = ofss[2];
+            ofs[3] = ofss[3];
+        }
+        free(_bar_savebuf);
+        _bar_savebuf = NULL;
+    }
+    else
+        _print_bar();
+}
+
+void _bar_saveBufferBehind(void)
+{
+    // Save display area and clear
+    if ((_bar_savebuf = (uint32_t *)malloc(DISPLAY_WIDTH * DISPLAY_HEIGHT *
+                                           sizeof(uint32_t)))) {
+        uint32_t i, *ofs = fb_addr, *ofss = _bar_savebuf;
+        ofs += DISPLAY_WIDTH - 4;
+        ofss += DISPLAY_WIDTH - 4;
+        for (i = 0; i < DISPLAY_HEIGHT;
+             i++, ofs += DISPLAY_WIDTH, ofss += DISPLAY_WIDTH) {
+            ofss[0] = ofs[0];
+            ofss[1] = ofs[1];
+            ofss[2] = ofs[2];
+            ofss[3] = ofs[3];
+        }
+    }
 }
 
 //
@@ -155,7 +189,7 @@ static void *_osd_thread(void *_)
         _print_bar();
         msleep(1);
     }
-    _remove_bar();
+    _bar_restoreBufferBehind();
     osd_thread_active = false;
     return 0;
 }
@@ -170,6 +204,7 @@ void osd_showBar(int value, int value_max, bool alt_color)
     if (osd_thread_active)
         return;
 
+    _bar_saveBufferBehind();
     pthread_create(&osd_pt, NULL, _osd_thread, _print_bar);
     osd_thread_active = true;
 }
@@ -180,7 +215,7 @@ void osd_hideBar(void)
         return;
     pthread_cancel(osd_pt);
     pthread_join(osd_pt, NULL);
-    _remove_bar();
+    _bar_restoreBufferBehind();
     osd_thread_active = false;
 }
 
