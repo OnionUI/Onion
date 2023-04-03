@@ -69,6 +69,7 @@ int upgradeRomDB(void) {
 }
 
 void openDB(void) {
+    print_debug("openDB()\n");
     if (!exists(PLAY_ACTIVITY_SQLITE_PATH)) {
         upgradeRomDB();
     }
@@ -80,10 +81,12 @@ void openDB(void) {
 }
 
 void closeDB(void) {
+    print_debug("closeDB()\n")
     sqlite3_close(db);
 }
 
 void addPlayTime(const char* name, const char* filePath, int playTime) {
+    print_debug("addPlayTime()\n")
     sqlite3_stmt *res;
     char *updateSQL = "INSERT OR REPLACE INTO playActivity VALUES(?, ?, COALESCE((SELECT playCount FROM playActivity WHERE name=?), 0) + 1);, COALESCE((SELECT playTime FROM playActivity WHERE name=?), 0) + ?););";
     int rc = sqlite3_prepare_v2(db, updateSQL, -1, &res, NULL);
@@ -311,9 +314,9 @@ void registerTimerEnd(const char *identifier, const char *full_path)
 int main(int argc, char *argv[])
 {
     log_setName("playActivity");
-    print_debug("main(): ");
+    print_debug("main():\n");
     while (*argv != NULL) {
-            printf_debug("%s ", *argv);
+            printf_debug("%s\n", *argv);
             argv++;
     }
 
