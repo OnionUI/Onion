@@ -81,12 +81,12 @@ void openDB(void) {
 }
 
 void closeDB(void) {
-    print_debug("closeDB()\n")
+    print_debug("closeDB()\n");
     sqlite3_close(db);
 }
 
 void addPlayTime(const char* name, const char* filePath, int playTime) {
-    print_debug("addPlayTime()\n")
+    print_debug("addPlayTime()\n");
     sqlite3_stmt *res;
     char *updateSQL = "INSERT OR REPLACE INTO playActivity VALUES(?, ?, COALESCE((SELECT playCount FROM playActivity WHERE name=?), 0) + 1);, COALESCE((SELECT playTime FROM playActivity WHERE name=?), 0) + ?););";
     int rc = sqlite3_prepare_v2(db, updateSQL, -1, &res, NULL);
