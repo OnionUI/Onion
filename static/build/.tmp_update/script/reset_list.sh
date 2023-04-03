@@ -13,3 +13,4 @@ current_idx="$(cat /appconfigs/romwinidx.json | awk -v search="$romdir" '$0 ~ se
 echo "$current_idx" > /appconfigs/romwinidx.json
 
 rm -f "$romdir/$(basename "$romdir")_cache2.db" 2> /dev/null
+rm -f "$romdir/$(basename "$romdir")_cache6.db" 2> /dev/null
