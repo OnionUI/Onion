@@ -19,11 +19,7 @@ int check_autosave(void)
 
 void kill_wifi(void)
 {
-    FILE *fp;
-    char cmd[STR_MAX * 4];
-    snprintf(cmd, STR_MAX * 4 - 1,
-             "pkill -9 wpa_supplicant; pkill -9 udhcpc; pkill -9 sshd;");
-    file_put_sync(fp, "/tmp/cmd_to_run.sh", "%s", cmd);
+    system("pkill -9 wpa_supplicant; pkill -9 udhcpc; pkill -9 sshd;");
 }
 
 void kill_mainUI(void)
