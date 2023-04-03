@@ -8,7 +8,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "cjson/cJSON.h"
+#include <sqlite3/sqlite3.h>
 #include "utils/file.h"
 #include "utils/log.h"
 #include "utils/str.h"
@@ -18,6 +18,8 @@
 #define MAXBACKUPFILES 80
 #define NEW_GAME_MINIMAL_PLAYTIME 60
 #define INIT_TIMER_PATH "/tmp/initTimer"
+#define PLAY_ACTIVITY_SQLITE_PATH                                                  \
+    "/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.sqlite"
 #define PLAY_ACTIVITY_DB_PATH                                                  \
     "/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db"
 #define PLAY_ACTIVITY_DB_TMP_PATH                                              \
@@ -34,6 +36,77 @@ static struct rom_s {
 } rom_list[MAXVALUES];
 static int rom_list_len = 0;
 static int total_time_played = 0;
+sqlite3 *db;
+
+int upgradeRomDB(void) {
+    FILE *file = fopen(PLAY_ACTIVITY_DB_PATH, "rb");
+    if (file != NULL) {
+        fread(rom_list, sizeof(rom_list), 1, file);
+        fclose(file);
+    }
+    char *err_msg = 0;
+    int rc = sqlite3_open(PLAY_ACTIVITY_SQLITE_PATH, &db);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+    }
+    char sql[10000];
+    strcpy(sql, "DROP TABLE IF EXISTS playActivity;");
+    strcat(sql, "CREATE TABLE playActivity(name TEXT, filePath Text, playCount INT, playTime INT);");
+    strcat(sql, "CREATE UNIQUE INDEX name_index ON playActivity(name);");
+    int i;
+    char insert[200];
+    for (i = 0; i < MAXVALUES; i++) {
+        if (strlen(rom_list[i].name) > 0) {
+            snprintf(insert, 200, "INSERT OR REPLACE INTO playActivity VALUES ('%s', %d);", rom_list[i].name, rom_list[i].playTime);
+            strcat(sql, insert);
+        }
+    }
+    rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
+    if (rc != SQLITE_OK ) {
+        fprintf(stderr, "SQL error: %s\n", err_msg);
+        sqlite3_free(err_msg);
+        sqlite3_close(db);
+        return 1;
+    }
+    sqlite3_close(db);
+    return 0;
+}
+
+void openDB(void) {
+    if (!exists(PLAY_ACTIVITY_SQLITE_PATH)) {
+        upgradeRomDB();
+    }
+    char *err_msg = 0;
+    int rc = sqlite3_open(PLAY_ACTIVITY_SQLITE_PATH, &db);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+    }
+}
+
+void closeDB(void) {
+    sqlite3_close(db);
+}
+
+void addPlayTime(const char* name, int playTime) {
+    sqlite3_stmt *res;
+    char *err_msg = 0;
+    char *updateSQL = "INSERT OR REPLACE INTO playActivity VALUES(?, COALESCE((SELECT playTime FROM playActivity WHERE name=?), 0) + ?););";
+    int rc = sqlite3_prepare_v2(db, updateSQL, -1, &res, NULL);
+    if (rc == SQLITE_OK) {
+        sqlite3_bind_text(res, 1, name, -1, NULL);
+        sqlite3_bind_text(res, 2, name, -1, NULL);
+        sqlite3_bind_int(res, 3, playTime);
+    } else {
+        fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
+    }
+    rc = sqlite3_step(res);
+    if (rc == SQLITE_ROW) {
+        fprintf(stderr, "%s\n", sqlite3_column_text(res, 0));
+    }
+    sqlite3_finalize(res);
+}
 
 int readRomDB(const char *filePath)
 {
@@ -209,22 +282,23 @@ void registerTimerEnd(const char *identifier)
     strncpy(gameName, identifier, 99);
 
     // Addition of the new time
-    int searchPosition = searchRomDB(gameName);
-    if (searchPosition >= 0) {
-        // Game found
-        rom_list[searchPosition].playTime += iTempsDeJeuSession;
-    }
-    else {
-        // A new game must be used more than
-        if (iTempsDeJeuSession > NEW_GAME_MINIMAL_PLAYTIME) {
-            // Game inexistant, add to the DB
-            if (rom_list_len < MAXVALUES - 1) {
-                rom_list[rom_list_len].playTime = iTempsDeJeuSession;
-                strncpy(rom_list[rom_list_len].name, gameName, 99);
-                rom_list_len++;
-            }
-        }
-    }
+    addPlayTime(gameName, iTempsDeJeuSession);
+    // int searchPosition = searchRomDB(gameName);
+    // if (searchPosition >= 0) {
+    //     // Game found
+    //     rom_list[searchPosition].playTime += iTempsDeJeuSession;
+    // }
+    // else {
+    //     // A new game must be used more than
+    //     if (iTempsDeJeuSession > NEW_GAME_MINIMAL_PLAYTIME) {
+    //         // Game inexistant, add to the DB
+    //         if (rom_list_len < MAXVALUES - 1) {
+    //             rom_list[rom_list_len].playTime = iTempsDeJeuSession;
+    //             strncpy(rom_list[rom_list_len].name, gameName, 99);
+    //             rom_list_len++;
+    //         }
+    //     }
+    // }
 
     printf("Timer ended (%s): session = %d\n", gameName, iTempsDeJeuSession);
 
@@ -240,6 +314,7 @@ void registerTimerEnd(const char *identifier)
 
 int main(int argc, char *argv[])
 {
+    openDB();
     int init_fd;
 
     if (argc <= 1)
@@ -310,5 +385,6 @@ int main(int argc, char *argv[])
     printf_debug("register end: '%s'\n", gameName);
     registerTimerEnd(gameName);
 
+    closeDB();
     return EXIT_SUCCESS;
 }
