@@ -18,17 +18,11 @@
 // #define MAXBACKUPFILES 80
 // #define NEW_GAME_MINIMAL_PLAYTIME 60
 #define INIT_TIMER_PATH "/tmp/initTimer"
-#define PLAY_ACTIVITY_SQLITE_PATH                                                  \
-    "/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.sqlite"
-#define PLAY_ACTIVITY_DB_PATH                                                  \
-    "/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db"
-// #define PLAY_ACTIVITY_DB_TMP_PATH                                              \
-//     "/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity_tmp.db"
-// #define PLAY_ACTIVITY_BACKUP_DIR                                               \
-//     "/mnt/SDCARD/Saves/CurrentProfile/saves/PlayActivityBackup"
-// #define PLAY_ACTIVITY_BACKUP_NUM(num)                                          \
-//     "/mnt/SDCARD/Saves/CurrentProfile/saves/PlayActivityBackup/"               \
-//     "playActivityBackup" num ".db"
+#define PLAY_ACTIVITY_SQLITE_PATH "/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.sqlite"
+#define PLAY_ACTIVITY_DB_PATH "/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db"
+// #define PLAY_ACTIVITY_DB_TMP_PATH "/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity_tmp.db"
+// #define PLAY_ACTIVITY_BACKUP_DIR "/mnt/SDCARD/Saves/CurrentProfile/saves/PlayActivityBackup"
+// #define PLAY_ACTIVITY_BACKUP_NUM(num) "/mnt/SDCARD/Saves/CurrentProfile/saves/PlayActivityBackup/" "playActivityBackup" num ".db"
 
 static struct rom_s {
     char name[100];
@@ -101,7 +95,7 @@ void addPlayTime(const char* name, const char* filePath, int playTime) {
     } else {
         printf_debug("Failed to execute statement: %s\n", sqlite3_errmsg(db));
     }
-    printf_debug("%s\n", sqlite3_expanded_sql(res);
+    printf_debug("%s\n", sqlite3_expanded_sql(res));
     rc = sqlite3_step(res);
     if (rc == SQLITE_ROW) {
         printf_debug("%s\n", sqlite3_column_text(res, 0));
