@@ -39,6 +39,7 @@ static int total_time_played = 0;
 sqlite3 *db;
 
 int upgradeRomDB(void) {
+    printf_debug("upgradeRomDB() start\n");
     FILE *file = fopen(PLAY_ACTIVITY_DB_PATH, "rb");
     if (file != NULL) {
         fread(rom_list, sizeof(rom_list), 1, file);
@@ -47,7 +48,7 @@ int upgradeRomDB(void) {
     char *err_msg = 0;
     int rc = sqlite3_open(PLAY_ACTIVITY_SQLITE_PATH, &db);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+        printf_debug("Cannot open database: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
     }
     char sql[10000];
@@ -64,7 +65,7 @@ int upgradeRomDB(void) {
     }
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
     if (rc != SQLITE_OK ) {
-        fprintf(stderr, "SQL error: %s\n", err_msg);
+        printf_debug("SQL error: %s\n", err_msg);
         sqlite3_free(err_msg);
         sqlite3_close(db);
         return 1;
@@ -80,7 +81,7 @@ void openDB(void) {
     char *err_msg = 0;
     int rc = sqlite3_open(PLAY_ACTIVITY_SQLITE_PATH, &db);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+        printf_debug("Cannot open database: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
     }
 }
@@ -99,11 +100,11 @@ void addPlayTime(const char* name, int playTime) {
         sqlite3_bind_text(res, 2, name, -1, NULL);
         sqlite3_bind_int(res, 3, playTime);
     } else {
-        fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(db));
+        printf_debug("Failed to execute statement: %s\n", sqlite3_errmsg(db));
     }
     rc = sqlite3_step(res);
     if (rc == SQLITE_ROW) {
-        fprintf(stderr, "%s\n", sqlite3_column_text(res, 0));
+        printf_debug("%s\n", sqlite3_column_text(res, 0));
     }
     sqlite3_finalize(res);
 }
@@ -300,7 +301,7 @@ void registerTimerEnd(const char *identifier)
     //     }
     // }
 
-    printf("Timer ended (%s): session = %d\n", gameName, iTempsDeJeuSession);
+    printf_debug("Timer ended (%s): session = %d\n", gameName, iTempsDeJeuSession);
 
     // DB Backup
     backupDB();
@@ -314,26 +315,38 @@ void registerTimerEnd(const char *identifier)
 
 int main(int argc, char *argv[])
 {
+    printf_debug("playActiviy ");
+    while (*argv != NULL)
+    {
+            printf_debug("%s ", *argv);
+            argv++;
+    }
+    printf_debug("started\n");
     openDB();
     int init_fd;
 
     if (argc <= 1)
+        printf_debug("return: argc <= 1\n");
         return 1;
 
     if (strcmp(argv[1], "init") == 0) {
+        printf_debug("init:\n");
         int epochTime = (int)time(NULL);
         char baseTime[15];
         sprintf(baseTime, "%d", epochTime);
 
+        printf_debug("remove init timer\n");
         remove(INIT_TIMER_PATH);
 
         if ((init_fd = open(INIT_TIMER_PATH, O_CREAT | O_WRONLY)) > 0) {
+            printf_debug("write init fd\n");
             write(init_fd, baseTime, strlen(baseTime));
             close(init_fd);
             system("sync");
+            printf_debug("saved init fd\n");
         }
 
-        printf("Timer initiated: %d\n", epochTime);
+        printf_debug("Timer initiated: %d\n", epochTime);
 
         return EXIT_SUCCESS;
     }
