@@ -7,8 +7,8 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
-
 #include <sqlite3/sqlite3.h>
+
 #include "utils/file.h"
 #include "utils/log.h"
 #include "utils/str.h"
@@ -39,7 +39,7 @@ static int total_time_played = 0;
 sqlite3 *db;
 
 int upgradeRomDB(void) {
-    printf_debug("upgradeRomDB() start\n");
+    print_debug("upgradeRomDB() start\n");
     FILE *file = fopen(PLAY_ACTIVITY_DB_PATH, "rb");
     if (file != NULL) {
         fread(rom_list, sizeof(rom_list), 1, file);
@@ -78,7 +78,6 @@ void openDB(void) {
     if (!exists(PLAY_ACTIVITY_SQLITE_PATH)) {
         upgradeRomDB();
     }
-    char *err_msg = 0;
     int rc = sqlite3_open(PLAY_ACTIVITY_SQLITE_PATH, &db);
     if (rc != SQLITE_OK) {
         printf_debug("Cannot open database: %s\n", sqlite3_errmsg(db));
@@ -92,7 +91,6 @@ void closeDB(void) {
 
 void addPlayTime(const char* name, int playTime) {
     sqlite3_stmt *res;
-    char *err_msg = 0;
     char *updateSQL = "INSERT OR REPLACE INTO playActivity VALUES(?, COALESCE((SELECT playTime FROM playActivity WHERE name=?), 0) + ?););";
     int rc = sqlite3_prepare_v2(db, updateSQL, -1, &res, NULL);
     if (rc == SQLITE_OK) {
@@ -315,35 +313,35 @@ void registerTimerEnd(const char *identifier)
 
 int main(int argc, char *argv[])
 {
-    printf_debug("playActiviy ");
+    print_debug("playActiviy ");
     while (*argv != NULL)
     {
             printf_debug("%s ", *argv);
             argv++;
     }
-    printf_debug("started\n");
+    print_debug("started\n");
     openDB();
     int init_fd;
 
     if (argc <= 1)
-        printf_debug("return: argc <= 1\n");
+        print_debug("return: argc <= 1\n");
         return 1;
 
     if (strcmp(argv[1], "init") == 0) {
-        printf_debug("init:\n");
+        print_debug("init:\n");
         int epochTime = (int)time(NULL);
         char baseTime[15];
         sprintf(baseTime, "%d", epochTime);
 
-        printf_debug("remove init timer\n");
+        print_debug("remove init timer\n");
         remove(INIT_TIMER_PATH);
 
         if ((init_fd = open(INIT_TIMER_PATH, O_CREAT | O_WRONLY)) > 0) {
-            printf_debug("write init fd\n");
+            print_debug("write init fd\n");
             write(init_fd, baseTime, strlen(baseTime));
             close(init_fd);
             system("sync");
-            printf_debug("saved init fd\n");
+            print_debug("saved init fd\n");
         }
 
         printf_debug("Timer initiated: %d\n", epochTime);
