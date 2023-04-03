@@ -313,13 +313,13 @@ void registerTimerEnd(const char *identifier)
 
 int main(int argc, char *argv[])
 {
-    print_debug("playActiviy ");
-    while (*argv != NULL)
-    {
+    log_setName("playActivity");
+    print_debug("main(): ");
+    while (*argv != NULL) {
             printf_debug("%s ", *argv);
             argv++;
     }
-    print_debug("started\n");
+
     openDB();
     int init_fd;
 
