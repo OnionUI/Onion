@@ -28,8 +28,8 @@ static struct rom_s {
     char name[100];
     int playTime;
 } rom_list[MAXVALUES];
-static int rom_list_len = 0;
-static int total_time_played = 0;
+//static int rom_list_len = 0;
+//static int total_time_played = 0;
 sqlite3 *db;
 
 int upgradeRomDB(void) {
