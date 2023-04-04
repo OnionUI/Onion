@@ -112,7 +112,7 @@ clear_logs() {
         ./logs/gameSwitcher.log \
         ./logs/keymon.log \
         ./logs/game_list_options.log \
-        2>&1 > /dev/null
+        2> /dev/null
 }
 
 check_main_ui() {
@@ -380,16 +380,16 @@ check_hide_expert() {
     if [ ! -f $sysdir/config/.showExpert ]; then
         # Should be clean
         if [ ! -f $clean_flag ] || [ -f $expert_flag ] || [ $is_device_model_changed -eq 1 ] || [ ! -f $mainui_target ]; then
-            rm -f $mainui_target 2>&1 > /dev/null
-            rm -f $expert_flag 2>&1 > /dev/null
+            rm -f $mainui_target 2> /dev/null
+            rm -f $expert_flag 2> /dev/null
             cp "$sysdir/bin/MainUI-$deviceModel-clean" $mainui_target
             touch $clean_flag
         fi
     else
         # Should be expert
         if [ ! -f $expert_flag ] || [ -f $clean_flag ] || [ $is_device_model_changed -eq 1 ] || [ ! -f $mainui_target ]; then
-            rm -f $mainui_target 2>&1 > /dev/null
-            rm -f $clean_flag 2>&1 > /dev/null
+            rm -f $mainui_target 2> /dev/null
+            rm -f $clean_flag 2> /dev/null
             cp "$sysdir/bin/MainUI-$deviceModel-expert" $mainui_target
             touch $expert_flag
         fi
