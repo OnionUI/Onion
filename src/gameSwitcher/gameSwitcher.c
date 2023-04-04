@@ -654,13 +654,13 @@ int main(void)
                 changed = true;
             }
 
-            if (select_pressed && ((changed_key == SW_BTN_L2 &&
+            if (combo_key ||
+                select_pressed && ((changed_key == SW_BTN_L2 &&
                                     keystate[SW_BTN_L2] == RELEASED) ||
                                    (changed_key == SW_BTN_R2 &&
                                     keystate[SW_BTN_R2] == RELEASED))) {
                 settings_load();
-                brightness_changed = true;
-                brightness_start = last_ticks;
+                brightness_changed = false;
                 changed = true;
             }
 
