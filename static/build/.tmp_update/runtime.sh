@@ -70,7 +70,7 @@ main() {
         touch $sysdir/.runGameSwitcher
     elif [ $startup_app -eq 2 ]; then
         echo -e "\n\n:: STARTUP APP: RetroArch\n\n"
-        echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v" > $sysdir/cmd_to_run.sh
+        echo "LD_PRELOAD=/customer/lib/libpadsp.so ./retroarch -v" > $sysdir/cmd_to_run.sh
         touch /tmp/quick_switch
     elif [ $startup_app -eq 3 ]; then
         echo -e "\n\n:: STARTUP APP: AdvanceMENU\n\n"
@@ -137,7 +137,7 @@ launch_main_ui() {
 
     # MainUI launch
     cd /mnt/SDCARD/miyoo/app
-    LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./MainUI 2>&1 > /dev/null
+    LD_PRELOAD="/customer/lib/libpadsp.so" ./MainUI 2>&1 > /dev/null
 
     if [ $deviceModel -eq 354 ] && [ -f /tmp/mainui_killed ]; then
         pkill -9 sshd
@@ -227,9 +227,9 @@ launch_game() {
 
             if [ -f "$corepath" ]; then
                 if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
-                    echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v --appendconfig \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+                    echo "LD_PRELOAD=/customer/lib/libpadsp.so ./retroarch -v --appendconfig \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
                 else
-                    echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+                    echo "LD_PRELOAD=/customer/lib/libpadsp.so ./retroarch -v -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
                 fi
             fi
         fi
@@ -318,7 +318,7 @@ check_switcher() {
 
 launch_switcher() {
     cd $sysdir
-    LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" gameSwitcher
+    LD_PRELOAD="/customer/lib/libpadsp.so" gameSwitcher
     rm $sysdir/.runGameSwitcher
     echo "switcher" > /tmp/prev_state
     sync
