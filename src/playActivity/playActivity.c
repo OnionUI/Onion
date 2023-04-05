@@ -313,7 +313,7 @@ void registerTimerEnd(const char *identifier, const char *full_path)
 
     remove(INIT_TIMER_PATH);
     free(baseTime);
-    printf_debug("registerTimerEnd() return\n");
+    print_debug("registerTimerEnd() return\n");
 }
 
 int main(int argc, char *argv[])
@@ -406,6 +406,6 @@ int main(int argc, char *argv[])
     registerTimerEnd(gameName, full_path);
 
     closeDB();
-    print_debug("main() return %d\n", EXIT_SUCCESS);
+    printf_debug("main() return %d\n", EXIT_SUCCESS);
     return EXIT_SUCCESS;
 }
