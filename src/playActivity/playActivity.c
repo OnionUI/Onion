@@ -33,7 +33,7 @@ static struct rom_s {
 sqlite3 *db;
 
 int upgradeRomDB(void) {
-    print_debug("upgradeRomDB()\n");
+    printf_debug("%s", "upgradeRomDB()\n");
     FILE *file = fopen(PLAY_ACTIVITY_DB_PATH, "rb");
     if (file != NULL) {
         fread(rom_list, sizeof(rom_list), 1, file);
@@ -65,12 +65,12 @@ int upgradeRomDB(void) {
         return 1;
     }
     sqlite3_close(db);
-    print_debug("upgradeRomDB() return 0\n");
+    printf_debug("%s", "upgradeRomDB() return 0\n");
     return 0;
 }
 
 void openDB(void) {
-    print_debug("openDB()\n");
+    printf_debug("%s", "openDB()\n");
     if (!exists(PLAY_ACTIVITY_SQLITE_PATH)) {
         upgradeRomDB();
     }
@@ -79,17 +79,17 @@ void openDB(void) {
         printf_debug("Cannot open database: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
     }
-    print_debug("openDB() return\n");
+    printf_debug("%s", "openDB() return\n");
 }
 
 void closeDB(void) {
-    print_debug("closeDB()\n");
+    printf_debug("%s", "closeDB()\n");
     sqlite3_close(db);
-    print_debug("closeDB() return\n");
+    printf_debug("%s", "closeDB() return\n");
 }
 
 void addPlayTime(const char* name, const char* filePath, int playTime) {
-    print_debug("addPlayTime()\n");
+    printf_debug("%s", "addPlayTime()\n");
     sqlite3_stmt *res;
     char *updateSQL = "INSERT OR REPLACE INTO playActivity VALUES(?, ?, COALESCE((SELECT playCount FROM playActivity WHERE name=?), 0) + 1);, COALESCE((SELECT playTime FROM playActivity WHERE name=?), 0) + ?););";
     int rc = sqlite3_prepare_v2(db, updateSQL, -1, &res, NULL);
@@ -313,13 +313,13 @@ void registerTimerEnd(const char *identifier, const char *full_path)
 
     remove(INIT_TIMER_PATH);
     free(baseTime);
-    print_debug("registerTimerEnd() return\n");
+    printf_debug("%s", "registerTimerEnd() return\n");
 }
 
 int main(int argc, char *argv[])
 {
     log_setName("playActivity");
-    print_debug("main():\n");
+    printf_debug("%s", "main()\n");
     while (*argv != NULL) {
             printf_debug("%s\n", *argv);
             argv++;
@@ -329,24 +329,24 @@ int main(int argc, char *argv[])
     int init_fd;
 
     if (argc <= 1)
-        print_debug("main() argc <= 1\n");
+        printf_debug("%s", "main() argc <= 1\n");
         return 1;
 
     if (strcmp(argv[1], "init") == 0) {
-        print_debug("main() argv[1] = 'init'\n");
+        printf_debug("%s", "main() argv[1] = 'init'\n");
         int epochTime = (int)time(NULL);
         char baseTime[15];
         sprintf(baseTime, "%d", epochTime);
 
-        print_debug("main() init remove init timer\n");
+        printf_debug("%s", "main() init remove init timer\n");
         remove(INIT_TIMER_PATH);
 
         if ((init_fd = open(INIT_TIMER_PATH, O_CREAT | O_WRONLY)) > 0) {
-            print_debug("main() init write init fd\n");
+            printf_debug("%s", "main() init write init fd\n");
             write(init_fd, baseTime, strlen(baseTime));
             close(init_fd);
             system("sync");
-            print_debug("main() init saved init fd\n");
+            printf_debug("%s", "main() init saved init fd\n");
         }
 
         printf_debug("main() init Timer initiated @ %d\n", epochTime);
