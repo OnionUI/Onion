@@ -70,7 +70,7 @@ main() {
         touch $sysdir/.runGameSwitcher
     elif [ $startup_app -eq 2 ]; then
         echo -e "\n\n:: STARTUP APP: RetroArch\n\n"
-        echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v" > $sysdir/cmd_to_run.sh
+        echo "LD_PRELOAD=/customer/lib/libpadsp.so ./retroarch -v" > $sysdir/cmd_to_run.sh
         touch /tmp/quick_switch
     elif [ $startup_app -eq 3 ]; then
         echo -e "\n\n:: STARTUP APP: AdvanceMENU\n\n"
@@ -112,7 +112,7 @@ clear_logs() {
         ./logs/gameSwitcher.log \
         ./logs/keymon.log \
         ./logs/game_list_options.log \
-        2>&1 > /dev/null
+        2> /dev/null
 }
 
 check_main_ui() {
@@ -137,7 +137,7 @@ launch_main_ui() {
 
     # MainUI launch
     cd /mnt/SDCARD/miyoo/app
-    LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./MainUI 2>&1 > /dev/null
+    LD_PRELOAD="/customer/lib/libpadsp.so" ./MainUI 2>&1 > /dev/null
 
     if [ $deviceModel -eq 354 ] && [ -f /tmp/mainui_killed ]; then
         pkill -9 sshd
@@ -227,9 +227,9 @@ launch_game() {
 
             if [ -f "$corepath" ]; then
                 if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
-                    echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v --appendconfig \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+                    echo "LD_PRELOAD=/customer/lib/libpadsp.so ./retroarch -v --appendconfig \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
                 else
-                    echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+                    echo "LD_PRELOAD=/customer/lib/libpadsp.so ./retroarch -v -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
                 fi
             fi
         fi
@@ -318,7 +318,7 @@ check_switcher() {
 
 launch_switcher() {
     cd $sysdir
-    LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" gameSwitcher
+    LD_PRELOAD="/customer/lib/libpadsp.so" gameSwitcher
     rm $sysdir/.runGameSwitcher
     echo "switcher" > /tmp/prev_state
     sync
@@ -380,16 +380,16 @@ check_hide_expert() {
     if [ ! -f $sysdir/config/.showExpert ]; then
         # Should be clean
         if [ ! -f $clean_flag ] || [ -f $expert_flag ] || [ $is_device_model_changed -eq 1 ] || [ ! -f $mainui_target ]; then
-            rm -f $mainui_target 2>&1 > /dev/null
-            rm -f $expert_flag 2>&1 > /dev/null
+            rm -f $mainui_target 2> /dev/null
+            rm -f $expert_flag 2> /dev/null
             cp "$sysdir/bin/MainUI-$deviceModel-clean" $mainui_target
             touch $clean_flag
         fi
     else
         # Should be expert
         if [ ! -f $expert_flag ] || [ -f $clean_flag ] || [ $is_device_model_changed -eq 1 ] || [ ! -f $mainui_target ]; then
-            rm -f $mainui_target 2>&1 > /dev/null
-            rm -f $clean_flag 2>&1 > /dev/null
+            rm -f $mainui_target 2> /dev/null
+            rm -f $clean_flag 2> /dev/null
             cp "$sysdir/bin/MainUI-$deviceModel-expert" $mainui_target
             touch $expert_flag
         fi

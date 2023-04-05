@@ -184,8 +184,8 @@ run_installation() {
 
     get_install_stats
 
-    rm -f /tmp/.update_msg 2>&1 > /dev/null
-    rm -f $sysdir/config/currentSlide 2>&1 > /dev/null
+    rm -f /tmp/.update_msg 2> /dev/null
+    rm -f $sysdir/config/currentSlide 2> /dev/null
 
     # Show installation progress
     cd $sysdir
@@ -312,7 +312,7 @@ run_installation() {
         touch $sysdir/.installed
     fi
 
-    rm -f $sysdir/config/currentSlide 2>&1 > /dev/null
+    rm -f $sysdir/config/currentSlide 2> /dev/null
     sync
 }
 
@@ -521,6 +521,9 @@ move_ports_collection() {
         rm -f /mnt/SDCARD/Roms/PORTS/PORTS_cache2.db
         rm -f /mnt/SDCARD/Emu/PORTS/config.json # Triggers a reinstall
     fi
+    if [ -d /mnt/SDCARD/Roms/PORTS/Binaries ]; then
+        mv -f /mnt/SDCARD/Roms/PORTS /mnt/SDCARD/Roms/PORTS_old
+    fi
 }
 
 refresh_roms() {
@@ -528,7 +531,7 @@ refresh_roms() {
     # Force refresh the rom lists
     if [ -d /mnt/SDCARD/Roms ] ; then
         cd /mnt/SDCARD/Roms
-        find . -type f -name "*_cache2.db" -exec rm -f {} \;
+        find . -type f -name "*_cache[0-9].db" -exec rm -f {} \;
     fi
 }
 

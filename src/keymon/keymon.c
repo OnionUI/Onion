@@ -343,8 +343,10 @@ int main(void)
     bool b_BTN_Not_Menu_Pressed = false;
     bool b_BTN_Menu_Pressed = false;
     bool power_pressed = false;
-    bool volUp_pressed = false;
-    bool volDown_pressed = false;
+    bool volUp_state = false;
+    bool volUp_active = false;
+    bool volDown_state = false;
+    bool volDown_active = false;
     bool comboKey_volume = false;
     bool comboKey_menu = false;
     bool comboKey_select = false;
@@ -548,13 +550,17 @@ int main(void)
                     osd_showBrightnessBar(settings.brightness);
                     break;
                 }
-                volDown_pressed = val;
-                if (comboKey_volume)
+                if (val == PRESSED)
+                    volDown_active = true;
+                volDown_state = val;
+                if (!volDown_active || comboKey_volume)
                     break;
                 if (val == RELEASED || val == REPEAT) {
                     if (settings_setVolume(settings.volume - 1, true))
                         settings_changed = true;
                 }
+                if (val == RELEASED)
+                    volDown_active = false;
                 osd_showVolumeBar(settings.volume, settings.mute);
                 break;
             case HW_BTN_VOLUME_UP:
@@ -569,8 +575,10 @@ int main(void)
                     osd_showBrightnessBar(settings.brightness);
                     break;
                 }
-                volUp_pressed = val;
-                if (comboKey_volume)
+                if (val == PRESSED)
+                    volUp_active = true;
+                volUp_state = val;
+                if (!volUp_active || comboKey_volume)
                     break;
                 if (val == RELEASED || val == REPEAT) {
                     if (settings_setMute(0, true)) {
@@ -579,6 +587,8 @@ int main(void)
                     else if (settings_setVolume(settings.volume + 1, true))
                         settings_changed = true;
                 }
+                if (val == RELEASED)
+                    volUp_active = false;
                 osd_showVolumeBar(settings.volume, settings.mute);
                 break;
             default:
@@ -590,14 +600,14 @@ int main(void)
             }
 
             // Mute toggle
-            if (volDown_pressed != RELEASED && volUp_pressed != RELEASED &&
+            if (volDown_state != RELEASED && volUp_state != RELEASED &&
                 !comboKey_volume) {
                 comboKey_volume = true;
                 if (settings_setMute(!settings.mute, true))
                     settings_changed = true;
                 osd_showVolumeBar(settings.volume, settings.mute);
             }
-            else if (volDown_pressed == RELEASED && volUp_pressed == RELEASED)
+            else if (volDown_state == RELEASED && volUp_state == RELEASED)
                 comboKey_volume = false;
 
             if (settings_changed) {
