@@ -33,7 +33,7 @@ static struct rom_s {
 sqlite3 *db;
 
 int upgradeRomDB(void) {
-    print_debug("upgradeRomDB() start\n");
+    print_debug("upgradeRomDB()\n");
     FILE *file = fopen(PLAY_ACTIVITY_DB_PATH, "rb");
     if (file != NULL) {
         fread(rom_list, sizeof(rom_list), 1, file);
@@ -65,6 +65,7 @@ int upgradeRomDB(void) {
         return 1;
     }
     sqlite3_close(db);
+    print_debug("upgradeRomDB() return 0\n");
     return 0;
 }
 
@@ -78,11 +79,13 @@ void openDB(void) {
         printf_debug("Cannot open database: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
     }
+    print_debug("openDB() return\n");
 }
 
 void closeDB(void) {
     print_debug("closeDB()\n");
     sqlite3_close(db);
+    print_debug("closeDB() return\n");
 }
 
 void addPlayTime(const char* name, const char* filePath, int playTime) {
@@ -233,6 +236,7 @@ void addPlayTime(const char* name, const char* filePath, int playTime) {
 
 void registerTimerEnd(const char *identifier, const char *full_path)
 {
+    printf_debug("registerTimerEnd(%s, %s)\n", identifier, full_path);
     FILE *fp;
     long lSize;
     char *baseTime;
@@ -309,6 +313,7 @@ void registerTimerEnd(const char *identifier, const char *full_path)
 
     remove(INIT_TIMER_PATH);
     free(baseTime);
+    printf_debug("registerTimerEnd() return\n");
 }
 
 int main(int argc, char *argv[])
@@ -324,28 +329,28 @@ int main(int argc, char *argv[])
     int init_fd;
 
     if (argc <= 1)
-        print_debug("return: argc <= 1\n");
+        print_debug("main() argc <= 1\n");
         return 1;
 
     if (strcmp(argv[1], "init") == 0) {
-        print_debug("init:\n");
+        print_debug("main() argv[1] = 'init'\n");
         int epochTime = (int)time(NULL);
         char baseTime[15];
         sprintf(baseTime, "%d", epochTime);
 
-        print_debug("remove init timer\n");
+        print_debug("main() init remove init timer\n");
         remove(INIT_TIMER_PATH);
 
         if ((init_fd = open(INIT_TIMER_PATH, O_CREAT | O_WRONLY)) > 0) {
-            print_debug("write init fd\n");
+            print_debug("main() init write init fd\n");
             write(init_fd, baseTime, strlen(baseTime));
             close(init_fd);
             system("sync");
-            print_debug("saved init fd\n");
+            print_debug("main() init saved init fd\n");
         }
 
-        printf_debug("Timer initiated: %d\n", epochTime);
-
+        printf_debug("main() init Timer initiated @ %d\n", epochTime);
+        printf_debug("main() init return %d\n", EXIT_SUCCESS);
         return EXIT_SUCCESS;
     }
 
@@ -358,6 +363,7 @@ int main(int argc, char *argv[])
     char full_path[STR_MAX];
 
     if (strstr(cmd, "Roms/PORTS/Shortcuts") != NULL) {
+        printf_debug("main() cmd includes 'Roms/PORTS/Shortcuts'", gameName);
         char *path =
             str_split(cmd, "/mnt/SDCARD/Emu/PORTS/../../Roms/PORTS/Shortcuts");
 
@@ -372,6 +378,7 @@ int main(int argc, char *argv[])
         }
     }
     else if (strstr(cmd, "/mnt/SDCARD/Roms") != NULL) {
+        printf_debug("main() cmd includes '/mnt/SDCARD/Roms'", gameName);
         char *path = str_split(cmd, "/mnt/SDCARD/Roms");
 
         if (path != NULL) {
@@ -393,9 +400,12 @@ int main(int argc, char *argv[])
         strcpy(gameName, file_removeExtension(basename(argv[1])));
     }
 
-    printf_debug("register end: '%s'\n", gameName);
+    printf_debug("main() cmd = '%s'\n", cmd);
+    printf_debug("main() gameName = '%s'\n", gameName);
+    printf_debug("main() full_path = '%s'\n", full_path);
     registerTimerEnd(gameName, full_path);
 
     closeDB();
+    print_debug("main() return %d\n", EXIT_SUCCESS);
     return EXIT_SUCCESS;
 }
