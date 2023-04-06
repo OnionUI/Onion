@@ -370,17 +370,20 @@ int main(int argc, char *argv[])
 
                 if (footer_changed) {
                     theme_renderFooter(screen);
-                    const char *a_btn_text = lang_get(LANG_NEXT);
-                    const char *b_btn_text = lang_get(LANG_BACK);
+                    const char *a_btn_text =
+                        lang_get(LANG_NEXT, LANG_FALLBACK_NEXT);
+                    const char *b_btn_text =
+                        lang_get(LANG_BACK, LANG_FALLBACK_BACK);
                     if (info_panel_mode || g_images_paths_count == 1) {
-                        a_btn_text = lang_get(LANG_OK);
-                        b_btn_text = lang_get(LANG_CANCEL);
+                        a_btn_text = lang_get(LANG_OK, LANG_FALLBACK_OK);
+                        b_btn_text =
+                            lang_get(LANG_CANCEL, LANG_FALLBACK_CANCEL);
                     }
                     else if (g_image_index == g_images_paths_count - 1) {
-                        a_btn_text = lang_get(LANG_EXIT);
+                        a_btn_text = lang_get(LANG_EXIT, LANG_FALLBACK_EXIT);
                     }
                     else if (g_image_index == 0) {
-                        b_btn_text = lang_get(LANG_EXIT);
+                        b_btn_text = lang_get(LANG_EXIT, LANG_FALLBACK_EXIT);
                     }
                     if (wait_confirm)
                         theme_renderStandardHint(screen, a_btn_text,

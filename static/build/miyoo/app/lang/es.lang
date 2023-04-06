@@ -1,5 +1,5 @@
 {
-	"lang":	"Español",
+	"lang":	"Español (Spanish)",
 	"0":	"Experto",
 	"1":	"Favoritos",
 	"2":	"Consolas",
@@ -154,5 +154,7 @@
 	"151":  "SSID de entrada",
 	"152":  "Ingrese la contraseña",
 	"153":  "Buscar",
-	"154":  "Error al conectarse\nComprueba tu contraseña\nO reinicie el enrutador"	
+	"154":  "Error al conectarse\nComprueba tu contraseña\nO reinicie el enrutador",
+	"300":  "Próximo",
+	"301":  "Reanudar"
 }

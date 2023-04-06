@@ -1,5 +1,5 @@
 {
-	"lang":	"Svenska",
+	"lang":	"Svenska (Swedish)",
 	"0":	"Expert",
 	"1":	"Favoriter",
 	"2":	"Spel",
@@ -154,5 +154,7 @@
 	"151":  "Input SSID",
 	"152":  "Input Password",
 	"153":  "Search",
-	"154":  "Fail to connect\nCheck your password\nOr reboot router"	
+	"154":  "Fail to connect\nCheck your password\nOr reboot router",
+	"300":  "NÄSTA",
+	"301":  "FORTSÄTT"
 }

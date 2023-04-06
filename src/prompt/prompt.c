@@ -100,8 +100,8 @@ int main(int argc, char *argv[])
     int battery_percentage = battery_getPercentage();
 
     if (pargc == 0) {
-        pargs[pargc++] = lang_get(LANG_OK);
-        pargs[pargc++] = lang_get(LANG_CANCEL);
+        pargs[pargc++] = (char *)lang_get(LANG_OK, LANG_FALLBACK_OK);
+        pargs[pargc++] = (char *)lang_get(LANG_CANCEL, LANG_FALLBACK_CANCEL);
     }
 
     List list = list_create(pargc, LIST_SMALL);
@@ -235,8 +235,9 @@ int main(int argc, char *argv[])
 
             if (footer_changed) {
                 theme_renderFooter(screen);
-                theme_renderStandardHint(screen, lang_get(LANG_SELECT),
-                                         required ? NULL : lang_get(LANG_BACK));
+                theme_renderStandardHint(
+                    screen, lang_get(LANG_SELECT, LANG_FALLBACK_SELECT),
+                    required ? NULL : lang_get(LANG_BACK, LANG_FALLBACK_BACK));
             }
 
             if (footer_changed || list_changed)

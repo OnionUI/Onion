@@ -874,8 +874,9 @@ int main(void)
                 }
                 else {
                     theme_renderFooter(screen);
-                    theme_renderStandardHint(screen, "RESUME",
-                                             lang_get(LANG_BACK));
+                    theme_renderStandardHint(
+                        screen, lang_get(LANG_RESUME, LANG_FALLBACK_RESUME),
+                        lang_get(LANG_BACK, LANG_FALLBACK_BACK));
                     theme_renderFooterStatus(
                         screen, game_list_len > 0 ? current_game + 1 : 0,
                         game_list_len);

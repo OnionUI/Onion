@@ -154,5 +154,7 @@
 	"151":  "Input SSID",
 	"152":  "Input Password",
 	"153":  "Search",
-	"154":  "Fail to connect\nCheck your password\nOr reboot router"	
+	"154":  "Fail to connect\nCheck your password\nOr reboot router",
+	"300":  "NEXT",
+	"301":  "RESUME"
 }

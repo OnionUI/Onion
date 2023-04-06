@@ -1,5 +1,5 @@
 {
-	"lang":	"Français",
+	"lang":	"Français (French)",
 	"0":	"Expert",
 	"1":	"Favoris",
 	"2":	"Consoles",
@@ -154,6 +154,8 @@
 	"151":  "Input SSID",
 	"152":  "Input Password",
 	"153":  "Search",
-	"154":  "Fail to connect\nCheck your password\nOr reboot router"	
+	"154":  "Fail to connect\nCheck your password\nOr reboot router",
+	"300":  "Prochain",
+	"301":  "Reprendre"
 }
 

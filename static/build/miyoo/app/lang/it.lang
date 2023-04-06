@@ -1,5 +1,5 @@
 {
-	"lang":	"Italiano",
+	"lang":	"Italiano (Italian)",
 	"0":	"Esperta",
 	"1":	"Preferiti",
 	"2":	"Consoles",
@@ -154,5 +154,7 @@
 	"151":  "Input SSID",
 	"152":  "Input Password",
 	"153":  "Search",
-	"154":  "Fail to connect\nCheck your password\nOr reboot router"	
+	"154":  "Fail to connect\nCheck your password\nOr reboot router",
+	"300":  "Prossimo",
+	"301":  "Riprendere"
 }

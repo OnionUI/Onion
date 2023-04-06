@@ -1,5 +1,5 @@
 {
-	"lang":	"Turkce",
+	"lang":	"Turkce (Turkish)",
 	"0":	"Uzman",
 	"1":	"Favoriler",
 	"2":	"Oyunlar",
@@ -154,5 +154,7 @@
 	"151":  "Input SSID",
 	"152":  "Input Password",
 	"153":  "Search",
-	"154":  "Fail to connect\nCheck your password\nOr reboot router"	
+	"154":  "Fail to connect\nCheck your password\nOr reboot router",
+	"300":  "ILERI",
+	"301":  "Sürdürmek"
 }
