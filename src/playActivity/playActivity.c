@@ -97,7 +97,8 @@ void addPlayTime(const char* name, const char* filePath, int playTime) {
         sqlite3_bind_text(res, 1, name, -1, NULL);
         sqlite3_bind_text(res, 2, filePath, -1, NULL);
         sqlite3_bind_text(res, 3, name, -1, NULL);
-        sqlite3_bind_int(res, 4, playTime);
+        sqlite3_bind_text(res, 4, name, -1, NULL);
+        sqlite3_bind_int(res, 5, playTime);
     } else {
         printf_debug("Failed to execute statement: %s\n", sqlite3_errmsg(db));
     }
