@@ -321,10 +321,10 @@ int main(int argc, char *argv[])
     int log_count = 0;
     log_setName("playActivity");
     printf_debug("%s", "main()\n");
-    while (*argv != NULL) {
-            printf_debug("%s\n", *argv);
-            argv++;
-    }
+    // while (*argv != NULL) {
+    //         printf_debug("%s\n", *argv);
+    //         argv++;
+    // }
 
     openDB();
     printf_debug("%d\n", log_count++);
