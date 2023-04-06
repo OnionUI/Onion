@@ -331,9 +331,10 @@ int main(int argc, char *argv[])
     int init_fd;
     printf_debug("%d\n", log_count++);
 
-    if (argc <= 1)
+    if (argc <= 1) {
         printf_debug("%s", "main() argc <= 1\n");
         return 1;
+    }
     printf_debug("%d\n", log_count++);
     if (strcmp(argv[1], "init") == 0) {
         printf_debug("%s", "main() argv[1] = 'init'\n");
