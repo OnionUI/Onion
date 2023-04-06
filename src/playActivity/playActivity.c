@@ -365,16 +365,15 @@ int main(int argc, char *argv[])
     memset(gameName, 0, STR_MAX);
 
     char full_path[STR_MAX];
+    char *path;
 
     if (strstr(cmd, "Roms/PORTS/Shortcuts") != NULL) {
         printf_debug("main() cmd includes 'Roms/PORTS/Shortcuts'", gameName);
-        char *path =
-            str_split(cmd, "/mnt/SDCARD/Emu/PORTS/../../Roms/PORTS/Shortcuts");
+        path = str_split(cmd, "/mnt/SDCARD/Emu/PORTS/../../Roms/PORTS/Shortcuts");
 
         if (path != NULL) {
             path[strlen(path) - 1] = 0;
-            snprintf(full_path, STR_MAX - 1,
-                     "/mnt/SDCARD/Roms/PORTS/Shortcuts%s", path);
+            snprintf(full_path, STR_MAX - 1, "/mnt/SDCARD/Roms/PORTS/Shortcuts%s", path);
 
             if (is_file(full_path)) {
                 file_parseKeyValue(full_path, "GameName", gameName, '=', 0);
@@ -383,15 +382,14 @@ int main(int argc, char *argv[])
     }
     else if (strstr(cmd, "../../Roms") != NULL) {
         printf_debug("main() cmd includes '../../Roms'", gameName);
-        char *path = str_split(cmd, "../../Roms");
+        path = str_split(cmd, "../../Roms");
 
         if (path != NULL) {
             path[strlen(path) - 1] = 0;
             snprintf(full_path, STR_MAX - 1, "/mnt/SDCARD/Roms%s", path);
 
             char name_path[STR_MAX];
-            sprintf(name_path, "%s/.game_config/%s.name", dirname(full_path),
-                    basename(full_path));
+            sprintf(name_path, "%s/.game_config/%s.name", dirname(full_path), basename(full_path));
 
             if (is_file(name_path)) {
                 FILE *fp;
