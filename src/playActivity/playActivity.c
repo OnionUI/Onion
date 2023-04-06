@@ -381,9 +381,9 @@ int main(int argc, char *argv[])
             }
         }
     }
-    else if (strstr(cmd, "/mnt/SDCARD/Roms") != NULL) {
-        printf_debug("main() cmd includes '/mnt/SDCARD/Roms'", gameName);
-        char *path = str_split(cmd, "/mnt/SDCARD/Roms");
+    else if (strstr(cmd, "../../Roms") != NULL) {
+        printf_debug("main() cmd includes '../../Roms'", gameName);
+        char *path = str_split(cmd, "../../Roms");
 
         if (path != NULL) {
             path[strlen(path) - 1] = 0;
@@ -407,7 +407,8 @@ int main(int argc, char *argv[])
     printf_debug("main() cmd = '%s'\n", cmd);
     printf_debug("main() gameName = '%s'\n", gameName);
     printf_debug("main() full_path = '%s'\n", full_path);
-    registerTimerEnd(gameName, full_path);
+    printf_debug("main() path = '%s'\n", path);
+    registerTimerEnd(gameName, path);
 
     closeDB();
     printf_debug("main() return %d\n", EXIT_SUCCESS);
