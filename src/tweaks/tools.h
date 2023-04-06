@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <sys/wait.h>
 
+#include "system/device_model.h"
 #include "./appstate.h"
 #include "components/list.h"
 #include "theme/theme.h"
@@ -127,14 +128,72 @@ void tool_generateCueFiles(void *pt)
                      "/mnt/SDCARD/.tmp_update/script/cue_gen.sh");
 }
 
+void tool_patchRAConfigMiyoo283(void *pt)
+{
+    char value[STR_MAX];
+    char key[] = "settings_show_achievements = \"";
+
+    file_parseKeyValue(RETROARCH_CONFIG_MIYOO283, "settings_show_achievements", value,'=', 0);    
+    strcat(key,value);     
+    strcat(key,"\"");                     
+    file_changeKeyValue(RETROARCH_CONFIG, "settings_show_achievements =", key);   
+
+    strcpy(key, "content_show_netplay = \"");
+    file_parseKeyValue(RETROARCH_CONFIG_MIYOO283, "content_show_netplay", value,'=', 0);    
+    strcat(key,value);     
+    strcat(key,"\"");                     
+    file_changeKeyValue(RETROARCH_CONFIG, "content_show_netplay =", key);   
+
+    strcpy(key, "netplay_nickname = \"");
+    file_parseKeyValue(RETROARCH_CONFIG_MIYOO283, "netplay_nickname", value,'=', 0);    
+    strcat(key,value);     
+    strcat(key,"\"");                     
+    file_changeKeyValue(RETROARCH_CONFIG, "netplay_nickname =", key);   
+                        
+}
+
+void tool_patchRAConfigMiyoo354(void *pt)
+{
+    
+    char value[STR_MAX];
+    char key[] = "settings_show_achievements = \"";    
+
+    file_parseKeyValue(RETROARCH_CONFIG_MIYOO354, "settings_show_achievements", value,'=', 0);    
+    strcat(key,value);     
+    strcat(key,"\"");   
+    file_changeKeyValue(RETROARCH_CONFIG, "settings_show_achievements =", key);    
+
+    strcpy(key, "content_show_netplay = \"");
+    file_parseKeyValue(RETROARCH_CONFIG_MIYOO354, "content_show_netplay", value,'=', 0);    
+    strcat(key,value);     
+    strcat(key,"\"");                     
+    file_changeKeyValue(RETROARCH_CONFIG, "content_show_netplay =", key);   
+
+    strcpy(key, "netplay_nickname = \"");
+    file_parseKeyValue(RETROARCH_CONFIG_MIYOO354, "netplay_nickname", value,'=', 0);    
+    strcat(key,value);     
+    strcat(key,"\"");                     
+    file_changeKeyValue(RETROARCH_CONFIG, "netplay_nickname =", key);   
+                        
+}
+
+
 void tool_patchRAConfig(void *_)
 {
     char value[STR_MAX];
     char theme_preset[STR_MAX];
     int color_theme = 0;
+    getDeviceModel();
 
     if (!is_file(RETROARCH_CONFIG))
         return;
+
+    if (DEVICE_ID == MIYOO283) {
+        tool_patchRAConfigMiyoo283(NULL);
+    }
+    else if (DEVICE_ID == MIYOO354) {
+        tool_patchRAConfigMiyoo354(NULL);
+    }
 
     if (file_parseKeyValue(RETROARCH_CONFIG, "rgui_menu_color_theme", value,
                            '=', 0) != NULL)
@@ -187,6 +246,8 @@ void tool_patchRAConfig(void *_)
     file_changeKeyValue(RETROARCH_CONFIG,
                         "notification_show_set_initial_disk =",
                         "notification_show_set_initial_disk = \"false\"");
+
+
 }
 
 static void (*tools_pt[NUM_TOOLS])(void *) = {
