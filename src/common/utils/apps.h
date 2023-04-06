@@ -12,6 +12,7 @@ typedef struct {
     int dup_id;
 } InstalledApp;
 static InstalledApp _installed_apps[100];
+static InstalledApp _installed_apps_sorted[100];
 static int installed_apps_count = 0;
 static bool installed_apps_loaded = false;
 
@@ -41,7 +42,7 @@ int _comp_installed_apps(const void *a, const void *b)
     return strcasecmp(((InstalledApp *)a)->label, ((InstalledApp *)b)->label);
 }
 
-InstalledApp *getInstalledApps()
+InstalledApp *getInstalledApps(bool sort)
 {
     DIR *dp;
     struct dirent *ep;
@@ -68,8 +69,8 @@ InstalledApp *getInstalledApps()
             app->dup_id = 0;
 
             // Check for duplicate labels
-            for (int i = installed_apps_count - 1; i >= 0; i--) {
-                InstalledApp *other = &_installed_apps[i];
+            for (int j = installed_apps_count - 1; j >= 0; j--) {
+                InstalledApp *other = &_installed_apps[j];
                 if (strcmp(other->label, app->label) == 0) {
                     other->is_duplicate = app->is_duplicate = true;
                     app->dup_id = other->dup_id + 1;
@@ -77,17 +78,19 @@ InstalledApp *getInstalledApps()
                 }
             }
 
+            _installed_apps_sorted[i] = _installed_apps[i];
+
             printf_debug("app %d: %s (%s)\n", i, app->dirName, app->label);
             installed_apps_count++;
         }
 
-        qsort(_installed_apps, installed_apps_count, sizeof(InstalledApp),
-              _comp_installed_apps);
+        qsort(_installed_apps_sorted, installed_apps_count,
+              sizeof(InstalledApp), _comp_installed_apps);
 
         installed_apps_loaded = true;
     }
 
-    return _installed_apps;
+    return sort ? _installed_apps_sorted : _installed_apps;
 }
 
 bool getAppPosition(const char *app_dir_name, int *currpos, int *total)
@@ -96,7 +99,7 @@ bool getAppPosition(const char *app_dir_name, int *currpos, int *total)
     *currpos = 0;
     *total = 0;
 
-    getInstalledApps();
+    getInstalledApps(false);
 
     for (int i = 0; i < installed_apps_count; i++) {
         InstalledApp *app = &_installed_apps[i];

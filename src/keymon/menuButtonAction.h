@@ -9,15 +9,14 @@
 #include "system/screenshot.h"
 #include "system/settings.h"
 #include "system/state.h"
-#include "system/system_utils.h"
 #include "utils/apps.h"
 
 #include "./input_fd.h"
 
-#define NUM_TOOLS 5
+#define NUM_TOOLS 6
 
 static char tools_short_names[NUM_TOOLS][STR_MAX] = {
-    "favsort-az", "favsort-sys", "favfix", "recents", "dot_clean"};
+    "dot_clean", "cue_gen", "favsort-az", "favsort-sys", "favfix", "recents"};
 static MainUIState tools_states[NUM_TOOLS] = {FAVORITES, FAVORITES, FAVORITES,
                                               RECENTS, GAMES};
 
@@ -54,7 +53,7 @@ void applyExtraButtonShortcut(int button)
     int i;
     char *action =
         button == 0 ? settings.mainui_button_x : settings.mainui_button_y;
-    InstalledApp *apps = getInstalledApps();
+    InstalledApp *apps = getInstalledApps(false);
 
     if (button == 1 && strcmp(action, "glo") == 0) {
         temp_flag_set("launch_alt", true);

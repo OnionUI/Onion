@@ -197,7 +197,7 @@ void menu_buttonAction(void *_)
                      (ListItem){.label = "MainUI: Menu button...",
                                 .action = menu_buttonActionMainUIMenu});
 
-        getInstalledApps();
+        getInstalledApps(true);
         list_addItem(&_menu_button_action,
                      (ListItem){.label = "MainUI: X button",
                                 .item_type = MULTIVALUE,
@@ -402,8 +402,14 @@ void menu_advanced(void *_)
 void menu_tools(void *_)
 {
     if (!_menu_tools._created) {
-        _menu_tools = list_create(5, LIST_SMALL);
+        _menu_tools = list_create(NUM_TOOLS, LIST_SMALL);
         strcpy(_menu_tools.title, "Tools");
+        list_addItem(&_menu_tools,
+                     (ListItem){.label = "Remove OSX system files",
+                                .action = tool_removeMacFiles});
+        list_addItem(&_menu_tools,
+                     (ListItem){.label = "Generate CUE files for PSX games",
+                                .action = tool_generateCueFiles});
         list_addItem(&_menu_tools,
                      (ListItem){.label = "Favorites: Sort alphabetically",
                                 .action = tool_favoritesSortAlpha});
@@ -417,9 +423,6 @@ void menu_tools(void *_)
         list_addItem(&_menu_tools,
                      (ListItem){.label = "Remove apps from recents",
                                 .action = tool_recentsRemoveApps});
-        list_addItem(&_menu_tools,
-                     (ListItem){.label = "Remove OSX system files",
-                                .action = tool_removeMacFiles});
     }
     menu_stack[++menu_level] = &_menu_tools;
     header_changed = true;
