@@ -55,16 +55,9 @@ void upgradeRomDB(void) {
         return;
     }
     printf_debug("%d\n", logCount++);
-    char* sql = "";
-    printf_debug("%d\n", logCount++);
-    char* dropSql = "DROP TABLE IF EXISTS playActivity;";
-    printf_debug("%d\n", logCount++);
-    printf_debug("%s\n", dropSql);
-    memcpy(sql, dropSql, sizeof(*dropSql)+1);
-    printf_debug("%d\n", logCount++);
-    strncat(sql, "CREATE TABLE playActivity(name TEXT, filePath Text, playCount INT, playTime INT);", STR_MAX+1);
-    printf_debug("%d\n", logCount++);
-    strncat(sql, "CREATE UNIQUE INDEX name_index ON playActivity(name);", STR_MAX);
+    char* sql = "DROP TABLE IF EXISTS playActivity;"
+        "CREATE TABLE playActivity(name TEXT, filePath Text, playCount INT, playTime INT);"
+        "CREATE UNIQUE INDEX name_index ON playActivity(name);";
     printf_debug("%d\n", logCount++);
     int i;
     char* insert = "";
@@ -73,9 +66,10 @@ void upgradeRomDB(void) {
         printf_debug("%d\n", logCount++);
         if (strlen(romList[i].name) > 0) {
             printf_debug("%d\n", logCount++);
-            snprintf(insert, STR_MAX, "INSERT OR REPLACE INTO playActivity VALUES ('%s', NULL, 1, %d);", romList[i].name, romList[i].playTime);
+            insertSql = "INSERT OR REPLACE INTO playActivity VALUES ('%s', NULL, 1, %d);";
+            snprintf(insert, strlen(insertSql), insertSql, romList[i].name, romList[i].playTime);
             printf_debug("%d\n", logCount++);
-            strncat(sql, insert, STR_MAX);
+            strncat(sql, insert, strlen(insert));
             printf_debug("%d\n", logCount++);
         }
         printf_debug("%d\n", logCount++);
