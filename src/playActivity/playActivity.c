@@ -19,7 +19,7 @@
 
 sqlite3 *db;
 static struct rom_s {
-    char *name;
+    char* name;
     int playTime;
 };
 
@@ -37,7 +37,7 @@ void upgradeRomDB(void) {
         fread(romList, sizeof(romList), 1, file);
         fclose(file);
     }
-    char *err_msg = 0;
+    char* err_msg = 0;
     int rc = sqlite3_open(PLAY_ACTIVITY_SQLITE_PATH, &db);
     if (rc != SQLITE_OK) {
         printf_debug("Cannot open database: %s\n", sqlite3_errmsg(db));
@@ -45,12 +45,12 @@ void upgradeRomDB(void) {
         printf_debug("%s\n", "upgradeRomDB() return");
         return;
     }
-    char *sql;
+    char* sql = "";
     strncpy(sql, "DROP TABLE IF EXISTS playActivity;", STR_MAX);
     strncat(sql, "CREATE TABLE playActivity(name TEXT, filePath Text, playCount INT, playTime INT);", STR_MAX);
     strncat(sql, "CREATE UNIQUE INDEX name_index ON playActivity(name);", STR_MAX);
     int i;
-    char *insert;
+    char* insert = "";
     for (i = 0; i < sizeof(romList)/sizeof(romList[0]); i++) {
         if (strlen(romList[i].name) > 0) {
             snprintf(insert, STR_MAX, "INSERT OR REPLACE INTO playActivity VALUES ('%s', NULL, 1, %d);", romList[i].name, romList[i].playTime);
@@ -80,7 +80,7 @@ void openDB(void) {
 void addPlayTime(const char* name, const char* filePath, int playTime) {
     printf_debug("addPlayTime(%s, %s)\n", name, filePath);
     sqlite3_stmt *res;
-    char *updateSQL = "INSERT OR REPLACE INTO playActivity VALUES(?, ?, COALESCE((SELECT playCount FROM playActivity WHERE name=?), 0) + 1, COALESCE((SELECT playTime FROM playActivity WHERE name=?), 0) + ?);";
+    char* updateSQL = "INSERT OR REPLACE INTO playActivity VALUES(?, ?, COALESCE((SELECT playCount FROM playActivity WHERE name=?), 0) + 1, COALESCE((SELECT playTime FROM playActivity WHERE name=?), 0) + ?);";
     int rc = sqlite3_prepare_v2(db, updateSQL, -1, &res, NULL);
     if (rc == SQLITE_OK) {
         sqlite3_bind_text(res, 1, name, -1, NULL);
@@ -100,19 +100,19 @@ void addPlayTime(const char* name, const char* filePath, int playTime) {
     printf_debug("%s\n", "addPlayTime() return");
 }
 
-void registerTimerEnd(const char *gameName, const char *filePath)
+void registerTimerEnd(const char* gameName, const char* filePath)
 {
     printf_debug("registerTimerEnd(%s, %s)\n", gameName, filePath);
     FILE *fp;
     long lSize;
-    char *baseTime;
+    char* baseTime;
     if ((fp = fopen(INIT_TIMER_PATH, "rb")) == 0) {
         return;
     }
     fseek(fp, 0L, SEEK_END);
     lSize = ftell(fp);
     rewind(fp);
-    baseTime = (char *)calloc(1, lSize + 1);
+    baseTime = (char* )calloc(1, lSize + 1);
     if (!baseTime) {
         fclose(fp);
         fputs("memory alloc fails", stderr);
@@ -134,7 +134,7 @@ void registerTimerEnd(const char *gameName, const char *filePath)
     printf_debug("%s\n", "registerTimerEnd() return");
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     log_setName("playActivity");
     printf_debug("%s\n", "main()");
@@ -166,18 +166,18 @@ int main(int argc, char *argv[])
         printf_debug("main() init return %d\n", EXIT_SUCCESS);
         return EXIT_SUCCESS;
     }
-    char *cmd;
+    char* cmd = "";
     strncpy(cmd, argv[1], STR_MAX);
-    char *gameName;
-    char *filePath;
-    char *relativePath;
+    char* gameName = "";
+    char* filePath = "";
+    char* relativePath = "";
     if (strstr(cmd, "../../Roms/") != NULL) {
         printf_debug("%s", "main() cmd includes '../../Roms/'\n");
         relativePath = str_split(cmd, "../../Roms/");
         if (relativePath != NULL) {
             relativePath[strlen(relativePath) - 1] = 0;
             snprintf(filePath, STR_MAX, "/mnt/SDCARD/Roms/./%s", relativePath);
-            char *name_path;
+            char* name_path;
             sprintf(name_path, "%s/.game_config/%s.name", dirname(filePath), basename(filePath));
             if (is_file(name_path)) {
                 FILE *fp;
