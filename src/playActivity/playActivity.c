@@ -56,9 +56,13 @@ void upgradeRomDB(void) {
     }
     printf_debug("%d\n", logCount++);
     char* sql = "";
-    strncpy(sql, "DROP TABLE IF EXISTS playActivity;", STR_MAX);
     printf_debug("%d\n", logCount++);
-    strncat(sql, "CREATE TABLE playActivity(name TEXT, filePath Text, playCount INT, playTime INT);", STR_MAX);
+    char* dropSql = "DROP TABLE IF EXISTS playActivity;";
+    printf_debug("%d\n", logCount++);
+    printf_debug("%s\n", dropSql);
+    memcpy(sql, dropSql, sizeof(*dropSql)+1);
+    printf_debug("%d\n", logCount++);
+    strncat(sql, "CREATE TABLE playActivity(name TEXT, filePath Text, playCount INT, playTime INT);", STR_MAX+1);
     printf_debug("%d\n", logCount++);
     strncat(sql, "CREATE UNIQUE INDEX name_index ON playActivity(name);", STR_MAX);
     printf_debug("%d\n", logCount++);
