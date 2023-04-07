@@ -399,14 +399,14 @@ last_device_model=/mnt/SDCARD/miyoo/app/lastDeviceModel
 is_device_model_changed=0
 
 check_device_model() {
-    if [ ! -f /customer/app/axp_test ]; then        
-        touch /tmp/deviceModel
-        printf "283" > /tmp/deviceModel
-        deviceModel=283
-    else
+    if axp 21; then
         touch /tmp/deviceModel
         printf "354" > /tmp/deviceModel
         deviceModel=354
+    else
+        touch /tmp/deviceModel
+        printf "283" > /tmp/deviceModel
+        deviceModel=283
     fi
     
     # Check if the SD is inserted in a different model
@@ -425,13 +425,18 @@ check_device_model() {
 
 
 init_system() {
+    if [ $deviceModel -eq 354 ]; then
+        # Reduce LCD voltage from 3000 to 2800 (to remove artifacts)
+        axp 21 0c
+    fi
+
     # init_lcd
     cat /proc/ls
     sleep 0.25
     
     /mnt/SDCARD/miyoo/app/audioserver &
 
-    if [ $deviceModel -eq 283 ]; then 
+    if [ $deviceModel -eq 283 ]; then
         # init charger detection
         if [ ! -f /sys/devices/gpiochip0/gpio/gpio59/direction ]; then
             echo 59 > /sys/class/gpio/export
