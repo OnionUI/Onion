@@ -177,7 +177,7 @@ int main(int argc, char* argv[])
         if (relativePath != NULL) {
             relativePath[strlen(relativePath) - 1] = 0;
             snprintf(filePath, STR_MAX, "/mnt/SDCARD/Roms/./%s", relativePath);
-            char* name_path;
+            char* name_path = "";
             sprintf(name_path, "%s/.game_config/%s.name", dirname(filePath), basename(filePath));
             if (is_file(name_path)) {
                 FILE *fp;
