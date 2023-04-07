@@ -57,20 +57,31 @@ void upgradeRomDB(void) {
     printf_debug("%d\n", logCount++);
     char* sql = "";
     strncpy(sql, "DROP TABLE IF EXISTS playActivity;", STR_MAX);
+    printf_debug("%d\n", logCount++);
     strncat(sql, "CREATE TABLE playActivity(name TEXT, filePath Text, playCount INT, playTime INT);", STR_MAX);
+    printf_debug("%d\n", logCount++);
     strncat(sql, "CREATE UNIQUE INDEX name_index ON playActivity(name);", STR_MAX);
+    printf_debug("%d\n", logCount++);
     int i;
     char* insert = "";
+    printf_debug("%d\n", logCount++);
     for (i = 0; i < sizeof(romList)/sizeof(romList[0]); i++) {
+        printf_debug("%d\n", logCount++);
         if (strlen(romList[i].name) > 0) {
+            printf_debug("%d\n", logCount++);
             snprintf(insert, STR_MAX, "INSERT OR REPLACE INTO playActivity VALUES ('%s', NULL, 1, %d);", romList[i].name, romList[i].playTime);
+            printf_debug("%d\n", logCount++);
             strncat(sql, insert, STR_MAX);
+            printf_debug("%d\n", logCount++);
         }
+        printf_debug("%d\n", logCount++);
     }
+    printf_debug("%d\n", logCount++);
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
     if (rc != SQLITE_OK ) {
         printf_debug("SQL error: %s\n", sqlite3_errmsg(db));
     }
+    printf_debug("%d\n", logCount++);
     printf_debug("%s\n", "upgradeRomDB() return");
 }
 
