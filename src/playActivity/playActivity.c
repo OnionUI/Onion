@@ -34,7 +34,7 @@ void closeDB(void) {
 void upgradeRomDB(void) {
     printf_debug("%s\n", "upgradeRomDB()");
     FILE *file = fopen(PLAY_ACTIVITY_DB_PATH, "rb");
-    struct rom_s[] rom_list;
+    struct rom_s rom_list[];
     if (file != NULL) {
         fread(rom_list, sizeof(rom_list), 1, file);
         fclose(file);
