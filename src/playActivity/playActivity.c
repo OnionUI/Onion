@@ -18,10 +18,6 @@
 #define PLAY_ACTIVITY_DB_PATH "/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db"
 
 sqlite3 *db;
-static struct rom_s {
-    char* name;
-    int playTime;
-};
 
 void closeDB(void) {
     printf_debug("%s\n", "closeDB()");
@@ -32,7 +28,10 @@ void closeDB(void) {
 void upgradeRomDB(void) {
     printf_debug("%s\n", "upgradeRomDB()");
     FILE *file = fopen(PLAY_ACTIVITY_DB_PATH, "rb");
-    struct rom_s romList[1000];
+    static struct rom_s {
+        char* name;
+        int playTime;
+    }; romList[1000];
     if (file != NULL) {
         fread(romList, sizeof(romList), 1, file);
         fclose(file);
