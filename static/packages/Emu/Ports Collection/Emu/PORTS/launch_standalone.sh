@@ -42,7 +42,7 @@ echo --------------------------------------------------------------------
 echo ":: APPLYING ADDITIONNAL CONFIGURATION"
 echo --------------------------------------------------------------------
 
-if [ "$KillAudioserver" = "1" ]; then pkill -9 -f audioserver; fi
+if [ "$KillAudioserver" = "1" ]; then pkill -9 wpa_supplicant & pkill -9 udhcpc & pkill -9 -f audioserver; fi
 if [ "$PerformanceMode" = "1" ]; then echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor; fi
 
 ParasytePath="/mnt/SDCARD/.tmp_update/lib/parasyte"
