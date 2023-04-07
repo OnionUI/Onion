@@ -1,5 +1,5 @@
 {
-	"lang":	"Português",
+	"lang":	"Português (Portuguese)",
 	"0":	"Espec.",
 	"1":	"Favorito",
 	"2":	"Consoles",
@@ -154,5 +154,7 @@
 	"151":  "SSID de entrada",
 	"152":  "Senha de entrada",
 	"154":  "Procurar",
-	"155":  "Falha ao se conectar\nVerifique sua senha\nOu reinicie o roteador"		
+	"155":  "Falha ao se conectar\nVerifique sua senha\nOu reinicie o roteador",
+	"300":  "Próximo",
+	"301":  "Continuar"
 }

@@ -655,10 +655,10 @@ int main(void)
             }
 
             if (combo_key ||
-                select_pressed && ((changed_key == SW_BTN_L2 &&
-                                    keystate[SW_BTN_L2] == RELEASED) ||
-                                   (changed_key == SW_BTN_R2 &&
-                                    keystate[SW_BTN_R2] == RELEASED))) {
+                (select_pressed && ((changed_key == SW_BTN_L2 &&
+                                     keystate[SW_BTN_L2] == RELEASED) ||
+                                    (changed_key == SW_BTN_R2 &&
+                                     keystate[SW_BTN_R2] == RELEASED)))) {
                 settings_load();
                 brightness_changed = false;
                 changed = true;
@@ -874,8 +874,9 @@ int main(void)
                 }
                 else {
                     theme_renderFooter(screen);
-                    theme_renderStandardHint(screen, "RESUME",
-                                             lang_get(LANG_BACK));
+                    theme_renderStandardHint(
+                        screen, lang_get(LANG_RESUME, LANG_FALLBACK_RESUME),
+                        lang_get(LANG_BACK, LANG_FALLBACK_BACK));
                     theme_renderFooterStatus(
                         screen, game_list_len > 0 ? current_game + 1 : 0,
                         game_list_len);

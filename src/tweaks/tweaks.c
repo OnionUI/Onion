@@ -167,8 +167,9 @@ int main(int argc, char *argv[])
 
             if (footer_changed) {
                 theme_renderFooter(screen);
-                theme_renderStandardHint(screen, lang_get(LANG_SELECT),
-                                         lang_get(LANG_BACK));
+                theme_renderStandardHint(
+                    screen, lang_get(LANG_SELECT, LANG_FALLBACK_SELECT),
+                    lang_get(LANG_BACK, LANG_FALLBACK_BACK));
             }
 
             if (footer_changed || list_changed)

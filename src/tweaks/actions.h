@@ -18,7 +18,7 @@ void action_setAppShortcut(void *pt)
     int value = item->value;
     char *sett_pt = item->action_id == 0 ? settings.mainui_button_x
                                          : settings.mainui_button_y;
-    InstalledApp *apps = getInstalledApps();
+    InstalledApp *apps = getInstalledApps(true);
 
     memset(sett_pt, 0, JSON_STRING_LEN * sizeof(char));
 

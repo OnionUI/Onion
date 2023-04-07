@@ -1,5 +1,5 @@
 {
-	"lang":	"Русский",
+	"lang":	"Русский (Russian)",
 	"0":	"Эксперт",
 	"1":	"Избран.",
 	"2":	"Консоли",
@@ -154,5 +154,7 @@
 	"151":  "Input SSID",
 	"152":  "Input Password",
 	"153":  "Search",
-	"154":  "Fail to connect\nCheck your password\nOr reboot router"	
+	"154":  "Fail to connect\nCheck your password\nOr reboot router",
+	"300":  "Далее",
+	"301":  "Продолжить"
 }

@@ -9,15 +9,25 @@
 #include "utils/log.h"
 #include "utils/str.h"
 
-#ifndef DT_REG
-#define DT_REG 8
-#endif
-
-#define LANG_MAX 150
+#define LANG_MAX 400
 #define LANG_DEFAULT "en.lang"
 #define LANG_DIR "/mnt/SDCARD/miyoo/app/lang"
 #define LANG_DIR_FALLBACK "/customer/app/lang"
 #define LANG_DIR_BACKUP "/mnt/SDCARD/miyoo/app/lang_backup"
+
+#define LANG_FALLBACK_SELECT "SELECT"
+#define LANG_FALLBACK_BACK "BACK"
+#define LANG_FALLBACK_OK "OK"
+#define LANG_FALLBACK_CANCEL "CANCEL"
+#define LANG_FALLBACK_NEXT "NEXT"
+#define LANG_FALLBACK_EXIT "EXIT"
+#define LANG_FALLBACK_RESUME "RESUME"
+
+#define LANG_FALLBACK_RECENTS_TAB "Recents"
+#define LANG_FALLBACK_FAVORITES_TAB "Favorites"
+#define LANG_FALLBACK_GAMES_TAB "Games"
+#define LANG_FALLBACK_EXPERT_TAB "Expert"
+#define LANG_FALLBACK_APPS_TAB "Apps"
 
 void lang_removeIconLabels(bool remove_icon_labels, bool remove_hints)
 {
@@ -77,7 +87,7 @@ void lang_removeIconLabels(bool remove_icon_labels, bool remove_hints)
             json_setString(root, "89", " ");  // BACK
             json_setString(root, "111", " "); // EXIT
             json_setString(root, "112", " "); // SAVE AND EXIT
-            json_setString(root, "131", " "); // NEXT
+            json_setString(root, "300", " "); // NEXT
         }
 
         json_save(root, file_path);
@@ -89,23 +99,24 @@ void lang_removeIconLabels(bool remove_icon_labels, bool remove_hints)
 static char **lang_list = NULL;
 
 typedef enum {
-    LANG_EXPERT_TAB,
-    LANG_FAVORITES_TAB,
-    LANG_GAMES_TAB,
+    LANG_EXPERT_TAB = 0,
+    LANG_FAVORITES_TAB = 1,
+    LANG_GAMES_TAB = 2,
     LANG_SETTINGS_TAB = 15,
     LANG_RECENTS_TAB = 18,
     LANG_CHARGING = 40,
     LANG_CANCEL = 45,
-    LANG_OK,
+    LANG_OK = 46,
     LANG_LOADING_SCREEN = 75,
-    LANG_LOADING_TITLE,
+    LANG_LOADING_TITLE = 76,
     LANG_SELECT = 88,
-    LANG_BACK,
+    LANG_BACK = 89,
     LANG_MENU = 91,
     LANG_APPS_TAB = 107,
     LANG_EXIT = 111,
-    LANG_SAVE_EXIT,
-    LANG_NEXT = 131
+    LANG_SAVE_EXIT = 112,
+    LANG_NEXT = 300,
+    LANG_RESUME = 301
 } lang_hash;
 
 bool lang_getFilePath(const char *lang_name, char *lang_path)
@@ -152,11 +163,11 @@ bool lang_load(void)
 
 void lang_free(void) { free(lang_list); }
 
-char *lang_get(lang_hash key)
+const char *lang_get(lang_hash key, const char *fallback)
 {
     if (lang_list && lang_list[key])
         return lang_list[key];
-    return "";
+    return fallback;
 }
 
 #endif // SYSTEM_LANG_H__

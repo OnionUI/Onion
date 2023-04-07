@@ -4,7 +4,7 @@
 "iconsel":"../../Icons/Default/rapp/openbor.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/OPENBOR",
-"imgpath":"../../Imgs/OPENBOR",
+"imgpath":"../../Roms/OPENBOR/Imgs",
 "useswap":1,
 "shortname":0,
 "hidebios":0,

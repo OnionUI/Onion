@@ -51,7 +51,8 @@ void theme_renderDialog(SDL_Surface *screen, const char *title_str,
         hint_rect.x += button_a->w + 5;
 
         SDL_Surface *label_ok = TTF_RenderUTF8_Blended(
-            resource_getFont(HINT), lang_get(LANG_OK), theme()->hint.color);
+            resource_getFont(HINT), lang_get(LANG_OK, LANG_FALLBACK_OK),
+            theme()->hint.color);
         if (label_ok) {
             SDL_Rect label_ok_rect = {hint_rect.x,
                                       hint_rect.y - label_ok->h / 2};
@@ -66,7 +67,8 @@ void theme_renderDialog(SDL_Surface *screen, const char *title_str,
         hint_rect.x += button_b->w + 5;
 
         SDL_Surface *label_cancel = TTF_RenderUTF8_Blended(
-            resource_getFont(HINT), lang_get(LANG_CANCEL), theme()->hint.color);
+            resource_getFont(HINT), lang_get(LANG_CANCEL, LANG_FALLBACK_CANCEL),
+            theme()->hint.color);
         if (label_cancel) {
             SDL_Rect label_cancel_rect = {hint_rect.x,
                                           hint_rect.y - label_cancel->h / 2};

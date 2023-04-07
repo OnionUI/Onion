@@ -1,5 +1,5 @@
 {
-	"lang":	"Nederlands",
+	"lang":	"Nederlands (Dutch)",
 	"0":	"Expert",
 	"1":	"Favorieten",
 	"2":	"Games",
@@ -154,5 +154,7 @@
 	"151":  "Input SSID",
 	"152":  "Input Password",
 	"153":  "Search",
-	"154":  "Fail to connect\nCheck your password\nOr reboot router"	
+	"154":  "Fail to connect\nCheck your password\nOr reboot router",
+	"300":  "VOLGENDE",
+	"301":  "DOORGAAN"
 }

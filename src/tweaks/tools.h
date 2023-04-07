@@ -12,10 +12,10 @@
 #include "theme/theme.h"
 #include "utils/msleep.h"
 
-#define NUM_TOOLS 5
+#define NUM_TOOLS 6
 
 static char tools_short_names[NUM_TOOLS][STR_MAX] = {
-    "favsort-az", "favsort-sys", "favfix", "recents", "dot_clean"};
+    "dot_clean", "cue_gen", "favsort-az", "favsort-sys", "favfix", "recents"};
 static pthread_t thread_pt;
 static bool thread_active = false;
 static bool thread_success = false;
@@ -119,6 +119,12 @@ void tool_removeMacFiles(void *pt)
 {
     _runCommandPopup(tools_short_names[4],
                      "/mnt/SDCARD/.tmp_update/script/dot-clean.sh");
+}
+
+void tool_generateCueFiles(void *pt)
+{
+    _runCommandPopup(tools_short_names[5],
+                     "/mnt/SDCARD/.tmp_update/script/cue_gen.sh");
 }
 
 void tool_patchRAConfig(void *_)
