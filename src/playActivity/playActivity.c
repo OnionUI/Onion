@@ -60,14 +60,14 @@ void upgradeRomDB(void) {
         "CREATE UNIQUE INDEX name_index ON playActivity(name);";
     printf_debug("%d\n", logCount++);
     int i;
+    char* insertSql = "INSERT OR REPLACE INTO playActivity VALUES ('%s', NULL, 1, %d);";
     char* insert = "";
     printf_debug("%d\n", logCount++);
     for (i = 0; i < sizeof(romList)/sizeof(romList[0]); i++) {
         printf_debug("%d\n", logCount++);
         if (strlen(romList[i].name) > 0) {
             printf_debug("%d\n", logCount++);
-            insertSql = "INSERT OR REPLACE INTO playActivity VALUES ('%s', NULL, 1, %d);";
-            snprintf(insert, strlen(insertSql), insertSql, romList[i].name, romList[i].playTime);
+            snprintf(insert, (strlen(insertSql) + strlen(romList[i].name) + 64), insertSql, romList[i].name, romList[i].playTime);
             printf_debug("%d\n", logCount++);
             strncat(sql, insert, strlen(insert));
             printf_debug("%d\n", logCount++);
