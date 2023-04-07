@@ -399,7 +399,7 @@ last_device_model=/mnt/SDCARD/miyoo/app/lastDeviceModel
 is_device_model_changed=0
 
 check_device_model() {
-    if axp 21; then
+    if axp 0; then
         touch /tmp/deviceModel
         printf "354" > /tmp/deviceModel
         deviceModel=354
@@ -408,19 +408,19 @@ check_device_model() {
         printf "283" > /tmp/deviceModel
         deviceModel=283
     fi
-    
+
     # Check if the SD is inserted in a different model
     is_device_model_changed=0
     if [ ! -f $last_device_model ]; then
         cp /tmp/deviceModel $last_device_model
         is_device_model_changed=1
-    else 
-        lastDeviceModel=`cat $last_device_model` 
-        if [ $lastDeviceModel -ne $deviceModel ]; then 
+    else
+        lastDeviceModel=`cat $last_device_model`
+        if [ $lastDeviceModel -ne $deviceModel ]; then
             is_device_model_changed=1
             echo $deviceModel > $last_device_model
         fi
-    fi    
+    fi
 }
 
 
