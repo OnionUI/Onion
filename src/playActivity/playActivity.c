@@ -129,13 +129,10 @@ void registerTimerEnd(const char *gameName, const char *filePath)
     int iBaseTime = atoi(baseTime);
     int iEndEpochTime = (int)time(NULL);
     int playTime = iEndEpochTime - iBaseTime;
-    // Addition of the new time
-    printf_debug("addPlayTime: %s, %s, %d", gameName, filePath, playTime);
     addPlayTime(gameName, filePath, playTime);
-    printf_debug("Timer ended (%s): session = %d\n", gameName, playTime);
     remove(INIT_TIMER_PATH);
     free(baseTime);
-    printf_debug("%s/n", "registerTimerEnd() return");
+    printf_debug("%s\n", "registerTimerEnd() return");
 }
 
 int main(int argc, char *argv[])
