@@ -55,6 +55,9 @@ main() {
         rm -f "$sysdir/cmd_to_run.sh" 2> /dev/null
     fi
 
+    # Patch RA config
+    ./script/patch_ra_cfg.sh ./res/miyoo${deviceModel}_ra_patch.cfg
+
     # Auto launch
     if [ ! -f $sysdir/config/.noAutoStart ]; then
         state_change
