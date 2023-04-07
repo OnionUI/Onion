@@ -27,23 +27,34 @@ void closeDB(void) {
 
 void upgradeRomDB(void) {
     printf_debug("%s\n", "upgradeRomDB()");
+    int logCount = 0;
+    printf_debug("%d\n", logCount++);
     FILE *file = fopen(PLAY_ACTIVITY_DB_PATH, "rb");
+    printf_debug("%d\n", logCount++);
     static struct rom_s {
         char* name;
         int playTime;
     } romList[1000];
+    printf_debug("%d\n", logCount++);
     if (file != NULL) {
+        printf_debug("%d\n", logCount++);
         fread(romList, sizeof(romList), 1, file);
+        printf_debug("%d\n", logCount++);
         fclose(file);
+        printf_debug("%d\n", logCount++);
     }
+    printf_debug("%d\n", logCount++);
     char* err_msg = 0;
+    printf_debug("%d\n", logCount++);
     int rc = sqlite3_open(PLAY_ACTIVITY_SQLITE_PATH, &db);
+    printf_debug("%d\n", logCount++);
     if (rc != SQLITE_OK) {
         printf_debug("Cannot open database: %s\n", sqlite3_errmsg(db));
         closeDB();
         printf_debug("%s\n", "upgradeRomDB() return");
         return;
     }
+    printf_debug("%d\n", logCount++);
     char* sql = "";
     strncpy(sql, "DROP TABLE IF EXISTS playActivity;", STR_MAX);
     strncat(sql, "CREATE TABLE playActivity(name TEXT, filePath Text, playCount INT, playTime INT);", STR_MAX);
