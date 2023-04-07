@@ -51,7 +51,7 @@ void upgradeRomDB(void) {
     strncat(sql, "CREATE UNIQUE INDEX name_index ON playActivity(name);", STR_MAX);
     int i;
     char *insert;
-    for (i = 0; i < sizeof(array)/sizeof(array[0]); i++) {
+    for (i = 0; i < sizeof(romList)/sizeof(romList[0]); i++) {
         if (strlen(romList[i].name) > 0) {
             snprintf(insert, STR_MAX, "INSERT OR REPLACE INTO playActivity VALUES ('%s', NULL, 1, %d);", romList[i].name, romList[i].playTime);
             strncat(sql, insert, STR_MAX);
