@@ -31,7 +31,7 @@ void upgradeRomDB(void) {
     static struct rom_s {
         char* name;
         int playTime;
-    }; romList[1000];
+    } romList[1000];
     if (file != NULL) {
         fread(romList, sizeof(romList), 1, file);
         fclose(file);
