@@ -13,8 +13,6 @@
 #include "utils/log.h"
 #include "utils/str.h"
 
-// Max number of records in the DB
-#define DBMAXVALUES 1000
 #define INIT_TIMER_PATH "/tmp/initTimer"
 #define PLAY_ACTIVITY_SQLITE_PATH "/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.sqlite"
 #define PLAY_ACTIVITY_DB_PATH "/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db"
@@ -34,9 +32,9 @@ void closeDB(void) {
 void upgradeRomDB(void) {
     printf_debug("%s\n", "upgradeRomDB()");
     FILE *file = fopen(PLAY_ACTIVITY_DB_PATH, "rb");
-    struct rom_s rom_list[];
+    struct rom_s romList[1000];
     if (file != NULL) {
-        fread(rom_list, sizeof(rom_list), 1, file);
+        fread(romList, sizeof(romList), 1, file);
         fclose(file);
     }
     char *err_msg = 0;
@@ -53,9 +51,9 @@ void upgradeRomDB(void) {
     strncat(sql, "CREATE UNIQUE INDEX name_index ON playActivity(name);", STR_MAX);
     int i;
     char *insert;
-    for (i = 0; i < DBMAXVALUES; i++) {
-        if (strlen(rom_list[i].name) > 0) {
-            snprintf(insert, STR_MAX, "INSERT OR REPLACE INTO playActivity VALUES ('%s', NULL, 1, %d);", rom_list[i].name, rom_list[i].playTime);
+    for (i = 0; i < sizeof(array)/sizeof(array[0]); i++) {
+        if (strlen(romList[i].name) > 0) {
+            snprintf(insert, STR_MAX, "INSERT OR REPLACE INTO playActivity VALUES ('%s', NULL, 1, %d);", romList[i].name, romList[i].playTime);
             strncat(sql, insert, STR_MAX);
         }
     }
