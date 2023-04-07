@@ -21,9 +21,9 @@
 
 sqlite3 *db;
 static struct rom_s {
-    char name[STR_MAX];
+    char *name;
     int playTime;
-} rom_list[DBMAXVALUES];
+};
 
 void closeDB(void) {
     printf_debug("%s\n", "closeDB()");
@@ -34,6 +34,7 @@ void closeDB(void) {
 void upgradeRomDB(void) {
     printf_debug("%s\n", "upgradeRomDB()");
     FILE *file = fopen(PLAY_ACTIVITY_DB_PATH, "rb");
+    struct rom_s[] rom_list;
     if (file != NULL) {
         fread(rom_list, sizeof(rom_list), 1, file);
         fclose(file);
@@ -46,12 +47,12 @@ void upgradeRomDB(void) {
         printf_debug("%s\n", "upgradeRomDB() return");
         return;
     }
-    char sql[STR_MAX];
+    char *sql;
     strncpy(sql, "DROP TABLE IF EXISTS playActivity;", STR_MAX);
     strncat(sql, "CREATE TABLE playActivity(name TEXT, filePath Text, playCount INT, playTime INT);", STR_MAX);
     strncat(sql, "CREATE UNIQUE INDEX name_index ON playActivity(name);", STR_MAX);
     int i;
-    char insert[STR_MAX];
+    char *insert;
     for (i = 0; i < DBMAXVALUES; i++) {
         if (strlen(rom_list[i].name) > 0) {
             snprintf(insert, STR_MAX, "INSERT OR REPLACE INTO playActivity VALUES ('%s', NULL, 1, %d);", rom_list[i].name, rom_list[i].playTime);
@@ -167,10 +168,10 @@ int main(int argc, char *argv[])
         printf_debug("main() init return %d\n", EXIT_SUCCESS);
         return EXIT_SUCCESS;
     }
-    char cmd[STR_MAX];
+    char *cmd;
     strncpy(cmd, argv[1], STR_MAX);
-    char gameName[STR_MAX];
-    char filePath[STR_MAX];
+    char *gameName;
+    char *filePath;
     char *relativePath;
     if (strstr(cmd, "../../Roms/") != NULL) {
         printf_debug("%s", "main() cmd includes '../../Roms/'\n");
@@ -178,7 +179,7 @@ int main(int argc, char *argv[])
         if (relativePath != NULL) {
             relativePath[strlen(relativePath) - 1] = 0;
             snprintf(filePath, STR_MAX, "/mnt/SDCARD/Roms/./%s", relativePath);
-            char name_path[STR_MAX];
+            char *name_path;
             sprintf(name_path, "%s/.game_config/%s.name", dirname(filePath), basename(filePath));
             if (is_file(name_path)) {
                 FILE *fp;
