@@ -67,7 +67,7 @@ void upgradeRomDB(void) {
             printf_debug("%d\n", logCount++);
             snprintf(insert, (strlen(insertSql) + strlen(romList[i].name) + 64), insertSql, romList[i].name, romList[i].playTime);
             printf_debug("%d\n", logCount++);
-            strncat(sql, insert, strlen(insert));
+            strncat(sql, insert, strlen(insert)+1);
             printf_debug("%d\n", logCount++);
             printf_debug("%s\n", insert);
             printf_debug("%s\n", sql);
