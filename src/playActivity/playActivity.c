@@ -29,7 +29,7 @@ void create_table(void) {
 }
 
 void insert_data(const char *name, const char *relative_path, int play_count, int play_time) {
-    printf_debug("insert_date(%s, %s, %d, %d)", name, relative_path, play_count, play_time);
+    printf_debug("insert_data(%s, %s, %d, %d)\n", name, relative_path, play_count, play_time);
     char *sql = sqlite3_mprintf("INSERT OR REPLACE INTO play_activities (name, relative_path, play_count, play_time) VALUES ('%q', '%q', COALESCE((SELECT play_count FROM play_activities WHERE name='%q'), 0) + %d, COALESCE((SELECT play_time FROM play_activities WHERE name='%q'), 0) + %d);", name, relative_path, name, play_count, name, play_time);
     int rc = sqlite3_exec(db, sql, NULL, NULL, NULL);
     if (rc != SQLITE_OK) {
@@ -80,7 +80,7 @@ void update_play_activity(const char *name, const char *relative_path)
     } else {
         fread(&play_time, sizeof(int), 1, file);
         time(&current_time);
-        insert_data(name, relative_path, 1, play_time);
+        insert_data(name, relative_path, 1, ((int)current_time - play_time));
         play_time = (int)current_time;
         fseek(file, 0, SEEK_SET);
         fwrite(&play_time, sizeof(int), 1, file);
