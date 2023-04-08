@@ -30,7 +30,7 @@ void create_table(void) {
 
 void insert_data(const char *name, const char *relative_path, int play_count, int play_time) {
     printf_debug("insert_date(%s, %s, %d, %d)", name, relative_path, play_count, play_time);
-    char *sql = sqlite3_mprintf("INSERT OR REPLACE INTO play_activities (name, relative_path, play_count, play_time) VALUES ('%q', '%q', COALESCE((SELECT play_count FROM playActivity WHERE name='%q'), 0) + %d, COALESCE((SELECT play_time FROM playActivity WHERE name='%q'), 0) + %d);", name, relative_path, name, play_count, name, play_time);
+    char *sql = sqlite3_mprintf("INSERT OR REPLACE INTO play_activities (name, relative_path, play_count, play_time) VALUES ('%q', '%q', COALESCE((SELECT play_count FROM play_activities WHERE name='%q'), 0) + %d, COALESCE((SELECT play_time FROM play_activities WHERE name='%q'), 0) + %d);", name, relative_path, name, play_count, name, play_time);
     int rc = sqlite3_exec(db, sql, NULL, NULL, NULL);
     if (rc != SQLITE_OK) {
         printf_debug("Error: could not insert play_activity: %s\n", sqlite3_errmsg(db));
@@ -88,6 +88,25 @@ void update_play_activity(const char *name, const char *relative_path)
         remove(INIT_TIMER_PATH);
     }
     printf_debug("%s\n", "start_timer() return");
+}
+
+int get_play_time(const char* name) {
+    printf_debug("get_play_time(%s)\n", name);
+    int play_time = 0;
+    char* sql = sqlite3_mprintf("SELECT play_time FROM play_activities WHERE name = '%q'", name);
+    sqlite3_stmt* stmt;
+    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "Error preparing SQL statement: %s\n", sqlite3_errmsg(db));
+    } else {
+        if (sqlite3_step(stmt) == SQLITE_ROW) {
+            play_time = sqlite3_column_int(stmt, 0);
+        }
+        sqlite3_finalize(stmt);
+    }
+    sqlite3_free(sql);
+    printf_debug("get_play_time(%s) return %s\n", name);
+    return play_time;
 }
 
 void usage(void) {
