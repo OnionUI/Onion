@@ -65,7 +65,7 @@ void update_play_activity(const char *name, const char *relative_path)
     int play_time;
     file = fopen(INIT_TIMER_PATH, "rb");
     if (file == NULL) {
-        file = fopen(filename, "wb");
+        file = fopen(INIT_TIMER_PATH, "wb");
         time(&current_time);
         play_time = (int)current_time;
         fwrite(&play_time, sizeof(int), 1, file);
@@ -73,11 +73,12 @@ void update_play_activity(const char *name, const char *relative_path)
     } else {
         fread(&play_time, sizeof(int), 1, file);
         time(&current_time);
-        insert_data(name, relative_path, 1, play_time)
+        insert_data(name, relative_path, 1, play_time);
         play_time = (int)current_time;
         fseek(file, 0, SEEK_SET);
         fwrite(&play_time, sizeof(int), 1, file);
         fclose(file);
+        remove(INIT_TIMER_PATH);
     }
     printf_debug("%s\n", "start_timer() return");
 }
@@ -90,10 +91,6 @@ int main(int argc, char *argv[])
 {
     log_setName("playActivity");
     printf_debug("%s\n", "main()");
-    if (argc <= 1) {
-        usage();
-        return 1;
-    }
     if (!exists(PLAY_ACTIVITY_SQLITE_PATH)) {
         open_db();
         create_table();
@@ -107,51 +104,18 @@ int main(int argc, char *argv[])
         printf_debug("%s\n", "db == NULL");
         return 1;
     }
-    if (strcmp(argv[1], "init") == 0) {
-        printf_debug("%s\n", "main() argv[1] = 'init'");
-        int current_time = (int)time(NULL);
-        char base_time[15];
-        sprintf(base_time, "%d", current_time);
-        printf_debug("%s\n", "main() init remove init timer");
-        remove(INIT_TIMER_PATH);
-        int init_fd;
-        if ((init_fd = open(INIT_TIMER_PATH, O_CREAT | O_WRONLY)) > 0) {
-            printf_debug("%s\n", "main() init write init fd");
-            write(init_fd, base_time, strlen(base_time));
-            close(init_fd);
-            system("sync");
-            printf_debug("%s\n", "main() init saved init fd");
-        }
-        printf_debug("main() init Timer initiated @ %d\n", current_time);
-        printf_debug("main() init return %d\n", EXIT_SUCCESS);
-        return EXIT_SUCCESS;
+    char file_path[256] = argv[1];
+    char* roms_path = "../../ROMS/";
+    char* file_name = strrchr(file_path, '/') + 1;
+    char* extension = strrchr(file_path, '.');
+    char relative_path[256];
+    sprintf(relative_path, "%.*s", (int)(file_name - file_path - 1), file_path);
+
+    if (strncmp(relative_path, roms_path, strlen(roms_path)) != 0) {
+        printf_debug("%s must be within %s.\n", relative_path, roms_path);
+        return 1;
     }
-    char *cmd = argv[1];
-    if (strstr(cmd, "../../Roms/") != NULL) {
-        printf_debug("%s\n", "main() cmd includes '../../Roms/'");
-        char *relative_path = NULL;
-        snprintf(relative_path, strlen(str_split(cmd, "../../Roms/")), "%s", str_split(cmd, "../../Roms/"));
-        if (relative_path != NULL) {
-            relative_path[strlen(relative_path) - 1] = 0;
-            char *file_path = NULL;
-            snprintf(file_path, strlen(relative_path)+19, "/mnt/SDCARD/Roms/./%s", relative_path);
-            char *name_path = NULL;
-            sprintf(name_path, "%s/.game_config/%s.name", dirname(file_path), basename(file_path));
-            char *name = NULL;
-            if (is_file(name_path)) {
-                FILE *file;
-                file_get(file, name_path, "%[^\n]", name);
-            }
-            if (strlen(name) == 0) {
-                strncpy(name, file_removeExtension(basename(argv[1])), STR_MAX);
-            }
-            printf_debug("main() cmd = '%s'\n", cmd);
-            printf_debug("main() name = '%s'\n", name);
-            printf_debug("main() file_path = '%s'\n", file_path);
-            printf_debug("main() relative_path = '%s'\n", relative_path);
-            start_timer(name, relative_path);
-        }
-    }
+    update_play_activity(file_name, relative_path);
     close_db();
     printf_debug("main() return %d\n", EXIT_SUCCESS);
     return EXIT_SUCCESS;
