@@ -81,7 +81,7 @@ void upgrade_rom_db(void) {
         int play_count;
         int play_time;
     } PlayActivity;
-    PlayActivity play_activities[1000];
+    PlayActivity play_activities[0];
     if (file != NULL) {
         int index = 0;
         while (fread(&play_activities[index], sizeof(PlayActivity), 1, file) == 1 && index < 1000) {
