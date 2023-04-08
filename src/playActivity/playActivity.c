@@ -80,7 +80,8 @@ void upgrade_rom_db(void) {
         char file_path[STR_MAX];
         int play_count;
         int play_time;
-    } PlayActivity play_activities[];
+    } PlayActivity;
+    PlayActivity play_activities[];
     if (file != NULL) {
         while (fread(&play_activities[i], sizeof(PlayActivity), 1, file) == 1 && index < 1000) {
             insert_data(play_activities[index].name, play_activities[index].file_path, play_activities[index].play_count, play_activities[index].play_time);
