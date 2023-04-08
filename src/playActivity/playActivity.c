@@ -44,7 +44,7 @@ void upgradeRomDB(void) {
         printf_debug("%d\n", logCount++);
     }
     printf_debug("%d\n", logCount++);
-    char* err_msg = 0;
+    char *err_msg = 0;
     printf_debug("%d\n", logCount++);
     int rc = sqlite3_open(PLAY_ACTIVITY_SQLITE_PATH, &db);
     printf_debug("%d\n", logCount++);
@@ -55,22 +55,22 @@ void upgradeRomDB(void) {
         return;
     }
     printf_debug("%d\n", logCount++);
-    char* sql = "DROP TABLE IF EXISTS playActivity;CREATE TABLE playActivity(name TEXT, filePath Text, playCount INT, playTime INT);CREATE UNIQUE INDEX name_index ON playActivity(name);";
+    char sql[] = "DROP TABLE IF EXISTS playActivity;CREATE TABLE playActivity(name TEXT, filePath Text, playCount INT, playTime INT);CREATE UNIQUE INDEX name_index ON playActivity(name);";
     printf_debug("%d\n", logCount++);
-    char* insertSql = "INSERT OR REPLACE INTO playActivity VALUES ('%s', NULL, 1, %d);";
-    char* insert = "";
+    char insertSql[] = "INSERT OR REPLACE INTO playActivity VALUES ('%s', NULL, 1, %d);";
+    char insert[] = "";
     printf_debug("%d\n", logCount++);
     int i;
     for (i = 0; i <= 1000; i++) {
         if (strlen(romList[i].name) > 0) {
-            snprintf(insert, (strlen(insertSql) + strlen(romList[i].name) + 64), insertSql, romList[i].name, romList[i].playTime);
-            printf_debug("%s\n", insert);
-            strncat(sql, insert, strlen(insert));
-            printf_debug("%s\n", sql);
+            snprintf(&insert[0], (strlen(insertSql) + strlen(romList[i].name) + 64), insertSql, romList[i].name, romList[i].playTime);
+            printf_debug("%s\n", &insert[0]);
+            strncat(&sql[0], &insert[0], strlen(insert));
+            printf_debug("%s\n", &sql[0]);
         }
     }
     printf_debug("%d\n", logCount++);
-    rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
+    rc = sqlite3_exec(db, &sql[0], 0, 0, &err_msg);
     if (rc != SQLITE_OK ) {
         printf_debug("SQL error: %s\n", sqlite3_errmsg(db));
     }
@@ -91,10 +91,10 @@ void openDB(void) {
     printf_debug("%s\n", "openDB() return");
 }
 
-void addPlayTime(const char* name, const char* filePath, int playTime) {
+void addPlayTime(const char *name, const char *filePath, int playTime) {
     printf_debug("addPlayTime(%s, %s)\n", name, filePath);
     sqlite3_stmt *res;
-    char* updateSQL = "INSERT OR REPLACE INTO playActivity VALUES(?, ?, COALESCE((SELECT playCount FROM playActivity WHERE name=?), 0) + 1, COALESCE((SELECT playTime FROM playActivity WHERE name=?), 0) + ?);";
+    char *updateSQL = "INSERT OR REPLACE INTO playActivity VALUES(?, ?, COALESCE((SELECT playCount FROM playActivity WHERE name=?), 0) + 1, COALESCE((SELECT playTime FROM playActivity WHERE name=?), 0) + ?);";
     int rc = sqlite3_prepare_v2(db, updateSQL, -1, &res, NULL);
     if (rc == SQLITE_OK) {
         sqlite3_bind_text(res, 1, name, -1, NULL);
@@ -114,19 +114,19 @@ void addPlayTime(const char* name, const char* filePath, int playTime) {
     printf_debug("%s\n", "addPlayTime() return");
 }
 
-void registerTimerEnd(const char* gameName, const char* filePath)
+void registerTimerEnd(const char *gameName, const char *filePath)
 {
     printf_debug("registerTimerEnd(%s, %s)\n", gameName, filePath);
     FILE *fp;
     long lSize;
-    char* baseTime;
+    char *baseTime;
     if ((fp = fopen(INIT_TIMER_PATH, "rb")) == 0) {
         return;
     }
     fseek(fp, 0L, SEEK_END);
     lSize = ftell(fp);
     rewind(fp);
-    baseTime = (char* )calloc(1, lSize + 1);
+    baseTime = (char *)calloc(1, lSize + 1);
     if (!baseTime) {
         fclose(fp);
         fputs("memory alloc fails", stderr);
@@ -148,7 +148,7 @@ void registerTimerEnd(const char* gameName, const char* filePath)
     printf_debug("%s\n", "registerTimerEnd() return");
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     log_setName("playActivity");
     printf_debug("%s\n", "main()");
@@ -191,7 +191,7 @@ int main(int argc, char* argv[])
         if (relativePath != NULL) {
             relativePath[strlen(relativePath) - 1] = 0;
             snprintf(filePath, strlen(relativePath)+19, "/mnt/SDCARD/Roms/./%s", relativePath);
-            char* name_path = "";
+            char *name_path = "";
             sprintf(name_path, "%s/.game_config/%s.name", dirname(filePath), basename(filePath));
             if (is_file(name_path)) {
                 FILE *fp;
