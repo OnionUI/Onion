@@ -62,6 +62,9 @@ main() {
         ./script/patch_ra_cfg.sh ./res/miyoo${deviceModel}_ra_patch.cfg
     fi
 
+    # Bind arcade name library to customer path
+    mount -o bind /mnt/SDCARD/miyoo/lib/libgamename.so /customer/lib/libgamename.so
+
     touch /tmp/network_changed
     sync
     check_networking
