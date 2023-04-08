@@ -134,9 +134,7 @@ int main(int argc, char *argv[])
         printf_debug("main() init return %d\n", EXIT_SUCCESS);
         return EXIT_SUCCESS;
     }
-    char *cmd = NULL;
-    cmd = (char*)malloc(strlen(argv[1]) + 1);
-    snprintf(cmd, strlen(argv[1]), "%s", argv[1]);
+    char *cmd = argv[1];
     if (strstr(cmd, "../../Roms/") != NULL) {
         printf_debug("%s\n", "main() cmd includes '../../Roms/'");
         char *relative_path = NULL;
