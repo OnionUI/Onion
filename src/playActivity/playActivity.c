@@ -1,151 +1,131 @@
-#include <fcntl.h>
-#include <libgen.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <time.h>
-#include <unistd.h>
-#include <sqlite3/sqlite3.h>
-
-#include "utils/file.h"
-#include "utils/log.h"
-#include "utils/str.h"
-
-#define INIT_TIMER_PATH "/tmp/initTimer"
-#define PLAY_ACTIVITY_SQLITE_PATH "/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.sqlite"
-#define PLAY_ACTIVITY_DB_PATH "/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db"
+#include "./playActivity.h"
 
 sqlite3 *db;
 
-void closeDB(void) {
-    printf_debug("%s\n", "closeDB()");
-    sqlite3_close(db);
-    printf_debug("%s\n", "closeDB() return");
-}
-
-void upgradeRomDB(void) {
-    printf_debug("%s\n", "upgradeRomDB()");
-    int logCount = 0;
-    printf_debug("%d\n", logCount++);
-    FILE *file = fopen(PLAY_ACTIVITY_DB_PATH, "rb");
-    printf_debug("%d\n", logCount++);
-    static struct rom_s {
-        int playTime;
-        char name[];
-    } romList[1000];
-    printf_debug("%d\n", logCount++);
-    if (file != NULL) {
-        printf_debug("%d\n", logCount++);
-        fread(romList, sizeof(romList), 1, file);
-        printf_debug("%d\n", logCount++);
-        fclose(file);
-        printf_debug("%d\n", logCount++);
-    }
-    printf_debug("%d\n", logCount++);
-    char *err_msg = 0;
-    printf_debug("%d\n", logCount++);
-    int rc = sqlite3_open(PLAY_ACTIVITY_SQLITE_PATH, &db);
-    printf_debug("%d\n", logCount++);
-    if (rc != SQLITE_OK) {
-        printf_debug("Cannot open database: %s\n", sqlite3_errmsg(db));
-        closeDB();
-        printf_debug("%s\n", "upgradeRomDB() return");
-        return;
-    }
-    printf_debug("%d\n", logCount++);
-    char sql[] = "DROP TABLE IF EXISTS playActivity;CREATE TABLE playActivity(name TEXT, filePath Text, playCount INT, playTime INT);CREATE UNIQUE INDEX name_index ON playActivity(name);";
-    printf_debug("%d\n", logCount++);
-    char insertSql[] = "INSERT OR REPLACE INTO playActivity VALUES ('%s', NULL, 1, %d);";
-    char insert[] = "";
-    printf_debug("%d\n", logCount++);
-    int i;
-    for (i = 0; i <= 1000; i++) {
-        if (strlen(romList[i].name) > 0) {
-            snprintf(&insert[0], (strlen(insertSql) + strlen(romList[i].name) + 64), insertSql, romList[i].name, romList[i].playTime);
-            printf_debug("%s\n", &insert[0]);
-            strncat(&sql[0], &insert[0], strlen(insert));
-            printf_debug("%s\n", &sql[0]);
-        }
-    }
-    printf_debug("%d\n", logCount++);
-    rc = sqlite3_exec(db, &sql[0], 0, 0, &err_msg);
-    if (rc != SQLITE_OK ) {
-        printf_debug("SQL error: %s\n", sqlite3_errmsg(db));
-    }
-    printf_debug("%d\n", logCount++);
-    printf_debug("%s\n", "upgradeRomDB() return");
-}
-
-void openDB(void) {
-    printf_debug("%s\n", "openDB()");
-    if (!exists(PLAY_ACTIVITY_SQLITE_PATH)) {
-        upgradeRomDB();
-    }
+void open_db(void) {
+    printf_debug("%s\n", "open_db()");
     int rc = sqlite3_open(PLAY_ACTIVITY_SQLITE_PATH, &db);
     if (rc != SQLITE_OK) {
         printf_debug("Cannot open database: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
     }
-    printf_debug("%s\n", "openDB() return");
+    printf_debug("%s\n", "open_db() return");
 }
 
-void addPlayTime(const char *name, const char *filePath, int playTime) {
-    printf_debug("addPlayTime(%s, %s)\n", name, filePath);
-    sqlite3_stmt *res;
-    char *updateSQL = "INSERT OR REPLACE INTO playActivity VALUES(?, ?, COALESCE((SELECT playCount FROM playActivity WHERE name=?), 0) + 1, COALESCE((SELECT playTime FROM playActivity WHERE name=?), 0) + ?);";
-    int rc = sqlite3_prepare_v2(db, updateSQL, -1, &res, NULL);
-    if (rc == SQLITE_OK) {
-        sqlite3_bind_text(res, 1, name, -1, NULL);
-        sqlite3_bind_text(res, 2, filePath, -1, NULL);
-        sqlite3_bind_text(res, 3, name, -1, NULL);
-        sqlite3_bind_text(res, 4, name, -1, NULL);
-        sqlite3_bind_int(res, 5, playTime);
+void close_db(void) {
+    printf_debug("%s\n", "close_db()");
+    sqlite3_close(db);
+    printf_debug("%s\n", "close_db() return");
+}
+
+void create_table(void) {
+    printf_debug("%s\n", "create_table()");
+    char *err_msg = 0;
+    char *create_sql = "DROP TABLE IF EXISTS play_activity;CREATE TABLE play_activity(name TEXT, relative_path TEXT, play_count INT, play_time INT);CREATE UNIQUE INDEX name_index ON play_activity(name);";
+    rc = sqlite3_exec(db, create_sql, 0, 0, &err_msg);
+    if (rc != SQLITE_OK ) {
+        printf_debug("SQL error: %s\n", err_msg);
+        sqlite3_free(err_msg);
+        sqlite3_close(db);
+    }
+    printf_debug("%s\n", "create_table() return");
+}
+
+void insert_data(const char *name, const char *file_path, int play_count, int play_time) {
+    printf_debug("insert_date(%s, %s, %d, %d)", name, file_path, play_time);
+    char *insert_sql = "INSERT OR REPLACE INTO play_activity VALUES (?, ?, ?, ?);";
+    sqlite3_stmt *stmt;
+    rc = sqlite3_prepare_v2(db, insert_sql, -1, &stmt, 0);
+    sqlite3_bind_text(stmt, 1, name, -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 2, file_path, -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int(stmt, 3, play_count);
+    sqlite3_bind_int(stmt, 4, play_time);
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        filerintf(stderr, "SQL error: %s\n", err_msg);
+        sqlite3_free(err_msg);
     } else {
-        printf_debug("Failed to execute statement: %s\n", sqlite3_errmsg(db));
+        sqlite3_reset(stmt);
+        sqlite3_finalize(stmt);
     }
-    printf_debug("%s\n", sqlite3_expanded_sql(res));
-    rc = sqlite3_step(res);
-    if (rc == SQLITE_ROW) {
-        printf_debug("Success: %s\n", sqlite3_column_text(res, 0));
-    }
-    sqlite3_finalize(res);
-    printf_debug("%s\n", "addPlayTime() return");
+    printf_debug("%s\n", "insert_date() return");
 }
 
-void registerTimerEnd(const char *gameName, const char *filePath)
+void add_play_time(const char *name, const char *file_path, int play_time) {
+    printf_debug("add_play_time(%s, %s, %d)\n", name, file_path, play_time);
+    char *insert_sql = "INSERT OR REPLACE INTO playActivity VALUES(?, ?, COALESCE((SELECT play_count FROM playActivity WHERE name=?), 0) + 1, COALESCE((SELECT play_time FROM playActivity WHERE name=?), 0) + ?);";
+    sqlite3_stmt *stmt;
+    rc = sqlite3_prepare_v2(db, insert_sql, -1, &stmt, 0);
+    sqlite3_bind_text(res, 1, name, -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(res, 2, file_path, -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(res, 3, name, -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(res, 4, name, -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int(res, 5, play_time);
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        filerintf(stderr, "SQL error: %s\n", err_msg);
+        sqlite3_free(err_msg);
+    } else {
+        sqlite3_reset(stmt);
+        sqlite3_finalize(stmt);
+    }
+    printf_debug("%s\n", "add_play_time() return");
+}
+
+void upgrade_rom_db(void) {
+    printf_debug("%s\n", "upgrade_rom_db()");
+    FILE *file = fopen(PLAY_ACTIVITY_DB_PATH, "rb");
+    struct PlayActivity {
+        char name[STR_MAX];
+        char file_path[STR_MAX];
+        int play_count;
+        int play_time;
+    } play_activities[1000];
+    if (file != NULL) {
+        fread(play_activities, sizeof(play_activities), 1, file);
+        fclose(file);
+    }
+    for (int i = 0; i < 1000; i++) {
+        insert_data(play_activities[i].name, play_activities[i].file_path, play_activities[i].play_count, play_activities[i].play_time);
+    }
+    printf_debug("%s\n", "upgrade_rom_db() return");
+}
+
+void start_timer(const char *name, const char *file_path)
 {
-    printf_debug("registerTimerEnd(%s, %s)\n", gameName, filePath);
-    FILE *fp;
-    long lSize;
-    char *baseTime;
-    if ((fp = fopen(INIT_TIMER_PATH, "rb")) == 0) {
+    printf_debug("start_timer(%s, %s)\n", name, file_path);
+    FILE *file;
+    long file_size;
+    char *base_time;
+    if ((file = fopen(INIT_TIMER_PATH, "rb")) == 0) {
         return;
     }
-    fseek(fp, 0L, SEEK_END);
-    lSize = ftell(fp);
-    rewind(fp);
-    baseTime = (char *)calloc(1, lSize + 1);
-    if (!baseTime) {
-        fclose(fp);
-        fputs("memory alloc fails", stderr);
-        exit(1);
+    fseek(file, 0L, SEEK_END);
+    file_size = ftell(file);
+    rewind(file);
+    base_time = (char *)calloc(1, file_size + 1);
+    if (!base_time) {
+        fclose(file);
+        printf_debug("%s\n", "base_time memory alloc fails");
+        return;
     }
-    if (1 != fread(baseTime, lSize, 1, fp)) {
-        fclose(fp);
-        free(baseTime);
-        fputs("entire read fails", stderr);
-        exit(1);
+    if (1 != fread(base_time, file_size, 1, file)) {
+        fclose(file);
+        free(base_time);
+        printf_debug("%s\n", "base_time memory alloc fails");
+        return;
     }
-    fclose(fp);
-    int iBaseTime = atoi(baseTime);
-    int iEndEpochTime = (int)time(NULL);
-    int playTime = iEndEpochTime - iBaseTime;
-    addPlayTime(gameName, filePath, playTime);
+    fclose(file);
+    int timer_time = atoi(base_time);
+    int current_time = (int)time(NULL);
+    add_play_time(name, file_path, current_time - timer_time);
     remove(INIT_TIMER_PATH);
-    free(baseTime);
-    printf_debug("%s\n", "registerTimerEnd() return");
+    free(base_time);
+    printf_debug("%s\n", "start_timer() return");
+}
+
+void usage(void) {
+    printf_debug("%s\n", "main() argc <= 1");
 }
 
 int main(int argc, char *argv[])
@@ -153,61 +133,69 @@ int main(int argc, char *argv[])
     log_setName("playActivity");
     printf_debug("%s\n", "main()");
     if (argc <= 1) {
-        printf_debug("%s\n", "main() argc <= 1");
+        usage();
         return 1;
     }
-    openDB();
+    if (!exists(PLAY_ACTIVITY_SQLITE_PATH)) {
+        open_db();
+        create_table();
+        if (exists(PLAY_ACTIVITY_DB_PATH)) {
+            upgrade_rom_db();
+        }
+    } else {
+        open_db();
+    }
     if (db == NULL) {
         printf_debug("%s\n", "db == NULL");
         return 1;
     }
     if (strcmp(argv[1], "init") == 0) {
         printf_debug("%s\n", "main() argv[1] = 'init'");
-        int epochTime = (int)time(NULL);
-        char baseTime[15];
-        sprintf(baseTime, "%d", epochTime);
+        int current_time = (int)time(NULL);
+        char base_time[15];
+        sprintf(base_time, "%d", current_time);
         printf_debug("%s\n", "main() init remove init timer");
         remove(INIT_TIMER_PATH);
         int init_fd;
         if ((init_fd = open(INIT_TIMER_PATH, O_CREAT | O_WRONLY)) > 0) {
             printf_debug("%s\n", "main() init write init fd");
-            write(init_fd, baseTime, strlen(baseTime));
+            write(init_fd, base_time, strlen(base_time));
             close(init_fd);
             system("sync");
             printf_debug("%s\n", "main() init saved init fd");
         }
-        printf_debug("main() init Timer initiated @ %d\n", epochTime);
+        printf_debug("main() init Timer initiated @ %d\n", current_time);
         printf_debug("main() init return %d\n", EXIT_SUCCESS);
         return EXIT_SUCCESS;
     }
     char cmd[] = "";
     snprintf(cmd, strlen(argv[1]), "%s", argv[1]);
-    char gameName[] = "";
-    char filePath[] = "";
-    char relativePath[] = "";
+    char name[] = "";
+    char file_path[] = "";
+    char relative_path[] = "";
     if (strstr(cmd, "../../Roms/") != NULL) {
         printf_debug("%s\n", "main() cmd includes '../../Roms/'");
-        snprintf(relativePath, strlen(str_split(cmd, "../../Roms/")), "%s", str_split(cmd, "../../Roms/"));
-        if (relativePath != NULL) {
-            relativePath[strlen(relativePath) - 1] = 0;
-            snprintf(filePath, strlen(relativePath)+19, "/mnt/SDCARD/Roms/./%s", relativePath);
+        snprintf(relative_path, strlen(str_split(cmd, "../../Roms/")), "%s", str_split(cmd, "../../Roms/"));
+        if (relative_path != NULL) {
+            relative_path[strlen(relative_path) - 1] = 0;
+            snprintf(file_path, strlen(relative_path)+19, "/mnt/SDCARD/Roms/./%s", relative_path);
             char *name_path = "";
-            sprintf(name_path, "%s/.game_config/%s.name", dirname(filePath), basename(filePath));
+            sprintf(name_path, "%s/.game_config/%s.name", dirname(file_path), basename(file_path));
             if (is_file(name_path)) {
-                FILE *fp;
-                file_get(fp, name_path, "%[^\n]", gameName);
+                FILE *file;
+                file_get(file, name_path, "%[^\n]", name);
             }
-            if (strlen(gameName) == 0) {
-                strncpy(gameName, file_removeExtension(basename(argv[1])), STR_MAX);
+            if (strlen(name) == 0) {
+                strncpy(name, file_removeExtension(basename(argv[1])), STR_MAX);
             }
             printf_debug("main() cmd = '%s'\n", cmd);
-            printf_debug("main() gameName = '%s'\n", gameName);
-            printf_debug("main() filePath = '%s'\n", filePath);
-            printf_debug("main() relativePath = '%s'\n", relativePath);
-            registerTimerEnd(gameName, relativePath);
+            printf_debug("main() name = '%s'\n", name);
+            printf_debug("main() file_path = '%s'\n", file_path);
+            printf_debug("main() relative_path = '%s'\n", relative_path);
+            start_timer(name, relative_path);
         }
     }
-    closeDB();
+    close_db();
     printf_debug("main() return %d\n", EXIT_SUCCESS);
     return EXIT_SUCCESS;
 }
