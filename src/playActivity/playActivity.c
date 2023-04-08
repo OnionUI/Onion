@@ -75,19 +75,18 @@ void add_play_time(const char *name, const char *file_path, int play_time) {
 void upgrade_rom_db(void) {
     printf_debug("%s\n", "upgrade_rom_db()");
     FILE *file = fopen(PLAY_ACTIVITY_DB_PATH, "rb");
-    struct PlayActivity {
+    struct {
         char name[STR_MAX];
         char file_path[STR_MAX];
         int play_count;
         int play_time;
-    } play_activities[1000];
+    } PlayActivity play_activities[];
     if (file != NULL) {
-        fread(play_activities, sizeof(play_activities), 1, file);
+        while (fread(&play_activities[i], sizeof(PlayActivity), 1, file) == 1 && index < 1000) {
+            insert_data(play_activities[index].name, play_activities[index].file_path, play_activities[index].play_count, play_activities[index].play_time);
+            index++;
+        }
         fclose(file);
-    }
-    int length = sizeof(play_activities) / sizeof(play_activities[0]);
-    for (int index = 0; index < length; index++) {
-        insert_data(play_activities[index].name, play_activities[index].file_path, play_activities[index].play_count, play_activities[index].play_time);
     }
     printf_debug("%s\n", "upgrade_rom_db() return");
 }
