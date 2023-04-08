@@ -57,36 +57,28 @@ void upgrade_rom_db(void) {
     printf_debug("%s\n", "upgrade_rom_db() return");
 }
 
-void start_timer(const char *name, const char *file_path)
+void update_play_activity(const char *name, const char *relative_path)
 {
-    printf_debug("start_timer(%s, %s)\n", name, file_path);
+    printf_debug("update_play_activity(%s, %s)\n", name, relative_path);
     FILE *file;
-    long file_size;
-    char *base_time;
-    if ((file = fopen(INIT_TIMER_PATH, "rb")) == 0) {
-        return;
-    }
-    fseek(file, 0L, SEEK_END);
-    file_size = ftell(file);
-    rewind(file);
-    base_time = (char *)calloc(1, file_size + 1);
-    if (!base_time) {
+    time_t current_time;
+    int play_time;
+    file = fopen(INIT_TIMER_PATH, "rb");
+    if (file == NULL) {
+        file = fopen(filename, "wb");
+        time(&current_time);
+        play_time = (int)current_time;
+        fwrite(&play_time, sizeof(int), 1, file);
         fclose(file);
-        printf_debug("%s\n", "base_time memory alloc fails");
-        return;
-    }
-    if (1 != fread(base_time, file_size, 1, file)) {
+    } else {
+        fread(&play_time, sizeof(int), 1, file);
+        time(&current_time);
+        insert_data(name, relative_path, 1, play_time)
+        play_time = (int)current_time;
+        fseek(file, 0, SEEK_SET);
+        fwrite(&play_time, sizeof(int), 1, file);
         fclose(file);
-        free(base_time);
-        printf_debug("%s\n", "base_time memory alloc fails");
-        return;
     }
-    fclose(file);
-    int timer_time = atoi(base_time);
-    int current_time = (int)time(NULL);
-    insert_data(name, file_path, 1, current_time - timer_time);
-    remove(INIT_TIMER_PATH);
-    free(base_time);
     printf_debug("%s\n", "start_timer() return");
 }
 
