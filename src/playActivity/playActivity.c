@@ -85,7 +85,7 @@ void upgrade_rom_db(void) {
         fread(play_activities, sizeof(play_activities), 1, file);
         fclose(file);
     }
-    int length = sizeof(play_activities) / sizeof(PlayActivity);
+    int length = sizeof(play_activities) / sizeof(play_activities[0]);
     for (int index = 0; index < length; index++) {
         insert_data(play_activities[index].name, play_activities[index].file_path, play_activities[index].play_count, play_activities[index].play_time);
     }
