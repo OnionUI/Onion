@@ -63,7 +63,7 @@ void add_play_time(const char *name, const char *file_path, int play_time) {
     sqlite3_bind_int(stmt, 5, play_time);
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
-        filerintf(stderr, "SQL error: %s\n", err_msg);
+        printf_debug("SQL error: %s\n", err_msg);
         sqlite3_free(err_msg);
     } else {
         sqlite3_reset(stmt);
