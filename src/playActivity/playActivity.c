@@ -189,9 +189,10 @@ int main(int argc, char* argv[])
     snprintf(cmd, strlen(argv[1]), "%s", argv[1]);
     char gameName[] = "";
     char filePath[] = "";
+    char relativePath[] = "";
     if (strstr(cmd, "../../Roms/") != NULL) {
         printf_debug("%s\n", "main() cmd includes '../../Roms/'");
-        char relativePath[] = str_split(cmd, "../../Roms/");
+        snprintf(relativePath, strlen(str_split(cmd, "../../Roms/")), "%s", str_split(cmd, "../../Roms/"));
         if (relativePath != NULL) {
             relativePath[strlen(relativePath) - 1] = 0;
             snprintf(filePath, strlen(relativePath)+19, "/mnt/SDCARD/Roms/./%s", relativePath);
