@@ -1,15 +1,9 @@
-#include <fcntl.h>
-#include <libgen.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
-#include <time.h>
-#include <unistd.h>
 #include <sqlite3/sqlite3.h>
+#include <time.h>
 
-#include "utils/file.h"
 #include "utils/log.h"
 #include "utils/str.h"
 

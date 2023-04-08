@@ -1,17 +1,6 @@
 #include "./playActivity.h"
 
 sqlite3 *db;
-char *err_msg = 0;
-
-void open_db(void) {
-    printf_debug("%s\n", "open_db()");
-    int rc = sqlite3_open(PLAY_ACTIVITY_SQLITE_PATH, &db);
-    if (rc != SQLITE_OK) {
-        printf_debug("Cannot open database: %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
-    }
-    printf_debug("%s\n", "open_db() return");
-}
 
 void close_db(void) {
     printf_debug("%s\n", "close_db()");
@@ -19,36 +8,40 @@ void close_db(void) {
     printf_debug("%s\n", "close_db() return");
 }
 
+void open_db(void) {
+    printf_debug("%s\n", "open_db()");
+    int rc = sqlite3_open(PLAY_ACTIVITY_SQLITE_PATH, &db);
+    if (rc != SQLITE_OK) {
+        printf_debug("Cannot open database: %s\n", sqlite3_errmsg(db));
+        close_db();
+    }
+    printf_debug("%s\n", "open_db() return");
+}
+
 void create_table(void) {
     printf_debug("%s\n", "create_table()");
-    char *create_sql = "DROP TABLE IF EXISTS play_activity;CREATE TABLE play_activity(name TEXT, relative_path TEXT, play_count INT, play_time INT);CREATE UNIQUE INDEX name_index ON play_activity(name);";
-    int rc = sqlite3_exec(db, create_sql, 0, 0, &err_msg);
-    if (rc != SQLITE_OK ) {
-        printf_debug("SQL error: %s\n", err_msg);
-        sqlite3_free(err_msg);
-        sqlite3_close(db);
+    char *sql = "DROP TABLE IF EXISTS play_activity;CREATE TABLE play_activity(name TEXT PRIMARY KEY, relative_path TEXT, play_count INTEGER, play_time INTEGER);CREATE UNIQUE INDEX name_index ON play_activity(name);";
+    int rc = sqlite3_exec(db, sql, NULL, NULL, NULL);
+    if (rc != SQLITE_OK) {
+        printf_debug("Error: could not create table: %s\n", sqlite3_errmsg(db));
     }
     printf_debug("%s\n", "create_table() return");
 }
 
-void insert_data(const char *name, const char *file_path, int play_count, int play_time) {
-    printf_debug("insert_date(%s, %s, %d, %d)", name, file_path, play_time);
-    char *insert_sql = "INSERT OR REPLACE INTO play_activity VALUES (?, ?, ?, ?);";
-    sqlite3_stmt *stmt;
-    int rc = sqlite3_prepare_v2(db, insert_sql, -1, &stmt, 0);
-    sqlite3_bind_text(stmt, 1, name, -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(stmt, 2, file_path, -1, SQLITE_TRANSIENT);
-    sqlite3_bind_int(stmt, 3, play_count);
-    sqlite3_bind_int(stmt, 4, play_time);
-    rc = sqlite3_step(stmt);
-    if (rc != SQLITE_DONE) {
-        printf_debug("SQL error: %s\n", err_msg);
-        sqlite3_free(err_msg);
-    } else {
-        sqlite3_reset(stmt);
-        sqlite3_finalize(stmt);
+void insert_data(const char *name, const char *relative_path, int play_count, int play_time) {
+    printf_debug("insert_date(%s, %s, %d, %d)", name, relative_path, play_count, play_time);
+    sql = sqlite3_mprintf("INSERT OR REPLACE INTO play_activities "
+                        "(name, relative_path, play_count, play_time) "
+                        "VALUES ('%q', '%q', %d, %d);",
+                        name, relative_path,
+                        play_count, play_time);
+    rc = sqlite3_exec(db, sql, NULL, NULL, NULL);
+    if (rc != SQLITE_OK) {
+        printf_debug("Error: could not insert play_activity: %s\n", sqlite3_errmsg(db));
+        sqlite3_free(sql);
     }
-    printf_debug("%s\n", "insert_date() return");
+    sqlite3_free(sql);
+    printf_debug("%s\n", "insert_data() return");
 }
 
 void add_play_time(const char *name, const char *file_path, int play_time) {
@@ -74,19 +67,15 @@ void add_play_time(const char *name, const char *file_path, int play_time) {
 
 void upgrade_rom_db(void) {
     printf_debug("%s\n", "upgrade_rom_db()");
-    FILE *file = fopen(PLAY_ACTIVITY_DB_PATH, "rb");
     typedef struct {
-        char name[STR_MAX];
-        char file_path[STR_MAX];
-        int play_count;
+        char *name;
         int play_time;
     } PlayActivity;
-    PlayActivity play_activities[0];
+    FILE *file = fopen(PLAY_ACTIVITY_DB_PATH, "rb");
     if (file != NULL) {
-        int index = 0;
-        while (fread(&play_activities[index], sizeof(PlayActivity), 1, file) == 1 && index < 1000) {
-            insert_data(play_activities[index].name, play_activities[index].file_path, play_activities[index].play_count, play_activities[index].play_time);
-            index++;
+        PlayActivity play_activity;
+        while (fread(&play_activity, sizeof(PlayActivity), 1, file) == 1) {
+            insert_data(play_activity.name, NULL, 1, play_activity.play_time);
         }
         fclose(file);
     }
