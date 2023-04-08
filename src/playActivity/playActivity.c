@@ -1,6 +1,7 @@
 #include "./playActivity.h"
 
 sqlite3 *db;
+char *err_msg = 0;
 
 void open_db(void) {
     printf_debug("%s\n", "open_db()");
@@ -20,9 +21,8 @@ void close_db(void) {
 
 void create_table(void) {
     printf_debug("%s\n", "create_table()");
-    char *err_msg = 0;
     char *create_sql = "DROP TABLE IF EXISTS play_activity;CREATE TABLE play_activity(name TEXT, relative_path TEXT, play_count INT, play_time INT);CREATE UNIQUE INDEX name_index ON play_activity(name);";
-    rc = sqlite3_exec(db, create_sql, 0, 0, &err_msg);
+    int rc = sqlite3_exec(db, create_sql, 0, 0, &err_msg);
     if (rc != SQLITE_OK ) {
         printf_debug("SQL error: %s\n", err_msg);
         sqlite3_free(err_msg);
@@ -35,14 +35,14 @@ void insert_data(const char *name, const char *file_path, int play_count, int pl
     printf_debug("insert_date(%s, %s, %d, %d)", name, file_path, play_time);
     char *insert_sql = "INSERT OR REPLACE INTO play_activity VALUES (?, ?, ?, ?);";
     sqlite3_stmt *stmt;
-    rc = sqlite3_prepare_v2(db, insert_sql, -1, &stmt, 0);
+    int rc = sqlite3_prepare_v2(db, insert_sql, -1, &stmt, 0);
     sqlite3_bind_text(stmt, 1, name, -1, SQLITE_TRANSIENT);
     sqlite3_bind_text(stmt, 2, file_path, -1, SQLITE_TRANSIENT);
     sqlite3_bind_int(stmt, 3, play_count);
     sqlite3_bind_int(stmt, 4, play_time);
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
-        filerintf(stderr, "SQL error: %s\n", err_msg);
+        printf_debug("SQL error: %s\n", err_msg);
         sqlite3_free(err_msg);
     } else {
         sqlite3_reset(stmt);
@@ -55,12 +55,12 @@ void add_play_time(const char *name, const char *file_path, int play_time) {
     printf_debug("add_play_time(%s, %s, %d)\n", name, file_path, play_time);
     char *insert_sql = "INSERT OR REPLACE INTO playActivity VALUES(?, ?, COALESCE((SELECT play_count FROM playActivity WHERE name=?), 0) + 1, COALESCE((SELECT play_time FROM playActivity WHERE name=?), 0) + ?);";
     sqlite3_stmt *stmt;
-    rc = sqlite3_prepare_v2(db, insert_sql, -1, &stmt, 0);
-    sqlite3_bind_text(res, 1, name, -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(res, 2, file_path, -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(res, 3, name, -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(res, 4, name, -1, SQLITE_TRANSIENT);
-    sqlite3_bind_int(res, 5, play_time);
+    int rc = sqlite3_prepare_v2(db, insert_sql, -1, &stmt, 0);
+    sqlite3_bind_text(stmt, 1, name, -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 2, file_path, -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 3, name, -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 4, name, -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int(stmt, 5, play_time);
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
         filerintf(stderr, "SQL error: %s\n", err_msg);
