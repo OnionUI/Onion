@@ -80,13 +80,14 @@ void upgrade_rom_db(void) {
         char file_path[STR_MAX];
         int play_count;
         int play_time;
-    } play_activities[1000];
+    } play_activities[];
     if (file != NULL) {
         fread(play_activities, sizeof(play_activities), 1, file);
         fclose(file);
     }
-    for (int i = 0; i < 1000; i++) {
-        insert_data(play_activities[i].name, play_activities[i].file_path, play_activities[i].play_count, play_activities[i].play_time);
+    int length = sizeof(play_activities) / sizeof(PlayActivity);
+    for (int index = 0; index < length; index++) {
+        insert_data(play_activities[index].name, play_activities[index].file_path, play_activities[index].play_count, play_activities[index].play_time);
     }
     printf_debug("%s\n", "upgrade_rom_db() return");
 }
