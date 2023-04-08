@@ -32,8 +32,8 @@ void upgradeRomDB(void) {
     FILE *file = fopen(PLAY_ACTIVITY_DB_PATH, "rb");
     printf_debug("%d\n", logCount++);
     static struct rom_s {
-        char name[];
         int playTime;
+        char name[];
     } romList[1000];
     printf_debug("%d\n", logCount++);
     if (file != NULL) {
@@ -185,16 +185,17 @@ int main(int argc, char* argv[])
         printf_debug("main() init return %d\n", EXIT_SUCCESS);
         return EXIT_SUCCESS;
     }
-    char cmd[] = argv[1];
+    char cmd[] = "";
+    snprintf(cmd, strlen(argv[1]), "%s", argv[1]);
     char gameName[] = "";
     char filePath[] = "";
     char relativePath[] = "";
     if (strstr(cmd, "../../Roms/") != NULL) {
-        printf_debug("%s", "main() cmd includes '../../Roms/'\n");
+        printf_debug("%s\n", "main() cmd includes '../../Roms/'");
         relativePath = str_split(cmd, "../../Roms/");
         if (relativePath != NULL) {
             relativePath[strlen(relativePath) - 1] = 0;
-            snprintf(filePath, STR_MAX, "/mnt/SDCARD/Roms/./%s", relativePath);
+            snprintf(filePath, strlen(relativePath)+19, "/mnt/SDCARD/Roms/./%s", relativePath);
             char* name_path = "";
             sprintf(name_path, "%s/.game_config/%s.name", dirname(filePath), basename(filePath));
             if (is_file(name_path)) {
