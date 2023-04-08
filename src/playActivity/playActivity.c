@@ -138,11 +138,10 @@ int main(int argc, char *argv[])
         return 1;
     }
     relative_path += strlen(roms_path);
-    char *file_name = strrchr(relative_path, '/');
-    if (file_name == NULL) {
-        file_name = relative_path;
-    } else {
-        file_name++;
+    char *file_name = strrchr(relative_path, '/') + 1;
+    char *extension = strrchr(filename, '.');
+    if (extension != NULL) {
+        *extension = '\0';
     }
     update_play_activity(file_name, relative_path);
     close_db();
