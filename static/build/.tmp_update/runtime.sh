@@ -58,6 +58,10 @@ main() {
     # Patch RA config
     ./script/patch_ra_cfg.sh ./res/miyoo${deviceModel}_ra_patch.cfg
 
+    touch /tmp/network_changed
+    sync
+    check_networking
+
     # Auto launch
     if [ ! -f $sysdir/config/.noAutoStart ]; then
         state_change
@@ -88,16 +92,19 @@ main() {
     while true; do
         state_change
         check_main_ui
+
+        check_networking
+
         state_change
         check_game_menu
+
         state_change
         check_game
-        state_change  
+
+        check_networking
+
+        state_change
         check_switcher
-        
-        # Free memory
-        #/customer/app/sysmon freemma
-        $sysdir/bin/freemma
     done
 }
 
@@ -132,18 +139,26 @@ check_main_ui() {
 }
 
 launch_main_ui() {
+    echo -e "\n:: Launch MainUI"
+
     cd $sysdir
     mainUiBatPerc
 
     check_hide_recents
     check_hide_expert
 
+    wifi_setting=$(/customer/app/jsonval wifi)
+
     # MainUI launch
     cd /mnt/SDCARD/miyoo/app
-    LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./MainUI 2>&1 > /dev/null
+    PATH="$sysdir/script/redirect:$PATH" LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./MainUI 2>&1 > /dev/null
 
-	pkill -9 wpa_supplicant
-	pkill -9 udhcpc
+    if [ $(/customer/app/jsonval wifi) -ne $wifi_setting ]; then
+        touch /tmp/network_changed
+        sync
+    fi
+
+    $sysdir/bin/freemma
     
     mv -f /tmp/cmd_to_run.sh $sysdir/cmd_to_run.sh
     
@@ -165,11 +180,10 @@ check_game_menu() {
 }
 
 launch_game_menu() {
-    cd $sysdir
     echo -e "\n\n:: GLO\n\n"
-    sync
 
-    $sysdir/script/game_list_options.sh | tee -a ./logs/game_list_options.log
+    cd $sysdir
+    ./script/game_list_options.sh | tee -a ./logs/game_list_options.log
 
     if [ $? -ne 0 ]; then
         echo -e "\n\n< Back to MainUI\n\n"
@@ -190,6 +204,7 @@ check_is_game() {
 }
 
 launch_game() {
+    echo -e "\n:: Launch game"
     cmd=`cat $sysdir/cmd_to_run.sh`
 
     is_game=0
@@ -316,6 +331,7 @@ check_switcher() {
 }
 
 launch_switcher() {
+    echo -e "\n:: Launch switcher"
     cd $sysdir
     LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" gameSwitcher
     rm $sysdir/.runGameSwitcher
@@ -402,6 +418,8 @@ last_device_model=/mnt/SDCARD/miyoo/app/lastDeviceModel
 is_device_model_changed=0
 
 check_device_model() {
+    echo -e "\n:: Check device model"
+
     if axp 0; then
         touch /tmp/deviceModel
         printf "354" > /tmp/deviceModel
@@ -428,6 +446,8 @@ check_device_model() {
 
 
 init_system() {
+    echo -e "\n:: Init system"
+
     if [ $deviceModel -eq 354 ]; then
         # Reduce LCD voltage from 3000 to 2800 (to remove artifacts)
         axp 21 0c
@@ -492,6 +512,37 @@ set_startup_tab() {
     
     cd $sysdir
     setState "$startup_tab"
+}
+
+check_networking() {
+    if [ ! -f /tmp/network_changed ]; then
+        return
+    fi
+
+    rm /tmp/network_changed
+
+    echo -e "\n:: Update networking"
+
+    if [ $(/customer/app/jsonval wifi) -eq 1 ]; then
+        if ! ifconfig wlan0 || [ -f /tmp/restart_wifi ]; then
+            if [ -f /tmp/restart_wifi ]; then
+                pkill -9 wpa_supplicant
+                pkill -9 udhcpc
+                rm /tmp/restart_wifi
+            fi
+
+            echo "Initializing Wifi..."
+            /customer/app/axp_test wifion
+            sleep 2 
+            ifconfig wlan0 up
+            /mnt/SDCARD/miyoo/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
+            udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
+        fi
+    else
+        pkill -9 wpa_supplicant
+        pkill -9 udhcpc
+        /customer/app/axp_test wifioff
+    fi
 }
 
 main
