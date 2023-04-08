@@ -54,7 +54,7 @@ void upgrade_rom_db(void) {
         PlayActivity play_activity;
         printf_debug("%s\n", "define play_activity");
         while (fread(&play_activity, sizeof(PlayActivity), 1, file) == 1) {
-            if (play_activity.name != "") {
+            if (strlen(play_activity.name) > 0) {
                 printf_debug("%s\n", "read rom");
                 insert_data(play_activity.name, NULL, 1, play_activity.play_time);
             }
