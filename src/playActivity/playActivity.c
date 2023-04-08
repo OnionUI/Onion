@@ -189,7 +189,7 @@ int main(int argc, char* argv[])
     snprintf(cmd, strlen(argv[1]), "%s", argv[1]);
     char gameName[] = "";
     char filePath[] = "";
-    char relativePath[] = "";
+    char relativePath[];
     if (strstr(cmd, "../../Roms/") != NULL) {
         printf_debug("%s\n", "main() cmd includes '../../Roms/'");
         relativePath = str_split(cmd, "../../Roms/");
