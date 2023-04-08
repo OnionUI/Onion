@@ -200,6 +200,7 @@ clean:
 	@find include src -type f -name *.o -exec rm -f {} \;
 
 deepclean: clean
+	@rm -f $(CACHE)
 	@cd $(THIRD_PARTY_DIR)/RetroArch && make clean
 	@cd $(THIRD_PARTY_DIR)/SearchFilter && make clean
 	@cd $(THIRD_PARTY_DIR)/Terminal && make clean
