@@ -57,22 +57,17 @@ void upgradeRomDB(void) {
     printf_debug("%d\n", logCount++);
     char* sql = "DROP TABLE IF EXISTS playActivity;CREATE TABLE playActivity(name TEXT, filePath Text, playCount INT, playTime INT);CREATE UNIQUE INDEX name_index ON playActivity(name);";
     printf_debug("%d\n", logCount++);
-    char insertSql[] = "INSERT OR REPLACE INTO playActivity VALUES ('%s', NULL, 1, %d);";
-    char insert[] = "";
+    char* insertSql = "INSERT OR REPLACE INTO playActivity VALUES ('%s', NULL, 1, %d);";
+    char* insert = "";
     printf_debug("%d\n", logCount++);
     int i;
     for (i = 0; i <= 1000; i++) {
-        printf_debug("%d\n", logCount++);
         if (strlen(romList[i].name) > 0) {
-            printf_debug("%d\n", logCount++);
             snprintf(insert, (strlen(insertSql) + strlen(romList[i].name) + 64), insertSql, romList[i].name, romList[i].playTime);
-            printf_debug("%d\n", logCount++);
-            strncat(sql, insert, strlen(insert)+1);
-            printf_debug("%d\n", logCount++);
             printf_debug("%s\n", insert);
+            strncat(sql, insert, strlen(insert));
             printf_debug("%s\n", sql);
         }
-        printf_debug("%d\n", logCount++);
     }
     printf_debug("%d\n", logCount++);
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
