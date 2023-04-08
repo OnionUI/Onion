@@ -75,6 +75,7 @@ void upgradeRomDB(void) {
         printf_debug("%d\n", logCount++);
     }
     printf_debug("%d\n", logCount++);
+    printf_debug("%s\n", insert);
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
     if (rc != SQLITE_OK ) {
         printf_debug("SQL error: %s\n", sqlite3_errmsg(db));
