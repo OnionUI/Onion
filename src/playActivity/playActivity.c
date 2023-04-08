@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
         snprintf(relative_path, strlen(str_split(cmd, "../../Roms/")), "%s", str_split(cmd, "../../Roms/"));
         if (relative_path != NULL) {
             relative_path[strlen(relative_path) - 1] = 0;
-            char *file_path;
+            char *file_path = "";
             snprintf(file_path, strlen(relative_path)+19, "/mnt/SDCARD/Roms/./%s", relative_path);
             char *name_path = "";
             sprintf(name_path, "%s/.game_config/%s.name", dirname(file_path), basename(file_path));
