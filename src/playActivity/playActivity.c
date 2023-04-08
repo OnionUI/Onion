@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
     }
     relative_path += strlen(roms_path);
     char *file_name = strrchr(relative_path, '/') + 1;
-    char *extension = strrchr(filename, '.');
+    char *extension = strrchr(file_name, '.');
     if (extension != NULL) {
         *extension = '\0';
     }
