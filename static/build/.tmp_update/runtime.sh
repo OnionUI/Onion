@@ -1,6 +1,7 @@
 #!/bin/sh
 sysdir=/mnt/SDCARD/.tmp_update
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$sysdir/lib:$sysdir/lib/parasyte"
+miyoodir=/mnt/SDCARD/miyoo
+export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 export PATH="$sysdir/bin:$PATH"
 
 main() {
@@ -80,7 +81,7 @@ main() {
         touch $sysdir/.runGameSwitcher
     elif [ $startup_app -eq 2 ]; then
         echo -e "\n\n:: STARTUP APP: RetroArch\n\n"
-        echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v" > $sysdir/cmd_to_run.sh
+        echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v" > $sysdir/cmd_to_run.sh
         touch /tmp/quick_switch
     elif [ $startup_app -eq 3 ]; then
         echo -e "\n\n:: STARTUP APP: AdvanceMENU\n\n"
@@ -155,8 +156,11 @@ launch_main_ui() {
     start_audioserver
 
     # MainUI launch
-    cd /mnt/SDCARD/miyoo/app
-    PATH="$sysdir/script/redirect:$PATH" LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./MainUI 2>&1 > /dev/null
+    cd $miyoodir/app
+    PATH="$sysdir/script/redirect:$PATH" \
+    LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib" \
+    LD_PRELOAD="$miyoodir/lib/libpadsp.so" \
+    ./MainUI 2>&1 > /dev/null
 
     if [ $(/customer/app/jsonval wifi) -ne $wifi_setting ]; then
         touch /tmp/network_changed
@@ -248,9 +252,9 @@ launch_game() {
 
             if [ -f "/mnt/SDCARD/RetroArch/$corepath" ]; then
                 if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
-                    echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v --appendconfig \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+                    echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v --appendconfig \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
                 else
-                    echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+                    echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
                 fi
             fi
         fi
@@ -340,7 +344,7 @@ check_switcher() {
 launch_switcher() {
     echo -e "\n:: Launch switcher"
     cd $sysdir
-    LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" gameSwitcher
+    LD_PRELOAD="$miyoodir/lib/libpadsp.so" gameSwitcher
     rm $sysdir/.runGameSwitcher
     echo "switcher" > /tmp/prev_state
     sync
@@ -394,9 +398,9 @@ check_hide_recents() {
     sync
 }
 
-mainui_target=/mnt/SDCARD/miyoo/app/MainUI
-clean_flag=/mnt/SDCARD/miyoo/app/.isClean
-expert_flag=/mnt/SDCARD/miyoo/app/.isExpert
+mainui_target=$miyoodir/app/MainUI
+clean_flag=$miyoodir/app/.isClean
+expert_flag=$miyoodir/app/.isExpert
 
 check_hide_expert() {
     if [ ! -f $sysdir/config/.showExpert ]; then
@@ -421,7 +425,7 @@ check_hide_expert() {
 
 
 deviceModel=0
-last_device_model=/mnt/SDCARD/miyoo/app/lastDeviceModel
+last_device_model=$miyoodir/app/lastDeviceModel
 is_device_model_changed=0
 
 check_device_model() {
@@ -466,7 +470,7 @@ init_system() {
         axp 12 +80
     fi
     
-    /mnt/SDCARD/miyoo/app/audioserver &
+    start_audioserver
 
     if [ $deviceModel -eq 283 ]; then
         # init charger detection
@@ -525,7 +529,7 @@ set_startup_tab() {
 
 start_audioserver() {
     defvol=`echo $(/customer/app/jsonval vol) | awk '{ printf "%.0f\n", 48 * (log(1 + $1) / log(10)) - 60 }'`
-    runifnecessary "audioserver" /mnt/SDCARD/miyoo/app/audioserver $defvol
+    runifnecessary "audioserver" $miyoodir/app/audioserver $defvol
 }
 
 runifnecessary() {
@@ -562,7 +566,7 @@ check_networking() {
             /customer/app/axp_test wifion
             sleep 2 
             ifconfig wlan0 up
-            /mnt/SDCARD/miyoo/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
+            $miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
             udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
         fi
     else
