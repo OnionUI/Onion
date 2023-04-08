@@ -75,7 +75,7 @@ void add_play_time(const char *name, const char *file_path, int play_time) {
 void upgrade_rom_db(void) {
     printf_debug("%s\n", "upgrade_rom_db()");
     FILE *file = fopen(PLAY_ACTIVITY_DB_PATH, "rb");
-    struct {
+    typedef struct {
         char name[STR_MAX];
         char file_path[STR_MAX];
         int play_count;
