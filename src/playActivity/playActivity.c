@@ -170,19 +170,20 @@ int main(int argc, char *argv[])
         printf_debug("main() init return %d\n", EXIT_SUCCESS);
         return EXIT_SUCCESS;
     }
-    char *cmd = "";
+    char *cmd = NULL;
+    cmd = (char*)malloc(strlen(argv[1]) + 1);
     snprintf(cmd, strlen(argv[1]), "%s", argv[1]);
     if (strstr(cmd, "../../Roms/") != NULL) {
         printf_debug("%s\n", "main() cmd includes '../../Roms/'");
-        char *relative_path = "";
+        char *relative_path = NULL;
         snprintf(relative_path, strlen(str_split(cmd, "../../Roms/")), "%s", str_split(cmd, "../../Roms/"));
         if (relative_path != NULL) {
             relative_path[strlen(relative_path) - 1] = 0;
-            char *file_path = "";
+            char *file_path = NULL;
             snprintf(file_path, strlen(relative_path)+19, "/mnt/SDCARD/Roms/./%s", relative_path);
-            char *name_path = "";
+            char *name_path = NULL;
             sprintf(name_path, "%s/.game_config/%s.name", dirname(file_path), basename(file_path));
-            char *name = "";
+            char *name = NULL;
             if (is_file(name_path)) {
                 FILE *file;
                 file_get(file, name_path, "%[^\n]", name);
