@@ -32,7 +32,7 @@ void upgradeRomDB(void) {
     FILE *file = fopen(PLAY_ACTIVITY_DB_PATH, "rb");
     printf_debug("%d\n", logCount++);
     static struct rom_s {
-        char* name;
+        char name[];
         int playTime;
     } romList[1000];
     printf_debug("%d\n", logCount++);
@@ -60,8 +60,8 @@ void upgradeRomDB(void) {
         "CREATE UNIQUE INDEX name_index ON playActivity(name);";
     printf_debug("%d\n", logCount++);
     int i;
-    char* insertSql = "INSERT OR REPLACE INTO playActivity VALUES ('%s', NULL, 1, %d);";
-    char* insert = "";
+    char insertSql[] = "INSERT OR REPLACE INTO playActivity VALUES ('%s', NULL, 1, %d);";
+    char insert[] = "";
     printf_debug("%d\n", logCount++);
     for (i = 0; i < sizeof(romList)/sizeof(romList[0]); i++) {
         printf_debug("%d\n", logCount++);
@@ -185,11 +185,10 @@ int main(int argc, char* argv[])
         printf_debug("main() init return %d\n", EXIT_SUCCESS);
         return EXIT_SUCCESS;
     }
-    char* cmd = "";
-    strncpy(cmd, argv[1], STR_MAX);
-    char* gameName = "";
-    char* filePath = "";
-    char* relativePath = "";
+    char cmd[] = argv[1];
+    char gameName[] = "";
+    char filePath[] = "";
+    char relativePath[] = "";
     if (strstr(cmd, "../../Roms/") != NULL) {
         printf_debug("%s", "main() cmd includes '../../Roms/'\n");
         relativePath = str_split(cmd, "../../Roms/");
