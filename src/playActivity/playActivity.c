@@ -43,13 +43,18 @@ void insert_data(const char *name, const char *relative_path, int play_count, in
 void upgrade_rom_db(void) {
     printf_debug("%s\n", "upgrade_rom_db()");
     typedef struct {
-        char *name;
+        char name[STR_MAX];
         int play_time;
     } PlayActivity;
+    printf_debug("%s\n", "PlayActivity defined");
     FILE *file = fopen(PLAY_ACTIVITY_DB_PATH, "rb");
+    printf_debug("%s\n", "file opened");
     if (file != NULL) {
+        printf_debug("%s\n", "file not null");
         PlayActivity play_activity;
+        printf_debug("%s\n", "define play_activity");
         while (fread(&play_activity, sizeof(PlayActivity), 1, file) == 1) {
+            printf_debug("%s\n", "read rom");
             insert_data(play_activity.name, NULL, 1, play_activity.play_time);
         }
         fclose(file);
@@ -105,7 +110,7 @@ int main(int argc, char *argv[])
         return 1;
     }
     char *file_path = argv[1];
-    char *roms_path = "../ROMS/";
+    char *roms_path = "../Roms/";
     char *relative_path = strstr(file_path, roms_path);
     if (relative_path == NULL) {
         printf_debug("'%s' must be in '%s' directory.\n", relative_path, roms_path);
