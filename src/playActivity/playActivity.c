@@ -80,7 +80,7 @@ void upgrade_rom_db(void) {
         char file_path[STR_MAX];
         int play_count;
         int play_time;
-    } play_activities[];
+    } play_activities[1000];
     if (file != NULL) {
         fread(play_activities, sizeof(play_activities), 1, file);
         fclose(file);
