@@ -6,6 +6,7 @@
 
 #include "utils/log.h"
 #include "utils/str.h"
+#include "utils/file.h"
 
 #define INIT_TIMER_PATH "/tmp/initTimer"
 #define PLAY_ACTIVITY_SQLITE_PATH "/mnt/SDCARD/Saves/CurrentProfile/saves/play_activity.sqlite"
