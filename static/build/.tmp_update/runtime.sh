@@ -55,8 +55,11 @@ main() {
         rm -f "$sysdir/cmd_to_run.sh" 2> /dev/null
     fi
 
-    # Patch RA config
-    ./script/patch_ra_cfg.sh ./res/miyoo${deviceModel}_ra_patch.cfg
+    if [ $is_device_model_changed -eq 1 ]; then
+        # Patch RA config
+        cd $sysdir
+        ./script/patch_ra_cfg.sh ./res/miyoo${deviceModel}_ra_patch.cfg
+    fi
 
     touch /tmp/network_changed
     sync
@@ -149,6 +152,8 @@ launch_main_ui() {
 
     wifi_setting=$(/customer/app/jsonval wifi)
 
+    start_audioserver
+
     # MainUI launch
     cd /mnt/SDCARD/miyoo/app
     PATH="$sysdir/script/redirect:$PATH" LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./MainUI 2>&1 > /dev/null
@@ -212,6 +217,8 @@ launch_game() {
     romext=""
     romcfgpath=""
     retroarch_core=""
+
+    start_audioserver
 
     # TIMER BEGIN
     if check_is_game "$cmd"; then
@@ -448,14 +455,16 @@ check_device_model() {
 init_system() {
     echo -e "\n:: Init system"
 
-    if [ $deviceModel -eq 354 ]; then
-        # Reduce LCD voltage from 3000 to 2800 (to remove artifacts)
-        axp 21 0c
-    fi
-
     # init_lcd
     cat /proc/ls
     sleep 0.25
+
+    if [ $deviceModel -eq 354 ]; then
+        # Reduce LCD voltage from 3000 to 2800 (to remove artifacts)
+        axp 21 0c
+        axp 10 +02
+        axp 12 +80
+    fi
     
     /mnt/SDCARD/miyoo/app/audioserver &
 
@@ -512,6 +521,24 @@ set_startup_tab() {
     
     cd $sysdir
     setState "$startup_tab"
+}
+
+start_audioserver() {
+    defvol=`echo $(/customer/app/jsonval vol) | awk '{ printf "%.0f\n", 48 * (log(1 + $1) / log(10)) - 60 }'`
+    runifnecessary "audioserver" /mnt/SDCARD/miyoo/app/audioserver $defvol
+}
+
+runifnecessary() {
+    cnt=0
+    #a=`ps | grep $1 | grep -v grep`
+    a=`pgrep $1`
+    while [ "$a" == "" ] && [ $cnt -lt 8 ] ; do
+        echo try to run $2
+        $2 $3 &
+        sleep 0.5
+        cnt=`expr $cnt + 1`
+        a=`pgrep $1`
+    done
 }
 
 check_networking() {

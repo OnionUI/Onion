@@ -127,6 +127,8 @@ void action_resetRAMain(void *pt)
             "Are you sure you want to reset\nRetroArch main configuration?"))
         return;
     system("unzip -o " RESET_CONFIGS_PAK " \"RetroArch/*\" -d /mnt/SDCARD/");
+    system("cd /mnt/SDCARD/.tmp_update; ./script/patch_ra_cfg.sh "
+           "./res/miyoo$(cat /tmp/deviceModel)_ra_patch.cfg");
     reset_menus = true;
     if (!_disable_confirm)
         _notifyResetDone(title_str);

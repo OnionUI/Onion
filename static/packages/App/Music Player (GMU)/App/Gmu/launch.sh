@@ -1,11 +1,7 @@
 #!/bin/sh
 my_dir=`dirname $0`
 
-killall audioserver
-killall audioserver.mod
+/mnt/SDCARD/.tmp_update/script/stop_audioserver.sh
 
 cd $my_dir
 ./launch2.sh
-
-/mnt/SDCARD/miyoo/app/audioserver &
-
