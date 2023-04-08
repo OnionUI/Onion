@@ -20,7 +20,7 @@ void open_db(void) {
 
 void create_table(void) {
     printf_debug("%s\n", "create_table()");
-    char *sql = "DROP TABLE IF EXISTS play_activity;CREATE TABLE play_activity(name TEXT PRIMARY KEY, relative_path TEXT, play_count INTEGER, play_time INTEGER);CREATE UNIQUE INDEX name_index ON play_activity(name);";
+    char *sql = "DROP TABLE IF EXISTS play_activities;CREATE TABLE play_activities(name TEXT PRIMARY KEY, relative_path TEXT, play_count INTEGER, play_time INTEGER);CREATE UNIQUE INDEX name_index ON play_activities(name);";
     int rc = sqlite3_exec(db, sql, NULL, NULL, NULL);
     if (rc != SQLITE_OK) {
         printf_debug("Error: could not create table: %s\n", sqlite3_errmsg(db));
@@ -54,8 +54,10 @@ void upgrade_rom_db(void) {
         PlayActivity play_activity;
         printf_debug("%s\n", "define play_activity");
         while (fread(&play_activity, sizeof(PlayActivity), 1, file) == 1) {
-            printf_debug("%s\n", "read rom");
-            insert_data(play_activity.name, NULL, 1, play_activity.play_time);
+            if (play_activity.name != "") {
+                printf_debug("%s\n", "read rom");
+                insert_data(play_activity.name, NULL, 1, play_activity.play_time);
+            }
         }
         fclose(file);
     }
