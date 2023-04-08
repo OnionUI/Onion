@@ -90,7 +90,7 @@ void usage(void) {
 int main(int argc, char *argv[])
 {
     log_setName("playActivity");
-    printf_debug("%s\n", "main()");
+    printf_debug("main(%d, %s)\n", argc, argv[1]);
     if (!exists(PLAY_ACTIVITY_SQLITE_PATH)) {
         open_db();
         create_table();
@@ -104,16 +104,19 @@ int main(int argc, char *argv[])
         printf_debug("%s\n", "db == NULL");
         return 1;
     }
-    char file_path[256] = argv[1];
-    char* roms_path = "../../ROMS/";
-    char* file_name = strrchr(file_path, '/') + 1;
-    char* extension = strrchr(file_path, '.');
-    char relative_path[256];
-    sprintf(relative_path, "%.*s", (int)(file_name - file_path - 1), file_path);
-
-    if (strncmp(relative_path, roms_path, strlen(roms_path)) != 0) {
-        printf_debug("%s must be within %s.\n", relative_path, roms_path);
+    char *file_path = argv[1];
+    char *roms_path = "../ROMS/";
+    char *relative_path = strstr(file_path, roms_path);
+    if (relative_path == NULL) {
+        printf_debug("'%s' must be in '%s' directory.\n", relative_path, roms_path);
         return 1;
+    }
+    relative_path += strlen(roms_path);
+    char *file_name = strrchr(relative_path, '/');
+    if (file_name == NULL) {
+        file_name = relative_path;
+    } else {
+        file_name++;
     }
     update_play_activity(file_name, relative_path);
     close_db();
