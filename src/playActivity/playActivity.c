@@ -30,39 +30,14 @@ void create_table(void) {
 
 void insert_data(const char *name, const char *relative_path, int play_count, int play_time) {
     printf_debug("insert_date(%s, %s, %d, %d)", name, relative_path, play_count, play_time);
-    sql = sqlite3_mprintf("INSERT OR REPLACE INTO play_activities "
-                        "(name, relative_path, play_count, play_time) "
-                        "VALUES ('%q', '%q', %d, %d);",
-                        name, relative_path,
-                        play_count, play_time);
-    rc = sqlite3_exec(db, sql, NULL, NULL, NULL);
+    char *sql = sqlite3_mprintf("INSERT OR REPLACE INTO play_activities (name, relative_path, play_count, play_time) VALUES ('%q', '%q', COALESCE((SELECT play_count FROM playActivity WHERE name='%q'), 0) + %d, COALESCE((SELECT play_time FROM playActivity WHERE name='%q'), 0) + %d);", name, relative_path, name, play_count, name, play_time);
+    int rc = sqlite3_exec(db, sql, NULL, NULL, NULL);
     if (rc != SQLITE_OK) {
         printf_debug("Error: could not insert play_activity: %s\n", sqlite3_errmsg(db));
         sqlite3_free(sql);
     }
     sqlite3_free(sql);
     printf_debug("%s\n", "insert_data() return");
-}
-
-void add_play_time(const char *name, const char *file_path, int play_time) {
-    printf_debug("add_play_time(%s, %s, %d)\n", name, file_path, play_time);
-    char *insert_sql = "INSERT OR REPLACE INTO playActivity VALUES(?, ?, COALESCE((SELECT play_count FROM playActivity WHERE name=?), 0) + 1, COALESCE((SELECT play_time FROM playActivity WHERE name=?), 0) + ?);";
-    sqlite3_stmt *stmt;
-    int rc = sqlite3_prepare_v2(db, insert_sql, -1, &stmt, 0);
-    sqlite3_bind_text(stmt, 1, name, -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(stmt, 2, file_path, -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(stmt, 3, name, -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(stmt, 4, name, -1, SQLITE_TRANSIENT);
-    sqlite3_bind_int(stmt, 5, play_time);
-    rc = sqlite3_step(stmt);
-    if (rc != SQLITE_DONE) {
-        printf_debug("SQL error: %s\n", err_msg);
-        sqlite3_free(err_msg);
-    } else {
-        sqlite3_reset(stmt);
-        sqlite3_finalize(stmt);
-    }
-    printf_debug("%s\n", "add_play_time() return");
 }
 
 void upgrade_rom_db(void) {
@@ -109,7 +84,7 @@ void start_timer(const char *name, const char *file_path)
     fclose(file);
     int timer_time = atoi(base_time);
     int current_time = (int)time(NULL);
-    add_play_time(name, file_path, current_time - timer_time);
+    insert_data(name, file_path, 1, current_time - timer_time);
     remove(INIT_TIMER_PATH);
     free(base_time);
     printf_debug("%s\n", "start_timer() return");
