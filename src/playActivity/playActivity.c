@@ -63,7 +63,7 @@ void upgradeRomDB(void) {
     char insertSql[] = "INSERT OR REPLACE INTO playActivity VALUES ('%s', NULL, 1, %d);";
     char insert[] = "";
     printf_debug("%d\n", logCount++);
-    for (i = 0; i < sizeof(romList)/sizeof(romList[0]); i++) {
+    for (i = 0; i <= 1000; i++) {
         printf_debug("%d\n", logCount++);
         if (strlen(romList[i].name) > 0) {
             printf_debug("%d\n", logCount++);
