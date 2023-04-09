@@ -56,10 +56,9 @@ main() {
         rm -f "$sysdir/cmd_to_run.sh" 2> /dev/null
     fi
 
-    if [ $is_device_model_changed -eq 1 ]; then
-        # Patch RA config
-        cd $sysdir
-        ./script/patch_ra_cfg.sh ./res/miyoo${deviceModel}_ra_patch.cfg
+    if [ $deviceModel -eq 354 ] && [ -f /mnt/SDCARD/RetroArch/retroarch_miyoo354 ]; then
+        # Mount miyoo354 RA version
+        mount -o bind /mnt/SDCARD/RetroArch/retroarch_miyoo354 /mnt/SDCARD/RetroArch/retroarch
     fi
 
     # Bind arcade name library to customer path
