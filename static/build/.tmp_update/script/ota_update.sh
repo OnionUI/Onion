@@ -42,7 +42,7 @@ else
 fi
 
 echo checking internet connection...
-if ping -4 -c 1 github.com &> /dev/null
+if ping -4 -c 4 github.com &> /dev/null
 then
     echo "Internet check successful"
 else
