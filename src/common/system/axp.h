@@ -71,4 +71,30 @@ int axp_read(unsigned char address)
     return val;
 }
 
+int axp_lcd_get(void) { return axp_read(0x21); }
+
+int axp_lcd_set(int value)
+{
+    int res;
+
+    if (value < 0x09 || value > 0x0e)
+        return -1;
+
+    res = axp_write(0x21, value);
+
+    if (res == 0) {
+        int val = axp_read(0x10);
+        val |= 0x02;
+        res = axp_write(0x10, val);
+    }
+
+    if (res == 0) {
+        int val = axp_read(0x12);
+        val |= 0x80;
+        res = axp_write(0x12, val);
+    }
+
+    return res;
+}
+
 #endif // SYSTEM_AXP_H__

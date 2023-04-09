@@ -465,11 +465,8 @@ init_system() {
     cat /proc/ls
     sleep 0.25
 
-    if [ $deviceModel -eq 354 ]; then
-        # Reduce LCD voltage from 3000 to 2800 (to remove artifacts)
-        axp 21 0c
-        axp 10 +02
-        axp 12 +80
+    if [ $deviceModel -eq 354 ] && [ -f $sysdir/config/.lcdvolt ]; then
+        $sysdir/script/lcdvolt.sh 2> /dev/null
     fi
     
     start_audioserver
