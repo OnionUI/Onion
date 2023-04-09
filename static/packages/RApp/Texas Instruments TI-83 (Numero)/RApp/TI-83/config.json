@@ -1,0 +1,12 @@
+{
+"label":"ti-83",
+"icon":"../../Icons/Default/rapp/ti-83.png",
+"iconsel":"../../Icons/Default/rapp/ti-83.png",
+"launch":"launch.sh",
+"rompath":"../../Roms/TI83",
+"imgpath":"../../Roms/TI83/Imgs",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":"8xp|8xk|8xg"
+}
