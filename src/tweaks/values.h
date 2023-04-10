@@ -216,7 +216,6 @@ void value_setSwapTriggers(void)
 
 int value_getLcdVoltage(void)
 {
-    FILE *fp;
     int value = 0x0;
 
     if (!is_file(LCD_VOLT_CONFIG))

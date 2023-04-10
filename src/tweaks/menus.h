@@ -390,7 +390,6 @@ void menu_advanced(void *_)
                                 .value = value_getFrameThrottle(),
                                 .value_formatter = formatter_fastForward,
                                 .action = action_advancedSetFrameThrottle});
-        int values[] = {0x0, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e};
         if (DEVICE_ID == MIYOO354) {
             list_addItem(
                 &_menu_advanced,
