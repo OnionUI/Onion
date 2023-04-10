@@ -1,0 +1,12 @@
+{
+"label":"uw8",
+"icon":"../../Icons/Default/rapp/uw8.png",
+"iconsel":"../../Icons/Default/rapp/uw8.png",
+"launch":"launch.sh",
+"rompath":"../../Roms/MICROW8",
+"imgpath":"../../Roms/MICROW8/Imgs",
+"useswap":1,
+"shortname":0,
+"hidebios":0,
+"extlist":"uw8|wasm"
+}

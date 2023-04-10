@@ -1,0 +1,13 @@
+{
+"label":"chimerasnes",
+"icon":"../../Icons/Default/rapp/chimerasnes.png",
+"iconsel":"../../Icons/Default/rapp/chimerasnes.png",
+"launch":"launch.sh",
+"rompath":"../../Roms/SFC",
+"imgpath":"../../Roms/SFC/Imgs",
+"useswap":1,
+"shortname":0,
+"hidebios":0,
+"extlist":"sfc|smc|fig|bs|st|zip|7z"
+}
+
