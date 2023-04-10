@@ -169,7 +169,6 @@ external: $(CACHE)/.setup $(THIRD_PARTY_DIR)/RetroArch/retroarch_miyoo354
 # SearchFilter
 	@$(ECHO) "\n-- Build SearchFilter"
 	@cd $(THIRD_PARTY_DIR)/SearchFilter && make build && cp -a build/. $(BUILD_DIR)
-	@mkdir -p "$(PACKAGES_APP_DEST)/Search (Find your games)/App/Search" "$(PACKAGES_APP_DEST)/List shortcuts (Filter+Refresh)/App"
 	@cp -a $(BUILD_DIR)/App/Search/. "$(PACKAGES_APP_DEST)/Search (Find your games)/App/Search"
 	@mv $(BUILD_DIR)/App/Filter "$(PACKAGES_APP_DEST)/List shortcuts (Filter+Refresh)/App/Filter"
 # Other
