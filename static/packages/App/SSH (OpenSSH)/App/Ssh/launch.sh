@@ -10,8 +10,7 @@ if ! [ -f /appconfigs/ssh_host_ed25519_key ] ; then
 fi
 
 pkill -9 sshd
-pkill -9 wpa_supplicant
-pkill -9 udhcpc
+
 mkdir /var/empty
 
 /mnt/SDCARD/App/Ssh/sshd -f /mnt/SDCARD/App/Ssh/sshd_config
