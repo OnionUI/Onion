@@ -119,30 +119,6 @@ size_t state_getAppName(char *out, const char *str)
     return out_size;
 }
 
-//
-//    [onion] Check retroarch running & savestate_auto_save in retroarch.cfg is
-//    true
-//
-int check_autosave(void)
-{
-    char value[STR_MAX];
-    file_parseKeyValue(RETROARCH_CONFIG, "savestate_auto_save", value, '=', 0);
-    return strcmp(value, "true") == 0;
-}
-
-void kill_mainUI(void)
-{
-    if (system_state == MODE_MAIN_UI) {
-        kill(system_state_pid, SIGKILL);
-        display_reset();
-    }
-}
-
-void run_gameSwitcher(void)
-{
-    flag_set("/mnt/SDCARD/.tmp_update/", ".runGameSwitcher", true);
-}
-
 typedef enum mainui_states {
     MAIN_MENU,
     RECENTS,

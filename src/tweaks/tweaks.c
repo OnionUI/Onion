@@ -9,6 +9,7 @@
 
 #include "components/list.h"
 #include "system/battery.h"
+#include "system/device_model.h"
 #include "system/display.h"
 #include "system/keymap_sw.h"
 #include "system/lang.h"
@@ -29,6 +30,8 @@
 int main(int argc, char *argv[])
 {
     print_debug("Debug logging enabled");
+
+    getDeviceModel();
 
     char apply_tool[STR_MAX] = "";
     bool use_display = true;
@@ -55,10 +58,6 @@ int main(int argc, char *argv[])
             if (strncmp(tools_short_names[i], apply_tool, STR_MAX - 1) == 0) {
                 printf("Tool '%s':\n", tools_short_names[i]);
                 (*tools_pt[i])(NULL);
-                break;
-            }
-            if (strncmp("patch_ra_cfg", apply_tool, STR_MAX - 1) == 0) {
-                tool_patchRAConfig(NULL);
                 break;
             }
         }
@@ -167,8 +166,9 @@ int main(int argc, char *argv[])
 
             if (footer_changed) {
                 theme_renderFooter(screen);
-                theme_renderStandardHint(screen, lang_get(LANG_SELECT),
-                                         lang_get(LANG_BACK));
+                theme_renderStandardHint(
+                    screen, lang_get(LANG_SELECT, LANG_FALLBACK_SELECT),
+                    lang_get(LANG_BACK, LANG_FALLBACK_BACK));
             }
 
             if (footer_changed || list_changed)
@@ -202,6 +202,10 @@ int main(int argc, char *argv[])
     settings_save();
     value_setFrameThrottle();
     value_setSwapTriggers();
+
+    if (DEVICE_ID == MIYOO354) {
+        value_setLcdVoltage();
+    }
 
     Mix_CloseAudio();
 

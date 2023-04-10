@@ -16,12 +16,14 @@
 #include <unistd.h>
 
 #include "system/battery.h"
+#include "system/device_model.h"
 #include "system/display.h"
 #include "system/keymap_hw.h"
 #include "system/rumble.h"
 #include "system/settings.h"
 #include "system/system.h"
 #include "theme/config.h"
+#include "utils/file.h"
 #include "utils/log.h"
 #include "utils/msleep.h"
 
@@ -40,7 +42,6 @@ static struct pollfd fds[1];
 void getImageDir(const char *theme_path, char *image_dir)
 {
     char image0_path[STR_MAX * 2];
-
     sprintf(image0_path, "%s/skin/extra/chargingState0.png", THEME_OVERRIDES);
     if (exists(image0_path)) {
         sprintf(image_dir, "%s/skin/extra", THEME_OVERRIDES);
@@ -91,6 +92,8 @@ int main(void)
 
     char image_dir[STR_MAX];
     getImageDir(settings.theme, image_dir);
+
+    getDeviceModel();
 
     SDL_Init(SDL_INIT_VIDEO);
     SDL_ShowCursor(SDL_DISABLE);
@@ -196,8 +199,15 @@ int main(void)
 
         if (!suspended) {
             if (ticks - display_timer >= DISPLAY_TIMEOUT) {
-                suspend(true, video);
-                continue;
+                if (DEVICE_ID == MIYOO354) {
+                    quit = true;
+                    turn_off = true;
+                    break;
+                }
+                else {
+                    suspend(true, video);
+                    continue;
+                }
             }
 
             acc_ticks += ticks - last_ticks;
@@ -242,7 +252,13 @@ int main(void)
     if (turn_off) {
 #ifdef PLATFORM_MIYOOMINI
         display_setScreen(false);
-        system("sync; reboot; sleep 10");
+
+        if (DEVICE_ID == MIYOO283) {
+            system("sync; reboot; sleep 10");
+        }
+        else if (DEVICE_ID == MIYOO354) {
+            system("poweroff");
+        }
 #endif
     }
     else {

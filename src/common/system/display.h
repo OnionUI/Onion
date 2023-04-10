@@ -2,6 +2,7 @@
 #define DISPLAY_H__
 
 #include <linux/fb.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <sys/mman.h>
@@ -123,9 +124,16 @@ void display_setBrightnessRaw(uint32_t value)
     printf_debug("Raw brightness: %d\n", value);
 }
 
+// Set display brightness (0 - 10)
 void display_setBrightness(uint32_t value)
 {
-    display_setBrightnessRaw((value == 0) ? 6 : (value * 10));
+    // Linear curve
+    // int value_raw = (value == 0) ? 3 : (value * 10);
+
+    // Exponential curve
+    int value_raw = round(3.0 * exp(0.350656 * value));
+
+    display_setBrightnessRaw(value_raw);
 }
 
 //

@@ -37,13 +37,18 @@ main() {
     cat /proc/ls
     sleep 0.25
     
-    # init charger detection
-    gpiodir=/sys/devices/gpiochip0/gpio
-    if [ ! -f $gpiodir/gpio59/direction ]; then
-        echo 59 > /sys/class/gpio/export
-        echo "in" > $gpiodir/gpio59/direction
+    check_device_model
+    
+    # Start the battery monitor
+    if [ $deviceModel -eq 283 ]; then
+        # init charger detection
+        gpiodir=/sys/devices/gpiochip0/gpio
+        if [ ! -f $gpiodir/gpio59/direction ]; then
+            echo 59 > /sys/class/gpio/export
+            echo "in" > $gpiodir/gpio59/direction
+        fi
     fi
-
+    
     # init backlight
     pwmdir=/sys/class/pwm/pwmchip0
     echo 0  	> $pwmdir/export
@@ -127,7 +132,26 @@ cleanup() {
     rm -f $core_zipfile
     rm -f $ra_zipfile
     rm -f $ra_package_version_file
+
+    # Remove update trigger script
+    rm -f /mnt/SDCARD/miyoo/app/MainUI
 }
+
+
+deviceModel=0
+
+check_device_model() {
+    if [ ! -f /customer/app/axp_test ]; then        
+        touch /tmp/deviceModel
+        printf "283" > /tmp/deviceModel
+        deviceModel=283
+    else
+        touch /tmp/deviceModel
+        printf "354" > /tmp/deviceModel
+        deviceModel=354
+    fi
+}
+
 
 get_install_stats() {
     total_core=$(zip_total "$core_zipfile")
@@ -160,7 +184,8 @@ run_installation() {
 
     get_install_stats
 
-    rm -f /tmp/.update_msg
+    rm -f /tmp/.update_msg 2> /dev/null
+    rm -f $sysdir/config/currentSlide 2> /dev/null
 
     # Show installation progress
     cd $sysdir
@@ -206,21 +231,19 @@ run_installation() {
         rm -f $ra_package_version_file
     fi
 
+    echo "Finishing up..." >> /tmp/.update_msg
     if [ $reset_configs -eq 0 ]; then
         restore_ra_config
 
         # Patch RA config
         cd $sysdir
-        tweaks --apply_tool "patch_ra_cfg" --no_display
+        ./script/patch_ra_cfg.sh /mnt/SDCARD/RetroArch/onion_ra_patch.cfg
     fi
     install_configs $reset_configs
 
     if [ $system_only -ne 1 ]; then
-        touch $sysdir/.installed
-        sync
-
         if [ $reset_configs -eq 1 ]; then
-            cp -f $sysdir/config/system.json /appconfigs/system.json
+            cp -f $sysdir/res/miyoo${deviceModel}_system.json /appconfigs/system.json
         fi
 
         # Start the battery monitor
@@ -236,6 +259,9 @@ run_installation() {
         else
             themeSwitcher --update --reapply_icons
         fi
+
+        touch $sysdir/.installed
+        sync
 
         # Show quick guide
         if [ $reset_configs -eq 1 ]; then
@@ -259,27 +285,35 @@ run_installation() {
         rm -f .installed
     fi
 
-    echo "$verb2 complete!" >> /tmp/.update_msg
-    touch $sysdir/.waitConfirm
-    touch $sysdir/.installed
-    sync
+    if [ $deviceModel -eq 283 ]; then
+        echo "$verb2 complete!" >> /tmp/.update_msg
+        touch $sysdir/.waitConfirm
+        touch $sysdir/.installed
+        sync
+    else
+        echo "$verb2 complete!  -  Rebooting..." >> /tmp/.update_msg
+    fi
 
     installUI &
     sleep 1
 
-    counter=10
+    if [ $deviceModel -eq 283 ]; then
+        counter=10
 
-    while [ -f $sysdir/.waitConfirm ] && [ $counter -ge 0 ]; do
-        echo "Press A to turn off (""$counter""s)" >> /tmp/.update_msg
-        counter=$(( counter - 1 ))
-        sleep 1
-    done
+        while [ -f $sysdir/.waitConfirm ] && [ $counter -ge 0 ]; do
+            echo "Press A to turn off (""$counter""s)" >> /tmp/.update_msg
+            counter=$(( counter - 1 ))
+            sleep 1
+        done
 
-    killall installUI
+        killall installUI
+        bootScreen "End"
+    else
+        touch $sysdir/.installed
+    fi
 
-    rm -f $sysdir/config/currentSlide
-
-    bootScreen "End"
+    rm -f $sysdir/config/currentSlide 2> /dev/null
+    sync
 }
 
 install_core() {
@@ -487,6 +521,9 @@ move_ports_collection() {
         rm -f /mnt/SDCARD/Roms/PORTS/PORTS_cache2.db
         rm -f /mnt/SDCARD/Emu/PORTS/config.json # Triggers a reinstall
     fi
+    if [ -d /mnt/SDCARD/Roms/PORTS/Binaries ]; then
+        mv -f /mnt/SDCARD/Roms/PORTS /mnt/SDCARD/Roms/PORTS_old
+    fi
 }
 
 refresh_roms() {
@@ -494,7 +531,7 @@ refresh_roms() {
     # Force refresh the rom lists
     if [ -d /mnt/SDCARD/Roms ] ; then
         cd /mnt/SDCARD/Roms
-        find . -type f -name "*_cache2.db" -exec rm -f {} \;
+        find . -type f -name "*_cache[0-9].db" -exec rm -f {} \;
     fi
 }
 

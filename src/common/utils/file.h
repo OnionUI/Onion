@@ -2,6 +2,7 @@
 #define UTILS_FILE_H__
 
 #include <dirent.h>
+#include <libgen.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>

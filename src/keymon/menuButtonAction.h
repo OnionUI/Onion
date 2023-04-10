@@ -8,6 +8,7 @@
 #include "system/rumble.h"
 #include "system/screenshot.h"
 #include "system/settings.h"
+#include "system/state.h"
 #include "utils/apps.h"
 
 #include "./input_fd.h"

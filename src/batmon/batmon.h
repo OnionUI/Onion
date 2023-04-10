@@ -36,7 +36,7 @@ typedef struct {
     int adc_value;
 } SAR_ADC_CONFIG_READ;
 
-static bool adcthread_active;
+static bool adcthread_active = false;
 static pthread_t adc_pt;
 static bool quit = false;
 static int sar_fd, adc_value_g;
@@ -46,6 +46,7 @@ static void sigHandler(int sig);
 void cleanup(void);
 bool isCharging(void);
 int updateADCValue(int);
+int getBatPercMMP(void);
 int batteryPercentage(int);
 static void *batteryWarning_thread(void *param);
 void batteryWarning_show(void);

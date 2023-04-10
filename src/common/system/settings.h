@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #include "display.h"
+#include "system/volume.h"
 #include "utils/config.h"
 #include "utils/file.h"
 #include "utils/json.h"
@@ -28,6 +29,7 @@ static struct settings_s {
     int hue;
     int saturation;
     int contrast;
+    int wifi_on;
     char theme[JSON_STRING_LEN];
     int fontsize;
     int audiofix;
@@ -59,7 +61,7 @@ void _settings_reset(void)
     // MainUI settings
     settings.volume = 20;
     strcpy(settings.keymap, "L2,L,R2,R,X,A,B,Y");
-    settings.mute = 1;
+    settings.mute = 0;
     settings.bgm_volume = 20;
     settings.brightness = 7;
     strcpy(settings.language, "en.lang");
@@ -71,6 +73,7 @@ void _settings_reset(void)
     strcpy(settings.theme, DEFAULT_THEME_PATH);
     settings.fontsize = 24;
     settings.audiofix = 1;
+    settings.wifi_on = 0;
     // Onion settings
     settings.show_recents = false;
     settings.show_expert = false;
@@ -131,6 +134,7 @@ void _settings_load_mainui(void)
     json_getInt(json_root, "contrast", &settings.contrast);
     json_getInt(json_root, "fontsize", &settings.fontsize);
     json_getInt(json_root, "audiofix", &settings.audiofix);
+    json_getInt(json_root, "wifi", &settings.wifi_on);
 
     json_getString(json_root, "keymap", settings.keymap);
     json_getString(json_root, "language", settings.language);
@@ -221,7 +225,7 @@ void _settings_save_mainui(void)
 {
     FILE *fp;
 
-    if ((fp = fopen(MAIN_UI_SETTINGS, "w+")) == 0)
+    if ((fp = fopen(MAIN_UI_SETTINGS, "w+")) == NULL)
         return;
 
     fprintf(fp, "{\n");
@@ -238,7 +242,8 @@ void _settings_save_mainui(void)
     fprintf(fp, JSON_FORMAT_TAB_NUMBER, "contrast", settings.contrast);
     fprintf(fp, JSON_FORMAT_TAB_STRING, "theme", settings.theme);
     fprintf(fp, JSON_FORMAT_TAB_NUMBER, "fontsize", settings.fontsize);
-    fprintf(fp, JSON_FORMAT_TAB_NUMBER_NC, "audiofix", settings.audiofix);
+    fprintf(fp, JSON_FORMAT_TAB_NUMBER, "audiofix", settings.audiofix);
+    fprintf(fp, JSON_FORMAT_TAB_NUMBER_NC, "wifi", settings.wifi_on);
     fprintf(fp, "}");
 
     fflush(fp);
@@ -268,8 +273,23 @@ void settings_save(void)
     _settings_save_keymap();
     _settings_save_mainui();
 
-    FILE *fp;
-    file_put_sync(fp, "/tmp/settings_changed", "%s", "");
+    temp_flag_set("settings_changed", true);
+}
+
+bool settings_saveSystemProperty(const char *prop_name, int value)
+{
+    cJSON *json_root = json_load(MAIN_UI_SETTINGS);
+    cJSON *prop = cJSON_GetObjectItem(json_root, prop_name);
+
+    if (cJSON_GetNumberValue(prop) == value)
+        return false;
+
+    cJSON_SetNumberValue(prop, value);
+    json_save(json_root, MAIN_UI_SETTINGS);
+    cJSON_free(json_root);
+    temp_flag_set("settings_changed", true);
+
+    return true;
 }
 
 void settings_setBrightness(uint32_t value, bool apply, bool save)
@@ -277,17 +297,45 @@ void settings_setBrightness(uint32_t value, bool apply, bool save)
     settings.brightness = value;
 
     if (apply)
-        display_setBrightness(value);
+        display_setBrightness(settings.brightness);
 
-    if (save) {
-        cJSON *request_json = json_load(MAIN_UI_SETTINGS);
-        cJSON *itemBrightness = cJSON_GetObjectItem(request_json, "brightness");
-        cJSON_SetNumberValue(itemBrightness, settings.brightness);
-        json_save(request_json, MAIN_UI_SETTINGS);
-        cJSON_free(request_json);
-        FILE *fp;
-        file_put_sync(fp, "/tmp/settings_changed", "%s", "");
+    if (save)
+        settings_saveSystemProperty("brightness", settings.brightness);
+}
+
+bool settings_setVolume(int value, bool apply)
+{
+    bool changed = false;
+
+    if (value > 20)
+        value = 20;
+    else if (value < 0)
+        value = 0;
+
+    if (settings.volume != value) {
+        settings.volume = value;
+        changed = true;
     }
+
+    if (apply)
+        setVolume(settings.mute ? 0 : settings.volume);
+
+    return changed;
+}
+
+bool settings_setMute(uint32_t value, bool apply)
+{
+    bool changed = false;
+
+    if (settings.mute != value) {
+        settings.mute = value;
+        changed = true;
+    }
+
+    if (apply)
+        setVolume(settings.mute ? 0 : settings.volume);
+
+    return changed;
 }
 
 #endif // SETTINGS_H__

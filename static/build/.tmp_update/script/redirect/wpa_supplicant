@@ -1,0 +1,7 @@
+#!/bin/sh
+
+/customer/app/axp_test wifion
+sleep 2 
+ifconfig wlan0 up
+/mnt/SDCARD/miyoo/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
+udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &

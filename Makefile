@@ -1,15 +1,15 @@
 ###########################################################
 
 TARGET=Onion
-VERSION=4.1.4
-RA_SUBVERSION=1.14.0.1
+VERSION=4.2.0-beta
+RA_SUBVERSION=1.14.0.2
 
 ###########################################################
 
 ifneq ($(VERSION_OVERRIDE),)
 VERSION = $(VERSION_OVERRIDE)
 endif
-
+ 
 RELEASE_NAME := $(TARGET)-v$(VERSION)
 
 ifdef OS
@@ -130,6 +130,7 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/easter && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/read_uuid && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/detectKey && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/axp && BUILD_DIR=$(BIN_DIR) make
 # Build dependencies for installer
 	@mkdir -p $(INSTALLER_DIR)/bin
 	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(INSTALLER_DIR)/bin/ VERSION=$(VERSION) make
@@ -152,16 +153,22 @@ apps: $(CACHE)/.setup
 	@cp -a "$(PACKAGES_APP_DEST)/Tweaks/." $(BUILD_DIR)/
 	@cp -a "$(PACKAGES_APP_DEST)/ThemeSwitcher/." $(BUILD_DIR)/
 
-external: $(CACHE)/.setup
+$(THIRD_PARTY_DIR)/RetroArch/retroarch_miyoo354:
 	@$(ECHO) $(PRINT_RECIPE)
 # RetroArch
-	@$(ECHO) "\n-- Build RetroArch"
-	@cd $(THIRD_PARTY_DIR)/RetroArch && make && cp retroarch $(BUILD_DIR)/RetroArch/
+	@cd $(THIRD_PARTY_DIR)/RetroArch && make clean all
+	@cd $(THIRD_PARTY_DIR)/RetroArch && make clean all ADD_NETWORKING=1 PACKAGE_NAME=retroarch_miyoo354
+
+external: $(CACHE)/.setup $(THIRD_PARTY_DIR)/RetroArch/retroarch_miyoo354
+	@$(ECHO) $(PRINT_RECIPE)
+# Add RetroArch
+	@$(ECHO) "\n-- Add RetroArch"
+	@cp $(THIRD_PARTY_DIR)/RetroArch/retroarch $(BUILD_DIR)/RetroArch/
+	@cp $(THIRD_PARTY_DIR)/RetroArch/retroarch_miyoo354 $(BUILD_DIR)/RetroArch/
 	@echo $(RA_SUBVERSION) > $(BUILD_DIR)/RetroArch/onion_ra_version.txt
 # SearchFilter
 	@$(ECHO) "\n-- Build SearchFilter"
 	@cd $(THIRD_PARTY_DIR)/SearchFilter && make build && cp -a build/. $(BUILD_DIR)
-	@mkdir -p "$(PACKAGES_APP_DEST)/Search (Find your games)/App/Search" "$(PACKAGES_APP_DEST)/List shortcuts (Filter+Refresh)/App"
 	@cp -a $(BUILD_DIR)/App/Search/. "$(PACKAGES_APP_DEST)/Search (Find your games)/App/Search"
 	@mv $(BUILD_DIR)/App/Filter "$(PACKAGES_APP_DEST)/List shortcuts (Filter+Refresh)/App/Filter"
 # Other
@@ -199,6 +206,7 @@ clean:
 	@find include src -type f -name *.o -exec rm -f {} \;
 
 deepclean: clean
+	@rm -rf $(CACHE)
 	@cd $(THIRD_PARTY_DIR)/RetroArch && make clean
 	@cd $(THIRD_PARTY_DIR)/SearchFilter && make clean
 	@cd $(THIRD_PARTY_DIR)/Terminal && make clean

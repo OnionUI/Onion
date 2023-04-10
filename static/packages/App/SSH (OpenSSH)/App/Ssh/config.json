@@ -1,0 +1,7 @@
+{
+"label":"SSH",
+"icon":"ssh.png",
+"iconsel":"",
+"launch":"launch.sh",
+"description":"Portable OpenSSH"
+}

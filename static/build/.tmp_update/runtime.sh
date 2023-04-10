@@ -1,13 +1,15 @@
 #!/bin/sh
 sysdir=/mnt/SDCARD/.tmp_update
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$sysdir/lib:$sysdir/lib/parasyte"
+miyoodir=/mnt/SDCARD/miyoo
+export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 export PATH="$sysdir/bin:$PATH"
 
 main() {
+    check_device_model
     init_system
     update_time
     clear_logs
-
+	
     # Start the battery monitor
     batmon &
 
@@ -19,11 +21,21 @@ main() {
         themeSwitcher --reapply_icons
     fi
     
-    if [ `cat /sys/devices/gpiochip0/gpio/gpio59/value` -eq 1 ]; then
-        cd $sysdir
-        chargingState
+    if [ $deviceModel -eq 283 ]; then 
+        if [ `cat /sys/devices/gpiochip0/gpio/gpio59/value` -eq 1 ]; then
+            cd $sysdir
+            chargingState
+        fi
+    elif [ $deviceModel -eq 354 ]; then 
+        cd /customer/app/
+        batteryStatus=`./axp_test`
+        case $batteryStatus in
+        *\"charging\":3* ) 
+            cd $sysdir
+            chargingState
+        esac
     fi
-
+    
     # Make sure MainUI doesn't show charging animation
     touch /tmp/no_charging_ui
 
@@ -44,6 +56,18 @@ main() {
         rm -f "$sysdir/cmd_to_run.sh" 2> /dev/null
     fi
 
+    if [ $deviceModel -eq 354 ] && [ -f /mnt/SDCARD/RetroArch/retroarch_miyoo354 ]; then
+        # Mount miyoo354 RA version
+        mount -o bind /mnt/SDCARD/RetroArch/retroarch_miyoo354 /mnt/SDCARD/RetroArch/retroarch
+    fi
+
+    # Bind arcade name library to customer path
+    mount -o bind /mnt/SDCARD/miyoo/lib/libgamename.so /customer/lib/libgamename.so
+
+    touch /tmp/network_changed
+    sync
+    check_networking
+
     # Auto launch
     if [ ! -f $sysdir/config/.noAutoStart ]; then
         state_change
@@ -59,7 +83,7 @@ main() {
         touch $sysdir/.runGameSwitcher
     elif [ $startup_app -eq 2 ]; then
         echo -e "\n\n:: STARTUP APP: RetroArch\n\n"
-        echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v" > $sysdir/cmd_to_run.sh
+        echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v" > $sysdir/cmd_to_run.sh
         touch /tmp/quick_switch
     elif [ $startup_app -eq 3 ]; then
         echo -e "\n\n:: STARTUP APP: AdvanceMENU\n\n"
@@ -68,22 +92,25 @@ main() {
 
     state_change
     check_switcher
-
     set_startup_tab
 
     # Main runtime loop
     while true; do
         state_change
         check_main_ui
+
+        check_networking
+
         state_change
         check_game_menu
+
         state_change
         check_game
-        state_change  
+
+        check_networking
+
+        state_change
         check_switcher
-        
-        # Free memory
-        $sysdir/bin/freemma
     done
 }
 
@@ -99,7 +126,9 @@ clear_logs() {
     rm -f \
         ./logs/MainUI.log \
         ./logs/gameSwitcher.log \
-        ./logs/game_list_options.log
+        ./logs/keymon.log \
+        ./logs/game_list_options.log \
+        2> /dev/null
 }
 
 check_main_ui() {
@@ -116,18 +145,34 @@ check_main_ui() {
 }
 
 launch_main_ui() {
+    echo -e "\n:: Launch MainUI"
+
     cd $sysdir
     mainUiBatPerc
 
     check_hide_recents
     check_hide_expert
 
+    wifi_setting=$(/customer/app/jsonval wifi)
+
+    start_audioserver
+
     # MainUI launch
-    cd /mnt/SDCARD/miyoo/app
-    LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" ./MainUI 2>&1 > /dev/null
+    cd $miyoodir/app
+    PATH="$sysdir/script/redirect:$PATH" \
+    LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib" \
+    LD_PRELOAD="$miyoodir/lib/libpadsp.so" \
+    ./MainUI 2>&1 > /dev/null
+
+    if [ $(/customer/app/jsonval wifi) -ne $wifi_setting ]; then
+        touch /tmp/network_changed
+        sync
+    fi
+
+    $sysdir/bin/freemma
     
     mv -f /tmp/cmd_to_run.sh $sysdir/cmd_to_run.sh
-
+    
     echo "mainui" > /tmp/prev_state
 }
 
@@ -146,11 +191,10 @@ check_game_menu() {
 }
 
 launch_game_menu() {
-    cd $sysdir
     echo -e "\n\n:: GLO\n\n"
-    sync
 
-    $sysdir/script/game_list_options.sh | tee -a ./logs/game_list_options.log
+    cd $sysdir
+    ./script/game_list_options.sh | tee -a ./logs/game_list_options.log
 
     if [ $? -ne 0 ]; then
         echo -e "\n\n< Back to MainUI\n\n"
@@ -171,6 +215,7 @@ check_is_game() {
 }
 
 launch_game() {
+    echo -e "\n:: Launch game"
     cmd=`cat $sysdir/cmd_to_run.sh`
 
     is_game=0
@@ -178,6 +223,8 @@ launch_game() {
     romext=""
     romcfgpath=""
     retroarch_core=""
+
+    start_audioserver
 
     # TIMER BEGIN
     if check_is_game "$cmd"; then
@@ -207,9 +254,9 @@ launch_game() {
 
             if [ -f "/mnt/SDCARD/RetroArch/$corepath" ]; then
                 if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
-                    echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v --appendconfig \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+                    echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v --appendconfig \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
                 else
-                    echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+                    echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
                 fi
             fi
         fi
@@ -297,8 +344,9 @@ check_switcher() {
 }
 
 launch_switcher() {
+    echo -e "\n:: Launch switcher"
     cd $sysdir
-    LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so" gameSwitcher
+    LD_PRELOAD="$miyoodir/lib/libpadsp.so" gameSwitcher
     rm $sysdir/.runGameSwitcher
     echo "switcher" > /tmp/prev_state
     sync
@@ -306,14 +354,23 @@ launch_switcher() {
 
 check_off_order() {
     if  [ -f /tmp/.offOrder ] ; then
-        cd $sysdir
-        bootScreen "$1"
-
-        killall tee
-        rm -f /mnt/SDCARD/update.log
-        
+        pkill -9 sshd
+        pkill -9 wpa_supplicant
+        pkill -9 udhcpc
         sync
-        reboot
+
+        cd $sysdir
+        bootScreen "$1" &
+
+        # Allow the bootScreen to be displayed
+        sleep 1.5
+
+        if [ $deviceModel -eq 283 ]; then 
+            reboot
+        else
+            poweroff
+        fi
+
         sleep 10
     fi
 }
@@ -343,47 +400,102 @@ check_hide_recents() {
     sync
 }
 
-clean_flag=/mnt/SDCARD/miyoo/app/.isClean
-expert_flag=/mnt/SDCARD/miyoo/app/.isExpert
+mainui_target=$miyoodir/app/MainUI
+clean_flag=$miyoodir/app/.isClean
+expert_flag=$miyoodir/app/.isExpert
 
 check_hide_expert() {
     if [ ! -f $sysdir/config/.showExpert ]; then
         # Should be clean
-        if [ ! -f $clean_flag ] || [ -f $expert_flag ]; then
-            rm /mnt/SDCARD/miyoo/app/MainUI
-            rm -f $expert_flag
-	        cp $sysdir/bin/MainUI-clean /mnt/SDCARD/miyoo/app/MainUI
+        if [ ! -f $clean_flag ] || [ -f $expert_flag ] || [ $is_device_model_changed -eq 1 ] || [ ! -f $mainui_target ]; then
+            rm -f $mainui_target 2> /dev/null
+            rm -f $expert_flag 2> /dev/null
+            cp "$sysdir/bin/MainUI-$deviceModel-clean" $mainui_target
             touch $clean_flag
         fi
     else
         # Should be expert
-        if [ ! -f $expert_flag ] || [ -f $clean_flag ]; then
-            rm /mnt/SDCARD/miyoo/app/MainUI
-            rm -f $clean_flag
-	        cp $sysdir/bin/MainUI-expert /mnt/SDCARD/miyoo/app/MainUI
+        if [ ! -f $expert_flag ] || [ -f $clean_flag ] || [ $is_device_model_changed -eq 1 ] || [ ! -f $mainui_target ]; then
+            rm -f $mainui_target 2> /dev/null
+            rm -f $clean_flag 2> /dev/null
+            cp "$sysdir/bin/MainUI-$deviceModel-expert" $mainui_target
             touch $expert_flag
         fi
     fi
     sync
 }
 
+
+deviceModel=0
+last_device_model=$miyoodir/app/lastDeviceModel
+is_device_model_changed=0
+
+check_device_model() {
+    echo -e "\n:: Check device model"
+
+    if axp 0; then
+        touch /tmp/deviceModel
+        printf "354" > /tmp/deviceModel
+        deviceModel=354
+    else
+        touch /tmp/deviceModel
+        printf "283" > /tmp/deviceModel
+        deviceModel=283
+    fi
+
+    # Check if the SD is inserted in a different model
+    is_device_model_changed=0
+    if [ ! -f $last_device_model ]; then
+        cp /tmp/deviceModel $last_device_model
+        is_device_model_changed=1
+    else
+        lastDeviceModel=`cat $last_device_model`
+        if [ $lastDeviceModel -ne $deviceModel ]; then
+            is_device_model_changed=1
+            echo $deviceModel > $last_device_model
+        fi
+    fi
+}
+
+
 init_system() {
+    echo -e "\n:: Init system"
+
     # init_lcd
     cat /proc/ls
     sleep 0.25
-    
-    /mnt/SDCARD/miyoo/app/audioserver &
 
-    # init charger detection
-    if [ ! -f /sys/devices/gpiochip0/gpio/gpio59/direction ]; then
-        echo 59 > /sys/class/gpio/export
-        echo in > /sys/devices/gpiochip0/gpio/gpio59/direction
+    if [ $deviceModel -eq 354 ] && [ -f $sysdir/config/.lcdvolt ]; then
+        $sysdir/script/lcdvolt.sh 2> /dev/null
     fi
+    
+    start_audioserver
+
+    if [ $deviceModel -eq 283 ]; then
+        # init charger detection
+        if [ ! -f /sys/devices/gpiochip0/gpio/gpio59/direction ]; then
+            echo 59 > /sys/class/gpio/export
+            echo in > /sys/devices/gpiochip0/gpio/gpio59/direction
+        fi
+
+        if [ $(/customer/app/jsonval vol) -ne 20 ] || [ $(/customer/app/jsonval mute) -ne 0 ]; then
+            # Force volume and mute settings
+            cat /appconfigs/system.json \
+                | sed 's/^\s*"vol":\s*[0-9][0-9]*/\t"vol":\t20/g' \
+                | sed 's/^\s*"mute":\s*[0-9][0-9]*/\t"mute":\t0/g' \
+                > temp
+            mv -f temp /appconfigs/system.json
+        fi
+    fi
+
+    brightness=`/customer/app/jsonval brightness`
+    brightness_raw=`awk "BEGIN { print int(3 * exp(0.350656 * $brightness) + 0.5) }"`
+    echo "brightness: $brightness -> $brightness_raw"
 
     # init backlight
     echo 0 > /sys/class/pwm/pwmchip0/export
     echo 800 > /sys/class/pwm/pwmchip0/pwm0/period
-    echo 80 > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
+    echo $brightness_raw > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
     echo 1 > /sys/class/pwm/pwmchip0/pwm0/enable
 }
 
@@ -412,6 +524,55 @@ set_startup_tab() {
     
     cd $sysdir
     setState "$startup_tab"
+}
+
+start_audioserver() {
+    defvol=`echo $(/customer/app/jsonval vol) | awk '{ printf "%.0f\n", 48 * (log(1 + $1) / log(10)) - 60 }'`
+    runifnecessary "audioserver" $miyoodir/app/audioserver $defvol
+}
+
+runifnecessary() {
+    cnt=0
+    #a=`ps | grep $1 | grep -v grep`
+    a=`pgrep $1`
+    while [ "$a" == "" ] && [ $cnt -lt 8 ] ; do
+        echo try to run $2
+        $2 $3 &
+        sleep 0.5
+        cnt=`expr $cnt + 1`
+        a=`pgrep $1`
+    done
+}
+
+check_networking() {
+    if [ ! -f /tmp/network_changed ]; then
+        return
+    fi
+
+    rm /tmp/network_changed
+
+    echo -e "\n:: Update networking"
+
+    if [ $(/customer/app/jsonval wifi) -eq 1 ]; then
+        if ! ifconfig wlan0 || [ -f /tmp/restart_wifi ]; then
+            if [ -f /tmp/restart_wifi ]; then
+                pkill -9 wpa_supplicant
+                pkill -9 udhcpc
+                rm /tmp/restart_wifi
+            fi
+
+            echo "Initializing Wifi..."
+            /customer/app/axp_test wifion
+            sleep 2 
+            ifconfig wlan0 up
+            $miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
+            udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
+        fi
+    else
+        pkill -9 wpa_supplicant
+        pkill -9 udhcpc
+        /customer/app/axp_test wifioff
+    fi
 }
 
 main
