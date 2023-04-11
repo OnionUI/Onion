@@ -237,7 +237,7 @@ run_installation() {
 
         # Patch RA config
         cd $sysdir
-        ./script/patch_ra_cfg.sh ./res/onion_ra_patch.cfg
+        ./script/patch_ra_cfg.sh /mnt/SDCARD/RetroArch/onion_ra_patch.cfg
     fi
     install_configs $reset_configs
 

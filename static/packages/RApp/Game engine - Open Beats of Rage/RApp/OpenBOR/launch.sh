@@ -10,12 +10,6 @@ echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 
 cd $mydir
 
-
-killall audioserver
-killall audioserver.mod
-
+/mnt/SDCARD/.tmp_update/script/stop_audioserver.sh
 
 ./OpenBOR "$1"
-
-
-/mnt/SDCARD/miyoo/app/audioserver &

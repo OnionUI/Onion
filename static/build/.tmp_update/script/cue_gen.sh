@@ -1,6 +1,6 @@
 #!/bin/sh
 rootdir="/mnt/SDCARD/Roms"
-targets=PS
+targets=PS SEGACD NEOCD
 
 cd "$rootdir"
 

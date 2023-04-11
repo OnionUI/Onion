@@ -73,7 +73,7 @@ int setVolume(int volume)
         volume = 0;
 
     if (volume != 0)
-        volume_raw = round(45.3 * log10(1 + volume)); // see volume curve below
+        volume_raw = round(48 * log10(1 + volume)); // see volume curve below
 
     printf_debug("set volume: %d -> %d\n", volume, volume_raw);
 
@@ -82,7 +82,7 @@ int setVolume(int volume)
 }
 
 /*
-VOLUME CURVE
+VOLUME CURVE (later corrected to rise to 63)
 
          60 :                    .                    .                    .       ..............
             .                                                             .............

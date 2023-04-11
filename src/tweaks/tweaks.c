@@ -9,6 +9,7 @@
 
 #include "components/list.h"
 #include "system/battery.h"
+#include "system/device_model.h"
 #include "system/display.h"
 #include "system/keymap_sw.h"
 #include "system/lang.h"
@@ -29,6 +30,8 @@
 int main(int argc, char *argv[])
 {
     print_debug("Debug logging enabled");
+
+    getDeviceModel();
 
     char apply_tool[STR_MAX] = "";
     bool use_display = true;
@@ -199,6 +202,10 @@ int main(int argc, char *argv[])
     settings_save();
     value_setFrameThrottle();
     value_setSwapTriggers();
+
+    if (DEVICE_ID == MIYOO354) {
+        value_setLcdVoltage();
+    }
 
     Mix_CloseAudio();
 

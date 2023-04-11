@@ -2,11 +2,14 @@
 #define TWEAKS_ACTIONS_H__
 
 #include "components/list.h"
+#include "system/axp.h"
 #include "system/rumble.h"
 #include "system/settings.h"
 #include "theme/resources.h"
 #include "theme/sound.h"
 #include "utils/apps.h"
+#include "utils/config.h"
+#include "utils/file.h"
 #include "utils/msleep.h"
 
 #include "./appstate.h"
@@ -235,6 +238,43 @@ void action_advancedSetSwapTriggers(void *pt)
     int item_value = ((ListItem *)pt)->value;
     stored_value_swap_triggers = item_value;
     stored_value_swap_triggers_changed = true;
+}
+
+void action_advancedSetLcdVoltage(void *pt)
+{
+    int value = ((ListItem *)pt)->value;
+
+    if (value == 0) {
+        axp_lcd_set(0x0e);
+        config_flag_set(".lcdvolt", false);
+        return;
+    }
+
+    value += 0x08;
+
+    if (value < 0x09 || value > 0x0e) {
+        config_flag_set(".lcdvolt", false);
+        return;
+    }
+
+    int res = axp_lcd_set(value);
+
+    if (res != 0) {
+        printf_debug("Error: Failed to set LCD voltage: %d\n",
+                     1600 + value * 100);
+        config_flag_set(".lcdvolt", false);
+        msleep(200);
+        return;
+    }
+
+    printf_debug("LCD voltage set to: %d\n", 1600 + value * 100);
+
+    config_flag_set(".lcdvolt", true);
+
+    FILE *fp;
+    file_put(fp, LCD_VOLT_CONFIG, "%x", 0x0e);
+
+    msleep(200);
 }
 
 #endif // TWEAKS_ACTIONS_H__

@@ -153,16 +153,22 @@ apps: $(CACHE)/.setup
 	@cp -a "$(PACKAGES_APP_DEST)/Tweaks/." $(BUILD_DIR)/
 	@cp -a "$(PACKAGES_APP_DEST)/ThemeSwitcher/." $(BUILD_DIR)/
 
-external: $(CACHE)/.setup
+$(THIRD_PARTY_DIR)/RetroArch/retroarch_miyoo354:
 	@$(ECHO) $(PRINT_RECIPE)
 # RetroArch
-	@$(ECHO) "\n-- Build RetroArch"
-	@cd $(THIRD_PARTY_DIR)/RetroArch && make && cp retroarch $(BUILD_DIR)/RetroArch/
+	@cd $(THIRD_PARTY_DIR)/RetroArch && make clean all
+	@cd $(THIRD_PARTY_DIR)/RetroArch && make clean all ADD_NETWORKING=1 PACKAGE_NAME=retroarch_miyoo354
+
+external: $(CACHE)/.setup $(THIRD_PARTY_DIR)/RetroArch/retroarch_miyoo354
+	@$(ECHO) $(PRINT_RECIPE)
+# Add RetroArch
+	@$(ECHO) "\n-- Add RetroArch"
+	@cp $(THIRD_PARTY_DIR)/RetroArch/retroarch $(BUILD_DIR)/RetroArch/
+	@cp $(THIRD_PARTY_DIR)/RetroArch/retroarch_miyoo354 $(BUILD_DIR)/RetroArch/
 	@echo $(RA_SUBVERSION) > $(BUILD_DIR)/RetroArch/onion_ra_version.txt
 # SearchFilter
 	@$(ECHO) "\n-- Build SearchFilter"
 	@cd $(THIRD_PARTY_DIR)/SearchFilter && make build && cp -a build/. $(BUILD_DIR)
-	@mkdir -p "$(PACKAGES_APP_DEST)/Search (Find your games)/App/Search" "$(PACKAGES_APP_DEST)/List shortcuts (Filter+Refresh)/App"
 	@cp -a $(BUILD_DIR)/App/Search/. "$(PACKAGES_APP_DEST)/Search (Find your games)/App/Search"
 	@mv $(BUILD_DIR)/App/Filter "$(PACKAGES_APP_DEST)/List shortcuts (Filter+Refresh)/App/Filter"
 # Other
@@ -200,6 +206,7 @@ clean:
 	@find include src -type f -name *.o -exec rm -f {} \;
 
 deepclean: clean
+	@rm -rf $(CACHE)
 	@cd $(THIRD_PARTY_DIR)/RetroArch && make clean
 	@cd $(THIRD_PARTY_DIR)/SearchFilter && make clean
 	@cd $(THIRD_PARTY_DIR)/Terminal && make clean

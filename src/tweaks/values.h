@@ -2,14 +2,19 @@
 #define TWEAKS_VALUES_H__
 
 #include "components/list.h"
+#include "system/axp.h"
 #include "theme/resources.h"
 #include "utils/apps.h"
+#include "utils/config.h"
+#include "utils/file.h"
 #include "utils/json.h"
 #include "utils/msleep.h"
 
 #include "./appstate.h"
 #include "./formatters.h"
 #include "./tools.h"
+
+#define LCD_VOLT_CONFIG "/mnt/SDCARD/.tmp_update/config/.lcdvolt"
 
 static int stored_value_frame_throttle = 0;
 static bool stored_value_frame_throttle_changed = false;
@@ -207,6 +212,41 @@ void value_setSwapTriggers(void)
 
     printf_debug("Saved triggers = l: %d, r: %d, l2: %d, r2: %d\n", l_btn,
                  r_btn, l2_btn, r2_btn);
+}
+
+int value_getLcdVoltage(void)
+{
+    int value = 0x0;
+
+    if (!is_file(LCD_VOLT_CONFIG))
+        return 0;
+
+    value = axp_lcd_get();
+
+    if (value < 0x09 || value > 0x0e) {
+        config_flag_set(".lcdvolt", false);
+        return 0;
+    }
+
+    return value - 0x08;
+}
+
+void value_setLcdVoltage(void)
+{
+    FILE *fp;
+    int value;
+
+    if (!is_file(LCD_VOLT_CONFIG))
+        return;
+
+    value = axp_lcd_get();
+
+    if (value < 0x09 || value > 0x0e) {
+        config_flag_set(".lcdvolt", false);
+        return;
+    }
+
+    file_put(fp, LCD_VOLT_CONFIG, "%x", value);
 }
 
 #endif // TWEAKS_VALUES_H__

@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #include "components/list.h"
+#include "system/device_model.h"
 #include "utils/apps.h"
 
 #include "./actions.h"
@@ -375,8 +376,13 @@ void menu_resetSettings(void *_)
 void menu_advanced(void *_)
 {
     if (!_menu_advanced._created) {
-        _menu_advanced = list_create(3, LIST_SMALL);
+        _menu_advanced = list_create(4, LIST_SMALL);
         strcpy(_menu_advanced.title, "Advanced");
+        list_addItem(&_menu_advanced,
+                     (ListItem){.label = "Swap triggers (L<>L2, R<>R2)",
+                                .item_type = TOGGLE,
+                                .value = value_getSwapTriggers(),
+                                .action = action_advancedSetSwapTriggers});
         list_addItem(&_menu_advanced,
                      (ListItem){.label = "Fast forward rate",
                                 .item_type = MULTIVALUE,
@@ -384,11 +390,17 @@ void menu_advanced(void *_)
                                 .value = value_getFrameThrottle(),
                                 .value_formatter = formatter_fastForward,
                                 .action = action_advancedSetFrameThrottle});
-        list_addItem(&_menu_advanced,
-                     (ListItem){.label = "Swap triggers (L<>L2, R<>R2)",
-                                .item_type = TOGGLE,
-                                .value = value_getSwapTriggers(),
-                                .action = action_advancedSetSwapTriggers});
+        if (DEVICE_ID == MIYOO354) {
+            list_addItem(
+                &_menu_advanced,
+                (ListItem){.label = "Adjust LCD voltage",
+                           .item_type = MULTIVALUE,
+                           .value_max = 6,
+                           .value_labels = {"Off", "2.5V", "2.6V", "2.7V",
+                                            "2.8V", "2.9V", "3.0V"},
+                           .value = value_getLcdVoltage(),
+                           .action = action_advancedSetLcdVoltage});
+        }
         if (exists(RESET_CONFIGS_PAK)) {
             list_addItem(&_menu_advanced,
                          (ListItem){.label = "Reset settings...",

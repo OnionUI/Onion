@@ -39,7 +39,7 @@ echo --------------------------------------------------------------------
 echo ":: APPLYING ADDITIONNAL CONFIGURATION"
 echo --------------------------------------------------------------------
 
-if [ "$KillAudioserver" = "1" ]; then pkill -9 wpa_supplicant & pkill -9 udhcpc & pkill -9 -f audioserver; fi
+if [ "$KillAudioserver" = "1" ]; then /mnt/SDCARD/.tmp_update/script/stop_audioserver.sh; fi
 if [ "$PerformanceMode" = "1" ]; then echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor; fi
 
 romcfgpath="$(dirname "$RomFullPath")/.game_config/$(basename "$RomFullPath").name"
@@ -65,16 +65,5 @@ echo ":: POST RUNNING TASKS"
 echo --------------------------------------------------------------------
 
 unset LD_PRELOAD
-if [ "$KillAudioserver" = "1" ] 
-	then /mnt/SDCARD/miyoo/app/audioserver &
-fi
 
-echo -ne "\n\n" 
- 
-  
- 
- 
- 
- 
- 
- 
+echo -ne "\n\n"
