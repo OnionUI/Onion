@@ -111,35 +111,35 @@ int main(int argc, char *argv[])
     imageMileage =
     TTF_RenderUTF8_Blended(font30, cTotalHandheldMileage, color_white);
     
-//    for (int i = 0; i < 4; i++) {
-//        sprintf(cPosition, "%d", i + 1);
-//
-//        h = play_activities[i]->play_time / 3600;
-//        m = (play_activities[i]->play_time - 3600 * h) / 60;
-//
-//        if (strlen(play_activities[i]->name) != 0)
-//            sprintf(cTotalTimePlayed, "%d:%02d", h, m);
-//        else
-//            memset(cTotalTimePlayed, 0, sizeof(cTotalTimePlayed));
-//
-//        imageRomPosition =
-//        TTF_RenderUTF8_Blended(font40, cPosition, color_lilla);
-//        imageRomPlayTime =
-//        TTF_RenderUTF8_Blended(font40, cTotalTimePlayed, color_white);
-//        imageRomName = TTF_RenderUTF8_Blended(fontRomName25, play_activities[i]->name,
-//                                              color_white);
-//
-//        SDL_Rect rectPosition = {16, 78 + 90 * i, 76, 39};
-//        SDL_Rect rectRomPlayTime = {77, 66 + 90 * i, 254, 56};
-//        SDL_Rect rectRomNames = {78, 104 + 90 * i, 600, 40};
-//
-//        SDL_BlitSurface(imageRomPosition, NULL, screen, &rectPosition);
-//
-//        if (play_activities_len > i) {
-//            SDL_BlitSurface(imageRomPlayTime, NULL, screen, &rectRomPlayTime);
-//            SDL_BlitSurface(imageRomName, NULL, screen, &rectRomNames);
-//        }
-//    }
+    for (int i = 0; i < 4; i++) {
+        sprintf(cPosition, "%d", i + 1);
+        
+        h = play_activities[i]->play_time / 3600;
+        m = (play_activities[i]->play_time - 3600 * h) / 60;
+        
+        if (strlen(play_activities[i]->name) != 0)
+            sprintf(cTotalTimePlayed, "%d:%02d", h, m);
+        else
+            memset(cTotalTimePlayed, 0, sizeof(cTotalTimePlayed));
+        
+        imageRomPosition =
+        TTF_RenderUTF8_Blended(font40, cPosition, color_lilla);
+        imageRomPlayTime =
+        TTF_RenderUTF8_Blended(font40, cTotalTimePlayed, color_white);
+        imageRomName = TTF_RenderUTF8_Blended(fontRomName25, play_activities[i]->name,
+                                              color_white);
+        
+        SDL_Rect rectPosition = {16, 78 + 90 * i, 76, 39};
+        SDL_Rect rectRomPlayTime = {77, 66 + 90 * i, 254, 56};
+        SDL_Rect rectRomNames = {78, 104 + 90 * i, 600, 40};
+        
+        SDL_BlitSurface(imageRomPosition, NULL, screen, &rectPosition);
+        
+        if (play_activities_len > i) {
+            SDL_BlitSurface(imageRomPlayTime, NULL, screen, &rectRomPlayTime);
+            SDL_BlitSurface(imageRomName, NULL, screen, &rectRomNames);
+        }
+    }
     
     SDL_BlitSurface(imagePages, NULL, screen, &rectPages);
     SDL_BlitSurface(imageMileage, NULL, screen, &rectMileage);
@@ -187,31 +187,30 @@ int main(int argc, char *argv[])
         SDL_BlitSurface(imageMileage, NULL, screen, &rectMileage);
         
         for (int i = 0; i < 4; i++) {
-            PlayActivity *curr = play_activities[nCurrentPage * 4 + i];
-            sprintf(cPosition, "%d", (int)(nCurrentPage * 4 + i + 1));
-            h = curr->play_time / 3600;
-            m = (curr->play_time - 3600 * h) / 60;
-            
-            if (strlen(curr->name) != 0)
-                sprintf(cTotalTimePlayed, "%d:%02d", h, m);
-            else
-                memset(cTotalTimePlayed, 0, sizeof(cTotalTimePlayed));
-            
-            imageRomPosition =
-            TTF_RenderUTF8_Blended(font40, cPosition, color_lilla);
-            imageRomPlayTime =
-            TTF_RenderUTF8_Blended(font40, cTotalTimePlayed, color_white);
-            imageRomName =
-            TTF_RenderUTF8_Blended(fontRomName25, curr->name, color_white);
-            
-            SDL_Rect rectPosition = {16, 78 + 90 * i, 76, 39};
-            SDL_Rect rectRomPlayTime = {77, 66 + 90 * i, 254, 56};
-            SDL_Rect rectRomNames = {78, 104 + 90 * i, 600, 40};
-            
-            SDL_BlitSurface(imageRomPosition, NULL, screen, &rectPosition);
             if (play_activities_len > (nCurrentPage * 4 + i)) {
-                SDL_BlitSurface(imageRomPlayTime, NULL, screen,
-                                &rectRomPlayTime);
+                PlayActivity *curr = play_activities[nCurrentPage * 4 + i];
+                sprintf(cPosition, "%d", (int)(nCurrentPage * 4 + i + 1));
+                h = curr->play_time / 3600;
+                m = (curr->play_time - 3600 * h) / 60;
+                
+                if (strlen(curr->name) != 0)
+                    sprintf(cTotalTimePlayed, "%d:%02d", h, m);
+                else
+                    memset(cTotalTimePlayed, 0, sizeof(cTotalTimePlayed));
+                
+                imageRomPosition =
+                TTF_RenderUTF8_Blended(font40, cPosition, color_lilla);
+                imageRomPlayTime =
+                TTF_RenderUTF8_Blended(font40, cTotalTimePlayed, color_white);
+                imageRomName =
+                TTF_RenderUTF8_Blended(fontRomName25, curr->name, color_white);
+                
+                SDL_Rect rectPosition = {16, 78 + 90 * i, 76, 39};
+                SDL_Rect rectRomPlayTime = {77, 66 + 90 * i, 254, 56};
+                SDL_Rect rectRomNames = {78, 104 + 90 * i, 600, 40};
+                
+                SDL_BlitSurface(imageRomPosition, NULL, screen, &rectPosition);
+                SDL_BlitSurface(imageRomPlayTime, NULL, screen, &rectRomPlayTime);
                 SDL_BlitSurface(imageRomName, NULL, screen, &rectRomNames);
             }
         }
