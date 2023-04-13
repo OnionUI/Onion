@@ -112,30 +112,31 @@ int main(int argc, char *argv[])
     TTF_RenderUTF8_Blended(font30, cTotalHandheldMileage, color_white);
     
     for (int i = 0; i < 4; i++) {
-        sprintf(cPosition, "%d", i + 1);
-        
-        h = play_activities[i]->play_time / 3600;
-        m = (play_activities[i]->play_time - 3600 * h) / 60;
-        
-        if (strlen(play_activities[i]->name) != 0)
-            sprintf(cTotalTimePlayed, "%d:%02d", h, m);
-        else
-            memset(cTotalTimePlayed, 0, sizeof(cTotalTimePlayed));
-        
-        imageRomPosition =
-        TTF_RenderUTF8_Blended(font40, cPosition, color_lilla);
-        imageRomPlayTime =
-        TTF_RenderUTF8_Blended(font40, cTotalTimePlayed, color_white);
-        imageRomName = TTF_RenderUTF8_Blended(fontRomName25, play_activities[i]->name,
-                                              color_white);
-        
-        SDL_Rect rectPosition = {16, 78 + 90 * i, 76, 39};
-        SDL_Rect rectRomPlayTime = {77, 66 + 90 * i, 254, 56};
-        SDL_Rect rectRomNames = {78, 104 + 90 * i, 600, 40};
-        
-        SDL_BlitSurface(imageRomPosition, NULL, screen, &rectPosition);
-        
         if (play_activities_len > i) {
+            sprintf(cPosition, "%d", i + 1);
+            
+            h = play_activities[i]->play_time / 3600;
+            m = (play_activities[i]->play_time - 3600 * h) / 60;
+            
+            if (strlen(play_activities[i]->name) != 0)
+                sprintf(cTotalTimePlayed, "%d:%02d", h, m);
+            else
+                memset(cTotalTimePlayed, 0, sizeof(cTotalTimePlayed));
+            
+            imageRomPosition =
+            TTF_RenderUTF8_Blended(font40, cPosition, color_lilla);
+            imageRomPlayTime =
+            TTF_RenderUTF8_Blended(font40, cTotalTimePlayed, color_white);
+            imageRomName = TTF_RenderUTF8_Blended(fontRomName25, play_activities[i]->name,
+                                                  color_white);
+            
+            SDL_Rect rectPosition = {16, 78 + 90 * i, 76, 39};
+            SDL_Rect rectRomPlayTime = {77, 66 + 90 * i, 254, 56};
+            SDL_Rect rectRomNames = {78, 104 + 90 * i, 600, 40};
+            
+            SDL_BlitSurface(imageRomPosition, NULL, screen, &rectPosition);
+            
+            
             SDL_BlitSurface(imageRomPlayTime, NULL, screen, &rectRomPlayTime);
             SDL_BlitSurface(imageRomName, NULL, screen, &rectRomNames);
         }
