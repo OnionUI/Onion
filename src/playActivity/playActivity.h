@@ -56,10 +56,14 @@ PlayActivity ** find_play_activities(const char *name) {
         while (sqlite3_step(stmt) == SQLITE_ROW) {
             play_activities[i] = (PlayActivity *)malloc(sizeof(PlayActivity));
             printf_debug("maloc activity[%d]\n", i);
-            strcpy(play_activities[i]->name, (const char*) sqlite3_column_text(stmt, 0));
-            strcpy(play_activities[i]->file_path, (const char*) sqlite3_column_text(stmt, 1));
+            play_activities[i]->name = strdup((const char*) sqlite3_column_text(stmt, 0));
+            printf_debug("play_activities[i]->name = %s\n", play_activities[i]->name);
+            play_activities[i]->file_path = strdup((const char*) sqlite3_column_text(stmt, 1));
+            printf_debug("play_activities[i]->file_path = %s\n", play_activities[i]->file_path);
             play_activities[i]->play_count = sqlite3_column_int(stmt, 2);
+            printf_debug("play_activities[i]->play_count = %d\n", play_activities[i]->play_count);
             play_activities[i]->play_time = sqlite3_column_int(stmt, 3);
+            printf_debug("play_activities[i]->play_time = %d\n", play_activities[i]->play_time);
             i++;
         }
     }
