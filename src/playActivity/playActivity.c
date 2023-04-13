@@ -130,7 +130,7 @@ PlayActivity * find_play_activities(const char *name) {
             strcpy(play_activities[i]->name, (const char*) sqlite3_column_text(stmt, 0));
             strcpy(play_activities[i]->file_path, (const char*) sqlite3_column_text(stmt, 1));
             play_activities[i]->play_count = sqlite3_column_int(stmt, 2);
-            play_actiplay_activitiesvity[i]->play_time = sqlite3_column_int(stmt, 3);
+            play_activities[i]->play_time = sqlite3_column_int(stmt, 3);
             i++;
         }
     }
