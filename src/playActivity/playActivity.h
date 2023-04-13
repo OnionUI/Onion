@@ -123,7 +123,7 @@ int get_play_time(const char* name) {
 PlayActivity ** find_play_activities(const char *name) {
     printf_debug("find(%s)\n", name);
     PlayActivity **play_activities = NULL;
-    char* sql = sqlite3_mprintf("SELECT * FROM play_activities WHERE name LIKE '\%%q\%';", name);
+    char* sql = sqlite3_mprintf("SELECT * FROM play_activities WHERE name LIKE CONCAT('%|','%q','|%';", name);
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
     if (rc != SQLITE_OK) {
