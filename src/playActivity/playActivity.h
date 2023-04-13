@@ -38,7 +38,7 @@ PlayActivity ** find_play_activities(const char *name) {
     char *sql = sqlite3_mprintf("SELECT * FROM play_activities WHERE name LIKE CONCAT('%|','%q','|%';", name);
     sqlite3_stmt *stmt;
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
-    printf_debug("%s", sqlite3_normalized_sql(stmt));
+    printf_debug("%s\n", sqlite3_normalized_sql(stmt));
     if (rc != SQLITE_OK) {
         printf_debug("Error preparing SQL statement: %s\n", sqlite3_errmsg(db));
     } else {
