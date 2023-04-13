@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     
     open_db();
     PlayActivity **play_activities = find_play_activities("");
-    int play_activities_len = play_activities_count();
+    int play_activities_len = play_activities_count("");
     printf_debug("sizeof(%d)/%d\n", sizeof(**play_activities), sizeof(PlayActivity));
     printf_debug("play_activities_len = %d\n", play_activities_len);
     close_db();
