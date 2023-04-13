@@ -26,6 +26,12 @@ struct PlayActivity{
 
 sqlite3 *db;
 
+void close_db(void) {
+    printf_debug("%s\n", "close_db()");
+    sqlite3_close(db);
+    printf_debug("%s\n", "close_db() return");
+}
+
 PlayActivity ** find_play_activities(const char *name) {
     printf_debug("find(%s)\n", name);
     PlayActivity **play_activities = NULL;
@@ -99,7 +105,7 @@ void create_db(void) {
     int rc = sqlite3_open(PLAY_ACTIVITY_SQLITE_PATH, &db);
     if (rc != SQLITE_OK) {
         printf_debug("Cannot open database: %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
+        close_db();
     }
     char *sql = "DROP TABLE IF EXISTS play_activities;CREATE TABLE play_activities(name TEXT PRIMARY KEY, relative_path TEXT, play_count INTEGER, play_time INTEGER);CREATE UNIQUE INDEX name_index ON play_activities(name);";
     rc = sqlite3_exec(db, sql, NULL, NULL, NULL);
@@ -123,11 +129,5 @@ void open_db(void) {
         close_db();
     }
     printf_debug("%s\n", "open_db() return");
-}
-
-void close_db(void) {
-    printf_debug("%s\n", "close_db()");
-    sqlite3_close(db);
-    printf_debug("%s\n", "close_db() return");
 }
 #endif
