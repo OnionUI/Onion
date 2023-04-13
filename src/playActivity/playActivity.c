@@ -42,18 +42,18 @@ void insert_data(const char *name, const char *relative_path, int play_count, in
 
 void upgrade_rom_db(void) {
     printf_debug("%s\n", "upgrade_rom_db()");
-    struct {
+    struct PlayActivityStruct{
         char name[STR_MAX];
         int play_time;
-    } PlayActivityStruct;
+    };
     printf_debug("%s\n", "PlayActivityStruct defined");
     FILE *file = fopen(PLAY_ACTIVITY_DB_PATH, "rb");
     printf_debug("%s\n", "file opened");
     if (file != NULL) {
         printf_debug("%s\n", "file not null");
-        PlayActivityStruct play_activity;
+        struct PlayActivityStruct play_activity;
         printf_debug("%s\n", "define play_activity");
-        while (fread(&play_activity, sizeof(PlayActivityStruct), 1, file) == 1) {
+        while (fread(&play_activity, sizeof(struct PlayActivityStruct), 1, file) == 1) {
             if (strlen(play_activity.name) > 0) {
                 printf_debug("%s\n", "read rom");
                 insert_data(play_activity.name, NULL, 1, play_activity.play_time);
