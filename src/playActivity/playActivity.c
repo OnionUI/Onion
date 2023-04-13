@@ -42,18 +42,18 @@ void insert_data(const char *name, const char *relative_path, int play_count, in
 
 void upgrade_rom_db(void) {
     printf_debug("%s\n", "upgrade_rom_db()");
-    typedef struct {
+    struct {
         char name[STR_MAX];
         int play_time;
-    } PlayActivity;
-    printf_debug("%s\n", "PlayActivity defined");
+    } PlayActivityStruct;
+    printf_debug("%s\n", "PlayActivityStruct defined");
     FILE *file = fopen(PLAY_ACTIVITY_DB_PATH, "rb");
     printf_debug("%s\n", "file opened");
     if (file != NULL) {
         printf_debug("%s\n", "file not null");
-        PlayActivity play_activity;
+        PlayActivityStruct play_activity;
         printf_debug("%s\n", "define play_activity");
-        while (fread(&play_activity, sizeof(PlayActivity), 1, file) == 1) {
+        while (fread(&play_activity, sizeof(PlayActivityStruct), 1, file) == 1) {
             if (strlen(play_activity.name) > 0) {
                 printf_debug("%s\n", "read rom");
                 insert_data(play_activity.name, NULL, 1, play_activity.play_time);
@@ -107,6 +107,37 @@ int get_play_time(const char* name) {
     sqlite3_free(sql);
     printf_debug("get_play_time(%s) return %s\n", name);
     return play_time;
+}
+
+PlayActivity * find_play_activities(const char *name) {
+    printf_debug("find(%s)\n", name);
+    PlayActivity **play_activities = NULL;
+    char* sql = sqlite3_mprintf("SELECT * FROM play_activities WHERE name LIKE '\%%q\%';", name);
+    sqlite3_stmt* stmt;
+    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "Error preparing SQL statement: %s\n", sqlite3_errmsg(db));
+    } else {
+        int num_rows = 0;
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            num_rows++;
+        }
+        sqlite3_reset(stmt);
+        play_activities = (PlayActivity **)malloc(sizeof(PlayActivity *) * num_rows);
+        int i = 0;
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            play_activities[i] = (PlayActivity *)malloc(sizeof(struct PlayActivity));
+            strcpy(play_activities[i]->name, (const char*) sqlite3_column_text(stmt, 0));
+            strcpy(play_activity[i]->file_path, (const char*) sqlite3_column_text(stmt, 1));
+            play_activity[i]->play_count = sqlite3_column_int(stmt, 2);
+            play_activity[i]->play_time = sqlite3_column_int(stmt, 3);
+            i++;
+        }
+    }
+    sqlite3_free(sql);
+    sqlite3_finalize(stmt);
+    printf_debug("find(%s) return\n", name);
+    return play_activities;
 }
 
 void usage(void) {
