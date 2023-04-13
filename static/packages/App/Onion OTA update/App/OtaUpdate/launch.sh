@@ -1,6 +1,7 @@
 #!/bin/sh
+scriptdir=/mnt/SDCARD/.tmp_update/script
 
 touch /tmp/stay_awake
 
-cd /mnt/SDCARD/.tmp_update/script
-st -q -e sh ./ota_update.sh 
+cd $scriptdir
+st -q -e sh $scriptdir/ota_update.sh 
