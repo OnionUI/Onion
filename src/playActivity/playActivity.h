@@ -15,12 +15,14 @@
 #define PLAY_ACTIVITY_SQLITE_PATH "/mnt/SDCARD/Saves/CurrentProfile/saves/play_activity.sqlite"
 #define PLAY_ACTIVITY_DB_PATH "/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db"
 
-tyedef struct {
+typedef struct PlayActivity PlayActivity;
+
+struct PlayActivity{
     char *name;
     char *file_path;
     int play_count;
     int play_time;
-} PlayActivity;
+};
 
 PlayActivity * find_play_activities(const char *name);
 #endif
