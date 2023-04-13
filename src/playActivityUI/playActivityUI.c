@@ -199,6 +199,13 @@ int main(int argc, char *argv[])
         SDL_Flip(video);
     }
 
+    // free memory for each struct
+    for (int i = 0; i < sizeof(PlayActivity)/sizeof(play_activities); i++) {
+        free(play_activities[i]);
+    }
+    // free memory for the array of struct pointers
+    free(play_activities);
+
     SDL_FreeSurface(screen);
     SDL_FreeSurface(video);
 

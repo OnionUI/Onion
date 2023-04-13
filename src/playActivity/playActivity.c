@@ -126,7 +126,7 @@ PlayActivity * find_play_activities(const char *name) {
         play_activities = (PlayActivity **)malloc(sizeof(PlayActivity *) * num_rows);
         int i = 0;
         while (sqlite3_step(stmt) == SQLITE_ROW) {
-            play_activities[i] = (PlayActivity *)malloc(sizeof(struct PlayActivity));
+            play_activities[i] = (PlayActivity *)malloc(sizeof(PlayActivity));
             strcpy(play_activities[i]->name, (const char*) sqlite3_column_text(stmt, 0));
             strcpy(play_activity[i]->file_path, (const char*) sqlite3_column_text(stmt, 1));
             play_activity[i]->play_count = sqlite3_column_int(stmt, 2);
