@@ -67,7 +67,9 @@ PlayActivity ** find_play_activities(const char *name) {
             i++;
         }
     }
+    printf_debug("%s\n", "returning");
     sqlite3_reset(stmt);
+    printf_debug("%s\n", "reset statement");
     sqlite3_free(sql);
     printf_debug("find(%s) return\n", name);
     return play_activities;
