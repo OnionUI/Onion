@@ -32,8 +32,28 @@ void close_db(void) {
     printf_debug("%s\n", "close_db() return");
 }
 
+int play_activities_count(const char *name) {
+    printf_debug("%s\n", "play_activities_count()");
+    int count = 0;
+    char *sql = sqlite3_mprintf("SELECT COUNT(*) FROM play_activities WHERE name LIKE '%%%q%%';", name);
+    sqlite3_stmt *stmt;
+    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+    printf_debug("%s\n", sqlite3_sql(stmt));
+    if (rc != SQLITE_OK) {
+        printf_debug("Error preparing SQL statement: %s\n", sqlite3_errmsg(db));
+    } else {
+        count = sqlite3_column_int(stmt, 0)
+    }
+    printf_debug("%s\n", "returning");
+    sqlite3_reset(stmt);
+    printf_debug("%s\n", "reset statement");
+    sqlite3_free(sql);
+    printf_debug("%s\n", "play_activities_count() return %d", count);
+    return count;
+}
+
 PlayActivity ** find_play_activities(const char *name) {
-    printf_debug("find(%s)\n", name);
+    printf_debug("find_play_activities(%s)\n", name);
     PlayActivity **play_activities = NULL;
     char *sql = sqlite3_mprintf("SELECT * FROM play_activities WHERE name LIKE '%%%q%%';", name);
     sqlite3_stmt *stmt;
@@ -70,7 +90,7 @@ PlayActivity ** find_play_activities(const char *name) {
     sqlite3_reset(stmt);
     printf_debug("%s\n", "reset statement");
     sqlite3_free(sql);
-    printf_debug("find(%s) return\n", name);
+    printf_debug("find_play_activities(%s) return\n", name);
     return play_activities;
 }
 
