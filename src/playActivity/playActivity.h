@@ -42,7 +42,7 @@ int play_activities_count(const char *name) {
     if (rc != SQLITE_OK) {
         printf_debug("Error preparing SQL statement: %s\n", sqlite3_errmsg(db));
     } else {
-        count = sqlite3_column_int(stmt, 0)
+        count = sqlite3_column_int(stmt, 0);
     }
     printf_debug("%s\n", "returning");
     sqlite3_reset(stmt);
