@@ -58,7 +58,7 @@ int play_activities_count(const char *name) {
 PlayActivity ** find_play_activities(const char *name) {
     printf_debug("find_play_activities(%s)\n", name);
     PlayActivity **play_activities = NULL;
-    char *sql = sqlite3_mprintf("SELECT * FROM play_activities WHERE name LIKE '%%%q%%';", name);
+    char *sql = sqlite3_mprintf("SELECT * FROM play_activities WHERE name LIKE '%%%q%%' ORDER BY play_time DESC;", name);
     sqlite3_stmt *stmt;
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
     printf_debug("%s\n", sqlite3_sql(stmt));
