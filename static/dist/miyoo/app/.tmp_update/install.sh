@@ -238,6 +238,8 @@ run_installation() {
         # Patch RA config
         cd $sysdir
         ./script/patch_ra_cfg.sh /mnt/SDCARD/RetroArch/onion_ra_patch.cfg
+
+        temp_fix
     fi
     install_configs $reset_configs
 
@@ -582,6 +584,21 @@ unzip_progress() {
 
 free_mma() {
     /mnt/SDCARD/.tmp_update/bin/freemma
+}
+
+temp_fix() {
+    prev_version=`cat $sysdir/onionVersion/previous_version.txt`
+
+    if [ "$prev_version" == "4.2.0-beta-dev-65c7b31" ] \
+    || [ "$prev_version" == "4.2.0-beta-dev-0763d40" ] \
+    || [ "$prev_version" == "4.2.0-beta-dev-4c7e2db" ]; then
+        echo -e "cheevos_enable = \"false\"\ncheevos_hardcore_mode_enable = \"false\"" > /tmp/temp_fix_patch.cfg
+
+        cd $sysdir
+        ./script/patch_ra_cfg.sh /tmp/temp_fix_patch.cfg
+
+        rm /tmp/temp_fix_patch.cfg
+    fi
 }
 
 main
