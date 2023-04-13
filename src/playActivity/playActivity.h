@@ -47,8 +47,11 @@ PlayActivity ** find_play_activities(const char *name) {
         while (sqlite3_step(stmt) == SQLITE_ROW) {
             num_rows++;
         }
+        printf_debug("num_rows=%d", num_rows);
         sqlite3_reset(stmt);
+        printf_debug("%s\n", sqlite3_expanded_sql(stmt));
         play_activities = (PlayActivity **)malloc(sizeof(PlayActivity *) * num_rows);
+        printf_debug("%s\n", "maloc play_activities");
         int i = 0;
         while (sqlite3_step(stmt) == SQLITE_ROW) {
             play_activities[i] = (PlayActivity *)malloc(sizeof(PlayActivity));
