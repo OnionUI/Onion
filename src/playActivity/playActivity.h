@@ -24,5 +24,5 @@ struct PlayActivity{
     int play_time;
 };
 
-PlayActivity * find_play_activities(const char *name);
+PlayActivity ** find_play_activities(const char *name);
 #endif
