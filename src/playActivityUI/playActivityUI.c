@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
     if (play_activities == NULL) {
         return 1;
     }
-    int play_activities_len = sizeof(PlayActivity *)/sizeof(play_activities);
+    int play_activities_len = sizeof(play_activities)/sizeof(PlayActivity *);
     printf_debug("play_activities_len = %d\n", play_activities_len);
     
     signal(SIGINT, sigHandler);
@@ -84,11 +84,12 @@ int main(int argc, char *argv[])
     SDL_Rect rectPages = {561, 430, 90, 44};
     SDL_Rect rectMileage = {484, 8, 170, 42};
     
-    //    Mileage
+    printf_debug("%s\n", "Mileage");
     int ntotalTime = 0;
-    for (int i = 0; i < play_activities_len; i++)
+    for (int i = 0; i < play_activities_len; i++){
         ntotalTime += play_activities[i]->play_time;
-    
+    }
+    printf_debug("ntotalTime = %d\n", ntotalTime);
     char cTotalHandheldMileage[30];
     
     int h, m;
