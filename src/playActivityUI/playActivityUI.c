@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
     //    Mileage
     int ntotalTime = 0;
     for (int i = 0; i < play_activities_len; i++)
-        ntotalTime += play_activities[i]->playTime;
+        ntotalTime += play_activities[i]->play_time;
     
     char cTotalHandheldMileage[30];
     
