@@ -127,7 +127,7 @@ PlayActivity ** find_play_activities(const char *name) {
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "Error preparing SQL statement: %s\n", sqlite3_errmsg(db));
+        printf_debug("Error preparing SQL statement: %s\n", sqlite3_errmsg(db));
     } else {
         int num_rows = 0;
         while (sqlite3_step(stmt) == SQLITE_ROW) {

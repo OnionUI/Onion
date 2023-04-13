@@ -38,7 +38,7 @@ static void sigHandler(int sig)
 
 int main(int argc, char *argv[])
 {
-    log_setName("playActivity");
+    log_setName("playActivityUI");
     printf_debug("main(%d, %s)\n", argc, argv[1]);
 
     PlayActivity **play_activities = find_play_activities("");
