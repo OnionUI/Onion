@@ -15,7 +15,7 @@
 #define PLAY_ACTIVITY_SQLITE_PATH "/mnt/SDCARD/Saves/CurrentProfile/saves/play_activity.sqlite"
 #define PLAY_ACTIVITY_DB_PATH "/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db"
 
-struct {
+tyedef struct {
     char *name;
     char *file_path;
     int play_count;
