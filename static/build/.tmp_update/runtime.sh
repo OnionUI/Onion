@@ -304,6 +304,9 @@ launch_game() {
     # Reset CPU frequency
     echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 
+    # Reset flags
+    rm /tmp/stay_awake 2> /dev/null
+
     # Free memory
     $sysdir/bin/freemma
 
