@@ -34,15 +34,7 @@ int main(int argc, char *argv[])
 {
     log_setName("playActivity");
     printf_debug("main(%d, %s)\n", argc, argv[1]);
-    if (!exists(PLAY_ACTIVITY_SQLITE_PATH)) {
-        open_db();
-        create_table();
-        if (exists(PLAY_ACTIVITY_DB_PATH)) {
-            upgrade_rom_db();
-        }
-    } else {
-        open_db();
-    }
+    open_db();
     if (db == NULL) {
         printf_debug("%s\n", "db == NULL");
         return 1;

@@ -26,6 +26,21 @@ struct PlayActivity{
 
 sqlite3 *db;
 
+void create_db(void) {
+    printf_debug("%s\n", "create_table()");
+    int rc = sqlite3_open(PLAY_ACTIVITY_SQLITE_PATH, &db);
+    if (rc != SQLITE_OK) {
+        printf_debug("Cannot open database: %s\n", sqlite3_errmsg(db));
+        close_db();
+    }
+    char *sql = "DROP TABLE IF EXISTS play_activities;CREATE TABLE play_activities(name TEXT PRIMARY KEY, relative_path TEXT, play_count INTEGER, play_time INTEGER);CREATE UNIQUE INDEX name_index ON play_activities(name);";
+    rc = sqlite3_exec(db, sql, NULL, NULL, NULL);
+    if (rc != SQLITE_OK) {
+        printf_debug("Error: could not create table: %s\n", sqlite3_errmsg(db));
+    }
+    printf_debug("%s\n", "create_table() return");
+}
+
 void close_db(void) {
     printf_debug("%s\n", "close_db()");
     sqlite3_close(db);
@@ -34,22 +49,18 @@ void close_db(void) {
 
 void open_db(void) {
     printf_debug("%s\n", "open_db()");
+    if (!exists(PLAY_ACTIVITY_SQLITE_PATH)) {
+        create_db();
+        if (exists(PLAY_ACTIVITY_DB_PATH)) {
+            upgrade_rom_db();
+        }
+    }
     int rc = sqlite3_open(PLAY_ACTIVITY_SQLITE_PATH, &db);
     if (rc != SQLITE_OK) {
         printf_debug("Cannot open database: %s\n", sqlite3_errmsg(db));
         close_db();
     }
     printf_debug("%s\n", "open_db() return");
-}
-
-void create_table(void) {
-    printf_debug("%s\n", "create_table()");
-    char *sql = "DROP TABLE IF EXISTS play_activities;CREATE TABLE play_activities(name TEXT PRIMARY KEY, relative_path TEXT, play_count INTEGER, play_time INTEGER);CREATE UNIQUE INDEX name_index ON play_activities(name);";
-    int rc = sqlite3_exec(db, sql, NULL, NULL, NULL);
-    if (rc != SQLITE_OK) {
-        printf_debug("Error: could not create table: %s\n", sqlite3_errmsg(db));
-    }
-    printf_debug("%s\n", "create_table() return");
 }
 
 void insert_data(const char *name, const char *relative_path, int play_count, int play_time) {
