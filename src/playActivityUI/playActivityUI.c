@@ -48,6 +48,7 @@ int main(int argc, char *argv[])
         return 1;
     }
     int play_activities_len = sizeof(**play_activities)/sizeof(PlayActivity);
+    printf_debug("sizeof(%d)/%d\n", sizeof(**play_activities), sizeof(PlayActivity));
     printf_debug("play_activities_len = %d\n", play_activities_len);
     
     signal(SIGINT, sigHandler);
