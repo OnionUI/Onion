@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
     log_setName("playActivityUI");
     printf_debug("main(%d, %s)\n", argc, argv[1]);
 
+    open_db();
     PlayActivity **play_activities = find_play_activities("");
     printf_debug("play_activities[0]->name = %s\n", play_activities[0]->name);
 
