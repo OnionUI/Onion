@@ -267,7 +267,7 @@ launch_game() {
             echo "$temp" | sed 's/\$/\\\$/g' > $sysdir/cmd_to_run.sh
         fi
 
-        playActivity "init"
+        playActivity "$rompath"
     fi
 
     # Prevent quick switch loop
@@ -317,7 +317,7 @@ launch_game() {
         fi
 
         cd $sysdir
-        playActivity "$cmd"
+        playActivity "$rompath"
         
         echo "game" > /tmp/prev_state
         check_off_order "End_Save"
