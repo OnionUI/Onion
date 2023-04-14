@@ -207,6 +207,7 @@ clean:
 
 deepclean: clean
 	@rm -rf $(CACHE)
+	@rm -f $(THIRD_PARTY_DIR)/RetroArch/retroarch_miyoo354
 	@cd $(THIRD_PARTY_DIR)/RetroArch && make clean
 	@cd $(THIRD_PARTY_DIR)/SearchFilter && make clean
 	@cd $(THIRD_PARTY_DIR)/Terminal && make clean
