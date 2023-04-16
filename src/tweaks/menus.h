@@ -396,8 +396,7 @@ void menu_advanced(void *_)
                 (ListItem){.label = "Adjust LCD voltage",
                            .item_type = MULTIVALUE,
                            .value_max = 6,
-                           .value_labels = {"Off", "2.5V", "2.6V", "2.7V",
-                                            "2.8V", "2.9V", "3.0V"},
+                           .value_labels = {"Off","2.7V","2.8V", "2.9V", "3.0V"},
                            .value = value_getLcdVoltage(),
                            .action = action_advancedSetLcdVoltage});
         }
