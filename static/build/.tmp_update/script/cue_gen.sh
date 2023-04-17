@@ -31,4 +31,4 @@ find $targets -name *.bin -type f | (
     echo "$count cue $([ $count -eq 1 ] && (echo "file") || (echo "files")) created"
 )
 
-find $targets -type f -name "*_cache2.db" -exec rm -f {} \;
+find $targets -type f -name "*_cache6.db" -exec rm -f {} \;
