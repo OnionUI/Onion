@@ -56,22 +56,23 @@ int main(int argc, char *argv[])
             sprintf(cPosition, "%d", index + 1);
             h = play_activities->play_activity[index]->play_time_total / 3600;
             m = (play_activities->play_activity[index]->play_time_total - 3600 * h) / 60;
-            sprintf(play_time_total_formatted, "%d:%02d", h, m);
+            sprintf(play_time_total_formatted, "%d:%02d count: %d last: %s", h, m, play_activities->play_activity[index]->play_count, play_activities->play_activity[index]->last_played_at);
             imageRomPosition = TTF_RenderUTF8_Blended(font40, cPosition, color_lilla);
+            SDL_Surface* loadedRomImage;
             if (exists(play_activities->play_activity[index]->rom->image_path)) {
-                SDL_Surface* loadedRomImage = IMG_Load(play_activities->play_activity[index]->rom->image_path);
-                imageRomImage = SDL_CreateRGBSurface(0, 96, 96, loadedRomImage->format->BitsPerPixel, loadedRomImage->format->Rmask, loadedRomImage->format->Gmask, loadedRomImage->format->Bmask, loadedRomImage->format->Amask);
-                SDL_Rect src_rect = {0, 0, loadedRomImage->w, loadedRomImage->h};
-                SDL_Rect dst_rect = {0, 0, imageRomImage->w, imageRomImage->h};
-                SDL_SoftStretch(loadedRomImage, &src_rect, imageRomImage, &dst_rect);
-                SDL_FreeSurface(loadedRomImage);
+                loadedRomImage = IMG_Load(play_activities->play_activity[index]->rom->image_path);
             } else {
-                imageRomImage = TTF_RenderUTF8_Blended(font40, "N/A", color_lilla);
+                loadedRomImage = IMG_Load("/mnt/SDCARD/miyoo/app/skin/thumb-default.png");
             }
+            imageRomImage = SDL_CreateRGBSurface(0, 92, 92, loadedRomImage->format->BitsPerPixel, loadedRomImage->format->Rmask, loadedRomImage->format->Gmask, loadedRomImage->format->Bmask, loadedRomImage->format->Amask);
+            SDL_Rect src_rect = {0, 0, loadedRomImage->w, loadedRomImage->h};
+            SDL_Rect dst_rect = {0, 0, imageRomImage->w, imageRomImage->h};
+            SDL_SoftStretch(loadedRomImage, &src_rect, imageRomImage, &dst_rect);
+            SDL_FreeSurface(loadedRomImage);
             imageRomPlayTime = TTF_RenderUTF8_Blended(font40, play_time_total_formatted, color_white);
             imageRomName = TTF_RenderUTF8_Blended(fontRomName25, play_activities->play_activity[index]->rom->name, color_white);
             SDL_Rect rectPosition = {16, 78 + 90 * i, 76, 39};
-            SDL_Rect rectRomImage = {77, 66 + 90 * i, 96, 96};
+            SDL_Rect rectRomImage = {79, 68 + 90 * i, 92, 92};
             SDL_Rect rectRomPlayTime = {189, 66 + 90 * i, 100, 56};
             SDL_Rect rectRomNames = {190, 104 + 90 * i, 400, 40};
             SDL_BlitSurface(imageRomPosition, NULL, screen, &rectPosition);

@@ -32,7 +32,9 @@ struct PlayActivity {
     ROM *rom;
     int play_count;
     int play_time_total;
-    int last_played_at;
+    int play_time_average;
+    char *first_played_at;
+    char *last_played_at;
 };
 struct PlayActivities {
     PlayActivity **play_activity;
@@ -83,7 +85,7 @@ sqlite3_stmt * play_activity_db_prepare(char *sql) {
 
 PlayActivities * play_activity_find_all(void) {
     PlayActivities *play_activities = NULL;
-    char *sql = "SELECT rom.id, rom.type, rom.name, rom.file_path, rom.image_path, COUNT(play_activity.ROWID) AS play_count, SUM(play_activity.play_time) AS play_time_total, MAX(play_activity.created_at) AS last_played_at FROM rom LEFT JOIN play_activity ON rom.id = play_activity.rom_id GROUP BY rom.id ORDER BY play_time_total DESC;";
+    char *sql = "SELECT rom.id, rom.type, rom.name, rom.file_path, rom.image_path, COUNT(play_activity.ROWID) AS play_count_total, SUM(play_activity.play_time) AS play_time_total, play_time_total/play_count AS play_time_average, datetime(MIN(play_activity.created_at), 'unixepoch') AS first_played_at, datetime(MAX(play_activity.created_at), 'unixepoch') AS last_played_at FROM rom LEFT JOIN play_activity ON rom.id = play_activity.rom_id GROUP BY rom.id ORDER BY play_time_total DESC;";
     sqlite3_stmt *stmt = play_activity_db_prepare(sql);
     int play_activity_count = 0;
     while (sqlite3_step(stmt) == SQLITE_ROW) {
@@ -106,7 +108,9 @@ PlayActivities * play_activity_find_all(void) {
             play_activities->play_activity[i]->rom->image_path = strdup((const char *)sqlite3_column_text(stmt, 4));
             play_activities->play_activity[i]->play_count = sqlite3_column_int(stmt, 5);
             play_activities->play_activity[i]->play_time_total = sqlite3_column_int(stmt, 6);
-            play_activities->play_activity[i]->last_played_at = sqlite3_column_int(stmt, 7);
+            play_activities->play_activity[i]->play_time_average = sqlite3_column_int(stmt, 7);
+            play_activities->play_activity[i]->first_played_at = strdup((const char *)sqlite3_column_text(stmt, 8));
+            play_activities->play_activity[i]->last_played_at = strdup((const char *)sqlite3_column_text(stmt, 9));
         }
     }
     sqlite3_finalize(stmt);
