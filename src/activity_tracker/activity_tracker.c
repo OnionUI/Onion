@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
     imagePages = TTF_RenderUTF8_Blended(font30, cPages, color_white);
     int play_time_total = play_activities->play_time_total;
     char *play_time_total_formatted = (char *)malloc(256);
-    char *details = NULL;
+    char *details = (char *)malloc(100);
     printf_debug("found %d roms\n", play_activities->count);
     for (int i = 0; i < 4; i++) {
         int index = nCurrentPage * 4 + i;
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
             printf_debug("found %d roms\n", play_activities->count);
             imageRomPlayTime = TTF_RenderUTF8_Blended(font40, play_time_total_formatted, color_white);
             imageRomName = TTF_RenderUTF8_Blended(fontRomName25, play_activities->play_activity[index]->rom->name, color_white);
-            snprintf(details, 256, "count: %d last: %s, average: %d:%02d", play_activities->play_activity[index]->play_count, play_activities->play_activity[index]->last_played_at, play_activities->play_activity[index]->play_time_average/3600, (play_activities->play_activity[index]->play_time_average - ((play_activities->play_activity[index]->play_time_average/3600)*3600)) / 60);
+            snprintf(details, 100, "count: %d last: %s, average: %d:%02d", play_activities->play_activity[index]->play_count, play_activities->play_activity[index]->last_played_at, play_activities->play_activity[index]->play_time_average/3600, (play_activities->play_activity[index]->play_time_average-((play_activities->play_activity[index]->play_time_average/3600)*3600))/60);
             imageRomDetails = TTF_RenderUTF8_Blended(fontRomName25, details, color_white);
             SDL_Rect rectPosition = {16, 78 + 90 * i, 50, 39};
             SDL_Rect rectRomImage = {70, 70 + 90 * i, 80, 80};
