@@ -73,13 +73,13 @@ int main(int argc, char *argv[])
             SDL_SoftStretch(loadedRomImage, &src_rect, imageRomImage, &dst_rect);
             imageRomPlayTime = TTF_RenderUTF8_Blended(font40, play_time_total_formatted, color_white);
             imageRomName = TTF_RenderUTF8_Blended(fontRomName25, play_activities->play_activity[index]->rom->name, color_white);
-            snprintf(details, 100, "count: %d average: %d:%02d", play_activities->play_activity[index]->play_count, play_activities->play_activity[index]->play_time_average/3600, (play_activities->play_activity[index]->play_time_average-((play_activities->play_activity[index]->play_time_average/3600)*3600))/60);
+            snprintf(details, 100, "count: %d last: %s, average: %d:%02d", play_activities->play_activity[index]->play_count, play_activities->play_activity[index]->last_played_at, play_activities->play_activity[index]->play_time_average/3600, (play_activities->play_activity[index]->play_time_average-((play_activities->play_activity[index]->play_time_average/3600)*3600))/60);
             imageRomDetails = TTF_RenderUTF8_Blended(fontRomName25, details, color_white);
             SDL_Rect rectPosition = {16, 78 + 90 * i, 50, 39};
             SDL_Rect rectRomImage = {70, 70 + 90 * i, 80, 80};
             SDL_Rect rectRomPlayTime = {170, 66 + 90 * i, 100, 56};
             SDL_Rect rectRomNames = {170, 110 + 90 * i, 400, 40};
-            SDL_Rect rectRomDetails = {170, 130 + 90 * i, 400, 40};
+            SDL_Rect rectRomDetails = {170, 140 + 90 * i, 400, 40};
             SDL_BlitSurface(imageRomPosition, NULL, screen, &rectPosition);
             SDL_BlitSurface(imageRomImage, NULL, screen, &rectRomImage);
             SDL_BlitSurface(imageRomPlayTime, NULL, screen, &rectRomPlayTime);
@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
                 SDL_Rect rectRomImage = {70, 70 + 90 * i, 80, 80};
                 SDL_Rect rectRomPlayTime = {170, 66 + 90 * i, 100, 56};
                 SDL_Rect rectRomNames = {170, 110 + 90 * i, 400, 40};
-                SDL_Rect rectRomDetails = {170, 165 + 90 * i, 400, 40};
+                SDL_Rect rectRomDetails = {170, 140 + 90 * i, 400, 40};
                 SDL_BlitSurface(imageRomPosition, NULL, screen, &rectPosition);
                 SDL_BlitSurface(imageRomImage, NULL, screen, &rectRomImage);
                 SDL_BlitSurface(imageRomPlayTime, NULL, screen, &rectRomPlayTime);
