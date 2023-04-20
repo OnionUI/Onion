@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
     TTF_Font *font40 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 40);
     TTF_Font *font30 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 30);
     TTF_Font *fontRomName25 = TTF_OpenFont("/customer/app/wqy-microhei.ttc", 25);
+    TTF_Font *font18 = TTF_OpenFont("/customer/app/wqy-microhei.ttc", 18);
     SDL_Color color_white = {255, 255, 255};
     SDL_Color color_lilla = {136, 97, 252};
     SDL_Surface *imageBackground = IMG_Load("./res/background.png");
@@ -74,7 +75,7 @@ int main(int argc, char *argv[])
             imageRomPlayTime = TTF_RenderUTF8_Blended(font40, play_time_total_formatted, color_white);
             imageRomName = TTF_RenderUTF8_Blended(fontRomName25, play_activities->play_activity[index]->rom->name, color_white);
             snprintf(details, 100, "count: %d average: %d:%02d", play_activities->play_activity[index]->play_count, play_activities->play_activity[index]->play_time_average/3600, (play_activities->play_activity[index]->play_time_average-((play_activities->play_activity[index]->play_time_average/3600)*3600))/60);
-            imageRomDetails = TTF_RenderUTF8_Blended(fontRomName25, details, color_white);
+            imageRomDetails = TTF_RenderUTF8_Blended(font18, details, color_white);
             SDL_Rect rectPosition = {16, 80 + 90 * i, 50, 39};
             SDL_Rect rectRomImage = {70, 70 + 90 * i, 80, 80};
             SDL_Rect rectRomPlayTime = {170, 55 + 90 * i, 100, 56};
@@ -145,7 +146,7 @@ int main(int argc, char *argv[])
                 imageRomPlayTime = TTF_RenderUTF8_Blended(font40, play_time_total_formatted, color_white);
                 imageRomName = TTF_RenderUTF8_Blended(fontRomName25, play_activities->play_activity[index]->rom->name, color_white);
                 snprintf(details, 100, "count: %d average: %d:%02d", play_activities->play_activity[index]->play_count, play_activities->play_activity[index]->play_time_average/3600, (play_activities->play_activity[index]->play_time_average-((play_activities->play_activity[index]->play_time_average/3600)*3600))/60);
-                imageRomDetails = TTF_RenderUTF8_Blended(fontRomName25, details, color_white);
+                imageRomDetails = TTF_RenderUTF8_Blended(font18, details, color_white);
                 SDL_Rect rectPosition = {16, 80 + 90 * i, 50, 39};
                 SDL_Rect rectRomImage = {70, 70 + 90 * i, 80, 80};
                 SDL_Rect rectRomPlayTime = {170, 55 + 90 * i, 100, 56};
