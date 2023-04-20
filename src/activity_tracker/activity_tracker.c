@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
             SDL_Rect rectRomImage = {70, 70 + 90 * i, 80, 80};
             SDL_Rect rectRomPlayTime = {170, 55 + 90 * i, 100, 56};
             SDL_Rect rectRomNames = {170, 95 + 90 * i, 400, 40};
-            SDL_Rect rectRomDetails = {170, 130 + 90 * i, 400, 40};
+            SDL_Rect rectRomDetails = {170, 125 + 90 * i, 400, 40};
             SDL_BlitSurface(imageRomPosition, NULL, screen, &rectPosition);
             SDL_BlitSurface(imageRomImage, NULL, screen, &rectRomImage);
             SDL_BlitSurface(imageRomPlayTime, NULL, screen, &rectRomPlayTime);
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
                 SDL_Rect rectRomImage = {70, 70 + 90 * i, 80, 80};
                 SDL_Rect rectRomPlayTime = {170, 55 + 90 * i, 100, 56};
                 SDL_Rect rectRomNames = {170, 95 + 90 * i, 400, 40};
-                SDL_Rect rectRomDetails = {170, 130 + 90 * i, 400, 40};
+                SDL_Rect rectRomDetails = {170, 125 + 90 * i, 400, 40};
                 SDL_BlitSurface(imageRomPosition, NULL, screen, &rectPosition);
                 SDL_BlitSurface(imageRomImage, NULL, screen, &rectRomImage);
                 SDL_BlitSurface(imageRomPlayTime, NULL, screen, &rectRomPlayTime);
