@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
     sprintf(cPages, "%d/%d", nCurrentPage + 1, nPages);
     imagePages = TTF_RenderUTF8_Blended(font30, cPages, color_white);
     int play_time_total = play_activities->play_time_total;
-    char *play_time_total_formatted =(char *)malloc(50);
+    char *play_time_total_formatted =(char *)malloc(256);
     printf_debug("found %d roms\n", play_activities->count);
     for (int i = 0; i < 4; i++) {
         int index = nCurrentPage * 4 + i;
