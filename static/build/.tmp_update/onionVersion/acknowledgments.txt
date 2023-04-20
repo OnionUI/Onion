@@ -4,6 +4,7 @@ Schmurtz
 Olywa123
 DiMo
 Totofaki
+nil0bject
    
 CONTRIBUTORS
 jimgray

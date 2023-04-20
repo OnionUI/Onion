@@ -117,7 +117,7 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/gameSwitcher && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/mainUiBatPerc && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/keymon && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/playActivity && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/play_activity && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/themeSwitcher && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/tweaks && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/packageManager && BUILD_DIR=$(BIN_DIR) make
@@ -141,8 +141,8 @@ core: $(CACHE)/.setup
 
 apps: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
-	@cd $(SRC_DIR)/playActivityUI && BUILD_DIR="$(PACKAGES_APP_DEST)/Activity Tracker/App/PlayActivity" make
-	@find $(SRC_DIR)/playActivityUI -depth -type d -name res -exec cp -r {}/. "$(PACKAGES_APP_DEST)/Activity Tracker/App/PlayActivity/res/" \;
+	@cd $(SRC_DIR)/activity_tracker && BUILD_DIR="$(PACKAGES_APP_DEST)/Activity Tracker/App/ActivityTracker" make
+	@find $(SRC_DIR)/activity_tracker -depth -type d -name res -exec cp -r {}/. "$(PACKAGES_APP_DEST)/Activity Tracker/App/ActivityTracker/res/" \;
 	@find $(SRC_DIR)/packageManager -depth -type d -name res -exec cp -r {}/. $(BUILD_DIR)/App/PackageManager/res/ \;
 	@cd $(SRC_DIR)/clock && BUILD_DIR="$(BIN_DIR)" make
 	@cd $(SRC_DIR)/randomGamePicker && BUILD_DIR="$(BIN_DIR)" make
