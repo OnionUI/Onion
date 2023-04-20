@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
             h = play_activities->play_activity[index]->play_time_total / 3600;
             m = (play_activities->play_activity[index]->play_time_total - 3600 * h) / 60;
             printf_debug("found %d roms\n", play_activities->count);
-            sprintf(play_time_total_formatted, "%d:%02d (%d)", h, m, play_activities->play_activity[index]->play_count);
+            sprintf(play_time_total_formatted, "%d:%02d", h, m);
             printf_debug("found %d roms\n", play_activities->count);
             imageRomPosition = TTF_RenderUTF8_Blended(font40, cPosition, color_lilla);
             SDL_Surface* loadedRomImage;
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
             printf_debug("found %d roms\n", play_activities->count);
             imageRomPlayTime = TTF_RenderUTF8_Blended(font40, play_time_total_formatted, color_white);
             imageRomName = TTF_RenderUTF8_Blended(fontRomName25, play_activities->play_activity[index]->rom->name, color_white);
-            snprintf(details, 256, "count: %d last: %s, average: %s", play_activities->play_activity[index]->play_count, play_activities->play_activity[index]->last_played_at, play_activities->play_activity[index]->play_time_average);
+            snprintf(details, 256, "count: %d last: %s, average: %d:%02d", play_activities->play_activity[index]->play_count, play_activities->play_activity[index]->last_played_at, play_activities->play_activity[index]->play_time_average/3600, (play_activities->play_activity[index]->play_time_average - ((play_activities->play_activity[index]->play_time_average/3600)*3600)) / 60);
             imageRomDetails = TTF_RenderUTF8_Blended(fontRomName25, details, color_white);
             SDL_Rect rectPosition = {16, 78 + 90 * i, 50, 39};
             SDL_Rect rectRomImage = {70, 70 + 90 * i, 80, 80};
@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
                 printf_debug("found %d roms\n", play_activities->count);
                 imageRomPlayTime = TTF_RenderUTF8_Blended(font40, play_time_total_formatted, color_white);
                 imageRomName = TTF_RenderUTF8_Blended(fontRomName25, play_activities->play_activity[index]->rom->name, color_white);
-                snprintf(details, 256, "count: %d last: %s, average: %d:%02d", play_activities->play_activity[index]->play_count, play_activities->play_activity[index]->last_played_at, play_activities->play_activity[index]->play_time_average/3600, (play_activities->play_activity[index]->play_time_average - ((play_activities->play_activity[index]->play_time_average/3600)*3600)) / 60;
+                snprintf(details, 256, "count: %d last: %s, average: %d:%02d", play_activities->play_activity[index]->play_count, play_activities->play_activity[index]->last_played_at, play_activities->play_activity[index]->play_time_average/3600, (play_activities->play_activity[index]->play_time_average - ((play_activities->play_activity[index]->play_time_average/3600)*3600)) / 60);
                 imageRomDetails = TTF_RenderUTF8_Blended(fontRomName25, details, color_white);
                 SDL_Rect rectPosition = {16, 78 + 90 * i, 50, 39};
                 SDL_Rect rectRomImage = {70, 70 + 90 * i, 80, 80};
