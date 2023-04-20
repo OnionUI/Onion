@@ -85,7 +85,7 @@ sqlite3_stmt * play_activity_db_prepare(char *sql) {
 
 PlayActivities * play_activity_find_all(void) {
     PlayActivities *play_activities = NULL;
-    char *sql = "SELECT rom.id, rom.type, rom.name, rom.file_path, rom.image_path, COUNT(play_activity.ROWID) AS play_count_total, SUM(play_activity.play_time) AS play_time_total, play_time_total/play_count AS play_time_average, datetime(MIN(play_activity.created_at), 'unixepoch') AS first_played_at, datetime(MAX(play_activity.created_at), 'unixepoch') AS last_played_at FROM rom LEFT JOIN play_activity ON rom.id = play_activity.rom_id GROUP BY rom.id ORDER BY play_time_total DESC;";
+    char *sql = "SELECT rom.id, rom.type, rom.name, rom.file_path, rom.image_path, COUNT(play_activity.ROWID) AS play_count_total, SUM(play_activity.play_time) AS play_time_total, SUM(play_activity.play_time)/COUNT(play_activity.ROWID) AS play_time_average, datetime(MIN(play_activity.created_at), 'unixepoch') AS first_played_at, datetime(MAX(play_activity.created_at), 'unixepoch') AS last_played_at FROM rom LEFT JOIN play_activity ON rom.id = play_activity.rom_id GROUP BY rom.id ORDER BY play_time_total DESC;";
     sqlite3_stmt *stmt = play_activity_db_prepare(sql);
     int play_activity_count = 0;
     while (sqlite3_step(stmt) == SQLITE_ROW) {
