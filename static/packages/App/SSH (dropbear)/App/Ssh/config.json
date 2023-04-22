@@ -3,5 +3,5 @@
 "icon":"ssh.png",
 "iconsel":"",
 "launch":"launch.sh",
-"description":"SSH/SFTP Server (dropbear/gesftpserver)"
+"description":"SSH/SFTP Server"
 }
