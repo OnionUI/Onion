@@ -15,6 +15,7 @@
 
 // DEPRECATE
 #define PLAY_ACTIVITY_DB_PATH "/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db"
+#define PLAY_ACTIVITY_DB_TMP_PATH "/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity_tmp.db"
 // DEPRECATE
 
 typedef struct ROM ROM;
@@ -161,7 +162,12 @@ void play_activity_db_V3_upgrade(void) {
         char name[100];
         int play_time;
     };
-    FILE *play_activity_db_V3 = fopen(PLAY_ACTIVITY_DB_PATH, "rb");
+    FILE *play_activity_db_V3 = NULL;
+    if (exists(PLAY_ACTIVITY_DB_PATH)) {
+        play_activity_db_V3 = fopen(PLAY_ACTIVITY_DB_PATH, "rb");
+    } else if (exists(PLAY_ACTIVITY_DB_TMP_PATH)) {
+        play_activity_db_V3 = fopen(PLAY_ACTIVITY_DB_TMP_PATH, "rb");
+    }
     if (play_activity_db_V3 != NULL) {
         struct PlayActivityV3 play_activity_v3[1000];
         while (fread(play_activity_v3, sizeof(play_activity_v3), 1, play_activity_db_V3) == 1) {
