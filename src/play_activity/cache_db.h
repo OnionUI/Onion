@@ -57,7 +57,7 @@ CacheDBItem * cache_db_find(char *cache_db_item_file_path) {
     char *type = basename(dirname(strdup((char *)cache_db_item_file_path)));
     char *cache_db_file_path = malloc(strlen(type) * 2 + 29);
     snprintf(cache_db_file_path, strlen(type) * 2 + 29, "/mnt/SDCARD/Roms/%s/%s_cache2.db", type, type);
-    char *sql = sqlite3_mprintf("SELECT * FROM %q_roms WHERE path LIKE '%%%q%%';", type, cache_db_item_file_path);
+    char *sql = sqlite3_mprintf("SELECT * FROM %q_roms WHERE path LIKE '%%%q%%' OR disp = '%q' LIMIT 1;", type, cache_db_item_file_path, cache_db_item_file_path);
     sqlite3_stmt *stmt = cache_db_prepare(cache_db_file_path, sql);
     if (sqlite3_step(stmt) == SQLITE_ROW) {
         printf_debug("cache item found: %s\n", strdup((const char *)sqlite3_column_text(stmt, 1)));
