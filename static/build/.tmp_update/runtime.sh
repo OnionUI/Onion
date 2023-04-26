@@ -67,7 +67,12 @@ main() {
     touch /tmp/network_changed
     sync
     check_networking
-
+    
+    check_httpstate
+    check_ftpstate
+    check_telnetstate
+    #check_sshstate
+    
     # Auto launch
     if [ ! -f $sysdir/config/.noAutoStart ]; then
         state_change
@@ -99,7 +104,12 @@ main() {
         state_change
         check_main_ui
 
-        check_networking
+        check_networking   
+        check_ftpstate
+        #check_sshstate
+        check_telnetstate
+        check_httpstate
+             
 
         state_change
         check_game_menu
@@ -108,6 +118,11 @@ main() {
         check_game
 
         check_networking
+        check_ftpstate
+        #check_sshstate
+        check_telnetstate
+        check_httpstate
+                
 
         state_change
         check_switcher
@@ -128,6 +143,7 @@ clear_logs() {
         ./logs/gameSwitcher.log \
         ./logs/keymon.log \
         ./logs/game_list_options.log \
+		./logs/network.log
         2> /dev/null
 }
 
@@ -542,6 +558,99 @@ runifnecessary() {
         cnt=`expr $cnt + 1`
         a=`pgrep $1`
     done
+}
+
+check_httpstate() { # Starts Filebrowser if the toggle in tweaks is set on
+    if [ ! -f $sysdir/config/.HTTPState ]; then
+        if pgrep filebrowser > /dev/null ; then
+            pkill -9 filebrowser
+			echo "Filebrowser: Killed" >> $sysdir/logs/network.log
+        else
+            return
+        fi
+    else
+        if pgrep filebrowser > /dev/null ; then
+			echo "Filebrowser: Already running" >> $sysdir/logs/network.log
+            return
+        else
+            echo "Filebrowser: Checking for an IP address and trying to start" >> $sysdir/logs/network.log
+            while true; do # Need to loop this, wifi takes a while to start on boot so filebrowser will fail if there's no IP to bind against.. check if wifi is even turned on in settings
+                if [ $(/customer/app/jsonval wifi) -eq 1 ]; then #Checks if the toggle for WIFI is turned on.
+					IP=$(ip route get 1 | awk '{print $NF;exit}')
+					if [ "$IP" = "" ]; then
+						sleep 0.3 # Wait for an IP address to be assigned
+					else
+						pkill -9 udhcpc
+						cd /mnt/SDCARD/App/FileBrowser/
+						/mnt/SDCARD/App/FileBrowser/filebrowser config set --branding.name "Onion" &
+						/mnt/SDCARD/App/FileBrowser/filebrowser config set --branding.files "/mnt/SDCARD/App/FileBrowser/theme" &
+						/mnt/SDCARD/App/FileBrowser/filebrowser -p 80 -a $IP -r /mnt/SDCARD &
+						echo "Filebrowser: Starting filebrowser with $IP" >> $sysdir/logs/network.log
+						break 
+					fi
+				else
+					echo "Filebrowser: Wifi is turned off, disabling the toggle for HTTP FS and killing the process" >> $sysdir/logs/network.log
+					rm $sysdir/config/.HTTPState
+					pkill -9 filebrowser
+					return
+				fi
+            done &
+        fi
+    fi
+}
+
+check_telnetstate() { # Starts telnet if the toggle is set to on
+    if [ ! -f $sysdir/config/.TelnetState ]; then
+        if pgrep telnetd > /dev/null ; then
+            pkill -9 telnetd
+			echo "Telnet: Killed" >> $sysdir/logs/network.log
+        else
+            return
+        fi
+    else
+        if  pgrep telnetd > /dev/null ; then
+			echo "Telnet: Already running" >> $sysdir/logs/network.log
+            return
+        else
+			if [ $(/customer/app/jsonval wifi) -eq 1 ]; then #Checks if the toggle for WIFI is turned on.
+				echo -e "Telnet: Starting telnet" >> $sysdir/logs/network.log # Telnet is generally already running when you boot your MMP, you won't see this hit logs unless you bounce it
+				cd /mnt/SDCARD #Set this otherwise you'll drop in at the last cd which is retroarch
+				telnetd -l sh
+			else
+				echo "Telnet: Wifi is turned off, disabling the toggle for Telnet and killing the process" >> $sysdir/logs/network.log
+				rm $sysdir/config/.TelnetState
+				pkill -9 telnetd
+				return
+			fi
+        fi
+    fi
+}
+
+check_ftpstate() { # Starts bftpd if the toggle is set to on
+    if [ ! -f $sysdir/config/.FTPState ]; then
+        if pgrep bftpd > /dev/null ; then
+			pkill -9 bftpd
+			echo "FTP: Killed" >> $sysdir/logs/network.log
+        else
+            return
+        fi
+    else
+        if  pgrep bftpd > /dev/null ; then
+			echo "FTP: Already running" >> $sysdir/logs/network.log
+            return
+        else
+			if [ $(/customer/app/jsonval wifi) -eq 1 ]; then #Checks if the toggle for WIFI is turned on.
+				echo "FTP: Starting bftpd" >> $sysdir/logs/network.log
+				/mnt/SDCARD/App/Ftp/bftpd -d -c /mnt/SDCARD/App/Ftp/bftpd.conf &
+			else
+				echo "FTP: Wifi is turned off, disabling the toggle for FTP and killing the process" >> $sysdir/logs/network.log
+				rm $sysdir/config/.FTPState
+				pkill -9 bftpd
+				return
+			fi
+        fi
+        
+    fi
 }
 
 check_networking() {

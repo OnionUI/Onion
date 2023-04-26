@@ -39,6 +39,10 @@ static struct settings_s {
     bool menu_button_haptics;
     bool low_battery_autosave;
     bool low_battery_warning;
+	bool http_state;
+    bool ssh_state;
+    bool ftp_state;
+    bool telnet_state;				
     int low_battery_warn_at;
     int time_skip;
     int vibration;
@@ -50,6 +54,7 @@ static struct settings_s {
     int ingame_single_press;
     int ingame_long_press;
     int ingame_double_press;
+
     char mainui_button_x[JSON_STRING_LEN];
     char mainui_button_y[JSON_STRING_LEN];
 } settings;
@@ -86,6 +91,10 @@ void _settings_reset(void)
     settings.vibration = 2;
     settings.startup_tab = 0;
     settings.startup_application = 0;
+	settings.http_state = false;
+    settings.ssh_state = false;
+    settings.ftp_state = false; 
+    settings.telnet_state = false;	
     // Menu button actions
     settings.mainui_single_press = 1;
     settings.mainui_long_press = 0;
@@ -156,6 +165,11 @@ void settings_load(void)
     settings.show_recents = config_flag_get(".showRecents");
     settings.show_expert = config_flag_get(".showExpert");
     settings.low_battery_autosave = !config_flag_get(".noLowBatteryAutoSave");
+    settings.http_state = config_flag_get(".HTTPState");
+    settings.ssh_state = config_flag_get(".SSHState");
+    settings.ftp_state = config_flag_get(".FTPState");
+    settings.telnet_state = config_flag_get(".TelnetState");	
+    
 
     if (config_flag_get(
             ".noBatteryWarning")) // flag is deprecated, but keep compatibility
@@ -258,6 +272,10 @@ void settings_save(void)
     config_flag_set(".showRecents", settings.show_recents);
     config_flag_set(".showExpert", settings.show_expert);
     config_flag_set(".noLowBatteryAutoSave", !settings.low_battery_autosave);
+	config_flag_set(".HTTPState", settings.http_state);
+    config_flag_set(".SSHState", settings.ssh_state);
+    config_flag_set(".FTPState", settings.ftp_state);
+    config_flag_set(".TelnetState", settings.telnet_state);															  
     config_setNumber("battery/warnAt", settings.low_battery_warn_at);
     config_setNumber("startup/app", settings.startup_application);
     config_setNumber("startup/addHours", settings.time_skip);
