@@ -570,7 +570,6 @@ check_httpstate() { # Starts Filebrowser if the toggle in tweaks is set on
         fi
     else
         if pgrep filebrowser > /dev/null ; then
-			echo "Filebrowser: Already running" >> $sysdir/logs/network.log
             return
         else
             echo "Filebrowser: Checking for an IP address and trying to start" >> $sysdir/logs/network.log
@@ -609,7 +608,6 @@ check_telnetstate() { # Starts telnet if the toggle is set to on
         fi
     else
         if  pgrep telnetd > /dev/null ; then
-			echo "Telnet: Already running" >> $sysdir/logs/network.log
             return
         else
 			if [ $(/customer/app/jsonval wifi) -eq 1 ]; then #Checks if the toggle for WIFI is turned on.
@@ -636,7 +634,6 @@ check_ftpstate() { # Starts bftpd if the toggle is set to on
         fi
     else
         if  pgrep bftpd > /dev/null ; then
-			echo "FTP: Already running" >> $sysdir/logs/network.log
             return
         else
 			if [ $(/customer/app/jsonval wifi) -eq 1 ]; then #Checks if the toggle for WIFI is turned on.
