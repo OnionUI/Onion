@@ -228,7 +228,7 @@ int value_getLcdVoltage(void)
         return 0;
     }
 
-    return value - 0x08;
+    return 0x0e - value;
 }
 
 void value_setLcdVoltage(void)

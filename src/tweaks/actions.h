@@ -242,15 +242,13 @@ void action_advancedSetSwapTriggers(void *pt)
 
 void action_advancedSetLcdVoltage(void *pt)
 {
-    int value = ((ListItem *)pt)->value;
+    int value = 0x0e - ((ListItem *)pt)->value;
 
-    if (value == 0) {
+    if (value == 0x0e) {
         axp_lcd_set(0x0e);
         config_flag_set(".lcdvolt", false);
         return;
     }
-
-    value += 0x08;
 
     if (value < 0x09 || value > 0x0e) {
         config_flag_set(".lcdvolt", false);
@@ -273,8 +271,6 @@ void action_advancedSetLcdVoltage(void *pt)
 
     FILE *fp;
     file_put(fp, LCD_VOLT_CONFIG, "%x", 0x0e);
-
-    msleep(200);
 }
 
 #endif // TWEAKS_ACTIONS_H__
