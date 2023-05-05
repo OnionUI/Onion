@@ -719,7 +719,7 @@ check_hotspotstate() { # Starts personal hotspot if toggle is set to on
 
 				if [ "$passphrase" = "MiyooMiniApPassword" ]; then # Check if the wpa pass is still set to the default pass, if it is change it to the serial number, if it's not then they've set a custom password, leave it alone.
 					sed -i "s/^wpa_passphrase=.*/wpa_passphrase=$serial_number/" "$sysdir/config/hostapd.conf"
-					echo "Hotspot: Default key remoed" >> $sysdir/logs/network.log
+					echo "Hotspot: Default key removed" >> $sysdir/logs/network.log
 				else
 					echo "Hotspot: Key not default, not editing" >> $sysdir/logs/network.log
 				fi
@@ -727,7 +727,8 @@ check_hotspotstate() { # Starts personal hotspot if toggle is set to on
 				# Start AP and dhcp server
 				ifconfig wlan1 up # Bring up wlan1
 				$sysdir/bin/hostapd -P /var/run/hostapd.pid -B -i wlan1 $sysdir/config/hostapd.conf & # Start hotspot on wlan1 with config file
-				gatewayaddr=$(grep -E '^dhcp-option=3,' "$sysdir/config/dnsmasq.conf" | cut -d',' -f2) # Pull the gateway from the dnsmasq file (incase it's been changed)
+				gatewayaddr=$(grep -E '^dhcp-range=' "$sysdir/config/dnsmasq.conf" | cut -d',' -f1 | cut -d'=' -f2) # Pull the gateway from the dnsmasq file (in case it's been changed)
+				gatewayaddr=$(echo $gatewayaddr | awk -F'.' -v OFS='.' '{$NF-=1; print}')
 				subnetmask=$(grep -E '^dhcp-range=.*,[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+,' "$sysdir/config/dnsmasq.conf" | cut -d',' -f3) # Pull the subnetmask from the dnsmasq file (incase it's been changed)
 				ifconfig wlan1 $gatewayaddr netmask $subnetmask # Set gateway/subnet IP on wlan1
 				$sysdir/bin/dnsmasq --conf-file=$sysdir/config/dnsmasq.conf -u root & # Start DHCP server with config file
