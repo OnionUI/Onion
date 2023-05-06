@@ -68,7 +68,7 @@ main() {
     sync
 	
 	
-    # check_networking
+    check_networking
 	check_tzid
 	write_tzid
 	check_ftpstate
@@ -112,7 +112,7 @@ main() {
 
 		check_tzid
 		write_tzid
-        # check_networking   
+        check_networking   
 		check_ftpstate
 		check_sshstate
 		check_telnetstate
@@ -127,13 +127,14 @@ main() {
 
 		check_tzid
 		write_tzid
-        # check_networking
+        
 		check_ftpstate
 		check_sshstate
 		check_telnetstate
 		check_httpstate &
 		check_hotspotstate & # background this, it waits 10 seconds before killing wpasupp to start the hotspot, we have to do this or wpa_supplicant restarts during the hotspot starting and stops it grabbing wlan0
 		check_ntpstate
+		check_networking
 		
         state_change
         check_switcher
@@ -671,7 +672,6 @@ check_httpstate() {
 			# Starts filebrowser bound to 0.0.0.0 so we don't need to mess around binding different IP's
 			# This cuts down heavily on lag in the UI (as we don't need to run commands to check/grab IP's) and allows the menu to work more seamlessly
 			if [ $(/customer/app/jsonval wifi) -eq 1 ]; then 
-				pkill -9 udhcpc
 				cd /mnt/SDCARD/App/FileBrowser/
 				/mnt/SDCARD/App/FileBrowser/filebrowser config set --branding.name "Onion" &
 				/mnt/SDCARD/App/FileBrowser/filebrowser config set --branding.files "/mnt/SDCARD/App/FileBrowser/theme" &
@@ -839,36 +839,36 @@ check_ntpstate() {
 }
 
 
-# check_networking() {
-    # if [ ! -f /tmp/network_changed ]; then
-        # return
-    # fi
-	# rm /tmp/network_changed
+check_networking() {
+    if [ ! -f /tmp/network_changed ]; then
+        return
+    fi
+	rm /tmp/network_changed
 
-    # echo -e "\n:: Update networking"
+    echo -e "\n:: Update networking"
 	
 
-	# if [ $(/customer/app/jsonval wifi) -eq 1 ]; then
-		# if ! ifconfig wlan0 || [ -f /tmp/restart_wifi ]; then
-			# if [ -f /tmp/restart_wifi ]; then
-				# pkill -9 wpa_supplicant
-				# pkill -9 udhcpc
-				# rm /tmp/restart_wifi
-			# fi
+	if [ $(/customer/app/jsonval wifi) -eq 1 ]; then
+		if ! ifconfig wlan0 || [ -f /tmp/restart_wifi ]; then
+			if [ -f /tmp/restart_wifi ]; then
+				pkill -9 wpa_supplicant
+				pkill -9 udhcpc
+				rm /tmp/restart_wifi
+			fi
 
-			# echo "Initializing Wifi..."
-			# /customer/app/axp_test wifion
-			# sleep 2 
-			# ifconfig wlan0 up
-			# $miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
-			# udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
-		# fi
-	# else
-		# pkill -9 wpa_supplicant
-		# pkill -9 udhcpc
-		# /customer/app/axp_test wifioff
-	# fi
+			echo "Initializing Wifi..."
+			/customer/app/axp_test wifion
+			sleep 2 
+			ifconfig wlan0 up
+			$miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
+			udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
+		fi
+	else
+		pkill -9 wpa_supplicant
+		pkill -9 udhcpc
+		/customer/app/axp_test wifioff
+	fi
 
-# }
+}
 
 main
