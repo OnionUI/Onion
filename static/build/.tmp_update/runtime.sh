@@ -677,7 +677,6 @@ check_httpstate() {
 				/mnt/SDCARD/App/FileBrowser/filebrowser config set --branding.files "/mnt/SDCARD/App/FileBrowser/theme" &
 				/mnt/SDCARD/App/FileBrowser/filebrowser -p 80 -a 0.0.0.0 -r /mnt/SDCARD &
 				echo "$(date) Filebrowser: Starting filebrowser listening on 0.0.0.0 to accept all traffic" >> $sysdir/logs/network.log
-				break 
 			else
 				echo "$(date) Filebrowser: Wifi is turned off, disabling the toggle for HTTP FS and killing the process" >> $sysdir/logs/network.log
 				rm $sysdir/config/.HTTPState
@@ -723,7 +722,6 @@ start_hotspot() {
 	ip route add default via $gateway0addr # Set a default gateway (this is important as Retroarch will only send out discovers if one is set, even if it's not actually a valid device)
 	$sysdir/bin/dnsmasq --conf-file=$sysdir/config/dnsmasq.conf -u root & # Start DHCP server with config file
 	echo "$(date) Hotspot: Started with gateway of: $hotspot0addr, subnet of: $subnetmask" >> $sysdir/logs/network.log
-
 }
 
 # Starts personal hotspot if toggle is set to on
