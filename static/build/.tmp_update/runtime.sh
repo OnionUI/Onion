@@ -717,8 +717,10 @@ start_hotspot() {
 	$sysdir/bin/hostapd -P /var/run/hostapd.pid -B -i wlan0 $sysdir/config/hostapd.conf & # Start hotspot on wlan1 with config file
 	hotspot0addr=$(grep -E '^dhcp-range=' "$sysdir/config/dnsmasq.conf" | cut -d',' -f1 | cut -d'=' -f2) # pull the first dhcp address in the range and minus 1 for the wlan1 interface ip
 	hotspot0addr=$(echo $hotspot0addr | awk -F'.' -v OFS='.' '{$NF-=1; print}') # pull the first dhcp address in the range and minus 1 for the wlan1 interface ip
+	gateway0addr=$(grep -E '^dhcp-option=3' $sysdir/config/dnsmasq.conf | awk -F, '{print $2}')
 	subnetmask=$(grep -E '^dhcp-range=.*,[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+,' "$sysdir/config/dnsmasq.conf" | cut -d',' -f3) # Pull the subnetmask from the dnsmasq file (incase it's been changed)
 	ifconfig wlan0 $hotspot0addr netmask $subnetmask # Set gateway/subnet IP on wlan0
+	ip route add default via $gateway0addr # Set a default gateway (this is important as Retroarch will only send out discovers if one is set, even if it's not actually a valid device)
 	$sysdir/bin/dnsmasq --conf-file=$sysdir/config/dnsmasq.conf -u root & # Start DHCP server with config file
 	echo "$(date) Hotspot: Started with gateway of: $hotspot0addr, subnet of: $subnetmask" >> $sysdir/logs/network.log
 
