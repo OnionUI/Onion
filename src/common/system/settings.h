@@ -124,7 +124,6 @@ void _settings_load_mainui(void)
     cJSON *json_root = cJSON_Parse(json_str);
 
     json_getInt(json_root, "vol", &settings.volume);
-    json_getInt(json_root, "mute", &settings.mute);
     json_getInt(json_root, "bgmvol", &settings.bgm_volume);
     json_getInt(json_root, "brightness", &settings.brightness);
     json_getInt(json_root, "hibernate", &settings.sleep_timer);
@@ -156,6 +155,7 @@ void settings_load(void)
     settings.show_recents = config_flag_get(".showRecents");
     settings.show_expert = config_flag_get(".showExpert");
     settings.low_battery_autosave = !config_flag_get(".noLowBatteryAutoSave");
+    settings.mute = config_flag_get(".muteVolume");
 
     if (config_flag_get(
             ".noBatteryWarning")) // flag is deprecated, but keep compatibility
@@ -258,6 +258,7 @@ void settings_save(void)
     config_flag_set(".showRecents", settings.show_recents);
     config_flag_set(".showExpert", settings.show_expert);
     config_flag_set(".noLowBatteryAutoSave", !settings.low_battery_autosave);
+    config_flag_set(".muteVolume", settings.mute);
     config_setNumber("battery/warnAt", settings.low_battery_warn_at);
     config_setNumber("startup/app", settings.startup_application);
     config_setNumber("startup/addHours", settings.time_skip);
