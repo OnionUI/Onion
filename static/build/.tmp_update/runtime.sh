@@ -725,7 +725,6 @@ start_hotspot() {
 		sleep 5
 		pkill -9 wpa_supplicant 
 		pkill -9 udhcpc 
-		return
 	fi
 	
 	sleep 5 
