@@ -176,7 +176,7 @@ int batteryPercentage(int value)
 static void *batteryWarning_thread(void *param)
 {
     while (1) {
-        display_drawFrame(0x00FF0000); // draw red frame
+        display_drawBatteryIcon(0x00FF0000, 15, 450, 10, 0x00FF0000); // draw red battery icon
         usleep(0x4000);
     }
     return 0;
