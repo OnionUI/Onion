@@ -67,7 +67,7 @@ main() {
     touch /tmp/network_changed
     sync
 	
-	
+ 
     check_networking 
 	check_tzid 
 	write_tzid 
@@ -78,7 +78,7 @@ main() {
 	check_httpstate
 	
 	rm $sysdir/config/.HotspotState  # dont start hotspot at boot
-
+	
     # Auto launch
     if [ ! -f $sysdir/config/.noAutoStart ]; then
         state_change
@@ -104,6 +104,14 @@ main() {
     state_change
     check_switcher
     set_startup_tab
+	
+	# Set filebrowser branding to onion
+	CURRENT_DIR=$(pwd)
+	cd /mnt/SDCARD/App/FileBrowser/
+	/mnt/SDCARD/App/FileBrowser/filebrowser config set --branding.name "Onion" 
+	/mnt/SDCARD/App/FileBrowser/filebrowser config set --branding.files "/mnt/SDCARD/App/FileBrowser/theme" 
+	cd "$OLDPWD"
+
 
     # Main runtime loop
     while true; do
@@ -117,7 +125,7 @@ main() {
 		check_sshstate 
 		check_telnetstate 
 		check_httpstate & 
-		check_ntpstate 
+		check_ntpstate &
               
         state_change
         check_game_menu
@@ -133,7 +141,7 @@ main() {
 		check_telnetstate 
 		check_httpstate & 
 		check_hotspotstate &
-		check_ntpstate 
+		check_ntpstate &
 		check_networking 
 		
         state_change
@@ -689,8 +697,8 @@ check_httpstate() {
 			# This cuts down heavily on lag in the UI (as we don't need to run commands to check/grab IP's) and allows the menu to work more seamlessly
 			if [ $(/customer/app/jsonval wifi) -eq 1 ]; then 
 				cd /mnt/SDCARD/App/FileBrowser/
-				/mnt/SDCARD/App/FileBrowser/filebrowser config set --branding.name "Onion" 
-				/mnt/SDCARD/App/FileBrowser/filebrowser config set --branding.files "/mnt/SDCARD/App/FileBrowser/theme" 
+					  
+																																			 
 				/mnt/SDCARD/App/FileBrowser/filebrowser -p 80 -a 0.0.0.0 -r /mnt/SDCARD &
 				echo "$(date) Filebrowser: Starting filebrowser listening on 0.0.0.0 to accept all traffic" >> $sysdir/logs/network.log
 			else
@@ -712,8 +720,14 @@ start_hotspot() {
 		rm $sysdir/config/.NTPState
 	fi
 	
-	pkill -9 hostapd 
-	pkill -9 dnsmasq
+	if pgrep hostapd >/dev/null; then
+			echo "$(date) Hotspot: MainUI has taken wlan0 while we're supposed to be in AP mode, killing wpa_supp again." >> $sysdir/logs/network.log
+		sleep 5
+		pkill -9 wpa_supplicant 
+		pkill -9 udhcpc 
+		return
+	fi
+	
 	sleep 5 
 	
 	serial_number=$( { /config/riu_r 20 18 | awk 'NR==2'; /config/riu_r 20 17 | awk 'NR==2'; /config/riu_r 20 16 | awk 'NR==2'; } | sed 's/0x//g' | tr -d '[:space:]' ) 
@@ -752,9 +766,10 @@ check_hotspotstate() {
             ifconfig wlan0 up
             $miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf &
             udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
-			
+   
 			if [ -f /tmp/ntprestore ]; then
 				touch $sysdir/config/.NTPState
+				sync
 			fi
 			
 		else
@@ -773,7 +788,7 @@ check_hotspotstate() {
 				# Hotspot will come back up it just takes a little longer.
 				sleep 10 
 				if $sysdir/bin/iw dev wlan0 info | grep type | grep -q "type managed"; then
-					echo "$(date) Hotspot: Something has grabbed wlan0 when we're supposed to be in AP mode, restarting hotspot" >> $sysdir/logs/network.log
+																														 
 					start_hotspot &
 				else
 					return
@@ -872,7 +887,7 @@ check_networking() {
     fi
 	rm /tmp/network_changed
 
-    echo -e "\n:: Update networking"
+    echo "$(date) Network Checker: Update networking" >> $sysdir/logs/network.log
 	
 
 	if [ $(/customer/app/jsonval wifi) -eq 1 ]; then
@@ -882,8 +897,8 @@ check_networking() {
 				pkill -9 udhcpc
 				rm /tmp/restart_wifi
 			fi
-
-			echo "Initializing Wifi..."
+ 
+			echo "$(date) Network Checker: Initializing Wifi..." >> $sysdir/logs/network.log
 			/customer/app/axp_test wifion
 			sleep 2 
 			ifconfig wlan0 up
