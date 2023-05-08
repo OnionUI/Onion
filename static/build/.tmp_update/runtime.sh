@@ -697,8 +697,8 @@ check_httpstate() {
 			# This cuts down heavily on lag in the UI (as we don't need to run commands to check/grab IP's) and allows the menu to work more seamlessly
 			if [ $(/customer/app/jsonval wifi) -eq 1 ]; then 
 				cd /mnt/SDCARD/App/FileBrowser/
-					  
-																																			 
+	   
+																														 
 				/mnt/SDCARD/App/FileBrowser/filebrowser -p 80 -a 0.0.0.0 -r /mnt/SDCARD &
 				echo "$(date) Filebrowser: Starting filebrowser listening on 0.0.0.0 to accept all traffic" >> $sysdir/logs/network.log
 			else
@@ -723,6 +723,8 @@ start_hotspot() {
 	if pgrep hostapd >/dev/null; then
 			echo "$(date) Hotspot: MainUI has taken wlan0 while we're supposed to be in AP mode, killing wpa_supp again." >> $sysdir/logs/network.log
 		sleep 5
+		pkill -9 hostapd 
+		pkill -9 dnsmasq
 		pkill -9 wpa_supplicant 
 		pkill -9 udhcpc 
 	fi
@@ -765,7 +767,7 @@ check_hotspotstate() {
             ifconfig wlan0 up
             $miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf &
             udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
-   
+								  
 			if [ -f /tmp/ntprestore ]; then
 				touch $sysdir/config/.NTPState
 				sync
@@ -787,7 +789,7 @@ check_hotspotstate() {
 				# Hotspot will come back up it just takes a little longer.
 				sleep 10 
 				if $sysdir/bin/iw dev wlan0 info | grep type | grep -q "type managed"; then
-																														 
+		
 					start_hotspot &
 				else
 					return
@@ -888,7 +890,7 @@ check_networking() {
 
     echo "$(date) Network Checker: Update networking" >> $sysdir/logs/network.log
 	
-
+													   
 	if [ $(/customer/app/jsonval wifi) -eq 1 ]; then
 		if ! ifconfig wlan0 || [ -f /tmp/restart_wifi ]; then
 			if [ -f /tmp/restart_wifi ]; then
