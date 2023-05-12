@@ -751,7 +751,7 @@ start_hotspot() {
 	ifconfig wlan0 $hotspot0addr netmask $subnetmask 
 	ip route add default via $gateway0addr
 	$sysdir/bin/dnsmasq --conf-file=$sysdir/config/dnsmasq.conf -u root & 
-	echo "$(date) Hotspot: Started with gateway of: $hotspot0addr, subnet of: $subnetmask" >> $sysdir/logs/network.log
+	echo "$(date) Hotspot: Started with IP of: $hotspot0addr, subnet of: $subnetmask" >> $sysdir/logs/network.log
 }
 
 # Starts personal hotspot if toggle is set to on
