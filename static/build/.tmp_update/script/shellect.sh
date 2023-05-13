@@ -193,8 +193,8 @@ arg_format() {
 
     # overall display rule
     case "$cur" in
-	'') esc CUR 5; esc SGR '' 2 ;;
-	*) esc CUR 2; esc SGR 35 1; printf '>'; esc SGR 33 1; esc CUR 2 ;;
+	'') esc CUR 2; esc SGR '' 2 ;;
+	*) esc CUR -2; esc SGR 35 1; printf '>'; esc SGR 33 1; esc CUR 1 ;;
     esac
 
     # content display format

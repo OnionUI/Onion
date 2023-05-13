@@ -131,6 +131,8 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/read_uuid && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/detectKey && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/axp && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/pressMenu2Kill && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/pngScale && BUILD_DIR=$(BIN_DIR) make
 # Build dependencies for installer
 	@mkdir -p $(INSTALLER_DIR)/bin
 	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(INSTALLER_DIR)/bin/ VERSION=$(VERSION) make

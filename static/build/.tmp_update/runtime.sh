@@ -194,7 +194,11 @@ launch_game_menu() {
     echo -e "\n\n:: GLO\n\n"
 
     cd $sysdir
-    ./script/game_list_options.sh | tee -a ./logs/game_list_options.log
+    if [ -f ./config/.logging ]; then
+        ./script/game_list_options.sh >> ./logs/game_list_options.log
+    else
+        ./script/game_list_options.sh
+    fi
 
     if [ $? -ne 0 ]; then
         echo -e "\n\n< Back to MainUI\n\n"
