@@ -1,14 +1,15 @@
-#include <stdio.h>
-#include <string.h>
 #include <fcntl.h>
 #include <linux/input.h>
-#include <stdlib.h>
 #include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #define KEY_ESC 1
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[])
+{
     if (argc < 2) {
         printf("Usage: %s program_name\n", argv[0]);
         return 1;

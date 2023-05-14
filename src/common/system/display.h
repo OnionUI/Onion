@@ -168,18 +168,19 @@ void display_drawFrame(uint32_t color)
 //
 //    Draw a battery icon
 //
-void display_drawBatteryIcon(uint32_t color, int x, int y, int level, uint32_t fillColor)
+void display_drawBatteryIcon(uint32_t color, int x, int y, int level,
+                             uint32_t fillColor)
 {
     uint32_t *ofs = fb_addr;
     int i, j;
 
     // Draw battery body wireframe
     for (i = x; i < x + 30; i++) {
-        ofs[i + y * 640] = color; // Top border
+        ofs[i + y * 640] = color;        // Top border
         ofs[i + (y + 14) * 640] = color; // Bottom border
     }
     for (j = y; j < y + 15; j++) {
-        ofs[x + j * 640] = color; // Left border
+        ofs[x + j * 640] = color;      // Left border
         ofs[x + 29 + j * 640] = color; // Right border
     }
 
