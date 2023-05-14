@@ -70,66 +70,43 @@ Menu_Config_ScreenscraperAccount()
     fi
     
     
-    if [ "$userStored" = "false" ]; then
-        while true; do
-    	    Mychoice=$( echo -e "No\nYes\nScreenscraper information" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "     --== SCREENSCRAPER ACCOUNT ==--" -b "Press A to validate your choice.")
-            
-            if [ "$Mychoice" = "Yes" ]; then
-                clear
-                echo -e "Press X to display the keyboard and \nenter your screenscraper username\n\n"
-                read -p "username : " userSS
-                clear
-                
-                echo -e "Press X to display the keyboard and \nenter your screenscraper password\n\n"
-                read -p "password : " passSS
-                clear
-                
-                config=$(cat $ScraperConfigFile)
-                config=$(echo "$config" | jq --arg user "$userSS" --arg pass "$passSS" '.screenscraper_username = $user | .screenscraper_password = $pass')
-                echo "$config" > $ScraperConfigFile
-                
-            elif [ "$Mychoice" = "Screenscraper information" ]; then
-                Screenscraper_information
-            else
-                break
-            fi
-        done
-    else
+
         while true; do
         
-        	    Mychoice=$( echo -e "Username : $userSS\nPassword : xxxx\nScreenscraper information\nBack to configuration menu." | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "     --== SCREENSCRAPER ACCOUNT ==--" -b "Press A to validate your choice.")
-                
-                case "$Mychoice" in
-                    *Username\ :*)
-                        clear
-                        echo -e "Press X to display the keyboard and \nenter your screenscraper username\n\n"
-                        read -p "username : " userSS
-                        ;;
-                    *Password\ :*)
-                        clear
-                        echo -e "Press X to display the keyboard and \nenter your screenscraper password\n\n"
-                        read -p "password : " passSS
-                        ;;
-                    *Screenscraper\ information*)
-                        Screenscraper_information
-                        ;;
-                    *Back\ to\ configuration\ menu.*)
-                        Menu_Config
-                        break
-                        ;;
-                    *)
-                        false
-                        ;;
-                esac
+			Mychoice=$( echo -e "Username : $userSS\nPassword : xxxx\nScreenscraper information\nBack to configuration menu." | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "     --== SCREENSCRAPER ACCOUNT ==--" -b "Press A to validate your choice.")
+			
+			case "$Mychoice" in
+				*Username\ :*)
+					clear
+					echo -e "Press X to display the keyboard and \nenter your screenscraper username\n\n"
+					read -p "username : " userSS
+					;;
+				*Password\ :*)
+					clear
+					echo -e "Press X to display the keyboard and \nenter your screenscraper password\n\n"
+					read -p "password : " passSS
+					;;
+				*Screenscraper\ information*)
+					Screenscraper_information
+					;;
+				*Back\ to\ configuration\ menu.*)
+					clear
+					Menu_Config
+					break
+					;;
+				*)
+					false
+					;;
+			esac
 
-                
-    
-                config=$(cat $ScraperConfigFile)
-                config=$(echo "$config" | jq --arg user "$userSS" --arg pass "$passSS" '.screenscraper_username = $user | .screenscraper_password = $pass')
-                echo "$config" > $ScraperConfigFile
+			
+
+			config=$(cat $ScraperConfigFile)
+			config=$(echo "$config" | jq --arg user "$userSS" --arg pass "$passSS" '.screenscraper_username = $user | .screenscraper_password = $pass')
+			echo "$config" > $ScraperConfigFile
                
         done
-    fi
+
     clear
 }
 
@@ -415,5 +392,3 @@ Menu_Main
 
 
 
-
-      
