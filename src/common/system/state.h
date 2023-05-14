@@ -194,7 +194,7 @@ void write_mainui_state(MainUIState state, int currpos, int total)
     page_end = page_start + page_size - 1;
 
     sprintf(state_str,
-            "{\"list\":[{\"title\":156,\"type\":0,\"currpos\":%d,\"pagestart\":"
+            "{\"list\":[{\"title\":157,\"type\":0,\"currpos\":%d,\"pagestart\":"
             "%d,\"pageend\":%d},{\"title\":%d,\"type\":%d,\"currpos\":%d,"
             "\"pagestart\":%d,\"pageend\":%d}]}",
             main_currpos, main_page_start, main_page_end, title_num, page_type,
