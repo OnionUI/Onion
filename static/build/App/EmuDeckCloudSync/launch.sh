@@ -109,7 +109,7 @@ if [ $emudeck = "true" ]; then
 	
 	LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so /mnt/SDCARD/.tmp_update/bin/prompt -r \
 	-t "EmuDeck CloudSync" \
-	-m "These are the cores we will change:\nSuper Nintendo: Snex9x\nSega Systems: Genesis Plus GX\nGameBoy Advance: mGBA\nTo use old states saved using other cores\n you need set each game with the old core as default" \
+	-m "These are the cores we will change:\nSuper Nintendo: Snex9x\nSega Systems: Genesis Plus GX\nTo use old states saved using other cores\n you need set each game with the old core as default" \
 	"Next" \
 	"Exit"
 	
@@ -205,6 +205,37 @@ if [ $emudeck = "true" ]; then
 	 # we create a copy, never delete
 	 cp "$0" "$1/$filename"
 	' {} "$states_folder" \;
+	
+	#We set the EmuDeck cores
+	
+	#SNES
+	if ! [ -f /mnt/SDCARD/Emu/SFC/launch.sh.bak ]; then
+		cp /mnt/SDCARD/Emu/SFC/launch.sh /mnt/SDCARD/Emu/SFC/launch.sh.bak
+	fi	
+	sed -i 's/mednafen_supafaust_libretro/snes9x_libretro/g'/mnt/SDCARD/Emu/SFC/launch.sh
+
+	#Genesis
+	if ! [ -f /mnt/SDCARD/Emu/MD/launch.sh.bak ]; then
+		cp /mnt/SDCARD/Emu/MD/launch.sh /mnt/SDCARD/Emu/MD/launch.sh.bak
+	fi	
+	sed -i 's/picodrive_libretro/genesis_plus_gx_libretro/g'/mnt/SDCARD/Emu/MD/launch.sh
+	
+	#Master System
+	if ! [ -f /mnt/SDCARD/Emu/MS/launch.sh.bak ]; then
+		cp /mnt/SDCARD/Emu/MS/launch.sh /mnt/SDCARD/Emu/MS/launch.sh.bak
+	fi	
+	sed -i 's/picodrive_libretro/genesis_plus_gx_libretro/g'/mnt/SDCARD/Emu/MS/launch.sh
+
+		
+	#GameGear
+	if ! [ -f /mnt/SDCARD/Emu/GG/launch.sh.bak ]; then
+		cp /mnt/SDCARD/Emu/GG/launch.sh /mnt/SDCARD/Emu/GG/launch.sh.bak
+	fi	
+	sed -i 's/picodrive_libretro/genesis_plus_gx_libretro/g'/mnt/SDCARD/Emu/GG/launch.sh
+	
+	
+	
+	
 	
 	#Get Token
 	# code=$(cat ./.code_temp)
