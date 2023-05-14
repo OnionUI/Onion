@@ -67,6 +67,16 @@ main() {
     touch /tmp/network_changed
     sync
     check_networking
+    
+    #Startup scripts
+    mkdir -p "$sysdir/startup" 
+    startup_scripts=$(find "$sysdir/startup" -type f -name "*.sh")
+       
+    for startup_script in $startup_scripts; do
+    
+      sh "$startup_script"
+      
+    done
 
     # Auto launch
     if [ ! -f $sysdir/config/.noAutoStart ]; then
@@ -316,6 +326,19 @@ launch_game() {
         cd $sysdir
         playActivity "$cmd"
         
+        # EmuDeck CloudSync
+        # Always upload in the background when exiting of a game
+        # this will create a .pending_upload used to prevent Onion to shutdown if there's a pending upload
+        if [ -f /mnt/SDCARD/App/EmuDeckCloudSync/functions.sh ]; then
+            . /mnt/SDCARD/App/EmuDeckCloudSync/functions.sh
+            #CloudSync Upload
+            if emudeck_check_internet_connection && [ "$cloudEnabled" = true ]; then
+                   { emudeck_cloud_upload; } &                
+            fi
+        fi
+
+
+        
         echo "game" > /tmp/prev_state
         check_off_order "End_Save"
     else
@@ -353,7 +376,27 @@ launch_switcher() {
 }
 
 check_off_order() {
+        
     if  [ -f /tmp/.offOrder ] ; then
+                
+        # EmuDeck CloudSync, if we have internet connection
+        # we stop the power off if there's an upload in progress
+        if [ -f /mnt/SDCARD/App/EmuDeckCloudSync/functions.sh ]; then
+            . /mnt/SDCARD/App/EmuDeckCloudSync/functions.sh
+            if emudeck_check_internet_connection && [ "$cloudEnabled" = true ]; then
+                    timestamp=$(date +%s)
+                    echo $timestamp > $EmuDeckPath/.pending_upload
+                    if [ -f $EmuDeckPath/.pending_upload ]; then
+                        infoPanel --images-json /mnt/SDCARD/App/EmuDeckCloudSync/uploading.json --persistent &
+                        while [ -f $EmuDeckPath/.pending_upload ]; do
+                            emudeck_cloud_upload
+                        done
+                        touch /tmp/dismiss_info_panel
+                    fi            
+            fi
+        fi
+
+    
         pkill -9 sshd
         pkill -9 wpa_supplicant
         pkill -9 udhcpc
