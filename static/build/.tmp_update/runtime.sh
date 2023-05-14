@@ -159,8 +159,8 @@ launch_main_ui() {
 
     # MainUI launch
     cd $miyoodir/app
-    PATH="$sysdir/script/redirect:$PATH" \
-    LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib" \
+    PATH="$miyoodir/app:$PATH" \
+    LD_LIBRARY_PATH="$miyoodir/lib:/config/lib:/lib" \
     LD_PRELOAD="$miyoodir/lib/libpadsp.so" \
     ./MainUI 2>&1 > /dev/null
 
