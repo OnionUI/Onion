@@ -333,7 +333,7 @@ launch_game() {
             . /mnt/SDCARD/App/EmuDeckCloudSync/functions.sh
             #CloudSync Upload
             if emudeck_check_internet_connection && [ "$cloudEnabled" = true ]; then
-                   { emudeck_cloud_upload; } &                
+                   { emudeck_cloud_upload; }                
             fi
         fi
 
@@ -342,6 +342,18 @@ launch_game() {
         echo "game" > /tmp/prev_state
         check_off_order "End_Save"
     else
+        # EmuDeck CloudSync
+        # Always upload in the background when exiting of a game
+        # this will create a .pending_upload used to prevent Onion to shutdown if there's a pending upload
+        if [ -f /mnt/SDCARD/App/EmuDeckCloudSync/functions.sh ]; then
+            . /mnt/SDCARD/App/EmuDeckCloudSync/functions.sh
+            #CloudSync Upload
+            if emudeck_check_internet_connection && [ "$cloudEnabled" = true ]; then
+                   { emudeck_cloud_upload; } &
+            fi
+        fi
+        
+
         echo "app" > /tmp/prev_state
         check_off_order "End"
     fi
