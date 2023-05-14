@@ -13,7 +13,8 @@ void update_play_activity(const char *name, const char *relative_path)
         play_time = (int)current_time;
         fwrite(&play_time, sizeof(int), 1, file);
         fclose(file);
-    } else {
+    }
+    else {
         fread(&play_time, sizeof(int), 1, file);
         time(&current_time);
         insert_data(name, relative_path, 1, ((int)current_time - play_time));
@@ -26,9 +27,7 @@ void update_play_activity(const char *name, const char *relative_path)
     printf_debug("%s\n", "start_timer() return");
 }
 
-void usage(void) {
-    printf_debug("%s\n", "main() argc <= 1");
-}
+void usage(void) { printf_debug("%s\n", "main() argc <= 1"); }
 
 int main(int argc, char *argv[])
 {
@@ -43,7 +42,8 @@ int main(int argc, char *argv[])
     char *roms_path = "../Roms/";
     char *relative_path = strstr(file_path, roms_path);
     if (relative_path == NULL) {
-        printf_debug("'%s' must be in '%s' directory.\n", relative_path, roms_path);
+        printf_debug("'%s' must be in '%s' directory.\n", relative_path,
+                     roms_path);
         return 1;
     }
     relative_path += strlen(roms_path);
