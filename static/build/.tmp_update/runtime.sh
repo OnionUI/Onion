@@ -196,8 +196,8 @@ launch_main_ui() {
 
     # MainUI launch
     cd $miyoodir/app
-    PATH="$sysdir/script/redirect:$PATH" \
-    LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib" \
+    PATH="$miyoodir/app:$PATH" \
+    LD_LIBRARY_PATH="$miyoodir/lib:/config/lib:/lib" \
     LD_PRELOAD="$miyoodir/lib/libpadsp.so" \
     ./MainUI 2>&1 > /dev/null
 
@@ -231,7 +231,11 @@ launch_game_menu() {
     echo -e "\n\n:: GLO\n\n"
 
     cd $sysdir
-    ./script/game_list_options.sh | tee -a ./logs/game_list_options.log
+    if [ -f ./config/.logging ]; then
+        ./script/game_list_options.sh >> ./logs/game_list_options.log
+    else
+        ./script/game_list_options.sh
+    fi
 
     if [ $? -ne 0 ]; then
         echo -e "\n\n< Back to MainUI\n\n"
@@ -304,7 +308,7 @@ launch_game() {
             echo "$temp" | sed 's/\$/\\\$/g' > $sysdir/cmd_to_run.sh
         fi
 
-        playActivity "init"
+        playActivity "$rompath"
     fi
 
     # Prevent quick switch loop
@@ -341,6 +345,9 @@ launch_game() {
     # Reset CPU frequency
     echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 
+    # Reset flags
+    rm /tmp/stay_awake 2> /dev/null
+
     # Free memory
     $sysdir/bin/freemma
 
@@ -351,7 +358,7 @@ launch_game() {
         fi
 
         cd $sysdir
-        playActivity "$cmd"
+        playActivity "$rompath"
         
         echo "game" > /tmp/prev_state
         check_off_order "End_Save"

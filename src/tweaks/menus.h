@@ -554,17 +554,14 @@ void menu_advanced(void* _)
                 .action = action_advancedSetFrameThrottle
         });
         if (DEVICE_ID == MIYOO354) {
-            list_addItem(
-                &_menu_advanced,
-                (ListItem) {
-                .label = "Adjust LCD voltage",
-                    .item_type = MULTIVALUE,
-                    .value_max = 6,
-                    .value_labels = { "Off", "2.5V", "2.6V", "2.7V",
-                                     "2.8V", "2.9V", "3.0V" },
-                    .value = value_getLcdVoltage(),
-                    .action = action_advancedSetLcdVoltage
-            });
+            list_addItem(&_menu_advanced,
+             (ListItem){.label = "LCD undervolt",
+                        .item_type = MULTIVALUE,
+                        .value_max = 4,
+                        .value_labels = {"Off", "0.1V", "0.2V",
+                                         "0.3V", "0.4V"},
+                        .value = value_getLcdVoltage(),
+                        .action = action_advancedSetLcdVoltage});
         }
         if (exists(RESET_CONFIGS_PAK)) {
             list_addItem(&_menu_advanced,

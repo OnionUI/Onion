@@ -139,7 +139,6 @@ void _settings_load_mainui(void)
     cJSON* json_root = cJSON_Parse(json_str);
 
     json_getInt(json_root, "vol", &settings.volume);
-    json_getInt(json_root, "mute", &settings.mute);
     json_getInt(json_root, "bgmvol", &settings.bgm_volume);
     json_getInt(json_root, "brightness", &settings.brightness);
     json_getInt(json_root, "hibernate", &settings.sleep_timer);
@@ -177,10 +176,11 @@ void settings_load(void)
     settings.telnet_state = config_flag_get(".TelnetState");
     settings.hotspot_state = config_flag_get(".HotspotState");
     settings.ntp_state = config_flag_get(".NTPState");
+    settings.mute = config_flag_get(".muteVolume");
 
-        if (config_flag_get(
-            ".noBatteryWarning")) // flag is deprecated, but keep compatibility
-            settings.low_battery_warn_at = 0;
+    if (config_flag_get(
+        ".noBatteryWarning")) // flag is deprecated, but keep compatibility
+        settings.low_battery_warn_at = 0;
 
     if (config_flag_get(
         ".noVibration")) // flag is deprecated, but keep compatibility
@@ -286,6 +286,7 @@ void settings_save(void)
     config_flag_set(".TelnetState", settings.telnet_state);
     config_flag_set(".HotspotState", settings.hotspot_state);
     config_flag_set(".NTPState", settings.ntp_state);
+    config_flag_set(".muteVolume", settings.mute);
     config_setNumber("tzselect", settings.tzselect_state);
     config_setNumber("battery/warnAt", settings.low_battery_warn_at);
     config_setNumber("startup/app", settings.startup_application);
