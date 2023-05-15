@@ -15,38 +15,6 @@ main() {
     check_httpstate
 }
 
-wifi_enabled() {
-    [ $(/customer/app/jsonval wifi) -eq 1 ]
-}
-
-wifi_disabled() {
-    [ $(/customer/app/jsonval wifi) -eq 0 ]
-}
-
-flag_enabled() {
-    flag="$1"
-    [ -f "$sysdir/config/.$flag" ]
-}
-
-enable_flag() {
-    flag="$1"
-    touch "$sysdir/config/.$flag"
-}
-
-disable_flag() {
-    flag="$1"
-    rm "$sysdir/config/.$flag" 2>&1 /dev/null
-}
-
-is_running() {
-    process_name="$1"
-    pgrep "$process_name" > /dev/null
-}
-
-log() {
-    echo "$(date)" $* >> $sysdir/logs/network.log
-}
-
 
 check_wifi() {
     if wifi_enabled; then
@@ -416,3 +384,41 @@ check_ntpstate() {
         fi
     fi
 }
+
+
+# Utils
+
+wifi_enabled() {
+    [ $(/customer/app/jsonval wifi) -eq 1 ]
+}
+
+wifi_disabled() {
+    [ $(/customer/app/jsonval wifi) -eq 0 ]
+}
+
+flag_enabled() {
+    flag="$1"
+    [ -f "$sysdir/config/.$flag" ]
+}
+
+enable_flag() {
+    flag="$1"
+    touch "$sysdir/config/.$flag"
+}
+
+disable_flag() {
+    flag="$1"
+    rm "$sysdir/config/.$flag" 2>&1 /dev/null
+}
+
+is_running() {
+    process_name="$1"
+    pgrep "$process_name" > /dev/null
+}
+
+log() {
+    echo "$(date)" $* >> $sysdir/logs/network.log
+}
+
+
+main
