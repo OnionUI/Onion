@@ -13,31 +13,36 @@ main() {
     check_telnetstate 
     check_ntpstate 
     check_httpstate
+	check_hotspotstate
 }
 
 
 check_wifi() {
-    if wifi_enabled; then
-        if ! ifconfig wlan0 || [ -f /tmp/restart_wifi ]; then
-            if [ -f /tmp/restart_wifi ]; then
-                pkill -9 wpa_supplicant
-                pkill -9 udhcpc
-                rm /tmp/restart_wifi
-            fi
+	if flag_enabled HotspotState; then
+		return
+	else
+		if wifi_enabled; then
+			if ! ifconfig wlan0 || [ -f /tmp/restart_wifi ]; then
+				if [ -f /tmp/restart_wifi ]; then
+					pkill -9 wpa_supplicant
+					pkill -9 udhcpc
+					rm /tmp/restart_wifi
+				fi
 
-            log "Network Checker: Initializing wifi..."
+				log "Network Checker: Initializing wifi..."
 
-            /customer/app/axp_test wifion
-            sleep 2 
-            ifconfig wlan0 up
-            $miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
-            udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
-        fi
-    else
-        pkill -9 wpa_supplicant
-        pkill -9 udhcpc
-        /customer/app/axp_test wifioff
-    fi
+				/customer/app/axp_test wifion
+				sleep 2 
+				ifconfig wlan0 up
+				$miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
+				udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
+			fi
+		else
+			pkill -9 wpa_supplicant
+			pkill -9 udhcpc
+			/customer/app/axp_test wifioff
+		fi
+	fi
 }
 
 
