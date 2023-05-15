@@ -27,6 +27,20 @@
 
 #define FRAMES_PER_SECOND 60
 
+void check_networkChanged(void)
+{
+    bool modified = temp_flag_get("network_changed");
+    if (_menu_network._created) {
+        for (int i = 0; i < _menu_network.item_count; i++) {
+            ListItem *item = &_menu_network.items[i];
+            if (item->item_type != ACTION) {
+                modified |= item->value != item->_reset_value;
+            }
+        }
+    }
+    temp_flag_set("network_changed", modified);
+}
+
 int main(int argc, char *argv[])
 {
     print_debug("Debug logging enabled");
@@ -205,6 +219,7 @@ int main(int argc, char *argv[])
 
     if (DEVICE_ID == MIYOO354) {
         value_setLcdVoltage();
+        check_networkChanged();
     }
 
     Mix_CloseAudio();
