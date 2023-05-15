@@ -27,17 +27,25 @@
 
 #define FRAMES_PER_SECOND 60
 
-void check_networkChanged(void)
+bool check_menuHasChanges(List *menu)
 {
-    bool modified = temp_flag_get("network_changed");
-    if (_menu_network._created) {
-        for (int i = 0; i < _menu_network.item_count; i++) {
-            ListItem *item = &_menu_network.items[i];
+    bool modified = false;
+    if (menu->_created) {
+        for (int i = 0; i < menu->item_count; i++) {
+            ListItem *item = &menu->items[i];
             if (item->item_type != ACTION) {
                 modified |= item->value != item->_reset_value;
             }
         }
     }
+    return modified;
+}
+
+void check_networkChanged(void)
+{
+    bool modified = temp_flag_get("network_changed");
+    modified |= check_menuHasChanges(&_menu_network);
+    modified |= check_menuHasChanges(&_menu_date_time);
     temp_flag_set("network_changed", modified);
 }
 
