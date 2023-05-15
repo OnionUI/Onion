@@ -117,7 +117,7 @@ void _settings_load_keymap(void)
     if (!exists(CONFIG_PATH "keymap.json"))
         return;
 
-    cJSON* keymap = json_load(CONFIG_PATH "keymap.json");
+    cJSON *keymap = json_load(CONFIG_PATH "keymap.json");
     json_getInt(keymap, "mainui_single_press", &settings.mainui_single_press);
     json_getInt(keymap, "mainui_long_press", &settings.mainui_long_press);
     json_getInt(keymap, "mainui_double_press", &settings.mainui_double_press);
@@ -131,12 +131,12 @@ void _settings_load_keymap(void)
 
 void _settings_load_mainui(void)
 {
-    const char* json_str = NULL;
+    const char *json_str = NULL;
 
     if (!(json_str = file_read(MAIN_UI_SETTINGS)))
         return;
 
-    cJSON* json_root = cJSON_Parse(json_str);
+    cJSON *json_root = cJSON_Parse(json_str);
 
     json_getInt(json_root, "vol", &settings.volume);
     json_getInt(json_root, "bgmvol", &settings.bgm_volume);
@@ -179,11 +179,11 @@ void settings_load(void)
     settings.mute = config_flag_get(".muteVolume");
 
     if (config_flag_get(
-        ".noBatteryWarning")) // flag is deprecated, but keep compatibility
+            ".noBatteryWarning")) // flag is deprecated, but keep compatibility
         settings.low_battery_warn_at = 0;
 
     if (config_flag_get(
-        ".noVibration")) // flag is deprecated, but keep compatibility
+            ".noVibration")) // flag is deprecated, but keep compatibility
         settings.vibration = 0;
 
     config_get("tzselect", "%d", &settings.tzselect_state);
@@ -194,13 +194,13 @@ void settings_load(void)
     config_get("startup/tab", "%d", &settings.startup_tab);
 
     if (config_flag_get(
-        ".menuInverted")) { // flag is deprecated, but keep compatibility
+            ".menuInverted")) { // flag is deprecated, but keep compatibility
         settings.ingame_single_press = 2;
         settings.ingame_long_press = 1;
     }
 
     if (config_flag_get(
-        ".noGameSwitcher")) { // flag is deprecated, but keep compatibility
+            ".noGameSwitcher")) { // flag is deprecated, but keep compatibility
         settings.mainui_single_press = 0;
         settings.ingame_single_press = 2;
         settings.ingame_long_press = 0;
@@ -214,28 +214,28 @@ void settings_load(void)
 
 void _settings_save_keymap(void)
 {
-    FILE* fp;
+    FILE *fp;
 
     if ((fp = fopen(CONFIG_PATH "keymap.json", "w+")) == 0)
         return;
 
     fprintf(fp, "{\n");
     fprintf(fp, JSON_FORMAT_NUMBER, "mainui_single_press",
-        settings.mainui_single_press);
+            settings.mainui_single_press);
     fprintf(fp, JSON_FORMAT_NUMBER, "mainui_long_press",
-        settings.mainui_long_press);
+            settings.mainui_long_press);
     fprintf(fp, JSON_FORMAT_NUMBER, "mainui_double_press",
-        settings.mainui_double_press);
+            settings.mainui_double_press);
     fprintf(fp, JSON_FORMAT_NUMBER, "ingame_single_press",
-        settings.ingame_single_press);
+            settings.ingame_single_press);
     fprintf(fp, JSON_FORMAT_NUMBER, "ingame_long_press",
-        settings.ingame_long_press);
+            settings.ingame_long_press);
     fprintf(fp, JSON_FORMAT_NUMBER, "ingame_double_press",
-        settings.ingame_double_press);
+            settings.ingame_double_press);
     fprintf(fp, JSON_FORMAT_STRING, "mainui_button_x",
-        settings.mainui_button_x);
+            settings.mainui_button_x);
     fprintf(fp, JSON_FORMAT_STRING_NC, "mainui_button_y",
-        settings.mainui_button_y);
+            settings.mainui_button_y);
     fprintf(fp, "}\n");
 
     fflush(fp);
@@ -245,7 +245,7 @@ void _settings_save_keymap(void)
 
 void _settings_save_mainui(void)
 {
-    FILE* fp;
+    FILE *fp;
 
     if ((fp = fopen(MAIN_UI_SETTINGS, "w+")) == NULL)
         return;
@@ -306,10 +306,10 @@ void settings_save(void)
     temp_flag_set("settings_changed", true);
 }
 
-bool settings_saveSystemProperty(const char* prop_name, int value)
+bool settings_saveSystemProperty(const char *prop_name, int value)
 {
-    cJSON* json_root = json_load(MAIN_UI_SETTINGS);
-    cJSON* prop = cJSON_GetObjectItem(json_root, prop_name);
+    cJSON *json_root = json_load(MAIN_UI_SETTINGS);
+    cJSON *prop = cJSON_GetObjectItem(json_root, prop_name);
 
     if (cJSON_GetNumberValue(prop) == value)
         return false;
