@@ -66,8 +66,19 @@ main() {
 
     touch /tmp/network_changed
     sync
-    check_networking
-
+	
+ 
+    check_networking 
+	check_tzid 
+	write_tzid 
+	check_ftpstate 
+	check_sshstate 
+	check_telnetstate 
+	check_ntpstate 
+	check_httpstate
+	
+	rm $sysdir/config/.HotspotState  # dont start hotspot at boot
+	
     # Auto launch
     if [ ! -f $sysdir/config/.noAutoStart ]; then
         state_change
@@ -93,22 +104,46 @@ main() {
     state_change
     check_switcher
     set_startup_tab
+	
+	# Set filebrowser branding to onion
+	CURRENT_DIR=$(pwd)
+	cd /mnt/SDCARD/App/FileBrowser/
+	/mnt/SDCARD/App/FileBrowser/filebrowser config set --branding.name "Onion" 
+	/mnt/SDCARD/App/FileBrowser/filebrowser config set --branding.files "/mnt/SDCARD/App/FileBrowser/theme" 
+	cd "$OLDPWD"
+
 
     # Main runtime loop
     while true; do
         state_change
         check_main_ui
 
-        check_networking
-
+		check_tzid 
+		write_tzid  
+        check_networking   
+		check_ftpstate 
+		check_sshstate 
+		check_telnetstate 
+		check_httpstate & 
+		check_ntpstate &
+              
         state_change
         check_game_menu
 
         state_change
         check_game
 
-        check_networking
-
+		check_tzid
+		write_tzid
+        
+		check_ftpstate 
+		check_sshstate 
+		check_telnetstate 
+		check_httpstate & 
+		check_hotspotstate &
+		check_ntpstate &
+		check_networking 
+		
         state_change
         check_switcher
     done
@@ -128,6 +163,8 @@ clear_logs() {
         ./logs/gameSwitcher.log \
         ./logs/keymon.log \
         ./logs/game_list_options.log \
+		./logs/network.log \
+		./logs/dnsmasq.log \
         2> /dev/null
 }
 
@@ -551,35 +588,337 @@ runifnecessary() {
     done
 }
 
+# Starts bftpd if the toggle is set to on
+check_ftpstate() { 
+    if [ ! -f $sysdir/config/.FTPState ]; then
+        if pgrep bftpd > /dev/null ; then
+			killall -9 bftpd 
+			echo "$(date) FTP: Killed" >> $sysdir/logs/network.log
+        else
+            return
+        fi
+    else
+        if pgrep bftpd > /dev/null ; then
+			if [ $(/customer/app/jsonval wifi) -eq 0 ]; then
+				echo "$(date) FTP: Wifi is turned off, disabling the toggle for FTP and killing the process" >> $sysdir/logs/network.log
+				rm $sysdir/config/.FTPState
+				killall -9 bftpd
+			else
+				return
+			fi
+        else
+			if [ $(/customer/app/jsonval wifi) -eq 1 ]; then
+				echo "$(date) FTP: Starting bftpd" >> $sysdir/logs/network.log
+				/mnt/SDCARD/App/Ftp/bftpd -d -c /mnt/SDCARD/App/Ftp/bftpd.conf &
+			else
+				rm $sysdir/config/.FTPState
+			fi
+        fi
+        
+    fi
+}
+
+# Starts dropbear if the toggle is set to on
+check_sshstate() { 
+    if [ ! -f $sysdir/config/.SSHState ]; then
+        if pgrep dropbear > /dev/null ; then
+            killall -9 dropbear
+			echo "$(date) Dropbear: Killed" >> $sysdir/logs/network.log
+        else
+            return
+        fi
+    else
+        if pgrep dropbear > /dev/null ; then
+			if [ $(/customer/app/jsonval wifi) -eq 0 ]; then 
+				echo "$(date) Dropbear: Wifi is turned off, disabling the toggle for dropbear and killing the process" >> $sysdir/logs/network.log
+				rm $sysdir/config/.SSHState
+				killall -9 dropbear
+			else
+				return
+			fi
+        else
+			if [ $(/customer/app/jsonval wifi) -eq 1 ]; then 
+				echo "$(date) Dropbear: Starting dropbear" >> $sysdir/logs/network.log
+				dropbear -R
+			else
+				rm $sysdir/config/.SSHState
+			fi
+        fi
+    fi
+}
+
+
+# Starts telnet if the toggle is set to on
+# Telnet is generally already running when you boot your MMP, you won't see this hit logs unless you bounce it
+check_telnetstate() { 
+    if [ ! -f $sysdir/config/.TelnetState ]; then
+        if pgrep telnetd > /dev/null ; then
+            killall -9 telnetd
+			echo "$(date) Telnet: Killed" >> $sysdir/logs/network.log
+        else
+            return
+        fi
+    else
+        if pgrep telnetd > /dev/null ; then
+			if [ $(/customer/app/jsonval wifi) -eq 0 ]; then
+				echo "$(date) Telnet: Wifi is turned off, disabling the toggle for Telnet and killing the process" >> $sysdir/logs/network.log
+				rm $sysdir/config/.TelnetState
+				killall -9 telnetd
+			else
+				return
+			fi
+        else
+			if [ $(/customer/app/jsonval wifi) -eq 1 ]; then 
+				echo "$(date) Telnet: Starting telnet" >> $sysdir/logs/network.log 
+				cd /mnt/SDCARD 
+				telnetd -l sh
+			else
+				rm $sysdir/config/.TelnetState
+			fi
+        fi
+    fi
+}
+
+# Starts Filebrowser if the toggle in tweaks is set on
+check_httpstate() { 
+    if [ ! -f $sysdir/config/.HTTPState ]; then
+        if pgrep filebrowser > /dev/null ; then
+            killall -9 filebrowser
+			echo "$(date) Filebrowser: Killed" >> $sysdir/logs/network.log
+        else
+            return
+        fi
+    else
+        if pgrep filebrowser > /dev/null ; then
+			if [ $(/customer/app/jsonval wifi) -eq 0 ]; then 
+				echo "$(date) Filebrowser: Wifi is turned off, disabling the toggle for HTTP FS and killing the process" >> $sysdir/logs/network.log
+				rm $sysdir/config/.HTTPState
+				pkill -9 filebrowser
+				return
+			else
+				return
+			fi
+        else
+			# Checks if the toggle for WIFI is turned on.
+			# Starts filebrowser bound to 0.0.0.0 so we don't need to mess around binding different IP's
+			# This cuts down heavily on lag in the UI (as we don't need to run commands to check/grab IP's) and allows the menu to work more seamlessly
+			if [ $(/customer/app/jsonval wifi) -eq 1 ]; then 
+				cd /mnt/SDCARD/App/FileBrowser/
+	   
+																														 
+				/mnt/SDCARD/App/FileBrowser/filebrowser -p 80 -a 0.0.0.0 -r /mnt/SDCARD &
+				echo "$(date) Filebrowser: Starting filebrowser listening on 0.0.0.0 to accept all traffic" >> $sysdir/logs/network.log
+			else
+				rm $sysdir/config/.HTTPState
+			fi
+        fi
+    fi
+}
+
+# Starts the hotspot based on the results of check_hotspotstate, called twice saves repeating
+# We have to sleep a bit or sometimes supllicant starts before we can get the hotspot logo
+# Get the serial so we can use it for the hotspot password
+# Check if the wpa pass is still set to the default pass, if it is change it to the serial number, if it's not then they've set a custom password, leave it alone.
+# Starts AP and DHCP
+# Turns off NTP as you wont be using it when you're on a hotspot
+start_hotspot() { 
+	if [ -f $sysdir/config/.NTPState ]; then
+		touch /tmp/ntprestore
+		rm $sysdir/config/.NTPState
+	fi
+	
+	if pgrep hostapd >/dev/null; then
+			echo "$(date) Hotspot: MainUI has taken wlan0 while we're supposed to be in AP mode, killing wpa_supp again." >> $sysdir/logs/network.log
+		sleep 5
+		pkill -9 hostapd 
+		pkill -9 dnsmasq
+		pkill -9 wpa_supplicant 
+		pkill -9 udhcpc 
+	fi
+	
+	sleep 5 
+	
+	serial_number=$( { /config/riu_r 20 18 | awk 'NR==2'; /config/riu_r 20 17 | awk 'NR==2'; /config/riu_r 20 16 | awk 'NR==2'; } | sed 's/0x//g' | tr -d '[:space:]' ) 
+	passphrase=$(grep '^wpa_passphrase=' "$sysdir/config/hostapd.conf" | cut -d'=' -f2)
+
+	if [ "$passphrase" = "MiyooMiniApPassword" ]; then 
+		sed -i "s/^wpa_passphrase=.*/wpa_passphrase=$serial_number/" "$sysdir/config/hostapd.conf"
+		echo "$(date) Hotspot: Default key removed." >> $sysdir/logs/network.log
+	fi
+
+	pkill -9 wpa_supplicant 
+	pkill -9 udhcpc 
+	# Start AP and dhcp server
+	ifconfig wlan0 up 
+	$sysdir/bin/hostapd -P /var/run/hostapd.pid -B -i wlan0 $sysdir/config/hostapd.conf &
+	hotspot0addr=$(grep -E '^dhcp-range=' "$sysdir/config/dnsmasq.conf" | cut -d',' -f1 | cut -d'=' -f2) 
+	hotspot0addr=$(echo $hotspot0addr | awk -F'.' -v OFS='.' '{$NF-=1; print}') 
+	gateway0addr=$(grep -E '^dhcp-option=3' $sysdir/config/dnsmasq.conf | awk -F, '{print $2}')
+	subnetmask=$(grep -E '^dhcp-range=.*,[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+,' "$sysdir/config/dnsmasq.conf" | cut -d',' -f3) 
+	ifconfig wlan0 $hotspot0addr netmask $subnetmask 
+	ip route add default via $gateway0addr
+	$sysdir/bin/dnsmasq --conf-file=$sysdir/config/dnsmasq.conf -u root & 
+	echo "$(date) Hotspot: Started with IP of: $hotspot0addr, subnet of: $subnetmask" >> $sysdir/logs/network.log
+}
+
+# Starts personal hotspot if toggle is set to on
+# Calls start_hotspot from above
+# IF toggle is disabled, shuts down hotspot and bounces wifi.
+# Restores NTP if it was on before we turned the hotspot on.
+check_hotspotstate() { 
+    if [ ! -f $sysdir/config/.HotspotState ]; then
+        if pgrep hostapd >/dev/null; then
+			echo "$(date) Hotspot: Killed" >> $sysdir/logs/network.log
+			pkill -9 hostapd 
+			pkill -9 dnsmasq
+            ifconfig wlan0 up
+            $miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf &
+            udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
+								  
+			if [ -f /tmp/ntprestore ]; then
+				touch $sysdir/config/.NTPState
+				sync
+			fi
+			
+		else
+			return
+        fi
+    else
+        if pgrep hostapd >/dev/null; then
+			if [ $(/customer/app/jsonval wifi) -eq 0 ]; then
+				echo "$(date) Hotspot: Wifi is turned off, disabling the toggle for hotspot and killing the process" >> $sysdir/logs/network.log
+				rm $sysdir/config/.HotspotState
+				pkill -9 hostapd
+				pkill -9 dnsmasq
+			else
+				# Hotspot is turned on, closing apps restarts the supp.. 
+				# lets check if managed mode has taken over the adaptor before hotspot could grab it again, if it does we need to reset it for access & logos
+				# Hotspot will come back up it just takes a little longer.
+				sleep 10 
+				if $sysdir/bin/iw dev wlan0 info | grep type | grep -q "type managed"; then
+		
+					start_hotspot &
+				else
+					return
+				fi
+			fi
+        else
+			if [ $(/customer/app/jsonval wifi) -eq 0 ]; then
+				sed -i 's/"wifi":\s*0/"wifi": 1/' /appconfigs/system.json
+				/customer/app/axp_test wifion
+				sleep 2 
+				ifconfig wlan0 up
+				echo "$(date) Hotspot: Requested but WiFi is off, bringing WiFi up now." >> $sysdir/logs/network.log
+				start_hotspot &
+			else
+				start_hotspot &
+			fi
+        fi
+    fi
+}
+
+# Get the value of the tz set in tweaks
+check_tzid() {
+tzselect_file="$sysdir/config/tzselect"
+tzid=$(cat "$tzselect_file") 
+echo "$tzid"
+}
+
+# Check the value and write it into TZ var - if they look backwards its because they are, ntpd is weird..
+write_tzid() {
+check_tzid 
+case $tzid in 0)export TZ="UTC+12";;1)export TZ="UTC+11";;2)export TZ="UTC+10";;3)export TZ="UTC+9";; \
+4)export TZ="UTC+8";;5)export TZ="UTC+7";;6)export TZ="UTC+6";;7)export TZ="UTC+5";;8)export TZ="UTC+4";; \
+9)export TZ="UTC+3";;10)export TZ="UTC+2";;11)export TZ="UTC+1";;12)export TZ="UTC";;13)export TZ="UTC-1";; \
+14)export TZ="UTC-2";;15)export TZ="UTC-3";;16)export TZ="UTC-4";;17)export TZ="UTC-5";;18)export TZ="UTC-6";; \
+19)export TZ="UTC-7";;20)export TZ="UTC-8";;21)export TZ="UTC-9";;22)export TZ="UTC-10";;23)export TZ="UTC-11";;
+24)export TZ="UTC-12";;esac
+}
+
+# We need to check if NTP is enabled and then check the state of tzselect in /.tmp_update/config/tzselect, based on the value we'll pass the TZ via the env var to ntpd and get the time (has to be POSIX)
+# This will work but it will not export the TZ var across all opens shells so you may find the hwclock (and clock app, retroarch time etc) are correct but terminal time is not.
+# It does set TZ on the tty that Main is running in so this is ok
+check_ntpstate() { 
+	if [ ! -f $sysdir/config/.NTPState ]; then
+        if pgrep ntpd > /dev/null ; then
+            pkill -9 ntpd
+			echo "$(date) NTP: Killed by request" >> $sysdir/logs/network.log
+        else
+            return
+        fi
+    else
+        if pgrep ntpd > /dev/null; then
+			if [ $(/customer/app/jsonval wifi) -eq 1 ]; then 
+				export new_tz=$(check_tzid)
+				if [ "$old_tz" != "$new_tz" ]; then
+					pkill -9 ntpd
+					echo "$(date)NTP: Killed, TZ has changed" >> "$sysdir/logs/network.log"
+					check_tzid
+					write_tzid
+					ntpd -p time.google.com &
+					sleep 1
+					hwclock -w
+					echo "$(date)NTP2: TZ set to $TZ, Time set to: $(date) and merged to hwclock, which shows: $(hwclock)" >> $sysdir/logs/network.log
+					export old_tz=$(check_tzid)
+				else 
+					return
+				fi
+			else
+				echo "$(date) NTP: Wifi is turned off, disabling the toggle for NTP and killing the process" >> $sysdir/logs/network.log
+				rm $sysdir/config/.NTPState
+				pkill -9 ntpd
+			fi
+        else
+			if [ $(/customer/app/jsonval wifi) -eq 1 ]; then 
+				pkill -9 ntpd
+				check_tzid
+				write_tzid
+				echo "$(date) NTP: Starting NTP with TZ of $TZ" >> $sysdir/logs/network.log 
+				ntpd -p time.google.com &
+				sleep 1
+				hwclock -w
+				echo "$(date) NTP1: TZ set to $TZ, Time set to: $(date) and merged to hwclock, which shows: $(hwclock)" >> $sysdir/logs/network.log
+				export old_tz=$(check_tzid)
+			else
+				echo "$(date) NTP: Wifi is turned off, disabling the toggle for NTP and killing the process" >> $sysdir/logs/network.log
+				rm $sysdir/config/.NTPState
+				pkill -9 ntpd
+			fi
+        fi
+    fi
+}
+
+
 check_networking() {
     if [ ! -f /tmp/network_changed ]; then
         return
     fi
+	rm /tmp/network_changed
 
-    rm /tmp/network_changed
+    echo "$(date) Network Checker: Update networking" >> $sysdir/logs/network.log
+	
+													   
+	if [ $(/customer/app/jsonval wifi) -eq 1 ]; then
+		if ! ifconfig wlan0 || [ -f /tmp/restart_wifi ]; then
+			if [ -f /tmp/restart_wifi ]; then
+				pkill -9 wpa_supplicant
+				pkill -9 udhcpc
+				rm /tmp/restart_wifi
+			fi
+ 
+			echo "$(date) Network Checker: Initializing Wifi..." >> $sysdir/logs/network.log
+			/customer/app/axp_test wifion
+			sleep 2 
+			ifconfig wlan0 up
+			$miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
+			udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
+		fi
+	else
+		pkill -9 wpa_supplicant
+		pkill -9 udhcpc
+		/customer/app/axp_test wifioff
+	fi
 
-    echo -e "\n:: Update networking"
-
-    if [ $(/customer/app/jsonval wifi) -eq 1 ]; then
-        if ! ifconfig wlan0 || [ -f /tmp/restart_wifi ]; then
-            if [ -f /tmp/restart_wifi ]; then
-                pkill -9 wpa_supplicant
-                pkill -9 udhcpc
-                rm /tmp/restart_wifi
-            fi
-
-            echo "Initializing Wifi..."
-            /customer/app/axp_test wifion
-            sleep 2 
-            ifconfig wlan0 up
-            $miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
-            udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
-        fi
-    else
-        pkill -9 wpa_supplicant
-        pkill -9 udhcpc
-        /customer/app/axp_test wifioff
-    fi
 }
 
 main
