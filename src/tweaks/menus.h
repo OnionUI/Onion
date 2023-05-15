@@ -540,7 +540,7 @@ void menu_main(void)
                 (ListItem){.label = "Network",
                            .description = "Setup networking",
                            .action = menu_networks,
-                           .icon_ptr = _get_menu_icon("tweaks_system")});
+                           .icon_ptr = _get_menu_icon("tweaks_network")});
         }
         list_addItem(
             &_menu_main,
