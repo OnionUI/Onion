@@ -91,22 +91,46 @@ main() {
     state_change
     check_switcher
     set_startup_tab
+	
+	# Set filebrowser branding to onion
+	CURRENT_DIR=$(pwd)
+	cd /mnt/SDCARD/App/FileBrowser/
+	/mnt/SDCARD/App/FileBrowser/filebrowser config set --branding.name "Onion" 
+	/mnt/SDCARD/App/FileBrowser/filebrowser config set --branding.files "/mnt/SDCARD/App/FileBrowser/theme" 
+	cd "$OLDPWD"
+
 
     # Main runtime loop
     while true; do
         state_change
         check_main_ui
 
-        check_networking
-
+		check_tzid 
+		write_tzid  
+        check_networking   
+		check_ftpstate 
+		check_sshstate 
+		check_telnetstate 
+		check_httpstate & 
+		check_ntpstate &
+              
         state_change
         check_game_menu
 
         state_change
         check_game
 
-        check_networking
-
+		check_tzid
+		write_tzid
+        
+		check_ftpstate 
+		check_sshstate 
+		check_telnetstate 
+		check_httpstate & 
+		check_hotspotstate &
+		check_ntpstate &
+		check_networking 
+		
         state_change
         check_switcher
     done
@@ -563,8 +587,7 @@ check_networking() {
     if [ $deviceModel -ne 354 ] || [ ! -f /tmp/network_changed ]; then
         return
     fi
-
-    rm /tmp/network_changed
+	rm /tmp/network_changed
 
     $sysdir/script/update_networking.sh
 }

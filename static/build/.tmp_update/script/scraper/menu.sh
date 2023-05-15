@@ -364,8 +364,8 @@ Menu_Main ()
 
 {
 
-Option1="Scrap all $(basename "$CurrentSystem") roms"
-[ -f "$romimage" ] && Option2="" || Option2="Scrap current rom: $romname"
+Option1="Scrape all $(basename "$CurrentSystem") roms"
+[ -f "$romimage" ] && Option2="" || Option2="Scrape current rom: $romname"
 [ -f "$romimage" ] && Option3="Delete cover: $romNameNoExtension.png" || Option3=""
 Option4="Configuration"
 Option5="Exit"
