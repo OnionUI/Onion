@@ -133,7 +133,7 @@ Menu_Config_BackgroundScraping()
     ScrapeInBackground=$(echo "$config" | jq -r '.ScrapeInBackground')
     
     
-    	Mychoice=$( echo -e "No\nYes" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "Background scrapping ? (Currently: $ScrapeInBackground)" -b "Press A to validate your choice.")
+    	Mychoice=$( echo -e "No\nYes" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "Background scraping ? (Currently: $ScrapeInBackground)" -b "Press A to validate your choice.")
         # TODO : add a new option to display the tail of the log
 
         if [ "$Mychoice" = "Yes" ]; then
