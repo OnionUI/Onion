@@ -105,14 +105,7 @@ main() {
         state_change
         check_main_ui
 
-		check_tzid 
-		write_tzid  
-        check_networking   
-		check_ftpstate 
-		check_sshstate 
-		check_telnetstate 
-		check_httpstate & 
-		check_ntpstate &
+        check_networking  		
               
         state_change
         check_game_menu
@@ -123,13 +116,8 @@ main() {
 		check_tzid
 		write_tzid
         
-		check_ftpstate 
-		check_sshstate 
-		check_telnetstate 
-		check_httpstate & 
-		check_hotspotstate &
-		check_ntpstate &
 		check_networking 
+		check_hotspotstate &
 		
         state_change
         check_switcher
@@ -588,9 +576,7 @@ check_networking() {
         return
     fi
 	rm /tmp/network_changed
-
-    $sysdir/script/update_networking.sh
+    source $sysdir/script/update_networking.sh
 }
-
 
 main

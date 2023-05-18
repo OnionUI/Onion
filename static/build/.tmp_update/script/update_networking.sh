@@ -11,37 +11,32 @@ main() {
     check_ftpstate 
     check_sshstate 
     check_telnetstate 
-    check_ntpstate 
+    check_ntpstate &
     check_httpstate
-	check_hotspotstate
 }
 
 
 check_wifi() {
-	if flag_enabled HotspotState; then
-		return
-	else
-		if wifi_enabled; then
-			if ! ifconfig wlan0 || [ -f /tmp/restart_wifi ]; then
-				if [ -f /tmp/restart_wifi ]; then
-					pkill -9 wpa_supplicant
-					pkill -9 udhcpc
-					rm /tmp/restart_wifi
-				fi
-
-				log "Network Checker: Initializing wifi..."
-
-				/customer/app/axp_test wifion
-				sleep 2 
-				ifconfig wlan0 up
-				$miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
-				udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
+	if wifi_enabled; then
+		if ! ifconfig wlan0 || [ -f /tmp/restart_wifi ]; then
+			if [ -f /tmp/restart_wifi ]; then
+				pkill -9 wpa_supplicant
+				pkill -9 udhcpc
+				rm /tmp/restart_wifi
 			fi
-		else
-			pkill -9 wpa_supplicant
-			pkill -9 udhcpc
-			/customer/app/axp_test wifioff
+
+			log "Network Checker: Initializing wifi..."
+
+			/customer/app/axp_test wifion
+			sleep 2 
+			ifconfig wlan0 up
+			$miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
+			udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
 		fi
+	else
+		pkill -9 wpa_supplicant
+		pkill -9 udhcpc
+		/customer/app/axp_test wifioff
 	fi
 }
 
@@ -153,6 +148,7 @@ check_httpstate() {
     fi
 }
 
+
 # Starts the hotspot based on the results of check_hotspotstate, called twice saves repeating
 # We have to sleep a bit or sometimes supllicant starts before we can get the hotspot logo
 # Get the serial so we can use it for the hotspot password
@@ -160,46 +156,42 @@ check_httpstate() {
 # Starts AP and DHCP
 # Turns off NTP as you wont be using it when you're on a hotspot
 start_hotspot() { 
-    if flag_enabled NTPState; then
-        touch /tmp/ntprestore
-        disable_flag NTPState
-    fi
-    
-    if is_running hostapd; then
-        log "Hotspot: MainUI has taken wlan0 while we're supposed to be in AP mode, killing wpa_supp again."
-        sleep 5
-        pkill -9 hostapd 
-        pkill -9 dnsmasq
-        pkill -9 wpa_supplicant 
-        pkill -9 udhcpc 
-    fi
-    
-    sleep 5 
-    
-    serial_number=$( { /config/riu_r 20 18 | awk 'NR==2'; /config/riu_r 20 17 | awk 'NR==2'; /config/riu_r 20 16 | awk 'NR==2'; } | sed 's/0x//g' | tr -d '[:space:]' ) 
-    passphrase=$(grep '^wpa_passphrase=' "$sysdir/config/hostapd.conf" | cut -d'=' -f2)
+	if flag_enabled NTPState; then
+		touch /tmp/ntprestore
+		disable_flag NTPState
+	fi
+	
+	if pgrep hostapd >/dev/null; then
+		log "Hotspot: MainUI has taken wlan0 while we're supposed to be in AP mode, trying to relaunch"
+		pkill -9 hostapd 
+		pkill -9 dnsmasq
+	fi
+	
+	sleep 5 
+	
+	# serial_number=$( { /config/riu_r 20 18 | awk 'NR==2'; /config/riu_r 20 17 | awk 'NR==2'; /config/riu_r 20 16 | awk 'NR==2'; } | sed 's/0x//g' | tr -d '[:space:]' ) 
+	# passphrase=$(grep '^wpa_passphrase=' "$sysdir/config/hostapd.conf" | cut -d'=' -f2)
 
-    if [ "$passphrase" = "MiyooMiniApPassword" ]; then 
-        sed -i "s/^wpa_passphrase=.*/wpa_passphrase=$serial_number/" "$sysdir/config/hostapd.conf"
-        log "Hotspot: Default key removed."
-    fi
+	# if [ "$passphrase" = "onionos" ]; then 
+		# sed -i "s/^wpa_passphrase=.*/wpa_passphrase=$serial_number/" "$sysdir/config/hostapd.conf"
+		# log "Hotspot: Default key removed."
+	# fi
 
-    pkill -9 wpa_supplicant 
-    pkill -9 udhcpc 
-    # Start AP and dhcp server
-    ifconfig wlan0 up 
-    $sysdir/bin/hostapd -P /var/run/hostapd.pid -B -i wlan0 $sysdir/config/hostapd.conf &
-    
-    hotspot0addr=$(grep -E '^dhcp-range=' "$sysdir/config/dnsmasq.conf" | cut -d',' -f1 | cut -d'=' -f2) 
-    hotspot0addr=$(echo $hotspot0addr | awk -F'.' -v OFS='.' '{$NF-=1; print}') 
-    gateway0addr=$(grep -E '^dhcp-option=3' $sysdir/config/dnsmasq.conf | awk -F, '{print $2}')
-    subnetmask=$(grep -E '^dhcp-range=.*,[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+,' "$sysdir/config/dnsmasq.conf" | cut -d',' -f3) 
-    
-    ifconfig wlan0 $hotspot0addr netmask $subnetmask 
-    ip route add default via $gateway0addr
-    $sysdir/bin/dnsmasq --conf-file=$sysdir/config/dnsmasq.conf -u root & 
-    
-    log "Hotspot: Started with IP of: $hotspot0addr, subnet of: $subnetmask"
+	pkill -9 wpa_supplicant 
+	pkill -9 udhcpc 
+	
+	# Start AP and dhcp server
+	ifconfig wlan0 up 
+	$sysdir/bin/hostapd -P /var/run/hostapd.pid -B -i wlan0 $sysdir/config/hostapd.conf &
+	hotspot0addr=$(grep -E '^dhcp-range=' "$sysdir/config/dnsmasq.conf" | cut -d',' -f1 | cut -d'=' -f2) 
+	hotspot0addr=$(echo $hotspot0addr | awk -F'.' -v OFS='.' '{$NF-=1; print}') 
+	gateway0addr=$(grep -E '^dhcp-option=3' $sysdir/config/dnsmasq.conf | awk -F, '{print $2}')
+	subnetmask=$(grep -E '^dhcp-range=.*,[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+,' "$sysdir/config/dnsmasq.conf" | cut -d',' -f3) 
+	ifconfig wlan0 0.0.0.0
+	ifconfig wlan0 $hotspot0addr netmask $subnetmask 
+	ip route add default via $gateway0addr
+	$sysdir/bin/dnsmasq --conf-file=$sysdir/config/dnsmasq.conf -u root & 
+	log "Hotspot: Started with IP of: $hotspot0addr, subnet of: $subnetmask"
 }
 
 # Starts personal hotspot if toggle is set to on
@@ -207,51 +199,101 @@ start_hotspot() {
 # IF toggle is disabled, shuts down hotspot and bounces wifi.
 # Restores NTP if it was on before we turned the hotspot on.
 check_hotspotstate() { 
-    if flag_enabled HotspotState; then
+    if [ ! -f $sysdir/config/.HotspotState ]; then
         if is_running hostapd; then
-            if wifi_disabled; then
-                log "Hotspot: Wifi is turned off, disabling the toggle for hotspot and killing the process"
-                disable_flag HotspotState
-                pkill -9 hostapd
-                pkill -9 dnsmasq
-            else
-                # Hotspot is turned on, closing apps restarts the supp.. 
-                # lets check if managed mode has taken over the adaptor before hotspot could grab it again, if it does we need to reset it for access & logos
-                # Hotspot will come back up it just takes a little longer.
-                sleep 10 
-                if $sysdir/bin/iw dev wlan0 info | grep type | grep -q "type managed"; then
-                    start_hotspot &
-                else
-                    return
-                fi
-            fi
-        else
-            if wifi_disabled; then
-                sed -i 's/"wifi":\s*0/"wifi": 1/' /appconfigs/system.json
-                /customer/app/axp_test wifion
-                sleep 2 
-                ifconfig wlan0 up
-                log "Hotspot: Requested but WiFi is off, bringing WiFi up now."
-                start_hotspot &
-            else
-                start_hotspot &
-            fi
-        fi
-    else
-        if is_running hostapd; then
-            log "Hotspot: Killed"
-            pkill -9 hostapd 
-            pkill -9 dnsmasq
+			log "Hotspot: Killed"
+			pkill -9 hostapd 
+			pkill -9 dnsmasq
             ifconfig wlan0 up
             $miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf &
             udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
-                                  
-            if [ -f /tmp/ntprestore ]; then
-                enable_flag NTPState
-                sync
-            fi
+			if [ -f /tmp/ntprestore ]; then
+				enable_flag NTPState
+				sync
+			fi
+			
+		else
+			return
+        fi
+    else
+        if is_running hostapd; then
+			if wifi_disabled; then 
+				log "Hotspot: Wifi is turned off, disabling the toggle for hotspot and killing the process"
+				rm $sysdir/config/.HotspotState
+				pkill -9 hostapd
+				pkill -9 dnsmasq
+			else
+				# Hotspot is turned on, closing apps restarts the supp.. 
+				# lets check if managed mode has taken over the adaptor before hotspot could grab it again, if it does we need to reset it for access & logos
+				# Hotspot will come back up it just takes a little longer.
+				sleep 10
+				if $sysdir/bin/iw dev wlan0 info | grep type | grep -q "type managed"; then
+					start_hotspot &
+				else
+					return
+				fi
+			fi
+        else
+			# if wifi_disabled; then 
+				# sed -i 's/"wifi":\s*0/"wifi": 1/' /appconfigs/system.json
+				# /customer/app/axp_test wifion
+				# sleep 3 
+				# ifconfig wlan0 up
+				# log "Hotspot: Requested but WiFi is off, bringing WiFi up now."
+				# start_hotspot &
+			# else
+			start_hotspot &
+			# fi
         fi
     fi
+}
+
+# We need to check if NTP is enabled and then check the state of tzselect in /.tmp_update/config/tzselect, based on the value we'll pass the TZ via the env var to ntpd and get the time (has to be POSIX)
+# This will work but it will not export the TZ var across all opens shells so you may find the hwclock (and clock app, retroarch time etc) are correct but terminal time is not.
+# It does set TZ on the tty that Main is running in so this is ok
+check_ntpstate() { 
+    if flag_enabled NTPState; then
+        if is_running ntpd; then
+            if wifi_enabled; then 
+                export new_tz=$(check_tzid)
+                if [ "$old_tz" != "$new_tz" ]; then
+                    restart_ntp
+                fi
+            else
+                log "NTP: Wifi is turned off, disabling the toggle for NTP and killing the process"
+                disable_flag NTPState
+                pkill -9 ntpd
+            fi
+        else
+            if wifi_enabled; then 
+                restart_ntp
+            else
+                log "NTP: Wifi is turned off, disabling the toggle for NTP and killing the process"
+                disable_flag NTPState
+                pkill -9 ntpd
+            fi
+        fi
+    else
+        if is_running ntpd; then
+            pkill -9 ntpd
+            log "NTP: Killed by request"
+        fi
+    fi
+}
+
+
+# Utils
+
+restart_ntp() {
+pkill -9 ntpd
+check_tzid
+write_tzid
+log "NTP: Starting NTP with TZ of $TZ"
+ntpd -p time.google.com &
+sleep 1
+hwclock -w
+log "NTP1: TZ set to $TZ, Time set to: $(date) and merged to hwclock, which shows: $(hwclock)"
+export old_tz=$(check_tzid)
 }
 
 # Get the value of the tz set in tweaks
@@ -340,58 +382,6 @@ write_tzid() {
             ;;
     esac
 }
-
-# We need to check if NTP is enabled and then check the state of tzselect in /.tmp_update/config/tzselect, based on the value we'll pass the TZ via the env var to ntpd and get the time (has to be POSIX)
-# This will work but it will not export the TZ var across all opens shells so you may find the hwclock (and clock app, retroarch time etc) are correct but terminal time is not.
-# It does set TZ on the tty that Main is running in so this is ok
-check_ntpstate() { 
-    if flag_enabled NTPState; then
-        if is_running ntpd; then
-            if wifi_enabled; then 
-                export new_tz=$(check_tzid)
-                if [ "$old_tz" != "$new_tz" ]; then
-                    pkill -9 ntpd
-                    log "NTP: Killed, TZ has changed"
-                    check_tzid
-                    write_tzid
-                    ntpd -p time.google.com &
-                    sleep 1
-                    hwclock -w
-                    log "NTP2: TZ set to $TZ, Time set to: $(date) and merged to hwclock, which shows: $(hwclock)"
-                    export old_tz=$(check_tzid)
-                fi
-            else
-                log "NTP: Wifi is turned off, disabling the toggle for NTP and killing the process"
-                disable_flag NTPState
-                pkill -9 ntpd
-            fi
-        else
-            if wifi_enabled; then 
-                pkill -9 ntpd
-                check_tzid
-                write_tzid
-                log "NTP: Starting NTP with TZ of $TZ"
-                ntpd -p time.google.com &
-                sleep 1
-                hwclock -w
-                log "NTP1: TZ set to $TZ, Time set to: $(date) and merged to hwclock, which shows: $(hwclock)"
-                export old_tz=$(check_tzid)
-            else
-                log "NTP: Wifi is turned off, disabling the toggle for NTP and killing the process"
-                disable_flag NTPState
-                pkill -9 ntpd
-            fi
-        fi
-    else
-        if is_running ntpd; then
-            pkill -9 ntpd
-            log "NTP: Killed by request"
-        fi
-    fi
-}
-
-
-# Utils
 
 wifi_enabled() {
     [ $(/customer/app/jsonval wifi) -eq 1 ]
