@@ -11,7 +11,7 @@ main() {
     check_ftpstate 
     check_sshstate 
     check_telnetstate 
-    check_ntpstate &
+    check_ntpstate
     check_httpstate
 }
 
@@ -290,7 +290,6 @@ check_tzid
 write_tzid
 log "NTP: Starting NTP with TZ of $TZ"
 ntpd -p time.google.com &
-sleep 1
 hwclock -w
 log "NTP1: TZ set to $TZ, Time set to: $(date) and merged to hwclock, which shows: $(hwclock)"
 export old_tz=$(check_tzid)
