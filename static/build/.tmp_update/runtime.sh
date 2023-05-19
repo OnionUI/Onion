@@ -9,7 +9,7 @@ main() {
     init_system
     update_time
     clear_logs
-	
+
     # Start the battery monitor
     batmon &
 
@@ -64,9 +64,7 @@ main() {
     # Bind arcade name library to customer path
     mount -o bind /mnt/SDCARD/miyoo/lib/libgamename.so /customer/lib/libgamename.so
 
-    touch /tmp/network_changed
-    sync
-    check_networking
+    start_networking
 
     # Auto launch
     if [ ! -f $sysdir/config/.noAutoStart ]; then
@@ -93,22 +91,34 @@ main() {
     state_change
     check_switcher
     set_startup_tab
+	
+	# Set filebrowser branding to onion
+	CURRENT_DIR=$(pwd)
+	cd /mnt/SDCARD/App/FileBrowser/
+	/mnt/SDCARD/App/FileBrowser/filebrowser config set --branding.name "Onion" 
+	/mnt/SDCARD/App/FileBrowser/filebrowser config set --branding.files "/mnt/SDCARD/App/FileBrowser/theme" 
+	cd "$OLDPWD"
+
 
     # Main runtime loop
     while true; do
         state_change
         check_main_ui
 
-        check_networking
-
+        check_networking  		
+              
         state_change
         check_game_menu
 
         state_change
         check_game
 
-        check_networking
-
+		check_tzid
+		write_tzid
+        
+		check_networking 
+		check_hotspotstate &
+		
         state_change
         check_switcher
     done
@@ -128,6 +138,8 @@ clear_logs() {
         ./logs/gameSwitcher.log \
         ./logs/keymon.log \
         ./logs/game_list_options.log \
+        ./logs/network.log \
+        ./logs/dnsmasq.log \
         2> /dev/null
 }
 
@@ -551,35 +563,20 @@ runifnecessary() {
     done
 }
 
+start_networking() {
+    rm $sysdir/config/.HotspotState  # dont start hotspot at boot
+    
+    touch /tmp/network_changed
+    sync
+    check_networking
+}
+
 check_networking() {
-    if [ ! -f /tmp/network_changed ]; then
+    if [ $deviceModel -ne 354 ] || [ ! -f /tmp/network_changed ]; then
         return
     fi
-
-    rm /tmp/network_changed
-
-    echo -e "\n:: Update networking"
-
-    if [ $(/customer/app/jsonval wifi) -eq 1 ]; then
-        if ! ifconfig wlan0 || [ -f /tmp/restart_wifi ]; then
-            if [ -f /tmp/restart_wifi ]; then
-                pkill -9 wpa_supplicant
-                pkill -9 udhcpc
-                rm /tmp/restart_wifi
-            fi
-
-            echo "Initializing Wifi..."
-            /customer/app/axp_test wifion
-            sleep 2 
-            ifconfig wlan0 up
-            $miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
-            udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
-        fi
-    else
-        pkill -9 wpa_supplicant
-        pkill -9 udhcpc
-        /customer/app/axp_test wifioff
-    fi
+	rm /tmp/network_changed
+    source $sysdir/script/update_networking.sh
 }
 
 main
