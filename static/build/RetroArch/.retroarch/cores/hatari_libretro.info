@@ -15,8 +15,8 @@ systemid = "atari_st"
 
 # Libretro Features
 supports_no_game = "false"
-savestate = "false"
-savestate_features = "null"
+savestate = "true"
+savestate_features = "serialized"
 cheats = "false"
 input_descriptors = "true"
 memory_descriptors = "false"
