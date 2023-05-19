@@ -72,6 +72,41 @@ void action_setLowBatteryAutoSave(void *pt)
     settings.low_battery_autosave = ((ListItem *)pt)->value == 1;
 }
 
+void action_sethttpstate(void *pt)
+{
+    settings.http_state = ((ListItem *)pt)->value == 1;
+}
+
+void action_setsshstate(void *pt)
+{
+    settings.ssh_state = ((ListItem *)pt)->value == 1;
+}
+
+void action_setftpstate(void *pt)
+{
+    settings.ftp_state = ((ListItem *)pt)->value == 1;
+}
+
+void action_settelnetstate(void *pt)
+{
+    settings.telnet_state = ((ListItem *)pt)->value == 1;
+}
+
+void action_sethotspotstate(void *pt)
+{
+    settings.hotspot_state = ((ListItem *)pt)->value == 1;
+}
+
+void action_setntpstate(void *pt)
+{
+    settings.ntp_state = ((ListItem *)pt)->value == 1;
+}
+
+void action_settzselectstate(void *pt)
+{
+    settings.tzselect_state = ((ListItem *)pt)->value;
+}
+
 void action_setMenuButtonHaptics(void *pt)
 {
     settings.menu_button_haptics = ((ListItem *)pt)->value == 1;
@@ -242,15 +277,13 @@ void action_advancedSetSwapTriggers(void *pt)
 
 void action_advancedSetLcdVoltage(void *pt)
 {
-    int value = ((ListItem *)pt)->value;
+    int value = 0x0e - ((ListItem *)pt)->value;
 
-    if (value == 0) {
+    if (value == 0x0e) {
         axp_lcd_set(0x0e);
         config_flag_set(".lcdvolt", false);
         return;
     }
-
-    value += 0x08;
 
     if (value < 0x09 || value > 0x0e) {
         config_flag_set(".lcdvolt", false);
@@ -273,8 +306,6 @@ void action_advancedSetLcdVoltage(void *pt)
 
     FILE *fp;
     file_put(fp, LCD_VOLT_CONFIG, "%x", 0x0e);
-
-    msleep(200);
 }
 
 #endif // TWEAKS_ACTIONS_H__

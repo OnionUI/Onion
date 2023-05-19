@@ -7,10 +7,6 @@ echo $0 $*
 progdir=`dirname "$0"`
 homedir=`dirname "$1"`
 
-# Timer initialisation
-cd /mnt/SDCARD/App/PlayActivity
-./playActivity "init"
-
 # Arcade save state tutorial (played on the first launch only)
 
 if ! [ -f "$savedir/MAME 2003-Plus/.mame2003plusTutorialDone" ]; then 
@@ -41,7 +37,3 @@ fi
 
 cd /mnt/SDCARD/RetroArch/
 HOME=/mnt/SDCARD/RetroArch/ $progdir/../../RetroArch/retroarch -v -L $progdir/../../RetroArch/.retroarch/cores/mame2003_plus_libretro.so "$1"
-
-# Timer registration
-cd /mnt/SDCARD/App/PlayActivity
-./playActivity "$1"

@@ -9,6 +9,7 @@
 #include "system/screenshot.h"
 #include "system/settings.h"
 #include "system/state.h"
+#include "system/system_utils.h"
 #include "utils/apps.h"
 
 #include "./input_fd.h"
@@ -27,10 +28,8 @@ static bool menu_ignore_next = false;
 
 void _action_runApp(const char *app_dir_name)
 {
-    int currpos, total;
-    getAppPosition(app_dir_name, &currpos, &total);
     run_app(app_dir_name);
-    write_mainui_state(APPS, currpos, total);
+    write_mainui_state(MAIN_MENU, 0, 10);
     kill_mainUI();
 }
 

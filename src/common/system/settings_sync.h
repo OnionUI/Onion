@@ -33,7 +33,6 @@ void settings_shm_write(void)
     SetKeyShm(&shminfo, MONITOR_BRIGHTNESS, settings.brightness);
     SetKeyShm(&shminfo, MONITOR_VOLUME, settings.volume);
     SetKeyShm(&shminfo, MONITOR_BGM_VOLUME, settings.bgm_volume);
-    SetKeyShm(&shminfo, MONITOR_MUTE, settings.mute);
 
     SetKeyShm(&shminfo, MONITOR_HIBERNATE_DELAY, settings.sleep_timer);
 

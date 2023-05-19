@@ -35,13 +35,5 @@ if ! [ -f "$savedir/mGBA/.gpspImportDone" ]; then
     touch "$savedir/mGBA/.gpspImportDone"
 fi
 
-# Timer initialisation
-cd /mnt/SDCARD/App/PlayActivity
-./playActivity "init"
-
 cd /mnt/SDCARD/RetroArch/
 HOME=/mnt/SDCARD/RetroArch/ ./retroarch -v -L .retroarch/cores/mgba_libretro.so "$1"
-
-# Timer registration
-cd /mnt/SDCARD/App/PlayActivity
-./playActivity "$1"
