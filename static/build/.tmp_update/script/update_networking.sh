@@ -2,7 +2,7 @@
 sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo
 
-main() {
+update() {
     log "Network Checker: Update networking"
 
     check_wifi    
@@ -13,10 +13,14 @@ main() {
     check_telnetstate 
     check_ntpstate
     check_httpstate
+	check_hotspotstate
 }
 
 
 check_wifi() {
+if is_running hostapd; then
+	return
+else
 	if wifi_enabled; then
 		if ! ifconfig wlan0 || [ -f /tmp/restart_wifi ]; then
 			if [ -f /tmp/restart_wifi ]; then
@@ -38,6 +42,7 @@ check_wifi() {
 		pkill -9 udhcpc
 		/customer/app/axp_test wifioff
 	fi
+fi
 }
 
 
@@ -151,8 +156,6 @@ check_httpstate() {
 
 # Starts the hotspot based on the results of check_hotspotstate, called twice saves repeating
 # We have to sleep a bit or sometimes supllicant starts before we can get the hotspot logo
-# Get the serial so we can use it for the hotspot password
-# Check if the wpa pass is still set to the default pass, if it is change it to the serial number, if it's not then they've set a custom password, leave it alone.
 # Starts AP and DHCP
 # Turns off NTP as you wont be using it when you're on a hotspot
 start_hotspot() { 
@@ -161,37 +164,33 @@ start_hotspot() {
 		disable_flag NTPState
 	fi
 	
-	if pgrep hostapd >/dev/null; then
-		log "Hotspot: MainUI has taken wlan0 while we're supposed to be in AP mode, trying to relaunch"
-		pkill -9 hostapd 
-		pkill -9 dnsmasq
-	fi
+	ifconfig wlan1 up 
+	ifconfig wlan0 down
 	
-	sleep 5 
+	# Start AP
 	
-	# serial_number=$( { /config/riu_r 20 18 | awk 'NR==2'; /config/riu_r 20 17 | awk 'NR==2'; /config/riu_r 20 16 | awk 'NR==2'; } | sed 's/0x//g' | tr -d '[:space:]' ) 
-	# passphrase=$(grep '^wpa_passphrase=' "$sysdir/config/hostapd.conf" | cut -d'=' -f2)
-
-	# if [ "$passphrase" = "onionos" ]; then 
-		# sed -i "s/^wpa_passphrase=.*/wpa_passphrase=$serial_number/" "$sysdir/config/hostapd.conf"
-		# log "Hotspot: Default key removed."
-	# fi
-
-	pkill -9 wpa_supplicant 
-	pkill -9 udhcpc 
+	$sysdir/bin/hostapd -P /var/run/hostapd.pid -B -i wlan1 $sysdir/config/hostapd.conf &
 	
-	# Start AP and dhcp server
-	ifconfig wlan0 up 
-	$sysdir/bin/hostapd -P /var/run/hostapd.pid -B -i wlan0 $sysdir/config/hostapd.conf &
+	# IP setup
 	hotspot0addr=$(grep -E '^dhcp-range=' "$sysdir/config/dnsmasq.conf" | cut -d',' -f1 | cut -d'=' -f2) 
 	hotspot0addr=$(echo $hotspot0addr | awk -F'.' -v OFS='.' '{$NF-=1; print}') 
 	gateway0addr=$(grep -E '^dhcp-option=3' $sysdir/config/dnsmasq.conf | awk -F, '{print $2}')
 	subnetmask=$(grep -E '^dhcp-range=.*,[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+,' "$sysdir/config/dnsmasq.conf" | cut -d',' -f3) 
-	ifconfig wlan0 0.0.0.0
-	ifconfig wlan0 $hotspot0addr netmask $subnetmask 
-	ip route add default via $gateway0addr
+	
+	# Set IP route / If details
+	ifconfig wlan1 $hotspot0addr netmask $subnetmask 
+	
+	# Start DHCP server
 	$sysdir/bin/dnsmasq --conf-file=$sysdir/config/dnsmasq.conf -u root & 
-	log "Hotspot: Started with IP of: $hotspot0addr, subnet of: $subnetmask"
+	ip route add default via $gateway0addr
+	
+	if is_running hostapd; then
+		log "Hotspot: Started with IP of: $hotspot0addr, subnet of: $subnetmask"
+	else
+		log "Hotspot: Failed to start, please try turning off/on. If this doesn't resolve the issue reboot your device."
+		disable_flag HotspotState
+	fi
+
 }
 
 # Starts personal hotspot if toggle is set to on
@@ -205,8 +204,8 @@ check_hotspotstate() {
 			pkill -9 hostapd 
 			pkill -9 dnsmasq
             ifconfig wlan0 up
-            $miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf &
-            udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
+			ifconfig wlan1 down
+            check_wifi
 			if [ -f /tmp/ntprestore ]; then
 				enable_flag NTPState
 				sync
@@ -222,23 +221,12 @@ check_hotspotstate() {
 				rm $sysdir/config/.HotspotState
 				pkill -9 hostapd
 				pkill -9 dnsmasq
-			else
-				# Hotspot is turned on, closing apps restarts the supp.. 
-				# lets check if managed mode has taken over the adaptor before hotspot could grab it again, if it does we need to reset it for access & logos
-				# Hotspot will come back up it just takes a little longer.
-				sleep 10
-				if $sysdir/bin/iw dev wlan0 info | grep type | grep -q "type managed"; then
-					start_hotspot &
-				else
-					return
-				fi
 			fi
         else
 			# if wifi_disabled; then 
 				# sed -i 's/"wifi":\s*0/"wifi": 1/' /appconfigs/system.json
-				# /customer/app/axp_test wifion
-				# sleep 3 
-				# ifconfig wlan0 up
+				# check_wifi
+				# sleep 15
 				# log "Hotspot: Requested but WiFi is off, bringing WiFi up now."
 				# start_hotspot &
 			# else
@@ -291,7 +279,7 @@ write_tzid
 log "NTP: Starting NTP with TZ of $TZ"
 ntpd -p time.google.com &
 hwclock -w
-log "NTP1: TZ set to $TZ, Time set to: $(date) and merged to hwclock, which shows: $(hwclock)"
+log "NTP: TZ set to $TZ, Time set to: $(date) and merged to hwclock, which shows: $(hwclock)"
 export old_tz=$(check_tzid)
 }
 
@@ -415,4 +403,4 @@ log() {
 }
 
 
-main
+update

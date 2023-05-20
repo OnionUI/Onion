@@ -117,7 +117,6 @@ main() {
 		write_tzid
         
 		check_networking 
-		check_hotspotstate &
 		
         state_change
         check_switcher
@@ -576,7 +575,8 @@ check_networking() {
         return
     fi
 	rm /tmp/network_changed
-    source $sysdir/script/update_networking.sh
+	
+    $sysdir/script/update_networking.sh
 }
 
 main
