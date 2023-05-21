@@ -112,9 +112,6 @@ main() {
 
         state_change
         check_game
-
-		check_tzid
-		write_tzid
         
 		check_networking 
 		
