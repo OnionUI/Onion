@@ -93,12 +93,8 @@ main() {
     set_startup_tab
 	
 	# Set filebrowser branding to onion
-	CURRENT_DIR=$(pwd)
-	cd /mnt/SDCARD/App/FileBrowser/
-	/mnt/SDCARD/App/FileBrowser/filebrowser config set --branding.name "Onion" 
-	/mnt/SDCARD/App/FileBrowser/filebrowser config set --branding.files "/mnt/SDCARD/App/FileBrowser/theme" 
-	cd "$OLDPWD"
-
+	$sysdir/bin/filebrowser/filebrowser config set --branding.name "Onion" -d $sysdir/bin/filebrowser/filebrowser.db
+	$sysdir/bin/filebrowser/filebrowser config set --branding.files "/mnt/SDCARD/.tmp_update/bin/filebrowser/theme" -d $sysdir/bin/filebrowser/filebrowser.db
 
     # Main runtime loop
     while true; do

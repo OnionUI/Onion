@@ -58,7 +58,7 @@ check_ftpstate() {
         else
             if wifi_enabled; then
                 log "FTP: Starting bftpd"
-                /mnt/SDCARD/App/Ftp/bftpd -d -c /mnt/SDCARD/App/Ftp/bftpd.conf &
+                bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpd.conf &
             else
                 disable_flag FTPState
             fi
@@ -126,7 +126,7 @@ check_telnetstate() {
 
 # Starts Filebrowser if the toggle in tweaks is set on
 check_httpstate() { 
-    if flag_enabled HTTPState && [ -f /mnt/SDCARD/App/FileBrowser/filebrowser ]; then
+    if flag_enabled HTTPState && [ -f /mnt/SDCARD/.tmp_update/bin/filebrowser/filebrowser ]; then
         if is_running filebrowser; then
             if wifi_disabled; then 
                 log "Filebrowser: Wifi is turned off, disabling the toggle for HTTP FS and killing the process"
@@ -136,10 +136,8 @@ check_httpstate() {
         else
             # Checks if the toggle for WIFI is turned on.
             # Starts filebrowser bound to 0.0.0.0 so we don't need to mess around binding different IP's
-            # This cuts down heavily on lag in the UI (as we don't need to run commands to check/grab IP's) and allows the menu to work more seamlessly
             if wifi_enabled; then 
-                cd /mnt/SDCARD/App/FileBrowser/
-                ./filebrowser -p 80 -a 0.0.0.0 -r /mnt/SDCARD &
+                $sysdir/bin/filebrowser/filebrowser -p 80 -a 0.0.0.0 -r /mnt/SDCARD -d $sysdir/bin/filebrowser/filebrowser.db &
                 log "Filebrowser: Starting filebrowser listening on 0.0.0.0 to accept all traffic"
             else
                 disable_flag HTTPState
@@ -162,13 +160,13 @@ start_hotspot() {
 	if flag_enabled NTPState; then
 		touch /tmp/ntprestore
 		disable_flag NTPState
+		sync
 	fi
 	
 	ifconfig wlan1 up 
 	ifconfig wlan0 down
 	
 	# Start AP
-	
 	$sysdir/bin/hostapd -P /var/run/hostapd.pid -B -i wlan1 $sysdir/config/hostapd.conf &
 	
 	# IP setup
@@ -208,6 +206,7 @@ check_hotspotstate() {
             check_wifi
 			if [ -f /tmp/ntprestore ]; then
 				enable_flag NTPState
+				rm /tmp/ntprestore
 				sync
 			fi
 			
