@@ -141,24 +141,31 @@ fi #if [ $emudeck = "true" ]
 LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so /mnt/SDCARD/.tmp_update/bin/prompt -r \
 	-t "EmuDeck CloudSync" \
 	-m "Select your Cloud provider" \
-	"DropBox" \
 	"Google Drive" \
+	"oneDrive" \
+	"DropBox" \
 	"Box" \
 	"NextCloud" \
 	"pCloud" \
+	"SFTP" \
+	"SMB" \	
 
 	retcode=$?		
 	
 	if [ $retcode -eq 0 ]; then
-		provider="$systemCloud-DropBox"
-	elif [ $retcode -eq 1 ]; then
 		provider="$systemCloud-Gdrive"
+	elif [ $retcode -eq 1 ]; then
+		provider="$systemCloud-OneDrive"
 	elif [ $retcode -eq 2 ]; then
-		provider="$systemCloud-Box"
+		provider="$systemCloud-DropBox"
 	elif [ $retcode -eq 3 ]; then
-		provider="$systemCloud-NextCloud"
+		provider="$systemCloud-Box"
 	elif [ $retcode -eq 4 ]; then
-		provider="$systemCloud-pCloud"
+		provider="$systemCloud-pCloud"	
+	elif [ $retcode -eq 5 ]; then
+		provider="$systemCloud-NextCloud"
+	elif [ $retcode -eq 6 ]; then
+		provider="$systemCloud-SMB"	
 	fi
 	
 emudeck_changeLine 'systemCloud' "systemCloud=\"${systemCloud}\"" "$EmuDeckPath/settings.sh"	
