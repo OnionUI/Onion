@@ -165,6 +165,41 @@ void display_drawFrame(uint32_t color)
     }
 }
 
+//
+//    Draw a battery icon
+//
+void display_drawBatteryIcon(uint32_t color, int x, int y, int level,
+                             uint32_t fillColor)
+{
+    uint32_t *ofs = fb_addr;
+    int i, j;
+
+    // Draw battery body wireframe
+    for (i = x; i < x + 30; i++) {
+        ofs[i + y * 640] = color;        // Top border
+        ofs[i + (y + 14) * 640] = color; // Bottom border
+    }
+    for (j = y; j < y + 15; j++) {
+        ofs[x + j * 640] = color;      // Left border
+        ofs[x + 29 + j * 640] = color; // Right border
+    }
+
+    // Draw battery charge level
+    int levelWidth = (level * 26) / 100;
+    for (i = x + 3 + 26 - levelWidth; i < x + 1 + 26; i++) {
+        for (j = y + 3; j < y + 12; j++) {
+            ofs[i + j * 640] = fillColor;
+        }
+    }
+
+    // Draw battery head wireframe
+    for (i = x - 4; i < x; i++) {
+        for (j = y + 2; j < y + 13; j++) {
+            ofs[i + j * 640] = color;
+        }
+    }
+}
+
 void display_free(void)
 {
     if (savebuf)

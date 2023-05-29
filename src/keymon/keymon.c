@@ -612,7 +612,7 @@ int main(void)
 
             if (settings_changed) {
                 settings_shm_write();
-                _settings_save_mainui();
+                settings_save();
             }
 
             if ((val == PRESSED) && (system_state == MODE_MAIN_UI)) {

@@ -39,8 +39,15 @@ static struct settings_s {
     bool menu_button_haptics;
     bool low_battery_autosave;
     bool low_battery_warning;
+    bool http_state;
+    bool ssh_state;
+    bool ftp_state;
+    bool telnet_state;
+    bool hotspot_state;
+    bool ntp_state;
     int low_battery_warn_at;
     int time_skip;
+    int tzselect_state;
     int vibration;
     int startup_tab;
     int startup_application;
@@ -50,6 +57,7 @@ static struct settings_s {
     int ingame_single_press;
     int ingame_long_press;
     int ingame_double_press;
+
     char mainui_button_x[JSON_STRING_LEN];
     char mainui_button_y[JSON_STRING_LEN];
 } settings;
@@ -86,6 +94,13 @@ void _settings_reset(void)
     settings.vibration = 2;
     settings.startup_tab = 0;
     settings.startup_application = 0;
+    settings.http_state = false;
+    settings.ssh_state = false;
+    settings.ftp_state = false;
+    settings.telnet_state = false;
+    settings.hotspot_state = false;
+    settings.ntp_state = false;
+    settings.tzselect_state = 12;
     // Menu button actions
     settings.mainui_single_press = 1;
     settings.mainui_long_press = 0;
@@ -124,7 +139,6 @@ void _settings_load_mainui(void)
     cJSON *json_root = cJSON_Parse(json_str);
 
     json_getInt(json_root, "vol", &settings.volume);
-    json_getInt(json_root, "mute", &settings.mute);
     json_getInt(json_root, "bgmvol", &settings.bgm_volume);
     json_getInt(json_root, "brightness", &settings.brightness);
     json_getInt(json_root, "hibernate", &settings.sleep_timer);
@@ -156,6 +170,13 @@ void settings_load(void)
     settings.show_recents = config_flag_get(".showRecents");
     settings.show_expert = config_flag_get(".showExpert");
     settings.low_battery_autosave = !config_flag_get(".noLowBatteryAutoSave");
+    settings.http_state = config_flag_get(".HTTPState");
+    settings.ssh_state = config_flag_get(".SSHState");
+    settings.ftp_state = config_flag_get(".FTPState");
+    settings.telnet_state = config_flag_get(".TelnetState");
+    settings.hotspot_state = config_flag_get(".HotspotState");
+    settings.ntp_state = config_flag_get(".NTPState");
+    settings.mute = config_flag_get(".muteVolume");
 
     if (config_flag_get(
             ".noBatteryWarning")) // flag is deprecated, but keep compatibility
@@ -165,6 +186,7 @@ void settings_load(void)
             ".noVibration")) // flag is deprecated, but keep compatibility
         settings.vibration = 0;
 
+    config_get("tzselect", "%d", &settings.tzselect_state);
     config_get("battery/warnAt", "%d", &settings.low_battery_warn_at);
     config_get("startup/app", "%d", &settings.startup_application);
     config_get("startup/addHours", "%d", &settings.time_skip);
@@ -258,6 +280,14 @@ void settings_save(void)
     config_flag_set(".showRecents", settings.show_recents);
     config_flag_set(".showExpert", settings.show_expert);
     config_flag_set(".noLowBatteryAutoSave", !settings.low_battery_autosave);
+    config_flag_set(".HTTPState", settings.http_state);
+    config_flag_set(".SSHState", settings.ssh_state);
+    config_flag_set(".FTPState", settings.ftp_state);
+    config_flag_set(".TelnetState", settings.telnet_state);
+    config_flag_set(".HotspotState", settings.hotspot_state);
+    config_flag_set(".NTPState", settings.ntp_state);
+    config_flag_set(".muteVolume", settings.mute);
+    config_setNumber("tzselect", settings.tzselect_state);
     config_setNumber("battery/warnAt", settings.low_battery_warn_at);
     config_setNumber("startup/app", settings.startup_application);
     config_setNumber("startup/addHours", settings.time_skip);

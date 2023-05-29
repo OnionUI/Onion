@@ -20,69 +20,7 @@
 #include "utils/log.h"
 #include "utils/str.h"
 
-// Max number of records in the DB
-#define MAXVALUES 1000
-#define PLAY_ACTIVITY_DB_PATH                                                  \
-    "/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db"
-
-typedef struct structRom {
-    char name[100];
-    int playTime;
-} rom_list_s;
-static rom_list_s rom_list[MAXVALUES];
-static int rom_list_len = 0;
-
-int readRomDB()
-{
-    FILE *fp;
-
-    // Check to avoid corruption
-    if (exists(PLAY_ACTIVITY_DB_PATH)) {
-        if ((fp = fopen(PLAY_ACTIVITY_DB_PATH, "rb")) != NULL) {
-            fread(rom_list, sizeof(rom_list), 1, fp);
-            rom_list_len = 0;
-
-            for (int i = 0; i < MAXVALUES; i++) {
-                if (strlen(rom_list[i].name) != 0)
-                    rom_list_len++;
-            }
-
-            fclose(fp);
-        }
-        else {
-            // The file exists but could not be opened
-            // Something went wrong, the program is terminated
-            return -1;
-        }
-    }
-
-    return 1;
-}
-
-void writeRomDB(void)
-{
-    FILE *fp;
-
-    if ((fp = fopen(PLAY_ACTIVITY_DB_PATH, "wb")) != NULL) {
-        fwrite(rom_list, sizeof(rom_list), 1, fp);
-        fclose(fp);
-    }
-}
-
-void displayRomDB(void)
-{
-#ifdef LOG_DEBUG
-    printf("--------------------------------\n");
-    for (int i = 0; i < rom_list_len; i++) {
-        printf("rom_list name: %s\n", rom_list[i].name);
-
-        char cPlayTime[15];
-        sprintf(cPlayTime, "%d", rom_list[i].playTime);
-        printf("playtime: %s\n", cPlayTime);
-    }
-    printf("--------------------------------\n");
-#endif
-}
+#include "../playActivity/playActivity.h"
 
 static bool quit = false;
 
@@ -98,9 +36,21 @@ static void sigHandler(int sig)
     }
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
-    print_debug("Debug logging enabled");
+    log_setName("playActivityUI");
+    printf_debug("main(%d, %s)\n", argc, argv[1]);
+
+    open_db();
+    PlayActivity **play_activities = find_play_activities("");
+    int play_activities_len = play_activities_count("");
+    printf_debug("sizeof(%d)/%d\n", sizeof(**play_activities),
+                 sizeof(PlayActivity));
+    printf_debug("play_activities_len = %d\n", play_activities_len);
+    close_db();
+    if (play_activities == NULL) {
+        return 1;
+    }
 
     signal(SIGINT, sigHandler);
     signal(SIGTERM, sigHandler);
@@ -131,63 +81,25 @@ int main(void)
     SDL_Surface *imagePages;
     SDL_Surface *imageMileage;
 
-    // Loading DB
-    if (readRomDB() == -1) {
-        print_debug("Failed reading rom db");
-        // To avoid a DB overwrite
-        return EXIT_SUCCESS;
-    }
-
-    displayRomDB();
-    // Sorting DB
-    rom_list_s tempStruct;
-    int bFound = 1;
-
-    while (bFound == 1) {
-        bFound = 0;
-        for (int i = 0; i < rom_list_len - 1; i++) {
-            if (rom_list[i].playTime < rom_list[i + 1].playTime) {
-                tempStruct = rom_list[i + 1];
-                rom_list[i + 1] = rom_list[i];
-                rom_list[i] = tempStruct;
-                bFound = 1;
-            }
-        }
-    }
-
-    int end;
-    for (end = 0; end < rom_list_len; end++) {
-        if (rom_list[end].playTime < 60)
-            break;
-    }
-    rom_list_len = end;
-
-    // writeRomDB();
-
-    //    Mileage
-    int ntotalTime = 0;
-    for (int i = 0; i < rom_list_len; i++)
-        ntotalTime += rom_list[i].playTime;
-
-    char cTotalHandheldMileage[30];
-
-    // sprintf(cPages, "%d",ntotalTime);
-    // logMessage("Mileage");
-    // logMessage(cPages);
-    int h, m;
-    h = ntotalTime / 3600;
-    m = (ntotalTime - 3600 * h) / 60;
-    sprintf(cTotalHandheldMileage, "%d:%02d", h, m);
-
-    displayRomDB();
-
-    int nPages = (int)((rom_list_len - 1) / 4 + 1);
-
     SDL_BlitSurface(imageBackground, NULL, screen, NULL);
 
     SDL_Rect rectPages = {561, 430, 90, 44};
     SDL_Rect rectMileage = {484, 8, 170, 42};
 
+    printf_debug("%s\n", "Mileage");
+    int ntotalTime = 0;
+    for (int i = 0; i < play_activities_len; i++) {
+        ntotalTime += play_activities[i]->play_time;
+    }
+    printf_debug("ntotalTime = %d\n", ntotalTime);
+    char cTotalHandheldMileage[30];
+
+    int h, m;
+    h = ntotalTime / 3600;
+    m = (ntotalTime - 3600 * h) / 60;
+    sprintf(cTotalHandheldMileage, "%d:%02d", h, m);
+
+    int nPages = (int)((play_activities_len - 1) / 4 + 1);
     int nCurrentPage = 0;
     char cPosition[5];
     char cTotalTimePlayed[50];
@@ -200,30 +112,30 @@ int main(void)
         TTF_RenderUTF8_Blended(font30, cTotalHandheldMileage, color_white);
 
     for (int i = 0; i < 4; i++) {
-        sprintf(cPosition, "%d", i + 1);
+        if (play_activities_len > i) {
+            sprintf(cPosition, "%d", i + 1);
 
-        h = rom_list[i].playTime / 3600;
-        m = (rom_list[i].playTime - 3600 * h) / 60;
+            h = play_activities[i]->play_time / 3600;
+            m = (play_activities[i]->play_time - 3600 * h) / 60;
 
-        if (strlen(rom_list[i].name) != 0)
-            sprintf(cTotalTimePlayed, "%d:%02d", h, m);
-        else
-            memset(cTotalTimePlayed, 0, sizeof(cTotalTimePlayed));
+            if (strlen(play_activities[i]->name) != 0)
+                sprintf(cTotalTimePlayed, "%d:%02d", h, m);
+            else
+                memset(cTotalTimePlayed, 0, sizeof(cTotalTimePlayed));
 
-        imageRomPosition =
-            TTF_RenderUTF8_Blended(font40, cPosition, color_lilla);
-        imageRomPlayTime =
-            TTF_RenderUTF8_Blended(font40, cTotalTimePlayed, color_white);
-        imageRomName = TTF_RenderUTF8_Blended(fontRomName25, rom_list[i].name,
-                                              color_white);
+            imageRomPosition =
+                TTF_RenderUTF8_Blended(font40, cPosition, color_lilla);
+            imageRomPlayTime =
+                TTF_RenderUTF8_Blended(font40, cTotalTimePlayed, color_white);
+            imageRomName = TTF_RenderUTF8_Blended(
+                fontRomName25, play_activities[i]->name, color_white);
 
-        SDL_Rect rectPosition = {16, 78 + 90 * i, 76, 39};
-        SDL_Rect rectRomPlayTime = {77, 66 + 90 * i, 254, 56};
-        SDL_Rect rectRomNames = {78, 104 + 90 * i, 600, 40};
+            SDL_Rect rectPosition = {16, 78 + 90 * i, 76, 39};
+            SDL_Rect rectRomPlayTime = {77, 66 + 90 * i, 254, 56};
+            SDL_Rect rectRomNames = {78, 104 + 90 * i, 600, 40};
 
-        SDL_BlitSurface(imageRomPosition, NULL, screen, &rectPosition);
+            SDL_BlitSurface(imageRomPosition, NULL, screen, &rectPosition);
 
-        if (rom_list_len > i) {
             SDL_BlitSurface(imageRomPlayTime, NULL, screen, &rectRomPlayTime);
             SDL_BlitSurface(imageRomName, NULL, screen, &rectRomNames);
         }
@@ -275,29 +187,29 @@ int main(void)
         SDL_BlitSurface(imageMileage, NULL, screen, &rectMileage);
 
         for (int i = 0; i < 4; i++) {
-            rom_list_s curr = rom_list[nCurrentPage * 4 + i];
-            sprintf(cPosition, "%d", (int)(nCurrentPage * 4 + i + 1));
-            h = curr.playTime / 3600;
-            m = (curr.playTime - 3600 * h) / 60;
+            if (play_activities_len > (nCurrentPage * 4 + i)) {
+                PlayActivity *curr = play_activities[nCurrentPage * 4 + i];
+                sprintf(cPosition, "%d", (int)(nCurrentPage * 4 + i + 1));
+                h = curr->play_time / 3600;
+                m = (curr->play_time - 3600 * h) / 60;
 
-            if (strlen(curr.name) != 0)
-                sprintf(cTotalTimePlayed, "%d:%02d", h, m);
-            else
-                memset(cTotalTimePlayed, 0, sizeof(cTotalTimePlayed));
+                if (strlen(curr->name) != 0)
+                    sprintf(cTotalTimePlayed, "%d:%02d", h, m);
+                else
+                    memset(cTotalTimePlayed, 0, sizeof(cTotalTimePlayed));
 
-            imageRomPosition =
-                TTF_RenderUTF8_Blended(font40, cPosition, color_lilla);
-            imageRomPlayTime =
-                TTF_RenderUTF8_Blended(font40, cTotalTimePlayed, color_white);
-            imageRomName =
-                TTF_RenderUTF8_Blended(fontRomName25, curr.name, color_white);
+                imageRomPosition =
+                    TTF_RenderUTF8_Blended(font40, cPosition, color_lilla);
+                imageRomPlayTime = TTF_RenderUTF8_Blended(
+                    font40, cTotalTimePlayed, color_white);
+                imageRomName = TTF_RenderUTF8_Blended(fontRomName25, curr->name,
+                                                      color_white);
 
-            SDL_Rect rectPosition = {16, 78 + 90 * i, 76, 39};
-            SDL_Rect rectRomPlayTime = {77, 66 + 90 * i, 254, 56};
-            SDL_Rect rectRomNames = {78, 104 + 90 * i, 600, 40};
+                SDL_Rect rectPosition = {16, 78 + 90 * i, 76, 39};
+                SDL_Rect rectRomPlayTime = {77, 66 + 90 * i, 254, 56};
+                SDL_Rect rectRomNames = {78, 104 + 90 * i, 600, 40};
 
-            SDL_BlitSurface(imageRomPosition, NULL, screen, &rectPosition);
-            if (rom_list_len > (nCurrentPage * 4 + i)) {
+                SDL_BlitSurface(imageRomPosition, NULL, screen, &rectPosition);
                 SDL_BlitSurface(imageRomPlayTime, NULL, screen,
                                 &rectRomPlayTime);
                 SDL_BlitSurface(imageRomName, NULL, screen, &rectRomNames);
@@ -308,6 +220,13 @@ int main(void)
         SDL_Flip(video);
     }
 
+    // free memory for each struct
+    for (int i = 0; i < sizeof(PlayActivity) / sizeof(play_activities); i++) {
+        free(play_activities[i]);
+    }
+    // free memory for the array of struct pointers
+    free(play_activities);
+
     SDL_FreeSurface(screen);
     SDL_FreeSurface(video);
 
@@ -316,6 +235,5 @@ int main(void)
 #endif
     //  #18808
     SDL_Quit();
-
     return EXIT_SUCCESS;
 }
