@@ -5,9 +5,7 @@ miyoodir=/mnt/SDCARD/miyoo
 update() {
     log "Network Checker: Update networking"
 
-    check_wifi    
-    check_tzid 
-    write_tzid 
+    check_wifi
     check_ftpstate 
     check_sshstate 
     check_telnetstate 
@@ -111,7 +109,7 @@ check_telnetstate() {
             if wifi_enabled; then 
                 log "Telnet: Starting telnet"
                 cd /mnt/SDCARD 
-                telnetd -l sh
+                $sysdir/script/launchtelnet.sh
             else
                 disable_flag TelnetState
             fi
@@ -155,20 +153,11 @@ check_httpstate() {
 # Starts the hotspot based on the results of check_hotspotstate, called twice saves repeating
 # We have to sleep a bit or sometimes supllicant starts before we can get the hotspot logo
 # Starts AP and DHCP
-# Turns off NTP as you wont be using it when you're on a hotspot
 start_hotspot() { 
-	if flag_enabled NTPState; then
-		touch /tmp/ntprestore
-		disable_flag NTPState
-		sync
-	fi
 	
 	ifconfig wlan1 up 
 	ifconfig wlan0 down
-	
-	# Start AP
-	$sysdir/bin/hostapd -P /var/run/hostapd.pid -B -i wlan1 $sysdir/config/hostapd.conf &
-	
+		
 	# IP setup
 	hotspot0addr=$(grep -E '^dhcp-range=' "$sysdir/config/dnsmasq.conf" | cut -d',' -f1 | cut -d'=' -f2) 
 	hotspot0addr=$(echo $hotspot0addr | awk -F'.' -v OFS='.' '{$NF-=1; print}') 
@@ -178,7 +167,8 @@ start_hotspot() {
 	# Set IP route / If details
 	ifconfig wlan1 $hotspot0addr netmask $subnetmask 
 	
-	# Start DHCP server
+	# Start
+	$sysdir/bin/hostapd -P /var/run/hostapd.pid -B -i wlan1 $sysdir/config/hostapd.conf &
 	$sysdir/bin/dnsmasq --conf-file=$sysdir/config/dnsmasq.conf -u root & 
 	ip route add default via $gateway0addr
 	
@@ -194,7 +184,6 @@ start_hotspot() {
 # Starts personal hotspot if toggle is set to on
 # Calls start_hotspot from above
 # IF toggle is disabled, shuts down hotspot and bounces wifi.
-# Restores NTP if it was on before we turned the hotspot on.
 check_hotspotstate() { 
     if [ ! -f $sysdir/config/.HotspotState ]; then
         if is_running hostapd; then
@@ -203,13 +192,7 @@ check_hotspotstate() {
 			pkill -9 dnsmasq
             ifconfig wlan0 up
 			ifconfig wlan1 down
-            check_wifi
-			if [ -f /tmp/ntprestore ]; then
-				enable_flag NTPState
-				rm /tmp/ntprestore
-				sync
-			fi
-			
+            check_wifi			
 		else
 			return
         fi
@@ -238,136 +221,66 @@ check_hotspotstate() {
 # We need to check if NTP is enabled and then check the state of tzselect in /.tmp_update/config/tzselect, based on the value we'll pass the TZ via the env var to ntpd and get the time (has to be POSIX)
 # This will work but it will not export the TZ var across all opens shells so you may find the hwclock (and clock app, retroarch time etc) are correct but terminal time is not.
 # It does set TZ on the tty that Main is running in so this is ok
-check_ntpstate() { 
-    if flag_enabled NTPState; then
-        if is_running ntpd; then
-            if wifi_enabled; then 
-                export new_tz=$(check_tzid)
-                if [ "$old_tz" != "$new_tz" ]; then
-                    restart_ntp
-                fi
-            else
-                log "NTP: Wifi is turned off, disabling the toggle for NTP and killing the process"
-                disable_flag NTPState
-                pkill -9 ntpd
-            fi
-        else
-            if wifi_enabled; then 
-                restart_ntp
-            else
-                log "NTP: Wifi is turned off, disabling the toggle for NTP and killing the process"
-                disable_flag NTPState
-                pkill -9 ntpd
-            fi
-        fi
-    else
-        if is_running ntpd; then
-            pkill -9 ntpd
-            log "NTP: Killed by request"
-        fi
-    fi
-}
 
-
-# Utils
-
-restart_ntp() {
-pkill -9 ntpd
-check_tzid
-write_tzid
-log "NTP: Starting NTP with TZ of $TZ"
-ntpd -p time.google.com &
-hwclock -w
-log "NTP: TZ set to $TZ, Time set to: $(date) and merged to hwclock, which shows: $(hwclock)"
-export old_tz=$(check_tzid)
-}
-
-# Get the value of the tz set in tweaks
 check_tzid() {
     tzid=$(cat "$sysdir/config/tzselect") 
     echo "$tzid"
 }
 
-# Check the value and write it into TZ var - if they look backwards its because they are, ntpd is weird..
-write_tzid() {
-    case $tzid in 
-        0)
-            export TZ="UTC+12"
-            ;;
-        1)
-            export TZ="UTC+11"
-            ;;
-        2)
-            export TZ="UTC+10"
-            ;;
-        3)
-            export TZ="UTC+9"
-            ;;
-        4)
-            export TZ="UTC+8"
-            ;;
-        5)
-            export TZ="UTC+7"
-            ;;
-        6)
-            export TZ="UTC+6"
-            ;;
-        7)
-            export TZ="UTC+5"
-            ;;
-        8)
-            export TZ="UTC+4"
-            ;;
-        9)
-            export TZ="UTC+3"
-            ;;
-        10)
-            export TZ="UTC+2"
-            ;;
-        11)
-            export TZ="UTC+1"
-            ;;
-        12)
-            export TZ="UTC"
-            ;;
-        13)
-            export TZ="UTC-1"
-            ;;
-        14)
-            export TZ="UTC-2"
-            ;;
-        15)
-            export TZ="UTC-3"
-            ;;
-        16)
-            export TZ="UTC-4"
-            ;;
-        17)
-            export TZ="UTC-5"
-            ;;
-        18)
-            export TZ="UTC-6"
-            ;;
-        19)
-            export TZ="UTC-7"
-            ;;
-        20)
-            export TZ="UTC-8"
-            ;;
-        21)
-            export TZ="UTC-9"
-            ;;
-        22)
-            export TZ="UTC-10"
-            ;;
-        23)
-            export TZ="UTC-11"
-            ;;
-        24)
-            export TZ="UTC-12"
-            ;;
-    esac
+check_ntpstate() { 
+    if flag_enabled NTPState && wifi_enabled; then
+        current_tz=$(check_tzid)
+        if [ "$current_tz" != "$old_tz" ]; then
+            export old_tz="$current_tz"
+            restart_ntp &
+        fi
+    fi
 }
+
+restart_ntp() {
+    export old_tz=$(check_tzid)
+    set_tzid
+    log "NTP: Starting NTP with TZ of $TZ"
+    ntpdate time.google.com
+    hwclock -w
+	touch /tmp/time_update
+	sync
+    log "NTP: TZ set to $TZ, Time set to: $(date) and merged to hwclock, which shows: $(hwclock)"
+}
+
+set_tzid() {
+    check_tzid
+    case $tzid in 
+        0)  export TZ="UTC+12" ;;
+        1)  export TZ="UTC+11" ;;
+        2)  export TZ="UTC+10" ;;
+        3)  export TZ="UTC+9" ;;
+        4)  export TZ="UTC+8" ;;
+        5)  export TZ="UTC+7" ;;
+        6)  export TZ="UTC+6" ;;
+        7)  export TZ="UTC+5" ;;
+        8)  export TZ="UTC+4" ;;
+        9)  export TZ="UTC+3" ;;
+        10) export TZ="UTC+2" ;;
+        11) export TZ="UTC+1" ;;
+        12) export TZ="UTC" ;;
+        13) export TZ="UTC-1" ;;
+        14) export TZ="UTC-2" ;;
+        15) export TZ="UTC-3" ;;
+        16) export TZ="UTC-4" ;;
+        17) export TZ="UTC-5" ;;
+        18) export TZ="UTC-6" ;;
+        19) export TZ="UTC-7" ;;
+        20) export TZ="UTC-8" ;;
+        21) export TZ="UTC-9" ;;
+        22) export TZ="UTC-10" ;;
+        23) export TZ="UTC-11" ;;
+        24) export TZ="UTC-12" ;;
+    esac
+    echo "$TZ" > "$sysdir/config/T.Z"
+}
+
+set_tzid
 
 wifi_enabled() {
     [ $(/customer/app/jsonval wifi) -eq 1 ]
