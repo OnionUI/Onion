@@ -109,7 +109,7 @@ check_telnetstate() {
             if wifi_enabled; then 
                 log "Telnet: Starting telnet"
                 cd /mnt/SDCARD 
-                $sysdir/script/launchtelnet.sh
+                telnetd -l sh
             else
                 disable_flag TelnetState
             fi
