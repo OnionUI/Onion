@@ -48,19 +48,25 @@ fi
 
 # Starts bftpd if the toggle is set to on
 check_ftpstate() { 
-    if flag_enabled FTPState; then
+    if flag_enabled ftpState; then
         if is_running bftpd; then
             if wifi_disabled; then
                 log "FTP: Wifi is turned off, disabling the toggle for FTP and killing the process"
-                disable_flag FTPState
+                disable_flag ftpState
                 killall -9 bftpd
             fi
         else
             if wifi_enabled; then
                 log "FTP: Starting bftpd"
-                bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpd.conf &
+				if flag_enabled authftpState; then 
+					bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpdauth.conf
+					log "FTP: Starting bftpd with auth"
+				else	
+					bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpd.conf
+					log "FTP: Starting bftpd without auth"
+				fi
             else
-                disable_flag FTPState
+                disable_flag ftpState
             fi
         fi
     else
