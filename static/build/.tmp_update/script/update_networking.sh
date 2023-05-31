@@ -98,22 +98,32 @@ check_sshstate() {
 
 
 # Starts telnet if the toggle is set to on
-# Telnet is generally already running when you boot your MMP, you won't see this hit logs unless you bounce it
+# Telnet is generally already running when you boot your MMP. This will kill the firmware version and launch a passworded version if auth is turned on, if auth is off it will launch a version with env vars set
 check_telnetstate() { 
-    if flag_enabled TelnetState; then
+	if is_running_exact "telnetd -l sh"; then
+		pkill -9 -f "telnetd -l sh"
+		log "Telnet: Killing firmware telnetd process"
+		sleep 1 # Wait for the process to die
+	fi
+		
+    if flag_enabled telnetState; then
         if is_running telnetd; then
             if wifi_disabled; then
                 log "Telnet: Wifi is turned off, disabling the toggle for Telnet and killing the process"
-                disable_flag TelnetState
+                disable_flag telnetState
                 killall -9 telnetd
             fi
         else
             if wifi_enabled; then 
-                log "Telnet: Starting telnet"
-                cd /mnt/SDCARD 
-                telnetd -l sh
+				if flag_enabled authtelnetState; then
+					log "Telnet: Starting telnet with auth"
+					telnetd -l /mnt/SDCARD/.tmp_update/script/telnetlogin.sh
+				else
+					log "Telnet: Starting telnet without auth"
+					telnetd -l /mnt/SDCARD/.tmp_update/script/telnetenv.sh
+				fi
             else
-                disable_flag TelnetState
+                disable_flag telnetState
             fi
         fi
     else
@@ -395,6 +405,11 @@ disable_flag() {
 is_running() {
     process_name="$1"
     pgrep "$process_name" > /dev/null
+}
+
+is_running_exact() {
+    process_name="$1"
+    pgrep -f "$process_name" > /dev/null
 }
 
 log() {

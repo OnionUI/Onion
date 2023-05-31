@@ -24,6 +24,7 @@ static List _menu_main;
 static List _menu_system;
 static List _menu_date_time;
 static List _menu_network;
+static List _menu_telnet;
 static List _menu_system_startup;
 static List _menu_button_action;
 static List _menu_button_action_mainui_menu;
@@ -40,6 +41,7 @@ void menu_free_all(void)
     list_free(&_menu_main);
     list_free(&_menu_system);
     list_free(&_menu_network);
+    list_free(&_menu_telnet);
     list_free(&_menu_date_time);
     list_free(&_menu_system_startup);
     list_free(&_menu_button_action);
@@ -116,6 +118,33 @@ void menu_datetime(void *_)
     header_changed = true;
 }
 
+
+// Network services submenus
+
+void menu_telnet(void* _)
+{
+    if (!_menu_telnet._created) {
+        _menu_telnet = list_create(2, LIST_SMALL);
+        strcpy(_menu_telnet.title, "Telnet config");
+        list_addItem(&_menu_telnet,
+            (ListItem) {
+            .label = "Enable",
+                .item_type = TOGGLE,
+                .value = (int)settings.telnet_state,
+                .action = action_settelnetstate
+        });
+        list_addItem(&_menu_telnet,
+            (ListItem) {
+            .label = "Enable authentication",
+                .item_type = TOGGLE,
+                .value = (int)settings.auth_telnet_state,
+                .action = action_settelnetauthstate
+        });
+    }
+    menu_stack[++menu_level] = &_menu_telnet;
+    header_changed = true;
+}
+
 void menu_networks(void *_)
 {
     if (!_menu_network._created) {
@@ -137,10 +166,8 @@ void menu_networks(void *_)
                                 .value = (int)settings.ftp_state,
                                 .action = action_setftpstate});
         list_addItem(&_menu_network,
-                     (ListItem){.label = "Telnet (native)",
-                                .item_type = TOGGLE,
-                                .value = (int)settings.telnet_state,
-                                .action = action_settelnetstate});
+                     (ListItem){.label = "Telnet...",
+                                .action = menu_telnet});
         list_addItem(&_menu_network,
                      (ListItem){.label = "WiFi Hotspot",
                                 .item_type = TOGGLE,
