@@ -5,7 +5,9 @@
 
 #include "./msleep.h"
 
-typedef enum { RELEASED, PRESSED, REPEATING } KeyState;
+typedef enum { RELEASED,
+               PRESSED,
+               REPEATING } KeyState;
 
 static SDL_Event keystate_event;
 

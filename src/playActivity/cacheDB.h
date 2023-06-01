@@ -1,16 +1,16 @@
 #ifndef CACHE_DB_H
 #define CACHE_DB_H
 
+#include <libgen.h>
+#include <sqlite3/sqlite3.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <libgen.h>
 #include <sys/stat.h>
-#include <sqlite3/sqlite3.h>
 
 typedef struct CacheDBItem CacheDBItem;
 
-struct CacheDBItem{
+struct CacheDBItem {
     int id;
     char *rom_type;
     char *disp;
@@ -22,12 +22,14 @@ struct CacheDBItem{
 
 sqlite3 *cache_db = NULL;
 
-void cache_db_close(void) {
+void cache_db_close(void)
+{
     sqlite3_close(cache_db);
     cache_db = NULL;
 }
 
-void cache_db_open(char *cache_db_file_path) {
+void cache_db_open(char *cache_db_file_path)
+{
     struct stat buffer;
     if (stat(cache_db_file_path, &buffer) == 0) {
         int rc = sqlite3_open(cache_db_file_path, &cache_db);
@@ -37,7 +39,8 @@ void cache_db_open(char *cache_db_file_path) {
     }
 }
 
-sqlite3_stmt * cache_db_prepare(char *cache_db_file_path, char *sql) {
+sqlite3_stmt *cache_db_prepare(char *cache_db_file_path, char *sql)
+{
     printf_debug("cache_db_prepare(%s, %s)\n", cache_db_file_path, sql);
     sqlite3_stmt *stmt = NULL;
     cache_db_open(cache_db_file_path);
@@ -48,10 +51,11 @@ sqlite3_stmt * cache_db_prepare(char *cache_db_file_path, char *sql) {
         }
         cache_db_close();
     }
-    return(stmt);
+    return (stmt);
 }
 
-CacheDBItem * cache_db_find(char *cache_db_item_file_path) {
+CacheDBItem *cache_db_find(char *cache_db_item_file_path)
+{
     printf_debug("cache_db_find(%s)\n", cache_db_item_file_path);
     CacheDBItem *cache_db_item = NULL;
     char *type = basename(dirname(strdup((char *)cache_db_item_file_path)));

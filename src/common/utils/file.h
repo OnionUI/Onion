@@ -29,28 +29,28 @@
 #define DT_WHT 14
 #endif
 
-#define file_get(fp, path, format, dest)                                       \
-    {                                                                          \
-        if ((fp = fopen(path, "r"))) {                                         \
-            fscanf(fp, format, dest);                                          \
-            fclose(fp);                                                        \
-        }                                                                      \
+#define file_get(fp, path, format, dest) \
+    {                                    \
+        if ((fp = fopen(path, "r"))) {   \
+            fscanf(fp, format, dest);    \
+            fclose(fp);                  \
+        }                                \
     }
-#define file_put(fp, path, format, value)                                      \
-    {                                                                          \
-        if ((fp = fopen(path, "w+"))) {                                        \
-            fprintf(fp, format, value);                                        \
-            fclose(fp);                                                        \
-        }                                                                      \
+#define file_put(fp, path, format, value) \
+    {                                     \
+        if ((fp = fopen(path, "w+"))) {   \
+            fprintf(fp, format, value);   \
+            fclose(fp);                   \
+        }                                 \
     }
-#define file_put_sync(fp, path, format, value)                                 \
-    {                                                                          \
-        if ((fp = fopen(path, "w+"))) {                                        \
-            fprintf(fp, format, value);                                        \
-            fflush(fp);                                                        \
-            fsync(fileno(fp));                                                 \
-            fclose(fp);                                                        \
-        }                                                                      \
+#define file_put_sync(fp, path, format, value) \
+    {                                          \
+        if ((fp = fopen(path, "w+"))) {        \
+            fprintf(fp, format, value);        \
+            fflush(fp);                        \
+            fsync(fileno(fp));                 \
+            fclose(fp);                        \
+        }                                      \
     }
 
 bool exists(const char *file_path);

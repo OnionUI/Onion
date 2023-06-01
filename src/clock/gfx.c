@@ -21,7 +21,8 @@
 //			:  when NOWAIT, do not clear/write source surface
 // immediately after Flip 			:  if absolutely necessary, use
 // GFX_WaitAllDone() before write (or GFX_FlipWait())
-enum { GFX_BLOCKING = 1, GFX_FLIPWAIT = 2 };
+enum { GFX_BLOCKING = 1,
+       GFX_FLIPWAIT = 2 };
 //#define	DEFAULTFLIPFLAGS	(GFX_BLOCKING | GFX_FLIPWAIT)
 //// low performance with blocking #define	DEFAULTFLIPFLAGS (GFX_FLIPWAIT)
 //// middle performance nonblock, recommended for most cases
