@@ -46,6 +46,7 @@ void check_networkChanged(void)
     bool modified = temp_flag_get("network_changed");
     modified |= check_menuHasChanges(&_menu_network);
     modified |= check_menuHasChanges(&_menu_telnet);
+    modified |= check_menuHasChanges(&_menu_ftp);
     modified |= check_menuHasChanges(&_menu_date_time);
     temp_flag_set("network_changed", modified);
 }

@@ -102,7 +102,8 @@ main() {
         check_main_ui
 
         check_networking  		
-              
+        ntp_updater
+		
         state_change
         check_game_menu
 
@@ -110,10 +111,18 @@ main() {
         check_game
         
 		check_networking 
+		ntp_updater
 		
         state_change
         check_switcher
     done
+}
+
+ntp_updater() {
+	if [ -f /tmp/time_update ]; then
+		export TZ=$(cat "$sysdir/config/T.Z")
+		rm /tmp/time_update
+	fi
 }
 
 state_change() {
