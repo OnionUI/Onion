@@ -107,6 +107,11 @@ void action_settzselectstate(void *pt)
     settings.tzselect_state = ((ListItem *)pt)->value;
 }
 
+void action_setftpauthstate(void* pt)
+{
+    settings.auth_ftp_state = ((ListItem*)pt)->value == 1;
+}
+
 void action_setMenuButtonHaptics(void *pt)
 {
     settings.menu_button_haptics = ((ListItem *)pt)->value == 1;
