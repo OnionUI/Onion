@@ -7,21 +7,19 @@ PATH="$sysdir/bin:$PATH"
 LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/mnt/SDCARD/.tmp_update/lib:$sysdir/lib/parasyte"
 
 
-emupath="$2"
-CurrentSystem=$(basename "$emupath")
-rompath=/mnt/SDCARD/Roms/$(basename "$CurrentSystem")
 romname=$(basename "$1")
+CurrentSystem=$(echo "$1" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
 romNameNoExtension=${romname%.*}
 romimage="/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png"
 ScraperConfigFile=/mnt/SDCARD/.tmp_update/config/scraper.json
 
 
 # # for debugging
-# echo CurrentSystem : $CurrentSystem
-# echo emupath : $emupath
-# echo rompath : $rompath
-# echo romname : $romname
-# echo romNameNoExtension: $romNameNoExtension
+# echo "CurrentSystem : $CurrentSystem"
+# echo "romname : $romname"
+# echo "romimage : $romimage"
+# echo "romNameNoExtension : $romNameNoExtension"
+# echo "romimage : $romimage"
 # read -n 1 -s -r -p "Press A to continue"
 
 
