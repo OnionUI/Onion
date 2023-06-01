@@ -23,8 +23,6 @@ rm /tmp/.auth_tmp.txt
 echo -n "Login: " && read entered_username
 echo -n "Password: " && read -s entered_password
 
-echo
-
 if [ "$entered_username" = "$username" ] && [ "$entered_password" = "$password" ]; then
 	echo -e "Successful login - Welcome to Onion.\n"
     /bin/sh
