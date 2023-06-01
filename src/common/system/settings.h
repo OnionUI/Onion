@@ -45,6 +45,7 @@ static struct settings_s {
     bool telnet_state;
     bool hotspot_state;
     bool ntp_state;
+    bool auth_telnet_state;
     bool auth_ftp_state;
     int low_battery_warn_at;
     int time_skip;
@@ -103,6 +104,7 @@ void _settings_reset(void)
     settings.ntp_state = false;
     settings.auth_ftp_state = false;
     settings.tzselect_state = 12;
+    settings.auth_telnet_state = true;
     // Menu button actions
     settings.mainui_single_press = 1;
     settings.mainui_long_press = 0;
@@ -174,9 +176,10 @@ void settings_load(void)
     settings.low_battery_autosave = !config_flag_get(".noLowBatteryAutoSave");
     settings.http_state = config_flag_get(".HTTPState");
     settings.ssh_state = config_flag_get(".SSHState");
+    settings.telnet_state = config_flag_get(".telnetState");
     settings.ftp_state = config_flag_get(".ftpState");
-    settings.telnet_state = config_flag_get(".TelnetState");
     settings.hotspot_state = config_flag_get(".HotspotState");
+    settings.auth_telnet_state = config_flag_get(".authtelnetState");
     settings.ntp_state = config_flag_get(".NTPState");
     settings.auth_ftp_state = config_flag_get(".authftpState");
     settings.mute = config_flag_get(".muteVolume");
@@ -286,9 +289,10 @@ void settings_save(void)
     config_flag_set(".HTTPState", settings.http_state);
     config_flag_set(".SSHState", settings.ssh_state);
     config_flag_set(".ftpState", settings.ftp_state);
-    config_flag_set(".TelnetState", settings.telnet_state);
+    config_flag_set(".telnetState", settings.telnet_state);
     config_flag_set(".HotspotState", settings.hotspot_state);
     config_flag_set(".NTPState", settings.ntp_state);
+    config_flag_set(".authtelnetState", settings.auth_telnet_state);
     config_flag_set(".authftpState", settings.auth_ftp_state);
     config_flag_set(".muteVolume", settings.mute);
     config_setNumber("tzselect", settings.tzselect_state);
