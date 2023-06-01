@@ -4,7 +4,9 @@
 #include "theme/config.h"
 #include "theme/resources.h"
 
-typedef enum { ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT } text_alignment_e;
+typedef enum { ALIGN_LEFT,
+               ALIGN_CENTER,
+               ALIGN_RIGHT } text_alignment_e;
 
 SDL_Surface *theme_textboxSurface(const char *message, TTF_Font *font,
                                   SDL_Color fg, text_alignment_e align)

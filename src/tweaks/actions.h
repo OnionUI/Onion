@@ -107,14 +107,14 @@ void action_settzselectstate(void *pt)
     settings.tzselect_state = ((ListItem *)pt)->value;
 }
 
-void action_settelnetauthstate(void* pt)
+void action_settelnetauthstate(void *pt)
 {
-    settings.auth_telnet_state = ((ListItem*)pt)->value == 1;
+    settings.auth_telnet_state = ((ListItem *)pt)->value == 1;
 }
 
-void action_setftpauthstate(void* pt)
+void action_setftpauthstate(void *pt)
 {
-    settings.auth_ftp_state = ((ListItem*)pt)->value == 1;
+    settings.auth_ftp_state = ((ListItem *)pt)->value == 1;
 }
 
 void action_setMenuButtonHaptics(void *pt)
@@ -128,7 +128,7 @@ void action_setMenuButtonKeymap(void *pt)
     static int *dests[] = {
         &settings.mainui_single_press, &settings.mainui_long_press,
         &settings.mainui_double_press, &settings.ingame_single_press,
-        &settings.ingame_long_press,   &settings.ingame_double_press};
+        &settings.ingame_long_press, &settings.ingame_double_press};
     *(dests[item->action_id]) = item->value;
 }
 

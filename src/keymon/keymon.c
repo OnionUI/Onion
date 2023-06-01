@@ -43,9 +43,9 @@
 
 uint32_t suspendpid[PIDMAX];
 
-const int KONAMI_CODE[] = {HW_BTN_UP,   HW_BTN_UP,    HW_BTN_DOWN, HW_BTN_DOWN,
+const int KONAMI_CODE[] = {HW_BTN_UP, HW_BTN_UP, HW_BTN_DOWN, HW_BTN_DOWN,
                            HW_BTN_LEFT, HW_BTN_RIGHT, HW_BTN_LEFT, HW_BTN_RIGHT,
-                           HW_BTN_B,    HW_BTN_A};
+                           HW_BTN_B, HW_BTN_A};
 const int KONAMI_CODE_LENGTH = sizeof(KONAMI_CODE) / sizeof(KONAMI_CODE[0]);
 
 void takeScreenshot(void)
