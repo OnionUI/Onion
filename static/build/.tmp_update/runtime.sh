@@ -9,7 +9,7 @@ main() {
     init_system
     update_time
     clear_logs
-	
+
     # Start the battery monitor
     batmon &
 
@@ -64,9 +64,7 @@ main() {
     # Bind arcade name library to customer path
     mount -o bind /mnt/SDCARD/miyoo/lib/libgamename.so /customer/lib/libgamename.so
 
-    touch /tmp/network_changed
-    sync
-    check_networking
+    start_networking
 
     # Auto launch
     if [ ! -f $sysdir/config/.noAutoStart ]; then
@@ -93,25 +91,38 @@ main() {
     state_change
     check_switcher
     set_startup_tab
+	
+	# Set filebrowser branding to onion
+	$sysdir/bin/filebrowser/filebrowser config set --branding.name "Onion" -d $sysdir/bin/filebrowser/filebrowser.db
+	$sysdir/bin/filebrowser/filebrowser config set --branding.files "/mnt/SDCARD/.tmp_update/bin/filebrowser/theme" -d $sysdir/bin/filebrowser/filebrowser.db
 
     # Main runtime loop
     while true; do
         state_change
         check_main_ui
 
-        check_networking
-
+        check_networking  		
+        ntp_updater
+		
         state_change
         check_game_menu
 
         state_change
         check_game
-
-        check_networking
-
+        
+		check_networking 
+		ntp_updater
+		
         state_change
         check_switcher
     done
+}
+
+ntp_updater() {
+	if [ -f /tmp/time_update ]; then
+		export TZ=$(cat "$sysdir/config/T.Z")
+		rm /tmp/time_update
+	fi
 }
 
 state_change() {
@@ -128,6 +139,8 @@ clear_logs() {
         ./logs/gameSwitcher.log \
         ./logs/keymon.log \
         ./logs/game_list_options.log \
+        ./logs/network.log \
+        ./logs/dnsmasq.log \
         2> /dev/null
 }
 
@@ -159,8 +172,8 @@ launch_main_ui() {
 
     # MainUI launch
     cd $miyoodir/app
-    PATH="$sysdir/script/redirect:$PATH" \
-    LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib" \
+    PATH="$miyoodir/app:$PATH" \
+    LD_LIBRARY_PATH="$miyoodir/lib:/config/lib:/lib" \
     LD_PRELOAD="$miyoodir/lib/libpadsp.so" \
     ./MainUI 2>&1 > /dev/null
 
@@ -194,7 +207,11 @@ launch_game_menu() {
     echo -e "\n\n:: GLO\n\n"
 
     cd $sysdir
-    ./script/game_list_options.sh | tee -a ./logs/game_list_options.log
+    if [ -f ./config/.logging ]; then
+        ./script/game_list_options.sh >> ./logs/game_list_options.log
+    else
+        ./script/game_list_options.sh
+    fi
 
     if [ $? -ne 0 ]; then
         echo -e "\n\n< Back to MainUI\n\n"
@@ -267,7 +284,7 @@ launch_game() {
             echo "$temp" | sed 's/\$/\\\$/g' > $sysdir/cmd_to_run.sh
         fi
 
-        play_activity start "$rompath"
+        playActivity start "$rompath"
     fi
 
     # Prevent quick switch loop
@@ -317,7 +334,7 @@ launch_game() {
         fi
 
         cd $sysdir
-        play_activity stop "$rompath"
+        playActivity stop "$rompath"
         
         echo "game" > /tmp/prev_state
         check_off_order "End_Save"
@@ -547,35 +564,21 @@ runifnecessary() {
     done
 }
 
+start_networking() {
+    rm $sysdir/config/.HotspotState  # dont start hotspot at boot
+    
+    touch /tmp/network_changed
+    sync
+    check_networking
+}
+
 check_networking() {
-    if [ ! -f /tmp/network_changed ]; then
+    if [ $deviceModel -ne 354 ] || [ ! -f /tmp/network_changed ]; then
         return
     fi
-
-    rm /tmp/network_changed
-
-    echo -e "\n:: Update networking"
-
-    if [ $(/customer/app/jsonval wifi) -eq 1 ]; then
-        if ! ifconfig wlan0 || [ -f /tmp/restart_wifi ]; then
-            if [ -f /tmp/restart_wifi ]; then
-                pkill -9 wpa_supplicant
-                pkill -9 udhcpc
-                rm /tmp/restart_wifi
-            fi
-
-            echo "Initializing Wifi..."
-            /customer/app/axp_test wifion
-            sleep 2 
-            ifconfig wlan0 up
-            $miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
-            udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
-        fi
-    else
-        pkill -9 wpa_supplicant
-        pkill -9 udhcpc
-        /customer/app/axp_test wifioff
-    fi
+	rm /tmp/network_changed
+	
+    $sysdir/script/update_networking.sh
 }
 
 main

@@ -72,6 +72,51 @@ void action_setLowBatteryAutoSave(void *pt)
     settings.low_battery_autosave = ((ListItem *)pt)->value == 1;
 }
 
+void action_sethttpstate(void *pt)
+{
+    settings.http_state = ((ListItem *)pt)->value == 1;
+}
+
+void action_setsshstate(void *pt)
+{
+    settings.ssh_state = ((ListItem *)pt)->value == 1;
+}
+
+void action_setftpstate(void *pt)
+{
+    settings.ftp_state = ((ListItem *)pt)->value == 1;
+}
+
+void action_settelnetstate(void *pt)
+{
+    settings.telnet_state = ((ListItem *)pt)->value == 1;
+}
+
+void action_sethotspotstate(void *pt)
+{
+    settings.hotspot_state = ((ListItem *)pt)->value == 1;
+}
+
+void action_setntpstate(void *pt)
+{
+    settings.ntp_state = ((ListItem *)pt)->value == 1;
+}
+
+void action_settzselectstate(void *pt)
+{
+    settings.tzselect_state = ((ListItem *)pt)->value;
+}
+
+void action_settelnetauthstate(void* pt)
+{
+    settings.auth_telnet_state = ((ListItem*)pt)->value == 1;
+}
+
+void action_setftpauthstate(void* pt)
+{
+    settings.auth_ftp_state = ((ListItem*)pt)->value == 1;
+}
+
 void action_setMenuButtonHaptics(void *pt)
 {
     settings.menu_button_haptics = ((ListItem *)pt)->value == 1;

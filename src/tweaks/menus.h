@@ -22,6 +22,10 @@
 
 static List _menu_main;
 static List _menu_system;
+static List _menu_date_time;
+static List _menu_network;
+static List _menu_telnet;
+static List _menu_ftp;
 static List _menu_system_startup;
 static List _menu_button_action;
 static List _menu_button_action_mainui_menu;
@@ -37,6 +41,10 @@ void menu_free_all(void)
 {
     list_free(&_menu_main);
     list_free(&_menu_system);
+    list_free(&_menu_network);
+    list_free(&_menu_telnet);
+    list_free(&_menu_ftp);
+    list_free(&_menu_date_time);
     list_free(&_menu_system_startup);
     list_free(&_menu_button_action);
     list_free(&_menu_button_action_mainui_menu);
@@ -54,7 +62,7 @@ void menu_free_all(void)
 void menu_systemStartup(void *_)
 {
     if (!_menu_system_startup._created) {
-        _menu_system_startup = list_create(4, LIST_SMALL);
+        _menu_system_startup = list_create(3, LIST_SMALL);
         strcpy(_menu_system_startup.title, "Startup");
         list_addItem(&_menu_system_startup,
                      (ListItem){.label = "Auto-resume last game",
@@ -76,7 +84,31 @@ void menu_systemStartup(void *_)
                                 .value_formatter = formatter_startupTab,
                                 .value = settings.startup_tab,
                                 .action = action_setStartupTab});
-        list_addItem(&_menu_system_startup,
+    }
+    menu_stack[++menu_level] = &_menu_system_startup;
+    header_changed = true;
+}
+
+void menu_datetime(void *_)
+{
+    if (!_menu_date_time._created) {
+        _menu_date_time = list_create(3, LIST_SMALL);
+        strcpy(_menu_date_time.title, "Date and time");
+        if (DEVICE_ID == MIYOO354) {
+            list_addItem(&_menu_date_time,
+                         (ListItem){.label = "Set automatically from network",
+                                    .item_type = TOGGLE,
+                                    .value = (int)settings.ntp_state,
+                                    .action = action_setntpstate});
+            list_addItem(&_menu_date_time,
+                         (ListItem){.label = "Select timezone",
+                                    .item_type = MULTIVALUE,
+                                    .value_max = 24,
+                                    .value_labels = TZ_SELECT,
+                                    .value = settings.tzselect_state,
+                                    .action = action_settzselectstate});
+        }
+        list_addItem(&_menu_date_time,
                      (ListItem){.label = "Emulated time skip",
                                 .item_type = MULTIVALUE,
                                 .value_max = 24,
@@ -84,17 +116,100 @@ void menu_systemStartup(void *_)
                                 .value = settings.time_skip,
                                 .action = action_setTimeSkip});
     }
-    menu_stack[++menu_level] = &_menu_system_startup;
+    menu_stack[++menu_level] = &_menu_date_time;
     header_changed = true;
 }
+
+
+// Network services submenus
+
+void menu_telnet(void* _)
+{
+    if (!_menu_telnet._created) {
+        _menu_telnet = list_create(2, LIST_SMALL);
+        strcpy(_menu_telnet.title, "Telnet config");
+        list_addItem(&_menu_telnet,
+            (ListItem) {
+            .label = "Enable",
+                .item_type = TOGGLE,
+                .value = (int)settings.telnet_state,
+                .action = action_settelnetstate
+        });
+        list_addItem(&_menu_telnet,
+            (ListItem) {
+            .label = "Enable authentication",
+                .item_type = TOGGLE,
+                .value = (int)settings.auth_telnet_state,
+                .action = action_settelnetauthstate
+        });
+    }
+    menu_stack[++menu_level] = &_menu_telnet;
+    header_changed = true;
+}
+
+void menu_ftp(void *_)
+{
+    if (!_menu_ftp._created) {
+        _menu_ftp = list_create(2, LIST_SMALL);
+        strcpy(_menu_ftp.title, "FTP config");
+        list_addItem(&_menu_ftp,
+                     (ListItem){.label = "Enable",
+                                .item_type = TOGGLE,
+                                .value = (int)settings.ftp_state,
+                                .action = action_setftpstate});
+        list_addItem(&_menu_ftp,
+                     (ListItem){.label = "Enable authentication",
+                                .item_type = TOGGLE,
+                                .value = (int)settings.auth_ftp_state,
+                                .action = action_setftpauthstate});
+    }
+    menu_stack[++menu_level] = &_menu_ftp;
+    header_changed = true;
+}
+
+
+void menu_networks(void *_)
+{
+    if (!_menu_network._created) {
+        _menu_network = list_create(5, LIST_SMALL);
+        strcpy(_menu_network.title, "Networks");
+        list_addItem(&_menu_network,
+                     (ListItem){.label = "HTTP Server (Filebrowser)",
+                                .item_type = TOGGLE,
+                                .value = (int)settings.http_state,
+                                .action = action_sethttpstate});
+        list_addItem(&_menu_network,
+                     (ListItem){.label = "SSH/SFTP/SCP (dropbear)",
+                                .item_type = TOGGLE,
+                                .value = (int)settings.ssh_state,
+                                .action = action_setsshstate});
+        list_addItem(&_menu_network,
+                     (ListItem){.label = "FTP...",
+                                .action = menu_ftp});
+        list_addItem(&_menu_network,
+                     (ListItem){.label = "Telnet...",
+                                .action = menu_telnet});
+        list_addItem(&_menu_network,
+                     (ListItem){.label = "WiFi Hotspot",
+                                .item_type = TOGGLE,
+                                .value = (int)settings.hotspot_state,
+                                .action = action_sethotspotstate});
+    }
+    menu_stack[++menu_level] = &_menu_network;
+    header_changed = true;
+}
+
+
 
 void menu_system(void *_)
 {
     if (!_menu_system._created) {
-        _menu_system = list_create(3, LIST_SMALL);
+        _menu_system = list_create(4, LIST_SMALL);
         strcpy(_menu_system.title, "System");
         list_addItem(&_menu_system, (ListItem){.label = "Startup...",
                                                .action = menu_systemStartup});
+        list_addItem(&_menu_system, (ListItem){.label = "Date and time...",
+                                               .action = menu_datetime});
         list_addItem(&_menu_system,
                      (ListItem){.label = "Save and exit when battery <4%",
                                 .item_type = TOGGLE,
@@ -461,7 +576,7 @@ void *_get_menu_icon(const char *name)
 void menu_main(void)
 {
     if (!_menu_main._created) {
-        _menu_main = list_create(6, LIST_LARGE);
+        _menu_main = list_create(7, LIST_LARGE);
         strcpy(_menu_main.title, "Tweaks");
         list_addItem(
             &_menu_main,
@@ -469,6 +584,14 @@ void menu_main(void)
                        .description = "Startup, save and exit, vibration",
                        .action = menu_system,
                        .icon_ptr = _get_menu_icon("tweaks_system")});
+        if (DEVICE_ID == MIYOO354) {
+            list_addItem(
+                &_menu_main,
+                (ListItem){.label = "Network",
+                           .description = "Setup networking",
+                           .action = menu_networks,
+                           .icon_ptr = _get_menu_icon("tweaks_network")});
+        }
         list_addItem(
             &_menu_main,
             (ListItem){.label = "Button shortcuts",
