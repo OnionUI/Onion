@@ -1,6 +1,6 @@
 include ../common/config.mk
 
-TARGET = play_activity
+TARGET = playActivity
 LDFLAGS := $(LDFLAGS) -s -lsqlite3
 
 include ../common/commands.mk

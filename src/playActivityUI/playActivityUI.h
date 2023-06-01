@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <linux/fb.h>
 #include <linux/input.h>
+#include <math.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -15,7 +16,6 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <math.h>
 
 #include "system/keymap_sw.h"
 #include "system/system.h"
@@ -24,6 +24,6 @@
 #include "utils/log.h"
 #include "utils/str.h"
 
-#include "../play_activity/play_activity_db.h"
+#include "../playActivity/playActivityDB.h"
 
 #endif

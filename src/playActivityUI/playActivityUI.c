@@ -1,22 +1,22 @@
-#include "./activity_tracker.h"
+#include "./playActivityUI.h"
 
 static bool quit = false;
 
 static void sigHandler(int sig)
 {
     switch (sig) {
-        case SIGINT:
-        case SIGTERM:
-            quit = true;
-            break;
-        default:
-            break;
+    case SIGINT:
+    case SIGTERM:
+        quit = true;
+        break;
+    default:
+        break;
     }
 }
 
 int main(int argc, char *argv[])
 {
-    log_setName("activity_tracker");
+    log_setName("playActivityUI");
     signal(SIGINT, sigHandler);
     signal(SIGTERM, sigHandler);
     SDL_Init(SDL_INIT_VIDEO);
@@ -24,10 +24,12 @@ int main(int argc, char *argv[])
     SDL_EnableKeyRepeat(300, 50);
     TTF_Init();
     SDL_Surface *video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
-    SDL_Surface *screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
+    SDL_Surface *screen =
+        SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
     TTF_Font *font40 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 40);
     TTF_Font *font30 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 30);
-    TTF_Font *fontRomName25 = TTF_OpenFont("/customer/app/wqy-microhei.ttc", 25);
+    TTF_Font *fontRomName25 =
+        TTF_OpenFont("/customer/app/wqy-microhei.ttc", 25);
     TTF_Font *font18 = TTF_OpenFont("/customer/app/wqy-microhei.ttc", 18);
     SDL_Color color_white = {255, 255, 255};
     SDL_Color color_lilla = {136, 97, 252};
@@ -59,23 +61,46 @@ int main(int argc, char *argv[])
         if (index < play_activities->count) {
             sprintf(cPosition, "%d", index + 1);
             h = play_activities->play_activity[index]->play_time_total / 3600;
-            m = (play_activities->play_activity[index]->play_time_total - 3600 * h) / 60;
+            m = (play_activities->play_activity[index]->play_time_total -
+                 3600 * h) /
+                60;
             sprintf(play_time_total_formatted, "%d:%02d", h, m);
-            imageRomPosition = TTF_RenderUTF8_Blended(font40, cPosition, color_lilla);
-            SDL_Surface* loadedRomImage;
-            if (exists(play_activities->play_activity[index]->rom->image_path)) {
-                loadedRomImage = IMG_Load(play_activities->play_activity[index]->rom->image_path);
-            } else {
-                loadedRomImage = IMG_Load("/mnt/SDCARD/miyoo/app/skin/thumb-default.png");
+            imageRomPosition =
+                TTF_RenderUTF8_Blended(font40, cPosition, color_lilla);
+            SDL_Surface *loadedRomImage;
+            if (exists(
+                    play_activities->play_activity[index]->rom->image_path)) {
+                loadedRomImage = IMG_Load(
+                    play_activities->play_activity[index]->rom->image_path);
             }
-            imageRomImage = SDL_CreateRGBSurface(0, 80, 80, loadedRomImage->format->BitsPerPixel, loadedRomImage->format->Rmask, loadedRomImage->format->Gmask, loadedRomImage->format->Bmask, loadedRomImage->format->Amask);
+            else {
+                loadedRomImage =
+                    IMG_Load("/mnt/SDCARD/miyoo/app/skin/thumb-default.png");
+            }
+            imageRomImage = SDL_CreateRGBSurface(
+                0, 80, 80, loadedRomImage->format->BitsPerPixel,
+                loadedRomImage->format->Rmask, loadedRomImage->format->Gmask,
+                loadedRomImage->format->Bmask, loadedRomImage->format->Amask);
             SDL_Rect src_rect = {0, 0, loadedRomImage->w, loadedRomImage->h};
             SDL_Rect dst_rect = {0, 0, imageRomImage->w, imageRomImage->h};
-            SDL_SoftStretch(loadedRomImage, &src_rect, imageRomImage, &dst_rect);
-            imageRomPlayTime = TTF_RenderUTF8_Blended(font40, play_time_total_formatted, color_white);
-            imageRomName = TTF_RenderUTF8_Blended(fontRomName25, play_activities->play_activity[index]->rom->name, color_white);
-            snprintf(details, 100, "count: %d average: %d:%02d", play_activities->play_activity[index]->play_count, play_activities->play_activity[index]->play_time_average/3600, (play_activities->play_activity[index]->play_time_average-((play_activities->play_activity[index]->play_time_average/3600)*3600))/60);
-            imageRomDetails = TTF_RenderUTF8_Blended(font18, details, color_white);
+            SDL_SoftStretch(loadedRomImage, &src_rect, imageRomImage,
+                            &dst_rect);
+            imageRomPlayTime = TTF_RenderUTF8_Blended(
+                font40, play_time_total_formatted, color_white);
+            imageRomName = TTF_RenderUTF8_Blended(
+                fontRomName25, play_activities->play_activity[index]->rom->name,
+                color_white);
+            snprintf(
+                details, 100, "count: %d average: %d:%02d",
+                play_activities->play_activity[index]->play_count,
+                play_activities->play_activity[index]->play_time_average / 3600,
+                (play_activities->play_activity[index]->play_time_average -
+                 ((play_activities->play_activity[index]->play_time_average /
+                   3600) *
+                  3600)) /
+                    60);
+            imageRomDetails =
+                TTF_RenderUTF8_Blended(font18, details, color_white);
             SDL_Rect rectPosition = {16, 80 + 90 * i, 50, 39};
             SDL_Rect rectRomImage = {70, 70 + 90 * i, 80, 80};
             SDL_Rect rectRomPlayTime = {170, 55 + 90 * i, 100, 56};
@@ -91,7 +116,8 @@ int main(int argc, char *argv[])
     h = play_time_total / 3600;
     m = (play_time_total - (3600 * h)) / 60;
     sprintf(play_time_total_formatted, "%d:%02d", h, m);
-    imageMileage = TTF_RenderUTF8_Blended(font30, play_time_total_formatted, color_white);
+    imageMileage =
+        TTF_RenderUTF8_Blended(font30, play_time_total_formatted, color_white);
     SDL_BlitSurface(imagePages, NULL, screen, &rectPages);
     SDL_BlitSurface(imageMileage, NULL, screen, &rectMileage);
     SDL_BlitSurface(screen, NULL, video, NULL);
@@ -129,24 +155,54 @@ int main(int argc, char *argv[])
             int index = nCurrentPage * 4 + i;
             if (index < play_activities->count) {
                 sprintf(cPosition, "%d", index + 1);
-                h = play_activities->play_activity[index]->play_time_total / 3600;
-                m = (play_activities->play_activity[index]->play_time_total - 3600 * h) / 60;
+                h = play_activities->play_activity[index]->play_time_total /
+                    3600;
+                m = (play_activities->play_activity[index]->play_time_total -
+                     3600 * h) /
+                    60;
                 sprintf(play_time_total_formatted, "%d:%02d", h, m);
-                imageRomPosition = TTF_RenderUTF8_Blended(font40, cPosition, color_lilla);
-                SDL_Surface* loadedRomImage;
-                if (exists(play_activities->play_activity[index]->rom->image_path)) {
-                    loadedRomImage = IMG_Load(play_activities->play_activity[index]->rom->image_path);
-                } else {
-                    loadedRomImage = IMG_Load("/mnt/SDCARD/miyoo/app/skin/thumb-default.png");
+                imageRomPosition =
+                    TTF_RenderUTF8_Blended(font40, cPosition, color_lilla);
+                SDL_Surface *loadedRomImage;
+                if (exists(play_activities->play_activity[index]
+                               ->rom->image_path)) {
+                    loadedRomImage = IMG_Load(
+                        play_activities->play_activity[index]->rom->image_path);
                 }
-                imageRomImage = SDL_CreateRGBSurface(0, 80, 80, loadedRomImage->format->BitsPerPixel, loadedRomImage->format->Rmask, loadedRomImage->format->Gmask, loadedRomImage->format->Bmask, loadedRomImage->format->Amask);
-                SDL_Rect src_rect = {0, 0, loadedRomImage->w, loadedRomImage->h};
+                else {
+                    loadedRomImage = IMG_Load(
+                        "/mnt/SDCARD/miyoo/app/skin/thumb-default.png");
+                }
+                imageRomImage = SDL_CreateRGBSurface(
+                    0, 80, 80, loadedRomImage->format->BitsPerPixel,
+                    loadedRomImage->format->Rmask,
+                    loadedRomImage->format->Gmask,
+                    loadedRomImage->format->Bmask,
+                    loadedRomImage->format->Amask);
+                SDL_Rect src_rect = {0, 0, loadedRomImage->w,
+                                     loadedRomImage->h};
                 SDL_Rect dst_rect = {0, 0, imageRomImage->w, imageRomImage->h};
-                SDL_SoftStretch(loadedRomImage, &src_rect, imageRomImage, &dst_rect);
-                imageRomPlayTime = TTF_RenderUTF8_Blended(font40, play_time_total_formatted, color_white);
-                imageRomName = TTF_RenderUTF8_Blended(fontRomName25, play_activities->play_activity[index]->rom->name, color_white);
-                snprintf(details, 100, "count: %d average: %d:%02d", play_activities->play_activity[index]->play_count, play_activities->play_activity[index]->play_time_average/3600, (play_activities->play_activity[index]->play_time_average-((play_activities->play_activity[index]->play_time_average/3600)*3600))/60);
-                imageRomDetails = TTF_RenderUTF8_Blended(font18, details, color_white);
+                SDL_SoftStretch(loadedRomImage, &src_rect, imageRomImage,
+                                &dst_rect);
+                imageRomPlayTime = TTF_RenderUTF8_Blended(
+                    font40, play_time_total_formatted, color_white);
+                imageRomName = TTF_RenderUTF8_Blended(
+                    fontRomName25,
+                    play_activities->play_activity[index]->rom->name,
+                    color_white);
+                snprintf(
+                    details, 100, "count: %d average: %d:%02d",
+                    play_activities->play_activity[index]->play_count,
+                    play_activities->play_activity[index]->play_time_average /
+                        3600,
+                    (play_activities->play_activity[index]->play_time_average -
+                     ((play_activities->play_activity[index]
+                           ->play_time_average /
+                       3600) *
+                      3600)) /
+                        60);
+                imageRomDetails =
+                    TTF_RenderUTF8_Blended(font18, details, color_white);
                 SDL_Rect rectPosition = {16, 80 + 90 * i, 50, 39};
                 SDL_Rect rectRomImage = {70, 70 + 90 * i, 80, 80};
                 SDL_Rect rectRomPlayTime = {170, 55 + 90 * i, 100, 56};
@@ -154,7 +210,8 @@ int main(int argc, char *argv[])
                 SDL_Rect rectRomDetails = {170, 130 + 90 * i, 400, 40};
                 SDL_BlitSurface(imageRomPosition, NULL, screen, &rectPosition);
                 SDL_BlitSurface(imageRomImage, NULL, screen, &rectRomImage);
-                SDL_BlitSurface(imageRomPlayTime, NULL, screen, &rectRomPlayTime);
+                SDL_BlitSurface(imageRomPlayTime, NULL, screen,
+                                &rectRomPlayTime);
                 SDL_BlitSurface(imageRomName, NULL, screen, &rectRomNames);
                 SDL_BlitSurface(imageRomDetails, NULL, screen, &rectRomDetails);
             }

@@ -4,7 +4,6 @@ Schmurtz
 Olywa123
 DiMo
 Totofaki
-nil0bject
    
 CONTRIBUTORS
 jimgray
@@ -29,6 +28,7 @@ Simple30 team
 Lucario
 Christian Haitian
 Razole
+nil0bject
  
 OUR THEME CREATORS
   
