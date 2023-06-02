@@ -7,7 +7,7 @@
     "imgpath": "../../Roms/PORTS/Imgs",
     "gamelist": "../../Roms/PORTS/miyoogamelist.xml",
     "useswap": 1,
-    "shortname": 1,
+    "shortname": 0,
     "hidebios": 0,
     "extlist": "port|miyoocmd"
 }

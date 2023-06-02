@@ -487,6 +487,9 @@ void menu_tools(void *_)
                      (ListItem){.label = "Generate CUE files for PSX games",
                                 .action = tool_generateCueFiles});
         list_addItem(&_menu_tools,
+                     (ListItem){.label = "Generate game list for short name roms",
+                                .action = tool_buildShortRomGameList});
+        list_addItem(&_menu_tools,
                      (ListItem){.label = "Favorites: Sort alphabetically",
                                 .action = tool_favoritesSortAlpha});
         list_addItem(&_menu_tools,
