@@ -26,6 +26,7 @@ static List _menu_date_time;
 static List _menu_network;
 static List _menu_telnet;
 static List _menu_ftp;
+static List _menu_http;
 static List _menu_system_startup;
 static List _menu_button_action;
 static List _menu_button_action_mainui_menu;
@@ -44,6 +45,7 @@ void menu_free_all(void)
     list_free(&_menu_network);
     list_free(&_menu_telnet);
     list_free(&_menu_ftp);
+    list_free(&_menu_http);
     list_free(&_menu_date_time);
     list_free(&_menu_system_startup);
     list_free(&_menu_button_action);
@@ -123,6 +125,31 @@ void menu_datetime(void *_)
 
 // Network services submenus
 
+void menu_http(void *_)
+{
+    if (!_menu_http._created) {
+        _menu_http = list_create(3, LIST_SMALL);
+        strcpy(_menu_http.title, "HTTP fileserver config");
+        list_addItem(&_menu_http,
+                     (ListItem){.label = "Enable",
+                                .item_type = TOGGLE,
+                                .value = (int)settings.http_state,
+                                .action = action_sethttpstate});
+        list_addItem(&_menu_http,
+                     (ListItem){.label = "Enable authentication",
+                                .item_type = TOGGLE,
+                                .value = (int)settings.auth_http_state,
+                                .action = action_sethttpauthstate});
+        list_addItem(&_menu_http,
+                     (ListItem){.label = "Enable new user signup",
+                                .item_type = TOGGLE,
+                                .value = (int)settings.signup_http_state,
+                                .action = action_sethttpsignupstate});
+    }
+    menu_stack[++menu_level] = &_menu_http;
+    header_changed = true;
+}
+
 void menu_telnet(void* _)
 {
     if (!_menu_telnet._created) {
@@ -167,17 +194,14 @@ void menu_ftp(void *_)
     header_changed = true;
 }
 
-
 void menu_networks(void *_)
 {
     if (!_menu_network._created) {
         _menu_network = list_create(5, LIST_SMALL);
         strcpy(_menu_network.title, "Networks");
-        list_addItem(&_menu_network,
-                     (ListItem){.label = "HTTP Server (Filebrowser)",
-                                .item_type = TOGGLE,
-                                .value = (int)settings.http_state,
-                                .action = action_sethttpstate});
+         list_addItem(&_menu_network,
+                     (ListItem){.label = "HTTP fileserver...",
+                                .action = menu_http});
         list_addItem(&_menu_network,
                      (ListItem){.label = "SSH/SFTP/SCP (dropbear)",
                                 .item_type = TOGGLE,
