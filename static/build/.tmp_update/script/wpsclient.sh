@@ -26,12 +26,20 @@ $IMGPOP 5 0 "$icondir/wpsfail.png" 84 428 > /dev/null 2>&1 &
 }
 
 wpstrying() {
+$IMGPOP 1 0 "$icondir/wpstrying.png" 84 428 > /dev/null 2>&1 &
+}
+
+wpsconnected() {
+$IMGPOP 10 0 "$icondir/wpsconnected.png" 84 428 > /dev/null 2>&1 &
+}
+
+wpsflicker() {
 count=0
     while [ $count -lt 4 ]; do
         if [ $((count % 2)) -eq 0 ]; then
-            $IMGPOP 1 0 "$icondir/wpstrying.png" 215 433 > /dev/null 2>&1 &
+            wpstrying
         else
-            $IMGPOP 1 0 "$icondir/wpsfail.png" 215 433 > /dev/null 2>&1 &
+            wpsfail
         fi
 		sleep 1
         count=$((count + 1))
@@ -39,9 +47,6 @@ count=0
     done &
 }
 
-wpsconnected() {
-$IMGPOP 10 0 "$icondir/wpsconnected.png" 215 433 > /dev/null 2>&1 &
-}
 
 log() {
     echo "$(date)" $* >> $sysdir/logs/network.log
@@ -63,7 +68,7 @@ while true; do
     IP=$(ip route get 1 2>/dev/null | awk '{print $NF;exit}')
 
     if [ -z "$IP" ]; then
-        wpstrying
+        wpsflicker
         sleep 5
 
         current_time=$(date +%s)
