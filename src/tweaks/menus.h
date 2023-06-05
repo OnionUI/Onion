@@ -171,8 +171,11 @@ void menu_ftp(void *_)
 void menu_networks(void *_)
 {
     if (!_menu_network._created) {
-        _menu_network = list_create(5, LIST_SMALL);
+        _menu_network = list_create(6, LIST_SMALL);
         strcpy(_menu_network.title, "Networks");
+        list_addItem(&_menu_network,
+                     (ListItem){.label = "WPS connect",
+                                .action = action_wpsconnection});
         list_addItem(&_menu_network,
                      (ListItem){.label = "HTTP Server (Filebrowser)",
                                 .item_type = TOGGLE,

@@ -117,6 +117,11 @@ void action_setftpauthstate(void* pt)
     settings.auth_ftp_state = ((ListItem*)pt)->value == 1;
 }
 
+void action_wpsconnection(void* pt)
+{
+    system("sh /mnt/SDCARD/.tmp_update/script/wpsclient.sh");
+}
+
 void action_setMenuButtonHaptics(void *pt)
 {
     settings.menu_button_haptics = ((ListItem *)pt)->value == 1;
