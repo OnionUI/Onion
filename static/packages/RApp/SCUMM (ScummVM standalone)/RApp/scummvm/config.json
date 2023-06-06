@@ -1,0 +1,7 @@
+{
+"label":"ScummVM",
+"icon":"scummvm.png",
+"iconsel":"scummvm.png",
+"launch":"launch.sh",
+"description":"Interpreter for several adventure games"
+}

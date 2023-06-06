@@ -1,0 +1,1231 @@
+ScummVM Team
+************
+  Project Leaders
+  ---------------
+     Pawel Kolodziejski
+     Eugene Sandulenko
+     Einar Johan T. Somaaen
+     Lothar Serra Mari
+
+  PR Office
+  ---------
+     Arnaud Boutonne                - Public Relations Officer, Project
+                                      Administrator
+     Eugene Sandulenko              - Project Leader
+
+  Retired Project Leaders
+  -----------------------
+     James Brown
+     Vincent Hamm                   - ScummVM co-founder, Original
+                                      Cruise/CinE author
+     Max Horn
+     Ludvig Strigeus                - Original ScummVM and SimonVM author
+
+  Engine Teams
+  ------------
+    Access:
+       Arnaud Boutonne
+       Paul Gilbert
+
+    ADL:
+       Walter van Niftrik
+
+    AGI:
+       Stuart George
+       Matthew Hoops                  - (retired)
+       Filippos Karapetis
+       Martin Kiewitz
+       Pawel Kolodziejski
+       Walter van Niftrik
+       Kari Salminen
+       Eugene Sandulenko
+       David Symonds                  - (retired)
+
+    AGOS:
+       Torbjorn Andersson
+       Paul Gilbert
+       Travis Howell
+       Oliver Kiehl                   - (retired)
+       Ludvig Strigeus                - (retired)
+
+    AGS:
+       Paul Gilbert
+       Thierry Crozat
+       Chris Jones                    - Creator
+       Alan Van Drake                 - AGS
+       Benjamin Penney                - AGS
+       Benoit Pierre                  - AGS
+       Bernhard Rosenkraenzer         - AGS
+       Cristian Morales Vega          - AGS
+       Edward Rudd                    - AGS
+       Erico Vieira Porto             - AGS
+       Ferdinand Thiessen             - AGS
+       Francesco Ariis                - AGS
+       Gilad Shaham                   - AGS
+       Ivan Mogilko                   - AGS
+       Janet Gilbert                  - AGS
+       Jochen Schleu                  - AGS
+       Joe Lee                        - AGS
+       John Steele Scott              - AGS
+       Martin Sedlak                  - AGS
+       Matthew Gambrell               - AGS
+       Michael Rittenhouse            - AGS
+       Morgan Willcock                - AGS
+       Nick Sonneveld                 - AGS
+       Ori Avtalion                   - AGS
+       Paul Wilkinson                 - AGS
+       Per Olav Flaten                - AGS
+       Piotr Wieczorek                - AGS
+       Ryan O'Connor                  - AGS
+       Scott Baker                    - AGS
+       Shane Stevens                  - AGS
+       Shawn R. Walker                - AGS
+       Stefano Collavini              - AGS
+       Steve McCrea                   - AGS
+       Steven Poulton                 - AGS
+       Sunit Das                      - AGS
+       Tobias Hansen                  - AGS
+       Tom Vandepoele                 - AGS
+       Tzach Shabtay                  - AGS
+       rofl0r                         - AGS
+       Berian Williams                - AgsCreditz
+
+    Asylum:
+       Alex Bevilacqua
+       Alex Fontoura
+       Alexander Panov
+       Benjamin Haisch
+       Filippos Karapetis
+       Joseph Davies
+       Julien Templier
+
+    Avalanche:
+       Peter Bozso
+       Arnaud Boutonne
+
+    BBVS:
+       Benjamin Haisch
+
+    Blade Runner:
+       Thanasis Antoniou
+       Thomas Fach-Pedersen
+       Peter Kohaut
+       Eugene Sandulenko
+
+    Buried:
+       Matthew Hoops
+
+    CGE:
+       Arnaud Boutonne
+       Paul Gilbert
+
+    CGE2:
+       Peter Bozso
+       Arnaud Boutonne
+       Paul Gilbert
+
+    Chamber:
+       Retro-Junk;
+       Eugene Sandulenko
+
+    Chewy:
+       Paul Gilbert
+       Eugene Sandulenko
+       Arnaud Boutonne
+       Filippos Karapetis
+
+    Cine:
+       Vincent Hamm                   - (retired)
+       Pawel Kolodziejski
+       Gregory Montoir                - (retired)
+       Kari Salminen
+       Eugene Sandulenko
+
+    Composer:
+       Alyssa Milburn
+
+    CruisE:
+       Paul Gilbert
+       Vincent Hamm                   - (retired)
+
+    Cryo:
+       Arnaud Boutonne
+       Filippos Karapetis
+       Retro-Junk;
+       Eugene Sandulenko
+
+    Cryomni3D:
+       Philippe Valembois
+
+    Director:
+       Eugene Sandulenko
+       Crane Yang                     - GSoC Student
+       Dmitry Iskrich
+       Deborah Servilla               - GSoC Student
+       Nathanael Gentry               - GSoC Student
+       Roland van Laar
+       Scott Percival
+       Steven Hoefel
+       Tobia Tesan
+       Misty De Meo
+
+    DM:
+       Arnaud Boutonne
+       Bendeguz Nagy
+
+    Draci:
+       Denis Kasak
+       Robert Spalek
+
+    Dragons:
+       Eric Fry
+       Benjamin Haisch                - Actor pathfinding
+       Angel Eduardo Garcia Hernandez - Help with reverse engineering
+
+    Drascula:
+       Filippos Karapetis
+       Pawel Kolodziejski
+       Thierry Crozat
+
+    DreamWeb:
+       Torbjorn Andersson
+       Bertrand Augereau
+       Filippos Karapetis
+       Vladimir Menshakov
+       Willem Jan Palenstijn
+
+    Freescape:
+       Chris Allen                    - Sound engine programming
+       Gustavo Grieco
+
+    Glk:
+       Paul Gilbert
+       Tor Andersson                  - GarGlk library
+       Stefan Jokisch                 - Frotz interpreter
+       Andrew Plotkin                 - Glulxe interpreter
+       Alan Cox                       - ScottFree interpreter
+       Michael J. Roberts             - TADS interpreter
+       Avijeet Maurya                 - Scott Sub-engine
+
+    Gnap:
+       Arnaud Boutonne
+       Benjamin Haisch
+
+    Gob:
+       Torbjorn Andersson
+       Arnaud Boutonne
+       Simon Delamarre
+       Sven Hesse
+       Eugene Sandulenko
+
+    Griffon:
+       Eugene Sandulenko
+
+    Grim:
+       James Brown                    - Grim (retired)
+       Giulio Camuffo                 - Grim (retired)
+       Daniel Schepler                - Initial engine contributor
+       Dries Harnie                   - EMI
+       Pawel Kolodziejski             - Grim
+       Christian Krause               - EMI (retired)
+       Einar Johan T. Somaaen         - Grim, EMI
+       Joel Teichroeb                 - EMI
+       Joni Vahamaki                  - EMI (retired)
+
+    Groovie:
+       Henry Bush
+       Ray Carro
+       Scott Thomas
+       Jordi Vilalta Prat
+
+    Hades Challenge:
+       Vladimir Serbinenko/Google
+
+    HDB:
+       Eugene Sandulenko
+       Nipun Garg                     - GSoC student
+
+    Hopkins:
+       Arnaud Boutonne
+       Paul Gilbert
+
+    Hpl1:
+       Emanuele Grisenti
+
+    Hugo:
+       Arnaud Boutonne
+       Oystein Eftevaag
+       Eugene Sandulenko
+
+    Hypno:
+       Gustavo Grieco
+
+    ICB:
+       Pawel Kolodziejski
+       Joost Peters
+       Einar Johan T. Somaaen
+
+    Illusions:
+       Benjamin Haisch
+       Eric Fry
+
+    Immortal:
+       Michael Hayman
+
+    Kingdom:
+       Arnaud Boutonne
+       Thomas Fach-Pedersen
+       Hein-Pieter van Braam-Stewart
+
+    Kyra:
+       Torbjorn Andersson             - VQA Player
+       Oystein Eftevaag
+       Florian Kagerer
+       Gregory Montoir                - (retired)
+       Johannes Schickel              - (retired)
+
+    Lab:
+       Arnaud Boutonne
+       Filippos Karapetis
+       Willem Jan Palenstijn
+       Eugene Sandulenko
+
+    Lastexpress:
+       Matthew Hoops                  - (retired)
+       Jordi Vilalta Prat
+       Julien Templier
+
+    Lilliput:
+       Arnaud Boutonne
+
+    Lure:
+       Paul Gilbert
+
+    MacVenture:
+       Borja Lorente                  - GSoC student
+
+    MADE:
+       Benjamin Haisch
+       Filippos Karapetis
+
+    MADS:
+       Arnaud Boutonne
+       Paul Gilbert
+       Filippos Karapetis
+
+    MM (Xeen):
+       Paul Gilbert
+       Benoit Pierre
+       David Goldsmith                - (Xeen analysis)
+       Matt Taylor                    - (Xeen analysis)
+
+    Mohawk:
+       Bastien Bouclet
+       Matthew Hoops                  - (retired)
+       Filippos Karapetis
+       Alyssa Milburn
+       Eugene Sandulenko
+       David Turner
+       David Fioramonti
+
+    Mortevielle:
+       Arnaud Boutonne
+       Paul Gilbert
+
+    mTropolis:
+       Eric Lasota
+
+    MutationOfJB:
+       Lubomir Remak
+       Miroslav Remak
+
+    Myst 3:
+       Bastien Bouclet
+
+    Nancy:
+       Kaloyan Chehlarski
+       Walter van Niftrik
+
+    Neverhood:
+       Benjamin Haisch
+       Filippos Karapetis
+
+    NGI:
+       Eugene Sandulenko
+
+    Parallaction:
+       peres
+
+    Pegasus:
+       Matthew Hoops                  - (retired)
+
+    Petka:
+       Andrei Prykhodko
+       Eugene Sandulenko
+
+    Pink:
+       Andrei Prykhodko
+       Eugene Sandulenko
+
+    Plumbers:
+       Retro-Junk;
+
+    Prince:
+       Eugene Sandulenko
+       Lukasz Watka
+       Kamil Zbrog
+
+    Private:
+       Gustavo Grieco
+
+    Queen:
+       David Eriksson                 - (retired)
+       Gregory Montoir                - (retired)
+       Joost Peters
+
+    SAGA:
+       Torbjorn Andersson
+       Daniel Balsom                  - Original engine reimplementation
+                                        author (retired)
+       Filippos Karapetis
+       Andrew Kurushin
+       Eugene Sandulenko
+
+    SAGA2:
+       Yuri Guimaraes                 - GSoC Student
+       Eugene Sandulenko
+
+    SCI:
+       Chris Benshoof
+       Greg Frieger
+       Paul Gilbert
+       Max Horn                       - (retired)
+       Filippos Karapetis
+       Martin Kiewitz
+       Walter van Niftrik
+       Willem Jan Palenstijn
+       Jordi Vilalta Prat
+       Lars Skovlund
+       Colin Snover
+
+    SCUMM:
+       Torbjorn Andersson
+       Andrea Boscarino               - Digital iMUSE, SMUSH audio, GUI
+       James Brown                    - (retired)
+       Jonathan Gray                  - (retired)
+       Vincent Hamm                   - (retired)
+       Max Horn                       - (retired)
+       Travis Howell
+       Pawel Kolodziejski             - Codecs, iMUSE, Smush, etc.
+       Gregory Montoir                - (retired)
+       Eugene Sandulenko              - FT INSANE, MM NES, MM C64, game
+                                        detection, Herc/CGA
+       Ludvig Strigeus                - (retired)
+
+    SCUMM HE:
+       Jonathan Gray                  - (retired)
+       Travis Howell
+       Gregory Montoir                - (retired)
+       Eugene Sandulenko
+
+    Sherlock:
+       Paul Gilbert
+       Martin Kiewitz
+
+    Sky:
+       Robert Goeffringmann           - (retired)
+       Oliver Kiehl                   - (retired)
+       Joost Peters
+
+    SLUDGE:
+       Eugene Sandulenko
+       Simei Yin                      - GSoC Student
+
+    Stark:
+       Bastien Bouclet
+       Einar Johan T. Somaaen
+       Liu Zhaosong
+
+    Star Trek:
+       Matthew Hoops                  - (retired)
+       Filippos Karapetis
+       Matthew Stewart                - GSoC Student
+
+    Supernova:
+       Joseph-Eugene Winzer
+       Jaromir Wysoglad
+       Thierry Crozat
+
+    Sword1:
+       Fabio Battaglia                - PSX version support
+       Thierry Crozat                 - Mac version support
+       Robert Goeffringmann           - (retired)
+
+    Sword2:
+       Torbjorn Andersson
+       Fabio Battaglia                - PSX version support
+       Jonathan Gray                  - (retired)
+
+    Sword2.5:
+       Torbjorn Andersson
+       Paul Gilbert
+       Max Horn                       - (retired)
+       Filippos Karapetis
+       Eugene Sandulenko
+
+    TeenAgent:
+       Robert Megone                  - Help with callback rewriting
+       Vladimir Menshakov
+
+    Tetraedge:
+       Matthew Duggan
+
+    Tinsel:
+       Torbjorn Andersson
+       Fabio Battaglia                - PSX version support
+       Paul Gilbert
+       Sven Hesse
+       Max Horn                       - (retired)
+       Filippos Karapetis
+       Joost Peters
+
+    Titanic:
+       David Fioramonti
+       Paul Gilbert
+       Colin Snover
+
+    Toltecs:
+       Benjamin Haisch
+       Filippos Karapetis
+
+    Tony:
+       Arnaud Boutonne
+       Paul Gilbert
+       Alyssa Milburn
+
+    Toon:
+       Sylvain Dupont
+
+    Touche:
+       Gregory Montoir                - (retired)
+
+    Trecision:
+       Daniel Albano
+       Arnaud Boutonne
+       Thomas Fach-Pedersen           - Smacker video support
+       Filippos Karapetis
+
+    TsAGE:
+       Arnaud Boutonne
+       Paul Gilbert
+
+    Tucker:
+       Gregory Montoir                - (retired)
+
+    TwinE:
+       Alexandre Fontoura             - (retired)
+       Vincent Hamm                   - (retired)
+       Felipe Sanches                 - (retired)
+       Nikita Tereshin                - (retired)
+       Patrik Dahlstroem              - (retired)
+       Arthur Blot                    - (retired)
+       Kyuubu                         - (retired)
+       Toel Hartmann                  - (retired)
+       Sebastien Viannay              - (retired)
+       Martin Gerhardy
+
+    Ultima:
+       Paul Gilbert
+       Matthew Duggan
+       Matthew Jimenez
+       Daniel c. Wuerl                - (Nuvie)
+       Eric Fry                       - (Nuvie)
+       Jeremy Newman                  - (Nuvie)
+       Jonathan E. Wright             - (Nuvie)
+       Joseph Applegate               - (Nuvie)
+       Malignant Manor                - (Nuvie)
+       Markus Niemistoe               - (Nuvie)
+       Michael Fink                   - (Nuvie)
+       Pieter Luteijn                 - (Nuvie)
+       Sam Matthews                   - (Nuvie)
+       Travis Howell                  - (Nuvie)
+       Willem Jan Palenstijn          - (Nuvie)
+       Brian Tietz                    - (Pentagram)
+       Dominik Reichardt              - (Pentagram)
+       Max Horn                       - (Pentagram)
+       Patrick Burke                  - (Pentagram)
+       Ryan Nunn                      - (Pentagram)
+       Willem Jan Palenstijn          - (Pentagram)
+
+    V-Cruise:
+       Eric Lasota
+
+    Voyeur:
+       Arnaud Boutonne
+       Paul Gilbert
+
+    WAGE:
+       Eugene Sandulenko
+
+    Wintermute:
+       Gunnar Birke                   - Wintermute 3D
+       Einar Johan T. Somaaen
+       Tobia Tesan
+
+    Z-Vision:
+       Adrian Astley
+       Filippos Karapetis
+       Anton Yarcev
+
+  Backend Teams
+  -------------
+    Android:
+       Andre Heider
+       Angus Lees
+       Lubomyr Lisen
+
+    Dreamcast:
+       Marcus Comstedt
+
+    GCW0:
+       Eugene Sandulenko
+
+    GPH Devices (GP2X, GP2XWiz & Caanoo):
+       John Willis
+
+    iPhone / iPad:
+       Oystein Eftevaag               - (retired)
+       Vincent Benony
+       Thierry Crozat
+       Lars Sundstroem
+
+    LinuxMoto:
+       Lubomyr Lisen
+
+    Maemo:
+       Frantisek Dufka                - (retired)
+       Tarek Soliman
+
+    Nintendo 3DS:
+       Thomas Edvalson
+
+    Nintendo 64:
+       Fabio Battaglia
+
+    Nintendo DS:
+       Bertrand Augereau              - HQ software scaler
+       Cameron Cawley
+       Neil Millstone
+
+    Nintendo Switch:
+       Cpasjuste
+       rsn8887
+
+    OpenPandora:
+       John Willis
+
+    PocketPC / WinCE:
+       Nicolas Bacca                  - (retired)
+       Ismail Khatib                  - (retired)
+       Kostas Nakos                   - (retired)
+
+    PlayStation 2:
+       Robert Goeffringmann           - (retired)
+       Max Lingua
+
+    PSP (PlayStation Portable):
+       Yotam Barnoy
+       Joost Peters
+
+    PlayStation Vita:
+       Cpasjuste
+       rsn8887
+
+    SDL (Win/Linux/macOS/etc.):
+       Max Horn                       - (retired)
+       Eugene Sandulenko              - Asm routines, GFX layers
+
+    SymbianOS:
+       Jurgen Braam
+       Lars Persson
+       Fedor Strizhniou
+
+    Tizen / BADA:
+       Chris Warren-Smith
+
+    Webassembly / Emscripten:
+       Christian Kuendig
+
+    WebOS:
+       Klaus Reimer
+
+    Wii:
+       Andre Heider
+       Alexander Reim
+
+    Raspberry Pi:
+       Manuel Alfayate
+
+  Other subsystems
+  ----------------
+    Infrastructure:
+       Max Horn                       - Backend & Engine APIs, file API,
+                                        sound mixer, audiostreams, data
+                                        structures, etc. (retired)
+       Eugene Sandulenko
+       Johannes Schickel              - (retired)
+
+    GUI:
+       Max Horn                       - (retired)
+       Vicent Marti
+       Eugene Sandulenko
+       Johannes Schickel              - (retired)
+
+    Miscellaneous:
+       David Corrales-Lopez           - Filesystem access improvements (GSoC
+                                        2007 task) (retired)
+       Jerome Fisher                  - MT-32 emulator
+       Benjamin Haisch                - Heavily improved de-/encoder for DXA
+                                        videos
+       Jochen Hoenicke                - Speaker & PCjr sound support, AdLib
+                                        work (retired)
+       Daniel ter Laan                - Restoring original Drascula tracks,
+                                        and writing convert_dxa.bat
+       Chris Page                     - Return to launcher, savestate
+                                        improvements, leak fixes, ... (GSoC
+                                        2008 task) (retired)
+       Coen Rampen                    - Sound improvements
+       Robin Watts                    - ARM assembly routines for nice
+                                        speedups on several ports;
+                                        improvements to the sound mixer
+       Trembyle                       - Archivist
+       Lothar Serra Mari              - Tackling Tremendously Tedious
+                                        Tasks(tm); ScummVM's Seal of Approval
+                                        (Awp?!)
+
+  Website (code)
+  --------------
+     Fredrik Wendel                 - (retired)
+
+  Website (maintenance)
+  ---------------------
+     James Brown                    - IRC Logs maintainer
+     Thierry Crozat                 - Wiki maintainer
+     Andre Heider                   - Buildbot maintainer
+     Joost Peters                   - Doxygen Project Documentation
+                                      maintainer
+     Jordi Vilalta Prat             - Wiki maintainer
+     Eugene Sandulenko              - Forum, IRC channel, Screen Shots and
+                                      Mailing list maintainer
+     John Willis
+
+  Website (content)
+  -----------------
+     All active team members
+
+  Documentation
+  -------------
+     Thierry Crozat                 - Numerous contributions to documentation
+     Joachim Eberhard               - Numerous contributions to documentation
+                                      (retired)
+     Matthew Hoops                  - Numerous contributions to documentation
+                                      (retired)
+     Cadi Howley                    - User documentation (GSOD 2020)
+
+  Retired Team Members
+  --------------------
+     Chris Apers                    - Former PalmOS porter
+     Ralph Brorsen                  - Help with GUI implementation
+     Jamieson Christian             - iMUSE, MIDI, all things musical
+     Felix Jakschitsch              - Zak256 reverse engineering
+     Mutwin Kraus                   - Original MacOS porter
+     Peter Moraliyski               - Port: GP32
+     Jeremy Newman                  - Former webmaster
+     Lionel Ulmer                   - Port: X11
+     Won Star                       - Former GP32 porter
+     Matan Bareket                  - Website, Infrastructure, UI/UX
+
+Other contributions
+*******************
+  Packages
+  --------
+    AmigaOS 4:
+       Hans-Joerg Frieden             - (retired)
+       Hubert Maier
+       Juha Niemimaki                 - (retired)
+
+    Atari/FreeMiNT:
+       Keith Scroggins
+
+    BeOS:
+       Stefan Parviainen              - (retired)
+       Luc Schrijvers
+
+    Debian GNU/Linux:
+       Tore Anderson                  - (retired)
+       David Weinehall
+
+    Fedora / RedHat:
+       Willem Jan Palenstijn
+
+    Haiku:
+       Luc Schrijvers
+
+    macOS:
+       Max Horn                       - (retired)
+       Oystein Eftevaag               - (retired)
+       Thierry Crozat
+       dwa                            - Tiger/Leopard PPC
+
+    Mandriva:
+       Dominik Scherer                - (retired)
+
+    MorphOS:
+       BeWorld
+       Fabien Coeurjoly
+       Ruediger Hanke                 - (retired)
+
+    OS/2:
+       Paul Smedley
+
+    RISC OS:
+       Cameron Cawley
+
+    SlackWare:
+       Robert Kelsen
+
+    Solaris x86:
+       Laurent Blume
+
+    Solaris SPARC:
+       Markus Strangl
+
+    Win32:
+       Travis Howell
+       Lothar Serra Mari
+
+    Win64:
+       Chris Gray                     - (retired)
+       Johannes Schickel              - (retired)
+       Lothar Serra Mari
+
+  GUI Translations
+  ----------------
+     Thierry Crozat                 - Translation Lead
+
+    Basque:
+       Mikel Iturbe Urretxa
+
+    Belarusian:
+       Ivan Lukyanov
+
+    Catalan:
+       Jordi Vilalta Prat
+
+    Czech:
+       Zbynik Schwarz
+
+    Danish:
+       Steffen Nyeland
+       scootergrisen
+
+    Dutch:
+       Ben Castricum
+
+    Finnish:
+       Toni Saarela
+       Timo Mikkolainen
+
+    French:
+       Thierry Crozat
+       Purple T
+
+    Galician:
+       Santiago G. Sanz
+
+    German:
+       Simon Sawatzki
+       Lothar Serra Mari
+
+    Greek:
+       Thanasis Antoniou
+       Filippos Karapetis
+
+    Hungarian:
+       Alex Bevilacqua
+       George Kormendi
+
+    Italian:
+       Matteo Angelino
+       Paolo Bossi
+       Walter Agazzi
+
+    Norwegian (Bokmaal):
+       Einar Johan Somaaen
+
+    Norwegian (Nynorsk):
+       Einar Johan Somaaen
+
+    Polish:
+       GrajPoPolsku.pl Team
+
+    Brazilian Portuguese:
+       ScummBR Team
+       Marcel Souza Lemes
+
+    Portuguese:
+       Daniel Albano
+
+    Russian:
+       Eugene Sandulenko
+
+    Spanish:
+       Tomas Maidagan
+       Jordi Vilalta Prat
+       IlDucci
+       Rodrigo Vegas Sanchez-Ferrero
+
+    Swedish:
+       Hampus Flink
+       Adrian Fruehwirth
+
+    Ukrainian:
+       Lubomyr Lisen
+
+  Game Translations
+  -----------------
+    CGE:
+       Dan Serban                     - Soltys English translation
+       Victor Gonzalez                - Soltys Spanish translation
+       Alejandro Gomez de la Munoza   - Soltys Spanish translation
+
+    CGE2:
+       Arnaud Boutonne                - Sfinx English translation
+       Thierry Crozat                 - Sfinx English translation
+       Peter Bozso                    - Sfinx English translation editor
+       Ryan Clark                     - Sfinx English translation editor
+
+    Drascula:
+       Thierry Crozat                 - Improve French translation
+
+    Mortevielle:
+       Hugo Labrande                  - Improve English translation
+       Thierry Crozat                 - Improve English translation
+
+    Prince:
+       ShinjiGR                       - English translation
+       Eugene Sandulenko              - English translation
+       Anna Baldur                    - English translation
+
+    Supernova:
+       Joseph-Eugene Winzer           - English translation
+       Thierry Crozat                 - English translation
+       Walter Agazzi                  - Italian translation
+
+  Websites (design)
+  -----------------
+     Dobo Balazs                    - Website design
+     William Claydon                - Skins for doxygen, buildbot and wiki
+     Yaroslav Fedevych              - HTML/CSS for the website
+     Jean Marc Gimenez              - ScummVM logo
+     David Jensen                   - SVG logo conversion
+     Raina                          - ScummVM forum buttons
+
+  Icons pack
+  ----------
+     David Calvert
+     Eugene Sandulenko
+     J Moretti
+     Jennifer McMurray
+     Lothar Serra Mari
+     Oleg Ermakov
+     Olly Dean
+     Stefan Philippsen
+     Canuma
+     SupSuper
+     Thunderforge
+     neuromancer
+     nightm4re94
+     trembyle
+
+  Code contributions
+  ------------------
+     Ori Avtalion                   - Subtitle control options in the GUI;
+                                      BASS GUI fixes
+     Stuart Caie                    - Decoders for Amiga and AtariST data
+                                      files (AGOS engine)
+     Paolo Costabel                 - PSP port contributions
+     Martin Doucha                  - CinE engine objectification
+     Thomas Fach-Pedersen           - ProTracker module player, Smacker video
+                                      decoder
+     Tobias Gunkel                  - Sound support for C64 version of
+                                      MM/Zak, Loom PCE support
+     Dries Harnie                   - Android port for ResidualVM
+     Janne Huttunen                 - V3 actor mask support, Dig/FT SMUSH
+                                      audio
+     Kovacs Endre Janos             - Several fixes for Simon1
+     Jeroen Janssen                 - Numerous readability and bugfix patches
+     Keith Kaisershot               - Several Pegasus Prime patches and DVD
+                                      additions
+     Andreas Karlsson               - Initial port for SymbianOS
+     Stefan Kristiansson            - Initial work on SDL2 support
+     Claudio Matsuoka               - Daily Linux builds
+     Thomas Mayer                   - PSP port contributions
+     Sean Murray                    - ScummVM tools GUI application (GSoC
+                                      2007 task)
+     n0p                            - Windows CE port aspect ratio correction
+                                      scaler and right click input method
+     Mikesch Nepomuk                - MI1 VGA floppy patches
+     Nicolas Noble                  - Config file and ALSA support
+     Tim Phillips                   - Initial MI1 CD music support
+     Quietust                       - Sound support for Amiga SCUMM V2/V3
+                                      games, MM NES support
+     Robert Crossfield              - Improved support for Apple II/C64
+                                      versions of MM
+     Andreas Roever                 - Broken Sword I & II MPEG2 cutscene
+                                      support
+     Edward Rudd                    - Fixes for playing MP3 versions of
+                                      MI1/Loom audio
+     Daniel Schepler                - Final MI1 CD music support, initial Ogg
+                                      Vorbis support
+     Andre Souza                    - SDL-based OpenGL renderer
+     Joel Teichroeb                 - Android port for ResidualVM
+     Tom Frost                      - WebOS port contributions
+
+  FreeSCI Contributors
+  --------------------
+     Francois-R Boyer               - MT-32 information and mapping code
+     Rainer Canavan                 - IRIX MIDI driver and bug fixes
+     Xiaojun Chen
+     Paul David Doherty             - Game version information
+     Vyacheslav Dikonov             - Config script improvements
+     Ruediger Hanke                 - Port to the MorphOS platform
+     Matt Hargett                   - Clean-ups, bugfixes, Hardcore QA, Win32
+     Max Horn                       - SetJump implementation
+     Ravi I.                        - SCI0 sound resource specification
+     Emmanuel Jeandel               - Bugfixes and bug reports
+     Dmitry Jemerov                 - Port to the Win32 platform, numerous
+                                      bugfixes
+     Chris Kehler                   - Makefile enhancements
+     Christopher T. Lansdown        - Original CVS maintainer, Alpha
+                                      compatibility fixes
+     Sergey Lapin                   - Port of Carl's type 2 decompression
+                                      code
+     Rickard Lind                   - MT-32->GM MIDI mapping magic, sound
+                                      research
+     Hubert Maier                   - AmigaOS 4 port
+     Johannes Manhave               - Document format translation
+     Claudio Matsuoka               - CVS snapshots, daily builds, BeOS and
+                                      cygwin ports
+     Dark Minister                  - SCI research (bytecode and parser)
+     Carl Muckenhoupt               - Sources to the SCI resource viewer
+                                      tools that started it all
+     Anders Baden Nielsen           - PPC testing
+     Walter van Niftrik             - Ports to the Dreamcast and GP32
+                                      platforms
+     Rune Orsval                    - Configuration file editor
+     Solomon Peachy                 - SDL ports and much of the sound
+                                      subsystem
+     Robey Pointer                  - Bug tracking system hosting
+     Magnus Reftel                  - Heap implementation, Python class
+                                      viewer, bugfixes
+     Christoph Reichenbach          - UN*X code, VM/Graphics/Sound/other
+                                      infrastructure
+     George Reid                    - FreeBSD package management
+     Lars Skovlund                  - Project maintenance, most
+                                      documentation, bugfixes, SCI1 support
+     Rink Springer                  - Port to the DOS platform, several bug
+                                      fixes
+     Rainer De Temple               - SCI research
+     Sean Terrell
+     Hugues Valois                  - Game selection menu
+     Jordi Vilalta                  - Numerous code and website clean-up
+                                      patches
+     Petr Vyhnak                    - The DCL-INFLATE algorithm, many Win32
+                                      improvements
+     Bas Zoetekouw                  - Man pages, debian package management,
+                                      CVS maintenance
+
+     Special thanks to Prof. Dr. Gary Nutt for allowing the FreeSCI VM
+     extension as a course project in his Advanced OS course.
+
+     Special thanks to Bob Heitman and Corey Cole for their support of
+     FreeSCI.
+
+  ResidualVM Contributors
+  -----------------------
+    Grim:
+       Thomas Allen                   - Various engine code fixes and
+                                        improvements
+       Torbjorn Andersson             - Various code fixes
+       Ori Avtalion                   - Lipsync, LAF support, various code
+                                        fixes
+       Robert Biro                    - Antialiasing support
+       Bastien Bouclet                - Various fixes to engine
+       David Cardwell                 - Few fixes to EMI
+       Marcus Comstedt                - Initial Dreamcast port
+       Andrea Corna                   - Patcher module, various engine
+                                        improvements
+       Jonathan Gray                  - Various code fixes
+       Tobias Gunkel                  - Initial Android port, few engines
+                                        fixes
+       Azamat H. Hackimov             - Configure fix
+       Vincent Hamm                   - Various engine code fixes and
+                                        improvements
+       Sven Hesse                     - Various compilation fixes
+       Matthew Hoops                  - Smush codec48, Grim and EMI engine
+                                        improvements
+       Erich Hoover                   - x86-64 fixes, various code fixes and
+                                        improvements
+       Max Horn                       - Few code fixes
+       Travis Howell                  - Various code fixes, Windows port
+       Joseph Jezak                   - A lot of engine improvements and
+                                        fixes
+       Guillem Jover                  - Few code improvements
+       Filippos Karapetis             - Compilation fixes
+       Ingo van Lil                   - Various fixes and improvements for
+                                        EMI
+       Vincent Pelletier              - Various engine and TinyGL
+                                        improvements
+       Joost Peters                   - Various code fixes
+       George Macon                   - Few fixes
+       Josh Matthews                  - Few fixes to engine
+       Matthieu Milan                 - Various engine improvements
+       Gregory Montoir                - Few fixes to engine
+       Stefano Musumeci               - TinyGL backend and engine driver
+                                        improvements
+       Christian Neumair              - Various optimisation patches
+       Daniel Schepler                - Initial grim engine contributor, LUA
+                                        support
+       Dmitry Smirnov                 - Minor spelling corrections
+       Yaron Tausky                   - Fixes to subtitles
+       Julien Templier                - create_project tool
+       Pino Toscano                   - Debian GNU/Linux package files
+       Lionel Ulmer                   - OpenGL optimisations
+       cmayer0087                     - Various engine code fixes
+       JenniBee                       - Compilation fixes
+       karjonas                       - Various engine code fixes
+       mparnaudeau                    - Various grim engine code fixes
+       PoulpiFr                       - Few fixes to Android port
+       sietschie                      - Few fixes to engine
+
+    Myst 3:
+       David Fioramonti               - Autosave support and few fixes
+       Matthew Hoops                  - Various engine improvements and code
+                                        fixes
+       Stefano Musumeci               - TinyGL engine support
+
+    Stark:
+       Bartosz Dudziak                - Various engine improvements and code
+                                        fixes
+       Matthew Hoops                  - ADPCM decoder
+       Pawel Kolodziejski             - Various engine code fixes
+       Awad Mackie                    - Few fixes to engine
+       Marius Ioan Orban              - Code fix
+       Vincent Pelletier              - Raw sound support
+       Jordi Vilalta Prat             - Initial engine contributor
+       Scott Thomas                   - Initial engine author
+       Will Thomson                   - Few fixes to engine
+       Faalagorn                      - Few code improvements
+       orangeforest11                 - Few engine improvements
+
+   And to all the contributors, users, and beta testers we've missed. Thanks!
+
+Special thanks to
+*****************
+   Daniel Balsom     - For the original Reinherit (SAGA) code
+   Sander Buskens    - For his work on the initial reversing of Monkey2
+   Dean Beeler       - For the original MT-32 emulator
+   Kevin Carnes      - For Scumm16, the basis of ScummVM's older gfx codecs
+   Curt Coder        - For the original TrollVM (preAGI) code
+   Patrick Combet    - For the original Gobliiins ADL player
+   Ivan Dubrov       - For contributing the initial version of the Gobliiins
+                       engine
+   Henrik Engqvist   - For generously providing hosting for our buildbot, SVN
+                       repository, planet and doxygen sites as well as tons
+                       of HD space
+   DOSBox Team       - For their awesome OPL2 and OPL3 emulator
+   Yusuke Kamiyamane - For contributing some GUI icons
+   Till Kresslein    - For design of modern ScummVM GUI
+   Jezar Wakefield   - For his freeverb filter implementation
+   Jim Leiterman     - Various info on his FM-TOWNS/Marty SCUMM ports
+   Lloyd Rosen       - For deep tech details about C64 Zak & MM
+   Sarien Team       - Original AGI engine code
+   Jimmi Thogersen   - For ScummRev, and much obscure code/documentation
+   Tristan Matthews  - For additional work on the original MT-32 emulator
+   James Woodcock    - Soundtrack enhancements
+   Anton Yartsev     - For the original re-implementation of the Z-Vision
+                       engine
+
+   Tony Warriner and everyone at Revolution Software Ltd. for sharing with us
+   the source of some of their brilliant games, allowing us to release
+   Beneath a Steel Sky as freeware... and generally being supportive above
+   and beyond the call of duty.
+
+   John Passfield and Steve Stamatiadis for sharing the source of their
+   classic title, Flight of the Amazon Queen and also being incredibly
+   supportive.
+
+   Joe Pearce from The Wyrmkeep Entertainment Co. for sharing the source of
+   their famous title Inherit the Earth, for sharing the source of The
+   Labyrinth of Time and for always replying promptly to our questions.
+
+   Aric Wilmunder, Ron Gilbert, David Fox, Vince Lee, and all those at
+   LucasFilm/LucasArts who made SCUMM the insane mess to reimplement that it
+   is today. Feel free to drop us a line and tell us what you think, guys!
+
+   Alan Bridgman, Simon Woodroffe and everyone at Adventure Soft for sharing
+   the source code of some of their games with us.
+
+   John Young, Colin Smythe and especially Terry Pratchett himself for
+   sharing the source code of Discworld I & II with us.
+
+   Emilio de Paz Aragon from Alcachofa Soft for sharing the source code of
+   Drascula: The Vampire Strikes Back with us and his generosity with
+   freewaring the game.
+
+   David P. Gray from Gray Design Associates for sharing the source code of
+   the Hugo trilogy.
+
+   The mindFactory team for writing Broken Sword 2.5, a splendid fan-made
+   sequel, and for sharing the source code with us.
+
+   Neil Dodwell and David Dew from Creative Reality for providing the source
+   of Dreamweb and for their tremendous support.
+
+   Janusz Wisniewski and Miroslaw Liminowicz from Laboratorium Komputerowe
+   Avalon for providing full source code for Soltys and Sfinx and letting us
+   redistribute the games.
+
+   Jan Nedoma for providing the sources to the Wintermute-engine, and for his
+   support while porting the engine to ScummVM.
+
+   Bob Bell, David Black, Michel Kripalani, and Tommy Yune from Presto
+   Studios for providing the source code of The Journeyman Project: Pegasus
+   Prime and The Journeyman Project 2: Buried in Time.
+
+   Electronic Arts IP Preservation Team, particularly Stefan Serbicki, and
+   Vasyl Tsvirkunov of Electronic Arts for providing the source code of the
+   two Lost Files of Sherlock Holmes games. James M. Ferguson and Barry
+   Duncan for their tenacious efforts to recover the sources.
+
+   John Romero for sharing the source code of Hyperspace Delivery Boy! with
+   us.
+
+   Steffen Dingel for sharing the source code of the Mission Supernova game
+   with us.
+
+   The LUA developers, for creating a nice compact script interpreter.
+
+   Tim Schafer, for obvious reasons, and everybody else who helped make Grim
+   Fandango a brilliant game; and the EMI team for giving it their best try.
+
+   Bret Mogilefsky, for managing to create a SPUTM-style 3D LUA engine, and
+   avoiding the horrible hack it could have been.
+
+   Benjamin Haisch, for emimeshviewer, which our EMI code borrows heavily
+   from.
+
+   Fabrizio Lagorio from Trecision S.p.A., for finding and providing the
+   source code of many of their games.
+

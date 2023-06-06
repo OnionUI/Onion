@@ -1,0 +1,966 @@
+ScummVM
+Copyright (C) 2001-2023 by the following:
+
+If you have contributed to this project then you deserve to be on this
+list.  Contact us (see: AUTHORS) and we'll add you.
+
+Daniel Albano
+Manuel Alfayate
+Thomas Allen
+Tore Anderson
+Tor Andersson
+Torbjörn Andersson
+Thanasis Antoniou
+Chris Apers
+Joseph Applegate
+Francesco Ariis
+Adrian Astley
+Bertrand Augereau
+Ori Avtalion
+Nicolas Bacca
+Scott Baker
+Daniel Balsom
+Matan Bareket
+Yotam Barnoy
+Fabio Battaglia
+Chris Benshoof
+Alex Bevilacqua
+Gunnar Birke
+Robert Biro
+Arthur Blot
+Laurent Blume
+Andrea Boscarino
+Bastien Bouclet
+Arnaud Boutonné
+Peter Bozsó
+Jurgen Braam
+Ralph Brorsen
+James Brown
+Patrick Burke
+Henry Bush
+Vincent Bénony
+Giulio Camuffo
+David Cardwell
+Ray Carro
+Cameron Cawley
+Kaloyan Chehlarski
+Jamieson Christian
+Fabien Coeurjoly
+Stefano Collavini
+Marcus Comstedt
+Andrea Corna
+David Corrales-Lopez
+Alan Cox
+Thierry Crozat
+Patrik Dahlström
+Sunit Das
+Joseph Davies
+Bartosz Dudziak
+Frantisek Dufka
+Matthew Duggan
+Sylvain Dupont
+Jonathan E. Wright
+Joachim Eberhard
+Ángel Eduardo García Hernández
+Thomas Edvalson
+Oystein Eftevaag
+David Eriksson
+Thomas Fach-Pedersen
+Michael Fink
+David Fioramonti
+Jerome Fisher
+Alex Fontoura
+Alexandre Fontoura
+Hans-Jörg Frieden
+Greg Frieger
+Eric Fry
+Matthew Gambrell
+Nipun Garg
+Nathanael Gentry
+Stuart George
+Martin Gerhardy
+Janet Gilbert
+Paul Gilbert
+David Goldsmith
+Chris Gray
+Jonathan Gray
+Gustavo Grieco
+Yuri Guimaraes
+Tobias Gunkel
+Robert Göffringmann
+Azamat H. Hackimov
+Benjamin Haisch
+Vincent Hamm
+Rüdiger Hanke
+Tobias Hansen
+Dries Harnie
+Toël Hartmann
+Andre Heider
+Sven Hesse
+Steven Hoefel
+Jochen Hoenicke
+Matthew Hoops
+Erich Hoover
+Max Horn
+Travis Howell
+Cadi Howley
+Marius Ioan Orban
+Dmitry Iskrich
+Michael J. Roberts
+Felix Jakschitsch
+Willem Jan Palenstijn
+Joseph Jezak
+Matthew Jimenez
+Einar Johan T. Sømåen
+Stefan Jokisch
+Chris Jones
+Guillem Jover
+Florian Kagerer
+Filippos Karapetis
+Denis Kasak
+Robert Kelsen
+Ismail Khatib
+Oliver Kiehl
+Martin Kiewitz
+Peter Kohaut
+Paweł Kołodziejski
+Mutwin Kraus
+Christian Krause
+Andrew Kurushin
+Christian Kündig
+Kyuubu
+Eric Lasota
+Joe Lee
+Angus Lees
+Max Lingua
+Lubomyr Lisen
+Borja Lorente
+Pieter Luteijn
+Awad Mackie
+George Macon
+Hubert Maier
+Malignant Manor
+Vicent Marti
+Josh Matthews
+Sam Matthews
+Avijeet Maurya
+Steve McCrea
+Robert Megone
+Vladimir Menshakov
+Matthieu Milan
+Alyssa Milburn
+Neil Millstone
+Ivan Mogilko
+Gregory Montoir
+Cristian Morales Vega
+Peter Moraliyski
+Stefano Musumeci
+Bendegúz Nagy
+Kostas Nakos
+Christian Neumair
+Jeremy Newman
+Juha Niemimäki
+Markus Niemistö
+Ryan Nunn
+Ryan O'Connor
+Per Olav Flaten
+Chris Page
+Alexander Panov
+Stefan Parviainen
+Vincent Pelletier
+Benjamin Penney
+Scott Percival
+Lars Persson
+Joost Peters
+Benoit Pierre
+Andrew Plotkin
+Steven Poulton
+Andrei Prykhodko
+Raina
+Coen Rampen
+Dominik Reichardt
+Alexander Reim
+Klaus Reimer
+Miroslav Remák
+Ľubomír Remák
+Retro-Junk
+Michael Rittenhouse
+Bernhard Rosenkraenzer
+Edward Rudd
+Kari Salminen
+Felipe Sanches
+Eugene Sandulenko
+Daniel Schepler
+Dominik Scherer
+Johannes Schickel
+Jochen Schleu
+Luc Schrijvers
+Keith Scroggins
+Martin Sedlak
+Vladimir Serbinenko/Google
+Lothar Serra Mari
+Deborah Servilla
+Tzach Shabtay
+Gilad Shaham
+Lars Skovlund
+Paul Smedley
+Dmitry Smirnov
+Colin Snover
+Tarek Soliman
+Nick Sonneveld
+Robert Špalek
+Won Star
+John Steele Scott
+Shane Stevens
+Matthew Stewart
+Markus Strangl
+Ludvig Strigeus
+Fedor Strizhniou
+David Symonds
+Yaron Tausky
+Matt Taylor
+Joel Teichroeb
+Julien Templier
+Nikita Tereshin
+Tobia Tesan
+Ferdinand Thiessen
+Scott Thomas
+Will Thomson
+Brian Tietz
+Pino Toscano
+Trembyle
+David Turner
+Lionel Ulmer
+Philippe Valembois
+Alan Van Drake
+Tom Vandepoele
+Sebástien Viannay
+Erico Vieira Porto
+Jordi Vilalta Prat
+Joni Vähämäki
+Shawn R. Walker
+Chris Warren-Smith
+Robin Watts
+David Weinehall
+Fredrik Wendel
+Piotr Wieczorek
+Paul Wilkinson
+Morgan Willcock
+Berian Williams
+John Willis
+Joseph-Eugene Winzer
+Jaromír Wysoglad
+Łukasz Wątka
+Crane Yang
+Anton Yarcev
+Simei Yin
+Kamil Zbróg
+Liu Zhaosong
+Daniel c. Würl
+Daniël ter Laan
+Hein-Pieter van Braam-Stewart
+Roland van Laar
+Ingo van Lil
+Walter van Niftrik
+
+
+Patches contributed by:
+
+Henrik "Henke37" Andersson
+Anton (Zidane)
+Alex ASP
+Laura Abbott "sageofminerva"
+Gordon Acocella
+Walter Agazzi
+Vikram Aggarwal "youngelf"
+Divyam Ahuja
+Daniel Albano
+Manuel Alfayate
+Fred Almeida
+Henrik Andersson
+Tor Andersson
+Fedor Antokhin
+Athanasios Antoniou
+Joseph Applegate
+Francesco Ariis
+Ettore Atalan
+Antoniou Athanasios
+Ivan Avdeev
+Logan B
+Niv Baehr
+Norbert Bajkó
+Giovanni Bajo
+Scott Baker
+Michael Ball
+Daniel Balsom
+Luca Barbato
+Matan Bareket
+Dieter Baron "dillo"
+Rouven Bauer
+Harsh Bawari
+Kevin Becker
+Alban Bedel "albeu"
+Bodo Bellut "bellut"
+Nagy Bendeguz
+Chris Benshoof
+Jonny Bergström
+Vincent Bernat
+C.W. Betts
+Vincent Bénony
+Andreas Bierfert "awjb"
+Kaustav Biswas
+Elio Blanca
+Elio Blanca "eblanca76"
+Dmitry Blau
+Laurent Blume
+Martin Bohm
+Paolo Bossi
+Peter Bozsó
+Jurgen Braam
+Carlo Bramini
+Christophe Branchereau
+David Breakey "dbreakey"
+Michael Brown
+Robert Buchholz "prendi"
+Lars Buitinck
+Patrick Burke
+Tim Burke
+Sander Buskens
+Vincent Bénony
+Martin Böhm
+Rafał Będźkowski
+Giulio Camuffo
+Ralph Caraveo III
+Sergio Carmona
+Kevin Carnes
+Mathieu Carot "yokna"
+Ray Carro
+Milo Casagrande
+Ben Castricum
+Little Cat
+Stefano Ceccherini "jackburton"
+Eduard Chaika
+Pragyansh Chaturvedi (r41k0u)
+Hyunseo Cho
+Dan Church
+Josh Coalson "jcoalson"
+Curt Coder
+Fabien Coeurjoly
+Stefano Collavini
+Thomas Combeleran "hibernatus"
+Patrick Combet
+Kees Cook "keescook"
+Carlos Corbacho "cathectic"
+David Cordero
+Andrea Corna
+Gabriel Corona
+David Corrales
+David Corrales-Lopez
+Roberto Costa "fiix76"
+Alan Cox
+Robert Crossfield
+Eric Culp
+Michael D
+Patrik Dahlström
+Sunit Das
+Misty De Meo
+Alexander Dergunov
+Alexandre Detiste
+John Doe
+Roman Donchenko
+Ian Douglas Scott
+Heather Douglass
+Michael Drüing "doc_wagon"
+Bartosz Dudziak
+Matthew Duggan "stauff1"
+Barry Duncan
+Olivier Duverne "richiefs"
+Andrei Dziahel "develop7"
+Tomasz Długosz
+Jonathan E. Wright
+John Eckerdal "johneck"
+Annick Ecuyer
+Erich Edgar Hoover
+Ángel Eduardo García Hernández
+Abdeselam El-Haman
+Chatziargyriou Eleftheria
+Henrik Engqvist
+Björn Esser
+Michael Fink
+Alexandre Folle de Menezes
+Alex Fontoura
+Ignaz Forster
+Hans-Jörg Frieden
+Mike Frysinger "vapier"
+Adrian Frühwirth
+Andrea G
+Markus G
+D G Turner
+Santiago G. Sanz
+Matthew Gambrell
+Edu Garcia
+Matthew Garrett
+Bence Gazder
+Chris Gelatt "kreeblah"
+Lafazar Gendibal
+Bartosz Gentkowski
+Jens Georg "phako"
+Nicolas George "cigaes"
+Martin Gerhardy
+Jonathan Gevaryahu "lord_nightmare"
+Anubhab Ghosh
+Janet Gilbert
+Dmitry Gladkov
+Boris Gnezdilov
+David Goldsmith
+Chris Gray
+Evgeny Grechnikov
+Gustavo Grieco
+Tobias Gruetzmacher "tobig"
+Damien Guard "damienguard"
+Yuri Guimaraes
+Krzysztof Głodo
+Matti Hamalainen "ccrtnsp"
+Ruediger Hanke
+Rüdiger Hanke
+Tobias Hansen
+Zvika Haramaty
+Matt Hargett
+Lauri Harsila
+Toël Hartmann
+Stefan Haubenthal "polluks"
+Gavin Hayler
+Peter Helbing
+Steven Hoefel
+Alexander Holler "holler"
+Erich Hoover
+Enrico Horn
+Cadi Howley
+Falk Hueffner "mellum"
+Casey Hutchinson "nnooiissee"
+Lauri Härsilä
+Marius Ioan Orban
+Mikel Iturbe Urretxa
+Marchukov Ivan
+Michael J. Roberts
+Tomas Jakobsson
+Alex Jakovleff
+Felix Jakschitsch
+Christian Jamieson
+Michał Janiszewski
+Gregor Jasny "gjasny"
+Joachim Jautz
+Francisco Javier Diéguez Tirado
+Francisco Javier Trujillo Mata
+Peter Johansson
+Matt Johnson "mattjon"
+Stefan Jokisch
+Nicolas Joly "njoly"
+Chris Jones
+Kastuś K
+Keith Kaisershot
+Yauheni Kaliuta
+Daniel Kamil Kozar
+Yusuke Kamiyamane
+Jonas Karlsson
+Felix Kehrer
+Robert Kelsen
+Martin Kennedy
+Stephen Kennedy
+Sam Kenny "sam_k"
+Kalle Kietavainen
+Arthur Kiyanovski
+Ruud Klaver
+Kai Knoblich
+Sven Kochmann
+Koen Kooi "koenkooi"
+George Kormendi
+Christoph Korn
+Maxim Kovalenko
+Petr Kratina
+Christian Krause
+Till Kresslein
+Henrik Kretzschmar
+Stefan Kristiansson
+Daniel Krol
+Zygmunt Krynicki "zygoon"
+Sebastian Krzyszkowiak
+Janne Kujanpaa "jukuja"
+Neeraj Kumar
+Pavel Kungurtsev
+Oleksiy Kurochko
+Bernhard Kölbl
+Jay Lanagan "r0ni"
+Norbert Lange "nolange"
+Manuel Lauss "mlau2"
+Gael Le Migno "kilobug"
+Joe Lee
+Joohan Lee
+Jozef Legény
+Rolf Leggewie "leggewie"
+Jim Leiterman
+Matt Lewandowsky
+Chenbo Li
+Christian Lindemann
+Lyubomyr Lisen
+Douglas Liu
+Rob Loach
+Duncan Lock "dflock"
+Mark Lodato "itsr0y"
+Fridvin Logi "phillip_j_fry"
+Michael Lojkovic
+Borja Lorente Escobar
+Schrijvers Luc
+Georg Lukas "ge0rg"
+Artem Lukoyanov
+Ivan Lukyanov
+Pieter Luteijn
+Duane Mach
+Michael Madsen "pidgeot"
+Matthias Mailander
+Narek Mailian
+Matthias Mailänder
+Christoph Mallon
+Engin Manap
+Malignant Manor
+Dmitry Marakasov "amdmi3"
+Dominik Marks
+Andrew Martin
+Víctor Martínez Pajares
+Alejandro Marzini "vgvgf"
+Claudio Matsuoka
+Sam Matthews
+Avijeet Maurya
+Christian Mayer
+Steve McCrea
+Travis McKay
+Connor McLeod "mcleod2032"
+Jennifer McMurray
+Mickey McMurray "metafox"
+Robert Megone
+Sven Meier
+Laurent Merckx
+Adam Metcalf "gamblore"
+Nicola Mettifogo
+Nicola Mettifogo
+Frank Meyering "frank_m24"
+Timo Mikkolainen
+Alexander Miller
+Evan Miller
+Etienne Millon
+Ivan Mogilko
+Andy Molloy "maloi"
+Joan Montané
+Omer Mor
+Cristian Morales Vega
+Armin Mueller "arm_in"
+Sean Murrau "lightcast"
+Andrea Musuruane "musuruan"
+KO Myung-Hun "lvzuufx"
+Markus Napp "meist3r"
+Peter Naulls "pnaulls"
+Christian Neumair "mannythegnome"
+Hannes Niederhausen
+Juha Niemimäki
+Markus Niemistö "niemisto"
+Nicolas Noble
+Bastien Nocera
+Jody Northup
+Ryan Nunn
+Steffen Nyeland
+Ano Nymous
+Ryan O'Connor
+Per Olav Flaten
+Pere Orga
+Julian Ospald
+Christopher Page
+Oliver Pahl
+Alexander Panov
+Chris Paras "paras_rasmatazz"
+Mathias Parnaudeau
+Stefan Parviainen
+Aubin Paul "outlyer"
+Dennis Payne
+Michael Pearce
+Vincent Pelletier "subdino"
+Benjamin Penney
+Tobias Pfaff
+Jonathan Phénix
+Jussi Pitkanen
+Daniel Plakhotich
+Andrew Plotkin
+Carsten Pohl "carstenpohl"
+Steven Poulton
+Tony Puccinelli
+Markus Pyykko "mankeli"
+Kamil Páral
+Sergi Pérez Labernia
+Shawn R. Walker
+Jelle Raaijmakers
+Max Raskin
+Aryan Rawlani
+Rodrigo Rebello
+Dominik Reichardt
+Alexander Reim
+Nick Renieris
+Frank Richter
+Thomas Richter "thorfdbg"
+Felix Riemann "kirschsaft"
+Michael Rittenhouse
+Morgan Roberts
+Stephen Robinson
+Timo Roehling "t1m0"
+Jonathan Rogers "jonner"
+Enrico Rolfi
+Jean-Christophe Rona
+Doron Rosenberg
+Bernhard Rosenkraenzer
+Marek Roth "logicdeluxe"
+Edward Rudd
+David Russo
+Uwe Ryssel "uweryssel"
+Rafał Rzepecki
+Travis S Coady "theealien"
+Felipe Sanches
+Santiago Sanchez
+Vitor Santos
+Fernando Sarmento
+Simon Sawatzki
+Dario Scarpa
+Dominik Scherer
+Jochen Schleu
+Florian Schmitt "fatpenguin"
+Martin Schoenmakers
+Mark Schreiber "mark7"
+Luc Schrijvers
+Stian Schultz
+Zbyněk Schwarz
+Keith Scroggins
+Martin Sedlak
+Deborah Servilla
+Tzach Shabtay
+Ben Shadwick "benshadwick"
+Gilad Shaham
+Orgad Shaneh
+Rodrigo Silva
+Jean-Yves Simon "lethalwp"
+Catarina Simões
+Andrej Sinicyn "andrej4000"
+Petter Sjölund
+Paul Smedley
+Dmitry Smirnov
+Nick Sonneveld
+Marcel Souza Lemes
+Thomas Sowell
+Christian Speckner
+Jan Sperling
+Steve Stavropoulos "isnothere"
+John Steele Scott
+Daniel Steinberger "amorphousshape"
+Shane Stevens
+Markus Strangl
+Fedor Strizhniou
+Sven Strothoff "dataslayer"
+Andrea Suatoni "mrhandler"
+Yoshi Sugawara
+Purple T
+Martin T. H. Sandsmark
+Max Tabachenko
+Krzysztof Targoński
+Yaron Tausky
+Matt Taylor
+DOSBox Team
+Sarien Team
+Jonathan Teh
+Joel Teichroeb
+Denis Telyukh
+Nikita Tereshin
+Jimmi Thogersen
+Will Thomson
+Brian Tietz
+Yegor Timoshenko
+Pino Toscano
+Luigi Toscano "ltosky"
+Xavier Trochu "xtrochu"
+Vasyl Tsvirkunov
+Michal Tulacek "tutchek"
+Michael Udaltsov "cccp99"
+Joni Vahamaki
+Aashwin Vaish
+Alfred Vallés Tortosa
+Alan Van Drake
+Tom Vandepoele
+Kristof Vansant "lupusbe"
+Aaryaman Vasishta
+Rodrigo Vegas Sánchez-Ferrero
+Sebástien Viannay
+Erico Vieira Porto
+Aapo Vienamo
+Marc Vinyals
+Artem Vorobiev
+Josef Väcklén
+Joni Vähämäki
+Linus Väinämö Virtanen
+Benjamin W. Zale "junior_aepi"
+Jakob Wagner
+Rebecca Wallander
+Tim Walters "realmz"
+Donovan Watteau
+David Weinehall
+Eric A. Welsh "eweish42"
+Fredrik Wendel
+Lars Wendler
+Yudhi Widyatama "yudhi97"
+Piotr Wieczorek
+Jakub Wilk
+Kieron Wilkinson
+Paul Wilkinson
+Stefan Will
+Morgan Willcock
+Berian Williams
+David-John Willis
+Robert Wohlrab "moshroum"
+Daniel Wolf
+James Woodcock
+Jaromír Wysoglad
+Łukasz Wątka
+Crane Yang
+Anton Yarcev
+James Ye
+Grant Yeager "glo_kidd"
+Zhiqi Yin
+Kamil Zbrog
+Liu Zhaosong
+Xiao Zheng
+Michael Zinn
+Michał Ziąbkowski
+Erik Zubiria
+Daniel c. Würl
+Michael du Breuil "WickedShell"
+dc france "erwan2004"
+the rara avis "theraraavis"
+Daniël ter Laan
+Hein-Pieter van Braam
+Hein-Pieter van Braam-Stewart
+Max von Werner
+Crane yang
+Роман Донченко
+Денис Телюх
+AReim1982
+AndywinXp
+Arius
+AsciiWolf
+Asirome
+AspireONE-zz
+Avijeet
+BLooperZ
+BeWorld
+Bendegúz
+Bernhard
+Bluddy
+Bramvandijk "bramvandijk"
+Canadacow
+Carlos
+CeRiAl
+countingpine
+Cpasjuste
+CrazyMax
+Damien
+Damien
+dewt "mncl"
+DinoWattz
+DivyamAhuja
+DouglasLiuGamer
+DreadnoughtPT
+dubsdj
+Faalagorn
+Federico
+Fenyx4
+Florent "flobo"
+Florob "florob"
+Gazben
+Gilles
+Gucek
+GunnarBirke
+IlDucci
+Iskrich
+j0tt
+Jellby "jellby"
+JenniBee
+Joerg "macdrega"
+Jonas
+Kawa
+Kawa-oneechan
+Kyuubu
+LKramer
+LMerckx
+Lenny
+Lostech "lostech"
+Luis
+Manuel
+Marisa-Chan
+MaximRussia
+MestreLion
+MrHuu
+NMIError
+Nicos "anarxia"
+Nitrus
+ole
+phi1
+Pix2 "pix2"
+Quote58
+Raina
+Richard "trinity78"
+RichieSams
+Rossano
+Ryper_Zsolt
+Scarlatti "escarlate"
+SecularSteve
+ShaharAriel
+Snejp
+Strangerke
+SupSuper
+TehGelly
+Thunderforge
+Tim "tipabu"
+Timofonic
+TomFrost
+TomasM
+Trembyle
+Twan
+VAN-Gluon
+vandalo
+Vanfanel
+VelocityRa
+Vhati
+Wammus
+WinterGrascph
+Xanathar "xanathar"
+Xaviu
+YYxsCnnPP
+Zerophase
+Zibri
+Zvika
+
+
+FreeSCI contributors
+
+Francois-R Boyer
+Rainer Canavan
+Xiaojun Chen
+Paul David Doherty
+Vyacheslav Dikonov
+Ruediger Hanke
+Matt Hargett
+Max Horn
+Ravi I.
+Emmanuel Jeandel
+Dmitry Jemerov
+Chris Kehler
+Christopher T. Lansdown
+Sergey Lapin
+Rickard Lind
+Hubert Maier
+Johannes Manhave
+Claudio Matsuoka
+Dark Minister
+Carl Muckenhoupt
+Anders Baden Nielsen
+Walter van Niftrik
+Rune Orsval
+Solomon Peachy
+Robey Pointer
+Magnus Reftel
+Christoph Reichenbach
+George Reid
+Lars Skovlund
+Rink Springer
+Rainer De Temple
+Sean Terrell
+Hugues Valois
+Jordi Vilalta
+Petr Vyhnak
+Bas Zoetekouw
+
+
+ResidualVM
+Copyright (C) 2003-2021 by the following:
+
+Some of the code in this project was originally LGPL v2.1 (or later)
+but is used as GPL v2 (or later) starting from 19 Dec 2012.
+
+If you have contributed to this project then you deserve to be on this
+list.  Contact us (see: AUTHORS) and we'll add you.
+
+Thomas Allen
+Torbjorn Andersson
+Ori Avtalion
+Gunnar Birke
+Robert Biro
+Elio Blanca
+Bastien Bouclet
+James Brown
+Giulio Camuffo
+David Cardwell
+Cameron Cawley
+Marcus Comstedt
+Andrea Corna
+Bartosz Dudziak
+David Fioramonti
+Jonathan Gray
+Tobias Gunkel
+Azamat H. Hackimov
+Vincent Hamm
+Dries Harnie
+Sven Hesse
+Matthew Hoops
+Erich Hoover
+Max Horn
+Travis Howell
+Joseph Jezak
+Guillem Jover
+Filippos Karapetis
+Pawel Kolodziejski
+Christian Krause
+Ingo van Lil
+Douglas Liu
+Joost Peters
+Jordi Vilalta Prat
+Awad Mackie
+George Macon
+Hubert Maier
+Josh Matthews
+Matthieu Milan
+Gregory Montoir
+Stefano Musumeci
+Christian Neumair
+Marius Ioan Orban
+Vincent Pelletier
+Aryan Rawlani
+Daniel Schepler
+Orgad Shaneh
+Dmitry Smirnov
+Colin Snover
+Einar Johan T. Somaaen
+Yaron Tausky
+Joel Teichroeb
+Julien Templier
+Scott Thomas
+Will Thomson
+Pino Toscano
+Lionel Ulmer
+Joni Vahamaki
+Liu Zhaosong
+ArtemVorobiev
+aviloria
+cmayer0087
+Faalagorn
+federicorosso1993
+JenniBee
+karjonas
+Kaede
+LMerckx
+mparnaudeau
+orangeforest11
+PoulpiFr
+sietschie
