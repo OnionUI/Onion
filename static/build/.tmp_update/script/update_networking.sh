@@ -40,7 +40,6 @@ else
 			pkill -9 wpa_supplicant
 			pkill -9 udhcpc
 			/customer/app/axp_test wifioff
-			rm /tmp/dont_restart_wifi
 		fi
 	fi
 fi
