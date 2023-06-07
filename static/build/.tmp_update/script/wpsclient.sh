@@ -6,61 +6,34 @@ export WPACLI=/customer/app/wpa_cli
 export IMGPOP=$sysdir/bin/imgpop
 # Syntax: ./imgpop duration delay image_path x_position y_position.
 
-start_udhcpc(){
-udhcpc -i wlan0 -s /etc/init.d/udhcpc.script > /dev/null 2>&1 &	
-}
-
-kill_udhcpc() {
-if pgrep udhcpc > /dev/null; then
-	killall -9 udhcpc
-fi
-}
-
-conn_cleanup() {
-	kill_udhcpc
-	start_udhcpc 
-}
-
-wpsfail() {
-$IMGPOP 5 0 "$icondir/wpsfail.png" 84 428 > /dev/null 2>&1 &
-}
-
-wpstrying() {
-$IMGPOP 1 0 "$icondir/wpstrying.png" 84 428 > /dev/null 2>&1 &
-}
-
-wpsconnected() {
-$IMGPOP 10 0 "$icondir/wpsconnected.png" 84 428 > /dev/null 2>&1 &
-}
-
-wpsflicker() {
-count=0
-    while [ $count -lt 4 ]; do
-        if [ $((count % 2)) -eq 0 ]; then
-            wpstrying
-        else
-            wpsfail
-        fi
-		sleep 1
-        count=$((count + 1))
-		killall -9 imgpop
-    done &
-}
-
-
-log() {
-    echo "$(date)" $* >> $sysdir/logs/network.log
-}
-
 main() {
-ifconfig wlan0 down
-ifconfig wlan0 up
-kill_udhcpc
-$WPACLI disable_network all > /dev/null 2>&1 &	
+
+while true; do # do a check to make sure wlan0 is up before we try and activate wps against it.
+    if ifconfig wlan0 &>/dev/null; then
+        log "WPS: Wi-Fi is up"
+        wifiup
+        sleep 1
+        killall -9 imgpop
+        break
+    else
+        wifiquery
+        log "WPS: Wi-Fi disabled, trying to enable before connecting.."
+        /customer/app/axp_test wifion
+        sleep 2
+        ifconfig wlan0 up
+		wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
+		udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
+        sleep 2
+        killall -9 imgpop
+    fi
+done
+
+kill_udhcpc # restart udhcpc
+$WPACLI disable_network all > /dev/null 2>&1 &# disconnect any existing networks
 log "WPS: Disconnecting from current network"
-$WPACLI wps_pbc 
+$WPACLI wps_pbc # start wps
 log "WPS: Trying to connect to WPS host"
-start_udhcpc 
+start_udhcpc  # start udhcpc against wlan0
 
 start_time=$(date +%s)
 
@@ -95,6 +68,59 @@ wpsconnected
 sleep 2
 killall -9 imgpop
 exit
+}
+
+start_udhcpc(){
+udhcpc -i wlan0 -s /etc/init.d/udhcpc.script > /dev/null 2>&1 &	
+}
+
+kill_udhcpc() {
+if pgrep udhcpc > /dev/null; then
+	killall -9 udhcpc
+fi
+}
+
+conn_cleanup() {
+	kill_udhcpc
+	start_udhcpc 
+}
+
+wifiquery(){
+$IMGPOP 5 0 "$icondir/wifiquery.png" 84 428 > /dev/null 2>&1 &
+}
+
+wifiup(){
+$IMGPOP 5 0 "$icondir/wifiup.png" 84 428 > /dev/null 2>&1 &
+}
+
+wpsfail() {
+$IMGPOP 5 0 "$icondir/wpsfail.png" 84 428 > /dev/null 2>&1 &
+}
+
+wpstrying() {
+$IMGPOP 1 0 "$icondir/wpstrying.png" 84 428 > /dev/null 2>&1 &
+}
+
+wpsconnected() {
+$IMGPOP 10 0 "$icondir/wpsconnected.png" 84 428 > /dev/null 2>&1 &
+}
+
+wpsflicker() {
+count=0
+    while [ $count -lt 4 ]; do
+        if [ $((count % 2)) -eq 0 ]; then
+            wpstrying
+        else
+            wpsfail
+        fi
+		sleep 1
+        count=$((count + 1))
+		killall -9 imgpop
+    done &
+}
+
+log() {
+    echo "$(date)" $* >> $sysdir/logs/network.log
 }
 
 main &
