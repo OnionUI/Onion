@@ -8,28 +8,33 @@ export IMGPOP=$sysdir/bin/imgpop
 
 main() {
 
-while true; do # do a check to make sure wlan0 is up before we try and activate wps against it.
-    if ifconfig wlan0 &>/dev/null; then
-        log "WPS: Wi-Fi is up"
-        wifiup
-        sleep 1
-        killall -9 imgpop
-        break
-    else
-        wifiquery
-        log "WPS: Wi-Fi disabled, trying to enable before connecting.."
-        /customer/app/axp_test wifion
-        sleep 2
-        ifconfig wlan0 up
-		sleep 1
-		wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
-		start_udhcpc
-        sleep 2
-        killall -9 imgpop
-		sed -i 's/"wifi":\s*0/"wifi": 1/' /appconfigs/system.json # tell mainui that wifi needs to be kept up once started, if you dont do this it stays "off" and the next time MainUI starts wifi is again turned off.
-    fi
-done
+if ifconfig wlan0 &>/dev/null; then
+	log "WPS: Wi-Fi is up"
+	wifiup
+	sleep 1
+	killall -9 imgpop
+	break
+else
+	wifiquery
+	log "WPS: Wi-Fi disabled, trying to enable before connecting.."
+	/customer/app/axp_test wifion
+	sleep 2
+	ifconfig wlan0 up
+	sleep 1
+	wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
+	sleep 2
+	killall -9 imgpop
+	sed -i 's/"wifi":\s*0/"wifi": 1/' /appconfigs/system.json # tell mainui that wifi needs to be kept up once started
+	
+	if is_running wpa_supplicant; then
+		wifiup
+	fi
+	
+	touch /tmp/dont_restart_wifi
+	sync
+fi
 
+start_udhcpc
 $WPACLI disable_network all > /dev/null 2>&1 &# disconnect any existing networks
 log "WPS: Disconnecting from current network"
 $WPACLI wps_pbc # start wps
@@ -83,6 +88,11 @@ fi
 conn_cleanup() {
 	kill_udhcpc
 	start_udhcpc 
+}
+
+is_running() {
+    process_name="$1"
+    pgrep "$process_name" > /dev/null
 }
 
 wifiquery(){
