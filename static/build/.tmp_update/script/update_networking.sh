@@ -36,9 +36,12 @@ else
 			udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
 		fi
 	else
-		pkill -9 wpa_supplicant
-		pkill -9 udhcpc
-		/customer/app/axp_test wifioff
+		if [ ! -f "/tmp/dont_restart_wifi" ]
+			pkill -9 wpa_supplicant
+			pkill -9 udhcpc
+			/customer/app/axp_test wifioff
+			rm /tmp/dont_restart_wifi
+		fi
 	fi
 fi
 }
