@@ -21,11 +21,12 @@ while true; do # do a check to make sure wlan0 is up before we try and activate 
         /customer/app/axp_test wifion
         sleep 2
         ifconfig wlan0 up
+		sleep 1
 		wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
-		udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
-		sed -i 's/"wifi":\s*0/"wifi": 1/' /appconfigs/system.json
+		start_udhcpc
         sleep 2
         killall -9 imgpop
+		sed -i 's/"wifi":\s*0/"wifi": 1/' /appconfigs/system.json # tell mainui that wifi needs to be kept up once started, if you dont do this it stays "off" and the next time MainUI starts wifi is again turned off.
     fi
 done
 
