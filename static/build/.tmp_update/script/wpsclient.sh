@@ -23,17 +23,16 @@ while true; do # do a check to make sure wlan0 is up before we try and activate 
         ifconfig wlan0 up
 		wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
 		udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
+		sed -i 's/"wifi":\s*0/"wifi": 1/' /appconfigs/system.json
         sleep 2
         killall -9 imgpop
     fi
 done
 
-kill_udhcpc # restart udhcpc
 $WPACLI disable_network all > /dev/null 2>&1 &# disconnect any existing networks
 log "WPS: Disconnecting from current network"
 $WPACLI wps_pbc # start wps
 log "WPS: Trying to connect to WPS host"
-start_udhcpc  # start udhcpc against wlan0
 
 start_time=$(date +%s)
 
