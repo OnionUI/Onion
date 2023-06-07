@@ -9,9 +9,11 @@ export IMGPOP=$sysdir/bin/imgpop
 main() {
 
 if ifconfig wlan0 &>/dev/null; then
-	log "WPS: Wi-Fi is up"
-	wifiup
+	if is_running wpa_supplicant && is_running udhcpc; then
+    wifiup
+	fi
 	sleep 1
+	log "WPS: Wi-Fi is up"
 	killall -9 imgpop
 	break
 else
