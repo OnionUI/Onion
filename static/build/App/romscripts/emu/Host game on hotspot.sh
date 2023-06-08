@@ -31,6 +31,10 @@ else
 	conn_cleanup
 	$miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
 	sleep 2
+	
+	if is_running wpasupplicant && is_running udhcpc && ifconfig wlan0; then
+		log "GLO::Retro_Quick_Host: WiFi started"
+	fi
 fi
 }
 
@@ -81,30 +85,35 @@ fi
 
 # We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
 # start_retroarch(){
-# Currently not used, need to build the retroarch start process with -H to host netplay, the core dir and the rom path (aswell as -v -L)
-# Rom paths with spaces uses ""
+
+# /mnt/SDCARD/Retroarch/retroarch -H -v -L "$core" "$1"
 # }
 
 # Create a cookie, the client will attempt to grab this file via FTP to allow us to setup the retro connection on there
 create_cookie(){
-cookiefile="/mnt/SDCARD/retroarch_cookie.txt"
+cookiefile="/mnt/SDCARD/Retroarch/retroarch_cookie.txt"
+
+f [ -f "$cookiefile" ]; then
+    rm -f "$cookiefile"
+    log "GLO::Retro_Quick_Host: Old cookie file removed."
+fi
 
 pid=$(pgrep retroarch)
 
 if [ -z "$pid" ]; then
-  echo "GLO::Retro_Quick_Host: process not found."
+  log "GLO::Retro_Quick_Host: process not found."
   exit 1
 fi
 
 cmdline=$(cat "/proc/$pid/cmdline" | tr '\0' ' ')
 
-rom=$(echo "$cmdline" | awk '{print $5$6$7$8$9$10}') # concat as many entries as possible as some roms have spaces in
+rom=$(echo "$cmdline" | awk '{print $5$6$7$8$9$10$11}') # concat as many entries as possible as some roms have spaces in
 core=$(echo "$cmdline" | awk '{print $4}')
 
 echo "[core]: /mnt/SDCARD/Retroarch/$core" >> $cookiefile
 echo "[rom]: $rom" >> $cookiefile
 
-log "GLO::Retro_Quick_Host: Created cookie file for the client"
+log "GLO::Retro_Quick_Host: Created cookie file for the client with contents: "
 }
 
 ###########

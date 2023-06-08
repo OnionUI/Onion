@@ -141,6 +141,8 @@ clear_logs() {
         ./logs/game_list_options.log \
         ./logs/network.log \
         ./logs/dnsmasq.log \
+		./logs/ftp.log \
+		./logs/ra_quick_host.log \
         2> /dev/null
 }
 
