@@ -36,7 +36,7 @@ else
 			udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
 		fi
 	else
-		if [ ! -f "/tmp/dont_restart_wifi" ]
+		if [ ! -f "/tmp/dont_restart_wifi" ]; then
 			pkill -9 wpa_supplicant
 			pkill -9 udhcpc
 			/customer/app/axp_test wifioff
@@ -44,6 +44,7 @@ else
 	fi
 fi
 }
+
 
 
 # Starts bftpd if the toggle is set to on
