@@ -28,7 +28,7 @@ else
 	/customer/app/axp_test wifion
 	sleep 2
 	ifconfig wlan0 up
-	conn_cleanup
+	udhcpc_control
 	$miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
 	sleep 2
 	
@@ -120,19 +120,12 @@ log "GLO::Retro_Quick_Host: Created cookie file for the client with contents: "
 #Utilities#
 ###########
 
-start_udhcpc(){
-udhcpc -i wlan0 -s /etc/init.d/udhcpc.script > /dev/null 2>&1 &	
-}
-
-kill_udhcpc() {
-if pgrep udhcpc > /dev/null; then
-	killall -9 udhcpc
-fi
-}
-
-conn_cleanup() {
-	kill_udhcpc
-	start_udhcpc 
+udhcpc_control() {
+	if pgrep udhcpc > /dev/null; then
+		killall -9 udhcpc
+	fi
+	sleep 1
+	udhcpc -i wlan0 -s /etc/init.d/udhcpc.script > /dev/null 2>&1 &	
 }
 
 is_running() {
