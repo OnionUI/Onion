@@ -30,6 +30,7 @@ else
 	
 	if is_running wpa_supplicant; then
 		wifiup
+		sleep 1
 	fi
 	
 	touch /tmp/dont_restart_wifi
