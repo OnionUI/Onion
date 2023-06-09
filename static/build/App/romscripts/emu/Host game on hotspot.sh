@@ -4,8 +4,8 @@
 # 	Create a cookie file containing details for the client, 
 # 	Start FTP to be able to host this file, 
 # 	Start RA as a netplay host with -H, the core path and the rom path.
-# 	Leave WPS commented out until it's further tested, it works but leads to an unstable connection. Possible issue with the new hostapd binary
-# Used within GLO as an addon script
+# 	Leave WPS commented out until it's further tested, it works but leads to an unstable connection. Possible issue with the new hostapd binary.
+# Used within GLO as an addon script.
 
 # Env setup
 sysdir=/mnt/SDCARD/.tmp_update
@@ -40,6 +40,14 @@ fi
 
 # We'll need hotspot to host the local connection
 start_hotspot() { 
+	if is_running hostapd; then
+		killall hostapd
+	fi
+	
+	if is_running dnsmasq; then
+		killall dnsmasq
+	fi
+	
 	ifconfig wlan1 up 
 	ifconfig wlan0 down # Put wlan0 down to suspend the current wifi connections
 		
@@ -83,37 +91,20 @@ fi
 	# log "GLO::Retro_Quick_Host: Starting WPS host"
 # }
 
+# Pull the cookie info that the GLO script has generated
+get_cookie_info() {
+    COOKIE_FILE="/mnt/SDCARD/RetroArch/retroarch.cookie"
+
+    if [ -f "$COOKIE_FILE" ]; then
+        host_core=$(grep '\[core\]' "$COOKIE_FILE" | cut -d ':' -f 2 | xargs) && export host_core
+        host_rom=$(grep '\[rom\]' "$COOKIE_FILE" | cut -d ':' -f 2 | xargs) && export host_rom
+    fi
+}
+
 # We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
-# start_retroarch(){
-
-# /mnt/SDCARD/Retroarch/retroarch -H -v -L "$core" "$1"
-# }
-
-# Create a cookie, the client will attempt to grab this file via FTP to allow us to setup the retro connection on there
-create_cookie(){
-cookiefile="/mnt/SDCARD/Retroarch/retroarch_cookie.txt"
-
-f [ -f "$cookiefile" ]; then
-    rm -f "$cookiefile"
-    log "GLO::Retro_Quick_Host: Old cookie file removed."
-fi
-
-pid=$(pgrep retroarch)
-
-if [ -z "$pid" ]; then
-  log "GLO::Retro_Quick_Host: process not found."
-  exit 1
-fi
-
-cmdline=$(cat "/proc/$pid/cmdline" | tr '\0' ' ')
-
-rom=$(echo "$cmdline" | awk '{print $5$6$7$8$9$10$11}') # concat as many entries as possible as some roms have spaces in
-core=$(echo "$cmdline" | awk '{print $4}')
-
-echo "[core]: /mnt/SDCARD/Retroarch/$core" >> $cookiefile
-echo "[rom]: $rom" >> $cookiefile
-
-log "GLO::Retro_Quick_Host: Created cookie file for the client with contents: "
+start_retroarch(){
+	cd /mnt/SDCARD/RetroArch
+	HOME=/mnt/SDCARD/RetroArch ./retroarch -H -v -L "$host_core" "$host_rom"
 }
 
 ###########
@@ -145,9 +136,9 @@ lets_go(){
 check_wifi
 start_hotspot
 start_ftp
-# start_wps
-# start_retroarch ???
-create_cookie
+start_wps
+get_cookie_info
+start_retroarch
 }
 
 lets_go
