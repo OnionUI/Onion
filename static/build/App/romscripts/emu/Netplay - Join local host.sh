@@ -21,10 +21,11 @@ export hostip="192.168.100.100" # This should be the default unless the user has
 # We'll need wifi up for this. Lets try and start it..
 
 check_wifi(){
+ifconfig wlan1 down
 if ifconfig wlan0 &>/dev/null; then
 	log "GLO::Retro_Quick_Host: Wi-Fi is up already"
 	infoPanel --title "WIFI" --message "Wifi up" --auto
-	break
+	save_wifi_state
 else
 	log "GLO::Retro_Quick_Host: Wi-Fi disabled, trying to enable before connecting.."
 	
@@ -45,11 +46,12 @@ else
 fi
 }
 
+
 # Create a new network id, set it up and enable it, start udhcpc against it.
 connect_to_host() {
 	infoPanel --title "Connecting..." --message "Trying to join the hotspot..." --auto
 
-	new_id=$($WPACLI -i wlan0 add_network)
+	export new_id=$($WPACLI -i wlan0 add_network)
 	log "GLO::Retro_Quick_Host: Added new network with id $new_id"
 
 	$WPACLI -i wlan0 <<-EOF
@@ -154,12 +156,16 @@ sync_rom() {
         local rom_chksum_actual=$(cksum "$rom" | awk '{ print $1 }')
         if [ "$romchksum" -ne "$rom_chksum_actual" ]; then
             log "GLO::Retro_Quick_Host: Checksum doesn't match for $rom. Renaming the existing file and syncing rom again."
-           do_sync_rom
+			infoPanel --title "Rom Syncing" --message "Rom checksums don't match, syncing" --auto
+			sleep 0.5
+			do_sync_rom
         else
             log "GLO::Retro_Quick_Host: $rom exists and the checksum matches."
             infoPanel --title "Rom Synced!" --message "Rom checksums match, no sync required" --auto
         fi
     else
+		infoPanel --title "Syncing" --message "Rom doesn't exist locally; syncing with host." --auto
+		log "GLO::Retro_Quick_Host: $rom doesn't exist. Syncing."
 		do_sync_rom
     fi
 }
@@ -171,12 +177,16 @@ sync_core() {
         local core_chksum_actual=$(cksum "$core" | awk '{ print $1 }')
         if [ "$corechksum" -ne "$core_chksum_actual" ]; then
             log "GLO::Retro_Quick_Host: Checksum doesn't match for $core. Renaming the existing file and Syncing again."
+			infoPanel --title "Core Syncing" --message "Core checksums don't match, syncing" --auto
+			sleep 0.5
             do_sync_core
         else
             log "GLO::Retro_Quick_Host: $core exists and the checksum matches."
 			infoPanel --title "Core Synced!" --message "Core checksums match, no sync required" --auto
         fi
     else
+		infoPanel --title "Syncing" --message "Core doesn't exist locally; syncing with host." --auto
+		log "GLO::Retro_Quick_Host: $core doesn't exist. Syncing."
 		do_sync_core
     fi
 }
@@ -192,18 +202,21 @@ start_retroarch(){
 #Utilities#
 ###########
 
+# If we're currently connected to wifi, save the network ID so we can reconnect after we're done with retroarch - save the IP address and subnet so we can restore these.
+save_wifi_state() {
+    export IFACE=wlan0
+    export old_id=$(wpa_cli -i $IFACE list_networks | awk '/CURRENT/ {print $1}')
+	export old_ipv4=$(ip -4 addr show $IFACE | grep -o 'inet [^ ]*' | cut -d ' ' -f 2)
+}
+
 do_sync_rom() {
 	mv "$rom" "${rom}_old"
-	infoPanel --title "Syncing" --message "Rom doesn't exist locally; syncing with host." --auto
-	log "GLO::Retro_Quick_Host: $rom doesn't exist. Syncing."
 	curl -o "$rom" "ftp://$hostip/$rom_url" >> $sysdir/logs/ra_quick_host.log
 	infoPanel --title "Syncing" --message "Rom synced" --auto
 }
 
 do_sync_core() {
 	mv "$core" "${core}_old"
-	infoPanel --title "Syncing" --message "Core doesn't exist locally; syncing with host." --auto
-	log "GLO::Retro_Quick_Host: $core doesn't exist. Syncing."
 	curl -o "$core" "ftp://$hostip/$core_url"
 	infoPanel --title "Syncing" --message "Core synced." --auto
 }
@@ -242,14 +255,18 @@ cleanup(){
 		killall -9 infoPanel
 	fi
 	
-	$WPACLI -i wlan0 <<-EOF # remove our hotspot network and connect back to id 0..
+	$WPACLI -i $IFACE <<-EOF # remove our hotspot network and connect back to original id
 	remove_network $new_id
-	select_network 0
-	enable_network 0
+	select_network $old_id
+	enable_network $old_id
 	save_config
-	reconfigure
 	quit
 	EOF
+	
+	ip addr add $old_ipv4 dev wlan0
+	ip link set dev wlan0 up
+	
+	sleep 1
 		
 	log "GLO::Retro_Quick_Host: Cleanup done"
 }
@@ -269,7 +286,6 @@ lets_go(){
 	sync_core
 	start_retroarch
 	cleanup
-	exit
 	
 }
 

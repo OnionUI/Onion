@@ -149,7 +149,10 @@ cleanup(){
 		killall -9 infoPanel
 	fi
 	
+	ifconfig wlan1 down
+	
 	log "GLO::Retro_Quick_Host: Cleanup done"
+	
 }
 
 ###########
@@ -184,7 +187,6 @@ start_ftp
 get_cookie_info
 start_retroarch
 cleanup
-exit
 }
 
 lets_go
