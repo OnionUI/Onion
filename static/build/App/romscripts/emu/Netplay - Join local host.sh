@@ -106,7 +106,7 @@ wait_for_ip() {
         if [ $counter -ge 20 ]; then
             build_infoPanel "Failed to connect!"  "Could not get an IP in 20 seconds."
             log "GLO::Retro_Quick_Host: Failed to get an IP address within 20 seconds."
-            return 1  # Return with error status
+            return 1
         fi
     done
 
@@ -344,8 +344,8 @@ lets_go(){
 	wait_for_ip
 	download_cookie
 	read_cookie
-	sync_file rom "$rom" "$romchksum" "$rom_url"
-	sync_file core "$core" "$corechksum" "$core_url"
+	sync_file Rom "$rom" "$romchksum" "$rom_url"
+	sync_file Core "$core" "$corechksum" "$core_url"
 	start_retroarch
 	cleanup
 	
