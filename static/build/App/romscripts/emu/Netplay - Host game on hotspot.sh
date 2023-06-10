@@ -22,11 +22,11 @@ check_wifi(){
 if ifconfig wlan0 &>/dev/null; then
 	sleep 1
 	log "GLO::Retro_Quick_Host: Wi-Fi is up already"
-	infoPanel --title "WIFI" --message "Wifi up" --auto
+	build_infoPanel "WIFI" "Wifi up" 
 	break
 else
 	log "GLO::Retro_Quick_Host: Wi-Fi disabled, trying to enable before connecting.."
-	infoPanel --title "WIFI" --message "Wifi starting..." --auto
+	build_infoPanel "WIFI" "Wifi starting..." 
 	/customer/app/axp_test wifion
 	sleep 2
 	ifconfig wlan0 up
@@ -36,7 +36,7 @@ else
 	
 	if is_running wpasupplicant && is_running udhcpc && ifconfig wlan0; then
 		log "GLO::Retro_Quick_Host: WiFi started"
-		infoPanel --title "WIFI" --message "Wifi started" --auto
+		build_infoPanel "WIFI" "Wifi started" 
 	fi
 fi
 }
@@ -62,7 +62,7 @@ start_hotspot() {
 	
 	ifconfig wlan1 $hotspot0addr netmask $subnetmask 
 	
-	infoPanel --title "Hotspot" --message "Starting hotspot..." --auto
+	build_infoPanel "Hotspot" "Starting hotspot..." 
 	
 	$sysdir/bin/hostapd -P /var/run/hostapd.pid -B -i wlan1 $sysdir/config/hostapd.conf &
 	$sysdir/bin/dnsmasq --conf-file=$sysdir/config/dnsmasq.conf -u root & 
@@ -72,7 +72,7 @@ start_hotspot() {
 		log "GLO::Retro_Quick_Host: Started with IP of: $hotspot0addr, subnet of: $subnetmask"
 	else
 		log "GLO::Retro_Quick_Host: Failed to start, please try turning off/on. If this doesn't resolve the issue reboot your device."
-		infoPanel --title "Hotspot" --message "Failed to start hotspot, exiting.." --auto
+		build_infoPanel "Hotspot" "Failed to start hotspot, exiting.." 
 		sleep 2
 		exit
 	fi
@@ -122,7 +122,7 @@ get_cookie_info() {
 
 # We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
 start_retroarch(){
-	infoPanel --title "RetroArch" --message "Starting RetroArch..." --auto
+	build_infoPanel "RetroArch" "Starting RetroArch..." 
 	killall -9 infoPanel
 	cd /mnt/SDCARD/RetroArch
 	HOME=/mnt/SDCARD/RetroArch ./retroarch -H -v -L "$host_core" "$host_rom"
@@ -159,6 +159,13 @@ cleanup(){
 ###########
 #Utilities#
 ###########
+
+build_infoPanel() {
+    local title="$1"
+    local message="$2"
+    
+    infoPanel --title "$title" --message "$message" --auto
+}
 
 udhcpc_control() {
 	if pgrep udhcpc > /dev/null; then
