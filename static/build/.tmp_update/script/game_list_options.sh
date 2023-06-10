@@ -215,14 +215,19 @@ main() {
 
 # This creates a cookie for the quick host script to pick up (host & client both use this cookie) (clears every cycle)
 create_cookie(){
-cookiefile="/mnt/SDCARD/RetroArch/retroarch.cookie"
+    cookiefile="/mnt/SDCARD/RetroArch/retroarch.cookie"
 
-if [ -f "$cookiefile" ]; then
-    rm -f "$cookiefile"
-fi
+    if [ -f "$cookiefile" ]; then
+        rm -f "$cookiefile"
+    fi
 
-echo "[core]: $cookie_core_path" >> $cookiefile
-echo "[rom]: $cookie_rom_path" >> $cookiefile
+    core_checksum=$(cksum "$cookie_core_path" | cut -f 1 -d ' ')
+    rom_checksum=$(cksum "$cookie_rom_path" | cut -f 1 -d ' ')
+
+    echo "[core]: $cookie_core_path" >> $cookiefile
+    echo "[rom]: $cookie_rom_path" >> $cookiefile
+    echo "[corechksum]: $core_checksum" >> $cookiefile
+    echo "[romchksum]: $rom_checksum" >> $cookiefile
 }
 
 check_is_game() {
