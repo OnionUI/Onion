@@ -15,7 +15,7 @@ jobs:
     steps:
     - name: Install SDL libs
       run: |
-        sudo apt-get update && sudo apt-get install libsdl1.2-dev libsdl-image1.2-dev libsdl-image1.2-dev libsdl-ttf2.0-dev
+        sudo apt-get update && sudo apt-get install libsdl1.2-dev libsdl-image1.2-dev libsdl-image1.2-dev libsdl-ttf2.0-dev cppcheck
     - name: Install gtest manually
       run: |
         sudo apt-get install build-essential libgtest-dev cmake
@@ -28,6 +28,9 @@ jobs:
       uses: actions/checkout@v3
       with:
         submodules: recursive
+    - name: Run static analysis
+      run: |
+        make static-analysis
     - name: Test
       shell: bash
       run: |
