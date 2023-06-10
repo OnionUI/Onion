@@ -150,6 +150,7 @@ cleanup(){
 	fi
 	
 	ifconfig wlan1 down
+	ifconfig wlan0 up
 	
 	log "GLO::Retro_Quick_Host: Cleanup done"
 	
