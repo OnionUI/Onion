@@ -19,26 +19,32 @@ export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/p
 # We'll need wifi up for this. Lets try and start it..
 
 check_wifi(){
-if ifconfig wlan0 &>/dev/null; then
-	sleep 1
-	log "GLO::Retro_Quick_Host: Wi-Fi is up already"
-	build_infoPanel "WIFI" "Wifi up" 
-	break
-else
-	log "GLO::Retro_Quick_Host: Wi-Fi disabled, trying to enable before connecting.."
-	build_infoPanel "WIFI" "Wifi starting..." 
-	/customer/app/axp_test wifion
-	sleep 2
-	ifconfig wlan0 up
-	udhcpc_control
-	$miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
-	sleep 2
-	
-	if is_running wpasupplicant && is_running udhcpc && ifconfig wlan0; then
-		log "GLO::Retro_Quick_Host: WiFi started"
-		build_infoPanel "WIFI" "Wifi started" 
+ifconfig wlan1 down
+	if ifconfig wlan0 &>/dev/null; then
+		log "GLO::Retro_Quick_Host: Wi-Fi is up already"
+		build_infoPanel "WIFI" "Wifi up"
+	else
+		log "GLO::Retro_Quick_Host: Wi-Fi disabled, trying to enable before connecting.."
+		build_infoPanel "WIFI" "Wifi disabled, starting..." 
+		
+		/customer/app/axp_test wifion
+		sleep 2
+		ifconfig wlan0 up
+		sleep 1
+		$miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
+		
+		if is_running wpa_supplicant && ifconfig wlan0 > /dev/null 2>&1; then
+			log "GLO::Retro_Quick_Host: WiFi started"
+			build_infoPanel "WIFI" "Wifi started."
+		else
+			log "GLO::Retro_Quick_Host: WiFi started"
+			build_infoPanel "WIFI" "Unable to start WiFi\n unable to continue."
+			sleep 1
+			exit
+		fi
+		
+		sleep 2 
 	fi
-fi
 }
 
 
@@ -88,15 +94,16 @@ start_hotspot() {
 
 # We'll need FTP to host the cookie to the client - use the built in FTP, it allows us to curl (errors on bftpd re: path)
 start_ftp(){
-if is_running bftpd; then
-	log "GLO::Retro_Quick_Host: FTP already running, killing to rebind"
-	killall -9 bftpd
-	killall -9 tcpsvd
-	tcpsvd -E 0.0.0.0 21 ftpd -w / &
-else
-	tcpsvd -E 0.0.0.0 21 ftpd -w / &
-	log "GLO::Retro_Quick_Host: Starting FTP server"
-fi
+    if is_running bftpd; then
+        log "GLO::Retro_Quick_Host: FTP already running, killing to rebind"
+        bftpd_p=$(ps | grep bftpd | grep -v grep | awk '{for(i=4;i<=NF;++i) printf $i" "}')
+        killall -9 bftpd
+        killall -9 tcpsvd
+        tcpsvd -E 0.0.0.0 21 ftpd -w / &
+    else
+        tcpsvd -E 0.0.0.0 21 ftpd -w / &
+        log "GLO::Retro_Quick_Host: Starting FTP server"
+    fi
 }
 
 # We'll need WPS to make a hands off connection (even if the user has changed the hotspot password from the default)
@@ -123,7 +130,6 @@ get_cookie_info() {
 # We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
 start_retroarch(){
 	build_infoPanel "RetroArch" "Starting RetroArch..." 
-	killall -9 infoPanel
 	cd /mnt/SDCARD/RetroArch
 	HOME=/mnt/SDCARD/RetroArch ./retroarch -H -v -L "$host_core" "$host_rom"
 }
@@ -144,13 +150,12 @@ cleanup(){
 	if is_running retroarch; then
 		killall -9 retroarch
 	fi
-	
-	if is_running infoPanel; then
-		killall -9 infoPanel
-	fi
-	
+		
 	ifconfig wlan1 down
+	
 	ifconfig wlan0 up
+	
+	restore_ftp
 	
 	log "GLO::Retro_Quick_Host: Cleanup done"
 	
@@ -165,6 +170,11 @@ build_infoPanel() {
     local message="$2"
     
     infoPanel --title "$title" --message "$message" --auto
+}
+
+restore_ftp(){
+    log "GLO::Retro_Quick_Host: Restoring original FTP server"
+    $bftpd_p &
 }
 
 udhcpc_control() {

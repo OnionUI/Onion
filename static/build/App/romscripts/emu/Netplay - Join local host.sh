@@ -22,32 +22,32 @@ export hostip="192.168.100.100" # This should be the default unless the user has
 
 check_wifi(){
 ifconfig wlan1 down
-if ifconfig wlan0 &>/dev/null; then
-	log "GLO::Retro_Quick_Host: Wi-Fi is up already"
-	build_infoPanel "WIFI" "Wifi up"
-	save_wifi_state
-else
-	log "GLO::Retro_Quick_Host: Wi-Fi disabled, trying to enable before connecting.."
-	build_infoPanel "WIFI" "Wifi disabled, starting..." 
-	
-	/customer/app/axp_test wifion
-	sleep 2
-	ifconfig wlan0 up
-	sleep 1
-	$miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
-	
-	if is_running wpa_supplicant && ifconfig wlan0 > /dev/null 2>&1; then
-		log "GLO::Retro_Quick_Host: WiFi started"
-		build_infoPanel "WIFI" "Wifi started."
+	if ifconfig wlan0 &>/dev/null; then
+		log "GLO::Retro_Quick_Host: Wi-Fi is up already"
+		build_infoPanel "WIFI" "Wifi up"
+		save_wifi_state
 	else
-		log "GLO::Retro_Quick_Host: WiFi started"
-		build_infoPanel "WIFI" "Unable to start WiFi\n unable to continue."
+		log "GLO::Retro_Quick_Host: Wi-Fi disabled, trying to enable before connecting.."
+		build_infoPanel "WIFI" "Wifi disabled, starting..." 
+		
+		/customer/app/axp_test wifion
+		sleep 2
+		ifconfig wlan0 up
 		sleep 1
-		exit
+		$miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
+		
+		if is_running wpa_supplicant && ifconfig wlan0 > /dev/null 2>&1; then
+			log "GLO::Retro_Quick_Host: WiFi started"
+			build_infoPanel "WIFI" "Wifi started."
+		else
+			log "GLO::Retro_Quick_Host: WiFi started"
+			build_infoPanel "WIFI" "Unable to start WiFi\n unable to continue."
+			sleep 1
+			exit
+		fi
+		
+		sleep 2 
 	fi
-	
-	sleep 2 
-fi
 }
 
 
@@ -95,16 +95,24 @@ connect_to_host() {
 # We'd better wait for an ip address to be assigned before going any further.
 wait_for_ip() {
     local IP=$(ip route get 1 2>/dev/null | awk '{print $NF;exit}')
-	build_infoPanel "Connecting..."  "Waiting for an IP..." 
+    build_infoPanel "Connecting..."  "Waiting for an IP..."
+    local counter=0
 
     while [ -z "$IP" ]; do
         IP=$(ip route get 1 2>/dev/null | awk '{print $NF;exit}')
         sleep 1
+        counter=$((counter+1))
+
+        if [ $counter -ge 20 ]; then
+            build_infoPanel "Failed to connect!"  "Could not get an IP in 20 seconds."
+            log "GLO::Retro_Quick_Host: Failed to get an IP address within 20 seconds."
+            return 1  # Return with error status
+        fi
     done
-	
-	build_infoPanel "Joined hotspot!"  "IP: $IP" 
+
+    build_infoPanel "Joined hotspot!"  "IP: $IP" 
     log "GLO::Retro_Quick_Host: IP address assigned: $IP"
-	sleep 1
+    sleep 1
 }
 
 # Download the cookie from the host, check whether it downloaded and make sure it still exists on the client before we move on
@@ -234,12 +242,31 @@ save_wifi_state() {
 }
 
 restore_wifi_state() {
-	ip_output=$(ip addr add $old_ipv4 dev wlan0 2>&1)
+    if [ -z "$old_ipv4" ]; then
+        log "GLO::Retro_Quick_Host: Old IP address not found."
+    fi
+   
+    ip_output=$(ip link set wlan0 down 2>&1)
+    if [ $? -ne 0 ]; then
+        log "GLO::Retro_Quick_Host: Failed to bring down the interface."
+        log "GLO::Retro_Quick_Host: Output from 'ip link set down' command: $ip_output"
+    fi
+
+	ip -4 addr show wlan0 | awk '/inet/ {print $2}' | while IFS= read -r line
+	do
+		ip addr del "$line" dev wlan0
+	done
 	
+    ip_output=$(ip addr add $old_ipv4 dev wlan0 2>&1)
     if [ $? -ne 0 ]; then
         log "GLO::Retro_Quick_Host: Failed to assign the old IP address."
         log "GLO::Retro_Quick_Host: Output from 'ip addr add' command: $ip_output"
-        return 1
+    fi
+    
+    ip_output=$(ip link set wlan0 up 2>&1)
+    if [ $? -ne 0 ]; then
+        log "GLO::Retro_Quick_Host: Failed to bring up the interface."
+        log "GLO::Retro_Quick_Host: Output from 'ip link set up' command: $ip_output"
     fi
 }
 
@@ -296,17 +323,11 @@ cleanup(){
 	
 	if [ $? -ne 0 ]; then
 		log "GLO::Retro_Quick_Host: Failed to configure the network"
-		return 1
 	fi
-	
-	if [ $? -ne 0 ]; then
-		log "GLO::Retro_Quick_Host: Failed to assign the old IP address"
-		return 1
-	fi
-	
-	restore_wifi_state
 	
 	sleep 1
+	
+	restore_wifi_state
 		
 	log "GLO::Retro_Quick_Host: Cleanup done"
 	return 0
