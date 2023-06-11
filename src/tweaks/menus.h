@@ -127,7 +127,7 @@ void menu_datetime(void *_)
 void menu_http(void *_)
 {
     if (!_menu_http._created) {
-        _menu_http = list_create(3, LIST_SMALL);
+        _menu_http = list_create(2, LIST_SMALL);
         strcpy(_menu_http.title, "HTTP fileserver config");
         list_addItem(&_menu_http, (ListItem){.label = "Enable",
                                              .item_type = TOGGLE,
@@ -138,11 +138,6 @@ void menu_http(void *_)
                                 .item_type = TOGGLE,
                                 .value = (int)settings.auth_http_state,
                                 .action = action_sethttpauthstate});
-        list_addItem(&_menu_http,
-                     (ListItem){.label = "Enable new user signup",
-                                .item_type = TOGGLE,
-                                .value = (int)settings.signup_http_state,
-                                .action = action_sethttpsignupstate});
     }
     menu_stack[++menu_level] = &_menu_http;
     header_changed = true;

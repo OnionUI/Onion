@@ -48,7 +48,6 @@ static struct settings_s {
     bool auth_telnet_state;
     bool auth_ftp_state;
     bool auth_http_state;
-    bool signup_http_state;
     int low_battery_warn_at;
     int time_skip;
     int tzselect_state;
@@ -100,7 +99,6 @@ void _settings_reset(void)
     settings.startup_application = 0;
     settings.http_state = false;
     settings.auth_http_state = false;
-    settings.signup_http_state = false;
     settings.ssh_state = false;
     settings.ftp_state = false;
     settings.telnet_state = false;
@@ -187,7 +185,6 @@ void settings_load(void)
     settings.ntp_state = config_flag_get(".NTPState");
     settings.auth_ftp_state = config_flag_get(".authftpState");
     settings.auth_http_state = config_flag_get(".authhttpState");
-    settings.signup_http_state = config_flag_get(".signuphttpState");
     settings.mute = config_flag_get(".muteVolume");
 
     if (config_flag_get(
@@ -300,7 +297,6 @@ void settings_save(void)
     config_flag_set(".NTPState", settings.ntp_state);
     config_flag_set(".authtelnetState", settings.auth_telnet_state);
     config_flag_set(".authftpState", settings.auth_ftp_state);
-    config_flag_set(".signuphttpState", settings.signup_http_state);
     config_flag_set(".authhttpState", settings.auth_http_state);
     config_flag_set(".muteVolume", settings.mute);
     config_setNumber("tzselect", settings.tzselect_state);

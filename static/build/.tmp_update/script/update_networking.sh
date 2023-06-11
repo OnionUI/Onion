@@ -145,17 +145,17 @@ check_telnetstate() {
 check_httpstate() {     
     if flag_enabled httpState && [ -f $filebrowserbin ]; then
 		# Check if signuphttpState is enabled, if it is enable user signup
-		if [ "$(echo_enabled signuphttpState)" -eq 1 ]; then
-			if [ "$(is_signup_enabled)" -eq 0 ]; then
-				$filebrowserbin config set --signup=true -d $filebrowserdb >> $sysdir/logs/http.log
-				$filebrowserbin config set --auth.method=json -d $filebrowserdb  >> $sysdir/logs/http.log
-				enable_flag authhttpState
-			fi
-		else
-			if [ "$(is_signup_enabled)" -eq 1 ]; then
-				$filebrowserbin config set --signup=false -d $filebrowserdb >> $sysdir/logs/http.log
-			fi
-		fi
+		# if [ "$(echo_enabled signuphttpState)" -eq 1 ]; then
+			# if [ "$(is_signup_enabled)" -eq 0 ]; then
+				# $filebrowserbin config set --signup=true -d $filebrowserdb >> $sysdir/logs/http.log
+				# $filebrowserbin config set --auth.method=json -d $filebrowserdb  >> $sysdir/logs/http.log
+				# enable_flag authhttpState
+			# fi
+		# else
+			# if [ "$(is_signup_enabled)" -eq 1 ]; then
+				# $filebrowserbin config set --signup=false -d $filebrowserdb >> $sysdir/logs/http.log
+			# fi
+		# fi
 
 		# Check if authhttpState is enabled set json, if not set noauth
 		if [ "$(echo_enabled authhttpState)" -eq 1 ]; then 
@@ -185,10 +185,10 @@ check_httpstate() {
         if is_running filebrowser; then
             killall -9 filebrowser
 			# Reset admin account password incase user changes it
-			file_path="$sysdir/config/.auth.txt"
-			password=$(awk 'NR==1 {print $2}' "$file_path")
-			$sysdir/bin/filebrowser/filebrowser users update admin --password=$password -d $sysdir/bin/filebrowser/filebrowser.db
-            log "Filebrowser(HTTP server): Killed"
+			# file_path="$sysdir/config/.auth.txt"
+			# password=$(awk 'NR==1 {print $2}' "$file_path")
+			# $sysdir/bin/filebrowser/filebrowser users update admin --password=$password -d $sysdir/bin/filebrowser/filebrowser.db
+			# log "Filebrowser(HTTP server): Killed"
         fi
     fi
 }

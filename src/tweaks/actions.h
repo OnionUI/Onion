@@ -117,11 +117,6 @@ void action_setftpauthstate(void *pt)
     settings.auth_ftp_state = ((ListItem *)pt)->value == 1;
 }
 
-void action_sethttpsignupstate(void *pt)
-{
-    settings.signup_http_state = ((ListItem *)pt)->value == 1;
-}
-
 void action_sethttpauthstate(void *pt)
 {
     settings.auth_http_state = ((ListItem *)pt)->value == 1;
