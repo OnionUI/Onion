@@ -1,0 +1,4 @@
+#!/bin/sh
+cd /mnt/SDCARD/RApp/SCUMMVM
+
+./scripts/import_scummvm.sh
