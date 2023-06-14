@@ -294,9 +294,9 @@ bool addRandomFromJson(char *json_path)
     return true;
 }
 
-#define THICK_BAR                                                              \
+#define THICK_BAR \
     "================================================================="
-#define THIN_BAR                                                               \
+#define THIN_BAR \
     "-----------------------------------------------------------------"
 
 void logWeights()

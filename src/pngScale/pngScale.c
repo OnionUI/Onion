@@ -7,10 +7,10 @@
 #include <unistd.h>
 
 #define ALIGN4K(val) ((val + 4095) & (~4095))
-#define ERROR(str)                                                             \
-    {                                                                          \
-        fprintf(stderr, str "\n");                                             \
-        goto error;                                                            \
+#define ERROR(str)                 \
+    {                              \
+        fprintf(stderr, str "\n"); \
+        goto error;                \
     }
 
 //
