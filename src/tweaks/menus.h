@@ -26,6 +26,7 @@ static List _menu_date_time;
 static List _menu_network;
 static List _menu_telnet;
 static List _menu_ftp;
+static List _menu_wps;
 static List _menu_http;
 static List _menu_ssh;
 static List _menu_system_startup;
@@ -46,6 +47,7 @@ void menu_free_all(void)
     list_free(&_menu_network);
     list_free(&_menu_telnet);
     list_free(&_menu_ftp);
+    list_free(&_menu_wps);
     list_free(&_menu_http);
     list_free(&_menu_ssh);
     list_free(&_menu_date_time);
@@ -184,6 +186,18 @@ void menu_ftp(void *_)
     header_changed = true;
 }
 
+void menu_wps(void *_)
+{
+    if (!_menu_wps._created) {
+        _menu_wps = list_create(1, LIST_SMALL);
+        strcpy(_menu_wps.title, "WPS control");
+        list_addItem(&_menu_wps, (ListItem){.label = "WPS connect",
+                                            .action = action_wpsconnection});
+    }
+    menu_stack[++menu_level] = &_menu_wps;
+    header_changed = true;
+}
+
 void menu_ssh(void *_)
 {
     if (!_menu_ssh._created) {
@@ -206,10 +220,12 @@ void menu_ssh(void *_)
 void menu_networks(void *_)
 {
     if (!_menu_network._created) {
-        _menu_network = list_create(5, LIST_SMALL);
+        _menu_network = list_create(6, LIST_SMALL);
         strcpy(_menu_network.title, "Networks");
         list_addItem(&_menu_network, (ListItem){.label = "HTTP fileserver...",
                                                 .action = menu_http});
+        list_addItem(&_menu_network,
+                     (ListItem){.label = "WPS...", .action = menu_wps});
         list_addItem(&_menu_network,
                      (ListItem){.label = "SSH/SFTP...", .action = menu_ssh});
         list_addItem(&_menu_network,
@@ -225,6 +241,8 @@ void menu_networks(void *_)
     menu_stack[++menu_level] = &_menu_network;
     header_changed = true;
 }
+
+// End of network services
 
 void menu_system(void *_)
 {
