@@ -1,0 +1,12 @@
+{
+	"label":	"ScummVM",
+	"icon":	"/mnt/SDCARD/Icons/Default/rapp/scummvm.png",
+	"launch":	"launch.sh",
+	"rompath":	"../../Roms/SCUMMVM/Shortcuts_Standalone",
+	"imgpath":	"../../Roms/SCUMMVM/Imgs",
+	"gamelist":	"../../Roms/SCUMMVM/miyoogamelist.xml",
+	"useswap":	1,
+	"shortname":	0,
+	"hidebios":	0,
+	"extlist":	"scummvm|miyoocmd"
+}
