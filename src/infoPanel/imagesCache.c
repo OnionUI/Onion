@@ -10,8 +10,8 @@ static SDL_Surface *g_image_cache_next = NULL;
 #ifdef LOG_DEBUG
 #define DEBUG_PRINT(x) printf x
 #else
-#define DEBUG_PRINT(x)                                                         \
-    do {                                                                       \
+#define DEBUG_PRINT(x) \
+    do {               \
     } while (0)
 #endif
 

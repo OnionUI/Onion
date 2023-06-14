@@ -9,5 +9,5 @@
     "useswap": 1,
     "shortname": 0,
     "hidebios": 0,
-    "extlist": "cue|img|mdf|pbp|toc|cbn|m3u|ccd|chd"
+    "extlist": "iso|cue|img|mdf|pbp|toc|cbn|m3u|ccd|chd"
 }

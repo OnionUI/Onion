@@ -10,8 +10,11 @@
 
 #define MAX_NUM_VALUES 100
 
-typedef enum list_type { LIST_SMALL, LIST_LARGE } ListType;
-typedef enum item_type { ACTION, TOGGLE, MULTIVALUE } ListItemType;
+typedef enum list_type { LIST_SMALL,
+                         LIST_LARGE } ListType;
+typedef enum item_type { ACTION,
+                         TOGGLE,
+                         MULTIVALUE } ListItemType;
 
 typedef struct ListItem {
     int _id;
