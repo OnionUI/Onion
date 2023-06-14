@@ -72,6 +72,8 @@ main() {
         romtype=$ROM_TYPE_APP
     else
         rompath=$(echo "$cmd" | awk '{ st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3) }')
+		
+		export cookie_rom_path="$rompath"
 
         if echo "$rompath" | grep -q ":"; then
             rompath=$(echo "$rompath" | awk '{st = index($0,":"); print substr($0,st+1)}')
@@ -97,7 +99,7 @@ main() {
 
     echo "cmd: $cmd"
     # example: LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so "/mnt/SDCARD/Emu/GBATEST/../../.tmp_update/proxy.sh" "/mnt/SDCARD/Emu/GBATEST/../../Roms/GBATEST/mGBA/Final Fantasy IV Advance (U).zip"
-    echo "romtype: $romtype"
+    echo "romtype: $romtype" 
     echo "rompath: $rompath"
     # example: "/mnt/SDCARD/Emu/GBATEST/../../Roms/GBATEST/mGBA/Final Fantasy IV Advance (U).zip"
     echo "romext: $romext"
@@ -116,7 +118,7 @@ main() {
 
     if [ $skip_game_options -eq 0 ]; then
         get_core_info
-
+				
         game_core_label="Game core"
 
         if [ ! -f "$radir/cores/$default_core.so" ]; then
@@ -170,7 +172,7 @@ main() {
     if [ $current_tab -eq $TAB_GAMES ] || [ $current_tab -eq $TAB_EXPERT ]; then
         add_menu_option refresh_roms "Refresh list"
     fi
-
+	
     add_script_files "$globalscriptdir"
 
     if [ $current_tab -eq $TAB_GAMES ]; then
@@ -186,7 +188,9 @@ main() {
     if [ $current_tab -eq $TAB_GAMES ] || [ $current_tab -eq $TAB_EXPERT ]; then
         add_script_files "$emupath/romscripts"
     fi
-
+	
+	create_cookie 
+	
     # Show GLO menu
     runcmd="LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so prompt -t \"$UI_TITLE\" $(list_args "$menu_option_labels")"
     echo -e "\n\n=================================================================================================="
@@ -207,6 +211,23 @@ main() {
     echo -e "\n\n=================================================================================================="
 
     exit 1
+}
+
+# This creates a cookie for the quick host script to pick up (host & client both use this cookie) (clears every cycle)
+create_cookie(){
+    cookiefile="/mnt/SDCARD/RetroArch/retroarch.cookie"
+
+    if [ -f "$cookiefile" ]; then
+        rm -f "$cookiefile"
+    fi
+
+    core_checksum=$(cksum "$cookie_core_path" | cut -f 1 -d ' ')
+    rom_checksum=$(cksum "$cookie_rom_path" | cut -f 1 -d ' ')
+
+    echo "[core]: $cookie_core_path" >> $cookiefile
+    echo "[rom]: $cookie_rom_path" >> $cookiefile
+    echo "[corechksum]: $core_checksum" >> $cookiefile
+    echo "[romchksum]: $rom_checksum" >> $cookiefile
 }
 
 check_is_game() {
@@ -275,11 +296,13 @@ get_core_info() {
         retroarch_core="$default_core"
     fi
 
-    echo "default_core: $default_core"
+    echo "default_core: $default_core" 
     echo "retroarch_core: $retroarch_core"
 
     corepath="$radir/cores/$retroarch_core.so"
     coreinfopath="$radir/cores/$retroarch_core.info"
+	
+	export cookie_core_path="$corepath"
 }
 
 get_info_value() {
