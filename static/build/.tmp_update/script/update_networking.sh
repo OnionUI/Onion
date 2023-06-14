@@ -1,6 +1,8 @@
 #!/bin/sh
 sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo
+filebrowserbin=$sysdir/bin/filebrowser/filebrowser
+filebrowserdb=$sysdir/bin/filebrowser/filebrowser.db
 
 update() {
     log "Network Checker: Update networking"
@@ -13,6 +15,7 @@ update() {
     check_httpstate
 	check_hotspotstate
 }
+
 
 
 check_wifi() {
@@ -80,25 +83,32 @@ check_ftpstate() {
 
 # Starts dropbear if the toggle is set to on
 check_sshstate() { 
-    if flag_enabled SSHState; then
+    if flag_enabled sshState; then
         if is_running dropbear; then
             if wifi_disabled; then 
-                log "Dropbear: Wifi is turned off, disabling the toggle for dropbear and killing the process"
-                disable_flag SSHState
+                log "SSH: Wifi is turned off, disabling the toggle for dropbear and killing the process"
+                disable_flag sshState
                 killall -9 dropbear
             fi
         else
             if wifi_enabled; then 
-                log "Dropbear: Starting dropbear"
-                dropbear -R
+				if flag_enabled authsshState; then 
+					log "SSH: Starting dropbear with auth"
+					file_path="$sysdir/config/.auth.txt"
+					password=$(awk 'NR==1 {print $2}' "$file_path")
+					dropbear -R -Y $password
+				else
+					log "SSH: Starting dropbear without auth"
+					dropbear -R -B
+				fi
             else
-                disable_flag SSHState
+                disable_flag sshState
             fi
         fi
     else
         if is_running dropbear; then
             killall -9 dropbear
-            log "Dropbear: Killed"
+            log "SSH: Killed"
         fi
     fi
 }
@@ -142,32 +152,56 @@ check_telnetstate() {
 }
 
 # Starts Filebrowser if the toggle in tweaks is set on
-check_httpstate() { 
-    if flag_enabled HTTPState && [ -f /mnt/SDCARD/.tmp_update/bin/filebrowser/filebrowser ]; then
-        if is_running filebrowser; then
+check_httpstate() {     
+    if flag_enabled httpState && [ -f $filebrowserbin ]; then
+		# Check if signuphttpState is enabled, if it is enable user signup
+		# if [ "$(echo_enabled signuphttpState)" -eq 1 ]; then
+			# if [ "$(is_signup_enabled)" -eq 0 ]; then
+				# $filebrowserbin config set --signup=true -d $filebrowserdb >> $sysdir/logs/http.log
+				# $filebrowserbin config set --auth.method=json -d $filebrowserdb  >> $sysdir/logs/http.log
+				# enable_flag authhttpState
+			# fi
+		# else
+			# if [ "$(is_signup_enabled)" -eq 1 ]; then
+				# $filebrowserbin config set --signup=false -d $filebrowserdb >> $sysdir/logs/http.log
+			# fi
+		# fi
+
+		# Check if authhttpState is enabled set json, if not set noauth
+		if [ "$(echo_enabled authhttpState)" -eq 1 ]; then 
+			$filebrowserbin config set --auth.method=json -d $filebrowserdb >> $sysdir/logs/http.log
+		else
+			if [ "$(is_noauth_enabled)" -eq 0 ]; then
+				$filebrowserbin config set --auth.method=noauth -d $filebrowserdb >> $sysdir/logs/http.log
+			fi
+		fi
+	
+        if is_running_exact $filebrowserbin -p 80 -a 0.0.0.0 -r /mnt/SDCARD -d $filebrowserdb; then
             if wifi_disabled; then 
-                log "Filebrowser: Wifi is turned off, disabling the toggle for HTTP FS and killing the process"
-                disable_flag HTTPState
+                log "Filebrowser(HTTP server): Wifi is turned off, disabling the toggle for HTTP FS and killing the process"
+                disable_flag httpState
                 pkill -9 filebrowser
             fi
         else
             # Checks if the toggle for WIFI is turned on.
-            # Starts filebrowser bound to 0.0.0.0 so we don't need to mess around binding different IP's
             if wifi_enabled; then 
-                $sysdir/bin/filebrowser/filebrowser -p 80 -a 0.0.0.0 -r /mnt/SDCARD -d $sysdir/bin/filebrowser/filebrowser.db &
-                log "Filebrowser: Starting filebrowser listening on 0.0.0.0 to accept all traffic"
+				$filebrowserbin -p 80 -a 0.0.0.0 -r /mnt/SDCARD -d $filebrowserdb >> $sysdir/logs/http.log &
+                log "Filebrowser(HTTP server): Starting filebrowser listening on 0.0.0.0"
             else
-                disable_flag HTTPState
+                disable_flag httpState
             fi
         fi
     else
         if is_running filebrowser; then
             killall -9 filebrowser
-            log "Filebrowser: Killed"
+			# Reset admin account password incase user changes it
+			# file_path="$sysdir/config/.auth.txt"
+			# password=$(awk 'NR==1 {print $2}' "$file_path")
+			# $sysdir/bin/filebrowser/filebrowser users update admin --password=$password -d $sysdir/bin/filebrowser/filebrowser.db
+			# log "Filebrowser(HTTP server): Killed"
         fi
     fi
 }
-
 
 # Starts the hotspot based on the results of check_hotspotstate, called twice saves repeating
 # We have to sleep a bit or sometimes supllicant starts before we can get the hotspot logo
@@ -300,6 +334,39 @@ set_tzid() {
 }
 
 set_tzid
+ntpdate time.google.com
+
+is_signup_enabled() { # Used to check signup val for HTTPFS
+    DB_PATH="/mnt/SDCARD/.tmp_update/bin/filebrowser/filebrowser.db"
+    OUTPUT=$(cat $DB_PATH)
+
+    if echo $OUTPUT | grep -q '"signup":true'; then
+        echo 1
+    else
+        echo 0
+    fi
+}
+
+is_noauth_enabled() { # Used to check authMethod val for HTTPFS
+    DB_PATH="/mnt/SDCARD/.tmp_update/bin/filebrowser/filebrowser.db"
+    OUTPUT=$(cat $DB_PATH)
+
+    if echo $OUTPUT | grep -q '"authMethod":"noauth"'; then
+        echo 1
+    else
+        echo 0
+	fi
+}
+
+echo_enabled() {
+    flag="$1"
+    if [ -f "$sysdir/config/.$flag" ]; then
+        echo 1
+    else
+        echo 0
+    fi
+}
+
 
 wifi_enabled() {
     [ $(/customer/app/jsonval wifi) -eq 1 ]
