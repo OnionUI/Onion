@@ -122,6 +122,11 @@ void action_sethttpauthstate(void *pt)
     settings.auth_http_state = ((ListItem *)pt)->value == 1;
 }
 
+void action_setsshauthstate(void *pt)
+{
+    settings.auth_ssh_state = ((ListItem *)pt)->value == 1;
+}
+
 void action_setMenuButtonHaptics(void *pt)
 {
     settings.menu_button_haptics = ((ListItem *)pt)->value == 1;

@@ -80,25 +80,32 @@ check_ftpstate() {
 
 # Starts dropbear if the toggle is set to on
 check_sshstate() { 
-    if flag_enabled SSHState; then
+    if flag_enabled sshState; then
         if is_running dropbear; then
             if wifi_disabled; then 
-                log "Dropbear: Wifi is turned off, disabling the toggle for dropbear and killing the process"
-                disable_flag SSHState
+                log "SSH: Wifi is turned off, disabling the toggle for dropbear and killing the process"
+                disable_flag sshState
                 killall -9 dropbear
             fi
         else
             if wifi_enabled; then 
-                log "Dropbear: Starting dropbear"
-                dropbear -R
+				if flag_enabled authsshState; then 
+					log "SSH: Starting dropbear with auth"
+					file_path="$sysdir/config/.auth.txt"
+					password=$(awk 'NR==1 {print $2}' "$file_path")
+					dropbear -R -Y $password
+				else
+					log "SSH: Starting dropbear without auth"
+					dropbear -R -B
+				fi
             else
-                disable_flag SSHState
+                disable_flag sshState
             fi
         fi
     else
         if is_running dropbear; then
             killall -9 dropbear
-            log "Dropbear: Killed"
+            log "SSH: Killed"
         fi
     fi
 }
