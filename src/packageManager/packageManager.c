@@ -488,7 +488,9 @@ bool confirmDoNothing(KeyState *keystate)
     return confirm;
 }
 
-typedef enum Alignment { ALIGN_START, ALIGN_CENTER, ALIGN_END } alignment_e;
+typedef enum Alignment { ALIGN_START,
+                         ALIGN_CENTER,
+                         ALIGN_END } alignment_e;
 
 int alignCoord(int n, int size, alignment_e alignment)
 {

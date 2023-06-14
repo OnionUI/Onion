@@ -1,13 +1,13 @@
 name: Pre-release
 
 on:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - '.github/**'
-      - 'test/**'
-      - '**/README.md'
+  # push:
+  #   branches:
+  #     - main
+  #   paths-ignore:
+  #     - '.github/**'
+  #     - 'test/**'
+  #     - '**/README.md'
   workflow_dispatch:
 
 jobs:

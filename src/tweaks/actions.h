@@ -133,7 +133,7 @@ void action_setMenuButtonKeymap(void *pt)
     static int *dests[] = {
         &settings.mainui_single_press, &settings.mainui_long_press,
         &settings.mainui_double_press, &settings.ingame_single_press,
-        &settings.ingame_long_press,   &settings.ingame_double_press};
+        &settings.ingame_long_press, &settings.ingame_double_press};
     *(dests[item->action_id]) = item->value;
 }
 
