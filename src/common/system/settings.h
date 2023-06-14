@@ -47,6 +47,7 @@ static struct settings_s {
     bool ntp_state;
     bool auth_telnet_state;
     bool auth_ftp_state;
+    bool auth_ssh_state;
     int low_battery_warn_at;
     int time_skip;
     int tzselect_state;
@@ -103,6 +104,7 @@ void _settings_reset(void)
     settings.hotspot_state = false;
     settings.ntp_state = false;
     settings.auth_ftp_state = false;
+    settings.auth_ssh_state = true;
     settings.tzselect_state = 12;
     settings.auth_telnet_state = true;
     // Menu button actions
@@ -175,13 +177,14 @@ void settings_load(void)
     settings.show_expert = config_flag_get(".showExpert");
     settings.low_battery_autosave = !config_flag_get(".noLowBatteryAutoSave");
     settings.http_state = config_flag_get(".HTTPState");
-    settings.ssh_state = config_flag_get(".SSHState");
+    settings.ssh_state = config_flag_get(".sshState");
     settings.telnet_state = config_flag_get(".telnetState");
     settings.ftp_state = config_flag_get(".ftpState");
     settings.hotspot_state = config_flag_get(".HotspotState");
     settings.auth_telnet_state = config_flag_get(".authtelnetState");
     settings.ntp_state = config_flag_get(".NTPState");
     settings.auth_ftp_state = config_flag_get(".authftpState");
+    settings.auth_ssh_state = config_flag_get(".authsshState");
     settings.mute = config_flag_get(".muteVolume");
 
     if (config_flag_get(
@@ -287,13 +290,14 @@ void settings_save(void)
     config_flag_set(".showExpert", settings.show_expert);
     config_flag_set(".noLowBatteryAutoSave", !settings.low_battery_autosave);
     config_flag_set(".HTTPState", settings.http_state);
-    config_flag_set(".SSHState", settings.ssh_state);
+    config_flag_set(".sshState", settings.ssh_state);
     config_flag_set(".ftpState", settings.ftp_state);
     config_flag_set(".telnetState", settings.telnet_state);
     config_flag_set(".HotspotState", settings.hotspot_state);
     config_flag_set(".NTPState", settings.ntp_state);
     config_flag_set(".authtelnetState", settings.auth_telnet_state);
     config_flag_set(".authftpState", settings.auth_ftp_state);
+    config_flag_set(".authsshState", settings.auth_ssh_state);
     config_flag_set(".muteVolume", settings.mute);
     config_setNumber("tzselect", settings.tzselect_state);
     config_setNumber("battery/warnAt", settings.low_battery_warn_at);

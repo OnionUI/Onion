@@ -26,6 +26,7 @@ static List _menu_date_time;
 static List _menu_network;
 static List _menu_telnet;
 static List _menu_ftp;
+static List _menu_ssh;
 static List _menu_system_startup;
 static List _menu_button_action;
 static List _menu_button_action_mainui_menu;
@@ -44,6 +45,7 @@ void menu_free_all(void)
     list_free(&_menu_network);
     list_free(&_menu_telnet);
     list_free(&_menu_ftp);
+    list_free(&_menu_ssh);
     list_free(&_menu_date_time);
     list_free(&_menu_system_startup);
     list_free(&_menu_button_action);
@@ -128,17 +130,15 @@ void menu_telnet(void *_)
         _menu_telnet = list_create(2, LIST_SMALL);
         strcpy(_menu_telnet.title, "Telnet config");
         list_addItem(&_menu_telnet,
-                     (ListItem){
-                         .label = "Enable",
-                         .item_type = TOGGLE,
-                         .value = (int)settings.telnet_state,
-                         .action = action_settelnetstate});
+                     (ListItem){.label = "Enable",
+                                .item_type = TOGGLE,
+                                .value = (int)settings.telnet_state,
+                                .action = action_settelnetstate});
         list_addItem(&_menu_telnet,
-                     (ListItem){
-                         .label = "Enable authentication",
-                         .item_type = TOGGLE,
-                         .value = (int)settings.auth_telnet_state,
-                         .action = action_settelnetauthstate});
+                     (ListItem){.label = "Enable authentication",
+                                .item_type = TOGGLE,
+                                .value = (int)settings.auth_telnet_state,
+                                .action = action_settelnetauthstate});
     }
     menu_stack[++menu_level] = &_menu_telnet;
     header_changed = true;
@@ -149,11 +149,10 @@ void menu_ftp(void *_)
     if (!_menu_ftp._created) {
         _menu_ftp = list_create(2, LIST_SMALL);
         strcpy(_menu_ftp.title, "FTP config");
-        list_addItem(&_menu_ftp,
-                     (ListItem){.label = "Enable",
-                                .item_type = TOGGLE,
-                                .value = (int)settings.ftp_state,
-                                .action = action_setftpstate});
+        list_addItem(&_menu_ftp, (ListItem){.label = "Enable",
+                                            .item_type = TOGGLE,
+                                            .value = (int)settings.ftp_state,
+                                            .action = action_setftpstate});
         list_addItem(&_menu_ftp,
                      (ListItem){.label = "Enable authentication",
                                 .item_type = TOGGLE,
@@ -161,6 +160,25 @@ void menu_ftp(void *_)
                                 .action = action_setftpauthstate});
     }
     menu_stack[++menu_level] = &_menu_ftp;
+    header_changed = true;
+}
+
+void menu_ssh(void *_)
+{
+    if (!_menu_ssh._created) {
+        _menu_ssh = list_create(2, LIST_SMALL);
+        strcpy(_menu_ssh.title, "SSH config");
+        list_addItem(&_menu_ssh, (ListItem){.label = "Enable",
+                                            .item_type = TOGGLE,
+                                            .value = (int)settings.ssh_state,
+                                            .action = action_setsshstate});
+        list_addItem(&_menu_ssh,
+                     (ListItem){.label = "Enable authentication",
+                                .item_type = TOGGLE,
+                                .value = (int)settings.auth_ssh_state,
+                                .action = action_setsshauthstate});
+    }
+    menu_stack[++menu_level] = &_menu_ssh;
     header_changed = true;
 }
 
@@ -175,16 +193,11 @@ void menu_networks(void *_)
                                 .value = (int)settings.http_state,
                                 .action = action_sethttpstate});
         list_addItem(&_menu_network,
-                     (ListItem){.label = "SSH/SFTP/SCP (dropbear)",
-                                .item_type = TOGGLE,
-                                .value = (int)settings.ssh_state,
-                                .action = action_setsshstate});
+                     (ListItem){.label = "SSH/SFTP...", .action = menu_ssh});
         list_addItem(&_menu_network,
-                     (ListItem){.label = "FTP...",
-                                .action = menu_ftp});
+                     (ListItem){.label = "FTP...", .action = menu_ftp});
         list_addItem(&_menu_network,
-                     (ListItem){.label = "Telnet...",
-                                .action = menu_telnet});
+                     (ListItem){.label = "Telnet...", .action = menu_telnet});
         list_addItem(&_menu_network,
                      (ListItem){.label = "WiFi Hotspot",
                                 .item_type = TOGGLE,
