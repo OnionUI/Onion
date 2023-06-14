@@ -213,7 +213,7 @@ Menu_Config_ScrapingSelection()
 
 Launch_Scraping ()
 {
-    
+    touch /tmp/stay_awake
     rm -f /tmp/scraper_script.sh
 	
 	if [ "$(ip r)" = "" ]; then 
@@ -271,7 +271,8 @@ Launch_Scraping ()
             /mnt/SDCARD/.tmp_update/script/scraper/scrap_launchbox.sh $CurrentSystem "$onerom"
         fi
     fi
-
+	
+	rm -f /tmp/stay_awake
     exit
 }
 
