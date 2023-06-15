@@ -1,6 +1,7 @@
 #!/bin/sh
 # OTA updates for Onion.
 sysdir=/mnt/SDCARD/.tmp_update
+rm $sysdir/cmd_to_run.sh
 
 # Repository name :
 GITHUB_REPOSITORY=OnionUI/Onion
@@ -11,7 +12,8 @@ channel=beta
 GetVersion () { echo $@ | tr -d [:alpha:] | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
 
 # Available space in MB
-available_space=$(df -m /dev/mmcblk0p1 | awk 'NR==2{print $4}')
+mount_point=$(mount | grep -m 1 '/mnt/SDCARD' | awk '{print $1}')     # it could be /dev/mmcblk0p1 or /dev/mmcblk0
+available_space=$(df -m $mount_point | awk 'NR==2{print $4}')
 
 # Check available space
 if [ "$available_space" -lt "1000" ]; then
@@ -88,6 +90,14 @@ read -n 1 -s -r -p "Press A to continue"
 Mychoice=$( echo -e "No\nYes" | $sysdir/script/shellect.sh -t "Download $Release_Version ($((($Release_size/1024)/1024))MB) ?" -b "Press A to validate your choice.")
 clear
  if [ "$Mychoice" = "Yes" ]; then
+	Mychoice=$( echo -e "Yes\nNo" | $sysdir/script/shellect.sh -t "Check SD card health ? (long but recommended)" -b "Press A to validate your choice.")
+	clear
+	 if [ "$Mychoice" = "Yes" ]; then
+		echo -ne "\\n=================== CHECKDISK ===================\\n"
+		/mnt/SDCARD/.tmp_update/script/stop_audioserver.sh  > nul 2> nul # we need a maximum of memory available to run fsck.fat
+		echo -ne "\\nPlease wait during FAT file system integrity check.\\nIssues should be fixed automatically.\\nThe process can be long :\\nabout 2 minutes for 128GB SD card\\n\\n\\n"
+		fsck.fat -a $mount_point
+	fi
     mkdir -p $sysdir/download/
     echo -ne "\\n\\n== Downloading Onion $Release_Version ($channel channel) ==\\n" 
     wget --no-check-certificate $Release_url -O "$sysdir/download/$Release_Version.zip"
@@ -130,7 +140,7 @@ clear
 		exit 6
 	fi
  else
-	  echo -e "\\nYou have selected to not apply the update, see you next time !\\n Exiting.\\n"
+	  echo -e "\\nYou have selected to not apply the update.\\nSee you next time !\\nExiting.\\n"
 	  read -n 1 -s -r -p "Press A to continue"
 	  exit 7
  fi
