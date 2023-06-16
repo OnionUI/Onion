@@ -559,27 +559,37 @@ unzip_progress() {
 
     echo "   - Extract '$zipfile' ($total files) into $dest"
 
-    unzip -o "$zipfile" -d "$dest" | awk -v total="$total" -v out="/tmp/.update_msg" -v msg="$msg" 'BEGIN { cnt = 0; l = 0; printf "" > out; }{
-        print $0;
-        p = int(cnt * 100 / total);
-        if (p != l) {
-            printf "%s %3.0f%%\n", msg, p >> out;
-            close(out);
-            l = p;
-        }
-        cnt += 1;
-    }'
-    
-    if [ $? -ne 0 ]; then
-        touch $sysdir/.installFailed
-        echo ":: Installation failed!"
-        sync
-        reboot
-        sleep 10
-        exit 0
-    else
-        echo "$msg 100%" >> /tmp/.update_msg
+# Run the 7z extraction command in the background and redirect output to /tmp/.extraction_output
+(7z x -aoa -o"$dest" "$zipfile" -bsp1 -bb > /tmp/.extraction_output ; echo $? > "/tmp/extraction_status" ) &
+
+# Continuously update /tmp/.update_msg every 500 milliseconds until the command line finishes
+a=$(pgrep 7z)
+while [ -n "$a" ]; do
+    last_line=$(tail -n 1 /tmp/.extraction_output)
+    value=$(echo "$last_line" | sed 's/.* \([0-9]\+\)%.*/\1/')
+    if [ "$value" -eq "$value" ] 2>/dev/null; then    # check if the value is numeric
+        echo "$msg $value%" > /tmp/.update_msg
     fi
+    > /tmp/.extraction_output  # to avoid to parse a too big file
+    sleep 0.5
+    a=$(pgrep 7z)
+done
+
+# Check the exit status of the extraction command
+extraction_status=$(cat "/tmp/extraction_status")
+if [ "$extraction_status" -ne 0 ]; then
+    touch $sysdir/.installFailed
+    echo ":: Installation failed!"
+    sync
+    sleep 10
+    reboot
+    exit 0
+else
+    echo "$msg 100%" >> /tmp/.update_msg
+fi
+
+rm /tmp/extraction_status
+rm /tmp/.extraction_output
 }
 
 free_mma() {
