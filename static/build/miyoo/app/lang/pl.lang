@@ -1,5 +1,5 @@
 {
-	"lang": "Polski",
+	"lang": "Polski (Polish)",
 	"0": "Ekspert",
 	"1": "Ulubione",
 	"2": "Gry",
@@ -66,7 +66,7 @@
 	"63": "%dMHz",
 	"64": "Rozmiar pamięci RAM",
 	"65": "% dB",
-	"66": "Zajęta/wolna pamięć",
+	"66": "Zajęta/wolna pamięć SD",
 	"67": "Resetuj ustawienia",
 	"68": "Zresetować wszystkie ustawienia systemowe?\nZawartość karty SD\nnie zostanie usunięta.",
 	"69": "Odśwież romy na karcie SD",
