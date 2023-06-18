@@ -29,7 +29,6 @@ static void *_imageCacheThread(void *param)
         offset = images_total - image_cache_len;
     if (offset < 0)
         offset = 0;
-
     for (int i = 0; i < image_cache_len; i++) {
         int curr = offset + i;
 
@@ -47,7 +46,6 @@ static void *_imageCacheThread(void *param)
         if (load_image != NULL)
             image_cache[idx] = load_image(curr);
     }
-
     image_cache_offset = offset + image_cache_len - 1;
 
     thread_active = false;
