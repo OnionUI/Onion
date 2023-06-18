@@ -162,6 +162,7 @@ int main(int argc, char *argv[])
 
         if (ticks - slide_timer > SLIDE_TIMEOUT) {
             current_slide = nextSlide(current_slide, num_slides, 1);
+            slide = current_slide == -1 ? NULL : imageCache_getItem(&current_slide);
             slide_timer = ticks;
         }
 
