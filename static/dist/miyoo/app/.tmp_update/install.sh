@@ -182,7 +182,7 @@ run_installation() {
     
     killall batmon
 
-    get_install_stats
+    #get_install_stats
 
     rm -f /tmp/.update_msg 2> /dev/null
     rm -f $sysdir/config/currentSlide 2> /dev/null
@@ -336,7 +336,7 @@ install_core() {
 
     # Onion core installation / update
     cd /
-    unzip_progress "$core_zipfile" "$msg" /mnt/SDCARD $total_core
+    unzip_progress "$core_zipfile" "$msg" /mnt/SDCARD
 
     # Cleanup
     rm -f $core_zipfile
@@ -363,7 +363,7 @@ install_retroarch() {
     
     # Install RetroArch
     cd /
-    unzip_progress "$ra_zipfile" "$msg" /mnt/SDCARD $total_ra
+    unzip_progress "$ra_zipfile" "$msg" /mnt/SDCARD
 
     # Cleanup
     rm -f $ra_zipfile
@@ -436,9 +436,7 @@ check_firmware() {
     if [ ! -f /customer/lib/libpadsp.so ]; then
         cd $sysdir
         infoPanel -i "res/firmware.png"
-
         rm -rf $sysdir
-
         reboot
         sleep 10
         exit 0
@@ -555,9 +553,8 @@ unzip_progress() {
     zipfile="$1"
     msg="$2"
     dest="$3"
-    total=$4
 
-    echo "   - Extract '$zipfile' ($total files) into $dest"
+    echo "   - Extract '$zipfile' into $dest"
 
 # Run the 7z extraction command in the background and redirect output to /tmp/.extraction_output
 (7z x -aoa -o"$dest" "$zipfile" -bsp1 -bb > /tmp/.extraction_output ; echo $? > "/tmp/extraction_status" ) &
@@ -581,8 +578,8 @@ if [ "$extraction_status" -ne 0 ]; then
     touch $sysdir/.installFailed
     echo ":: Installation failed!"
     sync
-    sleep 10
     reboot
+    sleep 10
     exit 0
 else
     echo "$msg 100%" >> /tmp/.update_msg
