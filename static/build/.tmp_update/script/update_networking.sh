@@ -283,6 +283,7 @@ check_tzid() {
 check_ntpstate() { 
     if flag_enabled NTPState && wifi_enabled; then
         current_tz=$(check_tzid)
+		ntpdate time.google.com &
         if [ "$current_tz" != "$old_tz" ]; then
             export old_tz="$current_tz"
             restart_ntp &
@@ -294,7 +295,7 @@ restart_ntp() {
     export old_tz=$(check_tzid)
     set_tzid
     log "NTP: Starting NTP with TZ of $TZ"
-    ntpdate time.google.com
+    ntpdate time.google.com &
     hwclock -w
 	touch /tmp/time_update
 	sync
@@ -334,7 +335,6 @@ set_tzid() {
 }
 
 set_tzid
-ntpdate time.google.com
 
 is_signup_enabled() { # Used to check signup val for HTTPFS
     DB_PATH="/mnt/SDCARD/.tmp_update/bin/filebrowser/filebrowser.db"
