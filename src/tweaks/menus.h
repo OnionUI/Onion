@@ -247,7 +247,7 @@ void menu_networks(void *_)
 void menu_system(void *_)
 {
     if (!_menu_system._created) {
-        _menu_system = list_create(4, LIST_SMALL);
+        _menu_system = list_create(5, LIST_SMALL);
         strcpy(_menu_system.title, "System");
         list_addItem(&_menu_system, (ListItem){.label = "Startup...",
                                                .action = menu_systemStartup});
@@ -258,6 +258,11 @@ void menu_system(void *_)
                                 .item_type = TOGGLE,
                                 .value = (int)settings.low_battery_autosave,
                                 .action = action_setLowBatteryAutoSave});
+        list_addItem(&_menu_system,
+                     (ListItem){.label = "Instant turn off (no standby)",
+                                .item_type = TOGGLE,
+                                .value = (int)settings.disable_standby,
+                                .action = action_setdisableStandby});
         list_addItem(
             &_menu_system,
             (ListItem){.label = "Vibration intensity",

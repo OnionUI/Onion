@@ -61,6 +61,7 @@ static struct settings_s {
     int ingame_single_press;
     int ingame_long_press;
     int ingame_double_press;
+    bool disable_standby;
 
     char mainui_button_x[JSON_STRING_LEN];
     char mainui_button_y[JSON_STRING_LEN];
@@ -116,6 +117,7 @@ void _settings_reset(void)
     settings.ingame_single_press = 1;
     settings.ingame_long_press = 2;
     settings.ingame_double_press = 3;
+    settings.disable_standby = false;
     memset(settings.mainui_button_x, 0, JSON_STRING_LEN);
     memset(settings.mainui_button_y, 0, JSON_STRING_LEN);
 }
@@ -189,6 +191,7 @@ void settings_load(void)
     settings.auth_http_state = config_flag_get(".authhttpState");
     settings.auth_ssh_state = config_flag_get(".authsshState");
     settings.mute = config_flag_get(".muteVolume");
+    settings.disable_standby = config_flag_get(".disableStandby");
 
     if (config_flag_get(
             ".noBatteryWarning")) // flag is deprecated, but keep compatibility
@@ -303,6 +306,7 @@ void settings_save(void)
     config_flag_set(".authhttpState", settings.auth_http_state);
     config_flag_set(".authsshState", settings.auth_ssh_state);
     config_flag_set(".muteVolume", settings.mute);
+    config_flag_set(".disableStandby",settings.disable_standby);
     config_setNumber("tzselect", settings.tzselect_state);
     config_setNumber("battery/warnAt", settings.low_battery_warn_at);
     config_setNumber("startup/app", settings.startup_application);
