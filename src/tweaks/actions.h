@@ -72,9 +72,9 @@ void action_setLowBatteryAutoSave(void *pt)
     settings.low_battery_autosave = ((ListItem *)pt)->value == 1;
 }
 
-void action_setPowerSinglePress(void *pt)
+void action_setDisableStandby(void *pt)
 {
-    settings.power_single_press = ((ListItem *)pt)->value == 1;
+    settings.disable_standby = ((ListItem *)pt)->value == 1;
 }
 
 void action_sethttpstate(void *pt)

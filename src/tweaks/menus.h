@@ -379,8 +379,8 @@ void menu_buttonAction(void *_)
                                 .item_type = MULTIVALUE,
                                 .value_max = 1,
                                 .value_labels = {"Standby", "Shutdown"},
-                                .value = (int)settings.power_single_press,
-                                .action = action_setPowerSinglePress});
+                                .value = (int)settings.disable_standby,
+                                .action = action_setDisableStandby});
     }
     menu_stack[++menu_level] = &_menu_button_action;
     header_changed = true;
