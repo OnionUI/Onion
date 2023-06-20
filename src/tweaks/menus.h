@@ -247,7 +247,7 @@ void menu_networks(void *_)
 void menu_system(void *_)
 {
     if (!_menu_system._created) {
-        _menu_system = list_create(5, LIST_SMALL);
+        _menu_system = list_create(4, LIST_SMALL);
         strcpy(_menu_system.title, "System");
         list_addItem(&_menu_system, (ListItem){.label = "Startup...",
                                                .action = menu_systemStartup});
@@ -258,11 +258,6 @@ void menu_system(void *_)
                                 .item_type = TOGGLE,
                                 .value = (int)settings.low_battery_autosave,
                                 .action = action_setLowBatteryAutoSave});
-        list_addItem(&_menu_system,
-                     (ListItem){.label = "Instant turn off (no standby)",
-                                .item_type = TOGGLE,
-                                .value = (int)settings.disable_standby,
-                                .action = action_setdisableStandby});
         list_addItem(
             &_menu_system,
             (ListItem){.label = "Vibration intensity",
@@ -347,7 +342,7 @@ void menu_buttonActionInGameMenu(void *_)
 void menu_buttonAction(void *_)
 {
     if (!_menu_button_action._created) {
-        _menu_button_action = list_create(5, LIST_SMALL);
+        _menu_button_action = list_create(6, LIST_SMALL);
         strcpy(_menu_button_action.title, "Button shortcuts");
         list_addItem(&_menu_button_action,
                      (ListItem){.label = "Menu single press vibration",
@@ -379,6 +374,13 @@ void menu_buttonAction(void *_)
                        .value_formatter = formatter_appShortcut,
                        .action_id = 1,
                        .action = action_setAppShortcut});
+        list_addItem(&_menu_button_action,
+                     (ListItem){.label = "Power single press",
+                                .item_type = MULTIVALUE,
+                                .value_max = 1,
+                                .value_labels = {"Standby", "Shutdown"},
+                                .value = (int)settings.power_single_press,
+                                .action = action_setPowerSinglePress});
     }
     menu_stack[++menu_level] = &_menu_button_action;
     header_changed = true;

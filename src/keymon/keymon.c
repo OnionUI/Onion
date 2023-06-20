@@ -409,7 +409,7 @@ int main(void)
                 if (!comboKey_menu && val == REPEAT) {
                     repeat_power++;
                     if (repeat_power == 7)
-                        if(!settings.disable_standby)
+                        if(!settings.power_single_press)
                             deepsleep(); // 0.5sec deepsleep
                     else if (repeat_power == REPEAT_SEC(5)) {
                         short_pulse();
@@ -428,7 +428,7 @@ int main(void)
                         if (comboKey_menu)
                             takeScreenshot();
                         else{
-                            if(settings.disable_standby){
+                            if(settings.power_single_press){
                                 deepsleep();
                             } else{
                                 turnOffScreen();
