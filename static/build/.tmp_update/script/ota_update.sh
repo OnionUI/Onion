@@ -93,11 +93,13 @@ clear
 
 	echo -ne "\\n=================== CHECKDISK ===================\\n"
 	/mnt/SDCARD/.tmp_update/script/stop_audioserver.sh  > nul 2> nul # we need a maximum of memory available to run fsck.fat
+	/mnt/SDCARD/.tmp_update/bin/freemma > NUL
 	echo -ne "\\nPlease wait during FAT file system integrity check.\\nIssues should be fixed automatically.\\nThe process can be long :\\nabout 2 minutes for 128GB SD card\\n\\n\\n"
 	fsck.fat -a $mount_point
 
     mkdir -p $sysdir/download/
     echo -ne "\\n\\n== Downloading Onion $Release_Version ($channel channel) ==\\n"
+	/mnt/SDCARD/.tmp_update/bin/freemma > NUL
 	sync
     wget --no-check-certificate $Release_url -O "$sysdir/download/$Release_Version.zip"
     echo -ne "\\n\\n=================== Download done =================== \\n"
@@ -125,6 +127,7 @@ Mychoice=$( echo -e "No\nYes" | $sysdir/script/shellect.sh -t "Apply update $Rel
 clear
  if [ "$Mychoice" = "Yes" ]; then
 	echo "Applying update"
+	/mnt/SDCARD/.tmp_update/bin/freemma > NUL
 	# unzip -o "$sysdir/download/$Release_Version.zip" -d "/mnt/SDCARD"
 	7z x -aoa -o"/mnt/SDCARD" "$sysdir/download/$Release_Version.zip"
 	
