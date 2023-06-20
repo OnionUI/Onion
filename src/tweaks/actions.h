@@ -72,6 +72,11 @@ void action_setLowBatteryAutoSave(void *pt)
     settings.low_battery_autosave = ((ListItem *)pt)->value == 1;
 }
 
+void action_setDisableStandby(void *pt)
+{
+    settings.disable_standby = ((ListItem *)pt)->value == 1;
+}
+
 void action_sethttpstate(void *pt)
 {
     settings.http_state = ((ListItem *)pt)->value == 1;
