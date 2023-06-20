@@ -17,7 +17,7 @@ if [ -f $ra_version_file ] && [ -f $ra_package_version_file ]; then
     current_ra_version=`cat $ra_version_file`
     package_ra_version=`cat $ra_package_version_file`
 
-    # Skip installation if current version is up-to-date
+    # Skip installation if current version is up-to-date.
     if [ $(version $current_ra_version) -ge $(version $package_ra_version) ]; then
         install_ra=0
         echo "RetroArch is up-to-date!" >> $sysdir/logs/install.log
@@ -35,7 +35,7 @@ total_ra=0
 main() {
     # init_lcd
     cat /proc/ls
-    sleep 0.25
+    sleep 0.2
     
     check_device_model
     
@@ -176,6 +176,34 @@ remove_configs() {
         /mnt/SDCARD/Saves/GuestProfile/config/*
 }
 
+verify_file() {
+    local file="/mnt/SDCARD/.tmp_update/onion.pak"
+
+    if [ -f "$file" ]; then
+        echo "File $file exists."
+        
+        if [ -w "$file" ]; then
+            echo "File $file has write permission."
+        else
+            echo "File $file does not have write permission."
+        fi
+        
+        if fuser "$file" &> /dev/null; then
+            echo "Something is currently writing to $file."
+        else
+            echo "No process is currently writing to $file."
+        fi
+        
+        size=$(stat -c %s "$file")
+        echo "File $file size: $size bytes."
+    else
+        echo "File $file does not exist."
+    fi
+    
+    echo ""
+
+}
+
 run_installation() {
     reset_configs=$1
     system_only=$2
@@ -190,6 +218,7 @@ run_installation() {
     # Show installation progress
     cd $sysdir
     installUI &
+	sync
     sleep 1
 
     verb="Updating"
@@ -209,7 +238,7 @@ run_installation() {
             install_ra=1
         fi
 
-        # Remove stock folders
+        # Remove stock folders.
         cd /mnt/SDCARD
         rm -rf App Emu RApp miyoo
         
@@ -222,9 +251,11 @@ run_installation() {
     fi
 
     if [ $install_ra -eq 1 ]; then
+		verify_file
         install_core "1/2: $verb Onion..."
         install_retroarch "2/2: $verb RetroArch..."
     else
+		verify_file
         install_core "1/1: $verb Onion..."
         echo "Skipped installing RetroArch"
         rm -f $ra_zipfile
@@ -323,6 +354,7 @@ install_core() {
     msg="$1"
 
     if [ ! -f "$core_zipfile" ]; then
+		echo "CORE FILE MISSING"
         return
     fi
 
@@ -334,7 +366,7 @@ install_core() {
 
     echo "$msg 0%" >> /tmp/.update_msg
 
-    # Onion core installation / update
+    # Onion core installation / update.
     cd /
     unzip_progress "$core_zipfile" "$msg" /mnt/SDCARD
 
@@ -364,7 +396,7 @@ install_retroarch() {
     # Install RetroArch
     cd /
     unzip_progress "$ra_zipfile" "$msg" /mnt/SDCARD
-
+	
     # Cleanup
     rm -f $ra_zipfile
     rm -f $ra_package_version_file
@@ -556,8 +588,44 @@ unzip_progress() {
 
     echo "   - Extract '$zipfile' into $dest"
 
+
+verify_file
+
+echo "Starting..." > /tmp/.update_msg
+sleep 3
+
+if [ -f "/mnt/SDCARD/.tmp_update/onion.pak" ]; then
+	echo "onion.pak exists"
+	sleep 1
+else
+	echo "onion.pak is missing, extraction will fail"
+fi
+
+verify_file
+
+sleep 1
+
 # Run the 7z extraction command in the background and redirect output to /tmp/.extraction_output
 (7z x -aoa -o"$dest" "$zipfile" -bsp1 -bb > /tmp/.extraction_output ; echo $? > "/tmp/extraction_status" ) &
+
+sleep 1 
+
+if pgrep 7z > /dev/null; then
+    echo "7Z is running"
+	sleep 1
+else
+    echo "7Z is NOT running and should be"
+	sleep 1
+fi
+
+if [ -f "/mnt/SDCARD/.tmp_update/onion.pak" ]; then
+	echo "onion.pak still exists"
+	sleep 1
+else
+	echo "onion.pak is still missing, extraction has probably failed"
+	sleep 1
+	echo "the build will say it's complete but isn't"
+fi
 
 # Continuously update /tmp/.update_msg every 500 milliseconds until the command line finishes
 a=$(pgrep 7z)
