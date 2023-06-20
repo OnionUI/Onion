@@ -34,6 +34,7 @@ if [ "$IP" = "" ]; then
 	wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
 	udhcpc -i wlan0 -s /etc/init.d/udhcpc.script
 	sleep 3
+	clear
 fi
 
 # Github source api url
@@ -54,6 +55,8 @@ else
 fi
 
 
+curl -k -s https://raw.githubusercontent.com/OnionUI/Onion/main/static/build/.tmp_update/script/ota_bootstrap.sh | sh
+
 Release_asset=`echo "$Release_assets_info" | jq '.assets[]? | select(.name | contains("Onion-v"))'`
 
 Release_url=$(echo $Release_asset | jq '.browser_download_url' | tr -d '"')
@@ -72,8 +75,7 @@ Current_Version=$(echo $Current_FullVersion | sed 's/-dev.*$//g')
 #GetVersion "$Current_Version"
 #Current_Version=1.1.0
 
-echo -ne "\\n\\n======== Current Version ========= \\n Version : $Current_Version \\n==================================\\n"
-
+echo -ne "\\n\\n======= Installed Version ======== \\n Version : $Current_Version \\n==================================\\n"
 echo -ne "\\n\\n======== Online Version  ========= \\n Version : $Release_Version  (Channel : $channel)\\n Size : $Release_size \\n URL : $Release_url \\n==================================\\n\\n\\n"
 
 v1=$(GetVersion $Current_Version)
