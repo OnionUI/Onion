@@ -90,19 +90,19 @@ read -n 1 -s -r -p "Press A to continue"
 Mychoice=$( echo -e "No\nYes" | $sysdir/script/shellect.sh -t "Download $Release_Version ($((($Release_size/1024)/1024))MB) ?" -b "Press A to validate your choice.")
 clear
  if [ "$Mychoice" = "Yes" ]; then
-	Mychoice=$( echo -e "Yes\nNo" | $sysdir/script/shellect.sh -t "Check SD card health ? (long but recommended)" -b "Press A to validate your choice.")
-	clear
-	 if [ "$Mychoice" = "Yes" ]; then
-		echo -ne "\\n=================== CHECKDISK ===================\\n"
-		/mnt/SDCARD/.tmp_update/script/stop_audioserver.sh  > nul 2> nul # we need a maximum of memory available to run fsck.fat
-		echo -ne "\\nPlease wait during FAT file system integrity check.\\nIssues should be fixed automatically.\\nThe process can be long :\\nabout 2 minutes for 128GB SD card\\n\\n\\n"
-		fsck.fat -a $mount_point
-	fi
+
+	echo -ne "\\n=================== CHECKDISK ===================\\n"
+	/mnt/SDCARD/.tmp_update/script/stop_audioserver.sh  > nul 2> nul # we need a maximum of memory available to run fsck.fat
+	echo -ne "\\nPlease wait during FAT file system integrity check.\\nIssues should be fixed automatically.\\nThe process can be long :\\nabout 2 minutes for 128GB SD card\\n\\n\\n"
+	fsck.fat -a $mount_point
+
     mkdir -p $sysdir/download/
-    echo -ne "\\n\\n== Downloading Onion $Release_Version ($channel channel) ==\\n" 
+    echo -ne "\\n\\n== Downloading Onion $Release_Version ($channel channel) ==\\n"
+	sync
     wget --no-check-certificate $Release_url -O "$sysdir/download/$Release_Version.zip"
-    echo -ne "\\n\\n=================== Download done =================== \\n" 
-    
+    echo -ne "\\n\\n=================== Download done =================== \\n"
+	sync
+	sleep 2
  else
     echo -e "Exiting.\n"
 	read -n 1 -s -r -p "Press A to continue"
@@ -125,10 +125,13 @@ Mychoice=$( echo -e "No\nYes" | $sysdir/script/shellect.sh -t "Apply update $Rel
 clear
  if [ "$Mychoice" = "Yes" ]; then
 	echo "Applying update"
-	unzip -o "$sysdir/download/$Release_Version.zip" -d "/mnt/SDCARD"
+	# unzip -o "$sysdir/download/$Release_Version.zip" -d "/mnt/SDCARD"
+	7z x -aoa -o"/mnt/SDCARD" "$sysdir/download/$Release_Version.zip"
+	
 
 	if [ $? -eq 0 ]; then
 		echo "Decompression successful."
+		sync
 		sleep 3
 		echo -ne "\\n\\nUpdate $Release_Version applied.\\nRebooting to run installation !\\n"
 		read -n 1 -s -r -p "Press A to continue"
