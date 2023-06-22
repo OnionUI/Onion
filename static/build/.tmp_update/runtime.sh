@@ -65,6 +65,11 @@ main() {
     mount -o bind /mnt/SDCARD/miyoo/lib/libgamename.so /customer/lib/libgamename.so
 
     start_networking
+	
+	# do an NTP update at startup
+	if flag_enabled NTPState; then
+		ntpdate time.google.com &
+	fi
 
     # Auto launch
     if [ ! -f $sysdir/config/.noAutoStart ]; then
