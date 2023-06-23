@@ -255,7 +255,7 @@ bool menuButtonAction(uint32_t val, bool comboKey)
 {
     if (comboKey) {
         keyinput_enable();
-        quietMainUI();    // Will be enabled again when MainUI "click" sounds will be affected to L2 instead of L1 (requires a new MainUI)
+        quietMainUI(); // Will be enabled again when MainUI "click" sounds will be affected to L2 instead of L1 (requires a new MainUI)
         return val != RELEASED;
     }
 
