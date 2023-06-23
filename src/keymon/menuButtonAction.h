@@ -106,9 +106,9 @@ bool terminate_retroarch(void)
 void quietMainUI(void)
 {
     if (system_state == MODE_MAIN_UI) {
-        print_debug("Sending L2 to quiet MainUI");
-        keyinput_send(HW_BTN_L2, PRESSED);
-        keyinput_send(HW_BTN_L2, RELEASED);
+        print_debug("Sending L1 to quiet MainUI");
+        keyinput_send(HW_BTN_L1, PRESSED);
+        keyinput_send(HW_BTN_L1, RELEASED);
         print_debug("Done (quietMainUI)");
     }
 }
@@ -118,7 +118,7 @@ void action_MainUI_contextMenu(void)
     print_debug("Sending keys (contextMenu)");
     keyinput_enable();
     keyinput_send(HW_BTN_MENU, RELEASED);
-    quietMainUI();
+    // quietMainUI();    // Will be enabled again when MainUI "click" sounds will be affected to L2 instead of L1 (requires a new MainUI)
 }
 
 void action_MainUI_gameSwitcher(void)
@@ -255,7 +255,7 @@ bool menuButtonAction(uint32_t val, bool comboKey)
 {
     if (comboKey) {
         keyinput_enable();
-        quietMainUI();
+        quietMainUI();    // Will be enabled again when MainUI "click" sounds will be affected to L2 instead of L1 (requires a new MainUI)
         return val != RELEASED;
     }
 
