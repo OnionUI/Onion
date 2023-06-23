@@ -10,13 +10,13 @@
 	"96":	"Esci dal gioco",
 	"97":	"Record %d/%d",
 	"98":	"Vuoto",
-	"99":	"No antep.",
-	"100":	"caric. fallito",
-	"101":	"salv. fallito",
-	"102":	"slot %d salvato",
-	"103":  "Schermo int.",
-	"104":  "On",
-	"105":  "Off",
-	"106":  "Menu nativo",
-    "138":  "Netplay"	
+	"99":	"Nessuna miniatura",
+	"100":	"Caricamento fallito",
+	"101":	"Salvataggio fallito",
+	"102":	"Slot %d salvato",
+	"103":  "Schermo intero",
+	"104":  "ON",
+	"105":  "OFF",
+	"106":  "Menu avanzato",
+    	"138":  "Netplay"	
 }
