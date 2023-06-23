@@ -38,6 +38,9 @@ main() {
     
     # Make sure MainUI doesn't show charging animation
     touch /tmp/no_charging_ui
+	
+	# Loop breaker for NTP
+	touch /tmp/ntp_run_once
 
     cd $sysdir
     bootScreen "Boot"
@@ -65,12 +68,7 @@ main() {
     mount -o bind /mnt/SDCARD/miyoo/lib/libgamename.so /customer/lib/libgamename.so
 
     start_networking
-	
-	# do an NTP update at startup
-	if flag_enabled NTPState; then
-		ntpdate time.google.com &
-	fi
-
+		
     # Auto launch
     if [ ! -f $sysdir/config/.noAutoStart ]; then
         state_change
@@ -100,7 +98,7 @@ main() {
 	# Set filebrowser branding to onion
 	$sysdir/bin/filebrowser/filebrowser config set --branding.name "Onion" -d $sysdir/bin/filebrowser/filebrowser.db
 	$sysdir/bin/filebrowser/filebrowser config set --branding.files "/mnt/SDCARD/.tmp_update/bin/filebrowser/theme" -d $sysdir/bin/filebrowser/filebrowser.db
-
+	
     # Main runtime loop
     while true; do
         state_change
@@ -570,6 +568,7 @@ runifnecessary() {
         a=`pgrep $1`
     done
 }
+
 
 start_networking() {
     rm $sysdir/config/.HotspotState  # dont start hotspot at boot

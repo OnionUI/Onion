@@ -14,6 +14,7 @@ update() {
     check_ntpstate
     check_httpstate
 	check_hotspotstate
+	sync_time &
 }
 
 
@@ -48,7 +49,21 @@ else
 fi
 }
 
+sync_time() {
+    if [ -f "$sysdir/config/.NTPState" ]; then
+        while true; do
+            if [ ! -f "/tmp/ntp_run_once" ]; then
+                break
+            fi
 
+            if ping -q -c 1 google.com > /dev/null 2>&1 ; then
+                ntpdate time.google.com &
+				rm /tmp/ntp_run_once
+            fi
+            sleep 2
+        done
+    fi
+}
 
 # Starts bftpd if the toggle is set to on
 check_ftpstate() { 
