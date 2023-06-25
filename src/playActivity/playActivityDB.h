@@ -13,7 +13,15 @@
 
 #define PLAY_ACTIVITY_DB_PATH "/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db"
 #define PLAY_ACTIVITY_DB_TMP_PATH "/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity_tmp.db"
+#define MAXVALUES 1000
 
+typedef struct structRom { // for reading from old DB
+    char name[100];
+    int playTime;
+} rom_list_s;
+
+static rom_list_s rom_list[MAXVALUES];
+static int rom_list_len = 0;
 typedef struct ROM ROM;
 typedef struct PlayActivity PlayActivity;
 typedef struct PlayActivities PlayActivities;
@@ -53,7 +61,7 @@ void play_activity_db_open(void)
     mkdir("/mnt/SDCARD/Saves/CurrentProfile/play_activity/", 0777);
     int rc = sqlite3_open("/mnt/SDCARD/Saves/CurrentProfile/play_activity/play_activity_db.sqlite", &play_activity_db);
     if (rc != SQLITE_OK) {
-        printf_debug("%s\n", sqlite3_errmsg(play_activity_db));
+        printf("%s\n", sqlite3_errmsg(play_activity_db));
         play_activity_db_close();
         return;
     }
@@ -84,6 +92,25 @@ int play_activity_db_execute(char *sql)
     return rc;
 }
 
+int play_activity_db_execute_select(char *sql)
+{
+    printf_debug("play_activity_db_execute_select(%s)\n", sql);
+    play_activity_db_open();
+
+    sqlite3_stmt *stmt;
+    int result = 0;
+
+    if (sqlite3_prepare_v2(play_activity_db, sql, -1, &stmt, NULL) == SQLITE_OK) {
+        if (sqlite3_step(stmt) == SQLITE_ROW) {
+            result = sqlite3_column_int(stmt, 0);
+        }
+        sqlite3_finalize(stmt);
+    }
+
+    play_activity_db_close();
+    return result;
+}
+
 sqlite3_stmt *play_activity_db_prepare(char *sql)
 {
     printf_debug("play_activity_db_prepare(%s)\n", sql);
@@ -91,8 +118,8 @@ sqlite3_stmt *play_activity_db_prepare(char *sql)
     sqlite3_stmt *stmt = NULL;
     if (sqlite3_prepare_v2(play_activity_db, sql, -1, &stmt, NULL) !=
         SQLITE_OK) {
-        printf_debug("%s: %s\n", sqlite3_errmsg(play_activity_db),
-                     sqlite3_sql(stmt));
+        printf("%s: %s\n", sqlite3_errmsg(play_activity_db),
+               sqlite3_sql(stmt));
     }
     play_activity_db_close();
     return (stmt);
@@ -199,31 +226,26 @@ ROM *rom_find_by_file_path(char *rom_file_path)
     return rom;
 }
 
-
 void play_activity_start(char *rom_file_path)
 {
-    printf_debug("play_activity_start(%s)\n", rom_file_path);
-
     ROM *rom = rom_find_by_file_path(rom_file_path);
     if (rom == NULL) {
         exit(0);
     }
-
+    printf("play_activity_stop(%s)\n", rom->name);
     int rom_id = rom->id;
     play_activity_db_execute(sqlite3_mprintf(
         "INSERT INTO play_activity(rom_id) VALUES(%d);", rom_id));
 }
 
-
 void play_activity_stop(char *rom_file_path)
 {
-    printf_debug("play_activity_stop(%s)\n", rom_file_path);
 
     ROM *rom = rom_find_by_file_path(rom_file_path);
     if (rom == NULL) {
         exit(0);
     }
-
+    printf("play_activity_stop(%s)\n", rom->name);
     int rom_id = rom->id;
     play_activity_db_execute(
         sqlite3_mprintf("UPDATE play_activity SET play_time = (strftime('%%s', "
@@ -232,73 +254,120 @@ void play_activity_stop(char *rom_file_path)
                         rom_id));
 }
 
+int readRomOldDB()
+{
+    FILE *fp;
 
-// DEPRECATE
+    // Check to avoid corruption
+    if (exists(PLAY_ACTIVITY_DB_PATH)) {
+        if ((fp = fopen(PLAY_ACTIVITY_DB_PATH, "rb")) != NULL) {
+            fread(rom_list, sizeof(rom_list), 1, fp);
+            rom_list_len = 0;
+
+            for (int i = 0; i < MAXVALUES; i++) {
+                if (strlen(rom_list[i].name) != 0)
+                    rom_list_len++;
+            }
+
+            fclose(fp);
+        }
+        else {
+            // The file exists but could not be opened
+            // Something went wrong, the program is terminated
+            return -1;
+        }
+    }
+
+    return 1;
+}
+
+void displayRomOldDB(void)
+{
+
+    printf("--------------- Old DB entries ---------------\n");
+    for (int i = 0; i < rom_list_len; i++) {
+        printf("rom_list name: %s\n", rom_list[i].name);
+
+        char cPlayTime[15];
+        sprintf(cPlayTime, "%d", rom_list[i].playTime);
+        printf("playtime: %s\n", cPlayTime);
+    }
+}
+
 void play_activity_db_V3_upgrade(void)
 {
     printf_debug("%s\n", "play_activity_db_V3_upgrade()");
     remove("/tmp/initTimer");
-    struct PlayActivityV3 {
-        char name[100];
-        int play_time;
-    };
-    FILE *play_activity_db_V3 = NULL;
-    if (exists(PLAY_ACTIVITY_DB_PATH)) {
-        play_activity_db_V3 = fopen(PLAY_ACTIVITY_DB_PATH, "rb");
+
+    if (readRomOldDB() == -1) {
+        return;
     }
-    else if (exists(PLAY_ACTIVITY_DB_TMP_PATH)) {
-        play_activity_db_V3 = fopen(PLAY_ACTIVITY_DB_TMP_PATH, "rb");
-    }
-    if (play_activity_db_V3 != NULL) {
-        struct PlayActivityV3 play_activity_v3[1000];
-        while (fread(play_activity_v3, sizeof(play_activity_v3), 1,
-                     play_activity_db_V3) == 1) {
-            printf_debug("upgrading rom %s play_time %d\n",
-                         play_activity_v3->name, play_activity_v3->play_time);
-            if (strlen(play_activity_v3->name) > 0) {
-                CacheDBItem *cache_db_item = NULL;
-                DIR *dir;
-                struct dirent *entry;
-                dir = opendir("/mnt/SDCARD/Roms");
-                while ((cache_db_item == NULL) &&
-                       ((entry = readdir(dir)) != NULL)) {
-                    if (entry->d_type == DT_DIR &&
-                        strcmp(entry->d_name, ".") != 0 &&
-                        strcmp(entry->d_name, "..") != 0) {
-                        char file_path[strlen(entry->d_name) +
-                                       strlen(play_activity_v3->name) + 7];
-                        snprintf(file_path,
-                                 strlen(entry->d_name) +
-                                     strlen(play_activity_v3->name) + 8,
-                                 "/Roms/%s/%s", entry->d_name,
-                                 play_activity_v3->name);
-                        cache_db_item = cache_db_find(file_path);
-                    }
+
+    displayRomOldDB();
+    printf("\n------- Migrating data to new database -------\n");
+
+    int totalOldRecords = 0;
+    int totalImported = 0;
+    int totalAlreadyImported = 0;
+    int totalSkipped = 0;
+
+    for (int i = 0; i < rom_list_len; i++) {
+        totalOldRecords++;
+        printf_debug("rom_list name: %s\n", rom_list[i].name);
+        if (strlen(rom_list[i].name) > 0) {
+            CacheDBItem *cache_db_item = NULL;
+            DIR *dir;
+            struct dirent *entry;
+            dir = opendir("/mnt/SDCARD/Roms");
+            while ((cache_db_item == NULL) && ((entry = readdir(dir)) != NULL)) {
+                if (entry->d_type == DT_DIR && strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+                    char file_path[strlen(entry->d_name) + strlen(rom_list[i].name) + 7];
+                    snprintf(file_path, strlen(entry->d_name) + strlen(rom_list[i].name) + 8, "/Roms/%s/%s", entry->d_name, rom_list[i].name);
+                    cache_db_item = cache_db_find(file_path);
                 }
-                printf_debug("%s\n", "finished rom loop");
-                closedir(dir);
-                if (cache_db_item != NULL) {
-                    printf_debug("%s\n", "cache found");
-                    char *sql = sqlite3_mprintf(
-                        "INSERT INTO rom(type, name, file_path, image_path) "
-                        "VALUES(%q, %q, %q, %q);",
-                        entry->d_name, cache_db_item->disp, cache_db_item->path,
-                        cache_db_item->imgpath);
-                    play_activity_db_execute(sql);
-                    sql = sqlite3_mprintf(
-                        "INSERT INTO play_activity(rom_id, play_time, "
-                        "created_at, updated_at) VALUES(%d, %d, "
-                        "(strftime('%%s', 'now')), (strftime('%%s', 'now')) + "
-                        "%d);",
-                        sqlite3_last_insert_rowid(play_activity_db),
-                        play_activity_v3->play_time,
-                        play_activity_v3->play_time);
-                    play_activity_db_execute(sql);
+
+            }
+            closedir(dir);
+            if (cache_db_item != NULL) {
+                ROM *rom = rom_find_by_file_path(cache_db_item->path);
+                if (rom == NULL) {
+                    totalSkipped++;
+                    continue;
+                }
+
+                // Check if a record already exists with the same rom_id and created_at set to 0
+                char *selectSql = sqlite3_mprintf("SELECT COUNT(*) FROM play_activity WHERE rom_id = %d AND created_at = 0;", rom->id);
+                int result = play_activity_db_execute_select(selectSql);
+                printf_debug("SQL query result : %d\n", result);
+                sqlite3_free(selectSql);
+
+                if (result > 0) {
+                    printf("%s already imported!\n", rom->name);
+                    totalAlreadyImported++;
+                    continue;
+                }
+
+                printf("Importing %s (time: %d)\n", rom->name, rom_list[i].playTime);
+                char *sql = sqlite3_mprintf("INSERT INTO play_activity(rom_id, play_time, created_at, updated_at) VALUES "
+                                            "('%d','%d',0,'%d');", // Imported times have the particularity of having a "created_at" at 0.
+                                            rom->id, rom_list[i].playTime, rom_list[i].playTime);
+                printf_debug("SQL query: %s\n", sql);
+                if (play_activity_db_execute(sql) == 0) {
+                    totalImported++;
                 }
             }
+                            else {
+                    totalSkipped++;
+                }
         }
     }
-    fclose(play_activity_db_V3);
+    printf("\n**************************\n");
+    printf("Summary:\n========\n");
+    printf("Total of old records : %d\n", totalOldRecords);
+    printf("Total successfuly imported: %d\n", totalImported);
+    printf("Total already imported: %d\n", totalAlreadyImported);
+    printf("Total skipped: %d\n", totalSkipped);
+    printf("**************************\n");
 }
 
 #endif // PLAY_ACTIVITY_DB_H
