@@ -306,7 +306,7 @@ void settings_save(void)
     config_flag_set(".authhttpState", settings.auth_http_state);
     config_flag_set(".authsshState", settings.auth_ssh_state);
     config_flag_set(".muteVolume", settings.mute);
-    config_flag_set(".disableStandby",settings.disable_standby);
+    config_flag_set(".disableStandby", settings.disable_standby);
     config_setNumber("tzselect", settings.tzselect_state);
     config_setNumber("battery/warnAt", settings.low_battery_warn_at);
     config_setNumber("startup/app", settings.startup_application);
