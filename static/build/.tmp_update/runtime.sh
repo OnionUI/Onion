@@ -376,24 +376,11 @@ launch_switcher() {
 
 check_off_order() {
     if  [ -f /tmp/.offOrder ] ; then
-        pkill -9 sshd
-        pkill -9 wpa_supplicant
-        pkill -9 udhcpc
-        sync
-
         cd $sysdir
         bootScreen "$1" &
-
         # Allow the bootScreen to be displayed
-        sleep 1.5
-
-        if [ $deviceModel -eq 283 ]; then 
-            reboot
-        else
-            poweroff
-        fi
-
-        sleep 10
+        sleep 1
+		$sysdir/script/shutdown.sh
     fi
 }
 
