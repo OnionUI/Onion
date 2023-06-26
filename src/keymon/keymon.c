@@ -174,13 +174,6 @@ void shutdown(void)
     system_clock_save();
     sync();
 
-    if (DEVICE_ID == MIYOO283) {
-        reboot(RB_AUTOBOOT);
-    }
-    else if (DEVICE_ID == MIYOO354) {
-        system("poweroff");
-    }
-
     while (1)
         pause();
     exit(0);
