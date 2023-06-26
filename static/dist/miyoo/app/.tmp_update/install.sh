@@ -219,10 +219,14 @@ run_installation() {
     cd $sysdir
     installUI &
 	sync
+    echo ":: Migrating old Activity Tracker data"
+    playActivity DBmigration
     sleep 1
 
     verb="Updating"
     verb2="Update"
+
+
 
     if [ $reset_configs -eq 1 ]; then
         verb="Installing"
