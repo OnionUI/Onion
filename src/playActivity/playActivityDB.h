@@ -325,6 +325,7 @@ void play_activity_db_V3_upgrade(void)
                     snprintf(file_path, strlen(entry->d_name) + strlen(rom_list[i].name) + 8, "/Roms/%s/%s", entry->d_name, rom_list[i].name);
                     cache_db_item = cache_db_find(file_path);
                 }
+
             }
             closedir(dir);
             if (cache_db_item != NULL) {
@@ -355,9 +356,9 @@ void play_activity_db_V3_upgrade(void)
                     totalImported++;
                 }
             }
-            else {
-                totalSkipped++;
-            }
+                            else {
+                    totalSkipped++;
+                }
         }
     }
     printf("\n**************************\n");

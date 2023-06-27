@@ -3,15 +3,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-void printUsage()
-{
+void printUsage() {
     printf("Usage: playActivity start rom_path -> Launch the counter for this rom\n");
     printf("       playActivity stop rom_path  -> Stop the counter for this rom\n");
     printf("       playActivity DBmigration    -> Migrate the old database (prior to Onion 4.2.0) format to new SQLite format\n");
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     log_setName("play_activity");
 
     if (argc < 2) {
@@ -22,25 +20,20 @@ int main(int argc, char *argv[])
     if (strcmp(argv[1], "start") == 0) {
         if (argc >= 3) {
             play_activity_start(argv[2]);
-        }
-        else {
+        } else {
             printf("Error: Missing rom_path argument\n");
             printUsage();
         }
-    }
-    else if (strcmp(argv[1], "stop") == 0) {
+    } else if (strcmp(argv[1], "stop") == 0) {
         if (argc >= 3) {
             play_activity_stop(argv[2]);
-        }
-        else {
+        } else {
             printf("Error: Missing rom_path argument\n");
             printUsage();
         }
-    }
-    else if (strcmp(argv[1], "DBmigration") == 0) {
+    } else if (strcmp(argv[1], "DBmigration") == 0) {
         play_activity_db_V3_upgrade();
-    }
-    else {
+    } else {
         printf("Error: Invalid argument '%s'\n", argv[1]);
         printUsage();
     }

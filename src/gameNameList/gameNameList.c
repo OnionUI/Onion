@@ -1,13 +1,13 @@
-#include <ctype.h>
-#include <dirent.h>
-#include <dlfcn.h>
-#include <libgen.h>
-#include <sqlite3/sqlite3.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
+#include <ctype.h>
+#include <dirent.h>
 #include <unistd.h>
+#include <sys/stat.h>
+#include <libgen.h>
+#include <sqlite3/sqlite3.h>
+#include <dlfcn.h>
 
 #include "gamename.h"
 #include "utils/file.h"
@@ -44,10 +44,9 @@ void removeExtension(char *file_name)
     }
 }
 
-int findFoldersWithShortname(char *disk_path, char matching_folders[][256], int i)
-{
-    char command[STR_MAX * 5];
-    char path[STR_MAX * 3];
+int findFoldersWithShortname(char *disk_path, char matching_folders[][256], int i) {
+    char command[STR_MAX*5];
+    char path[STR_MAX*3];
     char folder[STR_MAX];
     FILE *find, *sed;
 
@@ -76,16 +75,16 @@ int findFoldersWithShortname(char *disk_path, char matching_folders[][256], int 
             fgets(folder, sizeof(folder), sed);
             folder[strcspn(folder, "\n")] = '\0'; // Remove trailing newline character
             pclose(sed);
-            char *system = basename(folder);
+            char * system = basename(folder);
             int cmp = -1;
             //check if we already added this folder/system
-            for (int x = 0; x < i; x++) {
+            for (int x = 0; x < i; x ++){
                 cmp = strcmp(matching_folders[x], system);
-                if (cmp == 0) {
+                if ( cmp == 0){
                     break;
                 }
             }
-            if (cmp != 0) {
+            if( cmp != 0){
                 // Extract the folder name and add it to the matching_folders array
                 sprintf(matching_folders[i], "%s", system);
                 i++;
@@ -100,15 +99,15 @@ int findFoldersWithShortname(char *disk_path, char matching_folders[][256], int 
     return i;
 }
 
-int sortFileLines(const char *filename)
-{
+
+
+int sortFileLines(const char* filename) {
     char cmd[STR_MAX];
     snprintf(cmd, STR_MAX, "awk '$1' %s | sort -uk 1 -o %s", filename, filename);
     return system(cmd);
 }
 
-int endsWith(const char *str, const char *suffix)
-{
+int endsWith(const char *str, const char *suffix) {
     size_t len_str = strlen(str);
     size_t len_suffix = strlen(suffix);
     if (len_suffix > len_str) {
@@ -117,8 +116,7 @@ int endsWith(const char *str, const char *suffix)
     return strncmp(str + len_str - len_suffix, suffix, len_suffix) == 0;
 }
 
-void getRomNamesDir(const char *dir_path, const char *rom_ext, FILE *rom_names_file)
-{
+void getRomNamesDir(const char *dir_path, const char *rom_ext, FILE *rom_names_file) {
     DIR *dir = opendir(dir_path);
     char shortname[256];
     if (dir == NULL) {
@@ -128,17 +126,16 @@ void getRomNamesDir(const char *dir_path, const char *rom_ext, FILE *rom_names_f
 
     struct dirent *entry;
     while ((entry = readdir(dir)) != NULL) {
-        if (entry->d_type == DT_DIR) { // directory
+        if (entry->d_type == DT_DIR) {  // directory
             if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
                 continue;
             }
             char sub_dir_path[1024];
             snprintf(sub_dir_path, sizeof(sub_dir_path), "%s/%s", dir_path, entry->d_name);
             getRomNamesDir(sub_dir_path, rom_ext, rom_names_file);
-        }
-        else if (entry->d_type == DT_REG) { // regular file
+        } else if (entry->d_type == DT_REG) {  // regular file
             if (endsWith(entry->d_name, rom_ext)) {
-                strcpy(shortname, entry->d_name);
+                strcpy( shortname, entry->d_name);
                 removeExtension(shortname);
                 fprintf(rom_names_file, "%s\n", shortname);
             }
@@ -148,14 +145,13 @@ void getRomNamesDir(const char *dir_path, const char *rom_ext, FILE *rom_names_f
     closedir(dir);
 }
 
-int getRomNames(char *rom_dir_path, char *rom_names_file_path)
-{
+int getRomNames(char* rom_dir_path, char* rom_names_file_path) {
     FILE *rom_names_file;
     char foldername[1256];
 
-    sprintf(foldername, "%s%s", rom_dir_path, "/Emu");
+    sprintf( foldername, "%s%s", rom_dir_path, "/Emu");
     systems_count = findFoldersWithShortname(foldername, matching_folders, 0);
-    sprintf(foldername, "%s%s", rom_dir_path, "/RApp");
+    sprintf( foldername, "%s%s", rom_dir_path, "/RApp");
     systems_count = findFoldersWithShortname(foldername, matching_folders, systems_count);
 
     // Open the file to write the rom names to
@@ -164,9 +160,9 @@ int getRomNames(char *rom_dir_path, char *rom_names_file_path)
         printf("Error: Failed to open file %s\n", rom_names_file_path);
         return -1;
     }
-
-    for (int i = 0; i < systems_count; i++) {
-        sprintf(foldername, "%s/Roms/%s", rom_dir_path, matching_folders[i]);
+    
+    for (int i = 0; i < systems_count ; i++){
+        sprintf( foldername, "%s/Roms/%s" , rom_dir_path, matching_folders[i] );
         getRomNamesDir(foldername, ".zip", rom_names_file);
     }
 
@@ -179,12 +175,12 @@ int getRomNames(char *rom_dir_path, char *rom_names_file_path)
     return 0;
 }
 
-int matchRomNames(char *rom_names_file, char *full_rom_list_file, char *arcade_rom_names_file, char *missing_rom_names_file)
-{
+
+int matchRomNames(char* rom_names_file, char* full_rom_list_file, char* arcade_rom_names_file, char* missing_rom_names_file) {
     // Open input and output files
     FILE *rom_names_fp, *full_rom_list_fp, *arcade_rom_names_fp, *missing_rom_names_fp;
     char filename[STR_MAX];
-    char *full_rom_name_first_word;
+    char* full_rom_name_first_word;
 
     rom_names_fp = fopen(rom_names_file, "r");
     full_rom_list_fp = fopen(full_rom_list_file, "r");
@@ -210,8 +206,8 @@ int matchRomNames(char *rom_names_file, char *full_rom_list_file, char *arcade_r
         strtok(full_rom_name, "\n");
 
         // Get first word from full rom name
-        strcpy(filename, full_rom_name); //preserve the original line;
-        full_rom_name_first_word = strtok(filename, "\t ");
+        strcpy(filename, full_rom_name);//preserve the original line;
+        full_rom_name_first_word = strtok(filename, "\t ");        
 
         if (strcmp(full_rom_name_first_word, rom_name) == 0) {
             // Write matched line to output file
@@ -219,22 +215,20 @@ int matchRomNames(char *rom_names_file, char *full_rom_list_file, char *arcade_r
             // Read next line from input files
             fgets(rom_name, 50, rom_names_fp);
             fgets(full_rom_name, 200, full_rom_list_fp);
-        }
-        else if (strcmp(full_rom_name_first_word, rom_name) > 0) {
+        } else if (strcmp(full_rom_name_first_word, rom_name) > 0) {
             // Skip ahead in full_rom_list_file until a match is found or EOF is reached
             while (strcmp(full_rom_name_first_word, rom_name) > 0 && !feof(rom_names_fp)) {
                 fprintf(missing_rom_names_fp, "%s\n", rom_name);
                 fgets(rom_name, 50, rom_names_fp);
                 strtok(rom_name, "\n");
             }
-        }
-        else if (strcmp(full_rom_name_first_word, rom_name) < 0) {
+        } else if (strcmp(full_rom_name_first_word, rom_name) < 0) {
             // Skip ahead in rom_names_file until a match is found or EOF is reached
             while (strcmp(full_rom_name_first_word, rom_name) < 0 && !feof(full_rom_list_fp)) {
                 fgets(full_rom_name, 200, full_rom_list_fp);
                 strtok(full_rom_name, "\n");
-                strcpy(filename, full_rom_name); //preserve the original line;
-                full_rom_name_first_word = strtok(filename, "\t ");
+                strcpy(filename, full_rom_name);//preserve the original line;
+                full_rom_name_first_word = strtok(filename, "\t ");                        
             }
         }
     }
@@ -248,8 +242,7 @@ int matchRomNames(char *rom_names_file, char *full_rom_list_file, char *arcade_r
     return 0;
 }
 
-int createCopyFile(const char *src_path, const char *dst_path)
-{
+int createCopyFile(const char* src_path, const char* dst_path) {
     // Check if the source file exists
     if (access(src_path, F_OK) != 0) {
         printf("The input file to copy does not exist\n");
@@ -276,8 +269,8 @@ int createCopyFile(const char *src_path, const char *dst_path)
     return 1;
 }
 
-void splitString(char *input, char *token1, char *token2)
-{
+
+void splitString(char* input, char* token1, char* token2) {
     int i, j = 0;
     int tab_pos = -1;
     int len = strlen(input);
@@ -312,8 +305,7 @@ void splitString(char *input, char *token1, char *token2)
             }
             // Skip the ending quote
             tab_pos = i + 1;
-        }
-        else {
+        } else {
             // If there are no quotes, copy the whole token
             i = tab_pos;
             while (i < len) {
@@ -335,28 +327,28 @@ void splitString(char *input, char *token1, char *token2)
 
 int updateCallback(void *data, int argc, char **argv, char **col_name)
 {
-    char update_sql[STR_MAX * 2];
-    UpdateData *d = (UpdateData *)data;
+    char update_sql[STR_MAX*2];
+    UpdateData *d = (UpdateData *) data;
 
     sqlite3 *db = d->db;
     char *table_name = d->table_name;
 
     // Retrieve the values from the current row of the result set
     int id = atoi(argv[0]); // Assuming the first column is an integer ID
-    char *path = argv[1];   // The new value to be updated
+    char * path = argv[1] ; // The new value to be updated
     char *romname = basename(path);
     removeExtension(romname);
-    char *title = GetGameName_func("wathever", romname);
-    if (title != NULL) {
+    char *title = GetGameName_func( "wathever", romname);
+    if ( title != NULL ){
         // Build and execute the update statement
         sprintf(update_sql, "UPDATE %s SET disp = ? WHERE id = ?", table_name);
         sqlite3_stmt *stmt;
-        int rc = sqlite3_prepare_v2(db, update_sql, -1, &stmt, NULL);
+        int rc = sqlite3_prepare_v2(db, update_sql, -1, &stmt, NULL);  
         sqlite3_bind_text(stmt, 1, title, -1, SQLITE_STATIC);
         sqlite3_bind_int(stmt, 2, id);
-
+        
         rc = sqlite3_step(stmt);
-        if (rc != SQLITE_DONE) {
+        if ( rc != SQLITE_DONE) {
             fprintf(stderr, "Update failed: %s (%d)\n", sqlite3_errmsg(db), rc);
             return 1;
         }
@@ -365,35 +357,35 @@ int updateCallback(void *data, int argc, char **argv, char **col_name)
     return 0;
 }
 
-int updateSqlliteCache(char *base_dir_path)
-{
+int updateSqlliteCache(char* base_dir_path) {
 
-    char table_name[STR_MAX + 6];
-    char select_sql[STR_MAX * 2];
+    char table_name[STR_MAX+6];
+    char select_sql[STR_MAX*2];
     sqlite3 *db;
     UpdateData data;
 
     //for every system open the DB and update every occurrence
-    for (int i = 0; i < systems_count; i++) {
-        char cache_path[STR_MAX * 3];
+    for (int i = 0; i < systems_count ; i++){
+        char cache_path[STR_MAX*3];
         //a bit of assumption here on the path, to be perfected
-        snprintf(cache_path, STR_MAX * 3 - 1, "%s/Roms/%s/%s_cache2.db", base_dir_path, matching_folders[i], matching_folders[i]);
+        snprintf(cache_path, STR_MAX*3 -1, "%s/Roms/%s/%s_cache2.db", base_dir_path, matching_folders[i], matching_folders[i]);
 
         if (!is_file(cache_path))
             continue; //skip this db, the update cache not found
 
+        
         sprintf(table_name, "%s_roms", matching_folders[i]);
-        int rc = sqlite3_open(cache_path, &db);
-        if (rc != SQLITE_OK) {
+        int rc =  sqlite3_open(cache_path, &db);
+        if ( rc != SQLITE_OK) {
             fprintf(stderr, "Cannot open database: %s (%s)\n", sqlite3_errmsg(db),
                     cache_path);
             sqlite3_close(db);
             continue;
         }
-
+    
         sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, NULL);
 
-        // Build and execute the select statement to retrieve all rows from the table to be updated.
+        // Build and execute the select statement to retrieve all rows from the table to be updated. 
         // we use 'path' because we are going to override 'dist', this way the tool can be run multiple times.
         data.table_name = table_name;
         data.db = db;
@@ -408,18 +400,19 @@ int updateSqlliteCache(char *base_dir_path)
         // end the transaction
         sqlite3_exec(db, "END TRANSACTION", NULL, NULL, NULL);
         sqlite3_close(db);
+
     }
     return 0;
 }
 
-int main(int argc, char *argv[])
-{
-    char *base_dir_path;
-    char *list_dir_path;
+int main(int argc, char *argv[]) {
+    char* base_dir_path;
+    char* list_dir_path;
     char full_rom_list_path[256];
     char arcade_rom_names_path[256];
     char missing_rom_names_path[256];
     char rom_names_file_path[256];
+
 
     if (argc < 2) {
         printf("Usage: gameNameList base_dir_path list_dir_path\n");
@@ -428,12 +421,13 @@ int main(int argc, char *argv[])
 
     base_dir_path = argv[1];
     list_dir_path = argv[2];
-    sprintf(full_rom_list_path, "%s/%s", list_dir_path, FULL_ROM_LIST_NAME);
-    sprintf(arcade_rom_names_path, "%s/%s", list_dir_path, ARCADE_ROM_NAMES_NAME);
-    sprintf(missing_rom_names_path, "%s/%s", list_dir_path, MISSING_ROM_NAMES_NAME);
-    sprintf(rom_names_file_path, "%s/%s", list_dir_path, ROM_NAMES_FILE_NAME);
+    sprintf(full_rom_list_path ,"%s/%s", list_dir_path, FULL_ROM_LIST_NAME);
+    sprintf(arcade_rom_names_path ,"%s/%s", list_dir_path, ARCADE_ROM_NAMES_NAME);
+    sprintf(missing_rom_names_path ,"%s/%s", list_dir_path, MISSING_ROM_NAMES_NAME);
+    sprintf(rom_names_file_path ,"%s/%s", list_dir_path, ROM_NAMES_FILE_NAME);
 
-    if (createCopyFile(arcade_rom_names_path, full_rom_list_path) < 0) {
+
+    if ( createCopyFile(arcade_rom_names_path, full_rom_list_path) < 0 ){
         return -1;
     }
 
@@ -442,6 +436,7 @@ int main(int argc, char *argv[])
         printf("Error: Failed to get rom names\n");
         return -1;
     }
+
 
     // Match the rom names and write the results to the output files
     if (matchRomNames(rom_names_file_path, full_rom_list_path, arcade_rom_names_path, missing_rom_names_path) != 0) {
@@ -467,7 +462,7 @@ int main(int argc, char *argv[])
     }
 
     // Update the sql lit cache on the new colum "lab" to let the UI sort by the title name displayed instead of of the rom name
-    if (updateSqlliteCache(base_dir_path) != 0) {
+    if (updateSqlliteCache(base_dir_path) != 0 ){
         printf("Error: Failed to update sql lite caches\n");
         dlclose(handle);
         return -1;
