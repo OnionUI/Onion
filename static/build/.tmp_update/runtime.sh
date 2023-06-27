@@ -380,12 +380,7 @@ check_off_order() {
         bootScreen "$1" &
         # Allow the bootScreen to be displayed
         sleep 1
-        if [ $deviceModel -eq 283 ]; then 
-            $sysdir/script/shutdown.sh -r
-        else
-            $sysdir/script/shutdown.sh
-        fi
-		
+		$sysdir/script/shutdown.sh
     fi
 }
 

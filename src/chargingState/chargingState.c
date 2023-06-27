@@ -252,13 +252,7 @@ int main(void)
     if (turn_off) {
 #ifdef PLATFORM_MIYOOMINI
         display_setScreen(false);
-
-        if (DEVICE_ID == MIYOO283) {
-            system("/mnt/SDCARD/.tmp_update/script/shutdown.sh -r; sleep 10");
-        }
-        else if (DEVICE_ID == MIYOO354) {
-            system("/mnt/SDCARD/.tmp_update/script/shutdown.sh");
-        }
+        system("/mnt/SDCARD/.tmp_update/script/shutdown.sh; sleep 10");
 #endif
     }
     else {

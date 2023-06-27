@@ -50,7 +50,11 @@ if [ "$0" = "/tmp/_shutdown" ]; then
 	if [ "$1" = "-r" ]; then
 		/sbin/reboot
 	else
-		/sbin/poweroff
+		if [ "$(cat /tmp/deviceModel)" = "283" ]; then
+			/sbin/reboot     # no poweroff command on Miyoo Mini
+		else
+			/sbin/poweroff
+		fi
 	fi
 	
 fi
