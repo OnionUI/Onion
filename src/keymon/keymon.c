@@ -401,25 +401,26 @@ int main(void)
                     power_pressed = true;
                 if (!comboKey_menu && val == REPEAT) {
                     repeat_power++;
-                    if (repeat_power == 7)
-                        if (!settings.disable_standby)
-                            deepsleep(); // 0.5sec deepsleep
-                        else if (repeat_power == REPEAT_SEC(5)) {
-                            short_pulse();
-                            remove(CMD_TO_RUN_PATH);
-                            suspend(2); // 5sec kill processes
-                        }
-                        else if (repeat_power >= REPEAT_SEC(10)) {
-                            short_pulse();
-                            shutdown(); // 10sec force shutdown
-                        }
+                    if (repeat_power == 7 && !settings.disable_standby) {
+                        deepsleep(); // 0.5sec deepsleep
+                    }
+                    else if (repeat_power == REPEAT_SEC(5)) {
+                        short_pulse();
+                        remove(CMD_TO_RUN_PATH);
+                        suspend(2); // 5sec kill processes
+                    }
+                    else if (repeat_power >= REPEAT_SEC(10)) {
+                        short_pulse();
+                        shutdown(); // 10sec force shutdown
+                    }
                     break;
                 }
                 if (val == RELEASED) {
                     // suspend
                     if (power_pressed && repeat_power < 7) {
-                        if (comboKey_menu)
+                        if (comboKey_menu) {
                             takeScreenshot();
+                        }
                         else {
                             if (settings.disable_standby) {
                                 deepsleep();
