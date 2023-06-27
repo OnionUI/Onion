@@ -60,7 +60,7 @@ if [ "$0" = "/tmp/_shutdown" ]; then
 fi
 
 if [ ! -f /tmp/_shutdown ]; then
-	cp -f /mnt/SDCARD/.tmp_update/script/shutdown.sh /tmp/_shutdown
+	cp -f "$0" /tmp/_shutdown
 fi
 
 # run the script totally detached from current shell
