@@ -26,11 +26,16 @@ jobs:
               - src/**/*.h
               - src/**/*.cpp
               - src/**/*.hpp
+      - name: List all changed src files
+        run: |
+          for file in ${{ steps.changed-files.outputs.src_all_changed_files }}; do
+            echo "$file was changed"
+          done
       - name: Apply formatting
         if: steps.changed-files-yaml.outputs.src_any_changed == 'true'
         run: |
           sudo apt install clang-format
-          for file in ${{ steps.changed-files-specific.outputs.changed_files }}; do
+          for file in ${{ steps.changed-files-specific.outputs.src_all_changed_files }}; do
             echo "clang-format -i '$file'"
             clang-format -style=file -i "$file"
           done
