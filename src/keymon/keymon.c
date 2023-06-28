@@ -173,7 +173,7 @@ void shutdown(void)
     system_clock_get();
     system_clock_save();
     sync();
-	system("shutdown");
+    system("shutdown");
     while (1)
         pause();
     exit(0);
