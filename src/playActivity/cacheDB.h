@@ -75,7 +75,7 @@ CacheDBItem *cache_db_find(char *cache_db_item_file_path)
             cache_db_file_path = cache2_db_file_path;
         }
         else {
-            printf("No cache database file found for %s\n", type);
+            printf_debug("No cache database file found for %s\n", type);
             free(cache6_db_file_path);
             free(cache2_db_file_path);
             return NULL;
@@ -94,6 +94,9 @@ CacheDBItem *cache_db_find(char *cache_db_item_file_path)
         cache_db_item->imgpath = strdup((const char *)sqlite3_column_text(stmt, 3));
         cache_db_item->type = sqlite3_column_int(stmt, 4);
         cache_db_item->ppath = strdup((const char *)sqlite3_column_text(stmt, 5));
+    }
+    else{
+        printf("Game not found in this cache db\n");
     }
     sqlite3_finalize(stmt);
 
