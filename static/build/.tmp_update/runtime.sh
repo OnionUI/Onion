@@ -380,11 +380,9 @@ launch_switcher() {
 
 check_off_order() {
     if  [ -f /tmp/.offOrder ] ; then
-        cd $sysdir
         bootScreen "$1" &
-        # Allow the bootScreen to be displayed
-        sleep 1
-		$sysdir/script/shutdown.sh
+        sleep 1			# Allow the bootScreen to be displayed
+        shutdown
     fi
 }
 

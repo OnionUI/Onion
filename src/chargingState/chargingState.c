@@ -252,7 +252,7 @@ int main(void)
     if (turn_off) {
 #ifdef PLATFORM_MIYOOMINI
         display_setScreen(false);
-        system("/mnt/SDCARD/.tmp_update/script/shutdown.sh; sleep 10");
+        system("shutdown; sleep 10");
 #endif
     }
     else {
