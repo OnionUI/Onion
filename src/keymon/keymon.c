@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "system/axp.h"
 #include "system/battery.h"
 #include "system/device_model.h"
 #include "system/keymap_hw.h"
@@ -311,6 +312,12 @@ int main(void)
     log_setName("keymon");
 
     getDeviceModel();
+
+    if (DEVICE_ID == 354) {
+        // set hardware poweroff time to 10s
+        axp_write(0x36, axp_read(0x36) | 3);
+    }
+
     settings_init();
 
     // Set Initial Volume / Brightness
@@ -404,13 +411,9 @@ int main(void)
                     if (repeat_power == 7 && !settings.disable_standby) {
                         deepsleep(); // 0.5sec deepsleep
                     }
-                    else if (repeat_power == REPEAT_SEC(5)) {
+                    else if (repeat_power >= REPEAT_SEC(5)) {
                         short_pulse();
                         remove(CMD_TO_RUN_PATH);
-                        suspend(2); // 5sec kill processes
-                    }
-                    else if (repeat_power >= REPEAT_SEC(10)) {
-                        short_pulse();
                         shutdown(); // 10sec force shutdown
                     }
                     break;
