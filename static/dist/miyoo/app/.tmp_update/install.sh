@@ -219,8 +219,6 @@ run_installation() {
     cd $sysdir
     installUI &
 	sync
-    echo ":: Migrating old Activity Tracker data"
-    playActivity DBmigration
     sleep 1
 
     verb="Updating"
@@ -250,7 +248,13 @@ run_installation() {
         echo "Preparing update..." >> /tmp/.update_msg
 
         debloat_apps
+        
+        echo "Migrating data..." >> /tmp/.update_msg
         move_ports_collection
+
+        echo ":: Migrating old Activity Tracker data"
+        playActivity DBmigration
+
         refresh_roms
     fi
 
