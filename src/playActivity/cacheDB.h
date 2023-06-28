@@ -95,7 +95,7 @@ CacheDBItem *cache_db_find(char *cache_db_item_file_path)
         cache_db_item->type = sqlite3_column_int(stmt, 4);
         cache_db_item->ppath = strdup((const char *)sqlite3_column_text(stmt, 5));
     }
-    else{
+    else {
         printf("Game not found in this cache db\n");
     }
     sqlite3_finalize(stmt);
