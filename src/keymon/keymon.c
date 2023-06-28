@@ -474,6 +474,8 @@ int main(void)
                             setVolumeRaw(0, -3);
                         break;
                     case SELECT:
+                        if (DEVICE_ID == 354)
+                            break; // disable this shortcut for MMP
                         // SELECT + L2 : brightness down
                         if (settings.brightness > 0) {
                             settings_setBrightness(settings.brightness - 1,
@@ -508,6 +510,8 @@ int main(void)
                             setVolumeRaw(0, +3);
                         break;
                     case SELECT:
+                        if (DEVICE_ID == 354)
+                            break; // disable this shortcut for MMP
                         // SELECT + R2 : brightness up
                         if (settings.brightness < MAX_BRIGHTNESS) {
                             settings_setBrightness(settings.brightness + 1,
