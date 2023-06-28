@@ -224,8 +224,6 @@ run_installation() {
     verb="Updating"
     verb2="Update"
 
-
-
     if [ $reset_configs -eq 1 ]; then
         verb="Installing"
         verb2="Installation"
