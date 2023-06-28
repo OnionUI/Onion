@@ -64,7 +64,7 @@ if [ ! -f /tmp/_shutdown ]; then
 fi
 
 # run the script totally detached from current shell
-pgrep -f /tmp/_shutdown || (set -m; su root -c "/usr/bin/nohup /tmp/_shutdown $1 >/dev/null 2>&1 &")
+pgrep -f /tmp/_shutdown || (set -m; su root -c "/usr/bin/nohup /tmp/_shutdown $1 </dev/null >/dev/null 2>&1 &")
 while true; do
 	sleep 10
 done
