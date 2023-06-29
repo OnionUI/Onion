@@ -64,6 +64,14 @@ main() {
     # Bind arcade name library to customer path
     mount -o bind /mnt/SDCARD/miyoo/lib/libgamename.so /customer/lib/libgamename.so
 
+	if [ -f "$sysdir/config/filebrowser/first.run" ]; then
+		# Set filebrowser branding to "Onion" and apply custom theme
+		$sysdir/bin/filebrowser config set --branding.name "Onion" -d $sysdir/config/filebrowser/filebrowser.db
+		$sysdir/bin/filebrowser config set --branding.files "$sysdir/config/filebrowser/theme" -d $sysdir/config/filebrowser/filebrowser.db
+		
+		rm "$sysdir/config/filebrowser/first.run"
+	fi
+	
     start_networking
 
     # Auto launch
@@ -91,10 +99,6 @@ main() {
     state_change
     check_switcher
     set_startup_tab
-	
-	# Set filebrowser branding to onion
-	$sysdir/bin/filebrowser/filebrowser config set --branding.name "Onion" -d $sysdir/bin/filebrowser/filebrowser.db
-	$sysdir/bin/filebrowser/filebrowser config set --branding.files "/mnt/SDCARD/.tmp_update/bin/filebrowser/theme" -d $sysdir/bin/filebrowser/filebrowser.db
 
     # Main runtime loop
     while true; do
@@ -376,24 +380,9 @@ launch_switcher() {
 
 check_off_order() {
     if  [ -f /tmp/.offOrder ] ; then
-        pkill -9 sshd
-        pkill -9 wpa_supplicant
-        pkill -9 udhcpc
-        sync
-
-        cd $sysdir
         bootScreen "$1" &
-
-        # Allow the bootScreen to be displayed
-        sleep 1.5
-
-        if [ $deviceModel -eq 283 ]; then 
-            reboot
-        else
-            poweroff
-        fi
-
-        sleep 10
+        sleep 1			# Allow the bootScreen to be displayed
+        shutdown
     fi
 }
 
