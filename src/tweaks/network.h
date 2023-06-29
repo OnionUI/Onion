@@ -192,7 +192,7 @@ void menu_telnet(void *pt)
     item->value = (int)settings.telnet_state;
     if (!_menu_telnet._created) {
         _menu_telnet = list_create(2, LIST_SMALL);
-        strcpy(_menu_telnet.title, "Telnet");
+        strcpy(_menu_telnet.title, "Telnet protocol");
         list_addItem(&_menu_telnet,
                      (ListItem){
                          .label = "Enable",
@@ -217,7 +217,7 @@ void menu_ftp(void *pt)
     item->value = (int)settings.ftp_state;
     if (!_menu_ftp._created) {
         _menu_ftp = list_create(2, LIST_SMALL);
-        strcpy(_menu_ftp.title, "FTP");
+        strcpy(_menu_ftp.title, "FTP server");
         list_addItem(&_menu_ftp,
                      (ListItem){
                          .label = "Enable",
@@ -256,7 +256,7 @@ void menu_ssh(void *pt)
     item->value = (int)settings.ssh_state;
     if (!_menu_ssh._created) {
         _menu_ssh = list_create(2, LIST_SMALL);
-        strcpy(_menu_ssh.title, "SSH");
+        strcpy(_menu_ssh.title, "SSH protocol");
         list_addItem(&_menu_ssh,
                      (ListItem){
                          .label = "Enable",
@@ -315,16 +315,7 @@ void menu_network(void *_)
                          .action = menu_http});
         list_addItem(&_menu_network,
                      (ListItem){
-                         .label = "SSH...",
-                         .item_type = TOGGLE,
-                         .hidden = !settings.wifi_on,
-                         .alternative_arrow_action = 1,
-                         .arrow_action = network_setSshState,
-                         .value = (int)settings.ssh_state,
-                         .action = menu_ssh});
-        list_addItem(&_menu_network,
-                     (ListItem){
-                         .label = "FTP...",
+                         .label = "FTP server...",
                          .item_type = TOGGLE,
                          .hidden = !settings.wifi_on,
                          .alternative_arrow_action = 1,
@@ -333,7 +324,16 @@ void menu_network(void *_)
                          .action = menu_ftp});
         list_addItem(&_menu_network,
                      (ListItem){
-                         .label = "Telnet...",
+                         .label = "SSH protocol...",
+                         .item_type = TOGGLE,
+                         .hidden = !settings.wifi_on,
+                         .alternative_arrow_action = 1,
+                         .arrow_action = network_setSshState,
+                         .value = (int)settings.ssh_state,
+                         .action = menu_ssh});
+        list_addItem(&_menu_network,
+                     (ListItem){
+                         .label = "Telnet protocol...",
                          .item_type = TOGGLE,
                          .hidden = !settings.wifi_on,
                          .alternative_arrow_action = 1,
