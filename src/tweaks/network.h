@@ -284,7 +284,7 @@ void menu_networks(void *_)
 {
     if (!_menu_network._created) {
         _menu_network = list_create(6, LIST_SMALL);
-        strcpy(_menu_network.title, "Networks");
+        strcpy(_menu_network.title, "Network");
         list_addItem(&_menu_network,
                      (ListItem){.label = "WiFi...", .action = menu_wifi});
         list_addItem(&_menu_network,
