@@ -138,22 +138,6 @@ void network_wpsConnect(void *pt)
     system("sh /mnt/SDCARD/.tmp_update/script/wpsclient.sh");
 }
 
-void network_disableAll(void *pt)
-{
-    settings.http_state = ((ListItem *)pt)->value == 1;
-    settings.ssh_state = ((ListItem *)pt)->value == 1;
-    settings.ftp_state = ((ListItem *)pt)->value == 1;
-    settings.telnet_state = ((ListItem *)pt)->value == 1;
-    settings.hotspot_state = ((ListItem *)pt)->value == 1;
-    settings.auth_telnet_state = ((ListItem *)pt)->value == 1;
-    settings.auth_ftp_state = ((ListItem *)pt)->value == 1;
-    settings.auth_ssh_state = ((ListItem *)pt)->value == 1;
-    settings.auth_http_state = ((ListItem *)pt)->value == 1;
-    system(NET_SCRIPT_PATH "/update_networking.sh disableall");
-    reset_menus = true;
-    all_changed = true;
-}
-
 void network_setTzSelectState(void *pt)
 {
     config_setNumber("tzselect", ((ListItem *)pt)->value);
@@ -298,7 +282,7 @@ void menu_wifi(void *_)
 void menu_network(void *_)
 {
     if (!_menu_network._created) {
-        _menu_network = list_create(6, LIST_SMALL);
+        _menu_network = list_create(5, LIST_SMALL);
         strcpy(_menu_network.title, "Network");
         list_addItem(&_menu_network,
                      (ListItem){
@@ -340,10 +324,6 @@ void menu_network(void *_)
                          .arrow_action = network_setTelnetState,
                          .value = (int)settings.telnet_state,
                          .action = menu_telnet});
-        list_addItem(&_menu_network,
-                     (ListItem){
-                         .label = "Disable all",
-                         .action = network_disableAll});
     }
     menu_stack[++menu_level] = &_menu_network;
     header_changed = true;
