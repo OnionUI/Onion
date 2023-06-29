@@ -95,6 +95,8 @@ void action_setntpstate(void *pt)
     config_flag_set(".ntpState", ((ListItem *)pt)->value == 1);
     settings.ntp_state = ((ListItem *)pt)->value == 1;
     network_setServiceState("ntp");
+    reset_menus = true;
+    all_changed = true;
 }
 
 void action_setntpwaitstate(void *pt)
@@ -164,7 +166,7 @@ void menu_http(void *pt)
     item->value = (int)settings.http_state;
     if (!_menu_http._created) {
         _menu_http = list_create(2, LIST_SMALL);
-        strcpy(_menu_http.title, "HTTP fileserver");
+        strcpy(_menu_http.title, "HTTP File Server");
         list_addItem(&_menu_http,
                      (ListItem){
                          .label = "Enable",

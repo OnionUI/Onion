@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
             if (footer_changed || list_changed)
                 theme_renderFooterStatus(screen,
                                          menu_stack[menu_level]->active_pos + 1,
-                                         list_countVisible(menu_stack[menu_level]));
+                                         menu_stack[menu_level]->item_count);
 
             if (header_changed || battery_changed)
                 theme_renderHeaderBattery(screen, battery_percentage);
