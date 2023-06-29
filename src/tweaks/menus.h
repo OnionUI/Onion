@@ -46,7 +46,7 @@ void menu_free_all(void)
     list_free(&_menu_main);
     list_free(&_menu_system);
     list_free(&_menu_network);
-	list_free(&_menu_wifi);
+    list_free(&_menu_wifi);
     list_free(&_menu_telnet);
     list_free(&_menu_ftp);
     list_free(&_menu_wps);
@@ -108,7 +108,7 @@ void menu_datetime(void *_)
                                     .item_type = TOGGLE,
                                     .value = (int)settings.ntp_state,
                                     .action = action_setntpstate});
-			list_addItem(&_menu_date_time,
+            list_addItem(&_menu_date_time,
                          (ListItem){.label = "Wait for NTP update (startup)",
                                     .item_type = TOGGLE,
                                     .value = (int)settings.ntp_wait,
@@ -224,7 +224,6 @@ void menu_ssh(void *_)
     header_changed = true;
 }
 
-
 void menu_wifi(void *_)
 {
     if (!_menu_wifi._created) {
@@ -235,7 +234,7 @@ void menu_wifi(void *_)
                                 .item_type = TOGGLE,
                                 .value = (int)settings.hotspot_state,
                                 .action = action_sethotspotstate});
-		list_addItem(&_menu_wifi,
+        list_addItem(&_menu_wifi,
                      (ListItem){.label = "WPS...", .action = menu_wps});
     }
     menu_stack[++menu_level] = &_menu_wifi;
@@ -247,12 +246,12 @@ void menu_networks(void *_)
     if (!_menu_network._created) {
         _menu_network = list_create(6, LIST_SMALL);
         strcpy(_menu_network.title, "Networks");
-		list_addItem(&_menu_network, 
-					 (ListItem){.label = "Disable all", .action = action_disableall});
-		list_addItem(&_menu_network, 
-					 (ListItem){.label = "Wifi...", .action = menu_wifi});  
-        list_addItem(&_menu_network, 
-					 (ListItem){.label = "HTTP fileserver...", .action = menu_http});               
+        list_addItem(&_menu_network,
+                     (ListItem){.label = "Disable all", .action = action_disableall});
+        list_addItem(&_menu_network,
+                     (ListItem){.label = "Wifi...", .action = menu_wifi});
+        list_addItem(&_menu_network,
+                     (ListItem){.label = "HTTP fileserver...", .action = menu_http});
         list_addItem(&_menu_network,
                      (ListItem){.label = "SSH/SFTP...", .action = menu_ssh});
         list_addItem(&_menu_network,

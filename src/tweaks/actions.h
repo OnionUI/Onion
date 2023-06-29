@@ -132,76 +132,76 @@ void action_setserviceauth(const char *service_name)
 void action_sethttpstate(void *pt)
 {
     config_flag_set(".httpState", ((ListItem *)pt)->value == 1);
-	settings.http_state = ((ListItem *)pt)->value == 1;
+    settings.http_state = ((ListItem *)pt)->value == 1;
     action_setservicestate("http");
 }
 
 void action_setsshstate(void *pt)
 {
     config_flag_set(".sshState", ((ListItem *)pt)->value == 1);
-	settings.ssh_state = ((ListItem *)pt)->value == 1;
+    settings.ssh_state = ((ListItem *)pt)->value == 1;
     action_setservicestate("ssh");
 }
 
 void action_setftpstate(void *pt)
 {
     config_flag_set(".ftpState", ((ListItem *)pt)->value == 1);
-	settings.ftp_state = ((ListItem *)pt)->value == 1;
+    settings.ftp_state = ((ListItem *)pt)->value == 1;
     action_setservicestate("ftp");
 }
 
 void action_settelnetstate(void *pt)
 {
     config_flag_set(".telnetState", ((ListItem *)pt)->value == 1);
-	settings.telnet_state = ((ListItem *)pt)->value == 1;
+    settings.telnet_state = ((ListItem *)pt)->value == 1;
     action_setservicestate("telnet");
 }
 
 void action_sethotspotstate(void *pt)
 {
     config_flag_set(".hotspotState", ((ListItem *)pt)->value == 1);
-	settings.hotspot_state = ((ListItem *)pt)->value == 1;
+    settings.hotspot_state = ((ListItem *)pt)->value == 1;
     action_setservicestate("hotspot");
 }
 
 void action_setntpstate(void *pt)
 {
     config_flag_set(".ntpState", ((ListItem *)pt)->value == 1);
-	settings.ntp_state = ((ListItem *)pt)->value == 1;
+    settings.ntp_state = ((ListItem *)pt)->value == 1;
     action_setservicestate("ntp");
 }
 
 void action_setntpwaitstate(void *pt)
 {
-	settings.ntp_wait = ((ListItem *)pt)->value == 1;
+    settings.ntp_wait = ((ListItem *)pt)->value == 1;
 }
 
 void action_settelnetauthstate(void *pt)
 {
     config_flag_set(".authtelnetState", ((ListItem *)pt)->value == 1);
-	settings.auth_telnet_state = ((ListItem *)pt)->value == 1;
-	action_setserviceauth("telnet");
+    settings.auth_telnet_state = ((ListItem *)pt)->value == 1;
+    action_setserviceauth("telnet");
 }
 
 void action_setftpauthstate(void *pt)
 {
     config_flag_set(".authftpState", ((ListItem *)pt)->value == 1);
-	settings.auth_ftp_state = ((ListItem *)pt)->value == 1;
-	action_setserviceauth("ftp");
+    settings.auth_ftp_state = ((ListItem *)pt)->value == 1;
+    action_setserviceauth("ftp");
 }
 
 void action_sethttpauthstate(void *pt)
 {
     config_flag_set(".authhttpState", ((ListItem *)pt)->value == 1);
-	settings.auth_http_state = ((ListItem *)pt)->value == 1;
-	action_setserviceauth("http");
+    settings.auth_http_state = ((ListItem *)pt)->value == 1;
+    action_setserviceauth("http");
 }
 
 void action_setsshauthstate(void *pt)
 {
     config_flag_set(".authsshState", ((ListItem *)pt)->value == 1);
-	settings.auth_ssh_state = ((ListItem *)pt)->value == 1;
-	action_setserviceauth("ssh");
+    settings.auth_ssh_state = ((ListItem *)pt)->value == 1;
+    action_setserviceauth("ssh");
 }
 
 void action_wpsconnection(void *pt)
@@ -211,23 +211,23 @@ void action_wpsconnection(void *pt)
 
 void action_disableall(void *pt)
 {
-	settings.http_state = ((ListItem *)pt)->value == 1;
-	settings.ssh_state = ((ListItem *)pt)->value == 1;
-	settings.ftp_state = ((ListItem *)pt)->value == 1;
-	settings.telnet_state = ((ListItem *)pt)->value == 1;
-	settings.hotspot_state = ((ListItem *)pt)->value == 1;
-	settings.auth_telnet_state = ((ListItem *)pt)->value == 1;
-	settings.auth_ftp_state = ((ListItem *)pt)->value == 1;
-	settings.auth_ssh_state = ((ListItem *)pt)->value == 1;
-	settings.auth_http_state = ((ListItem *)pt)->value == 1;
+    settings.http_state = ((ListItem *)pt)->value == 1;
+    settings.ssh_state = ((ListItem *)pt)->value == 1;
+    settings.ftp_state = ((ListItem *)pt)->value == 1;
+    settings.telnet_state = ((ListItem *)pt)->value == 1;
+    settings.hotspot_state = ((ListItem *)pt)->value == 1;
+    settings.auth_telnet_state = ((ListItem *)pt)->value == 1;
+    settings.auth_ftp_state = ((ListItem *)pt)->value == 1;
+    settings.auth_ssh_state = ((ListItem *)pt)->value == 1;
+    settings.auth_http_state = ((ListItem *)pt)->value == 1;
     system("/mnt/SDCARD/.tmp_update/script/network/update_networking.sh disableall");
 }
 
 void action_settzselectstate(void *pt)
 {
-	config_setNumber("tzselect", ((ListItem *)pt)->value);
+    config_setNumber("tzselect", ((ListItem *)pt)->value);
     settings.tzselect_state = ((ListItem *)pt)->value;
-	action_setservicestate("ntp");
+    action_setservicestate("ntp");
 }
 
 void action_setMenuButtonHaptics(void *pt)

@@ -45,7 +45,7 @@ static struct settings_s {
     bool telnet_state;
     bool hotspot_state;
     bool ntp_state;
-	bool ntp_wait;
+    bool ntp_wait;
     bool auth_telnet_state;
     bool auth_ftp_state;
     bool auth_http_state;
@@ -107,7 +107,7 @@ void _settings_reset(void)
     settings.telnet_state = false;
     settings.hotspot_state = false;
     settings.ntp_state = false;
-	settings.ntp_wait = false;
+    settings.ntp_wait = false;
     settings.auth_ftp_state = false;
     settings.auth_ssh_state = true;
     settings.tzselect_state = 12;
@@ -188,8 +188,8 @@ void settings_load(void)
     settings.ftp_state = config_flag_get(".ftpState");
     settings.hotspot_state = config_flag_get(".hotspotState");
     settings.ntp_state = config_flag_get(".ntpState");
-	settings.ntp_wait = config_flag_get(".ntpWait");
-	settings.auth_telnet_state = config_flag_get(".authtelnetState");
+    settings.ntp_wait = config_flag_get(".ntpWait");
+    settings.auth_telnet_state = config_flag_get(".authtelnetState");
     settings.auth_ftp_state = config_flag_get(".authftpState");
     settings.auth_http_state = config_flag_get(".authhttpState");
     settings.auth_ssh_state = config_flag_get(".authsshState");
@@ -304,13 +304,13 @@ void settings_save(void)
     config_flag_set(".telnetState", settings.telnet_state);
     config_flag_set(".hotspotState", settings.hotspot_state);
     config_flag_set(".ntpState", settings.ntp_state);
-	config_flag_set(".ntpWait", settings.ntp_wait);
+    config_flag_set(".ntpWait", settings.ntp_wait);
     config_flag_set(".authtelnetState", settings.auth_telnet_state);
     config_flag_set(".authftpState", settings.auth_ftp_state);
     config_flag_set(".authhttpState", settings.auth_http_state);
     config_flag_set(".authsshState", settings.auth_ssh_state);
     config_flag_set(".muteVolume", settings.mute);
-    config_flag_set(".disableStandby",settings.disable_standby);
+    config_flag_set(".disableStandby", settings.disable_standby);
     config_setNumber("tzselect", settings.tzselect_state);
     config_setNumber("battery/warnAt", settings.low_battery_warn_at);
     config_setNumber("startup/app", settings.startup_application);
