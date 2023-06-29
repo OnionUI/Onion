@@ -140,8 +140,19 @@ void network_wpsConnect(void *pt)
 
 void network_setTzSelectState(void *pt)
 {
-    config_setNumber("tzselect", ((ListItem *)pt)->value);
-    settings.tzselect_state = ((ListItem *)pt)->value;
+    char utc_str[10];
+    int select_value = ((ListItem *)pt)->value;
+    int utc_value = select_value - 12;
+    if (utc_value == 0) {
+        strcpy(utc_str, "UTC");
+    }
+    else {
+        sprintf(utc_str, utc_value > 0 ? "UTC-%d" : "UTC+%d", abs(utc_value));
+    }
+    printf_debug("Set timezone: %s\n", utc_str);
+    config_setString(".tz", utc_str);
+    config_setNumber("tzselect", select_value);
+    settings.tzselect_state = select_value;
     network_setServiceState("ntp");
 }
 

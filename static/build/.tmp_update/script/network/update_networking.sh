@@ -8,6 +8,7 @@ export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/p
 export PATH="$sysdir/bin:$PATH"
 
 main() {
+    set_tzid
     case "$1" in
         check) # runs the check function we use in runtime, will be called on boot
             check
@@ -411,40 +412,12 @@ restart_ntp() { # If we detect that the timezone has changed we'll restart the n
 # Utility functions
 
 check_tzid() {
-    tzid=$(cat "$sysdir/config/tzselect") 
+    tzid=$(cat "$sysdir/config/.tz") 
     echo "$tzid"
 }
 
-set_tzid() {
-    check_tzid
-    case $tzid in 
-        0)  export TZ="UTC+12" ;;
-        1)  export TZ="UTC+11" ;;
-        2)  export TZ="UTC+10" ;;
-        3)  export TZ="UTC+9" ;;
-        4)  export TZ="UTC+8" ;;
-        5)  export TZ="UTC+7" ;;
-        6)  export TZ="UTC+6" ;;
-        7)  export TZ="UTC+5" ;;
-        8)  export TZ="UTC+4" ;;
-        9)  export TZ="UTC+3" ;;
-        10) export TZ="UTC+2" ;;
-        11) export TZ="UTC+1" ;;
-        12) export TZ="UTC" ;;
-        13) export TZ="UTC-1" ;;
-        14) export TZ="UTC-2" ;;
-        15) export TZ="UTC-3" ;;
-        16) export TZ="UTC-4" ;;
-        17) export TZ="UTC-5" ;;
-        18) export TZ="UTC-6" ;;
-        19) export TZ="UTC-7" ;;
-        20) export TZ="UTC-8" ;;
-        21) export TZ="UTC-9" ;;
-        22) export TZ="UTC-10" ;;
-        23) export TZ="UTC-11" ;;
-        24) export TZ="UTC-12" ;;
-    esac
-    echo "$TZ" > "$sysdir/config/.tz"
+set_tzid() {    
+    export TZ=$(cat "$sysdir/config/.tz")
 }
 
 is_noauth_enabled() { # Used to check authMethod val for HTTPFS
@@ -531,5 +504,4 @@ log() {
     echo "$(date)" $* >> $sysdir/logs/network.log
 }
 
-set_tzid
 main "$@"
