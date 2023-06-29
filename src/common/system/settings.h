@@ -95,7 +95,7 @@ void _settings_reset(void)
     settings.menu_button_haptics = false;
     settings.low_battery_autosave = true;
     settings.low_battery_warning = true;
-    settings.low_battery_warn_at = 15;
+    settings.low_battery_warn_at = 10;
     settings.time_skip = 4;
     settings.vibration = 2;
     settings.startup_tab = 0;
@@ -109,9 +109,9 @@ void _settings_reset(void)
     settings.ntp_state = false;
     settings.ntp_wait = false;
     settings.auth_ftp_state = false;
-    settings.auth_ssh_state = true;
+    settings.auth_ssh_state = false;
     settings.tzselect_state = 12;
-    settings.auth_telnet_state = true;
+    settings.auth_telnet_state = false;
     // Menu button actions
     settings.mainui_single_press = 1;
     settings.mainui_long_press = 0;
