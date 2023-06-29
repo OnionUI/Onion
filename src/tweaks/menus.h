@@ -229,7 +229,7 @@ void menu_wifi(void *_)
 {
     if (!_menu_wifi._created) {
         _menu_wifi = list_create(2, LIST_SMALL);
-        strcpy(_menu_wifi.title, "HTTP fileserver config");
+        strcpy(_menu_wifi.title, "WiFi");
         list_addItem(&_menu_wifi,
                      (ListItem){.label = "WiFi Hotspot",
                                 .item_type = TOGGLE,
