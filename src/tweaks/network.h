@@ -24,7 +24,6 @@
 void network_setServiceState(const char *service_name)
 {
     char state[256];
-    FILE *debug_file;
     char command[512];
 
     sync();
@@ -40,7 +39,6 @@ void network_setServiceState(const char *service_name)
 void network_setServiceAuth(const char *service_name)
 {
     char authed[256];
-    FILE *debug_file;
     char command[512];
 
     sync();
@@ -50,7 +48,7 @@ void network_setServiceAuth(const char *service_name)
 
     system(command);
 
-    printf_debug("network_setServiceState: %s\n", authed);
+    printf_debug("network_setServiceAuth: %s\n", authed);
 }
 
 void network_commonEnableToggle(List *list, ListItem *item, bool *value_pt, const char *service_name, const char *service_flag)
