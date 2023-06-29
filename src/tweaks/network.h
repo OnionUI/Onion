@@ -185,8 +185,10 @@ void menu_http(void *pt)
     header_changed = true;
 }
 
-void menu_telnet(void *_)
+void menu_telnet(void *pt)
 {
+    ListItem *item = (ListItem *)pt;
+    item->value = (int)settings.telnet_state;
     if (!_menu_telnet._created) {
         _menu_telnet = list_create(2, LIST_SMALL);
         strcpy(_menu_telnet.title, "Telnet");
@@ -208,8 +210,10 @@ void menu_telnet(void *_)
     header_changed = true;
 }
 
-void menu_ftp(void *_)
+void menu_ftp(void *pt)
 {
+    ListItem *item = (ListItem *)pt;
+    item->value = (int)settings.ftp_state;
     if (!_menu_ftp._created) {
         _menu_ftp = list_create(2, LIST_SMALL);
         strcpy(_menu_ftp.title, "FTP");
@@ -243,8 +247,10 @@ void menu_wps(void *_)
     header_changed = true;
 }
 
-void menu_ssh(void *_)
+void menu_ssh(void *pt)
 {
+    ListItem *item = (ListItem *)pt;
+    item->value = (int)settings.ssh_state;
     if (!_menu_ssh._created) {
         _menu_ssh = list_create(2, LIST_SMALL);
         strcpy(_menu_ssh.title, "SSH");
