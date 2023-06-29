@@ -541,7 +541,9 @@ update_time() {
         hours=`cat $sysdir/config/startup/addHours`
     fi
     addTime=$(($hours * 3600))
-    currentTime=$(($currentTime + $addTime))
+    if [ ! -f $sysdir/config/.ntpState ]; then
+        currentTime=$(($currentTime + $addTime))
+    fi
     date +%s -s @$currentTime
 }
 
