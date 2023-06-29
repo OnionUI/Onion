@@ -1,8 +1,8 @@
 #!/bin/sh
 sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo
-filebrowserbin=$sysdir/bin/filebrowser
-filebrowserdb=$sysdir/config/filebrowser/filebrowser.db
+filebrowserbin=$sysdir/bin/filebrowser/filebrowser
+filebrowserdb=$sysdir/bin/filebrowser/filebrowser.db
 
 update() {
     log "Network Checker: Update networking"
@@ -154,6 +154,19 @@ check_telnetstate() {
 # Starts Filebrowser if the toggle in tweaks is set on
 check_httpstate() {     
     if flag_enabled httpState && [ -f $filebrowserbin ]; then
+		# Check if signuphttpState is enabled, if it is enable user signup
+		# if [ "$(echo_enabled signuphttpState)" -eq 1 ]; then
+			# if [ "$(is_signup_enabled)" -eq 0 ]; then
+				# $filebrowserbin config set --signup=true -d $filebrowserdb >> $sysdir/logs/http.log
+				# $filebrowserbin config set --auth.method=json -d $filebrowserdb  >> $sysdir/logs/http.log
+				# enable_flag authhttpState
+			# fi
+		# else
+			# if [ "$(is_signup_enabled)" -eq 1 ]; then
+				# $filebrowserbin config set --signup=false -d $filebrowserdb >> $sysdir/logs/http.log
+			# fi
+		# fi
+
 		# Check if authhttpState is enabled set json, if not set noauth
 		if [ "$(echo_enabled authhttpState)" -eq 1 ]; then 
 			$filebrowserbin config set --auth.method=json -d $filebrowserdb >> $sysdir/logs/http.log
@@ -181,6 +194,11 @@ check_httpstate() {
     else
         if is_running filebrowser; then
             killall -9 filebrowser
+			# Reset admin account password incase user changes it
+			# file_path="$sysdir/config/.auth.txt"
+			# password=$(awk 'NR==1 {print $2}' "$file_path")
+			# $sysdir/bin/filebrowser/filebrowser users update admin --password=$password -d $sysdir/bin/filebrowser/filebrowser.db
+			# log "Filebrowser(HTTP server): Killed"
         fi
     fi
 }
@@ -240,7 +258,15 @@ check_hotspotstate() {
 				pkill -9 dnsmasq
 			fi
         else
+			# if wifi_disabled; then 
+				# sed -i 's/"wifi":\s*0/"wifi": 1/' /appconfigs/system.json
+				# check_wifi
+				# sleep 15
+				# log "Hotspot: Requested but WiFi is off, bringing WiFi up now."
+				# start_hotspot &
+			# else
 			start_hotspot &
+			# fi
         fi
     fi
 }
@@ -309,6 +335,17 @@ set_tzid() {
 }
 
 set_tzid
+
+is_signup_enabled() { # Used to check signup val for HTTPFS
+    DB_PATH="/mnt/SDCARD/.tmp_update/bin/filebrowser/filebrowser.db"
+    OUTPUT=$(cat $DB_PATH)
+
+    if echo $OUTPUT | grep -q '"signup":true'; then
+        echo 1
+    else
+        echo 0
+    fi
+}
 
 is_noauth_enabled() { # Used to check authMethod val for HTTPFS
     DB_PATH="/mnt/SDCARD/.tmp_update/bin/filebrowser/filebrowser.db"

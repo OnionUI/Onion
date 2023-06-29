@@ -787,7 +787,7 @@ int main(int argc, char *argv[])
 
     while (!quit) {
         if (updateKeystate(keystate, &quit, true, NULL)) {
-            if (keystate[SW_BTN_R1] >= PRESSED) {
+            if (keystate[SW_BTN_R2] >= PRESSED) {
                 if (nTab < tab_count - 1)
                     nTab++;
                 else
@@ -796,7 +796,7 @@ int main(int argc, char *argv[])
                 nListPosition = 0;
                 state_changed = true;
             }
-            if (keystate[SW_BTN_L1] >= PRESSED) {
+            if (keystate[SW_BTN_L2] >= PRESSED) {
                 if (nTab > 0)
                     nTab--;
                 else
@@ -807,12 +807,12 @@ int main(int argc, char *argv[])
             }
 
             if (nTab == summary_tab && surfaceSummary != NULL) {
-                if (keystate[SW_BTN_R2] >= PRESSED) {
+                if (keystate[SW_BTN_R1] >= PRESSED) {
                     if (summaryScrollBy(323))
                         state_changed = true;
                 }
 
-                if (keystate[SW_BTN_L2] >= PRESSED) {
+                if (keystate[SW_BTN_L1] >= PRESSED) {
                     if (summaryScrollBy(-323))
                         state_changed = true;
                 }
@@ -828,7 +828,7 @@ int main(int argc, char *argv[])
                 }
             }
             else if (package_count[nTab] > 0) {
-                if (keystate[SW_BTN_R2] >= PRESSED) {
+                if (keystate[SW_BTN_R1] >= PRESSED) {
                     if ((nListPosition + 14) < package_count[nTab]) {
                         nListPosition += 7;
                     }
@@ -839,7 +839,7 @@ int main(int argc, char *argv[])
                     state_changed = true;
                 }
 
-                if (keystate[SW_BTN_L2] >= PRESSED) {
+                if (keystate[SW_BTN_L1] >= PRESSED) {
                     if ((nListPosition - 7) > 0) {
                         nListPosition -= 7;
                     }

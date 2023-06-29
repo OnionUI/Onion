@@ -1,4 +1,0 @@
-#!/bin/sh
-touch /tmp/.offOrder
-sync
-pkill -9 MainUI

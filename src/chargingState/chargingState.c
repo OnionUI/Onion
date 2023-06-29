@@ -252,7 +252,13 @@ int main(void)
     if (turn_off) {
 #ifdef PLATFORM_MIYOOMINI
         display_setScreen(false);
-        system("shutdown; sleep 10");
+
+        if (DEVICE_ID == MIYOO283) {
+            system("sync; reboot; sleep 10");
+        }
+        else if (DEVICE_ID == MIYOO354) {
+            system("poweroff");
+        }
 #endif
     }
     else {
