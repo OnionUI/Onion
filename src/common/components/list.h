@@ -2,6 +2,7 @@
 #define MENU_H__
 
 #include <SDL/SDL.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
@@ -19,6 +20,8 @@ typedef enum item_type { ACTION,
 typedef struct ListItem {
     int _id;
     ListItemType item_type;
+    bool hidden;
+    bool disable_arrows;
     char label[STR_MAX];
     char description[STR_MAX];
     char payload[STR_MAX];
@@ -47,6 +50,49 @@ typedef struct List {
 } List;
 
 int _list_modulo(int x, int n) { return (x % n + n) % n; }
+
+int list_countVisible(List *list)
+{
+    int n = 0, i;
+    for (i = 0; i < list->item_count; i++) {
+        if (!list->items[i].hidden)
+            n++;
+    }
+    return n;
+}
+
+void _list_ensureVisible(List *list, int direction, int items_left)
+{
+    if (list->items[list->active_pos].hidden) {
+        list->active_pos = _list_modulo(list->active_pos + direction, list->item_count);
+        if (items_left > 0) {
+            _list_ensureVisible(list, direction, items_left - 1);
+        }
+    }
+}
+
+void list_ensureVisible(List *list, int direction)
+{
+    _list_ensureVisible(list, direction, list->item_count);
+}
+
+ListItem *list_getVisibleItemAt(List *list, int index)
+{
+    int items_left = list->item_count - index;
+    while (list->items[index].hidden && items_left-- > 0) {
+        index++;
+    }
+    return index < list->item_count ? &list->items[index] : NULL;
+}
+
+void list_hideAllExcept(List *list, ListItem *item, bool hidden)
+{
+    for (int i = 0; i < list->item_count; i++) {
+        if (i == item->_id)
+            continue;
+        list->items[i].hidden = hidden;
+    }
+}
 
 List list_create(int max_items, ListType list_type)
 {
@@ -91,6 +137,7 @@ void list_scroll(List *list)
 bool list_scrollTo(List *list, int active_pos)
 {
     list->active_pos = _list_modulo(active_pos, list->item_count);
+    list_ensureVisible(list, 1);
     list_scroll(list);
     return true;
 }
@@ -106,6 +153,8 @@ bool list_keyUp(List *list, bool key_repeat)
     // Descrease selection (move up)
     else
         list->active_pos -= 1;
+
+    list_ensureVisible(list, -1);
     list_scroll(list);
 
     return true;
@@ -122,6 +171,8 @@ bool list_keyDown(List *list, bool key_repeat)
     // Increase selection (move down)
     else
         list->active_pos += 1;
+
+    list_ensureVisible(list, 1);
     list_scroll(list);
 
     return true;
@@ -132,7 +183,7 @@ bool list_keyLeft(List *list, bool key_repeat)
     bool apply_action = false;
     ListItem *item = list_currentItem(list);
 
-    if (item == NULL)
+    if (item == NULL || item->disable_arrows)
         return false;
 
     int old_value = item->value;
@@ -168,7 +219,7 @@ bool list_keyRight(List *list, bool key_repeat)
     bool apply_action = false;
     ListItem *item = list_currentItem(list);
 
-    if (item == NULL)
+    if (item == NULL || item->disable_arrows)
         return false;
 
     int old_value = item->value;

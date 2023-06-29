@@ -52,14 +52,19 @@ void theme_renderList(SDL_Surface *screen, List *list)
 
     int menu_pos_y = 420 - list->scroll_height * item_height;
     int last_item = list->scroll_pos + list->scroll_height;
+    int item_count = list_countVisible(list);
 
-    if (last_item > list->item_count)
-        last_item = list->item_count;
+    if (last_item > item_count)
+        last_item = item_count;
 
     ListItem *active_preview = NULL;
 
     for (int i = list->scroll_pos; i < last_item; i++) {
-        ListItem *item = &list->items[i];
+        ListItem *item = list_getVisibleItemAt(list, i);
+
+        if (item->hidden)
+            continue;
+
         item_bg_rect.y = menu_pos_y + (i - list->scroll_pos) * item_height;
 
         SDL_BlitSurface(resource_getSurface(HORIZONTAL_DIVIDER), &item_div_size,

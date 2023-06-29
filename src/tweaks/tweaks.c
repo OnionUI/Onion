@@ -55,7 +55,8 @@ void check_networkChanged(void)
 
 int main(int argc, char *argv[])
 {
-    print_debug("Debug logging enabled");
+    log_setName("")
+        print_debug("Debug logging enabled");
 
     getDeviceModel();
 
@@ -200,7 +201,7 @@ int main(int argc, char *argv[])
             if (footer_changed || list_changed)
                 theme_renderFooterStatus(screen,
                                          menu_stack[menu_level]->active_pos + 1,
-                                         menu_stack[menu_level]->item_count);
+                                         list_countVisible(menu_stack[menu_level]));
 
             if (header_changed || battery_changed)
                 theme_renderHeaderBattery(screen, battery_percentage);

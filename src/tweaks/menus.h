@@ -16,42 +16,15 @@
 #include "./appstate.h"
 #include "./formatters.h"
 #include "./icons.h"
+#include "./network.h"
 #include "./reset.h"
 #include "./tools.h"
 #include "./values.h"
-
-static List _menu_main;
-static List _menu_system;
-static List _menu_date_time;
-static List _menu_network;
-static List _menu_wifi;
-static List _menu_telnet;
-static List _menu_ftp;
-static List _menu_wps;
-static List _menu_http;
-static List _menu_ssh;
-static List _menu_system_startup;
-static List _menu_button_action;
-static List _menu_button_action_mainui_menu;
-static List _menu_button_action_ingame_menu;
-static List _menu_user_interface;
-static List _menu_theme_overrides;
-static List _menu_battery_percentage;
-static List _menu_advanced;
-static List _menu_reset_settings;
-static List _menu_tools;
 
 void menu_free_all(void)
 {
     list_free(&_menu_main);
     list_free(&_menu_system);
-    list_free(&_menu_network);
-    list_free(&_menu_wifi);
-    list_free(&_menu_telnet);
-    list_free(&_menu_ftp);
-    list_free(&_menu_wps);
-    list_free(&_menu_http);
-    list_free(&_menu_ssh);
     list_free(&_menu_date_time);
     list_free(&_menu_system_startup);
     list_free(&_menu_button_action);
@@ -65,6 +38,7 @@ void menu_free_all(void)
     list_free(&_menu_tools);
 
     menu_icons_free_all();
+    menu_network_free_all();
 }
 
 void menu_systemStartup(void *_)
@@ -132,138 +106,6 @@ void menu_datetime(void *_)
     menu_stack[++menu_level] = &_menu_date_time;
     header_changed = true;
 }
-
-// Network services submenus
-
-void menu_http(void *_)
-{
-    if (!_menu_http._created) {
-        _menu_http = list_create(2, LIST_SMALL);
-        strcpy(_menu_http.title, "HTTP fileserver config");
-        list_addItem(&_menu_http, (ListItem){.label = "Enable",
-                                             .item_type = TOGGLE,
-                                             .value = (int)settings.http_state,
-                                             .action = action_sethttpstate});
-        list_addItem(&_menu_http,
-                     (ListItem){.label = "Enable authentication",
-                                .item_type = TOGGLE,
-                                .value = (int)settings.auth_http_state,
-                                .action = action_sethttpauthstate});
-    }
-    menu_stack[++menu_level] = &_menu_http;
-    header_changed = true;
-}
-
-void menu_telnet(void *_)
-{
-    if (!_menu_telnet._created) {
-        _menu_telnet = list_create(2, LIST_SMALL);
-        strcpy(_menu_telnet.title, "Telnet config");
-        list_addItem(&_menu_telnet,
-                     (ListItem){.label = "Enable",
-                                .item_type = TOGGLE,
-                                .value = (int)settings.telnet_state,
-                                .action = action_settelnetstate});
-        list_addItem(&_menu_telnet,
-                     (ListItem){.label = "Enable authentication",
-                                .item_type = TOGGLE,
-                                .value = (int)settings.auth_telnet_state,
-                                .action = action_settelnetauthstate});
-    }
-    menu_stack[++menu_level] = &_menu_telnet;
-    header_changed = true;
-}
-
-void menu_ftp(void *_)
-{
-    if (!_menu_ftp._created) {
-        _menu_ftp = list_create(2, LIST_SMALL);
-        strcpy(_menu_ftp.title, "FTP config");
-        list_addItem(&_menu_ftp, (ListItem){.label = "Enable",
-                                            .item_type = TOGGLE,
-                                            .value = (int)settings.ftp_state,
-                                            .action = action_setftpstate});
-        list_addItem(&_menu_ftp,
-                     (ListItem){.label = "Enable authentication",
-                                .item_type = TOGGLE,
-                                .value = (int)settings.auth_ftp_state,
-                                .action = action_setftpauthstate});
-    }
-    menu_stack[++menu_level] = &_menu_ftp;
-    header_changed = true;
-}
-
-void menu_wps(void *_)
-{
-    if (!_menu_wps._created) {
-        _menu_wps = list_create(1, LIST_SMALL);
-        strcpy(_menu_wps.title, "WPS control");
-        list_addItem(&_menu_wps, (ListItem){.label = "WPS connect",
-                                            .action = action_wpsconnection});
-    }
-    menu_stack[++menu_level] = &_menu_wps;
-    header_changed = true;
-}
-
-void menu_ssh(void *_)
-{
-    if (!_menu_ssh._created) {
-        _menu_ssh = list_create(2, LIST_SMALL);
-        strcpy(_menu_ssh.title, "SSH config");
-        list_addItem(&_menu_ssh, (ListItem){.label = "Enable",
-                                            .item_type = TOGGLE,
-                                            .value = (int)settings.ssh_state,
-                                            .action = action_setsshstate});
-        list_addItem(&_menu_ssh,
-                     (ListItem){.label = "Enable authentication",
-                                .item_type = TOGGLE,
-                                .value = (int)settings.auth_ssh_state,
-                                .action = action_setsshauthstate});
-    }
-    menu_stack[++menu_level] = &_menu_ssh;
-    header_changed = true;
-}
-
-void menu_wifi(void *_)
-{
-    if (!_menu_wifi._created) {
-        _menu_wifi = list_create(2, LIST_SMALL);
-        strcpy(_menu_wifi.title, "WiFi");
-        list_addItem(&_menu_wifi,
-                     (ListItem){.label = "WiFi Hotspot",
-                                .item_type = TOGGLE,
-                                .value = (int)settings.hotspot_state,
-                                .action = action_sethotspotstate});
-        list_addItem(&_menu_wifi,
-                     (ListItem){.label = "WPS...", .action = menu_wps});
-    }
-    menu_stack[++menu_level] = &_menu_wifi;
-    header_changed = true;
-}
-
-void menu_networks(void *_)
-{
-    if (!_menu_network._created) {
-        _menu_network = list_create(6, LIST_SMALL);
-        strcpy(_menu_network.title, "Networks");
-        list_addItem(&_menu_network,
-                     (ListItem){.label = "Disable all", .action = action_disableall});
-        list_addItem(&_menu_network,
-                     (ListItem){.label = "Wifi...", .action = menu_wifi});
-        list_addItem(&_menu_network,
-                     (ListItem){.label = "HTTP fileserver...", .action = menu_http});
-        list_addItem(&_menu_network,
-                     (ListItem){.label = "SSH/SFTP...", .action = menu_ssh});
-        list_addItem(&_menu_network,
-                     (ListItem){.label = "FTP...", .action = menu_ftp});
-        list_addItem(&_menu_network,
-                     (ListItem){.label = "Telnet...", .action = menu_telnet});
-    }
-    menu_stack[++menu_level] = &_menu_network;
-    header_changed = true;
-}
-
-// End of network services
 
 void menu_system(void *_)
 {
