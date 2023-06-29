@@ -55,8 +55,8 @@ void check_networkChanged(void)
 
 int main(int argc, char *argv[])
 {
-    log_setName("")
-        print_debug("Debug logging enabled");
+    log_setName("tweaks");
+    print_debug("Debug logging enabled");
 
     getDeviceModel();
 
