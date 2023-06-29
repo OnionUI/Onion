@@ -95,7 +95,7 @@ void menu_datetime(void *_)
                                     .value_max = 24,
                                     .value_labels = TZ_SELECT,
                                     .value = settings.tzselect_state,
-                                    .action = action_settzselectstate});
+                                    .action = network_setTzSelectState});
         }
         list_addItem(&_menu_date_time,
                      (ListItem){.label = "Emulated time skip",
@@ -508,7 +508,7 @@ void menu_main(void)
                 &_menu_main,
                 (ListItem){.label = "Network",
                            .description = "Setup networking",
-                           .action = menu_networks,
+                           .action = menu_network,
                            .icon_ptr = _get_menu_icon("tweaks_network")});
         }
         list_addItem(

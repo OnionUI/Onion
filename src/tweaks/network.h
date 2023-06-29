@@ -59,31 +59,32 @@ void network_commonEnableToggle(List *list, ListItem *item, bool *value_pt, cons
     if (_menu_network._created) {
         list_currentItem(&_menu_network)->value = enabled;
     }
-    list_hideAllExcept(list, item, !enabled);
     network_setServiceState(service_name);
+    reset_menus = true;
+    all_changed = true;
 }
 
-void action_sethttpstate(void *pt)
+void network_setHttpState(void *pt)
 {
     network_commonEnableToggle(&_menu_http, (ListItem *)pt, &settings.http_state, "http", ".httpState");
 }
 
-void action_setsshstate(void *pt)
+void network_setSshState(void *pt)
 {
     network_commonEnableToggle(&_menu_ssh, (ListItem *)pt, &settings.ssh_state, "ssh", ".sshState");
 }
 
-void action_setftpstate(void *pt)
+void network_setFtpState(void *pt)
 {
     network_commonEnableToggle(&_menu_ftp, (ListItem *)pt, &settings.ftp_state, "ftp", ".ftpState");
 }
 
-void action_settelnetstate(void *pt)
+void network_setTelnetState(void *pt)
 {
     network_commonEnableToggle(&_menu_telnet, (ListItem *)pt, &settings.telnet_state, "telnet", ".telnetState");
 }
 
-void action_sethotspotstate(void *pt)
+void network_setHotspotState(void *pt)
 {
     config_flag_set(".hotspotState", ((ListItem *)pt)->value == 1);
     settings.hotspot_state = ((ListItem *)pt)->value == 1;
@@ -104,35 +105,35 @@ void action_setntpwaitstate(void *pt)
     settings.ntp_wait = ((ListItem *)pt)->value == 1;
 }
 
-void action_settelnetauthstate(void *pt)
+void network_setTelnetAuthState(void *pt)
 {
     config_flag_set(".authtelnetState", ((ListItem *)pt)->value == 1);
     settings.auth_telnet_state = ((ListItem *)pt)->value == 1;
     network_setServiceAuth("telnet");
 }
 
-void action_setftpauthstate(void *pt)
+void network_setFtpAuthState(void *pt)
 {
     config_flag_set(".authftpState", ((ListItem *)pt)->value == 1);
     settings.auth_ftp_state = ((ListItem *)pt)->value == 1;
     network_setServiceAuth("ftp");
 }
 
-void action_sethttpauthstate(void *pt)
+void network_setHttpAuthState(void *pt)
 {
     config_flag_set(".authhttpState", ((ListItem *)pt)->value == 1);
     settings.auth_http_state = ((ListItem *)pt)->value == 1;
     network_setServiceAuth("http");
 }
 
-void action_setsshauthstate(void *pt)
+void network_setSshAuthState(void *pt)
 {
     config_flag_set(".authsshState", ((ListItem *)pt)->value == 1);
     settings.auth_ssh_state = ((ListItem *)pt)->value == 1;
     network_setServiceAuth("ssh");
 }
 
-void action_wpsconnection(void *pt)
+void network_wpsConnect(void *pt)
 {
     system("sh /mnt/SDCARD/.tmp_update/script/wpsclient.sh");
 }
@@ -153,7 +154,7 @@ void network_disableAll(void *pt)
     all_changed = true;
 }
 
-void action_settzselectstate(void *pt)
+void network_setTzSelectState(void *pt)
 {
     config_setNumber("tzselect", ((ListItem *)pt)->value);
     settings.tzselect_state = ((ListItem *)pt)->value;
@@ -172,14 +173,14 @@ void menu_http(void *pt)
                          .label = "Enable",
                          .item_type = TOGGLE,
                          .value = (int)settings.http_state,
-                         .action = action_sethttpstate});
+                         .action = network_setHttpState});
         list_addItem(&_menu_http,
                      (ListItem){
                          .label = "Enable authentication",
                          .item_type = TOGGLE,
                          .hidden = !settings.http_state,
                          .value = (int)settings.auth_http_state,
-                         .action = action_sethttpauthstate});
+                         .action = network_setHttpAuthState});
     }
     menu_stack[++menu_level] = &_menu_http;
     header_changed = true;
@@ -197,14 +198,14 @@ void menu_telnet(void *pt)
                          .label = "Enable",
                          .item_type = TOGGLE,
                          .value = (int)settings.telnet_state,
-                         .action = action_settelnetstate});
+                         .action = network_setTelnetState});
         list_addItem(&_menu_telnet,
                      (ListItem){
                          .label = "Enable authentication",
                          .item_type = TOGGLE,
                          .hidden = !settings.telnet_state,
                          .value = (int)settings.auth_telnet_state,
-                         .action = action_settelnetauthstate});
+                         .action = network_setTelnetAuthState});
     }
     menu_stack[++menu_level] = &_menu_telnet;
     header_changed = true;
@@ -222,14 +223,14 @@ void menu_ftp(void *pt)
                          .label = "Enable",
                          .item_type = TOGGLE,
                          .value = (int)settings.ftp_state,
-                         .action = action_setftpstate});
+                         .action = network_setFtpState});
         list_addItem(&_menu_ftp,
                      (ListItem){
                          .label = "Enable authentication",
                          .item_type = TOGGLE,
                          .hidden = !settings.ftp_state,
                          .value = (int)settings.auth_ftp_state,
-                         .action = action_setftpauthstate});
+                         .action = network_setFtpAuthState});
     }
     menu_stack[++menu_level] = &_menu_ftp;
     header_changed = true;
@@ -240,8 +241,10 @@ void menu_wps(void *_)
     if (!_menu_wps._created) {
         _menu_wps = list_create(1, LIST_SMALL);
         strcpy(_menu_wps.title, "WPS control");
-        list_addItem(&_menu_wps, (ListItem){.label = "WPS connect",
-                                            .action = action_wpsconnection});
+        list_addItem(&_menu_wps,
+                     (ListItem){
+                         .label = "WPS connect",
+                         .action = network_wpsConnect});
     }
     menu_stack[++menu_level] = &_menu_wps;
     header_changed = true;
@@ -254,16 +257,19 @@ void menu_ssh(void *pt)
     if (!_menu_ssh._created) {
         _menu_ssh = list_create(2, LIST_SMALL);
         strcpy(_menu_ssh.title, "SSH");
-        list_addItem(&_menu_ssh, (ListItem){.label = "Enable",
-                                            .item_type = TOGGLE,
-                                            .value = (int)settings.ssh_state,
-                                            .action = action_setsshstate});
         list_addItem(&_menu_ssh,
-                     (ListItem){.label = "Enable authentication",
-                                .item_type = TOGGLE,
-                                .hidden = !settings.ssh_state,
-                                .value = (int)settings.auth_ssh_state,
-                                .action = action_setsshauthstate});
+                     (ListItem){
+                         .label = "Enable",
+                         .item_type = TOGGLE,
+                         .value = (int)settings.ssh_state,
+                         .action = network_setSshState});
+        list_addItem(&_menu_ssh,
+                     (ListItem){
+                         .label = "Enable authentication",
+                         .item_type = TOGGLE,
+                         .hidden = !settings.ssh_state,
+                         .value = (int)settings.auth_ssh_state,
+                         .action = network_setSshAuthState});
     }
     menu_stack[++menu_level] = &_menu_ssh;
     header_changed = true;
@@ -275,18 +281,21 @@ void menu_wifi(void *_)
         _menu_wifi = list_create(2, LIST_SMALL);
         strcpy(_menu_wifi.title, "WiFi");
         list_addItem(&_menu_wifi,
-                     (ListItem){.label = "WiFi Hotspot",
-                                .item_type = TOGGLE,
-                                .value = (int)settings.hotspot_state,
-                                .action = action_sethotspotstate});
+                     (ListItem){
+                         .label = "WiFi Hotspot",
+                         .item_type = TOGGLE,
+                         .value = (int)settings.hotspot_state,
+                         .action = network_setHotspotState});
         list_addItem(&_menu_wifi,
-                     (ListItem){.label = "WPS...", .action = menu_wps});
+                     (ListItem){
+                         .label = "WPS...",
+                         .action = menu_wps});
     }
     menu_stack[++menu_level] = &_menu_wifi;
     header_changed = true;
 }
 
-void menu_networks(void *_)
+void menu_network(void *_)
 {
     if (!_menu_network._created) {
         _menu_network = list_create(6, LIST_SMALL);
@@ -296,35 +305,45 @@ void menu_networks(void *_)
                          .label = "WiFi...",
                          .action = menu_wifi});
         list_addItem(&_menu_network,
-                     (ListItem){.label = "HTTP File Server...",
-                                .item_type = TOGGLE,
-                                .hidden = !settings.wifi_on,
-                                .disable_arrows = 1,
-                                .value = (int)settings.http_state,
-                                .action = menu_http});
+                     (ListItem){
+                         .label = "HTTP File Server...",
+                         .item_type = TOGGLE,
+                         .hidden = !settings.wifi_on,
+                         .alternative_arrow_action = 1,
+                         .arrow_action = network_setHttpState,
+                         .value = (int)settings.http_state,
+                         .action = menu_http});
         list_addItem(&_menu_network,
-                     (ListItem){.label = "SSH...",
-                                .item_type = TOGGLE,
-                                .hidden = !settings.wifi_on,
-                                .disable_arrows = 1,
-                                .value = (int)settings.ssh_state,
-                                .action = menu_ssh});
+                     (ListItem){
+                         .label = "SSH...",
+                         .item_type = TOGGLE,
+                         .hidden = !settings.wifi_on,
+                         .alternative_arrow_action = 1,
+                         .arrow_action = network_setSshState,
+                         .value = (int)settings.ssh_state,
+                         .action = menu_ssh});
         list_addItem(&_menu_network,
-                     (ListItem){.label = "FTP...",
-                                .item_type = TOGGLE,
-                                .hidden = !settings.wifi_on,
-                                .disable_arrows = 1,
-                                .value = (int)settings.ftp_state,
-                                .action = menu_ftp});
+                     (ListItem){
+                         .label = "FTP...",
+                         .item_type = TOGGLE,
+                         .hidden = !settings.wifi_on,
+                         .alternative_arrow_action = 1,
+                         .arrow_action = network_setFtpState,
+                         .value = (int)settings.ftp_state,
+                         .action = menu_ftp});
         list_addItem(&_menu_network,
-                     (ListItem){.label = "Telnet...",
-                                .item_type = TOGGLE,
-                                .hidden = !settings.wifi_on,
-                                .disable_arrows = 1,
-                                .value = (int)settings.telnet_state,
-                                .action = menu_telnet});
+                     (ListItem){
+                         .label = "Telnet...",
+                         .item_type = TOGGLE,
+                         .hidden = !settings.wifi_on,
+                         .alternative_arrow_action = 1,
+                         .arrow_action = network_setTelnetState,
+                         .value = (int)settings.telnet_state,
+                         .action = menu_telnet});
         list_addItem(&_menu_network,
-                     (ListItem){.label = "Disable all", .action = network_disableAll});
+                     (ListItem){
+                         .label = "Disable all",
+                         .action = network_disableAll});
     }
     menu_stack[++menu_level] = &_menu_network;
     header_changed = true;

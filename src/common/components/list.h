@@ -22,6 +22,7 @@ typedef struct ListItem {
     ListItemType item_type;
     bool hidden;
     bool disable_arrows;
+    bool alternative_arrow_action;
     char label[STR_MAX];
     char description[STR_MAX];
     char payload[STR_MAX];
@@ -31,6 +32,7 @@ typedef struct ListItem {
     char value_labels[MAX_NUM_VALUES][STR_MAX];
     void (*value_formatter)(void *self, char *out_label);
     void (*action)(void *self);
+    void (*arrow_action)(void *self);
     int action_id;
     int _reset_value;
     void *icon_ptr;
@@ -208,8 +210,12 @@ bool list_keyLeft(List *list, bool key_repeat)
         break;
     }
 
-    if (apply_action && item->action != NULL)
-        item->action((void *)item);
+    if (apply_action) {
+        if (item->alternative_arrow_action)
+            item->arrow_action((void *)item);
+        else if (item->action != NULL)
+            item->action((void *)item);
+    }
 
     return old_value != item->value;
 }
@@ -244,8 +250,12 @@ bool list_keyRight(List *list, bool key_repeat)
         break;
     }
 
-    if (apply_action && item->action != NULL)
-        item->action((void *)item);
+    if (apply_action) {
+        if (item->alternative_arrow_action)
+            item->arrow_action((void *)item);
+        else if (item->action != NULL)
+            item->action((void *)item);
+    }
 
     return old_value != item->value;
 }
