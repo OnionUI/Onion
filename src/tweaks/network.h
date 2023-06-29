@@ -292,28 +292,34 @@ void menu_networks(void *_)
         _menu_network = list_create(6, LIST_SMALL);
         strcpy(_menu_network.title, "Network");
         list_addItem(&_menu_network,
-                     (ListItem){.label = "WiFi...", .action = menu_wifi});
+                     (ListItem){
+                         .label = "WiFi...",
+                         .action = menu_wifi});
         list_addItem(&_menu_network,
                      (ListItem){.label = "HTTP File Server...",
                                 .item_type = TOGGLE,
+                                .hidden = !settings.wifi_on,
                                 .disable_arrows = 1,
                                 .value = (int)settings.http_state,
                                 .action = menu_http});
         list_addItem(&_menu_network,
                      (ListItem){.label = "SSH...",
                                 .item_type = TOGGLE,
+                                .hidden = !settings.wifi_on,
                                 .disable_arrows = 1,
                                 .value = (int)settings.ssh_state,
                                 .action = menu_ssh});
         list_addItem(&_menu_network,
                      (ListItem){.label = "FTP...",
                                 .item_type = TOGGLE,
+                                .hidden = !settings.wifi_on,
                                 .disable_arrows = 1,
                                 .value = (int)settings.ftp_state,
                                 .action = menu_ftp});
         list_addItem(&_menu_network,
                      (ListItem){.label = "Telnet...",
                                 .item_type = TOGGLE,
+                                .hidden = !settings.wifi_on,
                                 .disable_arrows = 1,
                                 .value = (int)settings.telnet_state,
                                 .action = menu_telnet});
