@@ -480,7 +480,7 @@ get_time() { # handles 2 types of NTP, instant from an API or longer from a time
 		touch /tmp/time_update
 		sync
     else
-        utc_time=$(echo "$response" | cut -dT -f2 | cut -d+ -f1 | cut -d. -f1)
+        utc_time=$(echo "$response" | cut -d. -f1 | sed "s/T/ /")
         if date -u -s "$utc_time" >/dev/null 2>&1; then
 			touch /tmp/time_update
 			sync
