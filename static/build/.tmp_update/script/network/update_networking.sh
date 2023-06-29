@@ -3,35 +3,97 @@ sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo
 filebrowserbin=$sysdir/bin/filebrowser
 filebrowserdb=$sysdir/config/filebrowser/filebrowser.db
+netscript=/mnt/SDCARD/.tmp_update/script/network
+export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
+export PATH="$sysdir/bin:$PATH"
 
-update() {
+main() {
+    case "$1" in
+        check) # runs the check function we use in runtime, will be called on boot
+            check
+            ;;
+        ftp|telnet|http|ssh)
+            service=$1
+            case "$2" in
+                toggle)
+                    check_${service}state &
+                    ;;
+                authed)
+                    ${service}_authed &
+                    ;;
+                *)
+                    print_usage
+                    ;;
+            esac
+            ;;
+        ntp|hotspot)
+            service=$1
+            case "$2" in
+                toggle)
+                    check_${service}state
+                    ;;
+                *)
+                    echo "Usage: $0 {ntp|hotspot} toggle"
+                    exit 1
+                    ;;
+            esac
+            ;;
+        disableall)
+            disable_all_services
+            ;;
+        *)
+            print_usage
+    esac
+}
+# Standard check from runtime for startup.
+check() {
     log "Network Checker: Update networking"
-
     check_wifi
     check_ftpstate 
     check_sshstate 
     check_telnetstate 
     check_ntpstate
     check_httpstate
-	check_hotspotstate
+	check_ntpstate
+	
+	if flag_enabled ntpWait; then
+			sync_time
+		else
+			sync_time &
+	fi
 }
 
+# Function to help disable and kill off all processes
+disable_all_services() {
+	disable_flag sshState
+	disable_flag authsshState
+	disable_flag telnetState
+	disable_flag authtelnetState
+	disable_flag ftpState
+	disable_flag authftpState
+	disable_flag httpState
+	disable_flag authhttpState
+	
+	for process in dropbear bftpd filebrowser telnetd hostapd dnsmasq; do
+        if is_running $process; then
+            killall -9 $process
+        fi
+    done
+}
 
-
+# Core function
 check_wifi() {
 if is_running hostapd; then
 	return
 else
 	if wifi_enabled; then
-		if ! ifconfig wlan0 || [ -f /tmp/restart_wifi ]; then
+		if ! ifconfig wlan0  || [ -f /tmp/restart_wifi ]; then
 			if [ -f /tmp/restart_wifi ]; then
 				pkill -9 wpa_supplicant
 				pkill -9 udhcpc
 				rm /tmp/restart_wifi
 			fi
-
 			log "Network Checker: Initializing wifi..."
-
 			/customer/app/axp_test wifion
 			sleep 2 
 			ifconfig wlan0 up
@@ -48,8 +110,6 @@ else
 fi
 }
 
-
-
 # Starts bftpd if the toggle is set to on
 check_ftpstate() { 
     if flag_enabled ftpState; then
@@ -62,13 +122,13 @@ check_ftpstate() {
         else
             if wifi_enabled; then
                 log "FTP: Starting bftpd"
-				if flag_enabled authftpState; then 
-					bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpdauth.conf
-					log "FTP: Starting bftpd with auth"
-				else	
-					bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpd.conf
-					log "FTP: Starting bftpd without auth"
-				fi
+				sync
+                if flag_enabled authftpState; then 
+                    ftp_authed
+                else
+                    bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpd.conf
+                    log "FTP: Starting bftpd without auth"
+                fi
             else
                 disable_flag ftpState
             fi
@@ -79,6 +139,20 @@ check_ftpstate() {
             log "FTP: Killed"
         fi
     fi
+}
+
+# Called by above function on boot or when auth state is toggled in tweaks
+ftp_authed() {
+if flag_enabled ftpState; then
+	if is_running_exact "bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpd.conf" || flag_enabled authftpState; then
+		killall -9 bftpd 
+		bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpdauth.conf
+		log "FTP: Starting bftpd with auth"
+	else
+		killall -9 bftpd 
+		bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpd.conf
+	fi
+fi
 }
 
 # Starts dropbear if the toggle is set to on
@@ -92,11 +166,9 @@ check_sshstate() {
             fi
         else
             if wifi_enabled; then 
+				sync
 				if flag_enabled authsshState; then 
-					log "SSH: Starting dropbear with auth"
-					file_path="$sysdir/config/.auth.txt"
-					password=$(awk 'NR==1 {print $2}' "$file_path")
-					dropbear -R -Y $password
+					ssh_authed
 				else
 					log "SSH: Starting dropbear without auth"
 					dropbear -R -B
@@ -111,6 +183,24 @@ check_sshstate() {
             log "SSH: Killed"
         fi
     fi
+}
+
+# Called by above function on boot or when auth state is toggled in tweaks
+ssh_authed(){
+if flag_enabled sshState; then
+	if is_running_exact "dropbear -R -B" || flag_enabled authsshState; then
+		killall -9 dropbear
+		log "SSH: Starting dropbear with auth"
+		file_path="$sysdir/config/.auth.txt"
+		password=$(awk 'NR==1 {print $2}' "$file_path")
+		dropbear -R -Y $password >> /mnt/SDCARD/sshdebug2.log 2>&1
+		log "SSH: Started dropbear with auth"
+	else
+		log "SSH: Starting dropbear without auth"
+		killall -9 dropbear
+		dropbear -R -B >> /mnt/SDCARD/sshdebug.log 2>&1
+	fi
+fi
 }
 
 
@@ -132,12 +222,12 @@ check_telnetstate() {
             fi
         else
             if wifi_enabled; then 
+				sync
 				if flag_enabled authtelnetState; then
-					log "Telnet: Starting telnet with auth"
-					telnetd -l /mnt/SDCARD/.tmp_update/script/telnetlogin.sh
+					telnet_authed
 				else
 					log "Telnet: Starting telnet without auth"
-					telnetd -l /mnt/SDCARD/.tmp_update/script/telnetenv.sh
+					telnetd -l $netscript/telnetenv.sh
 				fi
             else
                 disable_flag telnetState
@@ -151,29 +241,41 @@ check_telnetstate() {
     fi
 }
 
+# Called by above function on boot or when auth state is toggled in tweaks
+telnet_authed() {
+if flag_enabled telnetState; then
+	if is_running_exact "telnetd -l /mnt/SDCARD/.tmp_update/script/telnetenv.sh" || flag_enabled authtelnetState; then
+		killall -9 telnetd
+		sleep 0.5
+		log "Telnet: Starting telnet with auth"
+		telnetd -l $netscript/telnetlogin.sh
+	else
+		killall -9 telnetd
+		telnetd -l $netscript/telnetenv.sh
+	fi
+fi
+}
+
 # Starts Filebrowser if the toggle in tweaks is set on
-check_httpstate() {     
+check_httpstate() {
     if flag_enabled httpState && [ -f $filebrowserbin ]; then
-		# Check if authhttpState is enabled set json, if not set noauth
-		if [ "$(echo_enabled authhttpState)" -eq 1 ]; then 
-			$filebrowserbin config set --auth.method=json -d $filebrowserdb >> $sysdir/logs/http.log
-		else
-			if [ "$(is_noauth_enabled)" -eq 0 ]; then
-				$filebrowserbin config set --auth.method=noauth -d $filebrowserdb >> $sysdir/logs/http.log
-			fi
-		fi
-	
-        if is_running_exact $filebrowserbin -p 80 -a 0.0.0.0 -r /mnt/SDCARD -d $filebrowserdb; then
-            if wifi_disabled; then 
+        if is_running_exact "$filebrowserbin -p 80 -a 0.0.0.0 -r /mnt/SDCARD -d $filebrowserdb"; then
+            if wifi_disabled; then
                 log "Filebrowser(HTTP server): Wifi is turned off, disabling the toggle for HTTP FS and killing the process"
                 disable_flag httpState
                 pkill -9 filebrowser
             fi
         else
             # Checks if the toggle for WIFI is turned on.
-            if wifi_enabled; then 
-				$filebrowserbin -p 80 -a 0.0.0.0 -r /mnt/SDCARD -d $filebrowserdb >> $sysdir/logs/http.log &
-                log "Filebrowser(HTTP server): Starting filebrowser listening on 0.0.0.0"
+            if wifi_enabled; then
+                # Check if authhttpState is enabled/set to json, if not set noauth
+				sync
+                if flag_enabled authhttpState; then
+                    http_authed
+                else
+                    $filebrowserbin -p 80 -a 0.0.0.0 -r /mnt/SDCARD -d $filebrowserdb >> /dev/null 2>&1 &
+                    log "Filebrowser(HTTP server): Starting filebrowser listening on 0.0.0.0"
+                fi
             else
                 disable_flag httpState
             fi
@@ -185,14 +287,31 @@ check_httpstate() {
     fi
 }
 
+# Called by above function on boot or when auth state is toggled in tweaks
+http_authed() {
+if flag_enabled httpState; then
+	 if [ "$(echo_enabled authhttpState)" -eq 1 ]; then 
+			killall -9 filebrowser
+			$filebrowserbin config set --auth.method=json -d $filebrowserdb >> $sysdir/logs/http.log
+		else
+			if [ "$(is_noauth_enabled)" -eq 0 ]; then
+				killall -9 filebrowser
+				$filebrowserbin config set --auth.method=noauth -d $filebrowserdb >> $sysdir/logs/http.log
+			fi
+		fi
+		$filebrowserbin -p 80 -a 0.0.0.0 -r /mnt/SDCARD -d $filebrowserdb >> /dev/null 2>&1 &
+fi
+}
+
 # Starts the hotspot based on the results of check_hotspotstate, called twice saves repeating
 # We have to sleep a bit or sometimes supllicant starts before we can get the hotspot logo
 # Starts AP and DHCP
+
 start_hotspot() { 
+	ifconfig wlan1 up >> /dev/null 2>&1
+	ifconfig wlan0 down >> /dev/null 2>&1
 	
-	ifconfig wlan1 up 
-	ifconfig wlan0 down
-		
+	sleep 1
 	# IP setup
 	hotspot0addr=$(grep -E '^dhcp-range=' "$sysdir/config/dnsmasq.conf" | cut -d',' -f1 | cut -d'=' -f2) 
 	hotspot0addr=$(echo $hotspot0addr | awk -F'.' -v OFS='.' '{$NF-=1; print}') 
@@ -200,18 +319,20 @@ start_hotspot() {
 	subnetmask=$(grep -E '^dhcp-range=.*,[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+,' "$sysdir/config/dnsmasq.conf" | cut -d',' -f3) 
 	
 	# Set IP route / If details
-	ifconfig wlan1 $hotspot0addr netmask $subnetmask 
+	ifconfig wlan1 $hotspot0addr netmask $subnetmask >> /dev/null 2>&1
 	
 	# Start
-	$sysdir/bin/hostapd -P /var/run/hostapd.pid -B -i wlan1 $sysdir/config/hostapd.conf &
-	$sysdir/bin/dnsmasq --conf-file=$sysdir/config/dnsmasq.conf -u root & 
+
+	$sysdir/bin/dnsmasq --conf-file=$sysdir/config/dnsmasq.conf -u root &
+	$sysdir/bin/hostapd -i wlan1 $sysdir/config/hostapd.conf >> /dev/null 2>&1 &
+	
 	ip route add default via $gateway0addr
 	
 	if is_running hostapd; then
 		log "Hotspot: Started with IP of: $hotspot0addr, subnet of: $subnetmask"
 	else
 		log "Hotspot: Failed to start, please try turning off/on. If this doesn't resolve the issue reboot your device."
-		disable_flag HotspotState
+		disable_flag hotspotState
 	fi
 
 }
@@ -220,7 +341,8 @@ start_hotspot() {
 # Calls start_hotspot from above
 # IF toggle is disabled, shuts down hotspot and bounces wifi.
 check_hotspotstate() { 
-    if [ ! -f $sysdir/config/.HotspotState ]; then
+	sync
+    if [ ! -f $sysdir/config/.hotspotState ]; then
         if is_running hostapd; then
 			log "Hotspot: Killed"
 			pkill -9 hostapd 
@@ -235,7 +357,7 @@ check_hotspotstate() {
         if is_running hostapd; then
 			if wifi_disabled; then 
 				log "Hotspot: Wifi is turned off, disabling the toggle for hotspot and killing the process"
-				rm $sysdir/config/.HotspotState
+				rm $sysdir/config/.hotspotState
 				pkill -9 hostapd
 				pkill -9 dnsmasq
 			fi
@@ -245,35 +367,52 @@ check_hotspotstate() {
     fi
 }
 
+# This is the fallback! 
 # We need to check if NTP is enabled and then check the state of tzselect in /.tmp_update/config/tzselect, based on the value we'll pass the TZ via the env var to ntpd and get the time (has to be POSIX)
 # This will work but it will not export the TZ var across all opens shells so you may find the hwclock (and clock app, retroarch time etc) are correct but terminal time is not.
 # It does set TZ on the tty that Main is running in so this is ok
 
-check_tzid() {
-    tzid=$(cat "$sysdir/config/tzselect") 
-    echo "$tzid"
+sync_time() { # Run a sync at startup once, but only if we have internet
+	if [ -f "$sysdir/config/.ntpState" ]; then
+		while true; do
+			if [ ! -f "/tmp/ntp_run_once" ]; then
+				break
+			fi
+			
+			if ping -q -c 1 google.com > /dev/null 2>&1 ; then
+				get_time
+				rm /tmp/ntp_run_once
+				break
+			fi
+			sleep 0.5
+		done
+	fi
 }
 
-check_ntpstate() { 
-    if flag_enabled NTPState && wifi_enabled; then
+check_ntpstate() { # This function checks if the timezone has changed, we call this in the main loop. 
+    if flag_enabled ntpState && wifi_enabled; then
         current_tz=$(check_tzid)
-		ntpdate time.google.com &
+		get_time
         if [ "$current_tz" != "$old_tz" ]; then
-            export old_tz="$current_tz"
             restart_ntp &
         fi
     fi
 }
 
-restart_ntp() {
+
+restart_ntp() { # If we detect that the timezone has changed we'll restart the ntp process to reset it in the main shell (runtime.sh shell)
     export old_tz=$(check_tzid)
     set_tzid
     log "NTP: Starting NTP with TZ of $TZ"
-    ntpdate time.google.com &
-    hwclock -w
-	touch /tmp/time_update
-	sync
+    get_time
     log "NTP: TZ set to $TZ, Time set to: $(date) and merged to hwclock, which shows: $(hwclock)"
+}
+ 
+# Utility functions
+
+check_tzid() {
+    tzid=$(cat "$sysdir/config/tzselect") 
+    echo "$tzid"
 }
 
 set_tzid() {
@@ -305,13 +444,11 @@ set_tzid() {
         23) export TZ="UTC-11" ;;
         24) export TZ="UTC-12" ;;
     esac
-    echo "$TZ" > "$sysdir/config/T.Z"
+    echo "$TZ" > "$sysdir/config/.tz"
 }
 
-set_tzid
-
 is_noauth_enabled() { # Used to check authMethod val for HTTPFS
-    DB_PATH="/mnt/SDCARD/.tmp_update/bin/filebrowser/filebrowser.db"
+    DB_PATH="$filebrowserdb"
     OUTPUT=$(cat $DB_PATH)
 
     if echo $OUTPUT | grep -q '"authMethod":"noauth"'; then
@@ -330,6 +467,32 @@ echo_enabled() {
     fi
 }
 
+print_usage() {
+    echo "Usage: $0 {check|ftp|telnet|http|ssh|ntp|hotspot|disableall} {toggle|authed}"
+    exit 1
+}
+
+get_time() { # handles 2 types of NTP, instant from an API or longer from a time server, if the instant API check fails it will fallback to the longer ntp
+    response=$(curl -s http://worldtimeapi.org/api/ip.txt | grep -o 'utc_datetime: [^,]*' | cut -d ' ' -f 2)
+    if [ -z "$response" ]; then
+        log "NTP: Failed to get time from worldtimeapi.org, falling back to NTP."
+        ntpdate -u time.google.com 
+		touch /tmp/time_update
+		sync
+    else
+        utc_time=$(echo "$response" | cut -dT -f2 | cut -d+ -f1 | cut -d. -f1)
+        if date -u -s "$utc_time" >/dev/null 2>&1; then
+			touch /tmp/time_update
+			sync
+            hwclock -w
+        else
+            log "NTP: Failed to parse time from worldtimeapi.org, falling back to NTP."
+            ntpdate -u time.google.com
+			touch /tmp/time_update
+			sync
+        fi
+    fi
+}
 
 wifi_enabled() {
     [ $(/customer/app/jsonval wifi) -eq 1 ]
@@ -368,5 +531,5 @@ log() {
     echo "$(date)" $* >> $sysdir/logs/network.log
 }
 
-
-update
+set_tzid
+main "$@"

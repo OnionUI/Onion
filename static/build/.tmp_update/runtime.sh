@@ -38,6 +38,9 @@ main() {
     
     # Make sure MainUI doesn't show charging animation
     touch /tmp/no_charging_ui
+	
+	# Loop breaker for NTP
+	touch /tmp/ntp_run_once
 
     cd $sysdir
     bootScreen "Boot"
@@ -63,7 +66,7 @@ main() {
 
     # Bind arcade name library to customer path
     mount -o bind /mnt/SDCARD/miyoo/lib/libgamename.so /customer/lib/libgamename.so
-
+	
 	if [ -f "$sysdir/config/filebrowser/first.run" ]; then
 		# Set filebrowser branding to "Onion" and apply custom theme
 		$sysdir/bin/filebrowser config set --branding.name "Onion" -d $sysdir/config/filebrowser/filebrowser.db
@@ -71,9 +74,9 @@ main() {
 		
 		rm "$sysdir/config/filebrowser/first.run"
 	fi
-	
-    start_networking
 
+    start_networking
+		
     # Auto launch
     if [ ! -f $sysdir/config/.noAutoStart ]; then
         state_change
@@ -99,7 +102,7 @@ main() {
     state_change
     check_switcher
     set_startup_tab
-
+	
     # Main runtime loop
     while true; do
         state_change
@@ -124,7 +127,7 @@ main() {
 
 ntp_updater() {
 	if [ -f /tmp/time_update ]; then
-		export TZ=$(cat "$sysdir/config/T.Z")
+		export TZ=$(cat "$sysdir/config/.tz")
 		rm /tmp/time_update
 	fi
 }
@@ -570,8 +573,9 @@ runifnecessary() {
     done
 }
 
+
 start_networking() {
-    rm $sysdir/config/.HotspotState  # dont start hotspot at boot
+    rm $sysdir/config/.hotspotState  # dont start hotspot at boot
     
     touch /tmp/network_changed
     sync
@@ -584,7 +588,7 @@ check_networking() {
     fi
 	rm /tmp/network_changed
 	
-    $sysdir/script/update_networking.sh
+    $sysdir/script/network/update_networking.sh check
 }
 
 main

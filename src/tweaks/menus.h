@@ -24,6 +24,7 @@ static List _menu_main;
 static List _menu_system;
 static List _menu_date_time;
 static List _menu_network;
+static List _menu_wifi;
 static List _menu_telnet;
 static List _menu_ftp;
 static List _menu_wps;
@@ -45,6 +46,7 @@ void menu_free_all(void)
     list_free(&_menu_main);
     list_free(&_menu_system);
     list_free(&_menu_network);
+	list_free(&_menu_wifi);
     list_free(&_menu_telnet);
     list_free(&_menu_ftp);
     list_free(&_menu_wps);
@@ -98,7 +100,7 @@ void menu_systemStartup(void *_)
 void menu_datetime(void *_)
 {
     if (!_menu_date_time._created) {
-        _menu_date_time = list_create(3, LIST_SMALL);
+        _menu_date_time = list_create(4, LIST_SMALL);
         strcpy(_menu_date_time.title, "Date and time");
         if (DEVICE_ID == MIYOO354) {
             list_addItem(&_menu_date_time,
@@ -106,6 +108,11 @@ void menu_datetime(void *_)
                                     .item_type = TOGGLE,
                                     .value = (int)settings.ntp_state,
                                     .action = action_setntpstate});
+			list_addItem(&_menu_date_time,
+                         (ListItem){.label = "Wait for NTP update (startup)",
+                                    .item_type = TOGGLE,
+                                    .value = (int)settings.ntp_wait,
+                                    .action = action_setntpwaitstate});
             list_addItem(&_menu_date_time,
                          (ListItem){.label = "Select timezone",
                                     .item_type = MULTIVALUE,
@@ -217,26 +224,41 @@ void menu_ssh(void *_)
     header_changed = true;
 }
 
+
+void menu_wifi(void *_)
+{
+    if (!_menu_wifi._created) {
+        _menu_wifi = list_create(2, LIST_SMALL);
+        strcpy(_menu_wifi.title, "HTTP fileserver config");
+        list_addItem(&_menu_wifi,
+                     (ListItem){.label = "WiFi Hotspot",
+                                .item_type = TOGGLE,
+                                .value = (int)settings.hotspot_state,
+                                .action = action_sethotspotstate});
+		list_addItem(&_menu_wifi,
+                     (ListItem){.label = "WPS...", .action = menu_wps});
+    }
+    menu_stack[++menu_level] = &_menu_wifi;
+    header_changed = true;
+}
+
 void menu_networks(void *_)
 {
     if (!_menu_network._created) {
         _menu_network = list_create(6, LIST_SMALL);
         strcpy(_menu_network.title, "Networks");
-        list_addItem(&_menu_network, (ListItem){.label = "HTTP fileserver...",
-                                                .action = menu_http});
-        list_addItem(&_menu_network,
-                     (ListItem){.label = "WPS...", .action = menu_wps});
+		list_addItem(&_menu_network, 
+					 (ListItem){.label = "Disable all", .action = action_disableall});
+		list_addItem(&_menu_network, 
+					 (ListItem){.label = "Wifi...", .action = menu_wifi});  
+        list_addItem(&_menu_network, 
+					 (ListItem){.label = "HTTP fileserver...", .action = menu_http});               
         list_addItem(&_menu_network,
                      (ListItem){.label = "SSH/SFTP...", .action = menu_ssh});
         list_addItem(&_menu_network,
                      (ListItem){.label = "FTP...", .action = menu_ftp});
         list_addItem(&_menu_network,
                      (ListItem){.label = "Telnet...", .action = menu_telnet});
-        list_addItem(&_menu_network,
-                     (ListItem){.label = "WiFi Hotspot",
-                                .item_type = TOGGLE,
-                                .value = (int)settings.hotspot_state,
-                                .action = action_sethotspotstate});
     }
     menu_stack[++menu_level] = &_menu_network;
     header_changed = true;
