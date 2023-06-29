@@ -147,6 +147,7 @@ void network_setTzSelectState(void *pt)
         strcpy(utc_str, "UTC");
     }
     else {
+        // UTC +/- is reversed for export TZ
         sprintf(utc_str, utc_value > 0 ? "UTC-%d" : "UTC+%d", abs(utc_value));
     }
     printf_debug("Set timezone: %s\n", utc_str);
