@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "components/list.h"
@@ -73,11 +74,30 @@ void menu_systemStartup(void *_)
     header_changed = true;
 }
 
+bool _writeDateString(char *label_out)
+{
+    char new_label[STR_MAX];
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
+    snprintf(new_label, STR_MAX - 1, "Now: %d-%02d-%02d %02d:%02d:%02d (%s)", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, tm.tm_zone);
+    if (strncmp(new_label, label_out, STR_MAX) != 0) {
+        strcpy(label_out, new_label);
+        return true;
+    }
+    return false;
+}
+
 void menu_datetime(void *_)
 {
     if (!_menu_date_time._created) {
-        _menu_date_time = list_create(4, LIST_SMALL);
+        _menu_date_time = list_create(5, LIST_SMALL);
         strcpy(_menu_date_time.title, "Date and time");
+        list_addItem(&_menu_date_time,
+                     (ListItem){
+                         .label = "[DATESTRING]",
+                         .disabled = 1,
+                         .action = NULL});
+
         if (DEVICE_ID == MIYOO354 || settings.ntp_state) {
             list_addItem(&_menu_date_time,
                          (ListItem){
@@ -91,14 +111,14 @@ void menu_datetime(void *_)
                          (ListItem){
                              .label = "Wait for NTP update (startup)",
                              .item_type = TOGGLE,
-                             .hidden = !settings.ntp_state,
+                             .disabled = !settings.ntp_state,
                              .value = (int)settings.ntp_wait,
                              .action = network_setNtpWaitState});
             list_addItem(&_menu_date_time,
                          (ListItem){
                              .label = "Select timezone",
                              .item_type = MULTIVALUE,
-                             .hidden = !settings.ntp_state,
+                             .disabled = !settings.ntp_state,
                              .value_max = 24,
                              .value_labels = TZ_SELECT,
                              .value = settings.tzselect_state,
@@ -108,12 +128,13 @@ void menu_datetime(void *_)
                      (ListItem){
                          .label = "Emulated time skip",
                          .item_type = MULTIVALUE,
-                         .hidden = settings.ntp_state,
+                         .disabled = settings.ntp_state,
                          .value_max = 24,
                          .value_formatter = formatter_timeSkip,
                          .value = settings.time_skip,
                          .action = action_setTimeSkip});
     }
+    _writeDateString(_menu_date_time.items[0].label);
     menu_stack[++menu_level] = &_menu_date_time;
     header_changed = true;
 }

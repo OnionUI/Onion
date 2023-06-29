@@ -184,6 +184,12 @@ int main(int argc, char *argv[])
             battery_changed = true;
 
         if (acc_ticks >= time_step) {
+            if (_menu_date_time._created && menu_stack[menu_level]->_id == _menu_date_time._id) {
+                if (_writeDateString(_menu_date_time.items[0].label)) {
+                    list_changed = true;
+                }
+            }
+
             if (header_changed || battery_changed)
                 theme_renderHeader(screen, menu_stack[menu_level]->title,
                                    false);

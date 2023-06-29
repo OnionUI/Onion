@@ -174,7 +174,7 @@ void menu_http(void *pt)
                      (ListItem){
                          .label = "Enable authentication",
                          .item_type = TOGGLE,
-                         .hidden = !settings.http_state,
+                         .disabled = !settings.http_state,
                          .value = (int)settings.auth_http_state,
                          .action = network_setHttpAuthState});
     }
@@ -199,7 +199,7 @@ void menu_telnet(void *pt)
                      (ListItem){
                          .label = "Enable authentication",
                          .item_type = TOGGLE,
-                         .hidden = !settings.telnet_state,
+                         .disabled = !settings.telnet_state,
                          .value = (int)settings.auth_telnet_state,
                          .action = network_setTelnetAuthState});
     }
@@ -224,7 +224,7 @@ void menu_ftp(void *pt)
                      (ListItem){
                          .label = "Enable authentication",
                          .item_type = TOGGLE,
-                         .hidden = !settings.ftp_state,
+                         .disabled = !settings.ftp_state,
                          .value = (int)settings.auth_ftp_state,
                          .action = network_setFtpAuthState});
     }
@@ -263,7 +263,7 @@ void menu_ssh(void *pt)
                      (ListItem){
                          .label = "Enable authentication",
                          .item_type = TOGGLE,
-                         .hidden = !settings.ssh_state,
+                         .disabled = !settings.ssh_state,
                          .value = (int)settings.auth_ssh_state,
                          .action = network_setSshAuthState});
     }
@@ -304,7 +304,7 @@ void menu_network(void *_)
                      (ListItem){
                          .label = "HTTP File Server...",
                          .item_type = TOGGLE,
-                         .hidden = !settings.wifi_on,
+                         .disabled = !settings.wifi_on,
                          .alternative_arrow_action = 1,
                          .arrow_action = network_setHttpState,
                          .value = (int)settings.http_state,
@@ -313,7 +313,7 @@ void menu_network(void *_)
                      (ListItem){
                          .label = "FTP server...",
                          .item_type = TOGGLE,
-                         .hidden = !settings.wifi_on,
+                         .disabled = !settings.wifi_on,
                          .alternative_arrow_action = 1,
                          .arrow_action = network_setFtpState,
                          .value = (int)settings.ftp_state,
@@ -322,7 +322,7 @@ void menu_network(void *_)
                      (ListItem){
                          .label = "SSH protocol...",
                          .item_type = TOGGLE,
-                         .hidden = !settings.wifi_on,
+                         .disabled = !settings.wifi_on,
                          .alternative_arrow_action = 1,
                          .arrow_action = network_setSshState,
                          .value = (int)settings.ssh_state,
@@ -331,7 +331,7 @@ void menu_network(void *_)
                      (ListItem){
                          .label = "Telnet protocol...",
                          .item_type = TOGGLE,
-                         .hidden = !settings.wifi_on,
+                         .disabled = !settings.wifi_on,
                          .alternative_arrow_action = 1,
                          .arrow_action = network_setTelnetState,
                          .value = (int)settings.telnet_state,
