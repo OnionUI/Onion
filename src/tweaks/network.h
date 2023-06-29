@@ -91,7 +91,7 @@ void network_setHotspotState(void *pt)
     network_setServiceState("hotspot");
 }
 
-void action_setntpstate(void *pt)
+void network_setNtpState(void *pt)
 {
     config_flag_set(".ntpState", ((ListItem *)pt)->value == 1);
     settings.ntp_state = ((ListItem *)pt)->value == 1;
@@ -100,7 +100,7 @@ void action_setntpstate(void *pt)
     all_changed = true;
 }
 
-void action_setntpwaitstate(void *pt)
+void network_setNtpWaitState(void *pt)
 {
     settings.ntp_wait = ((ListItem *)pt)->value == 1;
 }
