@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "components/list.h"
@@ -143,6 +144,7 @@ void network_setTzSelectState(void *pt)
     char utc_str[10];
     int select_value = ((ListItem *)pt)->value;
     int utc_value = select_value - 12;
+
     if (utc_value == 0) {
         strcpy(utc_str, "UTC");
     }
@@ -150,11 +152,18 @@ void network_setTzSelectState(void *pt)
         // UTC +/- is reversed for export TZ
         sprintf(utc_str, utc_value > 0 ? "UTC-%d" : "UTC+%d", abs(utc_value));
     }
+
     printf_debug("Set timezone: %s\n", utc_str);
+
+    setenv("TZ", utc_str, 1);
+    tzset();
     config_setString(".tz", utc_str);
+
     config_setNumber("tzselect", select_value);
     settings.tzselect_state = select_value;
-    network_setServiceState("ntp");
+
+    temp_flag_set("timezone_update", true);
+    sync();
 }
 
 void menu_http(void *pt)

@@ -108,8 +108,7 @@ main() {
         state_change
         check_main_ui
 
-        check_networking  		
-        ntp_updater
+        check_networking
 		
         state_change
         check_game_menu
@@ -117,19 +116,11 @@ main() {
         state_change
         check_game
         
-		check_networking 
-		ntp_updater
+		check_networking
 		
         state_change
         check_switcher
     done
-}
-
-ntp_updater() {
-	if [ -f /tmp/time_update ]; then
-		export TZ=$(cat "$sysdir/config/.tz")
-		rm /tmp/time_update
-	fi
 }
 
 state_change() {
@@ -586,11 +577,21 @@ start_networking() {
 
 check_networking() {
     if [ $deviceModel -ne 354 ] || [ ! -f /tmp/network_changed ]; then
+        check_timezone
         return
     fi
 	rm /tmp/network_changed
 	
     $sysdir/script/network/update_networking.sh check
+
+    check_timezone
+}
+
+check_timezone() {
+	if [ -f /tmp/timezone_update ]; then
+		export TZ=$(cat "$sysdir/config/.tz")
+		rm /tmp/timezone_update
+	fi
 }
 
 main
