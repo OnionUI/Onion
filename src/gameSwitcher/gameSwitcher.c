@@ -952,6 +952,8 @@ int main(void)
 
     freeRomScreens();
 
+    free_play_activities(play_activities);
+
     SDL_FreeSurface(screen);
     SDL_FreeSurface(video);
 

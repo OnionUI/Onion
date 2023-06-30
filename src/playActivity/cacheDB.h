@@ -8,6 +8,8 @@
 #include <string.h>
 #include <sys/stat.h>
 
+#include "utils/str.h"
+
 typedef struct CacheDBItem CacheDBItem;
 
 struct CacheDBItem {
@@ -62,22 +64,20 @@ CacheDBItem *cache_db_find(char *cache_db_item_file_path)
     char *cache_db_file_path;
 
     // Check if "_cache6.db" file exists
-    char *cache6_db_file_path = malloc(strlen(type) * 2 + 29);
-    snprintf(cache6_db_file_path, strlen(type) * 2 + 29, "/mnt/SDCARD/Roms/%s/%s_cache6.db", type, type);
+    char cache6_db_file_path[STR_MAX];
+    snprintf(cache6_db_file_path, STR_MAX - 1, "/mnt/SDCARD/Roms/%s/%s_cache6.db", type, type);
     if (access(cache6_db_file_path, F_OK) != -1) {
         cache_db_file_path = cache6_db_file_path;
     }
     else {
         // Check if "_cache2.db" file exists
-        char *cache2_db_file_path = malloc(strlen(type) * 2 + 29);
-        snprintf(cache2_db_file_path, strlen(type) * 2 + 29, "/mnt/SDCARD/Roms/%s/%s_cache2.db", type, type);
+        char cache2_db_file_path[STR_MAX];
+        snprintf(cache2_db_file_path, STR_MAX - 1, "/mnt/SDCARD/Roms/%s/%s_cache2.db", type, type);
         if (access(cache2_db_file_path, F_OK) != -1) {
             cache_db_file_path = cache2_db_file_path;
         }
         else {
             printf_debug("No cache database file found for %s\n", type);
-            free(cache6_db_file_path);
-            free(cache2_db_file_path);
             return NULL;
         }
     }

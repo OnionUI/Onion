@@ -222,5 +222,8 @@ int main(int argc, char *argv[])
     SDL_FreeSurface(screen);
     SDL_FreeSurface(video);
     SDL_Quit();
+
+    free_play_activities(play_activities);
+
     return EXIT_SUCCESS;
 }

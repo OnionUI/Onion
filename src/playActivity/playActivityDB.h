@@ -144,41 +144,44 @@ PlayActivities *play_activity_find_all(void)
         play_activity_count++;
     }
     sqlite3_reset(stmt);
+
     play_activities = (PlayActivities *)malloc(sizeof(PlayActivities));
     play_activities->count = play_activity_count;
     play_activities->play_time_total = 0;
-    play_activities->play_activity = (PlayActivity **)malloc(
-        sizeof(PlayActivity *) * play_activities->count);
+    play_activities->play_activity = (PlayActivity **)malloc(sizeof(PlayActivity *) * play_activities->count);
+
     for (int i = 0; i < play_activities->count; i++) {
-        if (sqlite3_step(stmt) == SQLITE_ROW) {
-            play_activities->play_time_total += sqlite3_column_int(stmt, 6);
-            play_activities->play_activity[i] =
-                (PlayActivity *)malloc(sizeof(PlayActivity));
-            play_activities->play_activity[i]->rom = (ROM *)malloc(sizeof(ROM));
-            play_activities->play_activity[i]->rom->id =
-                sqlite3_column_int(stmt, 0);
-            play_activities->play_activity[i]->rom->type =
-                strdup((const char *)sqlite3_column_text(stmt, 1));
-            play_activities->play_activity[i]->rom->name =
-                strdup((const char *)sqlite3_column_text(stmt, 2));
-            play_activities->play_activity[i]->rom->file_path =
-                strdup((const char *)sqlite3_column_text(stmt, 3));
-            play_activities->play_activity[i]->rom->image_path =
-                strdup((const char *)sqlite3_column_text(stmt, 4));
-            play_activities->play_activity[i]->play_count =
-                sqlite3_column_int(stmt, 5);
-            play_activities->play_activity[i]->play_time_total =
-                sqlite3_column_int(stmt, 6);
-            play_activities->play_activity[i]->play_time_average =
-                sqlite3_column_int(stmt, 7);
-            play_activities->play_activity[i]->first_played_at =
-                strdup((const char *)sqlite3_column_text(stmt, 8));
-            play_activities->play_activity[i]->last_played_at =
-                strdup((const char *)sqlite3_column_text(stmt, 9));
-        }
+        if (sqlite3_step(stmt) != SQLITE_ROW)
+            continue;
+
+        play_activities->play_time_total += sqlite3_column_int(stmt, 6);
+        play_activities->play_activity[i] = (PlayActivity *)malloc(sizeof(PlayActivity));
+        play_activities->play_activity[i]->rom = (ROM *)malloc(sizeof(ROM));
+        play_activities->play_activity[i]->rom->id = sqlite3_column_int(stmt, 0);
+        play_activities->play_activity[i]->rom->type = strdup((const char *)sqlite3_column_text(stmt, 1));
+        play_activities->play_activity[i]->rom->name = strdup((const char *)sqlite3_column_text(stmt, 2));
+        play_activities->play_activity[i]->rom->file_path = strdup((const char *)sqlite3_column_text(stmt, 3));
+        play_activities->play_activity[i]->rom->image_path = strdup((const char *)sqlite3_column_text(stmt, 4));
+        play_activities->play_activity[i]->play_count = sqlite3_column_int(stmt, 5);
+        play_activities->play_activity[i]->play_time_total = sqlite3_column_int(stmt, 6);
+        play_activities->play_activity[i]->play_time_average = sqlite3_column_int(stmt, 7);
+        play_activities->play_activity[i]->first_played_at = strdup((const char *)sqlite3_column_text(stmt, 8));
+        play_activities->play_activity[i]->last_played_at = strdup((const char *)sqlite3_column_text(stmt, 9));
     }
+
     sqlite3_finalize(stmt);
+
     return play_activities;
+}
+
+void free_play_activities(PlayActivities *pa_ptr)
+{
+    for (int i = 0; i < pa_ptr->count; i++) {
+        free(pa_ptr->play_activity[i]->rom);
+        free(pa_ptr->play_activity[i]);
+    }
+    free(pa_ptr->play_activity);
+    free(pa_ptr);
 }
 
 ROM *rom_find_by_file_path(char *rom_file_path)
@@ -209,6 +212,7 @@ ROM *rom_find_by_file_path(char *rom_file_path)
                               "VALUES('%q', '%q', '%q', '%q');",
                               cache_db_item->rom_type, cache_db_item->disp,
                               cache_db_item->path, cache_db_item->imgpath);
+        free(cache_db_item);
         play_activity_db_execute(sql);
         sqlite3_free(sql);
         sql = sqlite3_mprintf(
@@ -298,8 +302,8 @@ void play_activity_start(char *rom_file_path)
     }
     printf("play_activity_stop(%s)\n", rom->name);
     int rom_id = rom->id;
-    play_activity_db_execute(sqlite3_mprintf(
-        "INSERT INTO play_activity(rom_id) VALUES(%d);", rom_id));
+    play_activity_db_execute(sqlite3_mprintf("INSERT INTO play_activity(rom_id) VALUES(%d);", rom_id));
+    free(rom);
 }
 
 void play_activity_stop(char *rom_file_path)
@@ -316,6 +320,7 @@ void play_activity_stop(char *rom_file_path)
                         "'now')) - created_at, updated_at = (strftime('%%s', "
                         "'now')) WHERE rom_id = %d AND play_time IS NULL;",
                         rom_id));
+    free(rom);
 }
 
 int readRomOldDB()
@@ -381,82 +386,93 @@ void play_activity_db_V3_upgrade(void)
         totalOldRecords++;
         printf("rom name : %s\n", rom_list[i].name);
 
+        if (strlen(rom_list[i].name) == 0) {
+            totalSkipped++;
+            continue;
+        }
+
         // ************************ //
         // Rom file + cache search  //
         // ************************ //
 
-        if (strlen(rom_list[i].name) > 0) {
-            CacheDBItem *cache_db_item = NULL;
-            DIR *dir;
-            struct dirent *entry;
+        CacheDBItem *cache_db_item = NULL;
+        DIR *dir;
+        struct dirent *entry;
 
-            if (is_dir("/mnt/SDCARD/Roms") == 1) {
+        if (is_dir("/mnt/SDCARD/Roms") == 1) {
 
-                // Scanning for accross all console roms for this specific game
-                // If the rom is found, the miyoo cache db is retrieved to retrieve the displayed name + img path
-                dir = opendir("/mnt/SDCARD/Roms");
+            // Scanning for accross all console roms for this specific game
+            // If the rom is found, the miyoo cache db is retrieved to retrieve the displayed name + img path
+            dir = opendir("/mnt/SDCARD/Roms");
 
-                while ((cache_db_item == NULL) && ((entry = readdir(dir)) != NULL)) {
-                    if (entry->d_type == DT_DIR && strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
-                        char file_path[strlen(entry->d_name) + strlen(rom_list[i].name) + 7];
-                        snprintf(file_path, strlen(entry->d_name) + strlen(rom_list[i].name) + 8, "/Roms/%s/%s", entry->d_name, rom_list[i].name);
+            while ((cache_db_item == NULL) && ((entry = readdir(dir)) != NULL)) {
+                if (entry->d_type == DT_DIR && strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+                    char file_path[strlen(entry->d_name) + strlen(rom_list[i].name) + 7];
+                    snprintf(file_path, strlen(entry->d_name) + strlen(rom_list[i].name) + 8, "/Roms/%s/%s", entry->d_name, rom_list[i].name);
 
-                        cache_db_item = cache_db_find(file_path);
-                    }
+                    cache_db_item = cache_db_find(file_path);
                 }
-                closedir(dir);
             }
-
-            // ************** //
-            // Rom migration  //
-            // ************** //
-            ROM *rom = NULL;
-            if (cache_db_item != NULL) {
-                // cache found for the game console
-                rom = rom_find_by_file_path(cache_db_item->path);
-            }
-            else {
-                printf("Cache empty\n");
-            }
-
-            if (rom == NULL) {
-                // Orphan rom
-                rom = add_orphan_rom(rom_list[i].name);
-            }
-
-            if (rom == NULL) {
-                // Error adding the orphan rom idn the db
-                totalSkipped++;
-                continue;
-            }
-
-            // ******************* //
-            // Play time migration //
-            // ******************* //
-
-            // The Rom is found or has been successfully inserted in the db
-            // Search for a previous play time migration (Same rom_id + created_at = 0)
-            char *selectSql = sqlite3_mprintf("SELECT COUNT(*) FROM play_activity WHERE rom_id = %d AND created_at = 0;", rom->id);
-            int result = play_activity_db_execute_select(selectSql);
-            printf("SQL query result : %d\n", result);
-            sqlite3_free(selectSql);
-
-            if (result > 0) {
-                printf("%s already imported!\n", rom_list[i].name);
-                totalAlreadyImported++;
-                continue;
-            }
-
-            printf("Importing %s (time: %d)\n", rom_list[i].name, rom_list[i].playTime);
-            char *sql = sqlite3_mprintf("INSERT INTO play_activity(rom_id, play_time, created_at, updated_at) VALUES "
-                                        "('%d','%d',0,0);", // Imported times have the particularity of having a "created_at" at 0.
-                                        rom->id, rom_list[i].playTime);
-            printf("SQL query: %s\n", sql);
-            if (play_activity_db_execute(sql) == 0) {
-                totalImported++;
-            }
+            closedir(dir);
         }
+
+        // ************** //
+        // Rom migration  //
+        // ************** //
+        ROM *rom = NULL;
+
+        if (cache_db_item != NULL) {
+            // cache found for the game console
+            rom = rom_find_by_file_path(cache_db_item->path);
+            free(cache_db_item);
+        }
+        else {
+            printf("Cache empty\n");
+        }
+
+        if (rom == NULL) {
+            // Orphan rom
+            rom = add_orphan_rom(rom_list[i].name);
+        }
+
+        if (rom == NULL) {
+            // Error adding the orphan rom idn the db
+            totalSkipped++;
+            continue;
+        }
+
+        // ******************* //
+        // Play time migration //
+        // ******************* //
+
+        // The Rom is found or has been successfully inserted in the db
+        // Search for a previous play time migration (Same rom_id + created_at = 0)
+        char *selectSql = sqlite3_mprintf("SELECT COUNT(*) FROM play_activity WHERE rom_id = %d AND created_at = 0;", rom->id);
+        int result = play_activity_db_execute_select(selectSql);
+
+        printf("SQL query result : %d\n", result);
+        sqlite3_free(selectSql);
+
+        if (result > 0) {
+            printf("%s already imported!\n", rom_list[i].name);
+            totalAlreadyImported++;
+            continue;
+        }
+
+        printf("Importing %s (time: %d)\n", rom_list[i].name, rom_list[i].playTime);
+
+        char *sql = sqlite3_mprintf("INSERT INTO play_activity(rom_id, play_time, created_at, updated_at) VALUES "
+                                    "('%d','%d',0,0);", // Imported times have the particularity of having a "created_at" at 0.
+                                    rom->id, rom_list[i].playTime);
+
+        printf("SQL query: %s\n", sql);
+
+        if (play_activity_db_execute(sql) == 0)
+            totalImported++;
+
+        free(rom);
     }
+
     printf("\n**************************\n");
     printf("Summary:\n========\n");
     printf("Total of old records : %d\n", totalOldRecords);
