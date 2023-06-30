@@ -8,5 +8,5 @@
 "useswap":0,
 "shortname":0,
 "hidebios":0,
-"extlist":"d64|D64|zip|ZIP|7z|7Z|t64|T64|crt|CRT|prg|PRG|nib|NIB|tap|TAP"
+"extlist":"d64|zip|7z|t64|crt|prg|nib|tap"
 }
