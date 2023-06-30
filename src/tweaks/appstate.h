@@ -10,6 +10,11 @@
 static int menu_level = 0;
 static List *menu_stack[5];
 
+bool isMenu(List *target)
+{
+    return menu_stack[menu_level]->_created && target->_created && menu_stack[menu_level]->_id == target->_id;
+}
+
 static List _menu_main;
 static List _menu_system;
 static List _menu_date_time;
@@ -70,6 +75,8 @@ static KeyState keystate[320] = {(KeyState)0};
 static bool keys_enabled = true;
 static bool reset_menus = false;
 static bool skip_next_change = false;
+
+static char ip_address_label[STR_MAX];
 
 static void sigHandler(int sig)
 {

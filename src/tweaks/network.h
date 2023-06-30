@@ -17,6 +17,7 @@
 #include "utils/apply_icons.h"
 #include "utils/json.h"
 #include "utils/keystate.h"
+#include "utils/netinfo.h"
 
 #include "./appstate.h"
 
@@ -90,6 +91,8 @@ void network_setHotspotState(void *pt)
     config_flag_set(".hotspotState", ((ListItem *)pt)->value == 1);
     settings.hotspot_state = ((ListItem *)pt)->value == 1;
     network_setServiceState("hotspot");
+    reset_menus = true;
+    all_changed = true;
 }
 
 void network_setNtpState(void *pt)
@@ -281,8 +284,13 @@ void menu_ssh(void *pt)
 void menu_wifi(void *_)
 {
     if (!_menu_wifi._created) {
-        _menu_wifi = list_create(2, LIST_SMALL);
+        _menu_wifi = list_create(3, LIST_SMALL);
         strcpy(_menu_wifi.title, "WiFi");
+        list_addItem(&_menu_wifi,
+                     (ListItem){
+                         .label = "IP address: N/A",
+                         .disabled = true,
+                         .action = NULL});
         list_addItem(&_menu_wifi,
                      (ListItem){
                          .label = "WiFi Hotspot",
@@ -291,9 +299,14 @@ void menu_wifi(void *_)
                          .action = network_setHotspotState});
         list_addItem(&_menu_wifi,
                      (ListItem){
-                         .label = "WPS...",
-                         .action = menu_wps});
+                         .label = "WPS connect",
+                         .action = network_wpsConnect});
+        // list_addItem(&_menu_wifi,
+        //              (ListItem){
+        //                  .label = "WPS...",
+        //                  .action = menu_wps});
     }
+    strcpy(_menu_wifi.items[0].label, ip_address_label);
     menu_stack[++menu_level] = &_menu_wifi;
     header_changed = true;
 }
@@ -301,8 +314,13 @@ void menu_wifi(void *_)
 void menu_network(void *_)
 {
     if (!_menu_network._created) {
-        _menu_network = list_create(5, LIST_SMALL);
+        _menu_network = list_create(6, LIST_SMALL);
         strcpy(_menu_network.title, "Network");
+        list_addItem(&_menu_network,
+                     (ListItem){
+                         .label = "IP address: N/A",
+                         .disabled = true,
+                         .action = NULL});
         list_addItem(&_menu_network,
                      (ListItem){
                          .label = "WiFi...",
@@ -344,6 +362,7 @@ void menu_network(void *_)
                          .value = (int)settings.telnet_state,
                          .action = menu_telnet});
     }
+    strcpy(_menu_network.items[0].label, ip_address_label);
     menu_stack[++menu_level] = &_menu_network;
     header_changed = true;
 }
