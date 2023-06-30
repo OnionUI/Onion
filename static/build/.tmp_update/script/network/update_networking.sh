@@ -367,7 +367,7 @@ check_hotspotstate() {
         else
 			start_hotspot &
         fi
-    fi
+    fi 
 }
 
 # This is the fallback! 
@@ -379,7 +379,7 @@ sync_time() {
 	if [ -f "$sysdir/config/.ntpState" ] && wifi_enabled; then
 		attempts=0
 		max_attempts=20
-
+		
 		while true; do
 			if [ ! -f "/tmp/ntp_run_once" ]; then
 				break
@@ -393,6 +393,7 @@ sync_time() {
 			attempts=$((attempts+1))
 			if [ $attempts -eq $max_attempts ]; then
 				log "NTPwait: Ran out of time before we could sync, stopping."
+				disable_flag ntpState
 				break
 			fi
 			sleep 1
@@ -401,7 +402,7 @@ sync_time() {
 	fi
 }
 
-check_ntpstate() { # This function checks if the timezone has changed, we call this in the main loop. 
+check_ntpstate() { # This function checks if the timezone has changed, we call this in the main loop.
     if flag_enabled ntpState && wifi_enabled && [ ! -f "$sysdir/config/.hotspotState" ] ; then
         current_tz=$(check_tzid)
 		get_time
