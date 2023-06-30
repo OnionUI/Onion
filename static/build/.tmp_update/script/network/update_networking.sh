@@ -350,6 +350,8 @@ check_hotspotstate() {
 			pkill -9 dnsmasq
             ifconfig wlan0 up
 			ifconfig wlan1 down
+            killall -9 udhcpc
+            udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
             check_wifi			
 		else
 			return
