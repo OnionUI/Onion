@@ -12,7 +12,6 @@
 #include "system/keymap_sw.h"
 #include "utils/config.h"
 #include "utils/file.h"
-#include "utils/imageCache.h"
 #include "utils/log.h"
 #include "utils/msleep.h"
 #include "utils/str.h"
@@ -25,6 +24,8 @@
 #define CHECK_TIMEOUT 300
 #define SLIDE_TIMEOUT 10000
 
+static SDL_Surface *slide = NULL;
+
 SDL_Surface *_loadSlide(int index)
 {
     char image_path[STR_MAX];
@@ -34,9 +35,14 @@ SDL_Surface *_loadSlide(int index)
     return NULL;
 }
 
-int nextSlide(int current_slide, int num_slides, int direction)
+void nextSlide(int *current_slide, int num_slides, int direction)
 {
-    int next_slide = current_slide;
+    if (slide != NULL) {
+        SDL_FreeSurface(slide);
+    }
+
+    int next_slide = *current_slide;
+
     do {
         next_slide += direction;
 
@@ -45,9 +51,9 @@ int nextSlide(int current_slide, int num_slides, int direction)
 
         if (next_slide < -1)
             next_slide = num_slides - 1;
-    } while (imageCache_getItem(&next_slide) == NULL &&
-             next_slide != current_slide && next_slide != -1);
-    return next_slide;
+    } while ((slide = _loadSlide(next_slide)) == NULL && next_slide != *current_slide && next_slide != -1);
+
+    *current_slide = next_slide;
 }
 
 int main(int argc, char *argv[])
@@ -89,8 +95,7 @@ int main(int argc, char *argv[])
 
     SDL_Surface *waiting_bg = IMG_Load("res/waitingBG.png");
     SDL_Surface *progress_stripes = IMG_Load("res/progress_stripes.png");
-    SDL_Surface *slide = NULL;
-    
+
     TTF_Font *font = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 36);
     TTF_Font *font_small =
         TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 18);
@@ -99,8 +104,7 @@ int main(int argc, char *argv[])
     char version_str[STR_MAX];
     sprintf(version_str, "v%s", ONION_VERSION);
 
-    SDL_Surface *surface_version =
-        TTF_RenderUTF8_Blended(font_small, version_str, fg_color);
+    SDL_Surface *surface_version = TTF_RenderUTF8_Blended(font_small, version_str, fg_color);
     SDL_Rect rect_version = {10, 10};
 
     Uint32 progress_bg = SDL_MapRGB(video->format, 29, 30, 37);
@@ -115,7 +119,6 @@ int main(int argc, char *argv[])
     int current_slide = -1;
     int num_slides = 9;
     config_get("currentSlide", "%d", &current_slide);
-    imageCache_load(&current_slide, _loadSlide, num_slides);
 
     bool quit = false;
     bool failed = false;
@@ -141,13 +144,11 @@ int main(int argc, char *argv[])
             else if (event.type == SDL_KEYUP) {
                 switch (event.key.keysym.sym) {
                 case SW_BTN_LEFT:
-                    current_slide = nextSlide(current_slide, num_slides, -1);
-                    slide = current_slide == -1 ? NULL : imageCache_getItem(&current_slide);
+                    nextSlide(&current_slide, num_slides, -1);
                     slide_timer = ticks;
                     break;
                 case SW_BTN_RIGHT:
-                    current_slide = nextSlide(current_slide, num_slides, 1);
-                    slide = current_slide == -1 ? NULL : imageCache_getItem(&current_slide);
+                    nextSlide(&current_slide, num_slides, 1);
                     slide_timer = ticks;
                     break;
                 case SW_BTN_A:
@@ -161,8 +162,7 @@ int main(int argc, char *argv[])
         }
 
         if (ticks - slide_timer > SLIDE_TIMEOUT) {
-            current_slide = nextSlide(current_slide, num_slides, 1);
-            slide = current_slide == -1 ? NULL : imageCache_getItem(&current_slide);
+            nextSlide(&current_slide, num_slides, 1);
             slide_timer = ticks;
         }
 
@@ -254,7 +254,9 @@ int main(int argc, char *argv[])
     TTF_CloseFont(font_small);
     TTF_Quit();
 
-    imageCache_freeAll();
+    if (slide != NULL) {
+        SDL_FreeSurface(slide);
+    }
     SDL_FreeSurface(waiting_bg);
     SDL_FreeSurface(surface_version);
     SDL_FreeSurface(screen);
