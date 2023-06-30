@@ -102,7 +102,6 @@ void menu_datetime(void *_)
             list_addItem(&_menu_date_time,
                          (ListItem){
                              .label = "Set automatically from network",
-                             .disabled = settings.hotspot_state,
                              .item_type = TOGGLE,
                              .value = (int)settings.ntp_state,
                              .action = network_setNtpState});

@@ -393,7 +393,7 @@ sync_time() { # Run a sync at startup once, but only if we have internet
 }
 
 check_ntpstate() { # This function checks if the timezone has changed, we call this in the main loop. 
-    if flag_enabled ntpState && wifi_enabled; then
+    if flag_enabled ntpState && wifi_enabled && [ ! -f "$sysdir/config/.hotspotState" ] ; then
         current_tz=$(check_tzid)
 		get_time
         if [ "$current_tz" != "$old_tz" ]; then
