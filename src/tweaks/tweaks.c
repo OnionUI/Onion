@@ -55,6 +55,7 @@ void check_networkChanged(void)
 
 int main(int argc, char *argv[])
 {
+    log_setName("tweaks");
     print_debug("Debug logging enabled");
 
     getDeviceModel();
@@ -183,6 +184,21 @@ int main(int argc, char *argv[])
             battery_changed = true;
 
         if (acc_ticks >= time_step) {
+            if (isMenu(&_menu_date_time)) {
+                if (_writeDateString(_menu_date_time.items[0].label)) {
+                    list_changed = true;
+                }
+            }
+            if (isMenu(&_menu_network) || isMenu(&_menu_wifi)) {
+                if (netinfo_getIpAddress(ip_address_label, settings.hotspot_state ? "wlan1" : "wlan0")) {
+                    if (_menu_network._created)
+                        strcpy(_menu_network.items[0].label, ip_address_label);
+                    if (_menu_wifi._created)
+                        strcpy(_menu_wifi.items[0].label, ip_address_label);
+                    list_changed = true;
+                }
+            }
+
             if (header_changed || battery_changed)
                 theme_renderHeader(screen, menu_stack[menu_level]->title,
                                    false);

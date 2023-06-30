@@ -106,9 +106,9 @@ bool terminate_retroarch(void)
 void quietMainUI(void)
 {
     if (system_state == MODE_MAIN_UI) {
-        print_debug("Sending L2 to quiet MainUI");
-        keyinput_send(HW_BTN_L2, PRESSED);
-        keyinput_send(HW_BTN_L2, RELEASED);
+        print_debug("Sending L1 to quiet MainUI");
+        keyinput_send(HW_BTN_L1, PRESSED);
+        keyinput_send(HW_BTN_L1, RELEASED);
         print_debug("Done (quietMainUI)");
     }
 }

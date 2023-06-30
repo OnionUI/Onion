@@ -22,14 +22,20 @@
     {                       \
         "-", "Off", "On"    \
     }
-#define TZ_SELECT                                                            \
-    {                                                                        \
-        "UTC-12:00", "UTC-11:00", "UTC-10:00", "UTC-09:00", "UTC-08:00",     \
-            "UTC-07:00", "UTC-06:00", "UTC-05:00", "UTC-04:00", "UTC-03:00", \
-            "UTC-02:00", "UTC-01:00", "UTC", "UTC+01:00", "UTC+02:00",       \
-            "UTC+03:00", "UTC+04:00", "UTC+05:00", "UTC+06:00", "UTC+07:00", \
-            "UTC+08:00", "UTC+09:00", "UTC+10:00", "UTC+11:00", "UTC+12:00"  \
+
+void formatter_timezone(void *pt, char *out_label)
+{
+    ListItem *item = (ListItem *)pt;
+    int value = item->value;
+    double utc_value = ((double)value / 2.0) - 12.0;
+    bool half_past = round(utc_value) != utc_value;
+    if (utc_value == 0.0) {
+        strcpy(out_label, "UTC");
     }
+    else {
+        sprintf(out_label, utc_value > 0.0 ? "UTC+%02d:%02d" : "UTC-%02d:%02d", (int)floor(abs(utc_value)), half_past ? 30 : 0);
+    }
+}
 
 void formatter_appShortcut(void *pt, char *out_label)
 {
