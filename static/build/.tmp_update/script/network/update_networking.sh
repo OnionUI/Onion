@@ -393,7 +393,6 @@ sync_time() {
 			attempts=$((attempts+1))
 			if [ $attempts -eq $max_attempts ]; then
 				log "NTPwait: Ran out of time before we could sync, stopping."
-				disable_flag ntpState
 				break
 			fi
 			sleep 1
