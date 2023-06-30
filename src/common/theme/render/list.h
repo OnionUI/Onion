@@ -6,11 +6,13 @@
 #include "theme/config.h"
 #include "theme/resources.h"
 
+#define HIDDEN_ITEM_ALPHA 60
+
 static SDL_Color color_black = {0, 0, 0};
 
 void theme_renderListLabel(SDL_Surface *screen, const char *label, SDL_Color fg,
                            int offset_x, int center_y, bool is_active,
-                           int label_end)
+                           int label_end, bool disabled)
 {
     TTF_Font *list_font = resource_getFont(LIST);
 
@@ -25,6 +27,9 @@ void theme_renderListLabel(SDL_Surface *screen, const char *label, SDL_Color fg,
             TTF_RenderUTF8_Blended(list_font, label, color_black);
         SDL_BlitSurface(item_shadow, &label_crop, screen, &item_shadow_rect);
         SDL_FreeSurface(item_shadow);
+    }
+    else if (disabled) {
+        surfaceSetAlpha(item_label, HIDDEN_ITEM_ALPHA);
     }
 
     SDL_BlitSurface(item_label, &label_crop, screen, &item_label_rect);
@@ -58,8 +63,19 @@ void theme_renderList(SDL_Surface *screen, List *list)
 
     ListItem *active_preview = NULL;
 
+    SDL_Surface *hidden_toggle_off = resource_getSurfaceCopy(TOGGLE_OFF);
+    SDL_Surface *hidden_toggle_on = resource_getSurfaceCopy(TOGGLE_ON);
+    SDL_Surface *hidden_arrow_left = resource_getSurfaceCopy(LEFT_ARROW);
+    SDL_Surface *hidden_arrow_right = resource_getSurfaceCopy(RIGHT_ARROW);
+    surfaceSetAlpha(hidden_toggle_off, HIDDEN_ITEM_ALPHA);
+    surfaceSetAlpha(hidden_toggle_on, HIDDEN_ITEM_ALPHA);
+    surfaceSetAlpha(hidden_arrow_left, HIDDEN_ITEM_ALPHA);
+    surfaceSetAlpha(hidden_arrow_right, HIDDEN_ITEM_ALPHA);
+
     for (int i = list->scroll_pos; i < last_item; i++) {
         ListItem *item = &list->items[i];
+        bool show_disabled = item->disabled && !item->show_opaque;
+
         item_bg_rect.y = menu_pos_y + (i - list->scroll_pos) * item_height;
 
         SDL_BlitSurface(resource_getSurface(HORIZONTAL_DIVIDER), &item_div_size,
@@ -93,48 +109,54 @@ void theme_renderList(SDL_Surface *screen, List *list)
         }
 
         if (item->item_type == TOGGLE) {
-            SDL_Surface *toggle =
-                resource_getSurface(item->value == 1 ? TOGGLE_ON : TOGGLE_OFF);
+            SDL_Surface *toggle = show_disabled ? (item->value == 1 ? hidden_toggle_on : hidden_toggle_off) : (resource_getSurface(item->value == 1 ? TOGGLE_ON : TOGGLE_OFF));
             toggle_rect.x = 620 - toggle->w;
             toggle_rect.y = item_center_y - toggle->h / 2;
             label_end = toggle_rect.x;
             SDL_BlitSurface(toggle, NULL, screen, &toggle_rect);
         }
         else if (item->item_type == MULTIVALUE) {
-            SDL_Surface *arrow_left = resource_getSurface(LEFT_ARROW);
-            SDL_Surface *arrow_right = resource_getSurface(RIGHT_ARROW);
-            SDL_Rect arrow_left_pos = {640 - 20 - arrow_right->w -
-                                           multivalue_width - arrow_left->w,
-                                       item_center_y - arrow_left->h / 2};
-            SDL_Rect arrow_right_pos = {640 - 20 - arrow_right->w,
-                                        item_center_y - arrow_right->h / 2};
+            SDL_Surface *arrow_left = show_disabled ? hidden_arrow_left : resource_getSurface(LEFT_ARROW);
+            SDL_Surface *arrow_right = show_disabled ? hidden_arrow_right : resource_getSurface(RIGHT_ARROW);
+            SDL_Rect arrow_left_pos = {
+                640 - 20 - arrow_right->w - multivalue_width - arrow_left->w,
+                item_center_y - arrow_left->h / 2};
+            SDL_Rect arrow_right_pos = {
+                640 - 20 - arrow_right->w,
+                item_center_y - arrow_right->h / 2};
             SDL_BlitSurface(arrow_left, NULL, screen, &arrow_left_pos);
             SDL_BlitSurface(arrow_right, NULL, screen, &arrow_right_pos);
             label_end = arrow_left_pos.x;
 
             char value_str[STR_MAX];
             list_getItemValueLabel(item, value_str);
-            SDL_Surface *value_label = TTF_RenderUTF8_Blended(
-                list_font, value_str, theme()->list.color);
+            SDL_Surface *value_label = TTF_RenderUTF8_Blended(list_font, value_str, theme()->list.color);
+            if (show_disabled) {
+                surfaceSetAlpha(value_label, HIDDEN_ITEM_ALPHA);
+            }
             SDL_Rect value_size = {0, 0, multivalue_width, value_label->h};
-            int label_width =
-                value_label->w > value_size.w ? value_size.w : value_label->w;
-            SDL_Rect value_pos = {640 - 20 - arrow_right->w -
-                                      multivalue_width / 2 - label_width / 2,
-                                  item_center_y - value_size.h / 2};
+            int label_width = value_label->w > value_size.w ? value_size.w : value_label->w;
+            SDL_Rect value_pos = {
+                640 - 20 - arrow_right->w - multivalue_width / 2 - label_width / 2,
+                item_center_y - value_size.h / 2};
             SDL_BlitSurface(value_label, &value_size, screen, &value_pos);
         }
 
         theme_renderListLabel(screen, item->label, theme()->list.color,
                               offset_x, item_bg_rect.y + label_y,
-                              list->active_pos == i, label_end);
+                              list->active_pos == i, label_end, show_disabled);
 
         if (!list_small && strlen(item->description)) {
             theme_renderListLabel(
                 screen, item->description, theme()->grid.color, offset_x,
-                item_bg_rect.y + 62, list->active_pos == i, label_end);
+                item_bg_rect.y + 62, list->active_pos == i, label_end, show_disabled);
         }
     }
+
+    SDL_FreeSurface(hidden_toggle_off);
+    SDL_FreeSurface(hidden_toggle_on);
+    SDL_FreeSurface(hidden_arrow_left);
+    SDL_FreeSurface(hidden_arrow_right);
 
     if (active_preview != NULL) {
         SDL_Surface *preview_bg = resource_getSurface(PREVIEW_BG);
