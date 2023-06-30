@@ -79,7 +79,7 @@ bool _writeDateString(char *label_out)
     char new_label[STR_MAX];
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
-    snprintf(new_label, STR_MAX - 1, "Now: %d-%02d-%02d %02d:%02d:%02d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+    strftime(new_label, STR_MAX - 1, "Now: %Y-%m-%d %H:%M:%S", &tm);
     if (strncmp(new_label, label_out, STR_MAX) != 0) {
         strcpy(label_out, new_label);
         return true;
