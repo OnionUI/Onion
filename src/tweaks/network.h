@@ -143,14 +143,15 @@ void network_setTzSelectState(void *pt)
 {
     char utc_str[10];
     int select_value = ((ListItem *)pt)->value;
-    int utc_value = select_value - 12;
+    double utc_value = ((double)select_value / 2.0) - 12.0;
+    bool half_past = round(utc_value) != utc_value;
 
-    if (utc_value == 0) {
+    if (utc_value == 0.0) {
         strcpy(utc_str, "UTC");
     }
     else {
         // UTC +/- is reversed for export TZ
-        sprintf(utc_str, utc_value > 0 ? "UTC-%d" : "UTC+%d", abs(utc_value));
+        sprintf(utc_str, utc_value > 0 ? "UTC-%02d:%02d" : "UTC+%02d:%02d", (int)floor(abs(utc_value)), half_past ? 30 : 0);
     }
 
     printf_debug("Set timezone: %s\n", utc_str);

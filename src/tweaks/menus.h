@@ -119,8 +119,8 @@ void menu_datetime(void *_)
                              .label = "Select timezone",
                              .item_type = MULTIVALUE,
                              .disabled = !settings.ntp_state,
-                             .value_max = 24,
-                             .value_labels = TZ_SELECT,
+                             .value_max = 48,
+                             .value_formatter = formatter_timezone,
                              .value = settings.tzselect_state,
                              .action = network_setTzSelectState});
         }
