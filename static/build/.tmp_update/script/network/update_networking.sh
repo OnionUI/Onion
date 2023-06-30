@@ -375,8 +375,11 @@ check_hotspotstate() {
 # This will work but it will not export the TZ var across all opens shells so you may find the hwclock (and clock app, retroarch time etc) are correct but terminal time is not.
 # It does set TZ on the tty that Main is running in so this is ok
 
-sync_time() { # Run a sync at startup once, but only if we have internet
-	if [ -f "$sysdir/config/.ntpState" ]; then
+sync_time() {
+	if [ -f "$sysdir/config/.ntpState" ] && wifi_enabled; then
+		attempts=0
+		max_attempts=20
+
 		while true; do
 			if [ ! -f "/tmp/ntp_run_once" ]; then
 				break
@@ -384,11 +387,17 @@ sync_time() { # Run a sync at startup once, but only if we have internet
 			
 			if ping -q -c 1 google.com > /dev/null 2>&1 ; then
 				get_time
-				rm /tmp/ntp_run_once
 				break
 			fi
-			sleep 0.5
+
+			attempts=$((attempts+1))
+			if [ $attempts -eq $max_attempts ]; then
+				log "NTPwait: Ran out of time before we could sync, stopping."
+				break
+			fi
+			sleep 1
 		done
+		rm /tmp/ntp_run_once
 	fi
 }
 
@@ -449,9 +458,14 @@ print_usage() {
 
 get_time() { # handles 2 types of NTP, instant from an API or longer from a time server, if the instant API check fails it will fallback to the longer ntp
     response=$(curl -s http://worldtimeapi.org/api/ip.txt | grep -o 'utc_datetime: [^,]*' | cut -d ' ' -f 2)
+	
     if [ -z "$response" ]; then
         log "NTP: Failed to get time from worldtimeapi.org, falling back to NTP."
         ntpdate -u time.google.com
+		
+        if [ $? -ne 0 ]; then
+            log "NTP: Failed to synchronize time using NTPdate, both methods have failed."
+        fi
     else
         utc_time=$(echo "$response" | cut -d. -f1 | sed "s/T/ /")
         if date -u -s "$utc_time" >/dev/null 2>&1; then
@@ -459,6 +473,10 @@ get_time() { # handles 2 types of NTP, instant from an API or longer from a time
         else
             log "NTP: Failed to parse time from worldtimeapi.org, falling back to NTP."
             ntpdate -u time.google.com
+			
+            if [ $? -ne 0 ]; then
+                log "NTP: Failed to synchronize time using NTPdate, both methods have failed."
+            fi
         fi
     fi
 }
