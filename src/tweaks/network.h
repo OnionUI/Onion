@@ -160,9 +160,6 @@ void network_setTzSelectState(void *pt)
     tzset();
     config_setString(".tz", utc_str);
 
-    config_setNumber("tzselect", select_value);
-    settings.tzselect_state = select_value;
-
     temp_flag_set("timezone_update", true);
     sync();
 }

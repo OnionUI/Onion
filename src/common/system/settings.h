@@ -52,7 +52,6 @@ static struct settings_s {
     bool auth_ssh_state;
     int low_battery_warn_at;
     int time_skip;
-    int tzselect_state;
     int vibration;
     int startup_tab;
     int startup_application;
@@ -110,7 +109,6 @@ void _settings_reset(void)
     settings.ntp_wait = false;
     settings.auth_ftp_state = false;
     settings.auth_ssh_state = false;
-    settings.tzselect_state = 12;
     settings.auth_telnet_state = false;
     // Menu button actions
     settings.mainui_single_press = 1;
@@ -204,7 +202,6 @@ void settings_load(void)
             ".noVibration")) // flag is deprecated, but keep compatibility
         settings.vibration = 0;
 
-    config_get("tzselect", "%d", &settings.tzselect_state);
     config_get("battery/warnAt", "%d", &settings.low_battery_warn_at);
     config_get("startup/app", "%d", &settings.startup_application);
     config_get("startup/addHours", "%d", &settings.time_skip);
@@ -311,7 +308,6 @@ void settings_save(void)
     config_flag_set(".authsshState", settings.auth_ssh_state);
     config_flag_set(".muteVolume", settings.mute);
     config_flag_set(".disableStandby", settings.disable_standby);
-    config_setNumber("tzselect", settings.tzselect_state);
     config_setNumber("battery/warnAt", settings.low_battery_warn_at);
     config_setNumber("startup/app", settings.startup_application);
     config_setNumber("startup/addHours", settings.time_skip);

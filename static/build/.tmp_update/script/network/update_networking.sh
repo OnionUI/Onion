@@ -449,20 +449,14 @@ get_time() { # handles 2 types of NTP, instant from an API or longer from a time
     response=$(curl -s http://worldtimeapi.org/api/ip.txt | grep -o 'utc_datetime: [^,]*' | cut -d ' ' -f 2)
     if [ -z "$response" ]; then
         log "NTP: Failed to get time from worldtimeapi.org, falling back to NTP."
-        ntpdate -u time.google.com 
-		touch /tmp/timezone_update
-		sync
+        ntpdate -u time.google.com
     else
         utc_time=$(echo "$response" | cut -d. -f1 | sed "s/T/ /")
         if date -u -s "$utc_time" >/dev/null 2>&1; then
-			touch /tmp/timezone_update
-			sync
             hwclock -w
         else
             log "NTP: Failed to parse time from worldtimeapi.org, falling back to NTP."
             ntpdate -u time.google.com
-			touch /tmp/timezone_update
-			sync
         fi
     fi
 }

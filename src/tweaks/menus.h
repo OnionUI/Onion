@@ -121,7 +121,7 @@ void menu_datetime(void *_)
                              .disabled = !settings.ntp_state,
                              .value_max = 48,
                              .value_formatter = formatter_timezone,
-                             .value = settings.tzselect_state,
+                             .value = value_timezone(),
                              .action = network_setTzSelectState});
         }
         list_addItem(&_menu_date_time,

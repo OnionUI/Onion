@@ -1,6 +1,8 @@
 #ifndef TWEAKS_VALUES_H__
 #define TWEAKS_VALUES_H__
 
+#include <time.h>
+
 #include "components/list.h"
 #include "system/axp.h"
 #include "theme/resources.h"
@@ -21,6 +23,18 @@ static bool stored_value_frame_throttle_changed = false;
 
 static int stored_value_swap_triggers = 0;
 static bool stored_value_swap_triggers_changed = false;
+
+int value_timezone(void)
+{
+
+    time_t t = time(NULL);
+    struct tm lt = *localtime(&t);
+    struct tm gm = *gmtime(&t);
+    double utc_offset = difftime(mktime(&lt), mktime(&gm)) / 3600.0;
+    if (gm.tm_isdst)
+        utc_offset += 1.0;
+    return (int)((utc_offset + 12.0) * 2.0);
+}
 
 int value_appShortcut(int button)
 {
