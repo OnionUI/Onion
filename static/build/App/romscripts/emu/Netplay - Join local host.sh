@@ -151,16 +151,11 @@ read_cookie() {
 				rom="${line##"[rom]: "}"
 				export rom
 				;;
-			"[corechksum]: "*)
-				corechksum="${line##"[corechksum]: "}"
-				export corechksum
-				;;
-			"[romchksum]: "*)
-				romchksum="${line##"[romchksum]: "}"
-				export romchksum
-				;;
 		esac
 	done <"/mnt/SDCARD/RetroArch/retroarch.cookie.client"
+
+    export romchksum=$(cksum "$rom" | cut -f 1 -d ' ')
+    export corechksum=$(cksum "$core" | cut -f 1 -d ' ')
 	
 	#url encode or curl complains
 	export rom_url=$(echo "$rom" | sed 's/ /%20/g')

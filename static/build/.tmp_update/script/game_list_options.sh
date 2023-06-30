@@ -221,13 +221,8 @@ create_cookie(){
         rm -f "$cookiefile"
     fi
 
-    core_checksum=$(cksum "$cookie_core_path" | cut -f 1 -d ' ')
-    rom_checksum=$(cksum "$cookie_rom_path" | cut -f 1 -d ' ')
-
     echo "[core]: $cookie_core_path" >> $cookiefile
     echo "[rom]: $cookie_rom_path" >> $cookiefile
-    echo "[corechksum]: $core_checksum" >> $cookiefile
-    echo "[romchksum]: $rom_checksum" >> $cookiefile
 }
 
 check_is_game() {
