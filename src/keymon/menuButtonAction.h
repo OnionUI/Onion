@@ -109,7 +109,7 @@ void quietMainUI(void)
         print_debug("Sending L1 to quiet MainUI");
         keyinput_send(HW_BTN_L1, PRESSED);
         keyinput_send(HW_BTN_L1, RELEASED);
-        print_debug("Done (quietMainUI)");
+        // print_debug("Done (quietMainUI)");
     }
 }
 
