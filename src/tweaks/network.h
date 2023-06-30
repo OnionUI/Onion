@@ -173,7 +173,7 @@ void menu_http(void *pt)
     item->value = (int)settings.http_state;
     if (!_menu_http._created) {
         _menu_http = list_create(2, LIST_SMALL);
-        strcpy(_menu_http.title, "HTTP File Server");
+        strcpy(_menu_http.title, "HTTP");
         list_addItem(&_menu_http,
                      (ListItem){
                          .label = "Enable",
@@ -198,7 +198,7 @@ void menu_telnet(void *pt)
     item->value = (int)settings.telnet_state;
     if (!_menu_telnet._created) {
         _menu_telnet = list_create(2, LIST_SMALL);
-        strcpy(_menu_telnet.title, "Telnet protocol");
+        strcpy(_menu_telnet.title, "Telnet");
         list_addItem(&_menu_telnet,
                      (ListItem){
                          .label = "Enable",
@@ -223,7 +223,7 @@ void menu_ftp(void *pt)
     item->value = (int)settings.ftp_state;
     if (!_menu_ftp._created) {
         _menu_ftp = list_create(2, LIST_SMALL);
-        strcpy(_menu_ftp.title, "FTP server");
+        strcpy(_menu_ftp.title, "FTP");
         list_addItem(&_menu_ftp,
                      (ListItem){
                          .label = "Enable",
@@ -246,7 +246,7 @@ void menu_wps(void *_)
 {
     if (!_menu_wps._created) {
         _menu_wps = list_create(1, LIST_SMALL);
-        strcpy(_menu_wps.title, "WPS control");
+        strcpy(_menu_wps.title, "WPS");
         list_addItem(&_menu_wps,
                      (ListItem){
                          .label = "WPS connect",
@@ -262,7 +262,7 @@ void menu_ssh(void *pt)
     item->value = (int)settings.ssh_state;
     if (!_menu_ssh._created) {
         _menu_ssh = list_create(2, LIST_SMALL);
-        strcpy(_menu_ssh.title, "SSH protocol");
+        strcpy(_menu_ssh.title, "SSH");
         list_addItem(&_menu_ssh,
                      (ListItem){
                          .label = "Enable",
@@ -323,11 +323,11 @@ void menu_network(void *_)
                          .action = NULL});
         list_addItem(&_menu_network,
                      (ListItem){
-                         .label = "WiFi...",
+                         .label = "WiFi: Hotspot/WPS...",
                          .action = menu_wifi});
         list_addItem(&_menu_network,
                      (ListItem){
-                         .label = "HTTP File Server...",
+                         .label = "HTTP: Web-based file sync...",
                          .item_type = TOGGLE,
                          .disabled = !settings.wifi_on,
                          .alternative_arrow_action = 1,
@@ -336,7 +336,7 @@ void menu_network(void *_)
                          .action = menu_http});
         list_addItem(&_menu_network,
                      (ListItem){
-                         .label = "FTP server...",
+                         .label = "FTP: File server...",
                          .item_type = TOGGLE,
                          .disabled = !settings.wifi_on,
                          .alternative_arrow_action = 1,
@@ -345,7 +345,7 @@ void menu_network(void *_)
                          .action = menu_ftp});
         list_addItem(&_menu_network,
                      (ListItem){
-                         .label = "SSH protocol...",
+                         .label = "SSH: Secure shell...",
                          .item_type = TOGGLE,
                          .disabled = !settings.wifi_on,
                          .alternative_arrow_action = 1,
@@ -354,7 +354,7 @@ void menu_network(void *_)
                          .action = menu_ssh});
         list_addItem(&_menu_network,
                      (ListItem){
-                         .label = "Telnet protocol...",
+                         .label = "Telnet: Remote shell...",
                          .item_type = TOGGLE,
                          .disabled = !settings.wifi_on,
                          .alternative_arrow_action = 1,
