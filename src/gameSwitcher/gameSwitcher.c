@@ -304,6 +304,26 @@ void serializeTime(int nTime, char *dest_str)
     }
 }
 
+int getRomTotalTime(const char *rom_path)
+{
+    char rom_path_clone[STR_MAX];
+    strcpy(rom_path_clone, rom_path);
+
+    char *rom_path_slice = strstr(rom_path_clone, "Roms");
+
+    if (rom_path_slice != NULL) {
+        ROM *romObject = rom_find_by_file_path(rom_path_slice);
+        for (int i = 0; i < play_activities->count; i++) {
+            PlayActivity *playActivityObject = play_activities->play_activity[i];
+
+            if (romObject->id == playActivityObject->rom->id)
+                return playActivityObject->play_time_total;
+        }
+    }
+
+    return 0;
+}
+
 /**
  * @brief History extraction
  *
@@ -361,21 +381,7 @@ void readHistory()
         removeParentheses(shortname, game->name);
         strcpy(game->shortname, shortname);
 
-        char rom_path_clone[STR_MAX];
-        strcpy(rom_path_clone, rom_path);
-
-        int nTime = 0;
-        char *rom_path_slice = strstr(rom_path_clone, "Roms");
-        if (rom_path_slice != NULL) {
-            ROM *romObject = rom_find_by_file_path(rom_path_slice);
-            for (int i = 0; i < play_activities->count; i++) {
-                PlayActivity *playActivityObject = play_activities->play_activity[i];
-                if (romObject->id == playActivityObject->rom->id) {
-                    nTime = playActivityObject->play_time_total;
-                }
-            }
-        }
-
+        int nTime = getRomTotalTime(rom_path);
         serializeTime(nTime, game->totalTime);
 
         printf_debug(
