@@ -7,7 +7,6 @@
 #include <string.h>
 #include <strings.h>
 
-#include "utils/log.h"
 #include "utils/str.h"
 
 #define MAX_NUM_VALUES 100
