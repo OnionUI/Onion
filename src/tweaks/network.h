@@ -109,6 +109,13 @@ void network_setNtpWaitState(void *pt)
     settings.ntp_wait = ((ListItem *)pt)->value == 1;
 }
 
+void network_setSmbdState(void *pt)
+{
+    config_flag_set(".smbdState", ((ListItem *)pt)->value == 1);
+    settings.smbd_state = ((ListItem *)pt)->value == 1;
+    network_setServiceState("smbd");
+}
+
 void network_setTelnetAuthState(void *pt)
 {
     config_flag_set(".authtelnetState", ((ListItem *)pt)->value == 1);
@@ -314,7 +321,7 @@ void menu_wifi(void *_)
 void menu_network(void *_)
 {
     if (!_menu_network._created) {
-        _menu_network = list_create(6, LIST_SMALL);
+        _menu_network = list_create(7, LIST_SMALL);
         strcpy(_menu_network.title, "Network");
         list_addItem(&_menu_network,
                      (ListItem){
@@ -325,6 +332,13 @@ void menu_network(void *_)
                      (ListItem){
                          .label = "WiFi: Hotspot/WPS...",
                          .action = menu_wifi});
+		list_addItem(&_menu_network,
+                     (ListItem){
+                         .label = "Samba: Network file share",
+                         .item_type = TOGGLE,
+                         .disabled = !settings.wifi_on,
+                         .value = (int)settings.smbd_state,
+                         .action = network_setSmbdState});
         list_addItem(&_menu_network,
                      (ListItem){
                          .label = "HTTP: Web-based file sync...",
@@ -334,15 +348,6 @@ void menu_network(void *_)
                          .arrow_action = network_setHttpState,
                          .value = (int)settings.http_state,
                          .action = menu_http});
-        list_addItem(&_menu_network,
-                     (ListItem){
-                         .label = "FTP: File server...",
-                         .item_type = TOGGLE,
-                         .disabled = !settings.wifi_on,
-                         .alternative_arrow_action = 1,
-                         .arrow_action = network_setFtpState,
-                         .value = (int)settings.ftp_state,
-                         .action = menu_ftp});
         list_addItem(&_menu_network,
                      (ListItem){
                          .label = "SSH: Secure shell...",
@@ -361,6 +366,15 @@ void menu_network(void *_)
                          .arrow_action = network_setTelnetState,
                          .value = (int)settings.telnet_state,
                          .action = menu_telnet});
+		list_addItem(&_menu_network,
+                     (ListItem){
+                         .label = "FTP: File server...",
+                         .item_type = TOGGLE,
+                         .disabled = !settings.wifi_on,
+                         .alternative_arrow_action = 1,
+                         .arrow_action = network_setFtpState,
+                         .value = (int)settings.ftp_state,
+                         .action = menu_ftp});
     }
     strcpy(_menu_network.items[0].label, ip_address_label);
     menu_stack[++menu_level] = &_menu_network;

@@ -4,7 +4,7 @@ miyoodir=/mnt/SDCARD/miyoo
 filebrowserbin=$sysdir/bin/filebrowser
 filebrowserdb=$sysdir/config/filebrowser/filebrowser.db
 netscript=/mnt/SDCARD/.tmp_update/script/network
-export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
+export LD_LIBRARY_PATH="$sysdir/lib/samba:/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 export PATH="$sysdir/bin:$PATH"
 
 main() {
@@ -27,14 +27,14 @@ main() {
                     ;;
             esac
             ;;
-        ntp|hotspot)
+        ntp|hotspot|smbd)
             service=$1
             case "$2" in
                 toggle)
                     check_${service}state
                     ;;
                 *)
-                    echo "Usage: $0 {ntp|hotspot} toggle"
+                    echo "Usage: $0 {ntp|hotspot|smbd} toggle"
                     exit 1
                     ;;
             esac
@@ -56,6 +56,7 @@ check() {
     check_ntpstate
     check_httpstate
 	check_ntpstate
+	check_smbdstate
 	
 	if flag_enabled ntpWait; then
 			sync_time
@@ -74,8 +75,9 @@ disable_all_services() {
 	disable_flag authftpState
 	disable_flag httpState
 	disable_flag authhttpState
+	disable_flag smbdState
 	
-	for process in dropbear bftpd filebrowser telnetd hostapd dnsmasq; do
+	for process in dropbear bftpd filebrowser telnetd hostapd dnsmasq smbd; do
         if is_running $process; then
             killall -9 $process
         fi
@@ -109,6 +111,44 @@ else
 		fi
 	fi
 fi
+}
+
+# Starts the samba daemon if the toggle is set to on
+check_smbdstate() { 
+    if flag_enabled smbdState; then
+        if is_running smbd; then
+            if wifi_disabled; then
+                log "Samba: Wifi is turned off, disabling the toggle for FTP and killing the process"
+                disable_flag smbdState
+                killall -9 smbd
+            fi
+        else
+            if wifi_enabled; then
+                log "Samba: Starting smbd"
+				sync
+				if [ ! -d "/var/lib/samba" ]; then
+					mkdir -p /var/lib/samba
+				fi
+		
+				if [ ! -d "/var/run/samba/ncalrpc" ]; then
+					mkdir -p /var/run/samba/ncalrpc
+				fi
+				
+				if [ ! -d "/var/private" ]; then
+					mkdir -p /var/private
+				fi
+				 LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$sysdir/lib/samba:$sysdir/lib/samba/private" /mnt/SDCARD/.tmp_update/bin/samba/sbin/smbd --no-process-group -D &
+
+            else
+                disable_flag smbdState
+            fi
+        fi
+    else
+        if is_running smbd; then
+            killall -9 smbd 
+            log "Samba: Killed"
+        fi
+    fi
 }
 
 # Starts bftpd if the toggle is set to on
@@ -443,7 +483,7 @@ echo_enabled() {
 }
 
 print_usage() {
-    echo "Usage: $0 {check|ftp|telnet|http|ssh|ntp|hotspot|disableall} {toggle|authed}"
+    echo "Usage: $0 {check|ftp|telnet|http|ssh|ntp|hotspot|smbd|disableall} {toggle|authed} - {ntp|hotspot|smbd} only accept toggle."
     exit 1
 }
 
