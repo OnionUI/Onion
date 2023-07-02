@@ -181,6 +181,7 @@ cleanup(){
 	restore_ftp
 	
 	log "GLO::Retro_Quick_Host: Cleanup done"
+ 	exit
 	
 }
 
