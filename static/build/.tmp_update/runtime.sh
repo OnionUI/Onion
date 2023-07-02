@@ -103,8 +103,6 @@ main() {
     check_switcher
     set_startup_tab
     
-    samba_start_parent
-	
     # Main runtime loop
     while true; do
         state_change
@@ -564,7 +562,6 @@ start_networking() {
 
 check_networking() {
     if [ $deviceModel -ne 354 ] || [ ! -f /tmp/network_changed ]; then
-        samba_start_parent
         check_timezone
         return
     fi
@@ -573,7 +570,6 @@ check_networking() {
     $sysdir/script/network/update_networking.sh check
         
     check_timezone
-    samba_start_parent
 }
 
 check_timezone() {
@@ -583,11 +579,5 @@ check_timezone() {
 	fi
 }
 
-samba_start_parent() {
-    if [ -f /tmp/smbd_kickstart ]; then
-        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/mnt/SDCARD/.tmp_update/lib/samba:/mnt/SDCARD/.tmp_update/lib/samba/private" /mnt/SDCARD/.tmp_update/bin/samba/sbin/smbd --no-process-group -D &
-        rm /tmp/smbd_kickstart
-    fi
-}
     
 main

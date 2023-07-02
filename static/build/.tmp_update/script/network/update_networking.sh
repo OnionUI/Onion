@@ -143,8 +143,9 @@ check_smbdstate() {
                     mkdir -p /var/log/
                 fi
                 
-                touch /tmp/smbd_kickstart # This lets runtime.sh handle it.. but only at boot and on exit of tweaks - If you start smbd here you lose sub-directory access
-                touch /tmp/network_changed
+                #unset preload or samba doesn't work correctly.
+                #dont env var all the libpaths for this shell, only the shell we open smbd in
+                LD_PRELOAD="" LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/mnt/SDCARD/.tmp_update/lib/samba:/mnt/SDCARD/.tmp_update/lib/samba/private" /mnt/SDCARD/.tmp_update/bin/samba/sbin/smbd --no-process-group -D &
                 
                 log "Samba: Starting smbd at exit of tweaks.."
             else
