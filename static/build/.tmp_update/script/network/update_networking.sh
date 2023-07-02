@@ -143,7 +143,7 @@ check_smbdstate() {
     if flag_enabled smbdState; then
         if is_running smbd; then
             if wifi_disabled; then
-                log "Samba: Wifi is turned off, disabling the toggle for FTP and killing the process"
+                log "Samba: Wifi is turned off, disabling the toggle for smbd and killing the process"
                 disable_flag smbdState
                 killall -9 smbd
             fi
