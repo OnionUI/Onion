@@ -7,6 +7,7 @@
 #include <string.h>
 #include <strings.h>
 
+#include "utils/log.h"
 #include "utils/str.h"
 
 #define MAX_NUM_VALUES 100
@@ -133,14 +134,17 @@ ListItem *list_currentItem(List *list)
     return &list->items[list->active_pos];
 }
 
-void list_scroll(List *list)
+void _list_scroll(List *list, int pos)
 {
+    pos = _list_modulo(pos, list->item_count);
+    printf_debug("scroll to active: %d\n", pos);
+
     // Scroll up
-    if (list->active_pos < list->scroll_pos)
-        list->scroll_pos = list->active_pos;
+    if (pos < list->scroll_pos)
+        list->scroll_pos = pos;
     // Scroll down
-    else if (list->active_pos >= list->scroll_pos + list->scroll_height)
-        list->scroll_pos = list->active_pos - list->scroll_height + 1;
+    else if (pos >= list->scroll_pos + list->scroll_height)
+        list->scroll_pos = pos - list->scroll_height + 1;
 
     // No scrolling if not enough items
     if (list->item_count <= list->scroll_height)
@@ -148,6 +152,11 @@ void list_scroll(List *list)
     // Max scroll to last item
     else if (list->scroll_pos + list->scroll_height > list->item_count)
         list->scroll_pos = list->item_count - list->scroll_height;
+}
+
+void list_scroll(List *list)
+{
+    _list_scroll(list, list->active_pos);
 }
 
 bool list_scrollTo(List *list, int active_pos)
@@ -176,11 +185,11 @@ bool list_keyUp(List *list, bool key_repeat)
 
     if (_list_did_wraparound(old_pos, list->active_pos, -1)) {
         if (list->scroll_pos > 0) {
-            list->scroll_pos -= 1;
+            _list_scroll(list, list->scroll_pos - 1);
             list->active_pos = old_pos;
         }
         else {
-            list->scroll_pos = list->item_count - list->scroll_height;
+            _list_scroll(list, list->item_count - 1);
         }
     }
     else {
@@ -207,12 +216,13 @@ bool list_keyDown(List *list, bool key_repeat)
     list_ensureVisible(list, 1);
 
     if (_list_did_wraparound(old_pos, list->active_pos, 1)) {
+        printf_debug("scroll_pos: %d < item_count: %d - scroll_height: %d\n", list->scroll_pos, list->item_count, list->scroll_height);
         if (list->scroll_pos < list->item_count - list->scroll_height) {
-            list->scroll_pos += 1;
+            _list_scroll(list, list->scroll_pos + list->scroll_height);
             list->active_pos = old_pos;
         }
         else {
-            list->scroll_pos = 0;
+            _list_scroll(list, 0);
         }
     }
     else {
