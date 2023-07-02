@@ -39,7 +39,7 @@ static struct settings_s {
     bool menu_button_haptics;
     bool low_battery_autosave;
     bool low_battery_warning;
-	bool smbd_state;
+    bool smbd_state;
     bool http_state;
     bool ssh_state;
     bool ftp_state;
@@ -100,7 +100,7 @@ void _settings_reset(void)
     settings.vibration = 2;
     settings.startup_tab = 0;
     settings.startup_application = 0;
-	settings.smbd_state = false;
+    settings.smbd_state = false;
     settings.http_state = false;
     settings.auth_http_state = false;
     settings.ssh_state = false;
@@ -182,7 +182,7 @@ void settings_load(void)
     settings.show_recents = config_flag_get(".showRecents");
     settings.show_expert = config_flag_get(".showExpert");
     settings.low_battery_autosave = !config_flag_get(".noLowBatteryAutoSave");
-	settings.smbd_state = config_flag_get(".smbdState");
+    settings.smbd_state = config_flag_get(".smbdState");
     settings.http_state = config_flag_get(".httpState");
     settings.ssh_state = config_flag_get(".sshState");
     settings.telnet_state = config_flag_get(".telnetState");
@@ -298,7 +298,7 @@ void settings_save(void)
     config_flag_set(".showRecents", settings.show_recents);
     config_flag_set(".showExpert", settings.show_expert);
     config_flag_set(".noLowBatteryAutoSave", !settings.low_battery_autosave);
-	config_flag_set(".smbdState", settings.smbd_state);
+    config_flag_set(".smbdState", settings.smbd_state);
     config_flag_set(".httpState", settings.http_state);
     config_flag_set(".sshState", settings.ssh_state);
     config_flag_set(".ftpState", settings.ftp_state);

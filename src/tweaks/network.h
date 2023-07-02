@@ -332,7 +332,7 @@ void menu_network(void *_)
                      (ListItem){
                          .label = "WiFi: Hotspot/WPS...",
                          .action = menu_wifi});
-		list_addItem(&_menu_network,
+        list_addItem(&_menu_network,
                      (ListItem){
                          .label = "Samba: Network file share",
                          .item_type = TOGGLE,
@@ -366,7 +366,7 @@ void menu_network(void *_)
                          .arrow_action = network_setTelnetState,
                          .value = (int)settings.telnet_state,
                          .action = menu_telnet});
-		list_addItem(&_menu_network,
+        list_addItem(&_menu_network,
                      (ListItem){
                          .label = "FTP: File server...",
                          .item_type = TOGGLE,
