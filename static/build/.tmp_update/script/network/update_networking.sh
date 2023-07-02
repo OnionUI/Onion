@@ -46,6 +46,7 @@ main() {
             print_usage
     esac
 }
+
 # Standard check from runtime for startup.
 check() {
     log "Network Checker: Update networking"
@@ -56,7 +57,7 @@ check() {
     check_ntpstate
     check_httpstate
 	check_ntpstate
-    start_smbd
+    check_smbdstate
 	
 	if flag_enabled ntpWait; then
 			sync_time
@@ -113,31 +114,6 @@ else
 fi
 }
 
-start_smbd() {
-    if [ -f /tmp/smbd ]; then
-        if [ ! -d "/var/lib/samba" ]; then
-            mkdir -p /var/lib/samba
-        fi
-
-        if [ ! -d "/var/run/samba/ncalrpc" ]; then
-            mkdir -p /var/run/samba/ncalrpc
-        fi
-
-        if [ ! -d "/var/private" ]; then
-            mkdir -p /var/private
-        fi
-
-        if [ ! -d "/var/log/" ]; then
-            mkdir -p /var/log/
-        fi
-        
-        rm /tmp/smbd
-        
-        LD_LIBRARY_PATH="/mnt/SDCARD/.tmp_update/lib/samba:/mnt/SDCARD/.tmp_update/lib/samba/private" /mnt/SDCARD/.tmp_update/bin/samba/sbin/smbd --no-process-group &
-
-    fi
-}
-
 # Starts the samba daemon if the toggle is set to on
 check_smbdstate() { 
     if flag_enabled smbdState; then
@@ -149,11 +125,27 @@ check_smbdstate() {
             fi
         else
             if wifi_enabled; then
-                log "Samba: Starting smbd"
+                sync
                 
-				touch /tmp/smbd
-                touch /tmp/network_changed
+                if [ ! -d "/var/lib/samba" ]; then
+                    mkdir -p /var/lib/samba
+                fi
 
+                if [ ! -d "/var/run/samba/ncalrpc" ]; then
+                    mkdir -p /var/run/samba/ncalrpc
+                fi
+
+                if [ ! -d "/var/private" ]; then
+                    mkdir -p /var/private
+                fi
+
+                if [ ! -d "/var/log/" ]; then
+                    mkdir -p /var/log/
+                fi
+                
+                touch /tmp/smbd_kickstart # This lets runtime.sh handle it.. but only at boot and on exit of tweaks - If you start smbd here you lose sub-directory access
+                
+                log "Samba: Starting smbd"
             else
                 disable_flag smbdState
             fi

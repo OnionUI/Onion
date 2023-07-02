@@ -102,6 +102,8 @@ main() {
     state_change
     check_switcher
     set_startup_tab
+    
+    samba_start_parent
 	
     # Main runtime loop
     while true; do
@@ -566,9 +568,11 @@ check_networking() {
         return
     fi
 	rm /tmp/network_changed
-	
-    $sysdir/script/network/update_networking.sh check
 
+    $sysdir/script/network/update_networking.sh check
+    
+    samba_start_parent
+    
     check_timezone
 }
 
@@ -579,4 +583,11 @@ check_timezone() {
 	fi
 }
 
+samba_start_parent() {
+    if [ -f /tmp/smbd_kickstart ]; then
+        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/mnt/SDCARD/.tmp_update/lib/samba:/mnt/SDCARD/.tmp_update/lib/samba/private" /mnt/SDCARD/.tmp_update/bin/samba/sbin/smbd --debug-stdout --no-process-group -F >> /mnt/SDCARD/loogggog.log 2>&1 &
+        rm /tmp/smbd_kickstart
+    fi
+}
+    
 main
