@@ -272,7 +272,7 @@ int add_orphan_rom(char *rom_file_name)
 
         // Retrieve ROM id by its name
         sql = sqlite3_mprintf("SELECT * FROM rom WHERE name LIKE '%%%q%%' LIMIT 1;", rom_file_name);
-        stmt = play_activity_db_prepare(sql);
+        //stmt = play_activity_db_prepare(sql);
         sqlite3_step(stmt);
         sqlite3_free(sql);
     }

@@ -62,7 +62,7 @@ int cache_get_path(char *cache_db_file_path, const char *type)
     char cache6_db_file_path[STR_MAX];
     snprintf(cache6_db_file_path, STR_MAX - 1, "/mnt/SDCARD/Roms/%s/%s_cache6.db", type, type);
 
-    if (access(cache6_db_file_path, F_OK) != -1) {
+    if (is_file(cache6_db_file_path) == 1) {
         strncpy(cache_db_file_path, cache6_db_file_path, STR_MAX - 1);
         return 6;
     }
@@ -71,7 +71,7 @@ int cache_get_path(char *cache_db_file_path, const char *type)
     char cache2_db_file_path[STR_MAX];
     snprintf(cache2_db_file_path, STR_MAX - 1, "/mnt/SDCARD/Roms/%s/%s_cache2.db", type, type);
 
-    if (access(cache2_db_file_path, F_OK) != -1) {
+    if (is_file(cache2_db_file_path) == 1) {
         strncpy(cache_db_file_path, cache2_db_file_path, STR_MAX - 1);
         return 2;
     }
