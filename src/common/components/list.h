@@ -82,6 +82,12 @@ void list_ensureVisible(List *list, int direction)
     _list_ensureVisible(list, direction, list->item_count);
 }
 
+bool _list_did_wraparound(int before, int after, int direction)
+{
+    int offset = after - before;
+    return offset != 0 && (direction > 0) != (offset > 0);
+}
+
 ListItem *list_getVisibleItemAt(List *list, int index)
 {
     int items_left = list->item_count - index;
@@ -154,24 +160,40 @@ bool list_scrollTo(List *list, int active_pos)
 
 bool list_keyUp(List *list, bool key_repeat)
 {
+    int old_pos = list->active_pos;
+
     // Wrap-around (move to bottom)
     if (list->active_pos == 0) {
         if (key_repeat)
             return false;
         list->active_pos = list->item_count - 1;
     }
-    // Descrease selection (move up)
+    // Decrease selection (move up)
     else
         list->active_pos -= 1;
 
     list_ensureVisible(list, -1);
-    list_scroll(list);
+
+    if (_list_did_wraparound(old_pos, list->active_pos, -1)) {
+        if (list->scroll_pos > 0) {
+            list->scroll_pos -= 1;
+            list->active_pos = old_pos;
+        }
+        else {
+            list->scroll_pos = list->item_count - list->scroll_height;
+        }
+    }
+    else {
+        list_scroll(list);
+    }
 
     return true;
 }
 
 bool list_keyDown(List *list, bool key_repeat)
 {
+    int old_pos = list->active_pos;
+
     // Wrap-around (move to top)
     if (list->active_pos == list->item_count - 1) {
         if (key_repeat)
@@ -183,7 +205,19 @@ bool list_keyDown(List *list, bool key_repeat)
         list->active_pos += 1;
 
     list_ensureVisible(list, 1);
-    list_scroll(list);
+
+    if (_list_did_wraparound(old_pos, list->active_pos, 1)) {
+        if (list->scroll_pos < list->item_count - list->scroll_height) {
+            list->scroll_pos += 1;
+            list->active_pos = old_pos;
+        }
+        else {
+            list->scroll_pos = 0;
+        }
+    }
+    else {
+        list_scroll(list);
+    }
 
     return true;
 }
