@@ -4,7 +4,7 @@ miyoodir=/mnt/SDCARD/miyoo
 filebrowserbin=$sysdir/bin/filebrowser
 filebrowserdb=$sysdir/config/filebrowser/filebrowser.db
 netscript=/mnt/SDCARD/.tmp_update/script/network
-export LD_LIBRARY_PATH="$sysdir/lib/samba:$sysdir/lib/samba/private:/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
+export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 export PATH="$sysdir/bin:$PATH"
 
 main() {
@@ -132,6 +132,7 @@ start_smbd() {
         fi
         
         rm /tmp/smbd
+        
         ( LD_LIBRARY_PATH="/mnt/SDCARD/.tmp_update/lib/samba:/mnt/SDCARD/.tmp_update/lib/samba/private" /mnt/SDCARD/.tmp_update/bin/samba/sbin/smbd --no-process-group & )
 
     fi
