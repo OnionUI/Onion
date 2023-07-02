@@ -4,7 +4,7 @@ miyoodir=/mnt/SDCARD/miyoo
 filebrowserbin=$sysdir/bin/filebrowser
 filebrowserdb=$sysdir/config/filebrowser/filebrowser.db
 netscript=/mnt/SDCARD/.tmp_update/script/network
-export LD_LIBRARY_PATH="$sysdir/lib/samba:/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
+export LD_LIBRARY_PATH="$sysdir/lib/samba:$sysdir/lib/samba/private:/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 export PATH="$sysdir/bin:$PATH"
 
 main() {
@@ -125,19 +125,26 @@ check_smbdstate() {
         else
             if wifi_enabled; then
                 log "Samba: Starting smbd"
-				sync
+				
 				if [ ! -d "/var/lib/samba" ]; then
 					mkdir -p /var/lib/samba
 				fi
-		
+
 				if [ ! -d "/var/run/samba/ncalrpc" ]; then
 					mkdir -p /var/run/samba/ncalrpc
 				fi
-				
+
 				if [ ! -d "/var/private" ]; then
 					mkdir -p /var/private
 				fi
-				 LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$sysdir/lib/samba:$sysdir/lib/samba/private" /mnt/SDCARD/.tmp_update/bin/samba/sbin/smbd --no-process-group -D &
+
+				if [ ! -d "/var/log/" ]; then
+					mkdir -p /var/log/
+				fi
+
+				sync
+				
+				$sysdir/bin/samba/sbin/smbd --no-process-group -D &
 
             else
                 disable_flag smbdState

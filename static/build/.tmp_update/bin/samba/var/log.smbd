@@ -1,0 +1,195 @@
+[2023/07/01 23:57:30,  0] ../../lib/util/util.c:224(directory_create_or_exist)
+  directory_create_or_exist: mkdir failed on directory /var/log/cores: No such file or directory
+[2023/07/01 23:57:30,  0] ../../source3/lib/dumpcore.c:60(get_default_corepath)
+  Failed to create /var/log/cores for user 0 with mode 0700
+[2023/07/01 23:57:30,  0] ../../source3/lib/dumpcore.c:257(dump_core_setup)
+  Unable to setup corepath for smbd: No such file or directory
+[2023/07/01 23:57:30,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:57:30.339950,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:57:30.340268,  0] ../../source3/smbd/server.c:1746(main)
+  smbd version 4.18.1 started.
+  Copyright Andrew Tridgell and the Samba Team 1992-2023
+[2023/07/01 23:57:30.341567,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:57:30.342123,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:57:30.346030,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:57:30.346621,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:57:30.346899,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:57:30.347312,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:57:30.350319,  0] ../../lib/util/pidfile.c:218(pidfile_create)
+  ERROR: smbd is already running. File /var/run//smbd.pid exists and process id 454 is running.
+[2023/07/01 23:58:03,  0] ../../lib/util/util.c:224(directory_create_or_exist)
+  directory_create_or_exist: mkdir failed on directory /var/log/cores: No such file or directory
+[2023/07/01 23:58:03,  0] ../../source3/lib/dumpcore.c:60(get_default_corepath)
+  Failed to create /var/log/cores for user 0 with mode 0700
+[2023/07/01 23:58:03,  0] ../../source3/lib/dumpcore.c:257(dump_core_setup)
+  Unable to setup corepath for smbd: No such file or directory
+[2023/07/01 23:58:03,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:58:03.230897,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:58:03.231174,  0] ../../source3/smbd/server.c:1746(main)
+  smbd version 4.18.1 started.
+  Copyright Andrew Tridgell and the Samba Team 1992-2023
+[2023/07/01 23:58:03.232645,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:58:03.233278,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:58:03.237061,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:58:03.237658,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:58:03.237929,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:58:03.238331,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:58:03.267695,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:58:03.270212,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:58:03.833194,  0] ../../source3/smbd/server.c:1091(smbd_open_one_socket)
+  smbd_open_one_socket: open_socket_in failed: Address family not supported by protocol
+[2023/07/01 23:58:03.860426,  0] ../../source3/smbd/server.c:1091(smbd_open_one_socket)
+  smbd_open_one_socket: open_socket_in failed: Address family not supported by protocol
+[2023/07/01 23:58:10.708645,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/192.168.1.84.log': No such file or directory
+[2023/07/01 23:58:10.711573,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/192.168.1.84.log': No such file or directory
+[2023/07/01 23:58:10.713061,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/192.168.1.84.log': No such file or directory
+[2023/07/01 23:58:10.714583,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/192.168.1.84.log': No such file or directory
+[2023/07/01 23:58:10.771190,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/mattpc.log': No such file or directory
+[2023/07/01 23:58:10.771921,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/mattpc.log': No such file or directory
+[2023/07/01 23:58:11.961403,  0] ../../lib/util/charset/codepoints.c:16650(get_conv_handle)
+  dos charset 'CP850' unavailable - using ASCII
+[2023/07/01 23:58:16,  0] ../../lib/util/util.c:224(directory_create_or_exist)
+  directory_create_or_exist: mkdir failed on directory /var/log/cores: No such file or directory
+[2023/07/01 23:58:16,  0] ../../source3/lib/dumpcore.c:60(get_default_corepath)
+  Failed to create /var/log/cores for user 0 with mode 0700
+[2023/07/01 23:58:16,  0] ../../source3/lib/dumpcore.c:257(dump_core_setup)
+  Unable to setup corepath for smbd: No such file or directory
+[2023/07/01 23:58:16,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:58:16.428551,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:58:16.428841,  0] ../../source3/smbd/server.c:1746(main)
+  smbd version 4.18.1 started.
+  Copyright Andrew Tridgell and the Samba Team 1992-2023
+[2023/07/01 23:58:16.430114,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:58:16.430948,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:58:16.434555,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:58:16.435208,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:58:16.435576,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:58:16.436206,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:58:16.440351,  0] ../../lib/util/pidfile.c:218(pidfile_create)
+  ERROR: smbd is already running. File /var/run//smbd.pid exists and process id 3004 is running.
+[2023/07/01 23:59:22,  0] ../../lib/util/util.c:224(directory_create_or_exist)
+  directory_create_or_exist: mkdir failed on directory /var/log/cores: No such file or directory
+[2023/07/01 23:59:22,  0] ../../source3/lib/dumpcore.c:60(get_default_corepath)
+  Failed to create /var/log/cores for user 0 with mode 0700
+[2023/07/01 23:59:22,  0] ../../source3/lib/dumpcore.c:257(dump_core_setup)
+  Unable to setup corepath for smbd: No such file or directory
+[2023/07/01 23:59:22,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:59:22.538455,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:59:22.538742,  0] ../../source3/smbd/server.c:1746(main)
+  smbd version 4.18.1 started.
+  Copyright Andrew Tridgell and the Samba Team 1992-2023
+[2023/07/01 23:59:22.540163,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:59:22.540711,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:59:22.545078,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:59:22.545749,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:59:22.546100,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:59:22.546688,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:59:22.571799,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:59:22.576191,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:59:22.616553,  0] ../../source3/smbd/server.c:1091(smbd_open_one_socket)
+  smbd_open_one_socket: open_socket_in failed: Address family not supported by protocol
+[2023/07/01 23:59:22.647238,  0] ../../source3/smbd/server.c:1091(smbd_open_one_socket)
+  smbd_open_one_socket: open_socket_in failed: Address family not supported by protocol
+[2023/07/01 23:59:26.849322,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/192.168.1.84.log': No such file or directory
+[2023/07/01 23:59:26.852252,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/192.168.1.84.log': No such file or directory
+[2023/07/01 23:59:26.853779,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/192.168.1.84.log': No such file or directory
+[2023/07/01 23:59:26.854586,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/192.168.1.84.log': No such file or directory
+[2023/07/01 23:59:26.910368,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/mattpc.log': No such file or directory
+[2023/07/01 23:59:26.911160,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/mattpc.log': No such file or directory
+[2023/07/01 23:59:28.103592,  0] ../../lib/util/charset/codepoints.c:16650(get_conv_handle)
+  dos charset 'CP850' unavailable - using ASCII
+[2023/07/01 23:59:47,  0] ../../lib/util/util.c:224(directory_create_or_exist)
+  directory_create_or_exist: mkdir failed on directory /var/log/cores: No such file or directory
+[2023/07/01 23:59:47,  0] ../../source3/lib/dumpcore.c:60(get_default_corepath)
+  Failed to create /var/log/cores for user 0 with mode 0700
+[2023/07/01 23:59:47,  0] ../../source3/lib/dumpcore.c:257(dump_core_setup)
+  Unable to setup corepath for smbd: No such file or directory
+[2023/07/01 23:59:47,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:59:47.526158,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:59:47.526450,  0] ../../source3/smbd/server.c:1746(main)
+  smbd version 4.18.1 started.
+  Copyright Andrew Tridgell and the Samba Team 1992-2023
+[2023/07/01 23:59:47.527701,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:59:47.528232,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:59:47.531311,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:59:47.531910,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:59:47.532189,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:59:47.532595,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:59:47.555871,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:59:47.558087,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/smbd.log': No such file or directory
+[2023/07/01 23:59:47.596705,  0] ../../source3/smbd/server.c:1091(smbd_open_one_socket)
+  smbd_open_one_socket: open_socket_in failed: Address family not supported by protocol
+[2023/07/01 23:59:47.623718,  0] ../../source3/smbd/server.c:1091(smbd_open_one_socket)
+  smbd_open_one_socket: open_socket_in failed: Address family not supported by protocol
+[2023/07/01 23:59:55.157150,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/192.168.1.84.log': No such file or directory
+[2023/07/01 23:59:55.159964,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/192.168.1.84.log': No such file or directory
+[2023/07/01 23:59:55.161253,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/192.168.1.84.log': No such file or directory
+[2023/07/01 23:59:55.161947,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/192.168.1.84.log': No such file or directory
+[2023/07/01 23:59:55.207119,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/mattpc.log': No such file or directory
+[2023/07/01 23:59:55.207879,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/mattpc.log': No such file or directory
+[2023/07/01 23:59:59.480015,  0] ../../lib/util/charset/codepoints.c:16650(get_conv_handle)
+  dos charset 'CP850' unavailable - using ASCII

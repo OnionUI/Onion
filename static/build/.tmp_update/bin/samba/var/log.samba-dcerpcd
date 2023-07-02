@@ -1,0 +1,30 @@
+[2023/07/01 23:58:10,  0] ../../lib/util/util.c:224(directory_create_or_exist)
+  directory_create_or_exist: mkdir failed on directory /var/log/cores: No such file or directory
+[2023/07/01 23:58:10,  0] ../../source3/lib/dumpcore.c:60(get_default_corepath)
+  Failed to create /var/log/cores for user 0 with mode 0700
+[2023/07/01 23:58:10,  0] ../../source3/lib/dumpcore.c:257(dump_core_setup)
+  Unable to setup corepath for samba-dcerpcd: No such file or directory
+[2023/07/01 23:58:10,  0] ../../source3/rpc_server/rpc_host.c:2968(main)
+  samba-dcerpcd version 4.18.1 started.
+  Copyright Andrew Tridgell and the Samba Team 1992-2023
+[2023/07/01 23:58:10,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/.log': No such file or directory
+[2023/07/01 23:58:10.978431,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/.log': No such file or directory
+[2023/07/01 23:58:11.960549,  0] ../../lib/util/charset/codepoints.c:16650(get_conv_handle)
+  dos charset 'CP850' unavailable - using ASCII
+[2023/07/01 23:59:27,  0] ../../lib/util/util.c:224(directory_create_or_exist)
+  directory_create_or_exist: mkdir failed on directory /var/log/cores: No such file or directory
+[2023/07/01 23:59:27,  0] ../../source3/lib/dumpcore.c:60(get_default_corepath)
+  Failed to create /var/log/cores for user 0 with mode 0700
+[2023/07/01 23:59:27,  0] ../../source3/lib/dumpcore.c:257(dump_core_setup)
+  Unable to setup corepath for samba-dcerpcd: No such file or directory
+[2023/07/01 23:59:27,  0] ../../source3/rpc_server/rpc_host.c:2968(main)
+  samba-dcerpcd version 4.18.1 started.
+  Copyright Andrew Tridgell and the Samba Team 1992-2023
+[2023/07/01 23:59:27,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/.log': No such file or directory
+[2023/07/01 23:59:27.106986,  0] ../../lib/util/debug.c:1262(reopen_one_log)
+  reopen_one_log: Unable to open new log file '/var/log/.log': No such file or directory
+[2023/07/01 23:59:28.102302,  0] ../../lib/util/charset/codepoints.c:16650(get_conv_handle)
+  dos charset 'CP850' unavailable - using ASCII
