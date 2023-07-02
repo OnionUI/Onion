@@ -29,7 +29,7 @@ if [ "$0" = "/tmp/_shutdown" ]; then
 	killall -9 main # mandatory to avoid the suppression of .tmp_update !
 	killall -9 updater
 	killall -9 runtime.sh
-   killall -9 smbd
+   	killall -9 smbd
 	
 	kill_hooked_tasks
 	sleep 0.1
