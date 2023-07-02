@@ -34,7 +34,7 @@ OFILES = $(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
 CFLAGS := -I../../include -I../common -DPLATFORM_$(shell echo $(PLATFORM) | tr a-z A-Z) -DONION_VERSION="\"$(VERSION)\"" -Wall
 
 ifeq ($(DEBUG),1)
-CFLAGS := $(CFLAGS) -DLOG_DEBUG -g
+CFLAGS := $(CFLAGS) -DLOG_DEBUG -g3
 endif
 
 ifeq ($(TEST),1)
