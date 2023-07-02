@@ -585,7 +585,7 @@ check_timezone() {
 
 samba_start_parent() {
     if [ -f /tmp/smbd_kickstart ]; then
-        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/mnt/SDCARD/.tmp_update/lib/samba:/mnt/SDCARD/.tmp_update/lib/samba/private" /mnt/SDCARD/.tmp_update/bin/samba/sbin/smbd --debug-stdout --no-process-group -F >> /mnt/SDCARD/loogggog.log 2>&1 &
+        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/mnt/SDCARD/.tmp_update/lib/samba:/mnt/SDCARD/.tmp_update/lib/samba/private" /mnt/SDCARD/.tmp_update/bin/samba/sbin/smbd --no-process-group -D &
         rm /tmp/smbd_kickstart
     fi
 }
