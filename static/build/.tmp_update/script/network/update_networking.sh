@@ -144,8 +144,9 @@ check_smbdstate() {
                 fi
                 
                 touch /tmp/smbd_kickstart # This lets runtime.sh handle it.. but only at boot and on exit of tweaks - If you start smbd here you lose sub-directory access
+                touch /tmp/network_changed
                 
-                log "Samba: Starting smbd"
+                log "Samba: Starting smbd at exit of tweaks.."
             else
                 disable_flag smbdState
             fi

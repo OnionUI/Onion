@@ -564,16 +564,16 @@ start_networking() {
 
 check_networking() {
     if [ $deviceModel -ne 354 ] || [ ! -f /tmp/network_changed ]; then
+        samba_start_parent
         check_timezone
         return
     fi
 	rm /tmp/network_changed
 
     $sysdir/script/network/update_networking.sh check
-    
-    samba_start_parent
-    
+        
     check_timezone
+    samba_start_parent
 }
 
 check_timezone() {
