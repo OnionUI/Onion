@@ -631,10 +631,12 @@ unzip_progress() {
     while [ -n "$a" ]; do
         last_line=$(tail -n 1 /tmp/.extraction_output)
         value=$(echo "$last_line" | sed 's/.* \([0-9]\+\)%.*/\1/')
-        if [ "$value" -eq "$value" ] && [ $value -eq 0 ] 2>/dev/null; then # check if the value is numeric. If it is 0, show a different message
-            echo "Preparing folders..." > /tmp/.update_msg
-        elif [ "$value" -eq "$value" ] && [ $value -gt 0 ] 2>/dev/null; then    
-            echo "$msg $value%" > /tmp/.update_msg
+        if [ "$value" -eq "$value" ] 2>/dev/null; then                  # check if the value is numeric
+            if [ $value -eq 0 ]; then
+                echo "Preparing folders..." > /tmp/.update_msg          # It gets stuck a bit at 0%, so don't show percentage yet
+            else
+                echo "$msg $value%" > /tmp/.update_msg                  # Now we can show completion percentage
+            fi
         fi
         > /tmp/.extraction_output  # to avoid to parse a too big file
         sleep 0.5
