@@ -56,7 +56,7 @@ check() {
     check_ntpstate
     check_httpstate
 	check_ntpstate
-	check_smbdstate
+    start_smbd
 	
 	if flag_enabled ntpWait; then
 			sync_time
@@ -113,6 +113,30 @@ else
 fi
 }
 
+start_smbd() {
+    if [ -f /tmp/smbd ]; then
+        if [ ! -d "/var/lib/samba" ]; then
+            mkdir -p /var/lib/samba
+        fi
+
+        if [ ! -d "/var/run/samba/ncalrpc" ]; then
+            mkdir -p /var/run/samba/ncalrpc
+        fi
+
+        if [ ! -d "/var/private" ]; then
+            mkdir -p /var/private
+        fi
+
+        if [ ! -d "/var/log/" ]; then
+            mkdir -p /var/log/
+        fi
+        
+        rm /tmp/smbd
+        ( LD_LIBRARY_PATH="/mnt/SDCARD/.tmp_update/lib/samba:/mnt/SDCARD/.tmp_update/lib/samba/private" /mnt/SDCARD/.tmp_update/bin/samba/sbin/smbd --no-process-group & )
+
+    fi
+}
+
 # Starts the samba daemon if the toggle is set to on
 check_smbdstate() { 
     if flag_enabled smbdState; then
@@ -125,26 +149,9 @@ check_smbdstate() {
         else
             if wifi_enabled; then
                 log "Samba: Starting smbd"
-				
-				if [ ! -d "/var/lib/samba" ]; then
-					mkdir -p /var/lib/samba
-				fi
-
-				if [ ! -d "/var/run/samba/ncalrpc" ]; then
-					mkdir -p /var/run/samba/ncalrpc
-				fi
-
-				if [ ! -d "/var/private" ]; then
-					mkdir -p /var/private
-				fi
-
-				if [ ! -d "/var/log/" ]; then
-					mkdir -p /var/log/
-				fi
-
-				sync
-				
-				$sysdir/bin/samba/sbin/smbd --no-process-group -D &
+                
+				touch /tmp/smbd
+                touch /tmp/network_changed
 
             else
                 disable_flag smbdState
