@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
     SDL_Surface *waiting_bg = IMG_Load("res/waitingBG.png");
     SDL_Surface *progress_stripes = IMG_Load("res/progress_stripes.png");
     SDL_Surface *slide = NULL;
-    
+
     TTF_Font *font = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 36);
     TTF_Font *font_small =
         TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 18);
@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
 
     int current_slide = -1;
     int num_slides = 9;
-    config_get("currentSlide", "%d", &current_slide);
+    config_get("currentSlide", CONFIG_INT, &current_slide);
     imageCache_load(&current_slide, _loadSlide, num_slides);
 
     bool quit = false;

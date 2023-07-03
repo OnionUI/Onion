@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
         }
 
         if (!is_suspended) {
-            config_get("battery/warnAt", "%d", &warn_at);
+            config_get("battery/warnAt", CONFIG_INT, &warn_at);
 
             if (ticks >= CHECK_BATTERY_TIMEOUT_S) {
                 if (DEVICE_ID == MIYOO283) {

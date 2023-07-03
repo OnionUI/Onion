@@ -72,9 +72,9 @@ void _notifyResetDone(const char *title_str)
 
 void action_resetTweaks(void *pt)
 {
-    const char title_str[] = "Reset tweaks";
+    const char title_str[] = "Reset Onion system configs";
     if (!_disable_confirm &&
-        !_confirmReset(title_str, "Are you sure you want to\nreset tweaks?"))
+        !_confirmReset(title_str, "Are you sure you want to\nreset system configs?"))
         return;
     rename(RESET_CONFIGS_PAK, "/mnt/SDCARD/.tmp_update/temp");
     system("rm -rf /mnt/SDCARD/.tmp_update/config && mkdir -p "
