@@ -8,7 +8,6 @@ export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/p
 export PATH="$sysdir/bin:$PATH"
 
 main() {
-    echo "PID = $$ PPID = $PPID"
     set_oldtz
     set_tzid
     case "$1" in
