@@ -38,9 +38,6 @@ main() {
     
     # Make sure MainUI doesn't show charging animation
     touch /tmp/no_charging_ui
-	
-	# Loop breaker for NTP
-	touch /tmp/ntp_run_once
 
     cd $sysdir
     bootScreen "Boot"
@@ -179,6 +176,7 @@ launch_main_ui() {
 
     if [ $(/customer/app/jsonval wifi) -ne $wifi_setting ]; then
         touch /tmp/network_changed
+        rm /tmp/ntp_synced 2> /dev/null
         sync
     fi
 
@@ -553,6 +551,9 @@ runifnecessary() {
 
 
 start_networking() {
+	# Loop breaker for NTP
+	touch /tmp/ntp_run_once
+
     rm $sysdir/config/.hotspotState  # dont start hotspot at boot
     
     touch /tmp/network_changed
@@ -573,10 +574,7 @@ check_networking() {
 }
 
 check_timezone() {
-	if [ -f /tmp/timezone_update ]; then
-		export TZ=$(cat "$sysdir/config/.tz")
-		rm /tmp/timezone_update
-	fi
+    export TZ=$(cat "$sysdir/config/.tz")
 }
 
 main
