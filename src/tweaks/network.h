@@ -23,7 +23,7 @@
 
 #define NET_SCRIPT_PATH "/mnt/SDCARD/.tmp_update/script/network"
 
-void network_setServiceState(const char *service_name)
+void network_setServiceState(const char *service_name, bool background)
 {
     char state[256];
     char command[512];
@@ -32,7 +32,8 @@ void network_setServiceState(const char *service_name)
 
     sprintf(state, NET_SCRIPT_PATH "/update_networking.sh %s toggle", service_name);
     sprintf(command, "%s 2>&1", state);
-
+    if(background)
+        strcat(command, " &");
     system(command);
 
     printf_debug("network_setServiceState: %s\n", state);
@@ -61,7 +62,7 @@ void network_commonEnableToggle(List *list, ListItem *item, bool *value_pt, cons
     if (_menu_network._created) {
         list_currentItem(&_menu_network)->value = enabled;
     }
-    network_setServiceState(service_name);
+    network_setServiceState(service_name, false);
     reset_menus = true;
     all_changed = true;
 }
@@ -90,7 +91,7 @@ void network_setHotspotState(void *pt)
 {
     config_flag_set(".hotspotState", ((ListItem *)pt)->value == 1);
     settings.hotspot_state = ((ListItem *)pt)->value == 1;
-    network_setServiceState("hotspot");
+    network_setServiceState("hotspot", false);
     reset_menus = true;
     all_changed = true;
 }
@@ -99,7 +100,7 @@ void network_setNtpState(void *pt)
 {
     config_flag_set(".ntpState", ((ListItem *)pt)->value == 1);
     settings.ntp_state = ((ListItem *)pt)->value == 1;
-    network_setServiceState("ntp");
+    network_setServiceState("ntp", true);
     reset_menus = true;
     all_changed = true;
 }

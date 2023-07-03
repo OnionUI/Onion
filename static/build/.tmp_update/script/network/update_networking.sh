@@ -8,6 +8,8 @@ export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/p
 export PATH="$sysdir/bin:$PATH"
 
 main() {
+    echo "PID = $$ PPID = $PPID"
+    set_oldtz
     set_tzid
     case "$1" in
         check) # runs the check function we use in runtime, will be called on boot
@@ -55,7 +57,6 @@ check() {
     check_telnetstate 
     check_ntpstate
     check_httpstate
-	check_ntpstate
 	
 	if flag_enabled ntpWait; then
 			sync_time
@@ -404,9 +405,12 @@ sync_time() {
 check_ntpstate() { # This function checks if the timezone has changed, we call this in the main loop.
     if flag_enabled ntpState && wifi_enabled && [ ! -f "$sysdir/config/.hotspotState" ] ; then
         current_tz=$(check_tzid)
-		get_time
         if [ "$current_tz" != "$old_tz" ]; then
-            restart_ntp &
+            log "NTP: timezone changed: current_tz:$current_tz old_tz:$old_tz"
+            restart_ntp
+        else
+            log "NTP: no need to restart_ntp, current_tz:$current_tz old_tz:$old_tz"
+            get_time
         fi
     fi
 }
@@ -414,6 +418,7 @@ check_ntpstate() { # This function checks if the timezone has changed, we call t
 
 restart_ntp() { # If we detect that the timezone has changed we'll restart the ntp process to reset it in the main shell (runtime.sh shell)
     export old_tz=$(check_tzid)
+    echo $old_tz > "$sysdir/config/.old_tz"
     set_tzid
     log "NTP: Starting NTP with TZ of $TZ"
     get_time
@@ -427,6 +432,9 @@ check_tzid() {
     echo "$tzid"
 }
 
+set_oldtz() { #export to file because environment variables don't carry over
+    export old_tz=$(cat "$sysdir/config/.old_tz") 
+}
 set_tzid() {    
     export TZ=$(cat "$sysdir/config/.tz")
 }
@@ -456,29 +464,27 @@ print_usage() {
     exit 1
 }
 
-get_time() { # handles 2 types of NTP, instant from an API or longer from a time server, if the instant API check fails it will fallback to the longer ntp
-    response=$(curl -s http://worldtimeapi.org/api/ip.txt | grep -o 'utc_datetime: [^,]*' | cut -d ' ' -f 2)
-	
+get_time() { # handles 2 types of network time, instant from an API or longer from an NTP server, if the instant API checks fails it will fallback to the longer ntp
+    log "NTP: started time update"
+    response=$(curl -s --connect-timeout 3 http://worldtimeapi.org/api/ip.txt |
+        grep -o 'utc_datetime: [^.]*' | cut -d ' ' -f2 | sed "s/T/ /")
     if [ -z "$response" ]; then
-        log "NTP: Failed to get time from worldtimeapi.org, falling back to NTP."
-        ntpdate -u time.google.com
-		
-        if [ $? -ne 0 ]; then
-            log "NTP: Failed to synchronize time using NTPdate, both methods have failed."
-        fi
-    else
-        utc_time=$(echo "$response" | cut -d. -f1 | sed "s/T/ /")
-        if date -u -s "$utc_time" >/dev/null 2>&1; then
+        log "NTP: Failed to get time from worldtimeapi.org, trying timeapi.io"
+        response=$(curl -s -k --connect-timeout 5 https://timeapi.io/api/Time/current/zone?timeZone=UTC |
+            grep -o '"dateTime":"[^.]*' | cut -d '"' -f4 | sed 's/T/ /')
+    fi
+    if [ ! -z "$response" ]; then
+        if date -u -s "$response" >/dev/null 2>&1; then
             hwclock -w
-        else
-            log "NTP: Failed to parse time from worldtimeapi.org, falling back to NTP."
-            ntpdate -u time.google.com
-			
-            if [ $? -ne 0 ]; then
-                log "NTP: Failed to synchronize time using NTPdate, both methods have failed."
-            fi
+            return 0
         fi
     fi
+    log "NTP: Failed to get time via timeapi.io as well, falling back to NTP."
+    ntpdate -t 3 -u time.google.com
+    if [ $? -ne 0 ]; then
+        log "NTP: Failed to synchronize time using NTPdate, both methods have failed."
+    fi
+
 }
 
 wifi_enabled() {
