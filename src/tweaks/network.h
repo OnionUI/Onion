@@ -32,7 +32,7 @@ void network_setServiceState(const char *service_name, bool background)
 
     sprintf(state, NET_SCRIPT_PATH "/update_networking.sh %s toggle", service_name);
     sprintf(command, "%s 2>&1", state);
-    if(background)
+    if (background)
         strcat(command, " &");
     system(command);
 
