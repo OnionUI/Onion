@@ -175,7 +175,7 @@ void network_setSshAuthState(void *pt)
 
 void network_wpsConnect(void *pt)
 {
-    system("sh /mnt/SDCARD/.tmp_update/script/wpsclient.sh");
+    system("sh " NET_SCRIPT_PATH "/wpsclient.sh");
 }
 
 void network_setTzManualState(void *pt)
