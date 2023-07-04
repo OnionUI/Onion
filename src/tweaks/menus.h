@@ -118,14 +118,14 @@ void menu_datetime(void *_)
                              .action = network_setNtpWaitState});
             list_addItem(&_menu_date_time,
                          (ListItem){
-                             .label = "Get timezone via IP address",
+                             .label = "Get time zone via IP address",
                              .item_type = TOGGLE,
                              .disabled = !network_state.ntp,
                              .value = !network_state.manual_tz,
                              .action = network_setTzManualState});
             list_addItem(&_menu_date_time,
                          (ListItem){
-                             .label = "Select timezone",
+                             .label = "Select time zone",
                              .item_type = MULTIVALUE,
                              .disabled = !network_state.ntp || !network_state.manual_tz,
                              .value_max = 48,
