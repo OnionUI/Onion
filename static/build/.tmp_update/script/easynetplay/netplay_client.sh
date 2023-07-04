@@ -23,11 +23,11 @@ export hostip="192.168.100.100" # This should be the default unless the user has
 check_wifi(){
 ifconfig wlan1 down
 	if ifconfig wlan0 &>/dev/null; then
-		log "GLO::Retro_Quick_Join: Wi-Fi is up already"
+		log "GLO::Easy_Netplay: Wi-Fi is up already"
 		build_infoPanel "WIFI" "Wifi up"
 		save_wifi_state
 	else
-		log "GLO::Retro_Quick_Join: Wi-Fi disabled, trying to enable before connecting.."
+		log "GLO::Easy_Netplay: Wi-Fi disabled, trying to enable before connecting.."
 		build_infoPanel "WIFI" "Wifi disabled, starting..." 
 		
 		/customer/app/axp_test wifion
@@ -37,10 +37,10 @@ ifconfig wlan1 down
 		$miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
 		
 		if is_running wpa_supplicant && ifconfig wlan0 > /dev/null 2>&1; then
-			log "GLO::Retro_Quick_Join: WiFi started"
+			log "GLO::Easy_Netplay: WiFi started"
 			build_infoPanel "WIFI" "Wifi started."
 		else
-			log "GLO::Retro_Quick_Join: WiFi started"
+			log "GLO::Easy_Netplay: WiFi started"
 			build_infoPanel "WIFI" "Unable to start WiFi\n unable to continue."
 			sleep 1
 			cleanup
@@ -61,7 +61,7 @@ connect_to_host() {
 		return 1
 	fi
 	
-	log "GLO::Retro_Quick_Join: Added new network with id $new_id"
+	log "GLO::Easy_Netplay: Added new network with id $new_id"
 
 	net_setup=$($WPACLI -i wlan0 <<-EOF
 	set_network $new_id ssid "MiyooMini+APOnionOS"
@@ -84,7 +84,7 @@ connect_to_host() {
 
 	udhcpc_control
 	
-	log "GLO::Retro_Quick_Join: Added new network and connected"
+	log "GLO::Easy_Netplay: Added new network and connected"
 	log "#############################Supplicant dump##################################"
 	cat /appconfigs/wpa_supplicant.conf >> $sysdir/logs/ra_quick_host.log
 	log "#############################Supplicant dump##################################"
@@ -105,14 +105,14 @@ wait_for_ip() {
 
         if [ $counter -ge 20 ]; then
             build_infoPanel "Failed to connect!"  "Could not get an IP in 20 seconds."
-            log "GLO::Retro_Quick_Join: Failed to get an IP address within 20 seconds."
+            log "GLO::Easy_Netplay: Failed to get an IP address within 20 seconds."
             sleep 1 
 			cleanup
         fi
     done
 
     build_infoPanel "Joined hotspot!"  "IP: $IP" 
-    log "GLO::Retro_Quick_Join: IP address assigned: $IP"
+    log "GLO::Easy_Netplay: IP address assigned: $IP"
     sleep 1
 }
 
@@ -123,21 +123,21 @@ download_cookie() {
     curl -o "$output_path" ftp://$hostip/mnt/SDCARD/RetroArch/retroarch.cookie
 
     if [ $? -ne 0 ]; then
-        log "GLO::Retro_Quick_Join: Failed to download cookie file."
+        log "GLO::Easy_Netplay: Failed to download cookie file."
 		build_infoPanel "Failed"  "Can't download the cookie, can't continue" 
 		sleep 1
         cleanup
     fi
 
     if [ ! -f $output_path ]; then
-        log "GLO::Retro_Quick_Join: We didn't get a cookie"
+        log "GLO::Easy_Netplay: We didn't get a cookie"
 		build_infoPanel "No cookie found"  "Cookie has been eaten, can't continue" 
 		sleep 1
         cleanup
     fi
 	
 	build_infoPanel "Success!"  "Got the cookie" 
-    log "GLO::Retro_Quick_Join: Cookie file downloaded successfully."
+    log "GLO::Easy_Netplay: Cookie file downloaded successfully."
 }
 
 # Read the cookie and store the paths and checksums into a var.
@@ -170,14 +170,14 @@ read_cookie() {
 				export romcheck
 				;;
 		esac
-	log "GLO::Retro_Quick_Join: $core $rom $coresize $corechksum $romsize $romchksum"
+	log "GLO::Easy_Netplay: $core $rom $coresize $corechksum $romsize $romchksum"
 	done <"/mnt/SDCARD/RetroArch/retroarch.cookie.client"
 	
 	#url encode or curl complains
 	export rom_url=$(echo "$rom" | sed 's/ /%20/g')
 	export core_url=$(echo "$core" | sed 's/ /%20/g')
 
-	log "GLO::Retro_Quick_Join: Cookie file read"
+	log "GLO::Easy_Netplay: Cookie file read"
 }
 
 sync_file() {
@@ -189,12 +189,12 @@ sync_file() {
 	
 
     if [ -z "$file_path" ]; then
-        log "GLO::Retro_Quick_Join: Potentially starting a contentless $file_type."
+        log "GLO::Easy_Netplay: Potentially starting a contentless $file_type."
         return
     fi
 
     if [ -e "$file_path" ]; then
-        log "GLO::Retro_Quick_Join: $file_path exists."
+        log "GLO::Easy_Netplay: $file_path exists."
         
         local file_size=$(stat -c%s "$file_path")
         local file_chksum_actual
@@ -206,7 +206,7 @@ sync_file() {
         fi
 
         if [ "$file_checksum" -ne "$file_chksum_actual" ]; then
-            log "GLO::Retro_Quick_Join: Checksum doesn't match for $file_path. Renaming the existing file and syncing $file_type again."
+            log "GLO::Easy_Netplay: Checksum doesn't match for $file_path. Renaming the existing file and syncing $file_type again."
             build_infoPanel "Syncing"  "$file_type checksums don't match, syncing" 
             sleep 0.5
             do_sync_file "$file_type" "$file_path" "$file_url"
@@ -219,12 +219,12 @@ sync_file() {
             fi
 
         else
-            log "GLO::Retro_Quick_Join: $file_path exists and the checksum matches."
+            log "GLO::Easy_Netplay: $file_path exists and the checksum matches."
             build_infoPanel "$file_type synced!"  "$file_type checksums match, no sync required" 
         fi
     else
         build_infoPanel "Syncing"  "$file_type doesn't exist locally; syncing with host." 
-        log "GLO::Retro_Quick_Join: $file_path doesn't exist. Syncing."
+        log "GLO::Easy_Netplay: $file_path doesn't exist. Syncing."
         do_sync_file "$file_type" "$file_path" "$file_url"
         
         if [ ! -e "$file_path" ]; then
@@ -251,7 +251,10 @@ build_infoPanel() {
     local title="$1"
     local message="$2"
     
-    infoPanel --title "$title" --message "$message" --auto
+    infoPanel --title "$title" --message "$message" --persistent &
+    sleep 0.5
+    touch /tmp/dismiss_info_panel
+    sync
 }
 
 # If we're currently connected to wifi, save the network ID so we can reconnect after we're done with retroarch - save the IP address and subnet so we can restore these.
@@ -264,13 +267,13 @@ save_wifi_state() {
 
 restore_wifi_state() {
     if [ -z "$old_ipv4" ]; then
-        log "GLO::Retro_Quick_Join: Old IP address not found."
+        log "GLO::Easy_Netplay: Old IP address not found."
     fi
    
     ip_output=$(ip link set wlan0 down 2>&1)
     if [ $? -ne 0 ]; then
-        log "GLO::Retro_Quick_Join: Failed to bring down the interface."
-        log "GLO::Retro_Quick_Join: Output from 'ip link set down' command: $ip_output"
+        log "GLO::Easy_Netplay: Failed to bring down the interface."
+        log "GLO::Easy_Netplay: Output from 'ip link set down' command: $ip_output"
     fi
 
 	ip -4 addr show wlan0 | awk '/inet/ {print $2}' | while IFS= read -r line
@@ -280,14 +283,14 @@ restore_wifi_state() {
 	
     ip_output=$(ip addr add $old_ipv4 dev wlan0 2>&1)
     if [ $? -ne 0 ]; then
-        log "GLO::Retro_Quick_Join: Failed to assign the old IP address."
-        log "GLO::Retro_Quick_Join: Output from 'ip addr add' command: $ip_output"
+        log "GLO::Easy_Netplay: Failed to assign the old IP address."
+        log "GLO::Easy_Netplay: Output from 'ip addr add' command: $ip_output"
     fi
     
     ip_output=$(ip link set wlan0 up 2>&1)
     if [ $? -ne 0 ]; then
-        log "GLO::Retro_Quick_Join: Failed to bring up the interface."
-        log "GLO::Retro_Quick_Join: Output from 'ip link set up' command: $ip_output"
+        log "GLO::Easy_Netplay: Failed to bring up the interface."
+        log "GLO::Easy_Netplay: Output from 'ip link set up' command: $ip_output"
     fi
 }
 
@@ -304,16 +307,16 @@ do_sync_file() {
 
     if [ -e "$file_path" ]; then
         mv "$file_path" "${file_path}_old"
-        log "GLO::Retro_Quick_Join: Existing $file_type file moved to ${file_path}_old"
+        log "GLO::Easy_Netplay: Existing $file_type file moved to ${file_path}_old"
     fi
 
-    log "GLO::Retro_Quick_Join: Starting to download $file_type from $file_url"
+    log "GLO::Easy_Netplay: Starting to download $file_type from $file_url"
     curl -o "$file_path" "ftp://$hostip/$file_url" > /mnt/SDCARD/curl_log.txt 2>&1
 
     if [ $? -eq 0 ]; then
-        log "GLO::Retro_Quick_Join: $file_type download completed"
+        log "GLO::Easy_Netplay: $file_type download completed"
     else
-        log "GLO::Retro_Quick_Join: $file_type download failed"
+        log "GLO::Easy_Netplay: $file_type download failed"
     fi
 }
 
@@ -323,12 +326,12 @@ udhcpc_control() {
 	if pgrep udhcpc > /dev/null; then
 		killall -9 udhcpc
 	fi
-	log "GLO::Retro_Quick_Join: Old DHCP proc killed."
+	log "GLO::Easy_Netplay: Old DHCP proc killed."
 	sleep 1
-	log "GLO::Retro_Quick_Join: Trying to start DHCP"
+	log "GLO::Easy_Netplay: Trying to start DHCP"
 	udhcpc -i wlan0 -s /etc/init.d/udhcpc.script > /dev/null 2>&1 &
 	if is_running udhcpc; then
-		log "GLO::Retro_Quick_Join: DHCP started"
+		log "GLO::Easy_Netplay: DHCP started"
 	else
 		build_infoPanel "DHCP" "Unable to start DHCP client\n unable to continue."
 	fi
@@ -340,7 +343,7 @@ is_running() {
 }
 
 log() {
-    echo "$(date)" $* >> $sysdir/logs/ra_quick_host.log
+    echo "$(date)" $* >> $sysdir/logs/easy_netplay.log
 }
 
 cleanup(){
@@ -362,7 +365,7 @@ cleanup(){
 	)
 	
 	if [ $? -ne 0 ]; then
-		log "GLO::Retro_Quick_Join: Failed to configure the network"
+		log "GLO::Easy_Netplay: Failed to configure the network"
 		cleanup
 	fi
 	
@@ -372,7 +375,7 @@ cleanup(){
 	
 	restore_wifi_state
 		
-	log "GLO::Retro_Quick_Join: Cleanup done"
+	log "GLO::Easy_Netplay: Cleanup done"
 	exit
 }
 

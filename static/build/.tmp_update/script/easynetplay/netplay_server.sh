@@ -21,10 +21,10 @@ export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/p
 check_wifi(){
 ifconfig wlan1 down
 	if ifconfig wlan0 &>/dev/null; then
-		log "GLO::Retro_Quick_Host: Wi-Fi is up already"
+		log "GLO::Easy_Netplay: Wi-Fi is up already"
 		build_infoPanel "WIFI" "Wifi up"
 	else
-		log "GLO::Retro_Quick_Host: Wi-Fi disabled, trying to enable before connecting.."
+		log "GLO::Easy_Netplay: Wi-Fi disabled, trying to enable before connecting.."
 		build_infoPanel "WIFI" "Wifi disabled, starting..." 
 		
 		/customer/app/axp_test wifion
@@ -34,10 +34,10 @@ ifconfig wlan1 down
 		$miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
 		
 		if is_running wpa_supplicant && ifconfig wlan0 > /dev/null 2>&1; then
-			log "GLO::Retro_Quick_Host: WiFi started"
+			log "GLO::Easy_Netplay: WiFi started"
 			build_infoPanel "WIFI" "Wifi started."
 		else
-			log "GLO::Retro_Quick_Host: WiFi started"
+			log "GLO::Easy_Netplay: WiFi started"
 			build_infoPanel "WIFI" "Unable to start WiFi\n unable to continue."
 			sleep 1
 			cleanup
@@ -75,9 +75,9 @@ start_hotspot() {
 	ip route add default via $gateway0addr
 	
 	if is_running hostapd; then
-		log "GLO::Retro_Quick_Host: Started with IP of: $hotspot0addr, subnet of: $subnetmask"
+		log "GLO::Easy_Netplay: Started with IP of: $hotspot0addr, subnet of: $subnetmask"
 	else
-		log "GLO::Retro_Quick_Host: Failed to start, please try turning off/on. If this doesn't resolve the issue reboot your device."
+		log "GLO::Easy_Netplay: Failed to start, please try turning off/on. If this doesn't resolve the issue reboot your device."
 		build_infoPanel "Hotspot" "Failed to start hotspot, exiting.." 
 		sleep 2
 		cleanup
@@ -95,14 +95,14 @@ start_hotspot() {
 # We'll need FTP to host the cookie to the client - use the built in FTP, it allows us to curl (errors on bftpd re: path)
 start_ftp(){
     if is_running bftpd; then
-        log "GLO::Retro_Quick_Host: FTP already running, killing to rebind"
+        log "GLO::Easy_Netplay: FTP already running, killing to rebind"
         bftpd_p=$(ps | grep bftpd | grep -v grep | awk '{for(i=4;i<=NF;++i) printf $i" "}')
         killall -9 bftpd
         killall -9 tcpsvd
         tcpsvd -E 0.0.0.0 21 ftpd -w / &
     else
         tcpsvd -E 0.0.0.0 21 ftpd -w / &
-        log "GLO::Retro_Quick_Host: Starting FTP server"
+        log "GLO::Easy_Netplay: Starting FTP server"
     fi
 }
 
@@ -112,7 +112,7 @@ start_ftp(){
 	# sync
 	# sleep 1
 	# $sysdir/bin/hostapd_cli wps_pbc
-	# log "GLO::Retro_Quick_Host: Starting WPS host"
+	# log "GLO::Easy_Netplay: Starting WPS host"
 # }
 
 # Pull the cookie info that the GLO script has generated (and use it to write the cksum to the cookie so the client has it)
@@ -128,10 +128,10 @@ get_cookie_info() {
             core_size=$(stat -c%s "$host_core")
             if [ "$core_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
                 echo "[coresize]: $core_size" >> "$COOKIE_FILE"
-				log "GLO::Retro_Quick_Host: Writing core size"
+				log "GLO::Easy_Netplay: Writing core size"
             else
                 echo "[corechksum]: $(cksum "$host_core" | cut -f 1 -d ' ')" >> "$COOKIE_FILE"
-				log "GLO::Retro_Quick_Host: Writing core checksum"
+				log "GLO::Easy_Netplay: Writing core checksum"
             fi
         fi
 
@@ -139,14 +139,14 @@ get_cookie_info() {
             rom_size=$(stat -c%s "$host_rom")
             if [ "$rom_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
                 echo "[romsize]: $rom_size" >> "$COOKIE_FILE"
-				log "GLO::Retro_Quick_Host: Writing rom size"
+				log "GLO::Easy_Netplay: Writing rom size"
             else
                 echo "[romchksum]: $(cksum "$host_rom" | cut -f 1 -d ' ')" >> "$COOKIE_FILE"
-				log "GLO::Retro_Quick_Host: Writing rom checksum"
+				log "GLO::Easy_Netplay: Writing rom checksum"
             fi
         fi
     else
-        log "GLO::Retro_Quick_Host: No cookie found!"
+        log "GLO::Easy_Netplay: No cookie found!"
     fi
 }
 
@@ -180,7 +180,7 @@ cleanup(){
 	
 	restore_ftp
 	
-	log "GLO::Retro_Quick_Host: Cleanup done"
+	log "GLO::Easy_Netplay: Cleanup done"
  	exit
 	
 }
@@ -193,11 +193,14 @@ build_infoPanel() {
     local title="$1"
     local message="$2"
     
-    infoPanel --title "$title" --message "$message" --auto
+    infoPanel --title "$title" --message "$message" --persistent &
+    sleep 0.5
+    touch /tmp/dismiss_info_panel
+    sync
 }
 
 restore_ftp(){
-    log "GLO::Retro_Quick_Host: Restoring original FTP server"
+    log "GLO::Easy_Netplay: Restoring original FTP server"
     $bftpd_p &
 }
 
@@ -215,7 +218,7 @@ is_running() {
 }
 
 log() {
-    echo "$(date)" $* >> $sysdir/logs/ra_quick_host.log
+    echo "$(date)" $* >> $sysdir/logs/easy_netplay.log
 }
 
 #########
