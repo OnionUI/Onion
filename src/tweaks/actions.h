@@ -72,49 +72,9 @@ void action_setLowBatteryAutoSave(void *pt)
     settings.low_battery_autosave = ((ListItem *)pt)->value == 1;
 }
 
-void action_sethttpstate(void *pt)
+void action_setDisableStandby(void *pt)
 {
-    settings.http_state = ((ListItem *)pt)->value == 1;
-}
-
-void action_setsshstate(void *pt)
-{
-    settings.ssh_state = ((ListItem *)pt)->value == 1;
-}
-
-void action_setftpstate(void *pt)
-{
-    settings.ftp_state = ((ListItem *)pt)->value == 1;
-}
-
-void action_settelnetstate(void *pt)
-{
-    settings.telnet_state = ((ListItem *)pt)->value == 1;
-}
-
-void action_sethotspotstate(void *pt)
-{
-    settings.hotspot_state = ((ListItem *)pt)->value == 1;
-}
-
-void action_setntpstate(void *pt)
-{
-    settings.ntp_state = ((ListItem *)pt)->value == 1;
-}
-
-void action_settzselectstate(void *pt)
-{
-    settings.tzselect_state = ((ListItem *)pt)->value;
-}
-
-void action_settelnetauthstate(void* pt)
-{
-    settings.auth_telnet_state = ((ListItem*)pt)->value == 1;
-}
-
-void action_setftpauthstate(void* pt)
-{
-    settings.auth_ftp_state = ((ListItem*)pt)->value == 1;
+    settings.disable_standby = ((ListItem *)pt)->value == 1;
 }
 
 void action_setMenuButtonHaptics(void *pt)
@@ -128,7 +88,7 @@ void action_setMenuButtonKeymap(void *pt)
     static int *dests[] = {
         &settings.mainui_single_press, &settings.mainui_long_press,
         &settings.mainui_double_press, &settings.ingame_single_press,
-        &settings.ingame_long_press,   &settings.ingame_double_press};
+        &settings.ingame_long_press, &settings.ingame_double_press};
     *(dests[item->action_id]) = item->value;
 }
 

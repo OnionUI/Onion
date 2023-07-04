@@ -2,7 +2,7 @@
 
 TARGET=Onion
 VERSION=4.2.0-beta
-RA_SUBVERSION=1.15.0.1
+RA_SUBVERSION=1.15.0.2
 
 ###########################################################
 
@@ -43,11 +43,12 @@ PACKAGES_EMU_DEST   := $(PACKAGES_DIR)/Emu
 PACKAGES_APP_DEST   := $(PACKAGES_DIR)/App
 PACKAGES_RAPP_DEST  := $(PACKAGES_DIR)/RApp
 TEMP_DIR            := $(ROOT_DIR)/cache/temp
+INCLUDE_DIR         := $(ROOT_DIR)/include
 ifeq (,$(GTEST_INCLUDE_DIR))
 GTEST_INCLUDE_DIR = /usr/include/
 endif
 
-TOOLCHAIN := mholdg16/miyoomini-toolchain:latest
+TOOLCHAIN := aemiii91/miyoomini-toolchain:latest
 
 include ./src/common/commands.mk
 
@@ -133,6 +134,8 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/axp && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/pressMenu2Kill && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/pngScale && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/libgamename && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/gameNameList && BUILD_DIR=$(BIN_DIR) make
 # Build dependencies for installer
 	@mkdir -p $(INSTALLER_DIR)/bin
 	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(INSTALLER_DIR)/bin/ VERSION=$(VERSION) make
@@ -140,6 +143,10 @@ core: $(CACHE)/.setup
 	@cp $(BIN_DIR)/batmon $(INSTALLER_DIR)/bin/
 	@cp $(BIN_DIR)/detectKey $(INSTALLER_DIR)/bin/
 	@cp $(BIN_DIR)/infoPanel $(INSTALLER_DIR)/bin/
+	@cp $(BIN_DIR)/gameNameList $(INSTALLER_DIR)/bin/
+	@cp $(BIN_DIR)/7z $(INSTALLER_DIR)/bin/
+# Overrider miyoo libraries
+	@cp $(BIN_DIR)/libgamename.so $(BUILD_DIR)/miyoo/lib/
 
 apps: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
@@ -183,22 +190,22 @@ dist: build
 	@$(ECHO) $(PRINT_RECIPE)
 # Package configs
 	@cp -R $(TEMP_DIR)/configs/Saves/CurrentProfile/ $(TEMP_DIR)/configs/Saves/GuestProfile
-	@cd $(TEMP_DIR)/configs && zip -rq $(BUILD_DIR)/.tmp_update/config/configs.pak .
+	@cd $(TEMP_DIR)/configs && 7z a -r -mtm=off $(BUILD_DIR)/.tmp_update/config/configs.pak . -bsp0 -bso0
 	@rm -rf $(TEMP_DIR)/configs
 	@rmdir $(TEMP_DIR)
 # Package RetroArch separately
-	@cd $(BUILD_DIR) && zip -rq retroarch.pak RetroArch
+	@cd $(BUILD_DIR) && 7z a -r -mtm=off retroarch.pak RetroArch -bsp0 -bso0
 	@mkdir -p $(DIST_DIR)/RetroArch
 	@mv $(BUILD_DIR)/retroarch.pak $(DIST_DIR)/RetroArch/
 	@echo $(RA_SUBVERSION) > $(DIST_DIR)/RetroArch/ra_package_version.txt
 # Package Onion core
-	@cd $(BUILD_DIR) && zip -rq $(DIST_DIR)/miyoo/app/.tmp_update/onion.pak . -x RetroArch RetroArch/\*
+	@cd $(BUILD_DIR) && 7z a -r -mtm=off $(DIST_DIR)/miyoo/app/.tmp_update/onion.pak . -xr!RetroArch -bsp0 -bso0
 	@$(ECHO) "\n-> [DIST READY!]"
 
 release: dist
 	@$(ECHO) $(PRINT_RECIPE)
 	@rm -f $(RELEASE_DIR)/$(RELEASE_NAME).zip
-	@cd $(DIST_DIR) && zip -rq $(RELEASE_DIR)/$(RELEASE_NAME).zip .
+	@cd $(DIST_DIR) && 7z a -r -mtc=off $(RELEASE_DIR)/$(RELEASE_NAME).zip . -bsp0 -bso0
 	@$(ECHO) "\n-> [RELEASE READY!]"
 
 clean:
@@ -249,6 +256,9 @@ test:
 	@mkdir -p $(BUILD_TEST_DIR)/infoPanel_test_data && cd $(TEST_SRC_DIR) && BUILD_DIR=$(BUILD_TEST_DIR)/ make dev
 	@cp -R $(TEST_SRC_DIR)/infoPanel_test_data $(BUILD_TEST_DIR)/
 	cd $(BUILD_TEST_DIR) && ./test
+
+static-analysis:
+	@cd $(ROOT_DIR) && cppcheck -I $(INCLUDE_DIR) --enable=all $(SRC_DIR)
 
 format:
 	@find ./src -regex '.*\.\(c\|h\|cpp\|hpp\)' -exec clang-format -style=file -i {} \;

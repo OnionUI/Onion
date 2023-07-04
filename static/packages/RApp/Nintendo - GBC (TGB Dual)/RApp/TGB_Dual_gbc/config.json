@@ -1,0 +1,12 @@
+{
+"label":"TGB Dual_gbc",
+"icon":"../../Icons/Default/rapp/TGB_Dual.png",
+"iconsel":"../../Icons/Default/rapp/TGB_Dual.png",
+"launch":"launch.sh",
+"rompath":"../../Roms/GBC",
+"imgpath":"../../Roms/GBC/Imgs",
+"useswap":0,
+"shortname":0,
+"hidebios":1,
+"extlist":"bin|dmg|gb|gbc|zip|7z|cgb"
+}

@@ -9,7 +9,7 @@ extern SDL_Surface *sdl_screen;
 #define HOST_WIDTH_RESOLUTION sdl_screen->w
 #define HOST_HEIGHT_RESOLUTION sdl_screen->h
 
-#define setPixel(buffer, x, y, c)                                              \
+#define setPixel(buffer, x, y, c) \
     *((uint16_t *restrict)buffer + ((x) + (y)*HOST_WIDTH_RESOLUTION)) = c;
 
 static int32_t isOutlinePixel(uint8_t *charfont, int32_t x, int32_t y)

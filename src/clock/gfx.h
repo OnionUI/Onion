@@ -25,7 +25,8 @@ extern struct fb_var_screeninfo vinfo;
 //			:  when NOWAIT, do not clear/write source surface
 // immediately after Flip 			:  if absolutely necessary, use
 // GFX_WaitAllDone() before write (or GFX_FlipWait())
-enum { GFX_BLOCKING = 1, GFX_FLIPWAIT = 2 };
+enum { GFX_BLOCKING = 1,
+       GFX_FLIPWAIT = 2 };
 
 //	GFX Init	Init, call after SDL_Init()
 void GFX_Init(void);

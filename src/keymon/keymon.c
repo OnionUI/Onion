@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "system/axp.h"
 #include "system/battery.h"
 #include "system/device_model.h"
 #include "system/keymap_hw.h"
@@ -43,9 +44,9 @@
 
 uint32_t suspendpid[PIDMAX];
 
-const int KONAMI_CODE[] = {HW_BTN_UP,   HW_BTN_UP,    HW_BTN_DOWN, HW_BTN_DOWN,
+const int KONAMI_CODE[] = {HW_BTN_UP, HW_BTN_UP, HW_BTN_DOWN, HW_BTN_DOWN,
                            HW_BTN_LEFT, HW_BTN_RIGHT, HW_BTN_LEFT, HW_BTN_RIGHT,
-                           HW_BTN_B,    HW_BTN_A};
+                           HW_BTN_B, HW_BTN_A};
 const int KONAMI_CODE_LENGTH = sizeof(KONAMI_CODE) / sizeof(KONAMI_CODE[0]);
 
 void takeScreenshot(void)
@@ -173,14 +174,7 @@ void shutdown(void)
     system_clock_get();
     system_clock_save();
     sync();
-
-    if (DEVICE_ID == MIYOO283) {
-        reboot(RB_AUTOBOOT);
-    }
-    else if (DEVICE_ID == MIYOO354) {
-        system("poweroff");
-    }
-
+    system("shutdown");
     while (1)
         pause();
     exit(0);
@@ -318,6 +312,12 @@ int main(void)
     log_setName("keymon");
 
     getDeviceModel();
+
+    if (DEVICE_ID == 354) {
+        // set hardware poweroff time to 10s
+        axp_write(0x36, axp_read(0x36) | 3);
+    }
+
     settings_init();
 
     // Set Initial Volume / Brightness
@@ -408,15 +408,12 @@ int main(void)
                     power_pressed = true;
                 if (!comboKey_menu && val == REPEAT) {
                     repeat_power++;
-                    if (repeat_power == 7)
+                    if (repeat_power == 7 && !settings.disable_standby) {
                         deepsleep(); // 0.5sec deepsleep
-                    else if (repeat_power == REPEAT_SEC(5)) {
+                    }
+                    else if (repeat_power >= REPEAT_SEC(5)) {
                         short_pulse();
                         remove(CMD_TO_RUN_PATH);
-                        suspend(2); // 5sec kill processes
-                    }
-                    else if (repeat_power >= REPEAT_SEC(10)) {
-                        short_pulse();
                         shutdown(); // 10sec force shutdown
                     }
                     break;
@@ -424,10 +421,17 @@ int main(void)
                 if (val == RELEASED) {
                     // suspend
                     if (power_pressed && repeat_power < 7) {
-                        if (comboKey_menu)
+                        if (comboKey_menu) {
                             takeScreenshot();
-                        else
-                            turnOffScreen();
+                        }
+                        else {
+                            if (settings.disable_standby) {
+                                deepsleep();
+                            }
+                            else {
+                                turnOffScreen();
+                            }
+                        }
                     }
                     power_pressed = false;
                 }
@@ -470,6 +474,8 @@ int main(void)
                             setVolumeRaw(0, -3);
                         break;
                     case SELECT:
+                        if (DEVICE_ID == 354)
+                            break; // disable this shortcut for MMP
                         // SELECT + L2 : brightness down
                         if (settings.brightness > 0) {
                             settings_setBrightness(settings.brightness - 1,
@@ -504,6 +510,8 @@ int main(void)
                             setVolumeRaw(0, +3);
                         break;
                     case SELECT:
+                        if (DEVICE_ID == 354)
+                            break; // disable this shortcut for MMP
                         // SELECT + R2 : brightness up
                         if (settings.brightness < MAX_BRIGHTNESS) {
                             settings_setBrightness(settings.brightness + 1,

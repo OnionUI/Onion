@@ -13,7 +13,7 @@
 #define MAIN_UI_SETTINGS "/appconfigs/system.json"
 #define CMD_TO_RUN_PATH "/mnt/SDCARD/.tmp_update/cmd_to_run.sh"
 #define RETROARCH_CONFIG "/mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg"
-#define HISTORY_PATH                                                           \
+#define HISTORY_PATH \
     "/mnt/SDCARD/Saves/CurrentProfile/lists/content_history.lpl"
 #define DEFAULT_THEME_PATH "/mnt/SDCARD/Themes/Silky by DiMo/"
 
@@ -45,11 +45,13 @@ static struct settings_s {
     bool telnet_state;
     bool hotspot_state;
     bool ntp_state;
+    bool ntp_wait;
     bool auth_telnet_state;
     bool auth_ftp_state;
+    bool auth_http_state;
+    bool auth_ssh_state;
     int low_battery_warn_at;
     int time_skip;
-    int tzselect_state;
     int vibration;
     int startup_tab;
     int startup_application;
@@ -59,6 +61,7 @@ static struct settings_s {
     int ingame_single_press;
     int ingame_long_press;
     int ingame_double_press;
+    bool disable_standby;
 
     char mainui_button_x[JSON_STRING_LEN];
     char mainui_button_y[JSON_STRING_LEN];
@@ -91,20 +94,22 @@ void _settings_reset(void)
     settings.menu_button_haptics = false;
     settings.low_battery_autosave = true;
     settings.low_battery_warning = true;
-    settings.low_battery_warn_at = 15;
+    settings.low_battery_warn_at = 10;
     settings.time_skip = 4;
     settings.vibration = 2;
     settings.startup_tab = 0;
     settings.startup_application = 0;
     settings.http_state = false;
+    settings.auth_http_state = false;
     settings.ssh_state = false;
     settings.ftp_state = false;
     settings.telnet_state = false;
     settings.hotspot_state = false;
     settings.ntp_state = false;
+    settings.ntp_wait = false;
     settings.auth_ftp_state = false;
-    settings.tzselect_state = 12;
-    settings.auth_telnet_state = true;
+    settings.auth_ssh_state = false;
+    settings.auth_telnet_state = false;
     // Menu button actions
     settings.mainui_single_press = 1;
     settings.mainui_long_press = 0;
@@ -112,6 +117,7 @@ void _settings_reset(void)
     settings.ingame_single_press = 1;
     settings.ingame_long_press = 2;
     settings.ingame_double_press = 3;
+    settings.disable_standby = false;
     memset(settings.mainui_button_x, 0, JSON_STRING_LEN);
     memset(settings.mainui_button_y, 0, JSON_STRING_LEN);
 }
@@ -174,15 +180,19 @@ void settings_load(void)
     settings.show_recents = config_flag_get(".showRecents");
     settings.show_expert = config_flag_get(".showExpert");
     settings.low_battery_autosave = !config_flag_get(".noLowBatteryAutoSave");
-    settings.http_state = config_flag_get(".HTTPState");
-    settings.ssh_state = config_flag_get(".SSHState");
+    settings.http_state = config_flag_get(".httpState");
+    settings.ssh_state = config_flag_get(".sshState");
     settings.telnet_state = config_flag_get(".telnetState");
     settings.ftp_state = config_flag_get(".ftpState");
-    settings.hotspot_state = config_flag_get(".HotspotState");
+    settings.hotspot_state = config_flag_get(".hotspotState");
+    settings.ntp_state = config_flag_get(".ntpState");
+    settings.ntp_wait = config_flag_get(".ntpWait");
     settings.auth_telnet_state = config_flag_get(".authtelnetState");
-    settings.ntp_state = config_flag_get(".NTPState");
     settings.auth_ftp_state = config_flag_get(".authftpState");
+    settings.auth_http_state = config_flag_get(".authhttpState");
+    settings.auth_ssh_state = config_flag_get(".authsshState");
     settings.mute = config_flag_get(".muteVolume");
+    settings.disable_standby = config_flag_get(".disableStandby");
 
     if (config_flag_get(
             ".noBatteryWarning")) // flag is deprecated, but keep compatibility
@@ -192,7 +202,6 @@ void settings_load(void)
             ".noVibration")) // flag is deprecated, but keep compatibility
         settings.vibration = 0;
 
-    config_get("tzselect", "%d", &settings.tzselect_state);
     config_get("battery/warnAt", "%d", &settings.low_battery_warn_at);
     config_get("startup/app", "%d", &settings.startup_application);
     config_get("startup/addHours", "%d", &settings.time_skip);
@@ -286,16 +295,19 @@ void settings_save(void)
     config_flag_set(".showRecents", settings.show_recents);
     config_flag_set(".showExpert", settings.show_expert);
     config_flag_set(".noLowBatteryAutoSave", !settings.low_battery_autosave);
-    config_flag_set(".HTTPState", settings.http_state);
-    config_flag_set(".SSHState", settings.ssh_state);
+    config_flag_set(".httpState", settings.http_state);
+    config_flag_set(".sshState", settings.ssh_state);
     config_flag_set(".ftpState", settings.ftp_state);
     config_flag_set(".telnetState", settings.telnet_state);
-    config_flag_set(".HotspotState", settings.hotspot_state);
-    config_flag_set(".NTPState", settings.ntp_state);
+    config_flag_set(".hotspotState", settings.hotspot_state);
+    config_flag_set(".ntpState", settings.ntp_state);
+    config_flag_set(".ntpWait", settings.ntp_wait);
     config_flag_set(".authtelnetState", settings.auth_telnet_state);
     config_flag_set(".authftpState", settings.auth_ftp_state);
+    config_flag_set(".authhttpState", settings.auth_http_state);
+    config_flag_set(".authsshState", settings.auth_ssh_state);
     config_flag_set(".muteVolume", settings.mute);
-    config_setNumber("tzselect", settings.tzselect_state);
+    config_flag_set(".disableStandby", settings.disable_standby);
     config_setNumber("battery/warnAt", settings.low_battery_warn_at);
     config_setNumber("startup/app", settings.startup_application);
     config_setNumber("startup/addHours", settings.time_skip);

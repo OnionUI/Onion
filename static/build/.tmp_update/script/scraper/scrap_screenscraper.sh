@@ -299,11 +299,12 @@ ScraperConfigFile=/mnt/SDCARD/.tmp_update/config/scraper.json
 if [ -f "$ScraperConfigFile" ]; then
 
     config=$(cat $ScraperConfigFile)
-
+	
     userSS=$(echo "$config" | jq -r '.screenscraper_username')
     passSS=$(echo "$config" | jq -r '.screenscraper_password')
     ScrapeInBackground=$(echo "$config" | jq -r '.ScrapeInBackground')
-
+	u=$(echo "U2FsdGVkX18PKpoEvELyE+5xionDX8iRxAIxJj4FN1U=" | openssl enc -aes-256-cbc -d -a -pbkdf2 -iter 10000 -salt -pass pass:"3x0tVD3jZvElZWRt3V67QQ==")
+	p=$(echo "U2FsdGVkX1/ydn2FWrwYcFVc5gVYgc5kVaJ5jDOeOKE=" |openssl enc -aes-256-cbc -d -a -pbkdf2 -iter 10000 -salt -pass pass:"RuA29ch3zVoodAItmvKKmZ+4Au+5owgvV/ztqRu4NjI=")
 
     if [ "$userSS" = "null" ] || [ "$passSS" = "null" ] || [ "$userSS" = "" ] || [ "$passSS" = "" ]; then
         userStored=false
@@ -415,8 +416,7 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 		let Scrap_notrequired++;
 	else
 
-        url="https://www.screenscraper.fr/api2/jeuInfos.php?devid=Schmurtz&devpassword=KH0ocJ3xt5N&softname=onion&output=json&ssid=${userSS}&sspassword=${passSS}&crc=&systemeid=${ssID}&romtype=rom&romnom=${romNameTrimmed}.zip"
-        echo $url    # for debugging
+        url="https://www.screenscraper.fr/api2/jeuInfos.php?devid=${u#???}&devpassword=${p%??}&softname=onion&output=json&ssid=${userSS}&sspassword=${passSS}&crc=&systemeid=${ssID}&romtype=rom&romnom=${romNameTrimmed}.zip"
         # TODO : search by CRC/MD5/shal or gameid
         # TODO : managing multithread for users who have it.
         

@@ -42,7 +42,7 @@
 
 #define ROM_SCREENS_DIR "/mnt/SDCARD/Saves/CurrentProfile/romScreens"
 #define ROM_DB_PATH "/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db"
-#define HISTORY_PATH                                                           \
+#define HISTORY_PATH \
     "/mnt/SDCARD/Saves/CurrentProfile/lists/content_history.lpl"
 
 #define MAXFILENAMESIZE 250
