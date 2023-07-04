@@ -56,14 +56,13 @@ check() {
     check_telnetstate 
     check_ntpstate
     check_httpstate
-	check_ntpstate
     check_smbdstate
 	
-	if flag_enabled ntpWait; then
-			sync_time
-		else
-			sync_time &
-	fi
+	  if flag_enabled ntpWait; then
+        sync_time
+    else
+        sync_time &
+	  fi
 }
 
 # Function to help disable and kill off all processes
@@ -340,7 +339,7 @@ check_httpstate() {
 # Called by above function on boot or when auth state is toggled in tweaks
 http_authed() {
 if flag_enabled httpState; then
-	 if [ "$(echo_enabled authhttpState)" -eq 1 ]; then 
+	 if flag_enabled authhttpState; then 
 			killall -9 filebrowser
 			$filebrowserbin config set --auth.method=json -d $filebrowserdb >> $sysdir/logs/http.log
 		else
@@ -416,7 +415,7 @@ check_hotspotstate() {
         else
 			start_hotspot &
         fi
-    fi
+    fi 
 }
 
 # This is the fallback! 
@@ -424,47 +423,102 @@ check_hotspotstate() {
 # This will work but it will not export the TZ var across all opens shells so you may find the hwclock (and clock app, retroarch time etc) are correct but terminal time is not.
 # It does set TZ on the tty that Main is running in so this is ok
 
-sync_time() { # Run a sync at startup once, but only if we have internet
-	if [ -f "$sysdir/config/.ntpState" ]; then
+sync_time() {
+	if [ -f "$sysdir/config/.ntpState" ] && wifi_enabled; then
+		attempts=0
+		max_attempts=20
+		
 		while true; do
 			if [ ! -f "/tmp/ntp_run_once" ]; then
 				break
 			fi
 			
 			if ping -q -c 1 google.com > /dev/null 2>&1 ; then
-				get_time
-				rm /tmp/ntp_run_once
+				if get_time; then
+                    touch /tmp/ntp_synced
+                fi
 				break
 			fi
-			sleep 0.5
+
+			attempts=$((attempts+1))
+			if [ $attempts -eq $max_attempts ]; then
+				log "NTPwait: Ran out of time before we could sync, stopping."
+				break
+			fi
+			sleep 1
 		done
+		rm /tmp/ntp_run_once
 	fi
 }
 
-check_ntpstate() { # This function checks if the timezone has changed, we call this in the main loop. 
+check_ntpstate() { # This function checks if the timezone has changed, we call this in the main loop.
     if flag_enabled ntpState && wifi_enabled && [ ! -f "$sysdir/config/.hotspotState" ] ; then
-        current_tz=$(check_tzid)
-		get_time
-        if [ "$current_tz" != "$old_tz" ]; then
-            restart_ntp &
+        set_tzid
+        if [ ! -f /tmp/ntp_synced ] && get_time; then
+            touch /tmp/ntp_synced
         fi
     fi
 }
 
+get_time() { # handles 2 types of network time, instant from an API or longer from an NTP server, if the instant API checks fails it will fallback to the longer ntp
+    log "NTP: started time update"
+    response=`curl -s --connect-timeout 3 http://worldtimeapi.org/api/ip.txt`
+    utc_datetime=`echo "$response" | grep -o 'utc_datetime: [^.]*' | cut -d ' ' -f2 | sed "s/T/ /"`
+    if ! flag_enabled "manual_tz"; then
+        utc_offset="UTC$(echo "$response" | grep -o 'utc_offset: [^.]*' | cut -d ' ' -f2)"
+    fi
+    
+    if [ -z "$utc_datetime" ]; then
+        log "NTP: Failed to get time from worldtimeapi.org, trying timeapi.io"
+        utc_datetime=`curl -s -k --connect-timeout 5 https://timeapi.io/api/Time/current/zone?timeZone=UTC | grep -o '"dateTime":"[^.]*' | cut -d '"' -f4 | sed 's/T/ /'`
+        if ! flag_enabled "manual_tz"; then
+            ip_address=`curl -s -k --connect-timeout 5 https://api.ipify.org`
+            utc_offset_seconds=$(curl -s -k --connect-timeout 5 https://timeapi.io/api/TimeZone/ip?ipAddress=$ip_address | jq '.currentUtcOffset.seconds')
+            utc_offset="$(convert_seconds_to_utc_offset $utc_offset_seconds)"
+        fi
+    fi
 
-restart_ntp() { # If we detect that the timezone has changed we'll restart the ntp process to reset it in the main shell (runtime.sh shell)
-    export old_tz=$(check_tzid)
-    set_tzid
-    log "NTP: Starting NTP with TZ of $TZ"
-    get_time
-    log "NTP: TZ set to $TZ, Time set to: $(date) and merged to hwclock, which shows: $(hwclock)"
+    if [ ! -z "$utc_datetime" ]; then
+        if [ ! -z "$utc_offset" ]; then
+            echo "$utc_offset" | sed 's/\+/_/' | sed 's/-/+/' | sed 's/_/-/' > $sysdir/config/.tz
+            cp $sysdir/config/.tz $sysdir/config/.tz_sync
+            sync
+            set_tzid
+        fi
+        if date -u -s "$utc_datetime" >/dev/null 2>&1; then
+            hwclock -w
+            return 0
+        fi
+    fi
+
+    log "NTP: Failed to get time via timeapi.io as well, falling back to NTP."
+    rm $sysdir/config/.tz_sync 2> /dev/null
+
+    ntpdate -t 3 -u time.google.com
+    if [ $? -eq 0 ]; then
+        return 0
+    fi
+
+    log "NTP: Failed to synchronize time using NTPdate, both methods have failed."
+    return 1
 }
  
 # Utility functions
 
-check_tzid() {
-    tzid=$(cat "$sysdir/config/.tz") 
-    echo "$tzid"
+convert_seconds_to_utc_offset() {
+    seconds=$(($1))
+    if [ $seconds -ne 0 ]; then
+        printf "UTC%s%02d%s" \
+            `[[ $seconds -lt 0 ]] && echo -n "-" || echo -n "+"` \
+            $(abs $(($seconds / 3600))) \
+            `[[ $(($seconds % 3600)) -eq 0 ]] && echo -n ":00" || echo -n ":30"`
+    else
+        echo -n "UTC"
+    fi
+}
+
+abs() { 
+    [[ $(($@)) -lt 0 ]] && echo "$((($@) * -1))" || echo "$(($@))"
 }
 
 set_tzid() {    
@@ -482,34 +536,9 @@ is_noauth_enabled() { # Used to check authMethod val for HTTPFS
 	fi
 }
 
-echo_enabled() {
-    flag="$1"
-    if [ -f "$sysdir/config/.$flag" ]; then
-        echo 1
-    else
-        echo 0
-    fi
-}
-
 print_usage() {
     echo "Usage: $0 {check|ftp|telnet|http|ssh|ntp|hotspot|smbd|disableall} {toggle|authed} - {ntp|hotspot|smbd} only accept toggle."
     exit 1
-}
-
-get_time() { # handles 2 types of NTP, instant from an API or longer from a time server, if the instant API check fails it will fallback to the longer ntp
-    response=$(curl -s http://worldtimeapi.org/api/ip.txt | grep -o 'utc_datetime: [^,]*' | cut -d ' ' -f 2)
-    if [ -z "$response" ]; then
-        log "NTP: Failed to get time from worldtimeapi.org, falling back to NTP."
-        ntpdate -u time.google.com
-    else
-        utc_time=$(echo "$response" | cut -d. -f1 | sed "s/T/ /")
-        if date -u -s "$utc_time" >/dev/null 2>&1; then
-            hwclock -w
-        else
-            log "NTP: Failed to parse time from worldtimeapi.org, falling back to NTP."
-            ntpdate -u time.google.com
-        fi
-    fi
 }
 
 wifi_enabled() {

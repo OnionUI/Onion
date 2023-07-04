@@ -39,18 +39,6 @@ static struct settings_s {
     bool menu_button_haptics;
     bool low_battery_autosave;
     bool low_battery_warning;
-    bool smbd_state;
-    bool http_state;
-    bool ssh_state;
-    bool ftp_state;
-    bool telnet_state;
-    bool hotspot_state;
-    bool ntp_state;
-    bool ntp_wait;
-    bool auth_telnet_state;
-    bool auth_ftp_state;
-    bool auth_http_state;
-    bool auth_ssh_state;
     int low_battery_warn_at;
     int time_skip;
     int vibration;
@@ -100,18 +88,6 @@ void _settings_reset(void)
     settings.vibration = 2;
     settings.startup_tab = 0;
     settings.startup_application = 0;
-    settings.smbd_state = false;
-    settings.http_state = false;
-    settings.auth_http_state = false;
-    settings.ssh_state = false;
-    settings.ftp_state = false;
-    settings.telnet_state = false;
-    settings.hotspot_state = false;
-    settings.ntp_state = false;
-    settings.ntp_wait = false;
-    settings.auth_ftp_state = false;
-    settings.auth_ssh_state = false;
-    settings.auth_telnet_state = false;
     // Menu button actions
     settings.mainui_single_press = 1;
     settings.mainui_long_press = 0;
@@ -182,43 +158,27 @@ void settings_load(void)
     settings.show_recents = config_flag_get(".showRecents");
     settings.show_expert = config_flag_get(".showExpert");
     settings.low_battery_autosave = !config_flag_get(".noLowBatteryAutoSave");
-    settings.smbd_state = config_flag_get(".smbdState");
-    settings.http_state = config_flag_get(".httpState");
-    settings.ssh_state = config_flag_get(".sshState");
-    settings.telnet_state = config_flag_get(".telnetState");
-    settings.ftp_state = config_flag_get(".ftpState");
-    settings.hotspot_state = config_flag_get(".hotspotState");
-    settings.ntp_state = config_flag_get(".ntpState");
-    settings.ntp_wait = config_flag_get(".ntpWait");
-    settings.auth_telnet_state = config_flag_get(".authtelnetState");
-    settings.auth_ftp_state = config_flag_get(".authftpState");
-    settings.auth_http_state = config_flag_get(".authhttpState");
-    settings.auth_ssh_state = config_flag_get(".authsshState");
     settings.mute = config_flag_get(".muteVolume");
     settings.disable_standby = config_flag_get(".disableStandby");
 
-    if (config_flag_get(
-            ".noBatteryWarning")) // flag is deprecated, but keep compatibility
+    if (config_flag_get(".noBatteryWarning")) // flag is deprecated, but keep compatibility
         settings.low_battery_warn_at = 0;
 
-    if (config_flag_get(
-            ".noVibration")) // flag is deprecated, but keep compatibility
+    if (config_flag_get(".noVibration")) // flag is deprecated, but keep compatibility
         settings.vibration = 0;
 
-    config_get("battery/warnAt", "%d", &settings.low_battery_warn_at);
-    config_get("startup/app", "%d", &settings.startup_application);
-    config_get("startup/addHours", "%d", &settings.time_skip);
-    config_get("vibration", "%d", &settings.vibration);
-    config_get("startup/tab", "%d", &settings.startup_tab);
+    config_get("battery/warnAt", CONFIG_INT, &settings.low_battery_warn_at);
+    config_get("startup/app", CONFIG_INT, &settings.startup_application);
+    config_get("startup/addHours", CONFIG_INT, &settings.time_skip);
+    config_get("vibration", CONFIG_INT, &settings.vibration);
+    config_get("startup/tab", CONFIG_INT, &settings.startup_tab);
 
-    if (config_flag_get(
-            ".menuInverted")) { // flag is deprecated, but keep compatibility
+    if (config_flag_get(".menuInverted")) { // flag is deprecated, but keep compatibility
         settings.ingame_single_press = 2;
         settings.ingame_long_press = 1;
     }
 
-    if (config_flag_get(
-            ".noGameSwitcher")) { // flag is deprecated, but keep compatibility
+    if (config_flag_get(".noGameSwitcher")) { // flag is deprecated, but keep compatibility
         settings.mainui_single_press = 0;
         settings.ingame_single_press = 2;
         settings.ingame_long_press = 0;
@@ -298,18 +258,6 @@ void settings_save(void)
     config_flag_set(".showRecents", settings.show_recents);
     config_flag_set(".showExpert", settings.show_expert);
     config_flag_set(".noLowBatteryAutoSave", !settings.low_battery_autosave);
-    config_flag_set(".smbdState", settings.smbd_state);
-    config_flag_set(".httpState", settings.http_state);
-    config_flag_set(".sshState", settings.ssh_state);
-    config_flag_set(".ftpState", settings.ftp_state);
-    config_flag_set(".telnetState", settings.telnet_state);
-    config_flag_set(".hotspotState", settings.hotspot_state);
-    config_flag_set(".ntpState", settings.ntp_state);
-    config_flag_set(".ntpWait", settings.ntp_wait);
-    config_flag_set(".authtelnetState", settings.auth_telnet_state);
-    config_flag_set(".authftpState", settings.auth_ftp_state);
-    config_flag_set(".authhttpState", settings.auth_http_state);
-    config_flag_set(".authsshState", settings.auth_ssh_state);
     config_flag_set(".muteVolume", settings.mute);
     config_flag_set(".disableStandby", settings.disable_standby);
     config_setNumber("battery/warnAt", settings.low_battery_warn_at);

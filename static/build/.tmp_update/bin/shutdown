@@ -25,7 +25,6 @@ kill_hooked_tasks() {
 
 if [ "$0" = "/tmp/_shutdown" ]; then
 
-	fuser -m /mnt/SDCARD >> /appconfigs/shutdown.log
 	killall -9 main # mandatory to avoid the suppression of .tmp_update !
 	killall -9 updater
 	killall -9 runtime.sh
