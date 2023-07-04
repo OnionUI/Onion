@@ -169,10 +169,6 @@ cleanup(){
 	if is_running tcpsvd; then
 		killall -9 tcpsvd
 	fi
-	
-	if is_running retroarch; then
-		killall -9 retroarch
-	fi
 		
 	ifconfig wlan1 down
 	
@@ -194,9 +190,9 @@ build_infoPanel() {
     local message="$2"
     
     infoPanel --title "$title" --message "$message" --persistent &
-    sleep 0.5
     touch /tmp/dismiss_info_panel
     sync
+    sleep 0.5
 }
 
 restore_ftp(){

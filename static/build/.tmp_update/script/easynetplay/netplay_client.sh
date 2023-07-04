@@ -252,9 +252,29 @@ build_infoPanel() {
     local message="$2"
     
     infoPanel --title "$title" --message "$message" --persistent &
-    sleep 0.5
     touch /tmp/dismiss_info_panel
     sync
+    sleep 0.5
+}
+
+confirm_join_panel() {
+    local title="$1"
+    local message="$2"
+    
+    infoPanel -t "$title" -m "$message"
+    retcode=$?
+
+    echo "retcode: $retcode"
+
+    if [ $retcode -ne 0 ]; then
+        build_infoPanel "Cancelled" "User cancelled, exiting."
+        cleanup
+        exit 1
+    fi
+}
+
+stripped_game_name(){
+    export game_name=$(awk -F'/' '/\[rom\]:/ {print $NF}' /mnt/SDCARD/RetroArch/retroarch.cookie.client | sed 's/\(.*\)\..*/\1/')
 }
 
 # If we're currently connected to wifi, save the network ID so we can reconnect after we're done with retroarch - save the IP address and subnet so we can restore these.
@@ -347,10 +367,7 @@ log() {
 }
 
 cleanup(){
-	if is_running retroarch; then
-		killall -9 retroarch
-	fi
-	
+
 	if is_running infoPanel; then
 		killall -9 infoPanel
 	fi
@@ -392,6 +409,8 @@ lets_go(){
 	read_cookie
 	sync_file Rom "$rom" "$romchksum" "$rom_url"
 	sync_file Core "$core" "$corechksum" "$core_url"
+    stripped_game_name
+    confirm_join_panel "Join now?" "$game_name"
 	start_retroarch
 	cleanup
 	
