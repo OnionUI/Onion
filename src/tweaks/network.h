@@ -139,7 +139,7 @@ void network_setSshAuthState(void *pt)
 
 void network_wpsConnect(void *pt)
 {
-    system("sh /mnt/SDCARD/.tmp_update/script/wpsclient.sh");
+    system("sh " NET_SCRIPT_PATH "/wpsclient.sh");
 }
 
 void network_setTzSelectState(void *pt)
@@ -161,9 +161,8 @@ void network_setTzSelectState(void *pt)
 
     setenv("TZ", utc_str, 1);
     tzset();
-    config_setString(".tz", utc_str);
 
-    temp_flag_set("timezone_update", true);
+    config_setString(".tz", utc_str);
     sync();
 }
 

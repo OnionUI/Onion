@@ -415,6 +415,9 @@ maybe_remove_retroarch() {
         if [ -d .retroarch/overlay ]; then
             mv .retroarch/overlay $tempdir/
         fi
+        if [ -d .retroarch/filters ]; then
+            mv .retroarch/filters $tempdir/
+        fi
         if [ -d .retroarch/thumbnails ]; then
             mv .retroarch/thumbnails $tempdir/
         fi
