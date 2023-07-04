@@ -24,10 +24,11 @@
 #define NET_SCRIPT_PATH "/mnt/SDCARD/.tmp_update/script/network"
 
 static struct network_s {
+    bool smbd;
     bool http;
     bool ssh;
-    bool ftp;
     bool telnet;
+    bool ftp;
     bool hotspot;
     bool ntp;
     bool ntp_wait;
@@ -43,6 +44,7 @@ void network_loadState(void)
 {
     if (network_state.loaded)
         return;
+    network_state.smbd = config_flag_get(".smbdState");
     network_state.http = config_flag_get(".httpState");
     network_state.ssh = config_flag_get(".sshState");
     network_state.telnet = config_flag_get(".telnetState");
@@ -151,9 +153,8 @@ void network_setNtpWaitState(void *pt)
 
 void network_setSmbdState(void *pt)
 {
-    config_flag_set(".smbdState", ((ListItem *)pt)->value == 1);
-    settings.smbd_state = ((ListItem *)pt)->value == 1;
-    network_setServiceState("smbd");
+    network_setState(&network_state.smbd, ".smbdState", ((ListItem *)pt)->value);
+    network_execServiceState("smbd", false);
 }
 
 void network_setTelnetAuthState(void *pt)
@@ -392,7 +393,7 @@ void menu_network(void *_)
                          .label = "Samba: Network file share",
                          .item_type = TOGGLE,
                          .disabled = !settings.wifi_on,
-                         .value = (int)settings.smbd_state,
+                         .value = (int)network_state.smbd,
                          .action = network_setSmbdState});
         list_addItem(&_menu_network,
                      (ListItem){
