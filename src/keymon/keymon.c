@@ -408,7 +408,7 @@ int main(void)
                     power_pressed = true;
                 if (!comboKey_menu && val == REPEAT) {
                     repeat_power++;
-                    if (repeat_power == 7 && !settings.disable_standby) {
+                    if (repeat_power == 7) {
                         deepsleep(); // 0.5sec deepsleep
                     }
                     else if (repeat_power >= REPEAT_SEC(5)) {

@@ -38,6 +38,9 @@ main() {
     
     # Make sure MainUI doesn't show charging animation
     touch /tmp/no_charging_ui
+	
+	# Loop breaker for NTP
+	touch /tmp/ntp_run_once
 
     cd $sysdir
     bootScreen "Boot"
@@ -63,7 +66,7 @@ main() {
 
     # Bind arcade name library to customer path
     mount -o bind /mnt/SDCARD/miyoo/lib/libgamename.so /customer/lib/libgamename.so
-
+	
 	if [ -f "$sysdir/config/filebrowser/first.run" ]; then
 		# Set filebrowser branding to "Onion" and apply custom theme
 		$sysdir/bin/filebrowser config set --branding.name "Onion" -d $sysdir/config/filebrowser/filebrowser.db
@@ -71,13 +74,12 @@ main() {
 		
 		rm "$sysdir/config/filebrowser/first.run"
 	fi
-	
-    start_networking
 
+    start_networking
+		
     # Auto launch
     if [ ! -f $sysdir/config/.noAutoStart ]; then
-        state_change
-        check_game
+        state_change check_game
     else
         rm -f "$sysdir/cmd_to_run.sh" 2> /dev/null
     fi
@@ -96,42 +98,24 @@ main() {
         touch /tmp/run_advmenu
     fi
 
-    state_change
-    check_switcher
+    state_change check_switcher
     set_startup_tab
-
+	
     # Main runtime loop
     while true; do
-        state_change
-        check_main_ui
-
-        check_networking  		
-        ntp_updater
-		
-        state_change
-        check_game_menu
-
-        state_change
-        check_game
-        
-		check_networking 
-		ntp_updater
-		
-        state_change
-        check_switcher
+        state_change check_main_ui
+        state_change check_game_menu
+        state_change check_game
+        state_change check_switcher
     done
 }
 
-ntp_updater() {
-	if [ -f /tmp/time_update ]; then
-		export TZ=$(cat "$sysdir/config/T.Z")
-		rm /tmp/time_update
-	fi
-}
-
 state_change() {
+    runifnecessary "keymon" keymon
+    check_networking
     touch /tmp/state_changed
     sync
+    eval "$1"
 }
 
 clear_logs() {
@@ -523,7 +507,9 @@ update_time() {
         hours=`cat $sysdir/config/startup/addHours`
     fi
     addTime=$(($hours * 3600))
-    currentTime=$(($currentTime + $addTime))
+    if [ ! -f $sysdir/config/.ntpState ]; then
+        currentTime=$(($currentTime + $addTime))
+    fi
     date +%s -s @$currentTime
 }
 
@@ -556,20 +542,26 @@ runifnecessary() {
 }
 
 start_networking() {
-    rm $sysdir/config/.HotspotState  # dont start hotspot at boot
+    rm $sysdir/config/.hotspotState  # dont start hotspot at boot
     
     touch /tmp/network_changed
     sync
-    check_networking
 }
 
 check_networking() {
     if [ $deviceModel -ne 354 ] || [ ! -f /tmp/network_changed ]; then
+        check_timezone
         return
     fi
 	rm /tmp/network_changed
 	
-    $sysdir/script/update_networking.sh
+    $sysdir/script/network/update_networking.sh check
+
+    check_timezone
+}
+
+check_timezone() {
+    export TZ=$(cat "$sysdir/config/.tz")
 }
 
 main

@@ -216,6 +216,17 @@ SDL_Surface *resource_getSurface(ThemeImages request)
     return resources.surfaces[request];
 }
 
+/**
+ * @brief Remember to free manually !
+ * 
+ * @param request 
+ * @return SDL_Surface* 
+ */
+SDL_Surface *resource_getSurfaceCopy(ThemeImages request)
+{
+    return _loadImage(request);
+}
+
 TTF_Font *resource_getFont(ThemeFonts request)
 {
     if (resources.fonts[request] == NULL)

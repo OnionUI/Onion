@@ -415,6 +415,9 @@ maybe_remove_retroarch() {
         if [ -d .retroarch/overlay ]; then
             mv .retroarch/overlay $tempdir/
         fi
+        if [ -d .retroarch/filters ]; then
+            mv .retroarch/filters $tempdir/
+        fi
         if [ -d .retroarch/thumbnails ]; then
             mv .retroarch/thumbnails $tempdir/
         fi
@@ -588,73 +591,76 @@ unzip_progress() {
 
     echo "   - Extract '$zipfile' into $dest"
 
+    verify_file
 
-verify_file
+    echo "Starting..." > /tmp/.update_msg
+    sleep 3
 
-echo "Starting..." > /tmp/.update_msg
-sleep 3
-
-if [ -f "/mnt/SDCARD/.tmp_update/onion.pak" ]; then
-	echo "onion.pak exists"
-	sleep 1
-else
-	echo "onion.pak is missing, extraction will fail"
-fi
-
-verify_file
-
-sleep 1
-
-# Run the 7z extraction command in the background and redirect output to /tmp/.extraction_output
-(7z x -aoa -o"$dest" "$zipfile" -bsp1 -bb > /tmp/.extraction_output ; echo $? > "/tmp/extraction_status" ) &
-
-sleep 1 
-
-if pgrep 7z > /dev/null; then
-    echo "7Z is running"
-	sleep 1
-else
-    echo "7Z is NOT running and should be"
-	sleep 1
-fi
-
-if [ -f "/mnt/SDCARD/.tmp_update/onion.pak" ]; then
-	echo "onion.pak still exists"
-	sleep 1
-else
-	echo "onion.pak is still missing, extraction has probably failed"
-	sleep 1
-	echo "the build will say it's complete but isn't"
-fi
-
-# Continuously update /tmp/.update_msg every 500 milliseconds until the command line finishes
-a=$(pgrep 7z)
-while [ -n "$a" ]; do
-    last_line=$(tail -n 1 /tmp/.extraction_output)
-    value=$(echo "$last_line" | sed 's/.* \([0-9]\+\)%.*/\1/')
-    if [ "$value" -eq "$value" ] 2>/dev/null; then    # check if the value is numeric
-        echo "$msg $value%" > /tmp/.update_msg
+    if [ -f "/mnt/SDCARD/.tmp_update/onion.pak" ]; then
+        echo "onion.pak exists"
+        sleep 1
+    else
+        echo "onion.pak is missing, extraction will fail"
     fi
-    > /tmp/.extraction_output  # to avoid to parse a too big file
-    sleep 0.5
+
+    verify_file
+
+    sleep 1
+
+    # Run the 7z extraction command in the background and redirect output to /tmp/.extraction_output
+    (7z x -aoa -o"$dest" "$zipfile" -bsp1 -bb > /tmp/.extraction_output ; echo $? > "/tmp/extraction_status" ) &
+
+    sleep 1 
+
+    if pgrep 7z > /dev/null; then
+        echo "7Z is running"
+        sleep 1
+    else
+        echo "7Z is NOT running and should be"
+        sleep 1
+    fi
+
+    if [ -f "/mnt/SDCARD/.tmp_update/onion.pak" ]; then
+        echo "onion.pak still exists"
+        sleep 1
+    else
+        echo "onion.pak is still missing, extraction has probably failed"
+        sleep 1
+        echo "the build will say it's complete but isn't"
+    fi
+
+    # Continuously update /tmp/.update_msg every 500 milliseconds until the command line finishes
     a=$(pgrep 7z)
-done
+    while [ -n "$a" ]; do
+        last_line=$(tail -n 1 /tmp/.extraction_output)
+        value=$(echo "$last_line" | sed 's/.* \([0-9]\+\)%.*/\1/')
+        if [ "$value" -eq "$value" ] 2>/dev/null; then                  # check if the value is numeric
+            if [ $value -eq 0 ]; then
+                echo "Preparing folders..." > /tmp/.update_msg          # It gets stuck a bit at 0%, so don't show percentage yet
+            else
+                echo "$msg $value%" > /tmp/.update_msg                  # Now we can show completion percentage
+            fi
+        fi
+        > /tmp/.extraction_output  # to avoid to parse a too big file
+        sleep 0.5
+        a=$(pgrep 7z)
+    done
 
-# Check the exit status of the extraction command
-extraction_status=$(cat "/tmp/extraction_status")
-if [ "$extraction_status" -ne 0 ]; then
-    touch $sysdir/.installFailed
-    echo ":: Installation failed!"
-    sync
-    reboot
-    sleep 10
-    exit 0
-else
-    echo "$msg 100%" >> /tmp/.update_msg
-fi
+    # Check the exit status of the extraction command
+    extraction_status=$(cat "/tmp/extraction_status")
+    if [ "$extraction_status" -ne 0 ]; then
+        touch $sysdir/.installFailed
+        echo ":: Installation failed!"
+        sync
+        reboot
+        sleep 10
+        exit 0
+    else
+        echo "$msg 100%" >> /tmp/.update_msg
+    fi
 
-rm /tmp/extraction_status
-rm /tmp/.extraction_output
+    rm /tmp/extraction_status
+    rm /tmp/.extraction_output
 }
 
 free_mma() {
