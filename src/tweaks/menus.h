@@ -90,7 +90,7 @@ bool _writeDateString(char *label_out)
 void menu_datetime(void *_)
 {
     if (!_menu_date_time._created) {
-        _menu_date_time = list_create(5, LIST_SMALL);
+        _menu_date_time = list_create(6, LIST_SMALL);
         strcpy(_menu_date_time.title, "Date and time");
         list_addItem(&_menu_date_time,
                      (ListItem){
@@ -98,12 +98,14 @@ void menu_datetime(void *_)
                          .disabled = 1,
                          .action = NULL});
 
-        if (DEVICE_ID == MIYOO354 || settings.ntp_state) {
+        network_loadState();
+
+        if (DEVICE_ID == MIYOO354 || network_state.ntp) {
             list_addItem(&_menu_date_time,
                          (ListItem){
                              .label = "Set automatically from network",
                              .item_type = TOGGLE,
-                             .value = (int)settings.ntp_state,
+                             .value = (int)network_state.ntp,
                              .action = network_setNtpState});
         }
         if (DEVICE_ID == MIYOO354) {
@@ -111,14 +113,21 @@ void menu_datetime(void *_)
                          (ListItem){
                              .label = "Wait for NTP update (startup)",
                              .item_type = TOGGLE,
-                             .disabled = !settings.ntp_state,
-                             .value = (int)settings.ntp_wait,
+                             .disabled = !network_state.ntp,
+                             .value = (int)network_state.ntp_wait,
                              .action = network_setNtpWaitState});
             list_addItem(&_menu_date_time,
                          (ListItem){
-                             .label = "Select timezone",
+                             .label = "Get time zone via IP address",
+                             .item_type = TOGGLE,
+                             .disabled = !network_state.ntp,
+                             .value = !network_state.manual_tz,
+                             .action = network_setTzManualState});
+            list_addItem(&_menu_date_time,
+                         (ListItem){
+                             .label = "Select time zone",
                              .item_type = MULTIVALUE,
-                             .disabled = !settings.ntp_state,
+                             .disabled = !network_state.ntp || !network_state.manual_tz,
                              .value_max = 48,
                              .value_formatter = formatter_timezone,
                              .value = value_timezone(),
@@ -128,7 +137,7 @@ void menu_datetime(void *_)
                      (ListItem){
                          .label = "Emulated time skip",
                          .item_type = MULTIVALUE,
-                         .disabled = settings.ntp_state,
+                         .disabled = network_state.ntp,
                          .value_max = 24,
                          .value_formatter = formatter_timeSkip,
                          .value = settings.time_skip,
