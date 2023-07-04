@@ -15,6 +15,9 @@ if [ ! -f ./cmd_to_run.sh ]; then
     exit 1
 fi
 
+device_model=$(cat /tmp/deviceModel)
+has_networking=$([ $device_model -eq 354 ] && echo 1 || echo 0)
+
 ROM_TYPE_UNKNOWN=0
 ROM_TYPE_GAME=1
 ROM_TYPE_APP=2
@@ -47,7 +50,7 @@ menu_options=""
 menu_option_labels=""
 menu_option_args=""
 
-main() {    
+main() {
     if [ $current_tab -eq $TAB_GAMES ]; then
         echo "tab: games"
     elif [ $current_tab -eq $TAB_FAVORITES ]; then
@@ -72,8 +75,8 @@ main() {
         romtype=$ROM_TYPE_APP
     else
         rompath=$(echo "$cmd" | awk '{ st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3) }')
-		
-		export cookie_rom_path="$rompath"
+
+        export cookie_rom_path="$rompath"
 
         if echo "$rompath" | grep -q ":"; then
             rompath=$(echo "$rompath" | awk '{st = index($0,":"); print substr($0,st+1)}')
@@ -99,7 +102,7 @@ main() {
 
     echo "cmd: $cmd"
     # example: LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so "/mnt/SDCARD/Emu/GBATEST/../../.tmp_update/proxy.sh" "/mnt/SDCARD/Emu/GBATEST/../../Roms/GBATEST/mGBA/Final Fantasy IV Advance (U).zip"
-    echo "romtype: $romtype" 
+    echo "romtype: $romtype"
     echo "rompath: $rompath"
     # example: "/mnt/SDCARD/Emu/GBATEST/../../Roms/GBATEST/mGBA/Final Fantasy IV Advance (U).zip"
     echo "romext: $romext"
@@ -110,6 +113,8 @@ main() {
     echo "romroot: $romroot"
     echo "launch: $launch_path"
 
+    echo "has_networking: $has_networking"
+
     skip_game_options=0
 
     if [ ! -f "$rompath" ] || [ "$romext" == "miyoocmd" ] || [ $romtype -ne $ROM_TYPE_GAME ]; then
@@ -118,7 +123,7 @@ main() {
 
     if [ $skip_game_options -eq 0 ]; then
         get_core_info
-				
+
         game_core_label="Game core"
 
         if [ ! -f "$radir/cores/$default_core.so" ]; then
@@ -172,7 +177,7 @@ main() {
     if [ $current_tab -eq $TAB_GAMES ] || [ $current_tab -eq $TAB_EXPERT ]; then
         add_menu_option refresh_roms "Refresh list"
     fi
-	
+
     add_script_files "$globalscriptdir"
 
     if [ $current_tab -eq $TAB_GAMES ]; then
@@ -188,9 +193,9 @@ main() {
     if [ $current_tab -eq $TAB_GAMES ] || [ $current_tab -eq $TAB_EXPERT ]; then
         add_script_files "$emupath/romscripts"
     fi
-	
-	create_cookie 
-	
+
+    create_cookie
+
     # Show GLO menu
     runcmd="LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so prompt -t \"$UI_TITLE\" $(list_args "$menu_option_labels")"
     echo -e "\n\n=================================================================================================="
@@ -214,7 +219,7 @@ main() {
 }
 
 # This creates a cookie for the quick host script to pick up (host & client both use this cookie) (clears every cycle)
-create_cookie(){
+create_cookie() {
     cookiefile="/mnt/SDCARD/RetroArch/retroarch.cookie"
 
     if [ -f "$cookiefile" ]; then
@@ -234,6 +239,14 @@ add_script_files() {
     if [ -d "$scriptdir" ]; then
         for entry in "$scriptdir"/*.sh ; do
             if [ ! -f "$entry" ]; then
+                continue
+            fi
+
+            require_networking=$([ $(get_info_value "$(cat "$entry")" require_networking) -eq 1 ] && echo 1 || echo 0)
+            echo "$entry"
+            echo "require_networking: $require_networking"
+
+            if [ $has_networking -eq 0 ] && [ $require_networking -eq 1 ]; then
                 continue
             fi
 
@@ -272,7 +285,7 @@ list_args() {
 
 get_item() {
     index=$2
-    echo "$1" | sed "$((index+1))q;d"
+    echo "$1" | sed "$((index + 1))q;d"
 }
 
 get_core_info() {
@@ -291,17 +304,17 @@ get_core_info() {
         retroarch_core="$default_core"
     fi
 
-    echo "default_core: $default_core" 
+    echo "default_core: $default_core"
     echo "retroarch_core: $retroarch_core"
 
     corepath="$radir/cores/$retroarch_core.so"
     coreinfopath="$radir/cores/$retroarch_core.info"
-	
-	export cookie_core_path="$corepath"
+
+    export cookie_core_path="$corepath"
 }
 
 get_info_value() {
-    echo "$1" | grep "$2\b" | awk '{split($0,a,"="); print a[2]}' | awk -F'"' '{print $2}' | tr -d '\n'
+    echo "$1" | grep "$2\b" | awk '{split($0,a,"="); print a[2]}' | tr -d '"' | tr -d '\n'
 }
 
 get_json_value() {
@@ -377,7 +390,7 @@ change_core() {
         if [ "$default_core" == "" ]; then
             is_valid=1
         fi
-        
+
         while read entry; do
             tmp_corename=`echo "$entry" | awk '{split($0,a,";"); print a[1]}'`
             tmp_core=`echo "$entry" | awk '{split($0,a,";"); print a[2]}'`
@@ -404,7 +417,7 @@ change_core() {
         if [ "$is_archive" == "" ]; then
             break
         fi
-        
+
         ext="$is_archive"
         is_archive=""
     done
