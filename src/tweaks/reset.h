@@ -103,7 +103,7 @@ void action_resetThemeOverrides(void *pt)
 void action_resetMainUI(void *pt)
 {
     const char title_str[] = "Reset MainUI settings";
-    const char cmd_str[80];
+    char cmd_str[80];
     if (!_disable_confirm &&
         !_confirmReset(title_str,
                        "Are you sure you want to\nreset MainUI settings?"))
