@@ -15,8 +15,7 @@ body:
       label: Checklist
       description: Please confirm the following in order to prevent misuse of issues
       options:
-        - label: I am reporting a bug in the Onion OS
-          description: Any issues with the closed source frontend (MainUI), or RetroArch or any of the cores should be directed to their respective repositories
+        - label: I am reporting a bug in the Onion OS - Any issues with the closed source frontend ([MainUI](https://github.com/OnionUI/MainUI-issues)), or [RetroArch](https://github.com/libretro/RetroArch) or any of the cores should be directed to their respective repositories
           required: true
         - label: I have reviewed the [Onion Wiki](https://github.com/OnionUI/Onion/wiki) and did not find the answer
           required: true
