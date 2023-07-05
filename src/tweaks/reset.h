@@ -79,10 +79,8 @@ void action_resetTweaks(void *pt)
     if (!_disable_confirm && !_confirmReset(title_str, "Are you sure you want to\nreset system tweaks?"))
         return;
     rename(RESET_CONFIGS_PAK, "/mnt/SDCARD/.tmp_update/temp");
-    system("rm -rf /mnt/SDCARD/.tmp_update/config && mkdir -p "
-           "/mnt/SDCARD/.tmp_update/config");
-    system("7z x /mnt/SDCARD/.tmp_update/temp -o/mnt/SDCARD/ "
-           "-ir!.tmp_update/config/*");
+    system("rm -rf /mnt/SDCARD/.tmp_update/config && mkdir -p /mnt/SDCARD/.tmp_update/config");
+    system("7z x /mnt/SDCARD/.tmp_update/temp -o/mnt/SDCARD/ -ir!.tmp_update/config/*");
     rename("/mnt/SDCARD/.tmp_update/temp", RESET_CONFIGS_PAK);
     reset_menus = true;
     settings_load();
@@ -103,12 +101,13 @@ void action_resetThemeOverrides(void *pt)
 void action_resetMainUI(void *pt)
 {
     const char title_str[] = "Reset MainUI settings";
-    char cmd_str[80];
 
     if (!_disable_confirm && !_confirmReset(title_str, "Are you sure you want to\nreset MainUI settings?"))
         return;
 
     system("rm -f /appconfigs/system.json");
+
+    char cmd_str[80];
     sprintf(cmd_str, "cp /mnt/SDCARD/.tmp_update/res/miyoo%d_system.json /appconfigs/system.json", DEVICE_ID);
     system(cmd_str);
 
