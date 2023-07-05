@@ -447,7 +447,7 @@ void menu_resetSettings(void *_)
         strcpy(_menu_reset_settings.title, "Reset settings");
         list_addItem(&_menu_reset_settings,
                      (ListItem){
-                         .label = "Reset tweaks",
+                         .label = "Reset system tweaks",
                          .action = action_resetTweaks});
         list_addItem(&_menu_reset_settings,
                      (ListItem){
