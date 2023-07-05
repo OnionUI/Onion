@@ -127,7 +127,7 @@ clear_logs() {
         ./logs/network.log \
         ./logs/dnsmasq.log \
 		./logs/ftp.log \
-		./logs/ra_quick_host.log \
+		./logs/easy_netplay.log \
         2> /dev/null
 }
 
