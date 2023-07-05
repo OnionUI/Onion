@@ -452,10 +452,10 @@ install_configs() {
     if [ $reset_configs -eq 1 ]; then
         # Overwrite all default configs
         rm -rf /mnt/SDCARD/Saves/CurrentProfile/config/*
-        unzip -oq $zipfile
+        7z x -aoa $zipfile # aoa = overwrite existing files
     else
         # Extract config files without overwriting any existing files
-        unzip -nq $zipfile
+        7z x -aos $zipfile # aos = skip existing files
     fi
 
     # Set X and Y button keymaps if empty
