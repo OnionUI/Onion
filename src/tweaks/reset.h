@@ -80,7 +80,7 @@ void action_resetTweaks(void *pt)
     system("rm -rf /mnt/SDCARD/.tmp_update/config && mkdir -p "
            "/mnt/SDCARD/.tmp_update/config");
     system("7z x /mnt/SDCARD/.tmp_update/temp -o/mnt/SDCARD/ "
-            "-ir!.tmp_update/config/*");
+           "-ir!.tmp_update/config/*");
     rename("/mnt/SDCARD/.tmp_update/temp", RESET_CONFIGS_PAK);
     reset_menus = true;
     settings_load();
@@ -157,7 +157,7 @@ void action_resetAdvanceMENU(void *pt)
             "Are you sure you want to\nreset AdvanceMENU/MAME/MESS?"))
         return;
     system("7z x -aoa " RESET_CONFIGS_PAK " -o/mnt/SDCARD/ "
-        "-ir!BIOS/.advance/*");
+           "-ir!BIOS/.advance/*");
     reset_menus = true;
     if (!_disable_confirm)
         _notifyResetDone(title_str);
