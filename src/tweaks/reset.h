@@ -79,8 +79,8 @@ void action_resetTweaks(void *pt)
     rename(RESET_CONFIGS_PAK, "/mnt/SDCARD/.tmp_update/temp");
     system("rm -rf /mnt/SDCARD/.tmp_update/config && mkdir -p "
            "/mnt/SDCARD/.tmp_update/config");
-    system("unzip /mnt/SDCARD/.tmp_update/temp \".tmp_update/config/*\" -d "
-           "/mnt/SDCARD/");
+    system("7z x /mnt/SDCARD/.tmp_update/temp -o/mnt/SDCARD/ "
+            "-ir!.tmp_update/config/*");
     rename("/mnt/SDCARD/.tmp_update/temp", RESET_CONFIGS_PAK);
     reset_menus = true;
     settings_load();
@@ -103,15 +103,14 @@ void action_resetThemeOverrides(void *pt)
 void action_resetMainUI(void *pt)
 {
     const char title_str[] = "Reset MainUI settings";
+    const char cmd_str[80];
     if (!_disable_confirm &&
         !_confirmReset(title_str,
                        "Are you sure you want to\nreset MainUI settings?"))
         return;
     system("rm -f /appconfigs/system.json");
-    system("unzip -o " RESET_CONFIGS_PAK
-           " \".tmp_update/config/system.json\" -d /mnt/SDCARD/");
-    system("cp /mnt/SDCARD/.tmp_update/config/system.json "
-           "/appconfigs/system.json");
+    sprintf(cmd_str, "cp /mnt/SDCARD/.tmp_update/res/miyoo%d_system.json /appconfigs/system.json", DEVICE_ID);
+    system(cmd_str);
     reset_menus = true;
     settings_load();
     if (!_disable_confirm)
@@ -126,7 +125,8 @@ void action_resetRAMain(void *pt)
             title_str,
             "Are you sure you want to reset\nRetroArch main configuration?"))
         return;
-    system("unzip -o " RESET_CONFIGS_PAK " \"RetroArch/*\" -d /mnt/SDCARD/");
+    system("7z x -aoa " RESET_CONFIGS_PAK " -o/mnt/SDCARD/ "
+           "-ir!RetroArch/*");
     reset_menus = true;
     if (!_disable_confirm)
         _notifyResetDone(title_str);
@@ -141,8 +141,8 @@ void action_resetRACores(void *pt)
             "Are you sure you want to reset\nall RetroArch core overrides?"))
         return;
     system("rm -rf /mnt/SDCARD/Saves/CurrentProfile/config/*");
-    system("unzip -o " RESET_CONFIGS_PAK
-           " \"Saves/CurrentProfile/config/*\" -d /mnt/SDCARD/");
+    system("7z x " RESET_CONFIGS_PAK " -o/mnt/SDCARD/ "
+           " -ir!Saves/CurrentProfile/config/*");
     reset_menus = true;
     if (!_disable_confirm)
         _notifyResetDone(title_str);
@@ -156,8 +156,8 @@ void action_resetAdvanceMENU(void *pt)
             title_str,
             "Are you sure you want to\nreset AdvanceMENU/MAME/MESS?"))
         return;
-    system("unzip -o " RESET_CONFIGS_PAK
-           " \"BIOS/.advance/*\" -d /mnt/SDCARD/");
+    system("7z x -aoa " RESET_CONFIGS_PAK " -o/mnt/SDCARD/ "
+        "-ir!BIOS/.advance/*");
     reset_menus = true;
     if (!_disable_confirm)
         _notifyResetDone(title_str);
