@@ -10,6 +10,7 @@
 # Env setup
 sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo
+LOGGING=$([ -f $sysdir/config/.logging ] && echo 1 || echo 0)
 export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 export WPACLI=/customer/app/wpa_cli
 export hostip="192.168.100.100" # This should be the default unless the user has changed it..
@@ -20,8 +21,8 @@ export hostip="192.168.100.100" # This should be the default unless the user has
 
 # We'll need wifi up for this. Lets try and start it..
 
-check_wifi(){
-ifconfig wlan1 down
+check_wifi() {
+	ifconfig wlan1 down
 	if ifconfig wlan0 &>/dev/null; then
 		log "GLO::Easy_Netplay: Wi-Fi is up already"
 		build_infoPanel "WIFI" "Wifi up"
@@ -80,13 +81,14 @@ connect_to_host() {
 		sleep 1
 		cleanup
 	fi
-	
 
 	udhcpc_control
 	
 	log "GLO::Easy_Netplay: Added new network and connected"
 	log "#############################Supplicant dump##################################"
-	cat /appconfigs/wpa_supplicant.conf >> $sysdir/logs/ra_quick_host.log
+	if [ $LOGGING -eq 1 ]; then
+		cat /appconfigs/wpa_supplicant.conf >> $sysdir/logs/easy_netplay.log
+	fi
 	log "#############################Supplicant dump##################################"
 	sleep 0.5
 }
@@ -237,8 +239,8 @@ sync_file() {
 }
 
 # We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
-start_retroarch(){
-	build_infoPanel "Starting RA"  "Starting RetroArch" 
+start_retroarch() {
+	build_infoPanel "Starting RA"  "Starting RetroArch"
 	cd /mnt/SDCARD/RetroArch
 	HOME=/mnt/SDCARD/RetroArch ./retroarch -C $hostip -v -L "$core" "$rom"
 }
@@ -273,7 +275,7 @@ confirm_join_panel() {
     fi
 }
 
-stripped_game_name(){
+stripped_game_name() {
     export game_name=$(awk -F'/' '/\[rom\]:/ {print $NF}' /mnt/SDCARD/RetroArch/retroarch.cookie.client | sed 's/\(.*\)\..*/\1/')
 }
 
@@ -363,10 +365,15 @@ is_running() {
 }
 
 log() {
-    echo "$(date)" $* >> $sysdir/logs/easy_netplay.log
+	if [ $LOGGING -eq 1 ]; then
+    	echo "$(date)" $* >> $sysdir/logs/easy_netplay.log
+	fi
 }
 
-cleanup(){
+cleanup() {
+	build_infoPanel "Cleanup" "Cleaing up after netplay session..."
+
+	pkill -9 pressMenu2Kill
 
 	if is_running infoPanel; then
 		killall -9 infoPanel
@@ -400,8 +407,8 @@ cleanup(){
 ##Main.##
 #########
 
-lets_go(){
-
+lets_go() {
+	pressMenu2Kill $(basename $0) &
 	check_wifi
 	connect_to_host
 	wait_for_ip
@@ -411,9 +418,9 @@ lets_go(){
 	sync_file Core "$core" "$corechksum" "$core_url"
     stripped_game_name
     confirm_join_panel "Join now?" "$game_name"
+	pkill -9 pressMenu2Kill
 	start_retroarch
 	cleanup
-	
 }
 
 lets_go

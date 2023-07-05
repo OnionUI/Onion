@@ -10,6 +10,7 @@
 # Env setup
 sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo
+LOGGING=$([ -f $sysdir/config/.logging ] && echo 1 || echo 0)
 export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 
 ##########
@@ -18,8 +19,8 @@ export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/p
 
 # We'll need wifi up for this. Lets try and start it..
 
-check_wifi(){
-ifconfig wlan1 down
+check_wifi() {
+	ifconfig wlan1 down
 	if ifconfig wlan0 &>/dev/null; then
 		log "GLO::Easy_Netplay: Wi-Fi is up already"
 		build_infoPanel "WIFI" "Wifi up"
@@ -93,7 +94,7 @@ start_hotspot() {
 }
 
 # We'll need FTP to host the cookie to the client - use the built in FTP, it allows us to curl (errors on bftpd re: path)
-start_ftp(){
+start_ftp() {
     if is_running bftpd; then
         log "GLO::Easy_Netplay: FTP already running, killing to rebind"
         bftpd_p=$(ps | grep bftpd | grep -v grep | awk '{for(i=4;i<=NF;++i) printf $i" "}')
@@ -151,13 +152,17 @@ get_cookie_info() {
 }
 
 # We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
-start_retroarch(){
-	build_infoPanel "RetroArch" "Starting RetroArch..." 
+start_retroarch() {
+	build_infoPanel "RetroArch" "Starting RetroArch..."
 	cd /mnt/SDCARD/RetroArch
 	HOME=/mnt/SDCARD/RetroArch ./retroarch -H -v -L "$host_core" "$host_rom"
 }
 
-cleanup(){
+cleanup() {
+	build_infoPanel "Cleanup" "Cleaing up after netplay session..."
+
+	pkill -9 pressMenu2Kill
+
 	if is_running hostapd; then
 		killall -9 hostapd
 	fi
@@ -195,7 +200,7 @@ build_infoPanel() {
     sleep 0.5
 }
 
-restore_ftp(){
+restore_ftp() {
     log "GLO::Easy_Netplay: Restoring original FTP server"
     $bftpd_p &
 }
@@ -214,20 +219,24 @@ is_running() {
 }
 
 log() {
-    echo "$(date)" $* >> $sysdir/logs/easy_netplay.log
+	if [ $LOGGING -eq 1 ]; then
+    	echo "$(date)" $* >> $sysdir/logs/easy_netplay.log
+	fi
 }
 
 #########
 ##Main.##
 #########
 
-lets_go(){
-check_wifi
-start_hotspot
-start_ftp
-get_cookie_info
-start_retroarch
-cleanup
+lets_go() {
+	pressMenu2Kill $(basename $0) &
+	check_wifi
+	start_hotspot
+	start_ftp
+	get_cookie_info
+	pkill -9 pressMenu2Kill
+	start_retroarch
+	cleanup
 }
 
 lets_go
