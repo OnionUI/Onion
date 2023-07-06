@@ -442,7 +442,7 @@ void play_activity_db_V3_upgrade(void)
           
             if (db_handles[nDB] != NULL) {
 
-                sql  = sqlite3_mprintf("SELECT * FROM %q_roms WHERE path LIKE '%%%q%%' LIMIT 1;", db_handles_type[nDB], rom_list[i].name);                 
+                sql  = sqlite3_mprintf("SELECT * FROM %q_roms WHERE path LIKE '%%%q' LIMIT 1;", db_handles_type[nDB], rom_list[i].name);                 
                 int rc = sqlite3_prepare_v2(db_handles[nDB], sql, -1, &stmt, NULL);
  
                 if (rc != SQLITE_OK) {
@@ -468,7 +468,7 @@ void play_activity_db_V3_upgrade(void)
 
                
                     sql = sqlite3_mprintf(
-                        "SELECT * FROM rom WHERE file_path LIKE '%%%q%%' LIMIT 1;",
+                        "SELECT * FROM rom WHERE file_path LIKE '%%%q' LIMIT 1;",
                         cache_db_item->path);
                  
                     rc = sqlite3_prepare_v2(play_activity_db, sql, -1, &stmt, NULL);
@@ -481,9 +481,6 @@ void play_activity_db_V3_upgrade(void)
  
                         // Rom not already inserted
                         
-                        //play_activity_db_close();    
-                        //play_activity_db_open();   
-
                         sql = sqlite3_mprintf("INSERT INTO rom(type, name, file_path, "
                                               "image_path) VALUES('%q', '%q', '%q', '%q');",
                                               cache_db_item->rom_type, cache_db_item->disp,
@@ -496,11 +493,8 @@ void play_activity_db_V3_upgrade(void)
                             printf("%s: %s\n", sqlite3_errmsg(play_activity_db), sqlite3_sql(stmt));
                         }  
 
-                        //play_activity_db_close();    
-                        //play_activity_db_open();   
-                                       
                         sql = sqlite3_mprintf(
-                            "SELECT * FROM rom WHERE file_path LIKE '%%%q%%' LIMIT 1;",
+                            "SELECT * FROM rom WHERE file_path LIKE '%%%q' LIMIT 1;",
                             cache_db_item->path);
                         
                         rc = sqlite3_prepare_v2(play_activity_db, sql, -1, &stmt, NULL);
@@ -540,7 +534,7 @@ void play_activity_db_V3_upgrade(void)
             */
             // Game existence in the DB check
          
-            sql = sqlite3_mprintf("SELECT * FROM rom WHERE name LIKE '%%%q%%' LIMIT 1;", rom_list[i].name);
+            sql = sqlite3_mprintf("SELECT * FROM rom WHERE name IS '%q' LIMIT 1;", rom_list[i].name);
             int rc = sqlite3_prepare_v2(play_activity_db, sql, -1, &stmt, NULL);
             
             if (rc != SQLITE_OK) {
@@ -560,7 +554,7 @@ void play_activity_db_V3_upgrade(void)
                 } 
                 // Retrieve ROM id by its name
                 
-                sql = sqlite3_mprintf("SELECT * FROM rom WHERE name LIKE '%%%q%%' LIMIT 1;", rom_list[i].name);
+                sql = sqlite3_mprintf("SELECT * FROM rom WHERE name LIKE '%%%q' LIMIT 1;", rom_list[i].name);
                 rc = sqlite3_prepare_v2(play_activity_db, sql, -1, &stmt, NULL);
                 
                 if (rc != SQLITE_OK) {
@@ -596,15 +590,10 @@ void play_activity_db_V3_upgrade(void)
         // ******************* //
 
         // The Rom is found or has been successfully inserted in the db
-        // Search for a previous play time migration (Same rom_id + created_at = 0)
-        
-        //play_activity_db_close();    
-        //play_activity_db_open();    
+        // Search for a previous play time migration (Same rom_id + created_at = 0)  
        
         sql = sqlite3_mprintf("SELECT rom_id FROM play_activity WHERE rom_id = %d AND created_at = 0;", rom_id);
         int rc = sqlite3_prepare_v2(play_activity_db, sql, -1, &stmt, NULL);
-  
-  
         
         if (rc != SQLITE_OK) {
             printf("%s\n", sqlite3_errmsg(play_activity_db));    
@@ -622,9 +611,6 @@ void play_activity_db_V3_upgrade(void)
             }
             else {
                 printf("Importing play time: %d\n", rom_list[i].playTime);
-                
-                //play_activity_db_close();    
-                //play_activity_db_open();                   
 
                 sql = sqlite3_mprintf("INSERT INTO play_activity(rom_id, play_time, created_at, updated_at) VALUES "
                                       "(%d,%d,0,0);", // Imported times have the particularity of having a "created_at" at 0.
@@ -645,13 +631,10 @@ void play_activity_db_V3_upgrade(void)
     }
     
     // Close the database connections
-    
-    //sqlite3_free(sql);
-    //sqlite3_finalize(stmt); 
+
     play_activity_db_close();     
     for (int i = 0; i < num_databases; i++) {
         sqlite3_close(db_handles[i]);
-      //  free(db_handles_type[i]);
     }
       
 
