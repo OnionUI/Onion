@@ -151,13 +151,13 @@ launch_main_ui() {
     mainUiBatPerc
 
     check_hide_recents
-    check_hide_expert
-
+    
     wifi_setting=$(/customer/app/jsonval wifi)
 
     start_audioserver
 
     # MainUI launch
+    mount_main_ui
     cd $miyoodir/app
     PATH="$miyoodir/app:$PATH" \
     LD_LIBRARY_PATH="$miyoodir/lib:/config/lib:/lib" \
@@ -394,34 +394,15 @@ check_hide_recents() {
 }
 
 mainui_target=$miyoodir/app/MainUI
-clean_flag=$miyoodir/app/.isClean
-expert_flag=$miyoodir/app/.isExpert
 
-check_hide_expert() {
-    if [ ! -f $sysdir/config/.showExpert ]; then
-        # Should be clean
-        if [ ! -f $clean_flag ] || [ -f $expert_flag ] || [ $is_device_model_changed -eq 1 ] || [ ! -f $mainui_target ]; then
-            rm -f $mainui_target 2> /dev/null
-            rm -f $expert_flag 2> /dev/null
-            cp "$sysdir/bin/MainUI-$deviceModel-clean" $mainui_target
-            touch $clean_flag
-        fi
+mount_main_ui() {
+    # Mount the correct MainUI binary
+    if [ -f $sysdir/config/.showExpert ]; then
+        mount -o bind "$sysdir/bin/MainUI-$deviceModel-expert" $mainui_target
     else
-        # Should be expert
-        if [ ! -f $expert_flag ] || [ -f $clean_flag ] || [ $is_device_model_changed -eq 1 ] || [ ! -f $mainui_target ]; then
-            rm -f $mainui_target 2> /dev/null
-            rm -f $clean_flag 2> /dev/null
-            cp "$sysdir/bin/MainUI-$deviceModel-expert" $mainui_target
-            touch $expert_flag
-        fi
+        mount -o bind "$sysdir/bin/MainUI-$deviceModel-clean" $mainui_target
     fi
-    sync
 }
-
-
-deviceModel=0
-last_device_model=$miyoodir/app/lastDeviceModel
-is_device_model_changed=0
 
 check_device_model() {
     echo -e "\n:: Check device model"
@@ -435,21 +416,7 @@ check_device_model() {
         printf "283" > /tmp/deviceModel
         deviceModel=283
     fi
-
-    # Check if the SD is inserted in a different model
-    is_device_model_changed=0
-    if [ ! -f $last_device_model ]; then
-        cp /tmp/deviceModel $last_device_model
-        is_device_model_changed=1
-    else
-        lastDeviceModel=`cat $last_device_model`
-        if [ $lastDeviceModel -ne $deviceModel ]; then
-            is_device_model_changed=1
-            echo $deviceModel > $last_device_model
-        fi
-    fi
 }
-
 
 init_system() {
     echo -e "\n:: Init system"
