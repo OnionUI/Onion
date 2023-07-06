@@ -394,15 +394,32 @@ check_hide_recents() {
 }
 
 mainui_target=$miyoodir/app/MainUI
+clean_flag=$miyoodir/app/.isClean
+expert_flag=$miyoodir/app/.isExpert
+first_mount=true
 
 mount_main_ui() {
     # Mount the correct MainUI binary
     if [ -f $sysdir/config/.showExpert ]; then
-        mount -o bind "$sysdir/bin/MainUI-$deviceModel-expert" $mainui_target
+        if  [ ! -f $expert_flag ] || [ "$first_mount" = true ]; then
+            rm -f $clean_flag 2> /dev/null
+            umount $mainui_target
+            mount -o bind "$sysdir/bin/MainUI-$deviceModel-expert" $mainui_target
+            touch $expert_flag
+        fi
     else
-        mount -o bind "$sysdir/bin/MainUI-$deviceModel-clean" $mainui_target
+        if  [ ! -f $clean_flag ] || [ "$first_mount" = true ]; then
+            rm -f $expert_flag 2> /dev/null
+            umount $mainui_target
+            mount -o bind "$sysdir/bin/MainUI-$deviceModel-clean" $mainui_target
+            touch $clean_flag
+        fi
     fi
+    first_mount=false
+    sync
 }
+
+deviceModel=0
 
 check_device_model() {
     echo -e "\n:: Check device model"
