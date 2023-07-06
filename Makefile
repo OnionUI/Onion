@@ -48,7 +48,7 @@ ifeq (,$(GTEST_INCLUDE_DIR))
 GTEST_INCLUDE_DIR = /usr/include/
 endif
 
-TOOLCHAIN := mholdg16/miyoomini-toolchain:latest
+TOOLCHAIN := aemiii91/miyoomini-toolchain:latest
 
 include ./src/common/commands.mk
 
@@ -191,22 +191,22 @@ dist: build
 	@$(ECHO) $(PRINT_RECIPE)
 # Package configs
 	@cp -R $(TEMP_DIR)/configs/Saves/CurrentProfile/ $(TEMP_DIR)/configs/Saves/GuestProfile
-	@cd $(TEMP_DIR)/configs && zip -rq $(BUILD_DIR)/.tmp_update/config/configs.pak .
+	@cd $(TEMP_DIR)/configs && 7z a -r -mtm=off $(BUILD_DIR)/.tmp_update/config/configs.pak . -bsp0 -bso0
 	@rm -rf $(TEMP_DIR)/configs
 	@rmdir $(TEMP_DIR)
 # Package RetroArch separately
-	@cd $(BUILD_DIR) && zip -rq retroarch.pak RetroArch
+	@cd $(BUILD_DIR) && 7z a -r -mtm=off retroarch.pak RetroArch -bsp0 -bso0
 	@mkdir -p $(DIST_DIR)/RetroArch
 	@mv $(BUILD_DIR)/retroarch.pak $(DIST_DIR)/RetroArch/
 	@echo $(RA_SUBVERSION) > $(DIST_DIR)/RetroArch/ra_package_version.txt
 # Package Onion core
-	@cd $(BUILD_DIR) && zip -rq $(DIST_DIR)/miyoo/app/.tmp_update/onion.pak . -x RetroArch RetroArch/\*
+	@cd $(BUILD_DIR) && 7z a -r -mtm=off $(DIST_DIR)/miyoo/app/.tmp_update/onion.pak . -xr!RetroArch -bsp0 -bso0
 	@$(ECHO) "\n-> [DIST READY!]"
 
 release: dist
 	@$(ECHO) $(PRINT_RECIPE)
 	@rm -f $(RELEASE_DIR)/$(RELEASE_NAME).zip
-	@cd $(DIST_DIR) && zip -rq $(RELEASE_DIR)/$(RELEASE_NAME).zip .
+	@cd $(DIST_DIR) && 7z a -r -mtc=off $(RELEASE_DIR)/$(RELEASE_NAME).zip . -bsp0 -bso0
 	@$(ECHO) "\n-> [RELEASE READY!]"
 
 clean:

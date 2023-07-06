@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
 
     int current_slide = -1;
     int num_slides = 9;
-    config_get("currentSlide", "%d", &current_slide);
+    config_get("currentSlide", CONFIG_INT, &current_slide);
 
     bool quit = false;
     bool failed = false;
