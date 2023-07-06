@@ -30,10 +30,10 @@ main() {
         cd /customer/app/
         batteryStatus=$(./axp_test)
         case $batteryStatus in
-        *\"charging\":3*)
-            cd $sysdir
-            chargingState
-            ;;
+            *\"charging\":3*)
+                cd $sysdir
+                chargingState
+                ;;
         esac
     fi
 
@@ -47,14 +47,14 @@ main() {
     keymon &
 
     # Init
-    rm /tmp/.offOrder 2>/dev/null
+    rm /tmp/.offOrder 2> /dev/null
     HOME=/mnt/SDCARD/RetroArch/
 
     detectKey 1
     menu_pressed=$?
 
     if [ $menu_pressed -eq 0 ]; then
-        rm -f "$sysdir/cmd_to_run.sh" 2>/dev/null
+        rm -f "$sysdir/cmd_to_run.sh" 2> /dev/null
     fi
 
     if [ $deviceModel -eq 354 ] && [ -f /mnt/SDCARD/RetroArch/retroarch_miyoo354 ]; then
@@ -79,7 +79,7 @@ main() {
     if [ ! -f $sysdir/config/.noAutoStart ]; then
         state_change check_game
     else
-        rm -f "$sysdir/cmd_to_run.sh" 2>/dev/null
+        rm -f "$sysdir/cmd_to_run.sh" 2> /dev/null
     fi
 
     startup_app=$(cat $sysdir/config/startup/app)
@@ -89,7 +89,7 @@ main() {
         touch $sysdir/.runGameSwitcher
     elif [ $startup_app -eq 2 ]; then
         echo -e "\n\n:: STARTUP APP: RetroArch\n\n"
-        echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v" >$sysdir/cmd_to_run.sh
+        echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v" > $sysdir/cmd_to_run.sh
         touch /tmp/quick_switch
     elif [ $startup_app -eq 3 ]; then
         echo -e "\n\n:: STARTUP APP: AdvanceMENU\n\n"
@@ -129,7 +129,7 @@ clear_logs() {
         ./logs/dnsmasq.log \
         ./logs/ftp.log \
         ./logs/ra_quick_host.log \
-        2>/dev/null
+        2> /dev/null
 }
 
 check_main_ui() {
@@ -164,11 +164,11 @@ launch_main_ui() {
     PATH="$miyoodir/app:$PATH" \
         LD_LIBRARY_PATH="$miyoodir/lib:/config/lib:/lib" \
         LD_PRELOAD="$miyoodir/lib/libpadsp.so" \
-        ./MainUI 2>&1 >/dev/null
+        ./MainUI 2>&1 > /dev/null
 
     if [ $(/customer/app/jsonval wifi) -ne $wifi_setting ]; then
         touch /tmp/network_changed
-        rm /tmp/ntp_synced 2>/dev/null
+        rm /tmp/ntp_synced 2> /dev/null
         sync
     fi
 
@@ -176,7 +176,7 @@ launch_main_ui() {
 
     mv -f /tmp/cmd_to_run.sh $sysdir/cmd_to_run.sh
 
-    echo "mainui" >/tmp/prev_state
+    echo "mainui" > /tmp/prev_state
 }
 
 check_game_menu() {
@@ -198,14 +198,14 @@ launch_game_menu() {
 
     cd $sysdir
     if [ -f ./config/.logging ]; then
-        ./script/game_list_options.sh >>./logs/game_list_options.log
+        ./script/game_list_options.sh >> ./logs/game_list_options.log
     else
         ./script/game_list_options.sh
     fi
 
     if [ $? -ne 0 ]; then
         echo -e "\n\n< Back to MainUI\n\n"
-        rm -f $sysdir/cmd_to_run.sh 2>/dev/null
+        rm -f $sysdir/cmd_to_run.sh 2> /dev/null
         check_off_order "End"
     fi
 }
@@ -257,13 +257,13 @@ launch_game() {
             retroarch_core=$(get_info_value "$romcfg" core)
             corepath=".retroarch/cores/$retroarch_core.so"
 
-            echo "per game core: $retroarch_core" >>$sysdir/logs/game_list_options.log
+            echo "per game core: $retroarch_core" >> $sysdir/logs/game_list_options.log
 
             if [ -f "/mnt/SDCARD/RetroArch/$corepath" ]; then
                 if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
-                    echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v --appendconfig \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" >$sysdir/cmd_to_run.sh
+                    echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v --appendconfig \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
                 else
-                    echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v -L \"$corepath\" \"$rompath\"" >$sysdir/cmd_to_run.sh
+                    echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
                 fi
             fi
         fi
@@ -271,14 +271,14 @@ launch_game() {
         # Handle dollar sign
         if echo "$rompath" | grep -q "\$"; then
             temp=$(cat $sysdir/cmd_to_run.sh)
-            echo "$temp" | sed 's/\$/\\\$/g' >$sysdir/cmd_to_run.sh
+            echo "$temp" | sed 's/\$/\\\$/g' > $sysdir/cmd_to_run.sh
         fi
 
         playActivity start "$rompath"
     fi
 
     # Prevent quick switch loop
-    rm -f /tmp/quick_switch 2>/dev/null
+    rm -f /tmp/quick_switch 2> /dev/null
 
     echo "----- COMMAND:"
     cat $sysdir/cmd_to_run.sh
@@ -309,10 +309,10 @@ launch_game() {
     fi
 
     # Reset CPU frequency
-    echo ondemand >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+    echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 
     # Reset flags
-    rm /tmp/stay_awake 2>/dev/null
+    rm /tmp/stay_awake 2> /dev/null
 
     # Free memory
     $sysdir/bin/freemma
@@ -320,16 +320,16 @@ launch_game() {
     # TIMER END + SHUTDOWN CHECK
     if [ $is_game -eq 1 ]; then
         if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
-            echo "$cmd" | sed 's/ --appendconfig \"\/mnt\/SDCARD\/.tmp_update\/reset.cfg\"//g' >$sysdir/cmd_to_run.sh
+            echo "$cmd" | sed 's/ --appendconfig \"\/mnt\/SDCARD\/.tmp_update\/reset.cfg\"//g' > $sysdir/cmd_to_run.sh
         fi
 
         cd $sysdir
         playActivity stop "$rompath"
 
-        echo "game" >/tmp/prev_state
+        echo "game" > /tmp/prev_state
         check_off_order "End_Save"
     else
-        echo "app" >/tmp/prev_state
+        echo "app" > /tmp/prev_state
         check_off_order "End"
     fi
 }
@@ -346,7 +346,7 @@ check_switcher() {
         rm -f /tmp/quick_switch
     else
         # Return to MainUI
-        rm $sysdir/cmd_to_run.sh 2>/dev/null
+        rm $sysdir/cmd_to_run.sh 2> /dev/null
         sync
     fi
 
@@ -358,7 +358,7 @@ launch_switcher() {
     cd $sysdir
     LD_PRELOAD="$miyoodir/lib/libpadsp.so" gameSwitcher
     rm $sysdir/.runGameSwitcher
-    echo "switcher" >/tmp/prev_state
+    echo "switcher" > /tmp/prev_state
     sync
 }
 
@@ -379,7 +379,7 @@ check_hide_recents() {
     if [ ! -f $sysdir/config/.showRecents ]; then
         # Hide recents by removing the json file
         if [ -f $recentlist ]; then
-            cat $recentlist $recentlist_hidden >$recentlist_temp
+            cat $recentlist $recentlist_hidden > $recentlist_temp
             mv -f $recentlist_temp $recentlist_hidden
             rm -f $recentlist
         fi
@@ -387,7 +387,7 @@ check_hide_recents() {
     else
         # Restore recentlist
         if [ -f $recentlist_hidden ]; then
-            cat $recentlist $recentlist_hidden >$recentlist_temp
+            cat $recentlist $recentlist_hidden > $recentlist_temp
             mv -f $recentlist_temp $recentlist
             rm -f $recentlist_hidden
         fi
@@ -405,11 +405,11 @@ mount_main_ui() {
 
     if [ ! -f $mainui_target ] || [ "$(head -1 "$mainui_target")" != "mounted:$mainui_srcname" ]; then
         if [ -f $mainui_target ]; then
-            umount $mainui_target 2>/dev/null
-            rm -f $mainui_target 2>/dev/null
+            umount $mainui_target 2> /dev/null
+            rm -f $mainui_target 2> /dev/null
         fi
 
-        echo "mounted:$mainui_srcname" >$mainui_target
+        echo "mounted:$mainui_srcname" > $mainui_target
         sync
 
         do_mount=1
@@ -429,11 +429,11 @@ check_device_model() {
 
     if axp 0; then
         touch /tmp/deviceModel
-        printf "354" >/tmp/deviceModel
+        printf "354" > /tmp/deviceModel
         deviceModel=354
     else
         touch /tmp/deviceModel
-        printf "283" >/tmp/deviceModel
+        printf "283" > /tmp/deviceModel
         deviceModel=283
     fi
 }
@@ -446,7 +446,7 @@ init_system() {
     sleep 0.25
 
     if [ $deviceModel -eq 354 ] && [ -f $sysdir/config/.lcdvolt ]; then
-        $sysdir/script/lcdvolt.sh 2>/dev/null
+        $sysdir/script/lcdvolt.sh 2> /dev/null
     fi
 
     start_audioserver
@@ -454,8 +454,8 @@ init_system() {
     if [ $deviceModel -eq 283 ]; then
         # init charger detection
         if [ ! -f /sys/devices/gpiochip0/gpio/gpio59/direction ]; then
-            echo 59 >/sys/class/gpio/export
-            echo in >/sys/devices/gpiochip0/gpio/gpio59/direction
+            echo 59 > /sys/class/gpio/export
+            echo in > /sys/devices/gpiochip0/gpio/gpio59/direction
         fi
 
         if [ $(/customer/app/jsonval vol) -ne 20 ] || [ $(/customer/app/jsonval mute) -ne 0 ]; then
@@ -463,7 +463,7 @@ init_system() {
             cat /appconfigs/system.json |
                 sed 's/^\s*"vol":\s*[0-9][0-9]*/\t"vol":\t20/g' |
                 sed 's/^\s*"mute":\s*[0-9][0-9]*/\t"mute":\t0/g' \
-                    >temp
+                    > temp
             mv -f temp /appconfigs/system.json
         fi
     fi
@@ -473,10 +473,10 @@ init_system() {
     echo "brightness: $brightness -> $brightness_raw"
 
     # init backlight
-    echo 0 >/sys/class/pwm/pwmchip0/export
-    echo 800 >/sys/class/pwm/pwmchip0/pwm0/period
-    echo $brightness_raw >/sys/class/pwm/pwmchip0/pwm0/duty_cycle
-    echo 1 >/sys/class/pwm/pwmchip0/pwm0/enable
+    echo 0 > /sys/class/pwm/pwmchip0/export
+    echo 800 > /sys/class/pwm/pwmchip0/pwm0/period
+    echo $brightness_raw > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
+    echo 1 > /sys/class/pwm/pwmchip0/pwm0/enable
 }
 
 update_time() {
