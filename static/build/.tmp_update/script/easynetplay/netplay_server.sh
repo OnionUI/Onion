@@ -107,15 +107,6 @@ start_ftp() {
     fi
 }
 
-# We'll need WPS to make a hands off connection (even if the user has changed the hotspot password from the default)
-# start_wps(){
-	# touch /tmp/hostapd.psk
-	# sync
-	# sleep 1
-	# $sysdir/bin/hostapd_cli wps_pbc
-	# log "GLO::Easy_Netplay: Starting WPS host"
-# }
-
 # Pull the cookie info that the GLO script has generated (and use it to write the cksum to the cookie so the client has it)
 get_cookie_info() {
     COOKIE_FILE="/mnt/SDCARD/RetroArch/retroarch.cookie"
