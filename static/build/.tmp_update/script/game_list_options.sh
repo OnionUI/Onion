@@ -314,11 +314,11 @@ get_core_info() {
 }
 
 get_info_value() {
-    echo "$1" | grep "$2\b" | awk '{split($0,a,"="); print a[2]}' | tr -d '"' | tr -d '\n'
+    echo "$1" | grep "$2\b" | awk '{split($0,a,/\s*=\s*/); print a[2]}' | tr -d '"' | tr -d '\n'
 }
 
 get_json_value() {
-    echo "$1" | grep "\"$2\"\s*:" | awk '{split($0,a,":"); print a[2]}' | awk -F'"' '{print $2}' | tr -d '\n'
+    echo "$1" | grep "\"$2\"\s*:" | awk '{split($0,a,/\s*:\s*/); print a[2]}' | awk -F'"' '{print $2}' | tr -d '\n'
 }
 
 reset_game() {
