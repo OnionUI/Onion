@@ -413,7 +413,7 @@ void play_activity_db_V3_upgrade(void)
     printf("\n%d games to migrate\n", rom_list_len);
     play_activity_db_open();
   
-    for (int i = 0; i < rom_list_len; i++) {
+   for (int i = 0; i < rom_list_len; i++) {
    // for (int i = 0; i < 10; i++) {
 
         totalOldRecords++;
@@ -492,12 +492,9 @@ void play_activity_db_V3_upgrade(void)
                         if (rc != SQLITE_OK) {
                             printf("%s: %s\n", sqlite3_errmsg(play_activity_db), sqlite3_sql(stmt));
                         }  
-
-                        sql = sqlite3_mprintf(
-                            "SELECT * FROM rom WHERE file_path LIKE '%%%q' LIMIT 1;",
-                            cache_db_item->path);
                         
-                        rc = sqlite3_prepare_v2(play_activity_db, sql, -1, &stmt, NULL);
+                        rc = sqlite3_prepare_v2(play_activity_db, "SELECT last_insert_rowid()", -1, &stmt, NULL);
+
                         if (rc != SQLITE_OK) {
                             printf("%s: %s\n", sqlite3_errmsg(play_activity_db), sqlite3_sql(stmt));
                         }
@@ -505,7 +502,6 @@ void play_activity_db_V3_upgrade(void)
                             rom_id = sqlite3_column_int(stmt, 0);                         
                             printf("- added - ID %d\n", rom_id);
                         }
-                        sqlite3_free(sql);
                         sqlite3_finalize(stmt);                        
                     }
                     else{
@@ -554,8 +550,7 @@ void play_activity_db_V3_upgrade(void)
                 } 
                 // Retrieve ROM id by its name
                 
-                sql = sqlite3_mprintf("SELECT * FROM rom WHERE name LIKE '%%%q' LIMIT 1;", rom_list[i].name);
-                rc = sqlite3_prepare_v2(play_activity_db, sql, -1, &stmt, NULL);
+                rc = sqlite3_prepare_v2(play_activity_db, "SELECT last_insert_rowid()", -1, &stmt, NULL);
                 
                 if (rc != SQLITE_OK) {
                     printf("%s: %s\n", sqlite3_errmsg(play_activity_db), sqlite3_sql(stmt));
@@ -571,7 +566,7 @@ void play_activity_db_V3_upgrade(void)
                 rom_id = sqlite3_column_int(stmt, 0); 
             }
             sqlite3_finalize(stmt);  
-            sqlite3_free(sql);   
+            //sqlite3_free(sql);   
 
             if (rom_id != 0)
                 totalOrphan++;
