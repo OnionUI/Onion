@@ -200,9 +200,21 @@ build_infoPanel() {
     sleep 0.5
 }
 
-restore_ftp() {
+restore_ftp(){
     log "GLO::Easy_Netplay: Restoring original FTP server"
-    $bftpd_p &
+    killall -9 tcpsvd
+    if flag_enabled ftpState; then
+        if flag_enabled authftpState; then 
+            bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpdauth.conf &
+        else 
+            bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpd.conf &
+        fi
+    fi
+}
+
+flag_enabled() {
+    flag="$1"
+    [ -f "$sysdir/config/.$flag" ]
 }
 
 udhcpc_control() {
