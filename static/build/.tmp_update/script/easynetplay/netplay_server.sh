@@ -150,7 +150,7 @@ start_retroarch() {
 }
 
 cleanup() {
-	build_infoPanel "Cleanup" "Cleaing up after netplay session..."
+	build_infoPanel "Cleanup" "Cleaning up after netplay session..."
 
 	pkill -9 pressMenu2Kill
 
