@@ -4,8 +4,15 @@ miyoodir=/mnt/SDCARD/miyoo
 export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 export PATH="$sysdir/bin:$PATH"
 
+MODEL_MM=283
+MODEL_MMP=354
+
 main() {
-    check_device_model
+    # Set model ID
+    axp 0 > /dev/null
+    export DEVICE_ID=$([ $? -eq 0 ] && echo $MODEL_MMP || echo $MODEL_MM)
+    echo -n "$DEVICE_ID" > /tmp/deviceModel
+
     init_system
     update_time
     clear_logs
@@ -21,20 +28,17 @@ main() {
         themeSwitcher --reapply_icons
     fi
 
-    if [ $deviceModel -eq 283 ]; then
-        if [ $(cat /sys/devices/gpiochip0/gpio/gpio59/value) -eq 1 ]; then
-            cd $sysdir
-            chargingState
-        fi
-    elif [ $deviceModel -eq 354 ]; then
-        cd /customer/app/
-        batteryStatus=$(./axp_test)
-        case $batteryStatus in
-            *\"charging\":3*)
-                cd $sysdir
-                chargingState
-                ;;
-        esac
+    # Check is charging
+    if [ $DEVICE_ID -eq $MODEL_MM ]; then
+        is_charging=$(cat /sys/devices/gpiochip0/gpio/gpio59/value)
+    elif [ $DEVICE_ID -eq $MODEL_MMP ]; then
+        is_charging=$(axp 0 | grep -q "value:c4" && echo 1 || echo 0)
+    fi
+
+    # Show charging animation
+    if [ $is_charging -eq 1 ]; then
+        cd $sysdir
+        chargingState
     fi
 
     # Make sure MainUI doesn't show charging animation
@@ -50,6 +54,7 @@ main() {
     rm /tmp/.offOrder 2> /dev/null
     HOME=/mnt/SDCARD/RetroArch/
 
+    # Detect if MENU button is held
     detectKey 1
     menu_pressed=$?
 
@@ -57,16 +62,16 @@ main() {
         rm -f "$sysdir/cmd_to_run.sh" 2> /dev/null
     fi
 
-    if [ $deviceModel -eq 354 ] && [ -f /mnt/SDCARD/RetroArch/retroarch_miyoo354 ]; then
+    if [ $DEVICE_ID -eq $MODEL_MMP ] && [ -f /mnt/SDCARD/RetroArch/retroarch_miyoo354 ]; then
         # Mount miyoo354 RA version
         mount -o bind /mnt/SDCARD/RetroArch/retroarch_miyoo354 /mnt/SDCARD/RetroArch/retroarch
     fi
 
     # Bind arcade name library to customer path
-    mount -o bind /mnt/SDCARD/miyoo/lib/libgamename.so /customer/lib/libgamename.so
+    mount -o bind $miyoodir/lib/libgamename.so /customer/lib/libgamename.so
 
+    # Set filebrowser branding to "Onion" and apply custom theme
     if [ -f "$sysdir/config/filebrowser/first.run" ]; then
-        # Set filebrowser branding to "Onion" and apply custom theme
         $sysdir/bin/filebrowser config set --branding.name "Onion" -d $sysdir/config/filebrowser/filebrowser.db
         $sysdir/bin/filebrowser config set --branding.files "$sysdir/config/filebrowser/theme" -d $sysdir/config/filebrowser/filebrowser.db
 
@@ -396,45 +401,22 @@ check_hide_recents() {
 }
 
 mainui_target=$miyoodir/app/MainUI
-first_mount=1
 
 mount_main_ui() {
-    do_mount=$first_mount
     mainui_mode=$([ -f $sysdir/config/.showExpert ] && echo "expert" || echo "clean")
-    mainui_srcname="MainUI-$deviceModel-$mainui_mode"
+    mainui_srcname="MainUI-$DEVICE_ID-$mainui_mode"
+    mainui_mount=$(basename "$(cat /proc/self/mountinfo | grep $mainui_target | cut -d' ' -f4)")
 
-    if [ ! -f $mainui_target ] || [ "$(head -1 "$mainui_target")" != "mounted:$mainui_srcname" ]; then
-        if [ -f $mainui_target ]; then
+    if [ "$mainui_mount" != "$mainui_srcname" ]; then
+        if mount | grep -q "$mainui_target"; then
             umount $mainui_target 2> /dev/null
-            rm -f $mainui_target 2> /dev/null
         fi
 
-        echo "mounted:$mainui_srcname" > $mainui_target
-        sync
+        if [ ! -f $mainui_target ]; then
+            touch $mainui_target
+        fi
 
-        do_mount=1
-    fi
-
-    if [ $do_mount -eq 1 ]; then
         mount -o bind "$sysdir/bin/$mainui_srcname" $mainui_target
-    fi
-
-    first_mount=0
-}
-
-deviceModel=0
-
-check_device_model() {
-    echo -e "\n:: Check device model"
-
-    if axp 0; then
-        touch /tmp/deviceModel
-        printf "354" > /tmp/deviceModel
-        deviceModel=354
-    else
-        touch /tmp/deviceModel
-        printf "283" > /tmp/deviceModel
-        deviceModel=283
     fi
 }
 
@@ -445,13 +427,13 @@ init_system() {
     cat /proc/ls
     sleep 0.25
 
-    if [ $deviceModel -eq 354 ] && [ -f $sysdir/config/.lcdvolt ]; then
+    if [ $DEVICE_ID -eq $MODEL_MMP ] && [ -f $sysdir/config/.lcdvolt ]; then
         $sysdir/script/lcdvolt.sh 2> /dev/null
     fi
 
     start_audioserver
 
-    if [ $deviceModel -eq 283 ]; then
+    if [ $DEVICE_ID -eq $MODEL_MM ]; then
         # init charger detection
         if [ ! -f /sys/devices/gpiochip0/gpio/gpio59/direction ]; then
             echo 59 > /sys/class/gpio/export
@@ -537,7 +519,7 @@ start_networking() {
 }
 
 check_networking() {
-    if [ $deviceModel -ne 354 ] || [ ! -f /tmp/network_changed ]; then
+    if [ $DEVICE_ID -ne $MODEL_MMP ] || [ ! -f /tmp/network_changed ]; then
         check_timezone
         return
     fi
