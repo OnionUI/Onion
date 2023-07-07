@@ -3,11 +3,16 @@ sysdir=$(
     cd -- "$(dirname "$0")" > /dev/null 2>&1
     pwd -P
 )
+miyoodir=/mnt/SDCARD/miyoo
+
 core_zipfile="$sysdir/onion.pak"
 ra_zipfile="/mnt/SDCARD/RetroArch/retroarch.pak"
 ra_version_file="/mnt/SDCARD/RetroArch/onion_ra_version.txt"
 ra_package_version_file="/mnt/SDCARD/RetroArch/ra_package_version.txt"
+
+export LD_LIBRARY_PATH="/lib:/config/lib:/customer/lib:$sysdir/lib"
 export PATH="$sysdir/bin:$PATH"
+unset LD_PRELOAD
 
 install_ra=1
 
@@ -37,8 +42,10 @@ total_ra=0
 
 main() {
     # init_lcd
-    cat /proc/ls
-    sleep 0.2
+    if [ "$(ps | grep dev/l | grep -v grep)" == "" ]; then
+        cat /proc/ls
+        sleep 1
+    fi
 
     check_device_model
 
@@ -266,7 +273,7 @@ run_installation() {
         rm -f $ra_package_version_file
     fi
 
-    echo "Finishing up..." >> /tmp/.update_msg
+    echo "Finishing up - Get ready!" >> /tmp/.update_msg
     if [ $reset_configs -eq 0 ]; then
         restore_ra_config
 
@@ -328,7 +335,7 @@ run_installation() {
         touch $sysdir/.installed
         sync
     else
-        echo "$verb2 complete!  -  Rebooting..." >> /tmp/.update_msg
+        echo "$verb2 complete - Rebooting..." >> /tmp/.update_msg
     fi
 
     installUI &
@@ -597,7 +604,7 @@ unzip_progress() {
 
     verify_file
 
-    echo "Starting..." > /tmp/.update_msg
+    echo "Verifying package..." > /tmp/.update_msg
     sleep 3
 
     if [ -f "/mnt/SDCARD/.tmp_update/onion.pak" ]; then
@@ -643,7 +650,7 @@ unzip_progress() {
         value=$(echo "$last_line" | sed 's/.* \([0-9]\+\)%.*/\1/')
         if [ "$value" -eq "$value" ] 2> /dev/null; then # check if the value is numeric
             if [ $value -eq 0 ]; then
-                echo "Preparing folders..." > /tmp/.update_msg # It gets stuck a bit at 0%, so don't show percentage yet
+                echo "Preparing file system..." > /tmp/.update_msg # It gets stuck a bit at 0%, so don't show percentage yet
             else
                 echo "$msg $value%" > /tmp/.update_msg # Now we can show completion percentage
             fi

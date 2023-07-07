@@ -14,9 +14,10 @@ main() {
     echo -n "$DEVICE_ID" > /tmp/deviceModel
 
     check_installer
+    clear_logs
+
     init_system
     update_time
-    clear_logs
 
     # Start the battery monitor
     batmon &
