@@ -13,6 +13,7 @@ main() {
     export DEVICE_ID=$([ $? -eq 0 ] && echo $MODEL_MMP || echo $MODEL_MM)
     echo -n "$DEVICE_ID" > /tmp/deviceModel
 
+    check_installer
     init_system
     update_time
     clear_logs
@@ -538,6 +539,18 @@ check_networking() {
 
 check_timezone() {
     export TZ=$(cat "$sysdir/config/.tz")
+}
+
+check_installer() {
+    # Check if installer is present
+    if [ -d $miyoodir/app/.tmp_update ] && fgrep -q "#!/bin/sh" "$miyoodir/app/MainUI"; then
+        echo "Installer detected!"
+        cd $miyoodir/app
+        ./MainUI
+        reboot
+        sleep 10
+        exit
+    fi
 }
 
 scriptname=$(basename "$0" .sh)
