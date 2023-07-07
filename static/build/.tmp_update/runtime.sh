@@ -90,14 +90,14 @@ main() {
     startup_app=$(cat $sysdir/config/startup/app)
 
     if [ $startup_app -eq 1 ]; then
-        echo -e "\n\n:: STARTUP APP: GameSwitcher\n\n"
+        log "\n\n:: STARTUP APP: GameSwitcher\n\n"
         touch $sysdir/.runGameSwitcher
     elif [ $startup_app -eq 2 ]; then
-        echo -e "\n\n:: STARTUP APP: RetroArch\n\n"
+        log "\n\n:: STARTUP APP: RetroArch\n\n"
         echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v" > $sysdir/cmd_to_run.sh
         touch /tmp/quick_switch
     elif [ $startup_app -eq 3 ]; then
-        echo -e "\n\n:: STARTUP APP: AdvanceMENU\n\n"
+        log "\n\n:: STARTUP APP: AdvanceMENU\n\n"
         touch /tmp/run_advmenu
     fi
 
@@ -119,6 +119,10 @@ state_change() {
     touch /tmp/state_changed
     sync
     eval "$1"
+}
+
+set_prev_state() {
+    echo "$1" > /tmp/prev_state
 }
 
 clear_logs() {
@@ -151,15 +155,20 @@ check_main_ui() {
 }
 
 launch_main_ui() {
-    echo -e "\n:: Launch MainUI"
+    log "\n:: Launch MainUI"
 
     cd $sysdir
+
+    # Generate battery percentage image
     mainUiBatPerc
 
-    mount_main_ui
-
+    # Hide any new recents if applicable
     check_hide_recents
 
+    # Ensure we've mounted the correct MainUI binary
+    mount_main_ui
+
+    # Wifi state before
     wifi_setting=$(/customer/app/jsonval wifi)
 
     start_audioserver
@@ -171,6 +180,7 @@ launch_main_ui() {
         LD_PRELOAD="$miyoodir/lib/libpadsp.so" \
         ./MainUI 2>&1 > /dev/null
 
+    # Check if wifi setting changed
     if [ $(/customer/app/jsonval wifi) -ne $wifi_setting ]; then
         touch /tmp/network_changed
         rm /tmp/ntp_synced 2> /dev/null
@@ -181,7 +191,7 @@ launch_main_ui() {
 
     mv -f /tmp/cmd_to_run.sh $sysdir/cmd_to_run.sh
 
-    echo "mainui" > /tmp/prev_state
+    set_prev_state "mainui"
 }
 
 check_game_menu() {
@@ -199,17 +209,13 @@ check_game_menu() {
 }
 
 launch_game_menu() {
-    echo -e "\n\n:: GLO\n\n"
+    log "\n\n:: GLO\n\n"
 
     cd $sysdir
-    if [ -f ./config/.logging ]; then
-        ./script/game_list_options.sh >> ./logs/game_list_options.log
-    else
-        ./script/game_list_options.sh
-    fi
+    ./script/game_list_options.sh
 
     if [ $? -ne 0 ]; then
-        echo -e "\n\n< Back to MainUI\n\n"
+        log "\n\n< Back to MainUI\n\n"
         rm -f $sysdir/cmd_to_run.sh 2> /dev/null
         check_off_order "End"
     fi
@@ -227,7 +233,7 @@ check_is_game() {
 }
 
 launch_game() {
-    echo -e "\n:: Launch game"
+    log "\n:: Launch game"
     cmd=$(cat $sysdir/cmd_to_run.sh)
 
     is_game=0
@@ -250,8 +256,8 @@ launch_game() {
         romcfgpath="$(dirname "$rompath")/.game_config/$(basename "$rompath" ".$romext").cfg"
 
         if [ "$romext" != "miyoocmd" ]; then
-            echo "rompath: $rompath (ext: $romext)"
-            echo "romcfgpath: $romcfgpath"
+            log "rompath: $rompath (ext: $romext)"
+            log "romcfgpath: $romcfgpath"
             is_game=1
         fi
     fi
@@ -262,7 +268,7 @@ launch_game() {
             retroarch_core=$(get_info_value "$romcfg" core)
             corepath=".retroarch/cores/$retroarch_core.so"
 
-            echo "per game core: $retroarch_core" >> $sysdir/logs/game_list_options.log
+            log "per game core: $retroarch_core" >> $sysdir/logs/game_list_options.log
 
             if [ -f "/mnt/SDCARD/RetroArch/$corepath" ]; then
                 if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
@@ -285,8 +291,8 @@ launch_game() {
     # Prevent quick switch loop
     rm -f /tmp/quick_switch 2> /dev/null
 
-    echo "----- COMMAND:"
-    cat $sysdir/cmd_to_run.sh
+    log "----- COMMAND:"
+    log "$(cat $sysdir/cmd_to_run.sh)"
 
     if [ "$romext" == "miyoocmd" ]; then
         if [ -f "$rompath" ]; then
@@ -306,7 +312,7 @@ launch_game() {
         retval=$?
     fi
 
-    echo "cmd retval: $retval"
+    log "cmd retval: $retval"
 
     if [ $retval -ge 128 ] && [ $retval -ne 143 ] && [ $retval -ne 255 ]; then
         cd $sysdir
@@ -331,10 +337,10 @@ launch_game() {
         cd $sysdir
         playActivity stop "$rompath"
 
-        echo "game" > /tmp/prev_state
+        set_prev_state "game"
         check_off_order "End_Save"
     else
-        echo "app" > /tmp/prev_state
+        set_prev_state "app"
         check_off_order "End"
     fi
 }
@@ -359,11 +365,11 @@ check_switcher() {
 }
 
 launch_switcher() {
-    echo -e "\n:: Launch switcher"
+    log "\n:: Launch switcher"
     cd $sysdir
     LD_PRELOAD="$miyoodir/lib/libpadsp.so" gameSwitcher
     rm $sysdir/.runGameSwitcher
-    echo "switcher" > /tmp/prev_state
+    set_prev_state "switcher"
     sync
 }
 
@@ -421,7 +427,7 @@ mount_main_ui() {
 }
 
 init_system() {
-    echo -e "\n:: Init system"
+    log "\n:: Init system"
 
     # init_lcd
     cat /proc/ls
@@ -452,7 +458,7 @@ init_system() {
 
     brightness=$(/customer/app/jsonval brightness)
     brightness_raw=$(awk "BEGIN { print int(3 * exp(0.350656 * $brightness) + 0.5) }")
-    echo "brightness: $brightness -> $brightness_raw"
+    log "brightness: $brightness -> $brightness_raw"
 
     # init backlight
     echo 0 > /sys/class/pwm/pwmchip0/export
@@ -500,7 +506,7 @@ runifnecessary() {
     #a=`ps | grep $1 | grep -v grep`
     a=$(pgrep $1)
     while [ "$a" == "" ] && [ $cnt -lt 8 ]; do
-        echo try to run $2
+        log "try to run: $2"
         $2 $3 &
         sleep 0.5
         cnt=$(expr $cnt + 1)
@@ -534,4 +540,16 @@ check_timezone() {
     export TZ=$(cat "$sysdir/config/.tz")
 }
 
-main
+scriptname=$(basename "$0" .sh)
+
+log() {
+    if [ -f $sysdir/config/.logging ]; then
+        echo -e "($scriptname) $(date):" $* | tee -a "$sysdir/logs/$scriptname.log"
+    fi
+}
+
+if [ -f $sysdir/config/.logging ]; then
+    main
+else
+    main 2>&1 > /dev/null
+fi
