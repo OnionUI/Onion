@@ -1,11 +1,14 @@
 #!/bin/sh
-sysdir=`cd -- "$(dirname "$0")" >/dev/null 2>&1; pwd -P`
+sysdir=$(
+    cd -- "$(dirname "$0")" > /dev/null 2>&1
+    pwd -P
+)
 
 cd $sysdir
 mkdir -p logs
-LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$sysdir/lib" ./install.sh 2>&1 > ./logs/install.log
 
-echo "Install script exited unexpectedly"
+./install.sh 2>&1 > ./logs/install.log
 
 # Turn off after update
+echo "Install script exited unexpectedly"
 reboot
