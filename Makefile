@@ -2,7 +2,7 @@
 
 TARGET=Onion
 VERSION=4.2.0-beta
-RA_SUBVERSION=1.15.0.2
+RA_SUBVERSION=1.15.0.3
 
 ###########################################################
 
@@ -108,7 +108,7 @@ $(CACHE)/.setup:
 	@touch $(CACHE)/.setup
 
 build: core apps external
-	@$(ECHO) "\n-> [BUILD READY!]"
+	@$(ECHO) $(PRINT_DONE)
 
 core: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
@@ -166,48 +166,56 @@ apps: $(CACHE)/.setup
 $(THIRD_PARTY_DIR)/RetroArch/retroarch_miyoo354:
 	@$(ECHO) $(PRINT_RECIPE)
 # RetroArch
+	@$(ECHO) $(COLOR_BLUE)"\n-- Build RetroArch"$(COLOR_NORMAL)
 	@cd $(THIRD_PARTY_DIR)/RetroArch && make clean all
 	@cd $(THIRD_PARTY_DIR)/RetroArch && make clean all ADD_NETWORKING=1 PACKAGE_NAME=retroarch_miyoo354
 
 external: $(CACHE)/.setup $(THIRD_PARTY_DIR)/RetroArch/retroarch_miyoo354
 	@$(ECHO) $(PRINT_RECIPE)
 # Add RetroArch
-	@$(ECHO) "\n-- Add RetroArch"
 	@cp $(THIRD_PARTY_DIR)/RetroArch/retroarch $(BUILD_DIR)/RetroArch/
 	@cp $(THIRD_PARTY_DIR)/RetroArch/retroarch_miyoo354 $(BUILD_DIR)/RetroArch/
 	@echo $(RA_SUBVERSION) > $(BUILD_DIR)/RetroArch/onion_ra_version.txt
+	@$(BUILD_DIR)/.tmp_update/script/build_ext_cache.sh $(BUILD_DIR)/RetroArch/.retroarch
 # SearchFilter
-	@$(ECHO) "\n-- Build SearchFilter"
+	@$(ECHO) $(COLOR_BLUE)"\n-- Build SearchFilter"$(COLOR_NORMAL)
 	@cd $(THIRD_PARTY_DIR)/SearchFilter && make build && cp -a build/. $(BUILD_DIR)
 	@cp -a $(BUILD_DIR)/App/Search/. "$(PACKAGES_APP_DEST)/Search (Find your games)/App/Search"
-	@mv $(BUILD_DIR)/App/Filter "$(PACKAGES_APP_DEST)/List shortcuts (Filter+Refresh)/App/Filter"
+	@mv -f $(BUILD_DIR)/App/Filter/* "$(PACKAGES_APP_DEST)/List shortcuts (Filter+Refresh)/App/Filter"
+	@rmdir $(BUILD_DIR)/App/Filter
 # Other
-	@$(ECHO) "\n-- Build Terminal"
+	@$(ECHO) $(COLOR_BLUE)"\n-- Build Terminal"$(COLOR_NORMAL)
 	@cd $(THIRD_PARTY_DIR)/Terminal && make && cp ./st "$(BIN_DIR)"
-	@$(ECHO) "\n-- Build DinguxCommander"
+	@$(ECHO) $(COLOR_BLUE)"\n-- Build DinguxCommander"$(COLOR_NORMAL)
 	@cd $(THIRD_PARTY_DIR)/DinguxCommander && make && cp ./output/DinguxCommander "$(PACKAGES_APP_DEST)/File Explorer (DinguxCommander)/App/Commander_Italic"
 
 dist: build
 	@$(ECHO) $(PRINT_RECIPE)
 # Package configs
 	@cp -R $(TEMP_DIR)/configs/Saves/CurrentProfile/ $(TEMP_DIR)/configs/Saves/GuestProfile
-	@cd $(TEMP_DIR)/configs && 7z a -r -mtm=off $(BUILD_DIR)/.tmp_update/config/configs.pak . -bsp0 -bso0
+	@echo -n "Packaging configs..."
+	@cd $(TEMP_DIR)/configs && 7z a -mtm=off $(BUILD_DIR)/.tmp_update/config/configs.pak . -bsp1 -bso0
+	@echo " DONE"
 	@rm -rf $(TEMP_DIR)/configs
 	@rmdir $(TEMP_DIR)
 # Package RetroArch separately
-	@cd $(BUILD_DIR) && 7z a -r -mtm=off retroarch.pak RetroArch -bsp0 -bso0
+	@echo -n "Packaging RetroArch..."
+	@cd $(BUILD_DIR) && 7z a -mtm=off retroarch.pak ./RetroArch -bsp1 -bso0
+	@echo " DONE"
 	@mkdir -p $(DIST_DIR)/RetroArch
 	@mv $(BUILD_DIR)/retroarch.pak $(DIST_DIR)/RetroArch/
 	@echo $(RA_SUBVERSION) > $(DIST_DIR)/RetroArch/ra_package_version.txt
 # Package Onion core
-	@cd $(BUILD_DIR) && 7z a -r -mtm=off $(DIST_DIR)/miyoo/app/.tmp_update/onion.pak . -xr!RetroArch -bsp0 -bso0
-	@$(ECHO) "\n-> [DIST READY!]"
+	@echo -n "Packaging Onion..."
+	@cd $(BUILD_DIR) && 7z a -mtm=off $(DIST_DIR)/miyoo/app/.tmp_update/onion.pak . -x!RetroArch -bsp1 -bso0
+	@echo " DONE"
+	@$(ECHO) $(PRINT_DONE)
 
 release: dist
 	@$(ECHO) $(PRINT_RECIPE)
 	@rm -f $(RELEASE_DIR)/$(RELEASE_NAME).zip
-	@cd $(DIST_DIR) && 7z a -r -mtc=off $(RELEASE_DIR)/$(RELEASE_NAME).zip . -bsp0 -bso0
-	@$(ECHO) "\n-> [RELEASE READY!]"
+	@cd $(DIST_DIR) && 7z a -mtc=off $(RELEASE_DIR)/$(RELEASE_NAME).zip . -bsp1 -bso0
+	@$(ECHO) $(PRINT_DONE)
 
 clean:
 	@$(ECHO) $(PRINT_RECIPE)

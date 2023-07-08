@@ -1,3 +1,13 @@
+#!/bin/sh
+
+version() {
+    echo "$@" | awk -F. '{ f=$1; if (substr(f,2,1) == "v") f = substr(f,3); printf("%d%03d%03d%03d\n", f,$2,$3,$4); }'
+}
+
+prev_version=$(version "$(cat $sysdir/onionVersion/previous_version.txt)")
+
+if [ $prev_version -lt $(version "4.1.0") ]; then
+    cat > /tmp/onion_ra_patch.cfg <<- EOM
 content_show_netplay = "true"
 fastforward_frameskip = "false"
 input_overlay_opacity = "1.000000"
@@ -16,3 +26,12 @@ rgui_menu_color_theme = "0"
 rgui_menu_theme_preset = ":/.retroarch/assets/rgui/Onion.cfg"
 savestate_thumbnail_enable = "true"
 settings_show_achievements = "true"
+EOM
+
+    # Patch RA config
+    ./script/patch_ra_cfg.sh /tmp/onion_ra_patch.cfg
+
+    rm /tmp/onion_ra_patch.cfg
+else
+    echo "Skipped"
+fi

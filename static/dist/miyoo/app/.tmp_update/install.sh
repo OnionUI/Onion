@@ -1,32 +1,27 @@
 #!/bin/sh
-sysdir=`cd -- "$(dirname "$0")" >/dev/null 2>&1; pwd -P`
-core_zipfile="$sysdir/onion.pak"
-ra_zipfile="/mnt/SDCARD/RetroArch/retroarch.pak"
-ra_version_file="/mnt/SDCARD/RetroArch/onion_ra_version.txt"
-ra_package_version_file="/mnt/SDCARD/RetroArch/ra_package_version.txt"
+sysdir=$(
+    cd -- "$(dirname "$0")" > /dev/null 2>&1
+    pwd -P
+)
+miyoodir=/mnt/SDCARD/miyoo
+
+CORE_PACKAGE_FILE="$sysdir/onion.pak"
+RA_PACKAGE_FILE="/mnt/SDCARD/RetroArch/retroarch.pak"
+RA_VERSION_FILE="/mnt/SDCARD/RetroArch/onion_ra_version.txt"
+RA_PACKAGE_VERSION_FILE="/mnt/SDCARD/RetroArch/ra_package_version.txt"
+
+export LD_LIBRARY_PATH="/lib:/config/lib:/customer/lib:$sysdir/lib"
 export PATH="$sysdir/bin:$PATH"
+unset LD_PRELOAD
+
+MODEL_MM=283
+MODEL_MMP=354
 
 install_ra=1
 
 version() {
-    echo "$@" | awk -F. '{ f=$1; if (substr(f,2,1) == "v") f = substr(f,3); printf("%d%03d%03d%03d\n", f,$2,$3,$4); }';
+    echo "$@" | awk -F. '{ f=$1; if (substr(f,2,1) == "v") f = substr(f,3); printf("%d%03d%03d%03d\n", f,$2,$3,$4); }'
 }
-
-# An existing version of Onion's RetroArch exist
-if [ -f $ra_version_file ] && [ -f $ra_package_version_file ]; then
-    current_ra_version=`cat $ra_version_file`
-    package_ra_version=`cat $ra_package_version_file`
-
-    # Skip installation if current version is up-to-date.
-    if [ $(version $current_ra_version) -ge $(version $package_ra_version) ]; then
-        install_ra=0
-        echo "RetroArch is up-to-date!" >> $sysdir/logs/install.log
-    fi
-fi
-
-if [ ! -f "$ra_zipfile" ]; then
-    install_ra=0
-fi
 
 # globals
 total_core=0
@@ -34,13 +29,16 @@ total_ra=0
 
 main() {
     # init_lcd
-    cat /proc/ls
-    sleep 0.2
-    
+    if [ "$(ps | grep dev/l | grep -v grep)" == "" ]; then
+        cat /proc/ls
+        sleep 1
+    fi
+
     check_device_model
-    
+    check_install_ra
+
     # Start the battery monitor
-    if [ $deviceModel -eq 283 ]; then
+    if [ $DEVICE_ID -eq MODEL_MM ]; then
         # init charger detection
         gpiodir=/sys/devices/gpiochip0/gpio
         if [ ! -f $gpiodir/gpio59/direction ]; then
@@ -48,13 +46,13 @@ main() {
             echo "in" > $gpiodir/gpio59/direction
         fi
     fi
-    
+
     # init backlight
     pwmdir=/sys/class/pwm/pwmchip0
-    echo 0  	> $pwmdir/export
-    echo 800    > $pwmdir/pwm0/period
-    echo 80     > $pwmdir/pwm0/duty_cycle
-    echo 1  	> $pwmdir/pwm0/enable
+    echo 0 > $pwmdir/export
+    echo 800 > $pwmdir/pwm0/period
+    echo 80 > $pwmdir/pwm0/duty_cycle
+    echo 1 > $pwmdir/pwm0/enable
 
     killall keymon
 
@@ -68,7 +66,7 @@ main() {
 
     # Start the battery monitor
     cd $sysdir
-    batmon 2>&1 > ./logs/batmon.log &
+    batmon 2>&1 > /dev/null &
 
     detectKey 1
     menu_pressed=$?
@@ -78,7 +76,7 @@ main() {
         cleanup
         return
     fi
-    
+
     run_installation 0 0
     cleanup
 }
@@ -129,36 +127,49 @@ cleanup() {
     rmdir /mnt/SDCARD/Backup
 
     # Clean zips if still present
-    rm -f $core_zipfile
-    rm -f $ra_zipfile
-    rm -f $ra_package_version_file
+    rm -f $CORE_PACKAGE_FILE
+    rm -f $RA_PACKAGE_FILE
+    rm -f $RA_PACKAGE_VERSION_FILE
 
     # Remove update trigger script
     rm -f /mnt/SDCARD/miyoo/app/MainUI
+
+    rm -f /mnt/SDCARD/miyoo354/app/MainUI
+    rmdir /mnt/SDCARD/miyoo354/app
+    rmdir /mnt/SDCARD/miyoo354
 }
 
-
-deviceModel=0
+DEVICE_ID=0
 
 check_device_model() {
-    if [ ! -f /customer/app/axp_test ]; then        
-        touch /tmp/deviceModel
-        printf "283" > /tmp/deviceModel
-        deviceModel=283
-    else
-        touch /tmp/deviceModel
-        printf "354" > /tmp/deviceModel
-        deviceModel=354
+    DEVICE_ID=$([ -f /customer/app/axp_test ] && echo $MODEL_MMP || echo $MODEL_MM)
+    echo -n "$DEVICE_ID" > /tmp/deviceModel
+}
+
+check_install_ra() {
+    # An existing version of Onion's RetroArch exist
+    if [ -f $RA_VERSION_FILE ] && [ -f $RA_PACKAGE_VERSION_FILE ]; then
+        local current_ra_version=$(cat $RA_VERSION_FILE)
+        local package_ra_version=$(cat $RA_PACKAGE_VERSION_FILE)
+
+        # Skip installation if current version is up-to-date.
+        if [ $(version $current_ra_version) -ge $(version $package_ra_version) ]; then
+            install_ra=0
+            echo "RetroArch is up-to-date!"
+        fi
+    fi
+
+    if [ ! -f "$RA_PACKAGE_FILE" ]; then
+        install_ra=0
     fi
 }
 
-
 get_install_stats() {
-    total_core=$(zip_total "$core_zipfile")
+    total_core=$(zip_total "$CORE_PACKAGE_FILE")
     total_ra=0
 
-    if [ -f $ra_zipfile ]; then
-        total_ra=$(zip_total "$ra_zipfile")
+    if [ -f $RA_PACKAGE_FILE ]; then
+        total_ra=$(zip_total "$RA_PACKAGE_FILE")
     fi
 
     echo "STATS"
@@ -172,7 +183,7 @@ remove_configs() {
     rm -f /mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg
 
     rm -rf \
-        /mnt/SDCARD/Saves/CurrentProfile/config/*
+        /mnt/SDCARD/Saves/CurrentProfile/config/* \
         /mnt/SDCARD/Saves/GuestProfile/config/*
 }
 
@@ -181,33 +192,32 @@ verify_file() {
 
     if [ -f "$file" ]; then
         echo "File $file exists."
-        
+
         if [ -w "$file" ]; then
             echo "File $file has write permission."
         else
             echo "File $file does not have write permission."
         fi
-        
-        if fuser "$file" &> /dev/null; then
+
+        if fuser "$file" > /dev/null; then
             echo "Something is currently writing to $file."
         else
             echo "No process is currently writing to $file."
         fi
-        
+
         size=$(stat -c %s "$file")
         echo "File $file size: $size bytes."
     else
         echo "File $file does not exist."
     fi
-    
-    echo ""
 
+    echo ""
 }
 
 run_installation() {
     reset_configs=$1
     system_only=$2
-    
+
     killall batmon
 
     #get_install_stats
@@ -218,7 +228,7 @@ run_installation() {
     # Show installation progress
     cd $sysdir
     installUI &
-	sync
+    sync
     sleep 1
 
     verb="Updating"
@@ -233,7 +243,7 @@ run_installation() {
         backup_system
 
         remove_configs
-        if [ -f $ra_zipfile ]; then
+        if [ -f $RA_PACKAGE_FILE ]; then
             maybe_remove_retroarch
             install_ra=1
         fi
@@ -241,58 +251,61 @@ run_installation() {
         # Remove stock folders.
         cd /mnt/SDCARD
         rm -rf App Emu RApp miyoo
-        
+
     elif [ $system_only -ne 1 ]; then
         echo "Preparing update..." >> /tmp/.update_msg
 
-        debloat_apps
-        
-        echo "Migrating data..." >> /tmp/.update_msg
-        move_ports_collection
-
         echo ":: Migrating old Activity Tracker data"
         playActivity DBmigration
+        
+        # Ensure packages are fresh !
+        rm -rf /mnt/SDCARD/App/PackageManager 2> /dev/null
 
-        refresh_roms
+        remove_old_search
     fi
 
     if [ $install_ra -eq 1 ]; then
-		verify_file
+        verify_file
         install_core "1/2: $verb Onion..."
         install_retroarch "2/2: $verb RetroArch..."
     else
-		verify_file
+        verify_file
         install_core "1/1: $verb Onion..."
         echo "Skipped installing RetroArch"
-        rm -f $ra_zipfile
-        rm -f $ra_package_version_file
+        rm -f $RA_PACKAGE_FILE
+        rm -f $RA_PACKAGE_VERSION_FILE
     fi
 
-    echo "Finishing up..." >> /tmp/.update_msg
     if [ $reset_configs -eq 0 ]; then
         restore_ra_config
-
-        # Patch RA config
-        cd $sysdir
-        ./script/patch_ra_cfg.sh /mnt/SDCARD/RetroArch/onion_ra_patch.cfg
-
-        temp_fix
     fi
+
     install_configs $reset_configs
+
+    run_migration_scripts
+
+    echo "Finishing up - Get ready!" >> /tmp/.update_msg
+
+    refresh_roms
+
+    #########################################################################################
+    #                                  Installation is done                                 #
+    #                           Show quick guide and package manager                        #
+    #########################################################################################
 
     if [ $system_only -ne 1 ]; then
         if [ $reset_configs -eq 1 ]; then
-            cp -f $sysdir/res/miyoo${deviceModel}_system.json /appconfigs/system.json
+            cp -f $sysdir/res/miyoo${DEVICE_ID}_system.json /appconfigs/system.json
         fi
 
         # Start the battery monitor
         cd $sysdir
-        batmon 2>&1 > ./logs/batmon.log &
+        batmon 2>&1 > /dev/null &
 
         # Reapply theme
         system_theme="$(/customer/app/jsonval theme)"
         active_theme="$(cat ./config/active_theme)"
-        
+
         if [ -d "$(cat ./config/active_icon_pack)" ] && [ "$system_theme" == "$active_theme" ] && [ -d "$system_theme" ]; then
             themeSwitcher --update
         else
@@ -309,7 +322,7 @@ run_installation() {
         fi
 
         # Launch package manager
-        cd /mnt/SDCARD/App/PackageManager/ 
+        cd /mnt/SDCARD/App/PackageManager/
         if [ $reset_configs -eq 1 ]; then
             packageManager --confirm
         else
@@ -324,24 +337,29 @@ run_installation() {
         rm -f .installed
     fi
 
-    if [ $deviceModel -eq 283 ]; then
+    #########################################################################################
+    #                                  Wizards are completed                                #
+    #                                           Exit                                        #
+    #########################################################################################
+
+    if [ $DEVICE_ID -eq MODEL_MM ]; then
         echo "$verb2 complete!" >> /tmp/.update_msg
         touch $sysdir/.waitConfirm
         touch $sysdir/.installed
         sync
     else
-        echo "$verb2 complete!  -  Rebooting..." >> /tmp/.update_msg
+        echo "$verb2 complete - Rebooting..." >> /tmp/.update_msg
     fi
 
     installUI &
     sleep 1
 
-    if [ $deviceModel -eq 283 ]; then
+    if [ $DEVICE_ID -eq MODEL_MM ]; then
         counter=10
 
         while [ -f $sysdir/.waitConfirm ] && [ $counter -ge 0 ]; do
             echo "Press A to turn off (""$counter""s)" >> /tmp/.update_msg
-            counter=$(( counter - 1 ))
+            counter=$((counter - 1))
             sleep 1
         done
 
@@ -359,8 +377,8 @@ install_core() {
     echo ":: Install Onion"
     msg="$1"
 
-    if [ ! -f "$core_zipfile" ]; then
-		echo "CORE FILE MISSING"
+    if [ ! -f "$CORE_PACKAGE_FILE" ]; then
+        echo "CORE FILE MISSING"
         return
     fi
 
@@ -370,14 +388,12 @@ install_core() {
         $sysdir/bin/prompt \
         /mnt/SDCARD/miyoo/app/.isExpert
 
-    echo "$msg 0%" >> /tmp/.update_msg
-
     # Onion core installation / update.
     cd /
-    unzip_progress "$core_zipfile" "$msg" /mnt/SDCARD
+    unzip_progress "$CORE_PACKAGE_FILE" "$msg" /mnt/SDCARD
 
     # Cleanup
-    rm -f $core_zipfile
+    rm -f $CORE_PACKAGE_FILE
 }
 
 install_retroarch() {
@@ -385,11 +401,9 @@ install_retroarch() {
     msg="$1"
 
     # Check if RetroArch zip also exists
-    if [ ! -f "$ra_zipfile" ]; then
+    if [ ! -f "$RA_PACKAGE_FILE" ]; then
         return
     fi
-
-    echo "$msg 0%" >> /tmp/.update_msg
 
     # Backup old RA configuration
     cd /mnt/SDCARD/RetroArch
@@ -398,18 +412,18 @@ install_retroarch() {
 
     # Remove old RetroArch before unzipping
     maybe_remove_retroarch
-    
+
     # Install RetroArch
     cd /
-    unzip_progress "$ra_zipfile" "$msg" /mnt/SDCARD
-	
+    unzip_progress "$RA_PACKAGE_FILE" "$msg" /mnt/SDCARD
+
     # Cleanup
-    rm -f $ra_zipfile
-    rm -f $ra_package_version_file
+    rm -f $RA_PACKAGE_FILE
+    rm -f $RA_PACKAGE_VERSION_FILE
 }
 
 maybe_remove_retroarch() {
-    if [ -f $ra_zipfile ]; then
+    if [ -f $RA_PACKAGE_FILE ]; then
         cd /mnt/SDCARD/RetroArch
 
         tempdir=/mnt/SDCARD/.temp
@@ -428,7 +442,7 @@ maybe_remove_retroarch() {
             mv .retroarch/thumbnails $tempdir/
         fi
 
-        remove_everything_except `basename $ra_zipfile`
+        remove_everything_except $(basename $RA_PACKAGE_FILE)
 
         mkdir -p .retroarch
         mv $tempdir/* .retroarch/
@@ -465,10 +479,10 @@ install_configs() {
     fi
 
     # Set X and Y button keymaps if empty
-    cat /mnt/SDCARD/.tmp_update/config/keymap.json \
-        | sed 's/"mainui_button_x"\s*:\s*""/"mainui_button_x": "app:Search"/g' \
-        | sed 's/"mainui_button_y"\s*:\s*""/"mainui_button_y": "glo"/g' \
-        > ./temp_keymap.json
+    cat /mnt/SDCARD/.tmp_update/config/keymap.json |
+        sed 's/"mainui_button_x"\s*:\s*""/"mainui_button_x": "app:Search"/g' |
+        sed 's/"mainui_button_y"\s*:\s*""/"mainui_button_y": "glo"/g' \
+            > ./temp_keymap.json
     mv -f ./temp_keymap.json /mnt/SDCARD/.tmp_update/config/keymap.json
 }
 
@@ -489,19 +503,19 @@ backup_system() {
     old_ra_dir=/mnt/SDCARD/RetroArch/.retroarch
 
     # Move BIOS files from stock location
-    if [ -d $old_ra_dir/system ] ; then
+    if [ -d $old_ra_dir/system ]; then
         mkdir -p /mnt/SDCARD/BIOS
         mv -f $old_ra_dir/system/* /mnt/SDCARD/BIOS/
     fi
 
     # Backup old saves
-    if [ -d $old_ra_dir/saves ] ; then
+    if [ -d $old_ra_dir/saves ]; then
         mkdir -p /mnt/SDCARD/Backup/saves
         mv -f $old_ra_dir/saves/* /mnt/SDCARD/Backup/saves/
-    fi    
+    fi
 
     # Backup old states
-    if [ -d $old_ra_dir/states ] ; then
+    if [ -d $old_ra_dir/states ]; then
         mkdir -p /mnt/SDCARD/Backup/states
         mv -f $old_ra_dir/states/* /mnt/SDCARD/Backup/states/
     fi
@@ -512,65 +526,86 @@ backup_system() {
     fi
 }
 
-debloat_apps() {
-    echo ":: Debloat apps"
-    cd /mnt/SDCARD/App
-    rm -rf \
-        Commander_CN \
-        power \
-        swapskin \
-        Retroarch \
-        StartGameSwitcher \
-        The_Onion_Installer \
-        Clean_View_Toggle \
-        Onion_Manual \
-        PlayActivity \
-        SearchFilter \
-        ThemeSwitcher \
-        IconThemer
-        
-    rm -rf /mnt/SDCARD/Emu/SEARCH
+remove_old_search() {
+    echo ":: Remove old search"
 
-    # Remove faulty PicoDrive remap
-    pdrmp_file="/mnt/SDCARD/Saves/CurrentProfile/config/remaps/PicoDrive/PicoDrive.rmp"
-    if [ -f "$pdrmp_file" ] && [ `md5hash "$pdrmp_file"` == "a3895a0eab19d4ce8aad6a8f7ded57bc" ]; then
-        rm -f "$pdrmp_file"
-    fi
-
-    if [ -d /mnt/SDCARD/Packages ]; then
-        rm -rf /mnt/SDCARD/Packages
-    fi
-
-    if [ -d /mnt/SDCARD/miyoo/packages ]; then
-        rm -rf /mnt/SDCARD/miyoo/packages
-    fi
-
-    if [ -d /mnt/SDCARD/App/PackageManager/data ]; then
-        rm -rf /mnt/SDCARD/App/PackageManager/data
-    fi
+    rm -rf /mnt/SDCARD/Emu/SEARCH 2> /dev/null
+    rm -f /mnt/SDCARD/App/Search/data/data_cache6.db 2> /dev/null
 }
 
-move_ports_collection() {
-    echo ":: Move ports collection"
-    if [ -d /mnt/SDCARD/Emu/PORTS/Binaries ] ; then
-        echo "Ports collection found! Moving..."
-        mkdir -p /mnt/SDCARD/Roms/PORTS/Binaries
-        mv -f /mnt/SDCARD/Emu/PORTS/Binaries/* /mnt/SDCARD/Roms/PORTS/Binaries
-        mv -f /mnt/SDCARD/Emu/PORTS/PORTS/* /mnt/SDCARD/Roms/PORTS
-        rmdir /mnt/SDCARD/Emu/PORTS/Binaries
-        rmdir /mnt/SDCARD/Emu/PORTS/PORTS
-        rm -f /mnt/SDCARD/Roms/PORTS/PORTS_cache2.db
-        rm -f /mnt/SDCARD/Emu/PORTS/config.json # Triggers a reinstall
+run_migration_scripts() {
+    local MIGRATION_DIR=$sysdir/script/migration
+    local MIGRATION_STATE_FILE=$sysdir/config/migration_state
+    local MIGRATION_LIST_FILE=/tmp/active_migrations
+    local count=0
+    local migration_state=$([ -f "$MIGRATION_STATE_FILE" ] 2> /dev/null && cat "$MIGRATION_STATE_FILE" || echo 0)
+
+    [ -n "$migration_state" ] && [ "$migration_state" -eq "$migration_state" ] 2> /dev/null
+    if [ $? -ne 0 ]; then
+        migration_state=0
     fi
-    if [ -d /mnt/SDCARD/Roms/PORTS/Binaries ]; then
-        mv -f /mnt/SDCARD/Roms/PORTS /mnt/SDCARD/Roms/PORTS_old
+
+    if [ -d "$MIGRATION_DIR" ]; then
+        for entry in "$MIGRATION_DIR"/*.sh; do
+            if [ ! -f "$entry" ]; then
+                continue
+            fi
+
+            migration_id=$(basename "$entry" | cut -d'_' -f1)
+
+            # Validate migration ID
+            [ -n "$migration_id" ] && [ "$migration_id" -eq "$migration_id" ] 2> /dev/null
+            if [ $? -ne 0 ]; then
+                continue
+            fi
+
+            if [ $migration_state -ge $migration_id ]; then
+                continue
+            fi
+
+            echo "$entry" >> "$MIGRATION_LIST_FILE"
+            count=$((count + 1))
+        done
+    fi
+
+    if [ $count -gt 0 ] && [ -f "$MIGRATION_LIST_FILE" ]; then
+        sort -f -o temp "$MIGRATION_LIST_FILE"
+        rm -f "$MIGRATION_LIST_FILE"
+        mv temp "$MIGRATION_LIST_FILE"
+
+        echo "0/$count: Running migrations... 0%" >> /tmp/.update_msg
+        local n=0
+        local max_id=0
+
+        while read entry; do
+            n=$((n + 1))
+            echo "Running migration script ($n/$count):" $(basename "$entry")
+            migration_id=$(basename "$entry" | cut -d'_' -f1)
+
+            cd $sysdir
+            chmod a+x "$entry"
+            eval "$entry"
+
+            local percent=$((n * 100 / count))
+            echo "$n/$count: Running migrations... $percent%" >> /tmp/.update_msg
+
+            if [ $migration_id -gt $max_id ]; then
+                max_id=$migration_id
+                echo "$migration_id" > "$MIGRATION_STATE_FILE"
+                sync
+            fi
+
+            sleep 0.1
+        done < "$MIGRATION_LIST_FILE"
+
+        rm $MIGRATION_LIST_FILE
     fi
 }
 
 refresh_roms() {
     echo ":: Refresh roms"
     # Force refresh the rom lists
-    if [ -d /mnt/SDCARD/Roms ] ; then
+    if [ -d /mnt/SDCARD/Roms ]; then
         cd /mnt/SDCARD/Roms
         find . -type f -name "*_cache[0-9].db" -exec rm -f {} \;
     fi
@@ -581,12 +616,12 @@ remove_everything_except() {
 }
 
 md5hash() {
-    echo `md5sum "$1" | awk '{ print $1; }'`
+    echo $(md5sum "$1" | awk '{ print $1; }')
 }
 
 zip_total() {
     zipfile="$1"
-    total=`unzip -l "$zipfile" | tail -1 | grep -Eo "([0-9]+) files" | sed "s/[^0-9]*//g"`
+    total=$(unzip -l "$zipfile" | tail -1 | grep -Eo "([0-9]+) files" | sed "s/[^0-9]*//g")
     echo $total
 }
 
@@ -599,7 +634,7 @@ unzip_progress() {
 
     verify_file
 
-    echo "Starting..." > /tmp/.update_msg
+    echo "Verifying package..." > /tmp/.update_msg
     sleep 3
 
     if [ -f "/mnt/SDCARD/.tmp_update/onion.pak" ]; then
@@ -614,9 +649,12 @@ unzip_progress() {
     sleep 1
 
     # Run the 7z extraction command in the background and redirect output to /tmp/.extraction_output
-    (7z x -aoa -o"$dest" "$zipfile" -bsp1 -bb > /tmp/.extraction_output ; echo $? > "/tmp/extraction_status" ) &
+    (
+        7z x -aoa -o"$dest" "$zipfile" -bsp1 -bb > /tmp/.extraction_output
+        echo $? > "/tmp/extraction_status"
+    ) &
 
-    sleep 1 
+    sleep 1
 
     if pgrep 7z > /dev/null; then
         echo "7Z is running"
@@ -640,14 +678,14 @@ unzip_progress() {
     while [ -n "$a" ]; do
         last_line=$(tail -n 1 /tmp/.extraction_output)
         value=$(echo "$last_line" | sed 's/.* \([0-9]\+\)%.*/\1/')
-        if [ "$value" -eq "$value" ] 2>/dev/null; then                  # check if the value is numeric
+        if [ "$value" -eq "$value" ] 2> /dev/null; then # check if the value is numeric
             if [ $value -eq 0 ]; then
-                echo "Preparing folders..." > /tmp/.update_msg          # It gets stuck a bit at 0%, so don't show percentage yet
+                echo "Preparing file system..." > /tmp/.update_msg # It gets stuck a bit at 0%, so don't show percentage yet
             else
-                echo "$msg $value%" > /tmp/.update_msg                  # Now we can show completion percentage
+                echo "$msg $value%" > /tmp/.update_msg # Now we can show completion percentage
             fi
         fi
-        > /tmp/.extraction_output  # to avoid to parse a too big file
+        > /tmp/.extraction_output # to avoid to parse a too big file
         sleep 0.5
         a=$(pgrep 7z)
     done
@@ -671,21 +709,6 @@ unzip_progress() {
 
 free_mma() {
     /mnt/SDCARD/.tmp_update/bin/freemma
-}
-
-temp_fix() {
-    prev_version=`cat $sysdir/onionVersion/previous_version.txt`
-
-    if [ "$prev_version" == "4.2.0-beta-dev-65c7b31" ] \
-    || [ "$prev_version" == "4.2.0-beta-dev-0763d40" ] \
-    || [ "$prev_version" == "4.2.0-beta-dev-4c7e2db" ]; then
-        echo -e "cheevos_enable = \"false\"\ncheevos_hardcore_mode_enable = \"false\"" > /tmp/temp_fix_patch.cfg
-
-        cd $sysdir
-        ./script/patch_ra_cfg.sh /tmp/temp_fix_patch.cfg
-
-        rm /tmp/temp_fix_patch.cfg
-    fi
 }
 
 main
