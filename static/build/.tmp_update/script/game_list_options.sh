@@ -10,11 +10,6 @@ mkdir -p $radir/cores/cache
 
 cd $sysdir
 
-if [ ! -f ./cmd_to_run.sh ]; then
-    echo "cmd_to_run.sh not found"
-    exit 1
-fi
-
 ROM_TYPE_UNKNOWN=0
 ROM_TYPE_GAME=1
 ROM_TYPE_APP=2
@@ -26,7 +21,7 @@ TAB_RECENTS=10
 TAB_EXPERT=16
 current_tab=$(cat /tmp/state.json | grep "\"type\":" | sed -e 's/^.*:\s*//g' | sed -e 's/\s*,$//g' | xargs | awk '{ print $2 }')
 
-cmd=`cat ./cmd_to_run.sh`
+cmd=$(cat ./cmd_to_run.sh 2> /dev/null)
 rompath=""
 emupath=""
 emulabel=""
@@ -47,7 +42,12 @@ menu_options=""
 menu_option_labels=""
 menu_option_args=""
 
-main() {    
+main() {
+    if [ ! -f ./cmd_to_run.sh ]; then
+        echo "cmd_to_run.sh not found"
+        exit 1
+    fi
+
     if [ $current_tab -eq $TAB_GAMES ]; then
         echo "tab: games"
     elif [ $current_tab -eq $TAB_FAVORITES ]; then
@@ -66,14 +66,14 @@ main() {
 
     rm -f ./cmd_to_run.sh 2> /dev/null
 
-    emupath=`dirname $(echo "$cmd" | awk '{ gsub(/"/, "", $2); st = index($2,".."); if (st) { print substr($2,0,st) } else { print $2 } }')`
+    emupath=$(dirname $(echo "$cmd" | awk '{ gsub(/"/, "", $2); st = index($2,".."); if (st) { print substr($2,0,st) } else { print $2 } }'))
 
     if [ "$emupath" == "/mnt/SDCARD/App" ]; then
         romtype=$ROM_TYPE_APP
     else
         rompath=$(echo "$cmd" | awk '{ st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3) }')
-		
-		export cookie_rom_path="$rompath"
+
+        export cookie_rom_path="$rompath"
 
         if echo "$rompath" | grep -q ":"; then
             rompath=$(echo "$rompath" | awk '{st = index($0,":"); print substr($0,st+1)}')
@@ -83,9 +83,9 @@ main() {
             romtype=$ROM_TYPE_GAME
         fi
 
-        romext=`echo "$(basename "$rompath")" | awk -F. '{print tolower($NF)}'`
+        romext=$(echo "$(basename "$rompath")" | awk -F. '{print tolower($NF)}')
 
-        emu_config_json=`cat "$emupath/config.json"`
+        emu_config_json=$(cat "$emupath/config.json")
         romroot="$emupath/$(get_json_value "$emu_config_json" "rompath")"
         emulabel="$(get_json_value "$emu_config_json" "label" | sed -e 's/^\s*//g' -e 's/\s*$//g')"
         launch_path="$emupath/launch.sh"
@@ -99,7 +99,7 @@ main() {
 
     echo "cmd: $cmd"
     # example: LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so "/mnt/SDCARD/Emu/GBATEST/../../.tmp_update/proxy.sh" "/mnt/SDCARD/Emu/GBATEST/../../Roms/GBATEST/mGBA/Final Fantasy IV Advance (U).zip"
-    echo "romtype: $romtype" 
+    echo "romtype: $romtype"
     echo "rompath: $rompath"
     # example: "/mnt/SDCARD/Emu/GBATEST/../../Roms/GBATEST/mGBA/Final Fantasy IV Advance (U).zip"
     echo "romext: $romext"
@@ -118,7 +118,7 @@ main() {
 
     if [ $skip_game_options -eq 0 ]; then
         get_core_info
-				
+
         game_core_label="Game core"
 
         if [ ! -f "$radir/cores/$default_core.so" ]; then
@@ -128,8 +128,8 @@ main() {
         add_reset_core=0
 
         if [ -f "$corepath" ] && [ -f "$coreinfopath" ]; then
-            coreinfo=`cat "$coreinfopath"`
-            corename=`get_info_value "$coreinfo" corename`
+            coreinfo=$(cat "$coreinfopath")
+            corename=$(get_info_value "$coreinfo" corename)
 
             game_core_label="Game core: $corename"
 
@@ -142,7 +142,7 @@ main() {
             add_menu_option reset_game "Reset game"
         fi
 
-        romdirname=`echo "$rompath" | sed "s/^.*Roms\///g" | cut -d "/" -f1`
+        romdirname=$(echo "$rompath" | sed "s/^.*Roms\///g" | cut -d "/" -f1)
         manpath="/mnt/SDCARD/Roms/$romdirname/Manuals/$(basename "$rompath" ".$romext").pdf"
 
         echo "romdirname: $romdirname"
@@ -161,7 +161,7 @@ main() {
 
     if [ $current_tab -eq $TAB_GAMES ]; then
         if [ -f "$emupath/active_filter" ]; then
-            filter_kw=`cat "$emupath/active_filter"`
+            filter_kw=$(cat "$emupath/active_filter")
             add_menu_option clear_filter "Clear filter"
             add_menu_option filter_roms "Filter: $filter_kw"
         else
@@ -172,7 +172,7 @@ main() {
     if [ $current_tab -eq $TAB_GAMES ] || [ $current_tab -eq $TAB_EXPERT ]; then
         add_menu_option refresh_roms "Refresh list"
     fi
-	
+
     add_script_files "$globalscriptdir"
 
     if [ $current_tab -eq $TAB_GAMES ]; then
@@ -188,9 +188,9 @@ main() {
     if [ $current_tab -eq $TAB_GAMES ] || [ $current_tab -eq $TAB_EXPERT ]; then
         add_script_files "$emupath/romscripts"
     fi
-	
-	create_cookie 
-	
+
+    create_cookie
+
     # Show GLO menu
     runcmd="LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so prompt -t \"$UI_TITLE\" $(list_args "$menu_option_labels")"
     echo -e "\n\n=================================================================================================="
@@ -202,8 +202,8 @@ main() {
     echo "retcode: $retcode"
 
     # Execute action
-    menu_action=`get_item "$menu_options" $retcode`
-    menu_arg=`get_item "$menu_option_args" $retcode`
+    menu_action=$(get_item "$menu_options" $retcode)
+    menu_arg=$(get_item "$menu_option_args" $retcode)
     runcmd="$menu_action $menu_arg"
     echo -e "> $runcmd"
     echo -e "\n\n==================================================================================================\n\n"
@@ -214,7 +214,7 @@ main() {
 }
 
 # This creates a cookie for the quick host script to pick up (host & client both use this cookie) (clears every cycle)
-create_cookie(){
+create_cookie() {
     cookiefile="/mnt/SDCARD/RetroArch/retroarch.cookie"
 
     if [ -f "$cookiefile" ]; then
@@ -237,18 +237,18 @@ check_is_game() {
 add_script_files() {
     scriptdir="$1"
     if [ -d "$scriptdir" ]; then
-        for entry in "$scriptdir"/*.sh ; do
+        for entry in "$scriptdir"/*.sh; do
             if [ ! -f "$entry" ]; then
                 continue
             fi
 
-            scriptlabel=`get_info_value "$(cat "$entry")" scriptlabel`
+            scriptlabel=$(get_info_value "$(cat "$entry")" scriptlabel)
 
             if [ "$scriptlabel" == "" ]; then
-                scriptlabel=`basename "$entry" .sh`
+                scriptlabel=$(basename "$entry" .sh)
             fi
 
-            scriptlabel=`echo "$scriptlabel" | sed "s/%LIST%/$emulabel/g"`
+            scriptlabel=$(echo "$scriptlabel" | sed "s/%LIST%/$emulabel/g")
 
             echo "adding romscript: $scriptlabel"
             add_menu_option run_script "$scriptlabel" "$entry"
@@ -265,9 +265,9 @@ add_menu_option() {
         menu_option_labels="$label"
         menu_option_args="\"$args\""
     else
-        menu_options=`echo -e "$menu_options\n$action"`
-        menu_option_labels=`echo -e "$menu_option_labels\n$label"`
-        menu_option_args=`echo -e "$menu_option_args\n\"$args\""`
+        menu_options=$(echo -e "$menu_options\n$action")
+        menu_option_labels=$(echo -e "$menu_option_labels\n$label")
+        menu_option_args=$(echo -e "$menu_option_args\n\"$args\"")
     fi
 }
 
@@ -277,7 +277,7 @@ list_args() {
 
 get_item() {
     index=$2
-    echo "$1" | sed "$((index+1))q;d"
+    echo "$1" | sed "$((index + 1))q;d"
 }
 
 get_core_info() {
@@ -286,23 +286,23 @@ get_core_info() {
     romcfgpath="$(dirname "$rompath")/.game_config/$(basename "$rompath" ".$romext").cfg"
 
     if [ -f "$romcfgpath" ]; then
-        romcfg=`cat "$romcfgpath"`
-        retroarch_core=`get_info_value "$romcfg" core`
+        romcfg=$(cat "$romcfgpath")
+        retroarch_core=$(get_info_value "$romcfg" core)
     fi
 
-    default_core=`cat "$launch_path" | grep ".retroarch/cores/" | awk '{st = index($0,".retroarch/cores/"); s = substr($0,st+17); st2 = index(s,".so"); print substr(s,0,st2-1)}' | xargs`
+    default_core=$(cat "$launch_path" | grep ".retroarch/cores/" | awk '{st = index($0,".retroarch/cores/"); s = substr($0,st+17); st2 = index(s,".so"); print substr(s,0,st2-1)}' | xargs)
 
     if [ "$retroarch_core" == "" ]; then
         retroarch_core="$default_core"
     fi
 
-    echo "default_core: $default_core" 
+    echo "default_core: $default_core"
     echo "retroarch_core: $retroarch_core"
 
     corepath="$radir/cores/$retroarch_core.so"
     coreinfopath="$radir/cores/$retroarch_core.info"
-	
-	export cookie_core_path="$corepath"
+
+    export cookie_core_path="$corepath"
 }
 
 get_info_value() {
@@ -337,19 +337,19 @@ change_core() {
 
         if ! cat "$emupath/config.json" | grep -q "\"shortname\"\s*:\s*1"; then
             if [ "$ext" == "zip" ]; then
-                zip_files=`unzip -l "$rompath" | sed '1,3d;$d' | sed '$d' | sort -n -r`
+                zip_files=$(unzip -l "$rompath" | sed '1,3d;$d' | sed '$d' | sort -n -r)
             else
-                zip_files=`./bin/7z l -ba "$rompath" | awk '{$1="";$2="";$3="";print $0;}' | sort -n -r`
+                zip_files=$(./bin/7z l -ba "$rompath" | awk '{$1="";$2="";$3="";print $0;}' | sort -n -r)
             fi
 
             echo "zip/7z output:"
             echo "$zip_files"
 
-            inner_name=`basename "$(echo "$zip_files" | grep "[!]")"`
+            inner_name=$(basename "$(echo "$zip_files" | grep "[!]")")
             if [ "$inner_name" == "" ]; then
-                inner_name=`basename "$(echo "$zip_files" | head -n 1)"`
+                inner_name=$(basename "$(echo "$zip_files" | head -n 1)")
             fi
-            ext=`echo "$inner_name" | awk -F. '{print tolower($NF)}'`
+            ext=$(echo "$inner_name" | awk -F. '{print tolower($NF)}')
             echo "inner extension: $ext"
             echo "-------------------------------------"
 
@@ -369,7 +369,7 @@ change_core() {
 
         if [ ! -f "$single_ext_cache_path" ]; then
             while read entry; do
-                tmp_extensions=`echo "$entry" | awk '{split($0,a,";"); print a[3]}'`
+                tmp_extensions=$(echo "$entry" | awk '{split($0,a,";"); print a[3]}')
 
                 if ! echo "$tmp_extensions" | tr '|' '\n' | grep -q "$ext"; then
                     continue
@@ -382,10 +382,10 @@ change_core() {
         if [ "$default_core" == "" ]; then
             is_valid=1
         fi
-        
+
         while read entry; do
-            tmp_corename=`echo "$entry" | awk '{split($0,a,";"); print a[1]}'`
-            tmp_core=`echo "$entry" | awk '{split($0,a,";"); print a[2]}'`
+            tmp_corename=$(echo "$entry" | awk '{split($0,a,";"); print a[1]}')
+            tmp_core=$(echo "$entry" | awk '{split($0,a,";"); print a[2]}')
 
             if [ "$tmp_core" == "$default_core" ]; then
                 is_valid=1
@@ -409,7 +409,7 @@ change_core() {
         if [ "$is_archive" == "" ]; then
             break
         fi
-        
+
         ext="$is_archive"
         is_archive=""
     done
@@ -418,11 +418,11 @@ change_core() {
     echo "corenames: $available_corenames"
 
     if [ $is_valid -eq 0 ]; then
-        infoPanel --title "GAME CORE" --message "Not available for this rom" --auto
+        infoPanel --title "GAME CORE ($ext)" --message "Not available for this rom\n($ext files)" --auto
         exit 1
     fi
 
-    runcmd="LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./bin/prompt -t \"GAME CORE\" -s $selected_index $available_corenames"
+    runcmd="LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./bin/prompt -t \"GAME CORE ($ext)\" -s $selected_index $available_corenames"
     eval $runcmd
     retcode=$?
 
@@ -430,7 +430,7 @@ change_core() {
         exit 1
     fi
 
-    new_core=`echo $available_cores | awk -v N=$((retcode+1)) '{print $N}'`
+    new_core=$(echo $available_cores | awk -v N=$((retcode + 1)) '{print $N}')
 
     echo "new default core: $new_core"
 
@@ -457,25 +457,7 @@ reset_core() {
 get_core_extensions() {
     if [ ! -f "$ext_cache_path" ]; then
         ./bin/infoPanel --title "CACHING CORES" --message "Caching core info\n \nThis may take a minute..." --persistent &
-
-        for entry in "$radir/cores"/*.info ; do
-            tmp_info=`cat "$entry"`
-            tmp_core=`basename "$entry" .info`
-
-            if [ ! -f "$radir/cores/$tmp_core.so" ]; then
-                continue
-            fi
-
-            tmp_corename=`get_info_value "$tmp_info" "corename"`
-            tmp_extensions=`get_info_value "$tmp_info" "supported_extensions"`
-
-            echo "$tmp_corename;$tmp_core;$tmp_extensions" >> "$ext_cache_path"
-
-            sort -f -o temp "$ext_cache_path"
-            rm -f "$ext_cache_path"
-            mv temp "$ext_cache_path"
-        done
-
+        ./script/build_ext_cache.sh "$radir"
         touch /tmp/dismiss_info_panel
     fi
 }
@@ -488,7 +470,7 @@ rename_rom() {
     eval $runcmd > temp
     retcode=$?
 
-    kboutput=`cat temp | tail -1`
+    kboutput=$(cat temp | tail -1)
     rm -f temp
 
     echo "kb retcode: $retcode"

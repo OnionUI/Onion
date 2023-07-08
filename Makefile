@@ -175,6 +175,7 @@ external: $(CACHE)/.setup $(THIRD_PARTY_DIR)/RetroArch/retroarch_miyoo354
 	@cp $(THIRD_PARTY_DIR)/RetroArch/retroarch $(BUILD_DIR)/RetroArch/
 	@cp $(THIRD_PARTY_DIR)/RetroArch/retroarch_miyoo354 $(BUILD_DIR)/RetroArch/
 	@echo $(RA_SUBVERSION) > $(BUILD_DIR)/RetroArch/onion_ra_version.txt
+	@$(BUILD_DIR)/.tmp_update/script/build_ext_cache.sh $(BUILD_DIR)/RetroArch/.retroarch
 # SearchFilter
 	@$(ECHO) $(COLOR_BLUE)"\n-- Build SearchFilter"$(COLOR_NORMAL)
 	@cd $(THIRD_PARTY_DIR)/SearchFilter && make build && cp -a build/. $(BUILD_DIR)
