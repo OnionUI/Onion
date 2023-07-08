@@ -35,6 +35,7 @@ if [ "$0" = "/tmp/_shutdown" ]; then
 	kill_hooked_tasks -9
 	
 	sync
+	umount /mnt/SDCARD/miyoo/app/MainUI
 	umount /mnt/SDCARD/RetroArch/retroarch
 	umount /customer/lib/libgamename.so
 	swapoff /mnt/SDCARD/cachefile
