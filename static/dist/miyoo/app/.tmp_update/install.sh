@@ -5,36 +5,23 @@ sysdir=$(
 )
 miyoodir=/mnt/SDCARD/miyoo
 
-core_zipfile="$sysdir/onion.pak"
-ra_zipfile="/mnt/SDCARD/RetroArch/retroarch.pak"
-ra_version_file="/mnt/SDCARD/RetroArch/onion_ra_version.txt"
-ra_package_version_file="/mnt/SDCARD/RetroArch/ra_package_version.txt"
+CORE_PACKAGE_FILE="$sysdir/onion.pak"
+RA_PACKAGE_FILE="/mnt/SDCARD/RetroArch/retroarch.pak"
+RA_VERSION_FILE="/mnt/SDCARD/RetroArch/onion_ra_version.txt"
+RA_PACKAGE_VERSION_FILE="/mnt/SDCARD/RetroArch/ra_package_version.txt"
 
 export LD_LIBRARY_PATH="/lib:/config/lib:/customer/lib:$sysdir/lib"
 export PATH="$sysdir/bin:$PATH"
 unset LD_PRELOAD
+
+MODEL_MM=283
+MODEL_MMP=354
 
 install_ra=1
 
 version() {
     echo "$@" | awk -F. '{ f=$1; if (substr(f,2,1) == "v") f = substr(f,3); printf("%d%03d%03d%03d\n", f,$2,$3,$4); }'
 }
-
-# An existing version of Onion's RetroArch exist
-if [ -f $ra_version_file ] && [ -f $ra_package_version_file ]; then
-    current_ra_version=$(cat $ra_version_file)
-    package_ra_version=$(cat $ra_package_version_file)
-
-    # Skip installation if current version is up-to-date.
-    if [ $(version $current_ra_version) -ge $(version $package_ra_version) ]; then
-        install_ra=0
-        echo "RetroArch is up-to-date!" >> $sysdir/logs/install.log
-    fi
-fi
-
-if [ ! -f "$ra_zipfile" ]; then
-    install_ra=0
-fi
 
 # globals
 total_core=0
@@ -48,9 +35,10 @@ main() {
     fi
 
     check_device_model
+    check_install_ra
 
     # Start the battery monitor
-    if [ $deviceModel -eq 283 ]; then
+    if [ $DEVICE_ID -eq MODEL_MM ]; then
         # init charger detection
         gpiodir=/sys/devices/gpiochip0/gpio
         if [ ! -f $gpiodir/gpio59/direction ]; then
@@ -139,9 +127,9 @@ cleanup() {
     rmdir /mnt/SDCARD/Backup
 
     # Clean zips if still present
-    rm -f $core_zipfile
-    rm -f $ra_zipfile
-    rm -f $ra_package_version_file
+    rm -f $CORE_PACKAGE_FILE
+    rm -f $RA_PACKAGE_FILE
+    rm -f $RA_PACKAGE_VERSION_FILE
 
     # Remove update trigger script
     rm -f /mnt/SDCARD/miyoo/app/MainUI
@@ -151,26 +139,37 @@ cleanup() {
     rmdir /mnt/SDCARD/miyoo354
 }
 
-deviceModel=0
+DEVICE_ID=0
 
 check_device_model() {
-    if [ ! -f /customer/app/axp_test ]; then
-        touch /tmp/deviceModel
-        printf "283" > /tmp/deviceModel
-        deviceModel=283
-    else
-        touch /tmp/deviceModel
-        printf "354" > /tmp/deviceModel
-        deviceModel=354
+    DEVICE_ID=$([ -f /customer/app/axp_test ] && echo $MODEL_MMP || echo $MODEL_MM)
+    echo -n "$DEVICE_ID" > /tmp/deviceModel
+}
+
+check_install_ra() {
+    # An existing version of Onion's RetroArch exist
+    if [ -f $RA_VERSION_FILE ] && [ -f $RA_PACKAGE_VERSION_FILE ]; then
+        local current_ra_version=$(cat $RA_VERSION_FILE)
+        local package_ra_version=$(cat $RA_PACKAGE_VERSION_FILE)
+
+        # Skip installation if current version is up-to-date.
+        if [ $(version $current_ra_version) -ge $(version $package_ra_version) ]; then
+            install_ra=0
+            echo "RetroArch is up-to-date!" >> $sysdir/logs/install.log
+        fi
+    fi
+
+    if [ ! -f "$RA_PACKAGE_FILE" ]; then
+        install_ra=0
     fi
 }
 
 get_install_stats() {
-    total_core=$(zip_total "$core_zipfile")
+    total_core=$(zip_total "$CORE_PACKAGE_FILE")
     total_ra=0
 
-    if [ -f $ra_zipfile ]; then
-        total_ra=$(zip_total "$ra_zipfile")
+    if [ -f $RA_PACKAGE_FILE ]; then
+        total_ra=$(zip_total "$RA_PACKAGE_FILE")
     fi
 
     echo "STATS"
@@ -244,7 +243,7 @@ run_installation() {
         backup_system
 
         remove_configs
-        if [ -f $ra_zipfile ]; then
+        if [ -f $RA_PACKAGE_FILE ]; then
             maybe_remove_retroarch
             install_ra=1
         fi
@@ -269,8 +268,8 @@ run_installation() {
         verify_file
         install_core "1/1: $verb Onion..."
         echo "Skipped installing RetroArch"
-        rm -f $ra_zipfile
-        rm -f $ra_package_version_file
+        rm -f $RA_PACKAGE_FILE
+        rm -f $RA_PACKAGE_VERSION_FILE
     fi
 
     echo "Finishing up - Get ready!" >> /tmp/.update_msg
@@ -287,7 +286,7 @@ run_installation() {
 
     if [ $system_only -ne 1 ]; then
         if [ $reset_configs -eq 1 ]; then
-            cp -f $sysdir/res/miyoo${deviceModel}_system.json /appconfigs/system.json
+            cp -f $sysdir/res/miyoo${DEVICE_ID}_system.json /appconfigs/system.json
         fi
 
         # Start the battery monitor
@@ -329,7 +328,7 @@ run_installation() {
         rm -f .installed
     fi
 
-    if [ $deviceModel -eq 283 ]; then
+    if [ $DEVICE_ID -eq MODEL_MM ]; then
         echo "$verb2 complete!" >> /tmp/.update_msg
         touch $sysdir/.waitConfirm
         touch $sysdir/.installed
@@ -341,7 +340,7 @@ run_installation() {
     installUI &
     sleep 1
 
-    if [ $deviceModel -eq 283 ]; then
+    if [ $DEVICE_ID -eq MODEL_MM ]; then
         counter=10
 
         while [ -f $sysdir/.waitConfirm ] && [ $counter -ge 0 ]; do
@@ -364,7 +363,7 @@ install_core() {
     echo ":: Install Onion"
     msg="$1"
 
-    if [ ! -f "$core_zipfile" ]; then
+    if [ ! -f "$CORE_PACKAGE_FILE" ]; then
         echo "CORE FILE MISSING"
         return
     fi
@@ -379,10 +378,10 @@ install_core() {
 
     # Onion core installation / update.
     cd /
-    unzip_progress "$core_zipfile" "$msg" /mnt/SDCARD
+    unzip_progress "$CORE_PACKAGE_FILE" "$msg" /mnt/SDCARD
 
     # Cleanup
-    rm -f $core_zipfile
+    rm -f $CORE_PACKAGE_FILE
 }
 
 install_retroarch() {
@@ -390,7 +389,7 @@ install_retroarch() {
     msg="$1"
 
     # Check if RetroArch zip also exists
-    if [ ! -f "$ra_zipfile" ]; then
+    if [ ! -f "$RA_PACKAGE_FILE" ]; then
         return
     fi
 
@@ -406,15 +405,15 @@ install_retroarch() {
 
     # Install RetroArch
     cd /
-    unzip_progress "$ra_zipfile" "$msg" /mnt/SDCARD
+    unzip_progress "$RA_PACKAGE_FILE" "$msg" /mnt/SDCARD
 
     # Cleanup
-    rm -f $ra_zipfile
-    rm -f $ra_package_version_file
+    rm -f $RA_PACKAGE_FILE
+    rm -f $RA_PACKAGE_VERSION_FILE
 }
 
 maybe_remove_retroarch() {
-    if [ -f $ra_zipfile ]; then
+    if [ -f $RA_PACKAGE_FILE ]; then
         cd /mnt/SDCARD/RetroArch
 
         tempdir=/mnt/SDCARD/.temp
@@ -433,7 +432,7 @@ maybe_remove_retroarch() {
             mv .retroarch/thumbnails $tempdir/
         fi
 
-        remove_everything_except $(basename $ra_zipfile)
+        remove_everything_except $(basename $RA_PACKAGE_FILE)
 
         mkdir -p .retroarch
         mv $tempdir/* .retroarch/
