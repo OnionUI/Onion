@@ -12,38 +12,39 @@ main() {
     case "$1" in
         check) # runs the check function we use in runtime, will be called on boot
             check
-        ;;
-        ftp|telnet|http|ssh)
+            ;;
+        ftp | telnet | http | ssh)
             service=$1
             case "$2" in
                 toggle)
                     check_${service}state &
-                ;;
+                    ;;
                 authed)
                     ${service}_authed &
-                ;;
+                    ;;
                 *)
                     print_usage
-                ;;
+                    ;;
             esac
-        ;;
-        ntp|hotspot|smbd)
+            ;;
+        ntp | hotspot | smbd)
             service=$1
             case "$2" in
                 toggle)
                     check_${service}state
-                ;;
+                    ;;
                 *)
                     echo "Usage: $0 {ntp|hotspot|smbd} toggle"
                     exit 1
-                ;;
+                    ;;
             esac
-        ;;
+            ;;
         disableall)
             disable_all_services
-        ;;
+            ;;
         *)
             print_usage
+            ;;
     esac
 }
 
@@ -57,7 +58,7 @@ check() {
     check_ntpstate
     check_httpstate
     check_smbdstate
-    
+
     if flag_enabled ntpWait; then
         sync_time
     else
@@ -76,7 +77,7 @@ disable_all_services() {
     disable_flag httpState
     disable_flag authhttpState
     disable_flag smbdState
-    
+
     for process in dropbear bftpd filebrowser telnetd hostapd dnsmasq smbd; do
         if is_running $process; then
             killall -9 $process
@@ -90,7 +91,7 @@ check_wifi() {
         return
     else
         if wifi_enabled; then
-            if ! ifconfig wlan0  || [ -f /tmp/restart_wifi ]; then
+            if ! ifconfig wlan0 || [ -f /tmp/restart_wifi ]; then
                 if [ -f /tmp/restart_wifi ]; then
                     pkill -9 wpa_supplicant
                     pkill -9 udhcpc
@@ -125,27 +126,27 @@ check_smbdstate() {
         else
             if wifi_enabled; then
                 sync
-                
+
                 if [ ! -d "/var/lib/samba" ]; then
                     mkdir -p /var/lib/samba
                 fi
-                
+
                 if [ ! -d "/var/run/samba/ncalrpc" ]; then
                     mkdir -p /var/run/samba/ncalrpc
                 fi
-                
+
                 if [ ! -d "/var/private" ]; then
                     mkdir -p /var/private
                 fi
-                
+
                 if [ ! -d "/var/log/" ]; then
                     mkdir -p /var/log/
                 fi
-                
+
                 #unset preload or samba doesn't work correctly.
                 #dont env var all the libpaths for this shell, only the shell we open smbd in
                 LD_PRELOAD="" LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/mnt/SDCARD/.tmp_update/lib/samba:/mnt/SDCARD/.tmp_update/lib/samba/private" /mnt/SDCARD/.tmp_update/bin/samba/sbin/smbd --no-process-group -D &
-                
+
                 log "Samba: Starting smbd at exit of tweaks.."
             else
                 disable_flag smbdState
@@ -235,7 +236,7 @@ check_sshstate() {
 }
 
 # Called by above function on boot or when auth state is toggled in tweaks
-ssh_authed(){
+ssh_authed() {
     if flag_enabled sshState; then
         if is_running_exact "dropbear -R -B" || flag_enabled authsshState; then
             killall -9 dropbear
@@ -252,7 +253,6 @@ ssh_authed(){
     fi
 }
 
-
 # Starts telnet if the toggle is set to on
 # Telnet is generally already running when you boot your MMP. This will kill the firmware version and launch a passworded version if auth is turned on, if auth is off it will launch a version with env vars set
 check_telnetstate() {
@@ -261,7 +261,7 @@ check_telnetstate() {
         log "Telnet: Killing firmware telnetd process"
         sleep 1 # Wait for the process to die
     fi
-    
+
     if flag_enabled telnetState; then
         if is_running telnetd; then
             if wifi_disabled; then
@@ -359,31 +359,31 @@ http_authed() {
 start_hotspot() {
     ifconfig wlan1 up >> /dev/null 2>&1
     ifconfig wlan0 down >> /dev/null 2>&1
-    
+
     sleep 1
     # IP setup
     hotspot0addr=$(grep -E '^dhcp-range=' "$sysdir/config/dnsmasq.conf" | cut -d',' -f1 | cut -d'=' -f2)
     hotspot0addr=$(echo $hotspot0addr | awk -F'.' -v OFS='.' '{$NF-=1; print}')
     gateway0addr=$(grep -E '^dhcp-option=3' $sysdir/config/dnsmasq.conf | awk -F, '{print $2}')
     subnetmask=$(grep -E '^dhcp-range=.*,[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+,' "$sysdir/config/dnsmasq.conf" | cut -d',' -f3)
-    
+
     # Set IP route / If details
     ifconfig wlan1 $hotspot0addr netmask $subnetmask >> /dev/null 2>&1
-    
+
     # Start
-    
+
     $sysdir/bin/dnsmasq --conf-file=$sysdir/config/dnsmasq.conf -u root &
     $sysdir/bin/hostapd -i wlan1 $sysdir/config/hostapd.conf >> /dev/null 2>&1 &
-    
+
     ip route add default via $gateway0addr
-    
+
     if is_running hostapd; then
         log "Hotspot: Started with IP of: $hotspot0addr, subnet of: $subnetmask"
     else
         log "Hotspot: Failed to start, please try turning off/on. If this doesn't resolve the issue reboot your device."
         disable_flag hotspotState
     fi
-    
+
 }
 
 # Starts personal hotspot if toggle is set to on
@@ -427,20 +427,20 @@ sync_time() {
     if [ -f "$sysdir/config/.ntpState" ] && wifi_enabled; then
         attempts=0
         max_attempts=20
-        
+
         while true; do
             if [ ! -f "/tmp/ntp_run_once" ]; then
                 break
             fi
-            
-            if ping -q -c 1 google.com > /dev/null 2>&1 ; then
+
+            if ping -q -c 1 google.com > /dev/null 2>&1; then
                 if get_time; then
                     touch /tmp/ntp_synced
                 fi
                 break
             fi
-            
-            attempts=$((attempts+1))
+
+            attempts=$((attempts + 1))
             if [ $attempts -eq $max_attempts ]; then
                 log "NTPwait: Ran out of time before we could sync, stopping."
                 break
@@ -452,7 +452,7 @@ sync_time() {
 }
 
 check_ntpstate() { # This function checks if the timezone has changed, we call this in the main loop.
-    if flag_enabled ntpState && wifi_enabled && [ ! -f "$sysdir/config/.hotspotState" ] ; then
+    if flag_enabled ntpState && wifi_enabled && [ ! -f "$sysdir/config/.hotspotState" ]; then
         set_tzid
         if [ ! -f /tmp/ntp_synced ] && get_time; then
             touch /tmp/ntp_synced
@@ -462,22 +462,22 @@ check_ntpstate() { # This function checks if the timezone has changed, we call t
 
 get_time() { # handles 2 types of network time, instant from an API or longer from an NTP server, if the instant API checks fails it will fallback to the longer ntp
     log "NTP: started time update"
-    response=`curl -s --connect-timeout 3 http://worldtimeapi.org/api/ip.txt`
-    utc_datetime=`echo "$response" | grep -o 'utc_datetime: [^.]*' | cut -d ' ' -f2 | sed "s/T/ /"`
+    response=$(curl -s --connect-timeout 3 http://worldtimeapi.org/api/ip.txt)
+    utc_datetime=$(echo "$response" | grep -o 'utc_datetime: [^.]*' | cut -d ' ' -f2 | sed "s/T/ /")
     if ! flag_enabled "manual_tz"; then
         utc_offset="UTC$(echo "$response" | grep -o 'utc_offset: [^.]*' | cut -d ' ' -f2)"
     fi
-    
+
     if [ -z "$utc_datetime" ]; then
         log "NTP: Failed to get time from worldtimeapi.org, trying timeapi.io"
-        utc_datetime=`curl -s -k --connect-timeout 5 https://timeapi.io/api/Time/current/zone?timeZone=UTC | grep -o '"dateTime":"[^.]*' | cut -d '"' -f4 | sed 's/T/ /'`
+        utc_datetime=$(curl -s -k --connect-timeout 5 https://timeapi.io/api/Time/current/zone?timeZone=UTC | grep -o '"dateTime":"[^.]*' | cut -d '"' -f4 | sed 's/T/ /')
         if ! flag_enabled "manual_tz"; then
-            ip_address=`curl -s -k --connect-timeout 5 https://api.ipify.org`
+            ip_address=$(curl -s -k --connect-timeout 5 https://api.ipify.org)
             utc_offset_seconds=$(curl -s -k --connect-timeout 5 https://timeapi.io/api/TimeZone/ip?ipAddress=$ip_address | jq '.currentUtcOffset.seconds')
             utc_offset="$(convert_seconds_to_utc_offset $utc_offset_seconds)"
         fi
     fi
-    
+
     if [ ! -z "$utc_datetime" ]; then
         if [ ! -z "$utc_offset" ]; then
             echo "$utc_offset" | sed 's/\+/_/' | sed 's/-/+/' | sed 's/_/-/' > $sysdir/config/.tz
@@ -485,20 +485,20 @@ get_time() { # handles 2 types of network time, instant from an API or longer fr
             sync
             set_tzid
         fi
-        if date -u -s "$utc_datetime" >/dev/null 2>&1; then
+        if date -u -s "$utc_datetime" > /dev/null 2>&1; then
             hwclock -w
             return 0
         fi
     fi
-    
+
     log "NTP: Failed to get time via timeapi.io as well, falling back to NTP."
     rm $sysdir/config/.tz_sync 2> /dev/null
-    
+
     ntpdate -t 3 -u time.google.com
     if [ $? -eq 0 ]; then
         return 0
     fi
-    
+
     log "NTP: Failed to synchronize time using NTPdate, both methods have failed."
     return 1
 }
@@ -509,9 +509,9 @@ convert_seconds_to_utc_offset() {
     seconds=$(($1))
     if [ $seconds -ne 0 ]; then
         printf "UTC%s%02d%s" \
-        `[[ $seconds -lt 0 ]] && echo -n "-" || echo -n "+"` \
-        $(abs $(($seconds / 3600))) \
-        `[[ $(($seconds % 3600)) -eq 0 ]] && echo -n ":00" || echo -n ":30"`
+            $([[ $seconds -lt 0 ]] && echo -n "-" || echo -n "+") \
+            $(abs $(($seconds / 3600))) \
+            $([[ $(($seconds % 3600)) -eq 0 ]] && echo -n ":00" || echo -n ":30")
     else
         echo -n "UTC"
     fi
@@ -528,7 +528,7 @@ set_tzid() {
 is_noauth_enabled() { # Used to check authMethod val for HTTPFS
     DB_PATH="$filebrowserdb"
     OUTPUT=$(cat $DB_PATH)
-    
+
     if echo $OUTPUT | grep -q '"authMethod":"noauth"'; then
         echo 1
     else
@@ -561,7 +561,7 @@ enable_flag() {
 
 disable_flag() {
     flag="$1"
-    rm "$sysdir/config/.$flag" 2>&1 /dev/null
+    rm "$sysdir/config/.$flag" /dev/null 2>&1
 }
 
 is_running() {
