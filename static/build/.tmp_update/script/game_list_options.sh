@@ -410,19 +410,21 @@ change_core() {
             break
         fi
 
-        ext="$is_archive"
-        is_archive=""
+        if [ $is_valid -eq 0 ]; then
+            ext="$is_archive"
+            is_archive=""
+        fi
     done
 
     echo "cores: $available_cores"
     echo "corenames: $available_corenames"
 
     if [ $is_valid -eq 0 ]; then
-        infoPanel --title "GAME CORE ($ext)" --message "Not available for this rom\n($ext files)" --auto
+        infoPanel --title "GAME CORE (.$ext)" --message "Not available for this rom\n(.$ext files)" --auto
         exit 1
     fi
 
-    runcmd="LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./bin/prompt -t \"GAME CORE ($ext)\" -s $selected_index $available_corenames"
+    runcmd="LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./bin/prompt -t \"GAME CORE (.$ext)\" -s $selected_index $available_corenames"
     eval $runcmd
     retcode=$?
 
