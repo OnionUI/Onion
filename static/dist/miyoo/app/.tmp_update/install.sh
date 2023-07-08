@@ -66,7 +66,7 @@ main() {
 
     # Start the battery monitor
     cd $sysdir
-    batmon 2>&1 > ./logs/batmon.log &
+    batmon 2>&1 > /dev/null &
 
     detectKey 1
     menu_pressed=$?
@@ -155,7 +155,7 @@ check_install_ra() {
         # Skip installation if current version is up-to-date.
         if [ $(version $current_ra_version) -ge $(version $package_ra_version) ]; then
             install_ra=0
-            echo "RetroArch is up-to-date!" >> $sysdir/logs/install.log
+            echo "RetroArch is up-to-date!"
         fi
     fi
 
@@ -291,7 +291,7 @@ run_installation() {
 
         # Start the battery monitor
         cd $sysdir
-        batmon 2>&1 > ./logs/batmon.log &
+        batmon 2>&1 > /dev/null &
 
         # Reapply theme
         system_theme="$(/customer/app/jsonval theme)"
