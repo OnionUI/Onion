@@ -531,8 +531,9 @@ remove_old_search() {
 }
 
 run_migration_scripts() {
-    local MIGRATION_DIR="$sysdir/script/migration"
-    local MIGRATION_STATE_FILE="$sysdir/config/migration_state"
+    local MIGRATION_DIR=$sysdir/script/migration
+    local MIGRATION_STATE_FILE=$sysdir/config/migration_state
+    local MIGRATION_LIST_FILE=/tmp/active_migrations
     local count=0
     local migration_state=$([ -f "$MIGRATION_STATE_FILE" ] 2> /dev/null && cat "$MIGRATION_STATE_FILE" || echo 0)
 
@@ -559,14 +560,20 @@ run_migration_scripts() {
                 continue
             fi
 
-            echo "$entry" >> /tmp/active_migrations
+            echo "$entry" >> "$MIGRATION_LIST_FILE"
             count=$((count + 1))
         done
     fi
 
-    if [ $count -gt 0 ] && [ -f "/tmp/active_migrations" ]; then
+    if [ $count -gt 0 ] && [ -f "$MIGRATION_LIST_FILE" ]; then
+        sort -f -o temp "$MIGRATION_LIST_FILE"
+        rm -f "$MIGRATION_LIST_FILE"
+        mv temp "$MIGRATION_LIST_FILE"
+
         echo "0/$count: Running migrations... 0%" >> /tmp/.update_msg
         local n=0
+        local max_id=0
+
         while read entry; do
             n=$((n + 1))
             echo "Running migration script ($n/$count):" $(basename "$entry")
@@ -578,13 +585,17 @@ run_migration_scripts() {
 
             local percent=$((n * 100 / count))
             echo "$n/$count: Running migrations... $percent%" >> /tmp/.update_msg
-            echo "$migration_id" > "$MIGRATION_STATE_FILE"
-            sync
+
+            if [ $migration_id -gt $max_id ]; then
+                max_id=$migration_id
+                echo "$migration_id" > "$MIGRATION_STATE_FILE"
+                sync
+            fi
 
             sleep 0.1
-        done < "/tmp/active_migrations"
+        done < "$MIGRATION_LIST_FILE"
 
-        rm /tmp/active_migrations
+        rm $MIGRATION_LIST_FILE
     fi
 }
 
