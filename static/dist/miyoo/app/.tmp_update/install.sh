@@ -255,9 +255,10 @@ run_installation() {
     elif [ $system_only -ne 1 ]; then
         echo "Preparing update..." >> /tmp/.update_msg
 
-        debloat_apps
-        move_ports_collection
-        refresh_roms
+        # Ensure packages are fresh !
+        rm -rf /mnt/SDCARD/App/PackageManager 2> /dev/null
+
+        remove_old_search
     fi
 
     if [ $install_ra -eq 1 ]; then
@@ -272,17 +273,22 @@ run_installation() {
         rm -f $RA_PACKAGE_VERSION_FILE
     fi
 
-    echo "Finishing up - Get ready!" >> /tmp/.update_msg
     if [ $reset_configs -eq 0 ]; then
         restore_ra_config
-
-        # Patch RA config
-        cd $sysdir
-        ./script/patch_ra_cfg.sh /mnt/SDCARD/RetroArch/onion_ra_patch.cfg
-
-        temp_fix
     fi
+
     install_configs $reset_configs
+
+    run_migration_scripts
+
+    echo "Finishing up - Get ready!" >> /tmp/.update_msg
+
+    refresh_roms
+
+    #########################################################################################
+    #                                  Installation is done                                 #
+    #                           Show quick guide and package manager                        #
+    #########################################################################################
 
     if [ $system_only -ne 1 ]; then
         if [ $reset_configs -eq 1 ]; then
@@ -327,6 +333,11 @@ run_installation() {
         # Show installation complete
         rm -f .installed
     fi
+
+    #########################################################################################
+    #                                  Wizards are completed                                #
+    #                                           Exit                                        #
+    #########################################################################################
 
     if [ $DEVICE_ID -eq MODEL_MM ]; then
         echo "$verb2 complete!" >> /tmp/.update_msg
@@ -374,8 +385,6 @@ install_core() {
         $sysdir/bin/prompt \
         /mnt/SDCARD/miyoo/app/.isExpert
 
-    echo "$msg 0%" >> /tmp/.update_msg
-
     # Onion core installation / update.
     cd /
     unzip_progress "$CORE_PACKAGE_FILE" "$msg" /mnt/SDCARD
@@ -392,8 +401,6 @@ install_retroarch() {
     if [ ! -f "$RA_PACKAGE_FILE" ]; then
         return
     fi
-
-    echo "$msg 0%" >> /tmp/.update_msg
 
     # Backup old RA configuration
     cd /mnt/SDCARD/RetroArch
@@ -516,58 +523,68 @@ backup_system() {
     fi
 }
 
-debloat_apps() {
-    echo ":: Debloat apps"
-    cd /mnt/SDCARD/App
-    rm -rf \
-        Commander_CN \
-        power \
-        swapskin \
-        Retroarch \
-        StartGameSwitcher \
-        The_Onion_Installer \
-        Clean_View_Toggle \
-        Onion_Manual \
-        PlayActivity \
-        SearchFilter \
-        ThemeSwitcher \
-        IconThemer
+remove_old_search() {
+    echo ":: Remove old search"
 
-    rm -rf /mnt/SDCARD/Emu/SEARCH
-
-    # Remove faulty PicoDrive remap
-    pdrmp_file="/mnt/SDCARD/Saves/CurrentProfile/config/remaps/PicoDrive/PicoDrive.rmp"
-    if [ -f "$pdrmp_file" ] && [ $(md5hash "$pdrmp_file") == "a3895a0eab19d4ce8aad6a8f7ded57bc" ]; then
-        rm -f "$pdrmp_file"
-    fi
-
-    if [ -d /mnt/SDCARD/Packages ]; then
-        rm -rf /mnt/SDCARD/Packages
-    fi
-
-    if [ -d /mnt/SDCARD/miyoo/packages ]; then
-        rm -rf /mnt/SDCARD/miyoo/packages
-    fi
-
-    if [ -d /mnt/SDCARD/App/PackageManager/data ]; then
-        rm -rf /mnt/SDCARD/App/PackageManager/data
-    fi
+    rm -rf /mnt/SDCARD/Emu/SEARCH 2> /dev/null
+    rm -f /mnt/SDCARD/App/Search/data/data_cache6.db 2> /dev/null
 }
 
-move_ports_collection() {
-    echo ":: Move ports collection"
-    if [ -d /mnt/SDCARD/Emu/PORTS/Binaries ]; then
-        echo "Ports collection found! Moving..."
-        mkdir -p /mnt/SDCARD/Roms/PORTS/Binaries
-        mv -f /mnt/SDCARD/Emu/PORTS/Binaries/* /mnt/SDCARD/Roms/PORTS/Binaries
-        mv -f /mnt/SDCARD/Emu/PORTS/PORTS/* /mnt/SDCARD/Roms/PORTS
-        rmdir /mnt/SDCARD/Emu/PORTS/Binaries
-        rmdir /mnt/SDCARD/Emu/PORTS/PORTS
-        rm -f /mnt/SDCARD/Roms/PORTS/PORTS_cache2.db
-        rm -f /mnt/SDCARD/Emu/PORTS/config.json # Triggers a reinstall
+run_migration_scripts() {
+    local MIGRATION_DIR="$sysdir/script/migration"
+    local MIGRATION_STATE_FILE="$sysdir/config/migration_state"
+    local count=0
+    local migration_state=$([ -f "$MIGRATION_STATE_FILE" ] 2> /dev/null && cat "$MIGRATION_STATE_FILE" || echo 0)
+
+    [ -n "$migration_state" ] && [ "$migration_state" -eq "$migration_state" ] 2> /dev/null
+    if [ $? -ne 0 ]; then
+        migration_state=0
     fi
-    if [ -d /mnt/SDCARD/Roms/PORTS/Binaries ]; then
-        mv -f /mnt/SDCARD/Roms/PORTS /mnt/SDCARD/Roms/PORTS_old
+
+    if [ -d "$MIGRATION_DIR" ]; then
+        for entry in "$MIGRATION_DIR"/*.sh; do
+            if [ ! -f "$entry" ]; then
+                continue
+            fi
+
+            migration_id=$(basename "$entry" | cut -d'_' -f1)
+
+            # Validate migration ID
+            [ -n "$migration_id" ] && [ "$migration_id" -eq "$migration_id" ] 2> /dev/null
+            if [ $? -ne 0 ]; then
+                continue
+            fi
+
+            if [ $migration_state -ge $migration_id ]; then
+                continue
+            fi
+
+            echo "$entry" >> /tmp/active_migrations
+            count=$((count + 1))
+        done
+    fi
+
+    if [ $count -gt 0 ] && [ -f "/tmp/active_migrations" ]; then
+        echo "0/$count: Running migrations... 0%" >> /tmp/.update_msg
+        local n=0
+        while read entry; do
+            n=$((n + 1))
+            echo "Running migration script ($n/$count):" $(basename "$entry")
+            migration_id=$(basename "$entry" | cut -d'_' -f1)
+
+            cd $sysdir
+            chmod a+x "$entry"
+            eval "$entry"
+
+            local percent=$((n * 100 / count))
+            echo "$n/$count: Running migrations... $percent%" >> /tmp/.update_msg
+            echo "$migration_id" > "$MIGRATION_STATE_FILE"
+            sync
+
+            sleep 0.1
+        done < "/tmp/active_migrations"
+
+        rm /tmp/active_migrations
     fi
 }
 
@@ -678,21 +695,6 @@ unzip_progress() {
 
 free_mma() {
     /mnt/SDCARD/.tmp_update/bin/freemma
-}
-
-temp_fix() {
-    prev_version=$(cat $sysdir/onionVersion/previous_version.txt)
-
-    if [ "$prev_version" == "4.2.0-beta-dev-65c7b31" ] ||
-        [ "$prev_version" == "4.2.0-beta-dev-0763d40" ] ||
-        [ "$prev_version" == "4.2.0-beta-dev-4c7e2db" ]; then
-        echo -e "cheevos_enable = \"false\"\ncheevos_hardcore_mode_enable = \"false\"" > /tmp/temp_fix_patch.cfg
-
-        cd $sysdir
-        ./script/patch_ra_cfg.sh /tmp/temp_fix_patch.cfg
-
-        rm /tmp/temp_fix_patch.cfg
-    fi
 }
 
 main
