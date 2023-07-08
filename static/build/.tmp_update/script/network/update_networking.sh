@@ -574,14 +574,17 @@ is_running_exact() {
     pgrep -f "$process_name" > /dev/null
 }
 
+LOGGING=$([ -f $sysdir/config/.logging ] && echo 1 || echo 0)
 scriptname=$(basename "$0" .sh)
 
 log() {
-    echo "($scriptname) $(date):" $*
+    if [ $LOGGING -eq 1 ]; then
+        echo -e "($scriptname) $(date):" $* | tee -a "$sysdir/logs/$scriptname.log"
+    fi
 }
 
-if [ -f $sysdir/config/.logging ]; then
-    main "$@" | tee "$sysdir/logs/$scriptname.log"
+if [ $LOGGING -eq 1 ]; then
+    main "$@"
 else
     main "$@" 2>&1 > /dev/null
 fi
