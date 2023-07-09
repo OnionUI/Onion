@@ -63,12 +63,15 @@ void network_loadState(void)
     network_state.loaded = true;
 }
 
+
 typedef struct {
     char name[MAX_LINE_LENGTH];
     char rawName[MAX_LINE_LENGTH];
-    int browseable; // 1 if browseable = yes, 0 otherwise
+    int browseable;  // 1 if browseable = yes, 0 otherwise
+    long browseablePos; // in file position for the browseable property
 } Share;
 
+// Func to parse smb.conf and look for the shares and browseable state
 void parseSmbConf(const char *filepath, Share **shares, int *numShares)
 {
     FILE *file = fopen(filepath, "r");
@@ -82,15 +85,19 @@ void parseSmbConf(const char *filepath, Share **shares, int *numShares)
     *shares = NULL;
 
     int is_browseable = 0;
+    long browseablePos = -1;
     int found_share = 0;
 
-    while (fgets(line, sizeof(line), file)) {
+   while (1) {
+        if (fgets(line, sizeof(line), file) == NULL) break;
+
         char *trimmedLine = strtok(line, "\n");
-        if (trimmedLine == NULL || trimmedLine[0] == '#') {
+        if (trimmedLine == NULL) {
             continue;
         }
 
         if (strstr(trimmedLine, "browseable =") != NULL) {
+            browseablePos = ftell(file) - strlen(trimmedLine) - 1;
             is_browseable = (strstr(trimmedLine, "yes") != NULL) ? 1 : 0;
             continue;
         }
@@ -98,6 +105,7 @@ void parseSmbConf(const char *filepath, Share **shares, int *numShares)
         if (strncmp(trimmedLine, "[", 1) == 0 && strncmp(trimmedLine + strlen(trimmedLine) - 1, "]", 1) == 0) {
             if (found_share) {
                 (*shares)[(*numShares) - 1].browseable = is_browseable;
+                (*shares)[(*numShares) - 1].browseablePos = browseablePos;
                 is_browseable = 0;
             }
 
@@ -137,12 +145,53 @@ void parseSmbConf(const char *filepath, Share **shares, int *numShares)
             }
         }
     }
+
     if (found_share) {
         (*shares)[(*numShares) - 1].browseable = is_browseable;
+        (*shares)[(*numShares) - 1].browseablePos = browseablePos;
     }
 
     fclose(file);
 }
+
+void toggleShareBrowseable(Share *share) {
+    const char *filepath = SMBD_CONFIG_PATH;
+
+    FILE *file = fopen(filepath, "r+");
+    if (file == NULL) {
+        printf("Failed to open smb.conf file.\n");
+        return;
+    }
+
+    if (fseek(file, share->browseablePos, SEEK_SET) != 0) {
+        printf("Failed to seek to the browseable property of share '%s'.\n", share->name);
+        fclose(file);
+        return;
+    }
+
+    char line[MAX_LINE_LENGTH];
+    fgets(line, sizeof(line), file);
+    share->browseable = (strstr(line, "yes") != NULL) ? 1 : 0;
+
+    fseek(file, share->browseablePos, SEEK_SET);
+
+    if (share->browseable == 1) {
+        fputs("browseable = no ", file);
+    } else {
+        fputs("browseable = yes", file);
+    }
+
+    fflush(file);
+
+    fclose(file);
+}
+
+void toggleAction(void *item) { // toggle helper func
+    ListItem *listItem = (ListItem *)item;
+    Share *share = (Share *)listItem->payload_ptr;
+    toggleShareBrowseable(share);
+}
+
 
 void network_setState(bool *state_ptr, const char *flag_name, bool value)
 {
@@ -468,9 +517,10 @@ void menu_smbd(void *_)
         for (int i = 0; i < numShares; i++) {
             ListItem shareItem = {
                 .item_type = TOGGLE,
-                .action = menu_wifi,
-                .value = shares[i].browseable // Added browseable value to ListItem
+                .action = toggleAction,  // set the action to the wrapper function
+                .value = shares[i].browseable,
             };
+            shareItem.payload_ptr = &shares[i];  // store a pointer to the share in the payload
             strcpy(shareItem.label, shares[i].name);
             list_addItem(&_menu_smbd, shareItem);
         }
@@ -479,8 +529,7 @@ void menu_smbd(void *_)
     for (int i = 0; i < _menu_smbd.item_count; i++) {
         printf("- %s\n", _menu_smbd.items[i].label);
     }
-
-    free(shares);
+    
     menu_stack[++menu_level] = &_menu_smbd;
     header_changed = true;
 }
@@ -504,7 +553,7 @@ void menu_network(void *_)
                          .action = menu_wifi});
         list_addItem(&_menu_network,
                      (ListItem){
-                         .label = "Samba: Network file share",
+                         .label = "Samba: Network file share...",
                          .item_type = TOGGLE,
                          .disabled = !settings.wifi_on,
                          .alternative_arrow_action = 1,
