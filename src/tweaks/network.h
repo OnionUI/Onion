@@ -63,11 +63,10 @@ void network_loadState(void)
     network_state.loaded = true;
 }
 
-
 typedef struct {
     char name[MAX_LINE_LENGTH];
     char rawName[MAX_LINE_LENGTH];
-    int browseable;  // 1 if browseable = yes, 0 otherwise
+    int browseable;     // 1 if browseable = yes, 0 otherwise
     long browseablePos; // in file position for the browseable property
 } Share;
 
@@ -88,8 +87,9 @@ void parseSmbConf(const char *filepath, Share **shares, int *numShares)
     long browseablePos = -1;
     int found_share = 0;
 
-   while (1) {
-        if (fgets(line, sizeof(line), file) == NULL) break;
+    while (1) {
+        if (fgets(line, sizeof(line), file) == NULL)
+            break;
 
         char *trimmedLine = strtok(line, "\n");
         if (trimmedLine == NULL) {
@@ -154,7 +154,8 @@ void parseSmbConf(const char *filepath, Share **shares, int *numShares)
     fclose(file);
 }
 
-void toggleShareBrowseable(Share *share) {
+void toggleShareBrowseable(Share *share)
+{
     const char *filepath = SMBD_CONFIG_PATH;
 
     FILE *file = fopen(filepath, "r+");
@@ -177,7 +178,8 @@ void toggleShareBrowseable(Share *share) {
 
     if (share->browseable == 1) {
         fputs("browseable = no ", file);
-    } else {
+    }
+    else {
         fputs("browseable = yes", file);
     }
 
@@ -186,12 +188,12 @@ void toggleShareBrowseable(Share *share) {
     fclose(file);
 }
 
-void toggleAction(void *item) { // toggle helper func
+void toggleAction(void *item)
+{ // toggle helper func
     ListItem *listItem = (ListItem *)item;
     Share *share = (Share *)listItem->payload_ptr;
     toggleShareBrowseable(share);
 }
-
 
 void network_setState(bool *state_ptr, const char *flag_name, bool value)
 {
@@ -517,10 +519,10 @@ void menu_smbd(void *_)
         for (int i = 0; i < numShares; i++) {
             ListItem shareItem = {
                 .item_type = TOGGLE,
-                .action = toggleAction,  // set the action to the wrapper function
+                .action = toggleAction, // set the action to the wrapper function
                 .value = shares[i].browseable,
             };
-            shareItem.payload_ptr = &shares[i];  // store a pointer to the share in the payload
+            shareItem.payload_ptr = &shares[i]; // store a pointer to the share in the payload
             strcpy(shareItem.label, shares[i].name);
             list_addItem(&_menu_smbd, shareItem);
         }
@@ -529,7 +531,7 @@ void menu_smbd(void *_)
     for (int i = 0; i < _menu_smbd.item_count; i++) {
         printf("- %s\n", _menu_smbd.items[i].label);
     }
-    
+
     menu_stack[++menu_level] = &_menu_smbd;
     header_changed = true;
 }
