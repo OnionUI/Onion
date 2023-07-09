@@ -63,11 +63,10 @@ void network_loadState(void)
     network_state.loaded = true;
 }
 
-
 typedef struct {
     char name[MAX_LINE_LENGTH];
     char rawName[MAX_LINE_LENGTH];
-    int browseable;  // 1 if browseable = yes, 0 otherwise
+    int browseable; // 1 if browseable = yes, 0 otherwise
 } Share;
 
 void parseSmbConf(const char *filepath, Share **shares, int *numShares)
@@ -81,7 +80,7 @@ void parseSmbConf(const char *filepath, Share **shares, int *numShares)
     char line[MAX_LINE_LENGTH];
     *numShares = 0;
     *shares = NULL;
-    
+
     int is_browseable = 0;
     int found_share = 0;
 
@@ -97,7 +96,7 @@ void parseSmbConf(const char *filepath, Share **shares, int *numShares)
         }
 
         if (strncmp(trimmedLine, "[", 1) == 0 && strncmp(trimmedLine + strlen(trimmedLine) - 1, "]", 1) == 0) {
-            if(found_share){
+            if (found_share) {
                 (*shares)[(*numShares) - 1].browseable = is_browseable;
                 is_browseable = 0;
             }
@@ -138,13 +137,12 @@ void parseSmbConf(const char *filepath, Share **shares, int *numShares)
             }
         }
     }
-    if(found_share){
+    if (found_share) {
         (*shares)[(*numShares) - 1].browseable = is_browseable;
     }
 
     fclose(file);
 }
-
 
 void network_setState(bool *state_ptr, const char *flag_name, bool value)
 {
@@ -471,7 +469,7 @@ void menu_smbd(void *_)
             ListItem shareItem = {
                 .item_type = TOGGLE,
                 .action = menu_wifi,
-                .value = shares[i].browseable  // Added browseable value to ListItem
+                .value = shares[i].browseable // Added browseable value to ListItem
             };
             strcpy(shareItem.label, shares[i].name);
             list_addItem(&_menu_smbd, shareItem);
