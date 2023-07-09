@@ -2,6 +2,7 @@
 #define TWEAKS_NETWORK_H__
 
 #include <SDL/SDL_image.h>
+#include <ctype.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -9,7 +10,6 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-#include <ctype.h>
 
 #include "components/list.h"
 #include "system/keymap_sw.h"
@@ -67,8 +67,9 @@ typedef struct {
     char name[MAX_LINE_LENGTH];
 } Share;
 
-void parseSmbConf(const char* filepath, Share** shares, int* numShares) {
-    FILE* file = fopen(filepath, "r");
+void parseSmbConf(const char *filepath, Share **shares, int *numShares)
+{
+    FILE *file = fopen(filepath, "r");
     if (file == NULL) {
         printf("Failed to open smb.conf file.\n");
         return;
@@ -79,26 +80,26 @@ void parseSmbConf(const char* filepath, Share** shares, int* numShares) {
     *shares = NULL;
 
     while (fgets(line, sizeof(line), file)) {
-        char* trimmedLine = strtok(line, "\r\n\t ");
+        char *trimmedLine = strtok(line, "\r\n\t ");
         if (trimmedLine == NULL || trimmedLine[0] == '#') {
             continue;
         }
 
         if (strncmp(trimmedLine, "[", 1) == 0 && strncmp(trimmedLine + strlen(trimmedLine) - 1, "]", 1) == 0) {
-            char* shareName = strtok(trimmedLine + 1, "]");
+            char *shareName = strtok(trimmedLine + 1, "]");
             if (shareName != NULL && strlen(shareName) > 0) {
                 if (strcmp(shareName, "global") == 0) {
                     continue;
                 }
-                
+
                 int j = 0;
                 int add_exclamation = (shareName[0] == '_' && shareName[1] == '_') ? 1 : 0;
-                for(int i = 0; i < strlen(shareName); i++) {
-                    if(shareName[i] == '_' && shareName[i+1] == '_') {
+                for (int i = 0; i < strlen(shareName); i++) {
+                    if (shareName[i] == '_' && shareName[i + 1] == '_') {
                         i++;
                         continue;
                     }
-                    else if(shareName[i] == '_') {
+                    else if (shareName[i] == '_') {
                         shareName[j++] = ' ';
                     }
                     else {
@@ -111,7 +112,7 @@ void parseSmbConf(const char* filepath, Share** shares, int* numShares) {
                 if (add_exclamation) {
                     strcat(shareName, " (!)");
                 }
-                
+
                 (*numShares)++;
                 *shares = realloc(*shares, (*numShares) * sizeof(Share));
                 strcpy((*shares)[(*numShares) - 1].name, shareName);
@@ -121,7 +122,6 @@ void parseSmbConf(const char* filepath, Share** shares, int* numShares) {
 
     fclose(file);
 }
-
 
 void network_setState(bool *state_ptr, const char *flag_name, bool value)
 {
@@ -436,7 +436,7 @@ void menu_wifi(void *_)
 
 void menu_smbd(void *_)
 {
-    Share* shares;
+    Share *shares;
     int numShares;
     parseSmbConf(SMBD_CONFIG_PATH, &shares, &numShares);
 
@@ -447,8 +447,7 @@ void menu_smbd(void *_)
         for (int i = 0; i < numShares; i++) {
             ListItem shareItem = {
                 .item_type = TOGGLE,
-                .action = menu_wifi
-            };
+                .action = menu_wifi};
             strcpy(shareItem.label, shares[i].name);
             list_addItem(&_menu_smbd, shareItem);
         }
