@@ -47,6 +47,7 @@ void menu_network_free_all(void)
     list_free(&_menu_wps);
     list_free(&_menu_http);
     list_free(&_menu_ssh);
+    list_free(&_menu_smbd);
 }
 
 static List _menu_icons;
