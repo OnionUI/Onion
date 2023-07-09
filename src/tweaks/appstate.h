@@ -36,6 +36,7 @@ static List _menu_ftp;
 static List _menu_wps;
 static List _menu_http;
 static List _menu_ssh;
+static List _menu_smbd;
 
 void menu_network_free_all(void)
 {
