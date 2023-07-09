@@ -63,8 +63,11 @@ void network_loadState(void)
     network_state.loaded = true;
 }
 
+
 typedef struct {
     char name[MAX_LINE_LENGTH];
+    char rawName[MAX_LINE_LENGTH];
+    int browseable;  // 1 if browseable = yes, 0 otherwise
 } Share;
 
 void parseSmbConf(const char *filepath, Share **shares, int *numShares)
@@ -78,19 +81,36 @@ void parseSmbConf(const char *filepath, Share **shares, int *numShares)
     char line[MAX_LINE_LENGTH];
     *numShares = 0;
     *shares = NULL;
+    
+    int is_browseable = 0;
+    int found_share = 0;
 
     while (fgets(line, sizeof(line), file)) {
-        char *trimmedLine = strtok(line, "\r\n\t ");
+        char *trimmedLine = strtok(line, "\n");
         if (trimmedLine == NULL || trimmedLine[0] == '#') {
             continue;
         }
 
+        if (strstr(trimmedLine, "browseable =") != NULL) {
+            is_browseable = (strstr(trimmedLine, "yes") != NULL) ? 1 : 0;
+            continue;
+        }
+
         if (strncmp(trimmedLine, "[", 1) == 0 && strncmp(trimmedLine + strlen(trimmedLine) - 1, "]", 1) == 0) {
+            if(found_share){
+                (*shares)[(*numShares) - 1].browseable = is_browseable;
+                is_browseable = 0;
+            }
+
             char *shareName = strtok(trimmedLine + 1, "]");
             if (shareName != NULL && strlen(shareName) > 0) {
                 if (strcmp(shareName, "global") == 0) {
                     continue;
                 }
+
+                (*numShares)++;
+                *shares = realloc(*shares, (*numShares) * sizeof(Share));
+                strcpy((*shares)[(*numShares) - 1].rawName, shareName);
 
                 int j = 0;
                 int add_exclamation = (shareName[0] == '_' && shareName[1] == '_') ? 1 : 0;
@@ -113,15 +133,18 @@ void parseSmbConf(const char *filepath, Share **shares, int *numShares)
                     strcat(shareName, " (!)");
                 }
 
-                (*numShares)++;
-                *shares = realloc(*shares, (*numShares) * sizeof(Share));
                 strcpy((*shares)[(*numShares) - 1].name, shareName);
+                found_share = 1;
             }
         }
+    }
+    if(found_share){
+        (*shares)[(*numShares) - 1].browseable = is_browseable;
     }
 
     fclose(file);
 }
+
 
 void network_setState(bool *state_ptr, const char *flag_name, bool value)
 {
@@ -447,13 +470,14 @@ void menu_smbd(void *_)
         for (int i = 0; i < numShares; i++) {
             ListItem shareItem = {
                 .item_type = TOGGLE,
-                .action = menu_wifi};
+                .action = menu_wifi,
+                .value = shares[i].browseable  // Added browseable value to ListItem
+            };
             strcpy(shareItem.label, shares[i].name);
             list_addItem(&_menu_smbd, shareItem);
         }
     }
 
-    printf("%s:\n", _menu_smbd.title);
     for (int i = 0; i < _menu_smbd.item_count; i++) {
         printf("- %s\n", _menu_smbd.items[i].label);
     }
