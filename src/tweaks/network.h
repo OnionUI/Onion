@@ -64,7 +64,7 @@ void network_loadState(void)
 
 typedef struct {
     char name[STR_MAX - 11];
-    char path[STR_MAX - 11];
+    char path[STR_MAX];
     int browseable;     // 1 if browseable = yes, 0 otherwise
     long browseablePos; // in file position for the browseable property
 } Share;
@@ -112,7 +112,7 @@ void network_getSmbShares()
         }
 
         if (strstr(trimmedLine, "path = ") != NULL) {
-            strncpy(_network_shares[numShares - 1].path, trimmedLine + 7, STR_MAX - 11);
+            strncpy(_network_shares[numShares - 1].path, trimmedLine + 7, STR_MAX);
             continue;
         }
 
@@ -380,7 +380,7 @@ void menu_smbd(void *pt)
                 .payload_ptr = _network_shares + i // store a pointer to the share in the payload
             };
             snprintf(shareItem.label, STR_MAX - 1, "Share: %s", _network_shares[i].name);
-            snprintf(shareItem.sticky_note, STR_MAX - 1, "SD:%s", str_replace(_network_shares[i].path, "/mnt/SDCARD", ""));
+            strncpy(shareItem.sticky_note, str_replace(_network_shares[i].path, "/mnt/SDCARD", "SD:"), STR_MAX - 1);
             list_addItem(&_menu_smbd, shareItem);
         }
     }
