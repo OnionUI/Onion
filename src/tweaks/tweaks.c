@@ -253,6 +253,8 @@ int main(int argc, char *argv[])
 
     Mix_CloseAudio();
 
+    network_freeSmbShares();
+
     lang_free();
     menu_free_all();
     resources_free();

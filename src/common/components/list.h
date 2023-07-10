@@ -7,7 +7,6 @@
 #include <string.h>
 #include <strings.h>
 
-#include "utils/log.h"
 #include "utils/str.h"
 
 #define MAX_NUM_VALUES 100
@@ -40,6 +39,7 @@ typedef struct ListItem {
     void *icon_ptr;
     void *preview_ptr;
     char preview_path[STR_MAX];
+    char sticky_note[STR_MAX];
 } ListItem;
 
 typedef struct List {
@@ -51,6 +51,7 @@ typedef struct List {
     int scroll_height;
     ListType list_type;
     ListItem *items;
+    bool has_sticky;
     bool _created;
 } List;
 
@@ -116,6 +117,21 @@ List list_create(int max_items, ListType list_type)
                   ._id = list_id_incr++};
 }
 
+List list_create_with_title(int max_items, ListType list_type, const char *title)
+{
+    List list = list_create(max_items, LIST_SMALL);
+    strncpy(list.title, title, STR_MAX - 1);
+    return list;
+}
+
+List list_create_sticky(int max_items, const char *title)
+{
+    List list = list_create_with_title(max_items, LIST_SMALL, title);
+    list.scroll_height = 5;
+    list.has_sticky = true;
+    return list;
+}
+
 void list_addItem(List *list, ListItem item)
 {
     item._reset_value = item.value;
@@ -137,7 +153,6 @@ ListItem *list_currentItem(List *list)
 void _list_scroll(List *list, int pos)
 {
     pos = _list_modulo(pos, list->item_count);
-    printf_debug("scroll to active: %d\n", pos);
 
     // Scroll up
     if (pos < list->scroll_pos)
@@ -216,7 +231,6 @@ bool list_keyDown(List *list, bool key_repeat)
     list_ensureVisible(list, 1);
 
     if (_list_did_wraparound(old_pos, list->active_pos, 1)) {
-        printf_debug("scroll_pos: %d < item_count: %d - scroll_height: %d\n", list->scroll_pos, list->item_count, list->scroll_height);
         if (list->scroll_pos < list->item_count - list->scroll_height) {
             _list_scroll(list, list->scroll_pos + list->scroll_height);
             list->active_pos = old_pos;
