@@ -13,9 +13,11 @@ main() {
     export DEVICE_ID=$([ $? -eq 0 ] && echo $MODEL_MMP || echo $MODEL_MM)
     echo -n "$DEVICE_ID" > /tmp/deviceModel
 
+    check_installer
+    clear_logs
+
     init_system
     update_time
-    clear_logs
 
     # Start the battery monitor
     batmon &
@@ -32,7 +34,8 @@ main() {
     if [ $DEVICE_ID -eq $MODEL_MM ]; then
         is_charging=$(cat /sys/devices/gpiochip0/gpio/gpio59/value)
     elif [ $DEVICE_ID -eq $MODEL_MMP ]; then
-        is_charging=$(axp 0 | grep -q "value:c4" && echo 1 || echo 0)
+        axp_status="0x$(axp 0 | cut -d':' -f2)"
+        is_charging=$([ $(($axp_status & 0x4)) -eq 4 ] && echo 1 || echo 0)
     fi
 
     # Show charging animation
@@ -539,6 +542,18 @@ check_networking() {
 
 check_timezone() {
     export TZ=$(cat "$sysdir/config/.tz")
+}
+
+check_installer() {
+    # Check if installer is present
+    if [ -d $miyoodir/app/.tmp_update ] && fgrep -q "#!/bin/sh" "$miyoodir/app/MainUI"; then
+        echo "Installer detected!"
+        cd $miyoodir/app
+        ./MainUI
+        reboot
+        sleep 10
+        exit
+    fi
 }
 
 scriptname=$(basename "$0" .sh)
