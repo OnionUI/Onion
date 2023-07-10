@@ -532,10 +532,11 @@ check_networking() {
         check_timezone
         return
     fi
+    
     rm /tmp/network_changed
 
     $sysdir/script/network/update_networking.sh check
-
+        
     check_timezone
 }
 
