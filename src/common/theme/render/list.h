@@ -52,8 +52,7 @@ void theme_renderList(SDL_Surface *screen, List *list)
     int item_padding = list_small ? 4 : 0;
     int item_height = list_small ? 60 : 90;
     int label_y = list_small ? 27 : 37;
-    SDL_Surface *item_bg =
-        resource_getSurface(list_small ? BG_LIST_S : BG_LIST_L);
+    SDL_Surface *item_bg = resource_getSurface(list_small ? BG_LIST_S : BG_LIST_L);
 
     int menu_pos_y = 420 - list->scroll_height * item_height;
     int last_item = list->scroll_pos + list->scroll_height;
@@ -72,14 +71,19 @@ void theme_renderList(SDL_Surface *screen, List *list)
     surfaceSetAlpha(hidden_arrow_left, HIDDEN_ITEM_ALPHA);
     surfaceSetAlpha(hidden_arrow_right, HIDDEN_ITEM_ALPHA);
 
+    if (list->has_sticky) {
+        ListItem *active_item = &list->items[list->active_pos];
+        SDL_BlitSurface(resource_getSurface(HORIZONTAL_DIVIDER), &item_div_size, screen, &item_bg_rect);
+        theme_renderListLabel(screen, active_item->sticky_note, theme()->list.color, 20, item_bg_rect.y + label_y, false, 640, true);
+    }
+
     for (int i = list->scroll_pos; i < last_item; i++) {
         ListItem *item = &list->items[i];
         bool show_disabled = item->disabled && !item->show_opaque;
 
         item_bg_rect.y = menu_pos_y + (i - list->scroll_pos) * item_height;
 
-        SDL_BlitSurface(resource_getSurface(HORIZONTAL_DIVIDER), &item_div_size,
-                        screen, &item_bg_rect);
+        SDL_BlitSurface(resource_getSurface(HORIZONTAL_DIVIDER), &item_div_size, screen, &item_bg_rect);
         item_bg_rect.y += item_padding;
 
         if (i == list->active_pos) {
