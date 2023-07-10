@@ -39,6 +39,7 @@ typedef struct ListItem {
     void *icon_ptr;
     void *preview_ptr;
     char preview_path[STR_MAX];
+    char sticky_note[STR_MAX];
 } ListItem;
 
 typedef struct List {
@@ -50,6 +51,7 @@ typedef struct List {
     int scroll_height;
     ListType list_type;
     ListItem *items;
+    bool has_sticky;
     bool _created;
 } List;
 
@@ -113,6 +115,21 @@ List list_create(int max_items, ListType list_type)
                   .items = (ListItem *)malloc(sizeof(ListItem) * max_items),
                   ._created = true,
                   ._id = list_id_incr++};
+}
+
+List list_create_with_title(int max_items, ListType list_type, const char *title)
+{
+    List list = list_create(max_items, LIST_SMALL);
+    strncpy(list.title, title, STR_MAX - 1);
+    return list;
+}
+
+List list_create_sticky(int max_items, const char *title)
+{
+    List list = list_create_with_title(max_items, LIST_SMALL, title);
+    list.scroll_height = 5;
+    list.has_sticky = true;
+    return list;
 }
 
 void list_addItem(List *list, ListItem item)

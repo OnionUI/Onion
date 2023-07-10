@@ -24,7 +24,6 @@
 
 #define NET_SCRIPT_PATH "/mnt/SDCARD/.tmp_update/script/network"
 #define SMBD_CONFIG_PATH "/mnt/SDCARD/.tmp_update/config/smb.conf"
-#define MAX_LINE_LENGTH 256
 
 static struct network_s {
     bool smbd;
@@ -64,49 +63,64 @@ void network_loadState(void)
 }
 
 typedef struct {
-    char name[MAX_LINE_LENGTH];
-    char rawName[MAX_LINE_LENGTH];
+    char name[STR_MAX - 11];
+    char path[STR_MAX - 11];
     int browseable;     // 1 if browseable = yes, 0 otherwise
     long browseablePos; // in file position for the browseable property
 } Share;
 
-// Func to parse smb.conf and look for the shares and browseable state
-void parseSmbConf(const char *filepath, Share **shares, int *numShares)
+static Share *_network_shares = NULL;
+static int network_numShares;
+
+void network_freeSmbShares()
 {
-    FILE *file = fopen(filepath, "r");
+    if (_network_shares != NULL) {
+        free(_network_shares);
+    }
+}
+
+void network_getSmbShares()
+{
+    if (_network_shares != NULL) {
+        return;
+    }
+
+    int numShares = 0;
+
+    FILE *file = fopen(SMBD_CONFIG_PATH, "r");
     if (file == NULL) {
         printf("Failed to open smb.conf file.\n");
         return;
     }
 
-    char line[MAX_LINE_LENGTH];
-    *numShares = 0;
-    *shares = NULL;
+    char line[STR_MAX];
 
-    int is_browseable = 0;
+    bool found_shares = false;
+    bool is_browseable = false;
     long browseablePos = -1;
-    int found_share = 0;
 
-    while (1) {
-        if (fgets(line, sizeof(line), file) == NULL)
-            break;
-
+    while (fgets(line, sizeof(line), file) != NULL) {
         char *trimmedLine = strtok(line, "\n");
         if (trimmedLine == NULL) {
             continue;
         }
 
-        if (strstr(trimmedLine, "browseable =") != NULL) {
+        if (strstr(trimmedLine, "browseable = ") != NULL) {
             browseablePos = ftell(file) - strlen(trimmedLine) - 1;
-            is_browseable = (strstr(trimmedLine, "yes") != NULL) ? 1 : 0;
+            is_browseable = strstr(trimmedLine, "1") != NULL;
+            continue;
+        }
+
+        if (strstr(trimmedLine, "path = ") != NULL) {
+            strncpy(_network_shares[numShares - 1].path, trimmedLine + 7, STR_MAX - 11);
             continue;
         }
 
         if (strncmp(trimmedLine, "[", 1) == 0 && strncmp(trimmedLine + strlen(trimmedLine) - 1, "]", 1) == 0) {
-            if (found_share) {
-                (*shares)[(*numShares) - 1].browseable = is_browseable;
-                (*shares)[(*numShares) - 1].browseablePos = browseablePos;
-                is_browseable = 0;
+            if (found_shares) {
+                _network_shares[numShares - 1].browseable = is_browseable;
+                _network_shares[numShares - 1].browseablePos = browseablePos;
+                is_browseable = false;
             }
 
             char *shareName = strtok(trimmedLine + 1, "]");
@@ -115,50 +129,42 @@ void parseSmbConf(const char *filepath, Share **shares, int *numShares)
                     continue;
                 }
 
-                (*numShares)++;
-                *shares = realloc(*shares, (*numShares) * sizeof(Share));
-                strcpy((*shares)[(*numShares) - 1].rawName, shareName);
+                numShares++;
+                _network_shares = (Share *)realloc(_network_shares, numShares * sizeof(Share));
 
-                int j = 0;
-                int add_exclamation = (shareName[0] == '_' && shareName[1] == '_') ? 1 : 0;
-                for (int i = 0; i < strlen(shareName); i++) {
-                    if (shareName[i] == '_' && shareName[i + 1] == '_') {
-                        i++;
-                        continue;
-                    }
-                    else if (shareName[i] == '_') {
-                        shareName[j++] = ' ';
-                    }
-                    else {
-                        shareName[j++] = shareName[i];
-                    }
+                bool add_exclamation = false;
+                if (strncmp("__", shareName, 2) == 0) {
+                    shareName = shareName + 2;
+                    add_exclamation = true;
                 }
-                shareName[j] = '\0';
-                shareName[0] = toupper(shareName[0]);
+
+                strncpy(_network_shares[numShares - 1].name, shareName, STR_MAX - 11);
 
                 if (add_exclamation) {
-                    strcat(shareName, " (!)");
+                    strncat(_network_shares[numShares - 1].name, " (!)", STR_MAX - 11 - strlen(shareName));
                 }
 
-                strcpy((*shares)[(*numShares) - 1].name, shareName);
-                found_share = 1;
+                found_shares = true;
             }
         }
     }
 
-    if (found_share) {
-        (*shares)[(*numShares) - 1].browseable = is_browseable;
-        (*shares)[(*numShares) - 1].browseablePos = browseablePos;
+    if (found_shares) {
+        _network_shares[numShares - 1].browseable = is_browseable;
+        _network_shares[numShares - 1].browseablePos = browseablePos;
     }
+
+    network_numShares = numShares;
 
     fclose(file);
 }
 
-void toggleShareBrowseable(Share *share)
+void network_toggleSmbBrowseable(void *item)
 {
-    const char *filepath = SMBD_CONFIG_PATH;
+    ListItem *listItem = (ListItem *)item;
+    Share *share = (Share *)listItem->payload_ptr;
 
-    FILE *file = fopen(filepath, "r+");
+    FILE *file = fopen(SMBD_CONFIG_PATH, "r+");
     if (file == NULL) {
         printf("Failed to open smb.conf file.\n");
         return;
@@ -170,29 +176,15 @@ void toggleShareBrowseable(Share *share)
         return;
     }
 
-    char line[MAX_LINE_LENGTH];
+    char line[STR_MAX];
     fgets(line, sizeof(line), file);
-    share->browseable = (strstr(line, "yes") != NULL) ? 1 : 0;
+    share->browseable = strstr(line, "1") == NULL; // toggle
 
     fseek(file, share->browseablePos, SEEK_SET);
-
-    if (share->browseable == 1) {
-        fputs("browseable = no ", file);
-    }
-    else {
-        fputs("browseable = yes", file);
-    }
-
+    fprintf(file, "browseable = %d\n", share->browseable);
     fflush(file);
 
     fclose(file);
-}
-
-void toggleAction(void *item)
-{ // toggle helper func
-    ListItem *listItem = (ListItem *)item;
-    Share *share = (Share *)listItem->payload_ptr;
-    toggleShareBrowseable(share);
 }
 
 void network_setState(bool *state_ptr, const char *flag_name, bool value)
@@ -244,6 +236,11 @@ void network_commonEnableToggle(List *list, ListItem *item, bool *value_pt, cons
     all_changed = true;
 }
 
+void network_setSmbdState(void *pt)
+{
+    network_commonEnableToggle(&_menu_smbd, (ListItem *)pt, &network_state.smbd, "smbd", ".smbdState");
+}
+
 void network_setHttpState(void *pt)
 {
     network_commonEnableToggle(&_menu_http, (ListItem *)pt, &network_state.http, "http", ".httpState");
@@ -284,12 +281,6 @@ void network_setNtpState(void *pt)
 void network_setNtpWaitState(void *pt)
 {
     network_setState(&network_state.ntp_wait, ".ntpWait", ((ListItem *)pt)->value);
-}
-
-void network_setSmbdState(void *pt)
-{
-    network_setState(&network_state.smbd, ".smbdState", ((ListItem *)pt)->value);
-    network_execServiceState("smbd", false);
 }
 
 void network_setTelnetAuthState(void *pt)
@@ -360,6 +351,42 @@ void network_setTzSelectState(void *pt)
     setenv("TZ", utc_str, 1);
     tzset();
     config_setString(".tz", utc_str);
+}
+
+void menu_smbd(void *pt)
+{
+    ListItem *item = (ListItem *)pt;
+    item->value = (int)network_state.smbd;
+
+    if (!_menu_smbd._created) {
+        network_getSmbShares();
+
+        _menu_smbd = list_create_sticky(1 + network_numShares, "Samba");
+
+        list_addItem(&_menu_smbd,
+                     (ListItem){
+                         .label = "Enable",
+                         .sticky_note = "Enable Samba file sharing",
+                         .item_type = TOGGLE,
+                         .value = (int)network_state.smbd,
+                         .action = network_setSmbdState});
+
+        for (int i = 0; i < network_numShares; i++) {
+            ListItem shareItem = {
+                .item_type = TOGGLE,
+                .disabled = !network_state.smbd,
+                .action = network_toggleSmbBrowseable, // set the action to the wrapper function
+                .value = _network_shares[i].browseable,
+                .payload_ptr = _network_shares + i // store a pointer to the share in the payload
+            };
+            snprintf(shareItem.label, STR_MAX - 1, "Share: %s", _network_shares[i].name);
+            snprintf(shareItem.sticky_note, STR_MAX - 1, "SD:%s", str_replace(_network_shares[i].path, "/mnt/SDCARD", ""));
+            list_addItem(&_menu_smbd, shareItem);
+        }
+    }
+
+    menu_stack[++menu_level] = &_menu_smbd;
+    header_changed = true;
 }
 
 void menu_http(void *pt)
@@ -506,36 +533,6 @@ void menu_wifi(void *_)
     header_changed = true;
 }
 
-void menu_smbd(void *_)
-{
-    Share *shares;
-    int numShares;
-    parseSmbConf(SMBD_CONFIG_PATH, &shares, &numShares);
-
-    if (!_menu_smbd._created) {
-        _menu_smbd = list_create(numShares, LIST_SMALL);
-        strcpy(_menu_smbd.title, "Shares");
-
-        for (int i = 0; i < numShares; i++) {
-            ListItem shareItem = {
-                .item_type = TOGGLE,
-                .action = toggleAction, // set the action to the wrapper function
-                .value = shares[i].browseable,
-            };
-            shareItem.payload_ptr = &shares[i]; // store a pointer to the share in the payload
-            strcpy(shareItem.label, shares[i].name);
-            list_addItem(&_menu_smbd, shareItem);
-        }
-    }
-
-    for (int i = 0; i < _menu_smbd.item_count; i++) {
-        printf("- %s\n", _menu_smbd.items[i].label);
-    }
-
-    menu_stack[++menu_level] = &_menu_smbd;
-    header_changed = true;
-}
-
 void menu_network(void *_)
 {
     if (!_menu_network._created) {
@@ -558,7 +555,7 @@ void menu_network(void *_)
                          .label = "Samba: Network file share...",
                          .item_type = TOGGLE,
                          .disabled = !settings.wifi_on,
-                         .alternative_arrow_action = 1,
+                         .alternative_arrow_action = true,
                          .arrow_action = network_setSmbdState,
                          .value = (int)network_state.smbd,
                          .action = menu_smbd});
@@ -567,7 +564,7 @@ void menu_network(void *_)
                          .label = "HTTP: Web-based file sync...",
                          .item_type = TOGGLE,
                          .disabled = !settings.wifi_on,
-                         .alternative_arrow_action = 1,
+                         .alternative_arrow_action = true,
                          .arrow_action = network_setHttpState,
                          .value = (int)network_state.http,
                          .action = menu_http});
@@ -576,7 +573,7 @@ void menu_network(void *_)
                          .label = "SSH: Secure shell...",
                          .item_type = TOGGLE,
                          .disabled = !settings.wifi_on,
-                         .alternative_arrow_action = 1,
+                         .alternative_arrow_action = true,
                          .arrow_action = network_setSshState,
                          .value = (int)network_state.ssh,
                          .action = menu_ssh});
@@ -585,7 +582,7 @@ void menu_network(void *_)
                          .label = "Telnet: Remote shell...",
                          .item_type = TOGGLE,
                          .disabled = !settings.wifi_on,
-                         .alternative_arrow_action = 1,
+                         .alternative_arrow_action = true,
                          .arrow_action = network_setTelnetState,
                          .value = (int)network_state.telnet,
                          .action = menu_telnet});
@@ -594,7 +591,7 @@ void menu_network(void *_)
                          .label = "FTP: File server...",
                          .item_type = TOGGLE,
                          .disabled = !settings.wifi_on,
-                         .alternative_arrow_action = 1,
+                         .alternative_arrow_action = true,
                          .arrow_action = network_setFtpState,
                          .value = (int)network_state.ftp,
                          .action = menu_ftp});
