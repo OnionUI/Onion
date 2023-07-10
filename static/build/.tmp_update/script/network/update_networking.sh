@@ -145,8 +145,7 @@ check_smbdstate() {
 
                 #unset preload or samba doesn't work correctly.
                 #dont env var all the libpaths for this shell, only the shell we open smbd in
-                LD_PRELOAD="" LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/mnt/SDCARD/.tmp_update/lib/samba:/mnt/SDCARD/.tmp_update/lib/samba/private" /mnt/SDCARD/.tmp_update/bin/samba/sbin/smbd --no-process-group -D &
-
+                $netscript/start_smbd.sh &
                 log "Samba: Starting smbd at exit of tweaks.."
             else
                 disable_flag smbdState
