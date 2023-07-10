@@ -13,7 +13,7 @@
 #define MAIN_UI_SETTINGS "/appconfigs/system.json"
 #define CMD_TO_RUN_PATH "/mnt/SDCARD/.tmp_update/cmd_to_run.sh"
 #define RETROARCH_CONFIG "/mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg"
-#define HISTORY_PATH                                                           \
+#define HISTORY_PATH \
     "/mnt/SDCARD/Saves/CurrentProfile/lists/content_history.lpl"
 #define DEFAULT_THEME_PATH "/mnt/SDCARD/Themes/Silky by DiMo/"
 
@@ -50,6 +50,8 @@ static struct settings_s {
     int ingame_single_press;
     int ingame_long_press;
     int ingame_double_press;
+    bool disable_standby;
+
     char mainui_button_x[JSON_STRING_LEN];
     char mainui_button_y[JSON_STRING_LEN];
 } settings;
@@ -81,7 +83,7 @@ void _settings_reset(void)
     settings.menu_button_haptics = false;
     settings.low_battery_autosave = true;
     settings.low_battery_warning = true;
-    settings.low_battery_warn_at = 15;
+    settings.low_battery_warn_at = 10;
     settings.time_skip = 4;
     settings.vibration = 2;
     settings.startup_tab = 0;
@@ -93,6 +95,7 @@ void _settings_reset(void)
     settings.ingame_single_press = 1;
     settings.ingame_long_press = 2;
     settings.ingame_double_press = 3;
+    settings.disable_standby = false;
     memset(settings.mainui_button_x, 0, JSON_STRING_LEN);
     memset(settings.mainui_button_y, 0, JSON_STRING_LEN);
 }
@@ -124,7 +127,6 @@ void _settings_load_mainui(void)
     cJSON *json_root = cJSON_Parse(json_str);
 
     json_getInt(json_root, "vol", &settings.volume);
-    json_getInt(json_root, "mute", &settings.mute);
     json_getInt(json_root, "bgmvol", &settings.bgm_volume);
     json_getInt(json_root, "brightness", &settings.brightness);
     json_getInt(json_root, "hibernate", &settings.sleep_timer);
@@ -156,29 +158,27 @@ void settings_load(void)
     settings.show_recents = config_flag_get(".showRecents");
     settings.show_expert = config_flag_get(".showExpert");
     settings.low_battery_autosave = !config_flag_get(".noLowBatteryAutoSave");
+    settings.mute = config_flag_get(".muteVolume");
+    settings.disable_standby = config_flag_get(".disableStandby");
 
-    if (config_flag_get(
-            ".noBatteryWarning")) // flag is deprecated, but keep compatibility
+    if (config_flag_get(".noBatteryWarning")) // flag is deprecated, but keep compatibility
         settings.low_battery_warn_at = 0;
 
-    if (config_flag_get(
-            ".noVibration")) // flag is deprecated, but keep compatibility
+    if (config_flag_get(".noVibration")) // flag is deprecated, but keep compatibility
         settings.vibration = 0;
 
-    config_get("battery/warnAt", "%d", &settings.low_battery_warn_at);
-    config_get("startup/app", "%d", &settings.startup_application);
-    config_get("startup/addHours", "%d", &settings.time_skip);
-    config_get("vibration", "%d", &settings.vibration);
-    config_get("startup/tab", "%d", &settings.startup_tab);
+    config_get("battery/warnAt", CONFIG_INT, &settings.low_battery_warn_at);
+    config_get("startup/app", CONFIG_INT, &settings.startup_application);
+    config_get("startup/addHours", CONFIG_INT, &settings.time_skip);
+    config_get("vibration", CONFIG_INT, &settings.vibration);
+    config_get("startup/tab", CONFIG_INT, &settings.startup_tab);
 
-    if (config_flag_get(
-            ".menuInverted")) { // flag is deprecated, but keep compatibility
+    if (config_flag_get(".menuInverted")) { // flag is deprecated, but keep compatibility
         settings.ingame_single_press = 2;
         settings.ingame_long_press = 1;
     }
 
-    if (config_flag_get(
-            ".noGameSwitcher")) { // flag is deprecated, but keep compatibility
+    if (config_flag_get(".noGameSwitcher")) { // flag is deprecated, but keep compatibility
         settings.mainui_single_press = 0;
         settings.ingame_single_press = 2;
         settings.ingame_long_press = 0;
@@ -258,6 +258,8 @@ void settings_save(void)
     config_flag_set(".showRecents", settings.show_recents);
     config_flag_set(".showExpert", settings.show_expert);
     config_flag_set(".noLowBatteryAutoSave", !settings.low_battery_autosave);
+    config_flag_set(".muteVolume", settings.mute);
+    config_flag_set(".disableStandby", settings.disable_standby);
     config_setNumber("battery/warnAt", settings.low_battery_warn_at);
     config_setNumber("startup/app", settings.startup_application);
     config_setNumber("startup/addHours", settings.time_skip);

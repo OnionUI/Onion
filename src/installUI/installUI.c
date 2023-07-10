@@ -89,6 +89,7 @@ int main(int argc, char *argv[])
 
     SDL_Surface *waiting_bg = IMG_Load("res/waitingBG.png");
     SDL_Surface *progress_stripes = IMG_Load("res/progress_stripes.png");
+    SDL_Surface *slide = NULL;
 
     TTF_Font *font = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 36);
     TTF_Font *font_small =
@@ -113,7 +114,7 @@ int main(int argc, char *argv[])
 
     int current_slide = -1;
     int num_slides = 9;
-    config_get("currentSlide", "%d", &current_slide);
+    config_get("currentSlide", CONFIG_INT, &current_slide);
     imageCache_load(&current_slide, _loadSlide, num_slides);
 
     bool quit = false;
@@ -127,7 +128,6 @@ int main(int argc, char *argv[])
     uint32_t acc_ticks = 0, last_ticks = SDL_GetTicks(),
              time_step = 1000 / 24, // 12 fps
         check_timer = 0;
-
     uint32_t slide_timer = last_ticks;
 
     while (!quit) {
@@ -142,10 +142,12 @@ int main(int argc, char *argv[])
                 switch (event.key.keysym.sym) {
                 case SW_BTN_LEFT:
                     current_slide = nextSlide(current_slide, num_slides, -1);
+                    slide = current_slide == -1 ? NULL : imageCache_getItem(&current_slide);
                     slide_timer = ticks;
                     break;
                 case SW_BTN_RIGHT:
                     current_slide = nextSlide(current_slide, num_slides, 1);
+                    slide = current_slide == -1 ? NULL : imageCache_getItem(&current_slide);
                     slide_timer = ticks;
                     break;
                 case SW_BTN_A:
@@ -160,6 +162,7 @@ int main(int argc, char *argv[])
 
         if (ticks - slide_timer > SLIDE_TIMEOUT) {
             current_slide = nextSlide(current_slide, num_slides, 1);
+            slide = current_slide == -1 ? NULL : imageCache_getItem(&current_slide);
             slide_timer = ticks;
         }
 
@@ -197,8 +200,6 @@ int main(int argc, char *argv[])
             break;
 
         if (acc_ticks >= time_step) {
-            SDL_Surface *slide =
-                current_slide == -1 ? NULL : imageCache_getItem(&current_slide);
             if (slide == NULL)
                 SDL_BlitSurface(waiting_bg, NULL, screen, NULL);
             else

@@ -1,25 +1,8 @@
 #!/bin/sh
-sysdir=`cd -- "$(dirname "$0")" >/dev/null 2>&1; pwd -P`
-appdir=/mnt/SDCARD/miyoo/app
-
-# Check if installer is present
-if [ -d $appdir/.tmp_update ] && fgrep -q "#!/bin/sh" "$appdir/MainUI"; then
-    echo "Installer detected!"
-    cd $appdir
-    ./MainUI
-else
-    cd $sysdir
-    mkdir -p ./logs
-
-    if [ -f ./config/.logging ]; then
-        ./runtime.sh | tee ./logs/runtime.log
-    else
-        ./runtime.sh 2>&1 > /dev/null
-    fi
-fi
-
-echo "Runtime exited unexpectedly"
+cd /mnt/SDCARD/.tmp_update
+./runtime.sh
 
 # Turn off if runtime exits
+echo "Runtime exited unexpectedly"
 reboot
 sleep 10

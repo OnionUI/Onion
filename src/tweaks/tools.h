@@ -12,10 +12,10 @@
 #include "theme/theme.h"
 #include "utils/msleep.h"
 
-#define NUM_TOOLS 6
+#define NUM_TOOLS 7
 
 static char tools_short_names[NUM_TOOLS][STR_MAX] = {
-    "dot_clean", "cue_gen", "favsort-az", "favsort-sys", "favfix", "recents"};
+    "favsort-az", "favsort-sys", "favfix", "recents", "dot_clean", "cue_gen", "build_short_rom_game_list"};
 static pthread_t thread_pt;
 static bool thread_active = false;
 static bool thread_success = false;
@@ -127,8 +127,14 @@ void tool_generateCueFiles(void *pt)
                      "/mnt/SDCARD/.tmp_update/script/cue_gen.sh");
 }
 
+void tool_buildShortRomGameList(void *pt)
+{
+    _runCommandPopup(tools_short_names[6],
+                     "./bin/gameNameList /mnt/SDCARD /mnt/SDCARD/BIOS/arcade_lists");
+}
+
 static void (*tools_pt[NUM_TOOLS])(void *) = {
     tool_favoritesSortAlpha, tool_favoritesSortSystem, tool_favoritesFix,
-    tool_recentsRemoveApps, tool_removeMacFiles};
+    tool_recentsRemoveApps, tool_removeMacFiles, tool_generateCueFiles, tool_buildShortRomGameList};
 
 #endif // TWEAKS_TOOLS_H__

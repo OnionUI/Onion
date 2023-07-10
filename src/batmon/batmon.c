@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
         }
 
         if (!is_suspended) {
-            config_get("battery/warnAt", "%d", &warn_at);
+            config_get("battery/warnAt", CONFIG_INT, &warn_at);
 
             if (ticks >= CHECK_BATTERY_TIMEOUT_S) {
                 if (DEVICE_ID == MIYOO283) {
@@ -176,7 +176,8 @@ int batteryPercentage(int value)
 static void *batteryWarning_thread(void *param)
 {
     while (1) {
-        display_drawFrame(0x00FF0000); // draw red frame
+        display_drawBatteryIcon(0x00FF0000, 15, 450, 10,
+                                0x00FF0000); // draw red battery icon
         usleep(0x4000);
     }
     return 0;

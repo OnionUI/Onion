@@ -42,7 +42,7 @@
 
 #define ROM_SCREENS_DIR "/mnt/SDCARD/Saves/CurrentProfile/romScreens"
 #define ROM_DB_PATH "/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db"
-#define HISTORY_PATH                                                           \
+#define HISTORY_PATH \
     "/mnt/SDCARD/Saves/CurrentProfile/lists/content_history.lpl"
 
 #define MAXFILENAMESIZE 250
@@ -261,7 +261,7 @@ bool getGameNameFromCache(const char *cache_path, const char *rom_path,
         return false;
 
     const char *sql =
-        sqlite3_mprintf("SELECT disp FROM '%q_roms' WHERE path LIKE '%%%q'",
+        sqlite3_mprintf("SELECT pinyin FROM '%q_roms' WHERE path LIKE '%%%q'",
                         basename(dirname(cache_path_clone)), rom_path_slice);
     printf_debug("query: %s\n", sql);
 
@@ -321,19 +321,13 @@ void getGameName(const char *rom_path, char *name_out)
     char gamelist_path[STR_MAX * 2];
 
     do {
-        snprintf(cache_path, STR_MAX * 2 - 1, "%s/%s_cache2.db", cache_dir,
+        snprintf(cache_path, STR_MAX * 2 - 1, "%s/%s_cache6.db", cache_dir,
                  basename(cache_dir));
-        snprintf(gamelist_path, STR_MAX * 2 - 1, "%s/miyoogamelist.xml",
-                 cache_dir);
 
         moveToParentDir(cache_dir);
 
         if (!is_file(cache_path))
             continue;
-
-        // Only check cache if miyoogamelist exists
-        if (!is_file(gamelist_path))
-            break;
 
         if (getGameNameFromCache(cache_path, rom_path, name_out))
             return;

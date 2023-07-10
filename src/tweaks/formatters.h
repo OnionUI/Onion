@@ -1,4 +1,4 @@
-#ifndef TWEAKS_FORMATTERS_H__
+﻿#ifndef TWEAKS_FORMATTERS_H__
 #define TWEAKS_FORMATTERS_H__
 
 #include <stdio.h>
@@ -9,19 +9,33 @@
 
 #include "./tools.h"
 
-#define BUTTON_MAINUI_LABELS                                                   \
-    {                                                                          \
-        "Context menu", "GameSwitcher", "Resume game"                          \
+#define BUTTON_MAINUI_LABELS                          \
+    {                                                 \
+        "Context menu", "GameSwitcher", "Resume game" \
     }
-#define BUTTON_INGAME_LABELS                                                   \
-    {                                                                          \
-        "Off", "GameSwitcher", "Exit to menu", "Quick switch"                  \
+#define BUTTON_INGAME_LABELS                                  \
+    {                                                         \
+        "Off", "GameSwitcher", "Exit to menu", "Quick switch" \
     }
 
-#define THEME_TOGGLE_LABELS                                                    \
-    {                                                                          \
-        "-", "Off", "On"                                                       \
+#define THEME_TOGGLE_LABELS \
+    {                       \
+        "-", "Off", "On"    \
     }
+
+void formatter_timezone(void *pt, char *out_label)
+{
+    ListItem *item = (ListItem *)pt;
+    int value = item->value;
+    double utc_value = ((double)value / 2.0) - 12.0;
+    bool half_past = round(utc_value) != utc_value;
+    if (utc_value == 0.0) {
+        strcpy(out_label, "UTC");
+    }
+    else {
+        sprintf(out_label, utc_value > 0.0 ? "UTC+%02d:%02d" : "UTC-%02d:%02d", (int)floor(abs(utc_value)), half_past ? 30 : 0);
+    }
+}
 
 void formatter_appShortcut(void *pt, char *out_label)
 {

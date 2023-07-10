@@ -10,6 +10,63 @@
 static int menu_level = 0;
 static List *menu_stack[5];
 
+bool isMenu(List *target)
+{
+    return menu_stack[menu_level]->_created && target->_created && menu_stack[menu_level]->_id == target->_id;
+}
+
+static List _menu_main;
+static List _menu_system;
+static List _menu_date_time;
+static List _menu_system_startup;
+static List _menu_button_action;
+static List _menu_button_action_mainui_menu;
+static List _menu_button_action_ingame_menu;
+static List _menu_user_interface;
+static List _menu_theme_overrides;
+static List _menu_battery_percentage;
+static List _menu_advanced;
+static List _menu_reset_settings;
+static List _menu_tools;
+
+static List _menu_network;
+static List _menu_wifi;
+static List _menu_telnet;
+static List _menu_ftp;
+static List _menu_wps;
+static List _menu_http;
+static List _menu_ssh;
+static List _menu_smbd;
+
+void menu_network_free_all(void)
+{
+    list_free(&_menu_network);
+    list_free(&_menu_wifi);
+    list_free(&_menu_telnet);
+    list_free(&_menu_ftp);
+    list_free(&_menu_wps);
+    list_free(&_menu_http);
+    list_free(&_menu_ssh);
+    list_free(&_menu_smbd);
+}
+
+static List _menu_icons;
+static List _menu_icon_packs;
+static List _menu_console_icons;
+static List _menu_app_icons;
+static List _menu_expert_icons;
+static List _menu_temp;
+
+void menu_icons_free_all(void)
+{
+    list_free(&_menu_icons);
+    list_free(&_menu_icon_packs);
+    list_free(&_menu_console_icons);
+    list_free(&_menu_app_icons);
+    list_free(&_menu_expert_icons);
+    list_free(&_menu_temp);
+}
+
 static bool quit = false;
 static bool all_changed = true;
 static bool header_changed = true;
@@ -20,6 +77,8 @@ static KeyState keystate[320] = {(KeyState)0};
 static bool keys_enabled = true;
 static bool reset_menus = false;
 static bool skip_next_change = false;
+
+static char ip_address_label[STR_MAX];
 
 static void sigHandler(int sig)
 {

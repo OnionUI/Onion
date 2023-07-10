@@ -2,7 +2,7 @@
 
 TARGET=Onion
 VERSION=4.2.0-beta
-RA_SUBVERSION=1.14.0.2
+RA_SUBVERSION=1.15.0.3
 
 ###########################################################
 
@@ -43,11 +43,12 @@ PACKAGES_EMU_DEST   := $(PACKAGES_DIR)/Emu
 PACKAGES_APP_DEST   := $(PACKAGES_DIR)/App
 PACKAGES_RAPP_DEST  := $(PACKAGES_DIR)/RApp
 TEMP_DIR            := $(ROOT_DIR)/cache/temp
+INCLUDE_DIR         := $(ROOT_DIR)/include
 ifeq (,$(GTEST_INCLUDE_DIR))
 GTEST_INCLUDE_DIR = /usr/include/
 endif
 
-TOOLCHAIN := mholdg16/miyoomini-toolchain:latest
+TOOLCHAIN := aemiii91/miyoomini-toolchain:latest
 
 include ./src/common/commands.mk
 
@@ -107,7 +108,7 @@ $(CACHE)/.setup:
 	@touch $(CACHE)/.setup
 
 build: core apps external
-	@$(ECHO) "\n-> [BUILD READY!]"
+	@$(ECHO) $(PRINT_DONE)
 
 core: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
@@ -131,6 +132,10 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/read_uuid && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/detectKey && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/axp && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/pressMenu2Kill && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/pngScale && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/libgamename && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/gameNameList && BUILD_DIR=$(BIN_DIR) make
 # Build dependencies for installer
 	@mkdir -p $(INSTALLER_DIR)/bin
 	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(INSTALLER_DIR)/bin/ VERSION=$(VERSION) make
@@ -138,6 +143,10 @@ core: $(CACHE)/.setup
 	@cp $(BIN_DIR)/batmon $(INSTALLER_DIR)/bin/
 	@cp $(BIN_DIR)/detectKey $(INSTALLER_DIR)/bin/
 	@cp $(BIN_DIR)/infoPanel $(INSTALLER_DIR)/bin/
+	@cp $(BIN_DIR)/gameNameList $(INSTALLER_DIR)/bin/
+	@cp $(BIN_DIR)/7z $(INSTALLER_DIR)/bin/
+# Overrider miyoo libraries
+	@cp $(BIN_DIR)/libgamename.so $(BUILD_DIR)/miyoo/lib/
 
 apps: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
@@ -156,48 +165,56 @@ apps: $(CACHE)/.setup
 $(THIRD_PARTY_DIR)/RetroArch/retroarch_miyoo354:
 	@$(ECHO) $(PRINT_RECIPE)
 # RetroArch
+	@$(ECHO) $(COLOR_BLUE)"\n-- Build RetroArch"$(COLOR_NORMAL)
 	@cd $(THIRD_PARTY_DIR)/RetroArch && make clean all
 	@cd $(THIRD_PARTY_DIR)/RetroArch && make clean all ADD_NETWORKING=1 PACKAGE_NAME=retroarch_miyoo354
 
 external: $(CACHE)/.setup $(THIRD_PARTY_DIR)/RetroArch/retroarch_miyoo354
 	@$(ECHO) $(PRINT_RECIPE)
 # Add RetroArch
-	@$(ECHO) "\n-- Add RetroArch"
 	@cp $(THIRD_PARTY_DIR)/RetroArch/retroarch $(BUILD_DIR)/RetroArch/
 	@cp $(THIRD_PARTY_DIR)/RetroArch/retroarch_miyoo354 $(BUILD_DIR)/RetroArch/
 	@echo $(RA_SUBVERSION) > $(BUILD_DIR)/RetroArch/onion_ra_version.txt
+	@$(BUILD_DIR)/.tmp_update/script/build_ext_cache.sh $(BUILD_DIR)/RetroArch/.retroarch
 # SearchFilter
-	@$(ECHO) "\n-- Build SearchFilter"
+	@$(ECHO) $(COLOR_BLUE)"\n-- Build SearchFilter"$(COLOR_NORMAL)
 	@cd $(THIRD_PARTY_DIR)/SearchFilter && make build && cp -a build/. $(BUILD_DIR)
 	@cp -a $(BUILD_DIR)/App/Search/. "$(PACKAGES_APP_DEST)/Search (Find your games)/App/Search"
-	@mv $(BUILD_DIR)/App/Filter "$(PACKAGES_APP_DEST)/List shortcuts (Filter+Refresh)/App/Filter"
+	@mv -f $(BUILD_DIR)/App/Filter/* "$(PACKAGES_APP_DEST)/List shortcuts (Filter+Refresh)/App/Filter"
+	@rmdir $(BUILD_DIR)/App/Filter
 # Other
-	@$(ECHO) "\n-- Build Terminal"
+	@$(ECHO) $(COLOR_BLUE)"\n-- Build Terminal"$(COLOR_NORMAL)
 	@cd $(THIRD_PARTY_DIR)/Terminal && make && cp ./st "$(BIN_DIR)"
-	@$(ECHO) "\n-- Build DinguxCommander"
+	@$(ECHO) $(COLOR_BLUE)"\n-- Build DinguxCommander"$(COLOR_NORMAL)
 	@cd $(THIRD_PARTY_DIR)/DinguxCommander && make && cp ./output/DinguxCommander "$(PACKAGES_APP_DEST)/File Explorer (DinguxCommander)/App/Commander_Italic"
 
 dist: build
 	@$(ECHO) $(PRINT_RECIPE)
 # Package configs
 	@cp -R $(TEMP_DIR)/configs/Saves/CurrentProfile/ $(TEMP_DIR)/configs/Saves/GuestProfile
-	@cd $(TEMP_DIR)/configs && zip -rq $(BUILD_DIR)/.tmp_update/config/configs.pak .
+	@echo -n "Packaging configs..."
+	@cd $(TEMP_DIR)/configs && 7z a -mtm=off $(BUILD_DIR)/.tmp_update/config/configs.pak . -bsp1 -bso0
+	@echo " DONE"
 	@rm -rf $(TEMP_DIR)/configs
 	@rmdir $(TEMP_DIR)
 # Package RetroArch separately
-	@cd $(BUILD_DIR) && zip -rq retroarch.pak RetroArch
+	@echo -n "Packaging RetroArch..."
+	@cd $(BUILD_DIR) && 7z a -mtm=off retroarch.pak ./RetroArch -bsp1 -bso0
+	@echo " DONE"
 	@mkdir -p $(DIST_DIR)/RetroArch
 	@mv $(BUILD_DIR)/retroarch.pak $(DIST_DIR)/RetroArch/
 	@echo $(RA_SUBVERSION) > $(DIST_DIR)/RetroArch/ra_package_version.txt
 # Package Onion core
-	@cd $(BUILD_DIR) && zip -rq $(DIST_DIR)/miyoo/app/.tmp_update/onion.pak . -x RetroArch RetroArch/\*
-	@$(ECHO) "\n-> [DIST READY!]"
+	@echo -n "Packaging Onion..."
+	@cd $(BUILD_DIR) && 7z a -mtm=off $(DIST_DIR)/miyoo/app/.tmp_update/onion.pak . -x!RetroArch -bsp1 -bso0
+	@echo " DONE"
+	@$(ECHO) $(PRINT_DONE)
 
 release: dist
 	@$(ECHO) $(PRINT_RECIPE)
 	@rm -f $(RELEASE_DIR)/$(RELEASE_NAME).zip
-	@cd $(DIST_DIR) && zip -rq $(RELEASE_DIR)/$(RELEASE_NAME).zip .
-	@$(ECHO) "\n-> [RELEASE READY!]"
+	@cd $(DIST_DIR) && 7z a -mtc=off $(RELEASE_DIR)/$(RELEASE_NAME).zip . -bsp1 -bso0
+	@$(ECHO) $(PRINT_DONE)
 
 clean:
 	@$(ECHO) $(PRINT_RECIPE)
@@ -207,6 +224,7 @@ clean:
 
 deepclean: clean
 	@rm -rf $(CACHE)
+	@rm -f $(THIRD_PARTY_DIR)/RetroArch/retroarch_miyoo354
 	@cd $(THIRD_PARTY_DIR)/RetroArch && make clean
 	@cd $(THIRD_PARTY_DIR)/SearchFilter && make clean
 	@cd $(THIRD_PARTY_DIR)/Terminal && make clean
@@ -246,6 +264,9 @@ test:
 	@mkdir -p $(BUILD_TEST_DIR)/infoPanel_test_data && cd $(TEST_SRC_DIR) && BUILD_DIR=$(BUILD_TEST_DIR)/ make dev
 	@cp -R $(TEST_SRC_DIR)/infoPanel_test_data $(BUILD_TEST_DIR)/
 	cd $(BUILD_TEST_DIR) && ./test
+
+static-analysis:
+	@cd $(ROOT_DIR) && cppcheck -I $(INCLUDE_DIR) --enable=all $(SRC_DIR)
 
 format:
 	@find ./src -regex '.*\.\(c\|h\|cpp\|hpp\)' -exec clang-format -style=file -i {} \;

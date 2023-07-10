@@ -121,7 +121,7 @@ bool pickRandomGameFromCache(char *emuname, char *romsdir,
     sqlite3_stmt *res;
 
     char cache_path[STR_MAX * 3];
-    snprintf(cache_path, STR_MAX * 3 - 1, "%s/%s_cache2.db", romsdir,
+    snprintf(cache_path, STR_MAX * 3 - 1, "%s/%s_cache6.db", romsdir,
              basename(romsdir));
     printf_debug("cache: %s\n", cache_path);
 
@@ -140,10 +140,10 @@ bool pickRandomGameFromCache(char *emuname, char *romsdir,
 
     int count = getTotalGamesCount(db, table_name);
 
-    const char *sql = sqlite3_mprintf(
-        "SELECT id, disp, path, imgpath FROM %q WHERE type=0 AND path NOT LIKE "
-        "'%%.miyoocmd' ORDER BY RANDOM() LIMIT 1",
-        table_name);
+    const char *sql = sqlite3_mprintf("SELECT id, pinyin, path, imgpath FROM "
+                                      "%q WHERE type=0 AND path NOT LIKE "
+                                      "'%%.miyoocmd' ORDER BY RANDOM() LIMIT 1",
+                                      table_name);
 
     if (sqlite3_prepare_v2(db, sql, -1, &res, 0) != SQLITE_OK) {
         sqlite3_close(db);
@@ -294,9 +294,9 @@ bool addRandomFromJson(char *json_path)
     return true;
 }
 
-#define THICK_BAR                                                              \
+#define THICK_BAR \
     "================================================================="
-#define THIN_BAR                                                               \
+#define THIN_BAR \
     "-----------------------------------------------------------------"
 
 void logWeights()

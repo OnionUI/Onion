@@ -17,6 +17,11 @@ if [ -d $sysdir ]; then
     mkdir -p /mnt/SDCARD/Saves/CurrentProfile/romScreens
     mv ./romScreens/* /mnt/SDCARD/Saves/CurrentProfile/romScreens/
 
+    if [ -f ./bin/installUI ]; then
+        mkdir -p onionVersion
+        ./bin/installUI --version > ./onionVersion/previous_version.txt
+    fi
+
     # Remove old system files, except dotfiles and onionVersion
     find * -maxdepth 0 -not -name "onionVersion" -not -name "config" -exec rm -rf {} \;
 

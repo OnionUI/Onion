@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
     // Rename cache entry
 
     char cache_path[STR_MAX * 3];
-    snprintf(cache_path, STR_MAX * 3 - 1, "%s/%s/%s_cache2.db", emupath,
+    snprintf(cache_path, STR_MAX * 3 - 1, "%s/%s/%s_cache6.db", emupath,
              config.rompath, basename(config.rompath));
 
     char new_rompath[STR_MAX * 3], new_imgpath[STR_MAX * 3];

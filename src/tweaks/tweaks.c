@@ -27,8 +27,35 @@
 
 #define FRAMES_PER_SECOND 60
 
+bool check_menuHasChanges(List *menu)
+{
+    bool modified = false;
+    if (menu->_created) {
+        for (int i = 0; i < menu->item_count; i++) {
+            ListItem *item = &menu->items[i];
+            if (item->item_type != ACTION) {
+                modified |= item->value != item->_reset_value;
+            }
+        }
+    }
+    return modified;
+}
+
+void check_networkChanged(void)
+{
+    bool modified = temp_flag_get("network_changed");
+    modified |= check_menuHasChanges(&_menu_network);
+    modified |= check_menuHasChanges(&_menu_telnet);
+    modified |= check_menuHasChanges(&_menu_ftp);
+    modified |= check_menuHasChanges(&_menu_http);
+    modified |= check_menuHasChanges(&_menu_ssh);
+    modified |= check_menuHasChanges(&_menu_date_time);
+    temp_flag_set("network_changed", modified);
+}
+
 int main(int argc, char *argv[])
 {
+    log_setName("tweaks");
     print_debug("Debug logging enabled");
 
     getDeviceModel();
@@ -157,6 +184,22 @@ int main(int argc, char *argv[])
             battery_changed = true;
 
         if (acc_ticks >= time_step) {
+            if (isMenu(&_menu_date_time)) {
+                if (_writeDateString(_menu_date_time.items[0].label)) {
+                    list_changed = true;
+                }
+            }
+            if (isMenu(&_menu_network) || isMenu(&_menu_wifi)) {
+                network_loadState();
+                if (netinfo_getIpAddress(ip_address_label, network_state.hotspot ? "wlan1" : "wlan0")) {
+                    if (_menu_network._created)
+                        strcpy(_menu_network.items[0].label, ip_address_label);
+                    if (_menu_wifi._created)
+                        strcpy(_menu_wifi.items[0].label, ip_address_label);
+                    list_changed = true;
+                }
+            }
+
             if (header_changed || battery_changed)
                 theme_renderHeader(screen, menu_stack[menu_level]->title,
                                    false);
@@ -205,9 +248,12 @@ int main(int argc, char *argv[])
 
     if (DEVICE_ID == MIYOO354) {
         value_setLcdVoltage();
+        check_networkChanged();
     }
 
     Mix_CloseAudio();
+
+    network_freeSmbShares();
 
     lang_free();
     menu_free_all();

@@ -28,23 +28,6 @@ typedef struct IconInfo {
 static IconInfo_t icon_infos[500];
 static int icon_infos_len = 0;
 
-static List _menu_icons;
-static List _menu_icon_packs;
-static List _menu_console_icons;
-static List _menu_app_icons;
-static List _menu_expert_icons;
-static List _menu_temp;
-
-void menu_icons_free_all(void)
-{
-    list_free(&_menu_icons);
-    list_free(&_menu_icon_packs);
-    list_free(&_menu_console_icons);
-    list_free(&_menu_app_icons);
-    list_free(&_menu_expert_icons);
-    list_free(&_menu_temp);
-}
-
 int _add_icon_alts(const char *pack_dir, const char *pack_name,
                    const char *icon_prefix, List *list, void (*action)(void *))
 {

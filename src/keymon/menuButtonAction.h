@@ -9,6 +9,7 @@
 #include "system/screenshot.h"
 #include "system/settings.h"
 #include "system/state.h"
+#include "system/system_utils.h"
 #include "utils/apps.h"
 
 #include "./input_fd.h"
@@ -27,10 +28,8 @@ static bool menu_ignore_next = false;
 
 void _action_runApp(const char *app_dir_name)
 {
-    int currpos, total;
-    getAppPosition(app_dir_name, &currpos, &total);
     run_app(app_dir_name);
-    write_mainui_state(APPS, currpos, total);
+    write_mainui_state(MAIN_MENU, 0, 10);
     kill_mainUI();
 }
 
@@ -107,9 +106,9 @@ bool terminate_retroarch(void)
 void quietMainUI(void)
 {
     if (system_state == MODE_MAIN_UI) {
-        print_debug("Sending L2 to quiet MainUI");
-        keyinput_send(HW_BTN_L2, PRESSED);
-        keyinput_send(HW_BTN_L2, RELEASED);
+        print_debug("Sending L1 to quiet MainUI");
+        keyinput_send(HW_BTN_L1, PRESSED);
+        keyinput_send(HW_BTN_L1, RELEASED);
         print_debug("Done (quietMainUI)");
     }
 }
