@@ -142,9 +142,7 @@ check_smbdstate() {
                 if [ ! -d "/var/log/" ]; then
                     mkdir -p /var/log/
                 fi
-
-                #unset preload or samba doesn't work correctly.
-                #dont env var all the libpaths for this shell, only the shell we open smbd in
+                
                 $netscript/start_smbd.sh &
                 log "Samba: Starting smbd at exit of tweaks.."
             else
