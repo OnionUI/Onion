@@ -1,2 +1,2 @@
 root:x:0:root/
-sdusergroup:x:1000:
+oniongroup:x:1000:
