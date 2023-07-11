@@ -34,6 +34,7 @@ static struct network_s {
     bool hotspot;
     bool ntp;
     bool ntp_wait;
+    bool auth_smbd;
     bool auth_telnet;
     bool auth_ftp;
     bool auth_http;
@@ -54,6 +55,7 @@ void network_loadState(void)
     network_state.hotspot = config_flag_get(".hotspotState");
     network_state.ntp = config_flag_get(".ntpState");
     network_state.ntp_wait = config_flag_get(".ntpWait");
+    network_state.auth_smbd = config_flag_get(",smbdState");
     network_state.auth_telnet = config_flag_get(".authtelnetState");
     network_state.auth_ftp = config_flag_get(".authftpState");
     network_state.auth_http = config_flag_get(".authhttpState");
@@ -283,6 +285,11 @@ void network_setNtpWaitState(void *pt)
     network_setState(&network_state.ntp_wait, ".ntpWait", ((ListItem *)pt)->value);
 }
 
+void network_setSmbdAuthState(void *pt)
+{
+    network_setState(&network_state.auth_smbd, ".authsmbdState", ((ListItem *)pt)->value);
+    network_execServiceAuth("smbd");
+}
 void network_setTelnetAuthState(void *pt)
 {
     network_setState(&network_state.auth_telnet, ".authtelnetState", ((ListItem *)pt)->value);
@@ -361,7 +368,7 @@ void menu_smbd(void *pt)
     if (!_menu_smbd._created) {
         network_getSmbShares();
 
-        _menu_smbd = list_create_sticky(1 + network_numShares, "Samba");
+        _menu_smbd = list_create_sticky(2 + network_numShares, "Samba");
 
         list_addItem(&_menu_smbd,
                      (ListItem){
@@ -370,6 +377,14 @@ void menu_smbd(void *pt)
                          .item_type = TOGGLE,
                          .value = (int)network_state.smbd,
                          .action = network_setSmbdState});
+        list_addItem(&_menu_smbd,
+                     (ListItem){
+                         .label = "Enable authentication",
+                        .sticky_note = "Enable password authentication",
+                         .item_type = TOGGLE,
+                         .disabled = !network_state.smbd,
+                         .value = (int)network_state.auth_smbd,
+                         .action = network_setSmbdAuthState});
 
         for (int i = 0; i < network_numShares; i++) {
             ListItem shareItem = {

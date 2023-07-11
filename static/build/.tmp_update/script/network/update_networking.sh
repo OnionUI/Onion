@@ -14,7 +14,7 @@ main() {
         check) # runs the check function we use in runtime, will be called on boot
             check
             ;;
-        ftp | telnet | http | ssh)
+        ftp | telnet | http | ssh | smbd)
             service=$1
             case "$2" in
                 toggle)
@@ -28,14 +28,14 @@ main() {
                     ;;
             esac
             ;;
-        ntp | hotspot | smbd)
+        ntp | hotspot)
             service=$1
             case "$2" in
                 toggle)
                     check_${service}state
                     ;;
                 *)
-                    echo "Usage: $0 {ntp|hotspot|smbd} toggle"
+                    echo "Usage: $0 {ntp|hotspot} toggle"
                     exit 1
                     ;;
             esac
@@ -144,6 +144,11 @@ check_smbdstate() {
                     mkdir -p /var/log/
                 fi
                 
+                if flag_enabled authsmbdState; then
+                    sed -i -e '/guest only/s/1/0/g' -e '/valid users = onion/s/^#//g' $sysdir/config/smb.conf
+                else
+                    sed -i -e '/guest only/s/0/1/g' -e '/valid users = onion/ s/^#*/#/' $sysdir/config/smb.conf
+                fi
                 $netscript/start_smbd.sh $PASS &
                 log "Samba: Starting smbd at exit of tweaks.."
             else
@@ -154,6 +159,19 @@ check_smbdstate() {
         if is_running smbd; then
             killall -9 smbd
             log "Samba: Killed"
+        fi
+    fi
+}
+
+smbd_authed() {
+    if flag_enabled smbdState; then
+        if flag_enabled authsmbdState; then
+            sed -i -e '/guest only/s/1/0/g' -e '/valid users = onion/s/^#//g' $sysdir/config/smb.conf
+        else
+            sed -i -e '/guest only/s/0/1/g' -e '/valid users = onion/ s/^#*/#/' $sysdir/config/smb.conf
+        fi
+        if ! is_running smbd; then
+            $netscript/start_smbd.sh $PASS &
         fi
     fi
 }
@@ -532,7 +550,7 @@ is_noauth_enabled() { # Used to check authMethod val for HTTPFS
 }
 
 print_usage() {
-    echo "Usage: $0 {check|ftp|telnet|http|ssh|ntp|hotspot|smbd|disableall} {toggle|authed} - {ntp|hotspot|smbd} only accept toggle."
+    echo "Usage: $0 {check|ftp|telnet|http|ssh|ntp|hotspot|smbd|disableall} {toggle|authed} - {ntp|hotspot} only accept toggle."
     exit 1
 }
 
