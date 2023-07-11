@@ -240,7 +240,6 @@ ssh_authed() {
             killall -9 dropbear
             log "SSH: Starting dropbear with auth"
             dropbear -R
-            log "SSH: Started dropbear with auth"
         else
             log "SSH: Starting dropbear without auth"
             killall -9 dropbear
