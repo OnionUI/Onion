@@ -117,7 +117,7 @@ void migrateDB(void)
         // Else : Search for its raw name in the new DB as an orphan
         //              Add it if needed
 
-        int rom_id = 0;
+        int rom_id = -1;
         char *sql;
         sqlite3_stmt *stmt;
 
@@ -195,7 +195,7 @@ void migrateDB(void)
             }
         }
 
-        if (rom_id == 0) {
+        if (rom_id == -1) {
             /**
             * A rom is an orphan if:
             * - it hasn't been found on the SD
@@ -249,11 +249,11 @@ void migrateDB(void)
             sqlite3_finalize(stmt);
             //sqlite3_free(sql);
 
-            if (rom_id != 0)
+            if (rom_id != -1)
                 totalOrphan++;
         }
 
-        if (rom_id == 0) {
+        if (rom_id == -1) {
             // Error adding the orphan rom idn the db
             totalSkipped++;
 
