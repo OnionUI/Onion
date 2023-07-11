@@ -55,7 +55,7 @@ void network_loadState(void)
     network_state.hotspot = config_flag_get(".hotspotState");
     network_state.ntp = config_flag_get(".ntpState");
     network_state.ntp_wait = config_flag_get(".ntpWait");
-    network_state.auth_smbd = config_flag_get(".smbdState");
+    network_state.auth_smbd = config_flag_get(".authsmbdState");
     network_state.auth_telnet = config_flag_get(".authtelnetState");
     network_state.auth_ftp = config_flag_get(".authftpState");
     network_state.auth_http = config_flag_get(".authhttpState");
