@@ -293,7 +293,7 @@ telnet_authed() {
             killall -9 telnetd
             sleep 0.5
             log "Telnet: Starting telnet with auth"
-            telnetd -l $netscript/telnetlogin.sh
+            telnetd
         else
             killall -9 telnetd
             telnetd -l $netscript/telnetenv.sh
