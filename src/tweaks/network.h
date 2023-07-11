@@ -380,7 +380,7 @@ void menu_smbd(void *pt)
         list_addItem(&_menu_smbd,
                      (ListItem){
                          .label = "Enable authentication",
-                        .sticky_note = "Enable password authentication",
+                         .sticky_note = "Enable password authentication",
                          .item_type = TOGGLE,
                          .disabled = !network_state.smbd,
                          .value = (int)network_state.auth_smbd,
