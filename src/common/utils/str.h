@@ -2,6 +2,7 @@
 #define UTILS_STR_H__
 
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -22,5 +23,8 @@ char *str_replace(char *orig, char *rep, char *with);
 size_t str_trim(char *out, size_t len, const char *str, bool first);
 
 int str_endsWith(const char *str, const char *suffix);
+
+void str_removeParentheses(char *str_out, const char *str_in);
+void str_serializeTime(char *dest_str, int nTime);
 
 #endif // UTILS_STR_H__

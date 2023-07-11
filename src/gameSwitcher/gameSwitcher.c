@@ -111,33 +111,6 @@ static int gameNameScrollEnd = 20;
 static cJSON *json_root = NULL;
 static cJSON *json_items = NULL;
 
-void removeParentheses(char *str_out, const char *str_in)
-{
-    char temp[STR_MAX];
-    int len = strlen(str_in);
-    int c = 0;
-    bool inside = false;
-    char end_char;
-
-    for (int i = 0; i < len && i < STR_MAX; i++) {
-        if (!inside && (str_in[i] == '(' || str_in[i] == '[')) {
-            end_char = str_in[i] == '(' ? ')' : ']';
-            inside = true;
-            continue;
-        }
-        else if (inside) {
-            if (str_in[i] == end_char)
-                inside = false;
-            continue;
-        }
-        temp[c++] = str_in[i];
-    }
-
-    temp[c] = '\0';
-
-    str_trim(str_out, STR_MAX - 1, temp, false);
-}
-
 SDL_Surface *loadRomScreen(int index)
 {
     if (index < 0 || index >= game_list_len)
@@ -289,21 +262,6 @@ void getGameName(const char *rom_path, char *name_out)
     strcpy(name_out, file_removeExtension(base_name));
 }
 
-void serializeTime(int nTime, char *dest_str)
-{
-    if (nTime >= 0) {
-        int h = nTime / 3600;
-        int m = (nTime - 3600 * h) / 60;
-        if (h > 0)
-            sprintf(dest_str, "%dh %dm", h, m);
-        else
-            sprintf(dest_str, "%dm", m);
-    }
-    else {
-        strcpy(dest_str, "0m");
-    }
-}
-
 int getRomTotalTime(const char *rom_path)
 {
     char rom_path_clone[STR_MAX];
@@ -381,11 +339,11 @@ void readHistory()
         game->is_duplicate = 0;
 
         char shortname[STR_MAX];
-        removeParentheses(shortname, game->name);
+        str_removeParentheses(shortname, game->name);
         strcpy(game->shortname, shortname);
 
         int nTime = getRomTotalTime(rom_path);
-        serializeTime(nTime, game->totalTime);
+        str_serializeTime(game->totalTime, nTime);
 
         printf_debug(
             "Game loaded:\n\tname: '%s' (%s)\n\tcmd: '%s'\n\thash: %" PRIu32
@@ -462,7 +420,7 @@ int main(void)
     signal(SIGTERM, sigHandler);
 
     play_activities = play_activity_find_all();
-    serializeTime(play_activities->play_time_total, sTotalTimePlayed);
+    str_serializeTime(sTotalTimePlayed, play_activities->play_time_total);
 
     readHistory();
     print_debug("Read ROM DB and history");
