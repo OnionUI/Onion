@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
             imageRomPosition =
                 TTF_RenderUTF8_Blended(font40, cPosition, color_lilla);
             SDL_Surface *loadedRomImage;
-            if (exists(
+            if (is_file(
                     play_activities->play_activity[index]->rom->image_path)) {
                 loadedRomImage = IMG_Load(
                     play_activities->play_activity[index]->rom->image_path);
@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
                 imageRomPosition =
                     TTF_RenderUTF8_Blended(font40, cPosition, color_lilla);
                 SDL_Surface *loadedRomImage;
-                if (exists(play_activities->play_activity[index]
+                if (is_file(play_activities->play_activity[index]
                                ->rom->image_path)) {
                     loadedRomImage = IMG_Load(
                         play_activities->play_activity[index]->rom->image_path);
