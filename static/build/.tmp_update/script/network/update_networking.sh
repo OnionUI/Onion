@@ -583,7 +583,7 @@ log() {
 
 get_password() {
     # Get password from file for use with network services authentication
-    export PASS=$(cat "$sysdir/config/.password.txt")
+    PASS=$(cat "$sysdir/config/.password.txt")
 }
 
 if [ $LOGGING -eq 1 ]; then
