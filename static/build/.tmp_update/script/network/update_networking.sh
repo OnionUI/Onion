@@ -9,6 +9,7 @@ export PATH="$sysdir/bin:$PATH"
 
 main() {
     set_tzid
+    get_password
     case "$1" in
         check) # runs the check function we use in runtime, will be called on boot
             check
@@ -143,7 +144,7 @@ check_smbdstate() {
                     mkdir -p /var/log/
                 fi
                 
-                $netscript/start_smbd.sh &
+                $netscript/start_smbd.sh $PASS &
                 log "Samba: Starting smbd at exit of tweaks.."
             else
                 disable_flag smbdState
@@ -578,6 +579,11 @@ log() {
     if [ $LOGGING -eq 1 ]; then
         echo -e "($scriptname) $(date):" $* | tee -a "$sysdir/logs/$scriptname.log"
     fi
+}
+
+get_password() {
+    # Get password from file for use with network services authentication
+    export PASS=$(cat "$sysdir/config/.password.txt")
 }
 
 if [ $LOGGING -eq 1 ]; then
