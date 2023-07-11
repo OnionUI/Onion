@@ -80,7 +80,7 @@ static void sigHandler(int sig)
     }
 }
 
-char sTotalTimePlayed[50];
+static char sTotalTimePlayed[50];
 
 static PlayActivities *play_activities;
 
@@ -313,11 +313,14 @@ int getRomTotalTime(const char *rom_path)
 
     if (rom_path_slice != NULL) {
         ROM *romObject = rom_find_by_file_path(rom_path_slice);
-        for (int i = 0; i < play_activities->count; i++) {
-            PlayActivity *playActivityObject = play_activities->play_activity[i];
 
-            if (romObject->id == playActivityObject->rom->id)
-                return playActivityObject->play_time_total;
+        if (romObject != NULL) {
+            for (int i = 0; i < play_activities->count; i++) {
+                PlayActivity *playActivityObject = play_activities->play_activity[i];
+
+                if (romObject->id == playActivityObject->rom->id)
+                    return playActivityObject->play_time_total;
+            }
         }
     }
 
@@ -452,6 +455,7 @@ int checkQuitAction(void)
 
 int main(void)
 {
+    log_setName("gameSwitcher");
     print_debug("Debug logging enabled");
 
     signal(SIGINT, sigHandler);

@@ -255,9 +255,6 @@ run_installation() {
     elif [ $system_only -ne 1 ]; then
         echo "Preparing update..." >> /tmp/.update_msg
 
-        echo ":: Migrating old Activity Tracker data"
-        playActivity DBmigration
-        
         # Ensure packages are fresh !
         rm -rf /mnt/SDCARD/App/PackageManager 2> /dev/null
 

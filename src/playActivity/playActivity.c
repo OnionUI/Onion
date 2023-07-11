@@ -1,13 +1,14 @@
 #include "./playActivity.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 void printUsage()
 {
-    printf("Usage: playActivity start rom_path -> Launch the counter for this rom\n");
-    printf("       playActivity stop rom_path  -> Stop the counter for this rom\n");
-    printf("       playActivity DBmigration    -> Migrate the old database (prior to Onion 4.2.0) format to new SQLite format\n");
+    printf("Usage: playActivity start [rom_path] -> Launch the counter for this rom\n");
+    printf("       playActivity stop [rom_path]  -> Stop the counter for this rom\n");
+    printf("       playActivity migrate          -> Migrate the old database (prior to Onion 4.2.0) to SQLite\n");
 }
 
 int main(int argc, char *argv[])
@@ -37,12 +38,13 @@ int main(int argc, char *argv[])
             printUsage();
         }
     }
-    else if (strcmp(argv[1], "DBmigration") == 0) {
-        play_activity_db_V3_upgrade();
+    else if (strcmp(argv[1], "migrate") == 0) {
+        migrateDB();
     }
     else {
         printf("Error: Invalid argument '%s'\n", argv[1]);
         printUsage();
+        return EXIT_FAILURE;
     }
 
     return EXIT_SUCCESS;
