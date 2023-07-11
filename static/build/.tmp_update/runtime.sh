@@ -23,6 +23,9 @@ main() {
     mount -o bind $sysdir/config/passwd /etc/passwd
     mount -o bind $sysdir/config/group  /etc/group 
 
+    # Needed to get authed telnet working
+    mount -o bind $sysdir/script/welcome /etc/profile
+
     # Start the battery monitor
     batmon &
 
