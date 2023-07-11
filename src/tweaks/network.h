@@ -67,8 +67,8 @@ void network_loadState(void)
 typedef struct {
     char name[STR_MAX - 11];
     char path[STR_MAX];
-    int browseable;     // 1 if browseable = yes, 0 otherwise
-    long browseablePos; // in file position for the browseable property
+    int available;     // 1 if available = yes, 0 otherwise
+    long availablePos; // in file position for the available property
 } Share;
 
 static Share *_network_shares = NULL;
@@ -98,8 +98,8 @@ void network_getSmbShares()
     char line[STR_MAX];
 
     bool found_shares = false;
-    bool is_browseable = false;
-    long browseablePos = -1;
+    bool is_available = false;
+    long availablePos = -1;
 
     while (fgets(line, sizeof(line), file) != NULL) {
         char *trimmedLine = strtok(line, "\n");
@@ -107,9 +107,9 @@ void network_getSmbShares()
             continue;
         }
 
-        if (strstr(trimmedLine, "browseable = ") != NULL) {
-            browseablePos = ftell(file) - strlen(trimmedLine) - 1;
-            is_browseable = strstr(trimmedLine, "1") != NULL;
+        if (strstr(trimmedLine, "available = ") != NULL) {
+            availablePos = ftell(file) - strlen(trimmedLine) - 1;
+            is_available = strstr(trimmedLine, "1") != NULL;
             continue;
         }
 
@@ -120,9 +120,9 @@ void network_getSmbShares()
 
         if (strncmp(trimmedLine, "[", 1) == 0 && strncmp(trimmedLine + strlen(trimmedLine) - 1, "]", 1) == 0) {
             if (found_shares) {
-                _network_shares[numShares - 1].browseable = is_browseable;
-                _network_shares[numShares - 1].browseablePos = browseablePos;
-                is_browseable = false;
+                _network_shares[numShares - 1].available = is_available;
+                _network_shares[numShares - 1].availablePos = availablePos;
+                is_available = false;
             }
 
             char *shareName = strtok(trimmedLine + 1, "]");
@@ -152,8 +152,8 @@ void network_getSmbShares()
     }
 
     if (found_shares) {
-        _network_shares[numShares - 1].browseable = is_browseable;
-        _network_shares[numShares - 1].browseablePos = browseablePos;
+        _network_shares[numShares - 1].available = is_available;
+        _network_shares[numShares - 1].availablePos = availablePos;
     }
 
     network_numShares = numShares;
@@ -161,7 +161,7 @@ void network_getSmbShares()
     fclose(file);
 }
 
-void network_toggleSmbBrowseable(void *item)
+void network_toggleSmbAvailable(void *item)
 {
     ListItem *listItem = (ListItem *)item;
     Share *share = (Share *)listItem->payload_ptr;
@@ -172,18 +172,18 @@ void network_toggleSmbBrowseable(void *item)
         return;
     }
 
-    if (fseek(file, share->browseablePos, SEEK_SET) != 0) {
-        printf("Failed to seek to the browseable property of share '%s'.\n", share->name);
+    if (fseek(file, share->availablePos, SEEK_SET) != 0) {
+        printf("Failed to seek to the available property of share '%s'.\n", share->name);
         fclose(file);
         return;
     }
 
     char line[STR_MAX];
     fgets(line, sizeof(line), file);
-    share->browseable = strstr(line, "1") == NULL; // toggle
+    share->available = strstr(line, "1") == NULL; // toggle
 
-    fseek(file, share->browseablePos, SEEK_SET);
-    fprintf(file, "browseable = %d\n", share->browseable);
+    fseek(file, share->availablePos, SEEK_SET);
+    fprintf(file, "available = %d\n", share->available);
     fflush(file);
 
     fclose(file);
@@ -390,8 +390,8 @@ void menu_smbd(void *pt)
             ListItem shareItem = {
                 .item_type = TOGGLE,
                 .disabled = !network_state.smbd,
-                .action = network_toggleSmbBrowseable, // set the action to the wrapper function
-                .value = _network_shares[i].browseable,
+                .action = network_toggleSmbAvailable, // set the action to the wrapper function
+                .value = _network_shares[i].available,
                 .payload_ptr = _network_shares + i // store a pointer to the share in the payload
             };
             snprintf(shareItem.label, STR_MAX - 1, "Share: %s", _network_shares[i].name);
