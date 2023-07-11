@@ -239,9 +239,7 @@ ssh_authed() {
         if is_running_exact "dropbear -R -B" || flag_enabled authsshState; then
             killall -9 dropbear
             log "SSH: Starting dropbear with auth"
-            file_path="$sysdir/config/.auth.txt"
-            password=$(awk 'NR==1 {print $2}' "$file_path")
-            dropbear -R -Y $password
+            dropbear -R
             log "SSH: Started dropbear with auth"
         else
             log "SSH: Starting dropbear without auth"
