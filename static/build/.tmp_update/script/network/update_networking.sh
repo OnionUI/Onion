@@ -151,9 +151,9 @@ check_smbdstate() {
 
 update_smbconf() {
     if flag_enabled authsmbdState; then
-        sed -i -e '/guest only/s/1/0/g' -e '/valid users = onion/s/^#//g' $sysdir/config/smb.conf
+        sed -i -e '/guest only/s/1/0/g' -e '/valid users =/s/onion/noino/g' $sysdir/config/smb.conf
     else
-        sed -i -e '/guest only/s/0/1/g' -e '/valid users = onion/ s/^#*/#/' $sysdir/config/smb.conf
+        sed -i -e '/guest only/s/0/1/g' -e '/valid users =/s/noino/onion/g' $sysdir/config/smb.conf
     fi
 }
 
