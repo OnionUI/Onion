@@ -128,22 +128,12 @@ check_smbdstate() {
             if wifi_enabled; then
                 sync
 
-                if [ ! -d "/var/lib/samba" ]; then
-                    mkdir -p /var/lib/samba
-                fi
+                mkdir -p \
+                    /var/lib/samba \
+                    /var/run/samba/ncalrpc \
+                    /var/private \
+                    /var/log/
 
-                if [ ! -d "/var/run/samba/ncalrpc" ]; then
-                    mkdir -p /var/run/samba/ncalrpc
-                fi
-
-                if [ ! -d "/var/private" ]; then
-                    mkdir -p /var/private
-                fi
-
-                if [ ! -d "/var/log/" ]; then
-                    mkdir -p /var/log/
-                fi
-                
                 update_smbconf
                 $netscript/start_smbd.sh $PASS &
                 log "Samba: Starting smbd at exit of tweaks.."
