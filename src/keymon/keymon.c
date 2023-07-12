@@ -188,7 +188,6 @@ void suspend_exec(int timeout)
     keyinput_disable();
 
     // suspend
-    system_clock_pause(true);
     suspend(0);
     rumble(0);
     setVolume(0);
@@ -251,7 +250,6 @@ void suspend_exec(int timeout)
     setVolume(settings.mute ? 0 : settings.volume);
     if (!killexit) {
         resume();
-        system_clock_pause(false);
     }
 
     keyinput_enable();
