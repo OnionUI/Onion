@@ -144,11 +144,7 @@ check_smbdstate() {
                     mkdir -p /var/log/
                 fi
                 
-                if flag_enabled authsmbdState; then
-                    sed -i -e '/guest only/s/1/0/g' -e '/valid users = onion/s/^#//g' $sysdir/config/smb.conf
-                else
-                    sed -i -e '/guest only/s/0/1/g' -e '/valid users = onion/ s/^#*/#/' $sysdir/config/smb.conf
-                fi
+                update_smbconf
                 $netscript/start_smbd.sh $PASS &
                 log "Samba: Starting smbd at exit of tweaks.."
             else
@@ -163,14 +159,17 @@ check_smbdstate() {
     fi
 }
 
+update_smbconf() {
+    if flag_enabled authsmbdState; then
+        sed -i -e '/guest only/s/1/0/g' -e '/valid users = onion/s/^#//g' $sysdir/config/smb.conf
+    else
+        sed -i -e '/guest only/s/0/1/g' -e '/valid users = onion/ s/^#*/#/' $sysdir/config/smb.conf
+    fi
+}
 
 smbd_authed() {
     if flag_enabled smbdState; then
-        if flag_enabled authsmbdState; then
-            sed -i -e '/guest only/s/1/0/g' -e '/valid users = onion/s/^#//g' $sysdir/config/smb.conf
-        else
-            sed -i -e '/guest only/s/0/1/g' -e '/valid users = onion/ s/^#*/#/' $sysdir/config/smb.conf
-        fi
+        update_smbconf
         if is_running smbd; then
             killall -9 smbd
         fi
