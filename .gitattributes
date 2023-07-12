@@ -10,4 +10,4 @@ static/dist/.tmp_update/updater					text eol=lf
 static/dist/miyoo/app/.tmp_update/updater		text eol=lf
 static/dist/miyoo/app/MainUI					text eol=lf
 static/dist/miyoo354/app/MainUI					text eol=lf
-static/dist/.tmp_update/bin/shutdown            text eol=lf
+static/build/.tmp_update/bin/shutdown            text eol=lf
