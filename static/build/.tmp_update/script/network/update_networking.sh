@@ -163,6 +163,7 @@ check_smbdstate() {
     fi
 }
 
+
 smbd_authed() {
     if flag_enabled smbdState; then
         if flag_enabled authsmbdState; then
@@ -170,9 +171,10 @@ smbd_authed() {
         else
             sed -i -e '/guest only/s/0/1/g' -e '/valid users = onion/ s/^#*/#/' $sysdir/config/smb.conf
         fi
-        if ! is_running smbd; then
-            $netscript/start_smbd.sh $PASS &
+        if is_running smbd; then
+            killall -9 smbd
         fi
+        $netscript/start_smbd.sh $PASS &
     fi
 }
 
