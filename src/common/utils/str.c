@@ -147,3 +147,45 @@ int str_endsWith(const char *str, const char *suffix)
         return 0;
     return strncmp(str + lenstr - lensuffix, suffix, lensuffix) == 0;
 }
+
+void str_removeParentheses(char *str_out, const char *str_in)
+{
+    char temp[STR_MAX];
+    int len = strlen(str_in);
+    int c = 0;
+    bool inside = false;
+    char end_char;
+
+    for (int i = 0; i < len && i < STR_MAX; i++) {
+        if (!inside && (str_in[i] == '(' || str_in[i] == '[')) {
+            end_char = str_in[i] == '(' ? ')' : ']';
+            inside = true;
+            continue;
+        }
+        else if (inside) {
+            if (str_in[i] == end_char)
+                inside = false;
+            continue;
+        }
+        temp[c++] = str_in[i];
+    }
+
+    temp[c] = '\0';
+
+    str_trim(str_out, STR_MAX - 1, temp, false);
+}
+
+void str_serializeTime(char *dest_str, int nTime)
+{
+    if (nTime >= 0) {
+        int h = nTime / 3600;
+        int m = (nTime - 3600 * h) / 60;
+        if (h > 0)
+            sprintf(dest_str, "%dh %dm", h, m);
+        else
+            sprintf(dest_str, "%dm", m);
+    }
+    else {
+        strcpy(dest_str, "0m");
+    }
+}
