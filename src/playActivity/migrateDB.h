@@ -95,7 +95,7 @@ void migrateDB(void)
     play_activity_db_open();
 
     for (int i = 0; i < LEGACY_DB_MAX; i++) {
-        
+
         if ((strlen(rom_list[i].name) == 0) || (rom_list[i].playTime) == 0) {
 
             continue;
@@ -121,14 +121,14 @@ void migrateDB(void)
         sqlite3_stmt *stmt;
         bool bFound = false;
         int nDB = 0;
-        
-        while ((nDB < __migrate_cache_count) && (bFound == false)){
-            
+
+        while ((nDB < __migrate_cache_count) && (bFound == false)) {
+
             DBHandle *handle = &__migrate_cache_handles[nDB];
-            nDB ++;    
-                
+            nDB++;
+
             if (handle->db_handle != NULL) {
-              
+
                 sql = sqlite3_mprintf("SELECT * FROM %q_roms WHERE path LIKE '%%%q%%';", handle->db_type, rom_list[i].name);
 
                 //sql = sqlite3_mprintf("SELECT * FROM %q_roms WHERE basename(path) = '%q' OR basename(path) = '%q' LIMIT 1;", handle->db_type, rom_list[i].name);
@@ -138,21 +138,21 @@ void migrateDB(void)
                     printf("%s: %s\n", sqlite3_errmsg(handle->db_handle), sqlite3_sql(stmt));
                 }
 
-                while ((sqlite3_step(stmt) == SQLITE_ROW) && (bFound == false)) {                    
-/*                 
+                while ((sqlite3_step(stmt) == SQLITE_ROW) && (bFound == false)) {
+                    /*                 
                  char *path_rom = (char *)sqlite3_column_text(stmt, 2);
                    char *path_rom_no_ext = file_removeExtension(path_rom);
                    
                    printf("Item found %s in cache %s\n",path_rom, handle->db_type);
                    printf("No ext %s\n",path_rom_no_ext);
-  */               
-                   if ((strcmp(basename((char *)sqlite3_column_text(stmt, 2)),rom_list[i].name) == 0)||(strcmp(basename(file_removeExtension((char *)sqlite3_column_text(stmt, 2))),rom_list[i].name) == 0)){
-                       
+  */
+                    if ((strcmp(basename((char *)sqlite3_column_text(stmt, 2)), rom_list[i].name) == 0) || (strcmp(basename(file_removeExtension((char *)sqlite3_column_text(stmt, 2))), rom_list[i].name) == 0)) {
+
                         bFound = true;
-                                                      
+
                         cache_db_item = (CacheDBItem *)malloc(sizeof(CacheDBItem));
                         cache_db_item->id = sqlite3_column_int(stmt, 0);
-        
+
                         cache_db_item->rom_type = handle->db_type;
                         cache_db_item->disp = strdup((const char *)sqlite3_column_text(stmt, 1));
                         cache_db_item->path = strdup((const char *)sqlite3_column_text(stmt, 2));
@@ -161,7 +161,7 @@ void migrateDB(void)
                         cache_db_item->ppath = strdup((const char *)sqlite3_column_text(stmt, 5));
                         sqlite3_free(sql);
                         sqlite3_finalize(stmt);
-                        
+
                         // Check if ROM does not already exist
                         sql = sqlite3_mprintf(
                             "SELECT * FROM rom WHERE file_path = '%q' LIMIT 1;",
@@ -198,20 +198,18 @@ void migrateDB(void)
                                 rom_id = sqlite3_column_int(stmt, 0);
                                 printf("- added - ID %d\n", rom_id);
                             }
-                          
+
                             sqlite3_finalize(stmt);
-                             
                         }
                         else {
                             rom_id = sqlite3_column_int(stmt, 0);
                             printf("- already added - ID %d\n", rom_id);
-                        
                         }
                         free(cache_db_item);
-                        break;                        
-                   } 
-               }              
-            }  
+                        break;
+                    }
+                }
+            }
         }
         if (rom_id == -1) {
             /**
@@ -237,7 +235,7 @@ void migrateDB(void)
 
             if (sqlite3_step(stmt) != SQLITE_ROW) {
                 // Game not found
-               
+
                 sql = sqlite3_mprintf("INSERT INTO rom(type, name, file_path, image_path) VALUES('ORPHAN', %Q, '', '');", rom_list[i].name);
                 int rc = sqlite3_exec(play_activity_db, sql, NULL, NULL, NULL);
                 sqlite3_free(sql);
