@@ -36,12 +36,13 @@
 #include "utils/str.h"
 #include "utils/surfaceSetAlpha.h"
 
+#include "../playActivity/playActivityDB.h"
+
 #define MAXHISTORY 100
 #define MAXHROMNAMESIZE 250
 #define MAXHROMPATHSIZE 150
 
 #define ROM_SCREENS_DIR "/mnt/SDCARD/Saves/CurrentProfile/romScreens"
-#define ROM_DB_PATH "/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db"
 #define HISTORY_PATH \
     "/mnt/SDCARD/Saves/CurrentProfile/lists/content_history.lpl"
 
@@ -79,7 +80,9 @@ static void sigHandler(int sig)
     }
 }
 
-char sTotalTimePlayed[50];
+static char sTotalTimePlayed[50];
+
+static PlayActivities *play_activities;
 
 // Game history list
 typedef struct {
@@ -107,83 +110,6 @@ static int gameNameScrollEnd = 20;
 
 static cJSON *json_root = NULL;
 static cJSON *json_items = NULL;
-
-// Play activity database
-static struct structPlayActivity {
-    char name[100];
-    int playTime;
-} rom_list[MAXVALUES];
-static int rom_list_len = 0;
-
-int readRomDB()
-{
-    int totalTimePlayed = 0;
-    // Check to avoid corruption
-    if (exists(ROM_DB_PATH)) {
-        FILE *file = fopen(ROM_DB_PATH, "rb");
-        fread(rom_list, sizeof(rom_list), 1, file);
-        rom_list_len = 0;
-
-        for (int i = 0; i < MAXVALUES; i++) {
-            if (strlen(rom_list[i].name) == 0)
-                break;
-            totalTimePlayed += rom_list[rom_list_len].playTime;
-            rom_list_len++;
-        }
-
-        int h = totalTimePlayed / 3600;
-        int m = (totalTimePlayed - 3600 * h) / 60;
-        if (h > 0)
-            snprintf(sTotalTimePlayed, sizeof(sTotalTimePlayed) - 1, "%dh %dm",
-                     h, m);
-        else
-            snprintf(sTotalTimePlayed, sizeof(sTotalTimePlayed) - 1, "%dm", m);
-        fclose(file);
-    }
-    return 1;
-}
-
-int searchRomDB(const char *romName)
-{
-    int position = -1;
-
-    for (int i = 0; i < rom_list_len; i++) {
-        if (strcmp(rom_list[i].name, romName) == 0 ||
-            strcmp(file_removeExtension(rom_list[i].name), romName) == 0) {
-            position = i;
-            break;
-        }
-    }
-
-    return position;
-}
-
-void removeParentheses(char *str_out, const char *str_in)
-{
-    char temp[STR_MAX];
-    int len = strlen(str_in);
-    int c = 0;
-    bool inside = false;
-    char end_char;
-
-    for (int i = 0; i < len && i < STR_MAX; i++) {
-        if (!inside && (str_in[i] == '(' || str_in[i] == '[')) {
-            end_char = str_in[i] == '(' ? ')' : ']';
-            inside = true;
-            continue;
-        }
-        else if (inside) {
-            if (str_in[i] == end_char)
-                inside = false;
-            continue;
-        }
-        temp[c++] = str_in[i];
-    }
-
-    temp[c] = '\0';
-
-    str_trim(str_out, STR_MAX - 1, temp, false);
-}
 
 SDL_Surface *loadRomScreen(int index)
 {
@@ -318,7 +244,6 @@ void getGameName(const char *rom_path, char *name_out)
     strcpy(cache_dir, dir_path);
 
     char cache_path[STR_MAX * 2];
-    char gamelist_path[STR_MAX * 2];
 
     do {
         snprintf(cache_path, STR_MAX * 2 - 1, "%s/%s_cache6.db", cache_dir,
@@ -337,6 +262,29 @@ void getGameName(const char *rom_path, char *name_out)
     strcpy(name_out, file_removeExtension(base_name));
 }
 
+int getRomTotalTime(const char *rom_path)
+{
+    char rom_path_clone[STR_MAX];
+    strcpy(rom_path_clone, rom_path);
+
+    char *rom_path_slice = strstr(rom_path_clone, "Roms");
+
+    if (rom_path_slice != NULL) {
+        ROM *romObject = rom_find_by_file_path(rom_path_slice);
+
+        if (romObject != NULL) {
+            for (int i = 0; i < play_activities->count; i++) {
+                PlayActivity *playActivityObject = play_activities->play_activity[i];
+
+                if (romObject->id == playActivityObject->rom->id)
+                    return playActivityObject->play_time_total;
+            }
+        }
+    }
+
+    return 0;
+}
+
 /**
  * @brief History extraction
  *
@@ -350,7 +298,7 @@ void readHistory()
         return;
     }
 
-    char path[STR_MAX], core_path[STR_MAX];
+    char rom_path[STR_MAX], core_path[STR_MAX];
 
     if (json_items == NULL) {
         json_root = json_load(HISTORY_PATH);
@@ -363,14 +311,14 @@ void readHistory()
         if (subitem == NULL)
             break;
 
-        if (!json_getString(subitem, "path", path) ||
+        if (!json_getString(subitem, "path", rom_path) ||
             !json_getString(subitem, "core_path", core_path))
             continue;
 
-        if (strncmp("/mnt/SDCARD/App", path, 15) == 0)
+        if (strncmp("/mnt/SDCARD/App", rom_path, 15) == 0)
             continue;
 
-        if (!exists(core_path) || !exists(path))
+        if (!exists(core_path) || !exists(rom_path))
             continue;
 
         Game_s *game = &game_list[game_list_len];
@@ -378,40 +326,24 @@ void readHistory()
         sprintf(game->RACommand,
                 "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v "
                 "-L \"%s\" \"%s\"",
-                core_path, path);
+                core_path, rom_path);
 
-        getGameName(path, game->name);
+        getGameName(rom_path, game->name);
 
         strcpy(game->core, basename(core_path));
         str_split(game->core, "_libretro");
 
-        game->hash = FNV1A_Pippip_Yurii(path, strlen(path));
+        game->hash = FNV1A_Pippip_Yurii(rom_path, strlen(rom_path));
         game->jsonIndex = nbGame;
         game->romScreen = NULL;
         game->is_duplicate = 0;
 
         char shortname[STR_MAX];
-        removeParentheses(shortname, game->name);
+        str_removeParentheses(shortname, game->name);
         strcpy(game->shortname, shortname);
 
-        // Rom name
-        char dbRomName[100];
-        strncpy(dbRomName, game->name, 99);
-        int nTimePosition = searchRomDB(dbRomName);
-        int nTime = nTimePosition >= 0 ? rom_list[nTimePosition].playTime : 0;
-        if (nTime >= 0) {
-            int h = nTime / 3600;
-            int m = (nTime - 3600 * h) / 60;
-            if (h > 0)
-                snprintf(game->totalTime, sizeof(game->totalTime) - 1,
-                         "%dh %dm", h, m);
-            else
-                snprintf(game->totalTime, sizeof(game->totalTime) - 1, "%dm",
-                         m);
-        }
-        else {
-            strcpy(game->totalTime, "0m");
-        }
+        int nTime = getRomTotalTime(rom_path);
+        str_serializeTime(game->totalTime, nTime);
 
         printf_debug(
             "Game loaded:\n\tname: '%s' (%s)\n\tcmd: '%s'\n\thash: %" PRIu32
@@ -481,12 +413,15 @@ int checkQuitAction(void)
 
 int main(void)
 {
+    log_setName("gameSwitcher");
     print_debug("Debug logging enabled");
 
     signal(SIGINT, sigHandler);
     signal(SIGTERM, sigHandler);
 
-    readRomDB();
+    play_activities = play_activity_find_all();
+    str_serializeTime(sTotalTimePlayed, play_activities->play_time_total);
+
     readHistory();
     print_debug("Read ROM DB and history");
 
@@ -978,6 +913,8 @@ int main(void)
     SDL_FreeSurface(transparent_bg);
 
     freeRomScreens();
+
+    free_play_activities(play_activities);
 
     SDL_FreeSurface(screen);
     SDL_FreeSurface(video);
