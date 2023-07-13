@@ -333,7 +333,7 @@ do_sync_file() {
     fi
 
     log "GLO::Easy_Netplay: Starting to download $file_type from $file_url"
-    curl -o "$file_path" "ftp://$hostip/$file_url" > /mnt/SDCARD/curl_log.txt 2>&1
+    curl -o "$file_path" "ftp://$hostip/$file_url" > /dev/null 2>&1
 
     if [ $? -eq 0 ]; then
         log "GLO::Easy_Netplay: $file_type download completed"
