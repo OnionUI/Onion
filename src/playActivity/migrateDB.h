@@ -139,13 +139,6 @@ void migrateDB(void)
                 }
 
                 while ((sqlite3_step(stmt) == SQLITE_ROW) && (bFound == false)) {
-                    /*                 
-                 char *path_rom = (char *)sqlite3_column_text(stmt, 2);
-                   char *path_rom_no_ext = file_removeExtension(path_rom);
-                   
-                   printf("Item found %s in cache %s\n",path_rom, handle->db_type);
-                   printf("No ext %s\n",path_rom_no_ext);
-  */
                     if ((strcmp(basename((char *)sqlite3_column_text(stmt, 2)), rom_list[i].name) == 0) || (strcmp(basename(file_removeExtension((char *)sqlite3_column_text(stmt, 2))), rom_list[i].name) == 0)) {
 
                         bFound = true;
@@ -262,7 +255,6 @@ void migrateDB(void)
                 rom_id = sqlite3_column_int(stmt, 0);
             }
             sqlite3_finalize(stmt);
-            //sqlite3_free(sql);
 
             if (rom_id != -1)
                 totalOrphan++;
@@ -306,8 +298,6 @@ void migrateDB(void)
                                       "(%d,%d,0,0);", // Imported times have the particularity of having a "created_at" at 0.
                                       rom_id, rom_list[i].playTime);
 
-                // printf("SQL query: %s\n", sql);
-
                 if (sqlite3_exec(play_activity_db, sql, NULL, NULL, NULL) == SQLITE_OK) {
                     totalImported++;
                 }
@@ -333,8 +323,6 @@ void migrateDB(void)
     printf("Total already imported:      %d\n", totalAlreadyImported);
     printf("Total skipped:               %d\n", totalSkipped);
     printf("********************************\n");
-
-    // rename(PLAY_ACTIVITY_DB_OLD_PATH, PLAY_ACTIVITY_DB_OLD_PATH_TMP);
 }
 
 #endif // PLAY_ACTIVITY_MIGRATE_DB
