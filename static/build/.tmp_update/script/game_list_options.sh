@@ -10,6 +10,9 @@ mkdir -p $radir/cores/cache
 
 cd $sysdir
 
+device_model=$(cat /tmp/deviceModel)
+has_networking=$([ $device_model -eq 354 ] && echo 1 || echo 0)
+
 ROM_TYPE_UNKNOWN=0
 ROM_TYPE_GAME=1
 ROM_TYPE_APP=2
@@ -109,6 +112,8 @@ main() {
 
     echo "romroot: $romroot"
     echo "launch: $launch_path"
+
+    echo "has_networking: $has_networking"
 
     skip_game_options=0
 
@@ -221,13 +226,8 @@ create_cookie() {
         rm -f "$cookiefile"
     fi
 
-    core_checksum=$(cksum "$cookie_core_path" | cut -f 1 -d ' ')
-    rom_checksum=$(cksum "$cookie_rom_path" | cut -f 1 -d ' ')
-
     echo "[core]: $cookie_core_path" >> $cookiefile
     echo "[rom]: $cookie_rom_path" >> $cookiefile
-    echo "[corechksum]: $core_checksum" >> $cookiefile
-    echo "[romchksum]: $rom_checksum" >> $cookiefile
 }
 
 check_is_game() {
@@ -239,6 +239,14 @@ add_script_files() {
     if [ -d "$scriptdir" ]; then
         for entry in "$scriptdir"/*.sh; do
             if [ ! -f "$entry" ]; then
+                continue
+            fi
+
+            require_networking=$([ $(get_info_value "$(cat "$entry")" require_networking) -eq 1 ] && echo 1 || echo 0)
+            echo "$entry"
+            echo "require_networking: $require_networking"
+
+            if [ $has_networking -eq 0 ] && [ $require_networking -eq 1 ]; then
                 continue
             fi
 
@@ -306,11 +314,11 @@ get_core_info() {
 }
 
 get_info_value() {
-    echo "$1" | grep "$2\b" | awk '{split($0,a,"="); print a[2]}' | awk -F'"' '{print $2}' | tr -d '\n'
+    echo "$1" | grep "$2\b" | awk '{split($0,a,/\s*=\s*/); print a[2]}' | tr -d '"' | tr -d '\n'
 }
 
 get_json_value() {
-    echo "$1" | grep "\"$2\"\s*:" | awk '{split($0,a,":"); print a[2]}' | awk -F'"' '{print $2}' | tr -d '\n'
+    echo "$1" | grep "\"$2\"\s*:" | awk '{split($0,a,/\s*:\s*/); print a[2]}' | awk -F'"' '{print $2}' | tr -d '\n'
 }
 
 reset_game() {
