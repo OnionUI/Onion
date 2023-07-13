@@ -535,22 +535,6 @@ void menu_tools(void *_)
                      (ListItem){
                          .label = "Generate game list for short name roms",
                          .action = tool_buildShortRomGameList});
-        list_addItem(&_menu_tools,
-                     (ListItem){
-                         .label = "Favorites: Sort alphabetically",
-                         .action = tool_favoritesSortAlpha});
-        list_addItem(&_menu_tools,
-                     (ListItem){
-                         .label = "Favorites: Sort by system",
-                         .action = tool_favoritesSortSystem});
-        list_addItem(&_menu_tools,
-                     (ListItem){
-                         .label = "Favorites: Fix thumbnails and duplicates",
-                         .action = tool_favoritesFix});
-        list_addItem(&_menu_tools,
-                     (ListItem){
-                         .label = "Remove apps from recents",
-                         .action = tool_recentsRemoveApps});
     }
     menu_stack[++menu_level] = &_menu_tools;
     header_changed = true;
