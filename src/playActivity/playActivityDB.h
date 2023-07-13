@@ -9,6 +9,9 @@
 #include <string.h>
 #include <sys/stat.h>
 
+#include "utils/file.h"
+#include "utils/log.h"
+
 #include "./cacheDB.h"
 
 #define PLAY_ACTIVITY_DB_NEW_FILE "/mnt/SDCARD/Saves/CurrentProfile/play_activity/play_activity_db.sqlite"
@@ -49,21 +52,22 @@ void play_activity_db_close()
 
 void play_activity_db_open(void)
 {
-    bool play_activity_db_created = exists(PLAY_ACTIVITY_DB_NEW_FILE);
+    bool play_activity_db_created = is_file(PLAY_ACTIVITY_DB_NEW_FILE);
+
     mkdir("/mnt/SDCARD/Saves/CurrentProfile/play_activity/", 0777);
-    int rc = sqlite3_open(PLAY_ACTIVITY_DB_NEW_FILE, &play_activity_db);
-    if (rc != SQLITE_OK) {
+
+    if (sqlite3_open(PLAY_ACTIVITY_DB_NEW_FILE, &play_activity_db) != SQLITE_OK) {
         printf("%s\n", sqlite3_errmsg(play_activity_db));
         play_activity_db_close();
         return;
     }
+
     if (!play_activity_db_created) {
-        sqlite3_exec(
-            play_activity_db,
-            "DROP TABLE IF EXISTS rom;"
-            "CREATE TABLE rom(id INTEGER PRIMARY KEY, type TEXT, name TEXT, file_path TEXT, image_path TEXT, created_at INTEGER DEFAULT (strftime('%s', 'now')), updated_at INTEGER);"
-            "CREATE UNIQUE INDEX rom_id_index ON rom(id);",
-            NULL, NULL, NULL);
+        sqlite3_exec(play_activity_db,
+                     "DROP TABLE IF EXISTS rom;"
+                     "CREATE TABLE rom(id INTEGER PRIMARY KEY, type TEXT, name TEXT, file_path TEXT, image_path TEXT, created_at INTEGER DEFAULT (strftime('%s', 'now')), updated_at INTEGER);"
+                     "CREATE UNIQUE INDEX rom_id_index ON rom(id);",
+                     NULL, NULL, NULL);
         sqlite3_exec(play_activity_db,
                      "DROP TABLE IF EXISTS play_activity;"
                      "CREATE TABLE play_activity(rom_id INTEGER, play_time INTEGER, created_at INTEGER DEFAULT (strftime('%s', 'now')), updated_at INTEGER);"
@@ -185,7 +189,7 @@ void free_play_activities(PlayActivities *pa_ptr)
 ROM *rom_find_by_file_path(char *rom_file_path)
 {
     // Game existence in the DB check
-    printf("rom_find_by_file_path(%s)\n", rom_file_path);
+    printf_debug("rom_find_by_file_path(%s)\n", rom_file_path);
     char *sql = sqlite3_mprintf("SELECT * FROM rom WHERE file_path LIKE '%%%q%%' LIMIT 1;", rom_file_path);
     sqlite3_stmt *stmt = play_activity_db_prepare(sql);
     sqlite3_free(sql);
@@ -194,14 +198,14 @@ ROM *rom_find_by_file_path(char *rom_file_path)
         // Game not found
         // We try to add it in the DB
         // Using the cache infos
-        printf("ROM not found in the DB\n");
+        printf_debug("ROM not found in the DB\n");
         sqlite3_finalize(stmt);
         stmt = NULL;
 
         CacheDBItem *cache_db_item = cache_db_find(rom_file_path);
 
         if (cache_db_item == NULL) {
-            printf("ROM not found in the database. File path: %s\n", rom_file_path);
+            printf_debug("ROM not found in the database. File path: %s\n", rom_file_path);
             return NULL;
         }
 
@@ -214,13 +218,14 @@ ROM *rom_find_by_file_path(char *rom_file_path)
 
         play_activity_db_execute(sql);
         sqlite3_free(sql);
+
         sql = sqlite3_mprintf("SELECT * FROM rom WHERE file_path LIKE '%%%q%%' LIMIT 1;", rom_file_path);
         stmt = play_activity_db_prepare(sql);
         sqlite3_step(stmt);
         sqlite3_free(sql);
     }
     else {
-        printf("ROM already exists in the DB\n");
+        printf_debug("ROM already exists in the DB\n");
     }
 
     ROM *rom = (ROM *)malloc(sizeof(ROM));
@@ -235,29 +240,55 @@ ROM *rom_find_by_file_path(char *rom_file_path)
     return rom;
 }
 
+int rom_get_latest_activity(void)
+{
+    int rom_id = -1;
+    const char *sql = "SELECT rom_id FROM play_activity ORDER BY updated_at DESC LIMIT 1;";
+    sqlite3_stmt *stmt = play_activity_db_prepare(sql);
+    sqlite3_free(sql);
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        rom_id = sqlite3_column_int(stmt, 0);
+    }
+    sqlite3_finalize(stmt);
+    return rom_id;
+}
+
 void play_activity_start(char *rom_file_path)
 {
     ROM *rom = rom_find_by_file_path(rom_file_path);
     if (rom == NULL) {
-        exit(0);
+        exit(1);
     }
-    printf("play_activity_stop(%s)\n", rom->name);
-    int rom_id = rom->id;
-    play_activity_db_execute(sqlite3_mprintf("INSERT INTO play_activity(rom_id) VALUES(%d);", rom_id));
+    printf_debug("play_activity_start(%s)\n", rom->name);
+    play_activity_db_execute(sqlite3_mprintf("INSERT INTO play_activity(rom_id) VALUES(%d);", rom->id));
     free(rom);
+}
+
+void play_activity_resume(void)
+{
+    int rom_id = rom_get_latest_activity();
+    if (rom_id == -1) {
+        exit(1);
+    }
+    printf_debug("play_activity_resume() - rom_id: %d\n", rom_id);
+    play_activity_db_execute(sqlite3_mprintf("INSERT INTO play_activity(rom_id) VALUES(%d);", rom_id));
 }
 
 void play_activity_stop(char *rom_file_path)
 {
-
     ROM *rom = rom_find_by_file_path(rom_file_path);
     if (rom == NULL) {
-        exit(0);
+        exit(1);
     }
-    printf("play_activity_stop(%s)\n", rom->name);
-    int rom_id = rom->id;
-    play_activity_db_execute(sqlite3_mprintf("UPDATE play_activity SET play_time = (strftime('%%s', 'now')) - created_at, updated_at = (strftime('%%s', 'now')) WHERE rom_id = %d AND play_time IS NULL;", rom_id));
+    printf_debug("play_activity_stop(%s)\n", rom->name);
+    play_activity_db_execute(sqlite3_mprintf("UPDATE play_activity SET play_time = (strftime('%%s', 'now')) - created_at, updated_at = (strftime('%%s', 'now')) WHERE rom_id = %d AND play_time IS NULL;", rom->id));
     free(rom);
+}
+
+void play_activity_stop_all(void)
+{
+    print_debug("play_activity_stop_all()");
+    play_activity_db_execute("UPDATE play_activity SET play_time = (strftime('%%s', 'now')) - created_at, updated_at = (strftime('%%s', 'now')) WHERE play_time IS NULL;");
 }
 
 #endif // PLAY_ACTIVITY_DB_H

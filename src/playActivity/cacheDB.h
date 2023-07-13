@@ -93,7 +93,7 @@ CacheDBItem *cache_db_find(char *cache_db_item_file_path)
         return NULL;
     }
 
-    char *sql = sqlite3_mprintf("SELECT * FROM %q_roms WHERE path LIKE '%%%q%%' OR disp = '%q' LIMIT 1;", type, cache_db_item_file_path, cache_db_item_file_path);
+    char *sql = sqlite3_mprintf("SELECT * FROM %q_roms WHERE path LIKE '%%%q%%' OR disp = %Q LIMIT 1;", type, cache_db_item_file_path, cache_db_item_file_path);
     sqlite3_stmt *stmt = cache_db_prepare(cache_db_file_path, sql);
 
     if (sqlite3_step(stmt) == SQLITE_ROW) {
