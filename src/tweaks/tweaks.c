@@ -190,7 +190,8 @@ int main(int argc, char *argv[])
                 }
             }
             if (isMenu(&_menu_network) || isMenu(&_menu_wifi)) {
-                if (netinfo_getIpAddress(ip_address_label, settings.hotspot_state ? "wlan1" : "wlan0")) {
+                network_loadState();
+                if (netinfo_getIpAddress(ip_address_label, network_state.hotspot ? "wlan1" : "wlan0")) {
                     if (_menu_network._created)
                         strcpy(_menu_network.items[0].label, ip_address_label);
                     if (_menu_wifi._created)
@@ -251,6 +252,8 @@ int main(int argc, char *argv[])
     }
 
     Mix_CloseAudio();
+
+    network_freeSmbShares();
 
     lang_free();
     menu_free_all();

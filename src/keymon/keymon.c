@@ -33,6 +33,8 @@
 #include "./input_fd.h"
 #include "./menuButtonAction.h"
 
+#define FAVORITES_PATH "/mnt/SDCARD/Roms/favourite.json"
+
 // for proc_stat flags
 #define PF_KTHREAD 0x00200000
 
@@ -359,6 +361,8 @@ int main(void)
     bool delete_flag = false;
     bool settings_changed = false;
 
+    time_t fav_last_modified = time(NULL);
+
     while (1) {
         if (poll(fds, 1, (CHECK_SEC - elapsed_sec) * 1000) > 0) {
             if (!keyinput_isValid())
@@ -402,13 +406,21 @@ int main(void)
                     comboKey_menu = true;
             }
 
+            if (system_state == MODE_MAIN_UI && (ev.code == HW_BTN_B || ev.code == HW_BTN_X) && val == RELEASED) {
+                // Check if favorite file changed
+                if (file_isModified(FAVORITES_PATH, &fav_last_modified)) {
+                    system("tools favfix");
+                    sync();
+                }
+            }
+
             switch (ev.code) {
             case HW_BTN_POWER:
                 if (val == PRESSED)
                     power_pressed = true;
                 if (!comboKey_menu && val == REPEAT) {
                     repeat_power++;
-                    if (repeat_power == 7 && !settings.disable_standby) {
+                    if (repeat_power == 7) {
                         deepsleep(); // 0.5sec deepsleep
                     }
                     else if (repeat_power >= REPEAT_SEC(5)) {

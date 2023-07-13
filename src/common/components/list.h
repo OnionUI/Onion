@@ -39,6 +39,7 @@ typedef struct ListItem {
     void *icon_ptr;
     void *preview_ptr;
     char preview_path[STR_MAX];
+    char sticky_note[STR_MAX];
 } ListItem;
 
 typedef struct List {
@@ -50,6 +51,7 @@ typedef struct List {
     int scroll_height;
     ListType list_type;
     ListItem *items;
+    bool has_sticky;
     bool _created;
 } List;
 
@@ -115,6 +117,21 @@ List list_create(int max_items, ListType list_type)
                   ._id = list_id_incr++};
 }
 
+List list_create_with_title(int max_items, ListType list_type, const char *title)
+{
+    List list = list_create(max_items, LIST_SMALL);
+    strncpy(list.title, title, STR_MAX - 1);
+    return list;
+}
+
+List list_create_sticky(int max_items, const char *title)
+{
+    List list = list_create_with_title(max_items, LIST_SMALL, title);
+    list.scroll_height = 5;
+    list.has_sticky = true;
+    return list;
+}
+
 void list_addItem(List *list, ListItem item)
 {
     item._reset_value = item.value;
@@ -133,14 +150,16 @@ ListItem *list_currentItem(List *list)
     return &list->items[list->active_pos];
 }
 
-void list_scroll(List *list)
+void _list_scroll(List *list, int pos)
 {
+    pos = _list_modulo(pos, list->item_count);
+
     // Scroll up
-    if (list->active_pos < list->scroll_pos)
-        list->scroll_pos = list->active_pos;
+    if (pos < list->scroll_pos)
+        list->scroll_pos = pos;
     // Scroll down
-    else if (list->active_pos >= list->scroll_pos + list->scroll_height)
-        list->scroll_pos = list->active_pos - list->scroll_height + 1;
+    else if (pos >= list->scroll_pos + list->scroll_height)
+        list->scroll_pos = pos - list->scroll_height + 1;
 
     // No scrolling if not enough items
     if (list->item_count <= list->scroll_height)
@@ -148,6 +167,11 @@ void list_scroll(List *list)
     // Max scroll to last item
     else if (list->scroll_pos + list->scroll_height > list->item_count)
         list->scroll_pos = list->item_count - list->scroll_height;
+}
+
+void list_scroll(List *list)
+{
+    _list_scroll(list, list->active_pos);
 }
 
 bool list_scrollTo(List *list, int active_pos)
@@ -176,11 +200,11 @@ bool list_keyUp(List *list, bool key_repeat)
 
     if (_list_did_wraparound(old_pos, list->active_pos, -1)) {
         if (list->scroll_pos > 0) {
-            list->scroll_pos -= 1;
+            _list_scroll(list, list->scroll_pos - 1);
             list->active_pos = old_pos;
         }
         else {
-            list->scroll_pos = list->item_count - list->scroll_height;
+            _list_scroll(list, list->item_count - 1);
         }
     }
     else {
@@ -208,11 +232,11 @@ bool list_keyDown(List *list, bool key_repeat)
 
     if (_list_did_wraparound(old_pos, list->active_pos, 1)) {
         if (list->scroll_pos < list->item_count - list->scroll_height) {
-            list->scroll_pos += 1;
+            _list_scroll(list, list->scroll_pos + list->scroll_height);
             list->active_pos = old_pos;
         }
         else {
-            list->scroll_pos = 0;
+            _list_scroll(list, 0);
         }
     }
     else {

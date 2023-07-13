@@ -28,12 +28,14 @@ if [ "$0" = "/tmp/_shutdown" ]; then
 	killall -9 main # mandatory to avoid the suppression of .tmp_update !
 	killall -9 updater
 	killall -9 runtime.sh
+   	killall -9 smbd
 	
 	kill_hooked_tasks
 	sleep 0.1
 	kill_hooked_tasks -9
 	
 	sync
+	umount /mnt/SDCARD/miyoo/app/MainUI
 	umount /mnt/SDCARD/RetroArch/retroarch
 	umount /customer/lib/libgamename.so
 	swapoff /mnt/SDCARD/cachefile

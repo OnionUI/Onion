@@ -4,6 +4,7 @@
 #include "utils/file.h"
 #include "utils/log.h"
 
+#include "./migrateDB.h"
 #include "./playActivityDB.h"
 
 #endif

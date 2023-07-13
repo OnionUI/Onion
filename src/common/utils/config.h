@@ -12,6 +12,8 @@
 #include "str.h"
 
 #define CONFIG_PATH "/mnt/SDCARD/.tmp_update/config/"
+#define CONFIG_INT "%d"
+#define CONFIG_STR "%[^\n]"
 
 bool config_flag_get(const char *key) { return flag_get(CONFIG_PATH, key); }
 
