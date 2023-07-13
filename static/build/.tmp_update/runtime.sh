@@ -139,8 +139,8 @@ clear_logs() {
         ./game_list_options.log \
         ./network.log \
         ./dnsmasq.log \
-		    ./ftp.log \
-		    ./easy_netplay.log \
+        ./ftp.log \
+        ./easy_netplay.log \
         2> /dev/null
 }
 
@@ -532,11 +532,11 @@ check_networking() {
         check_timezone
         return
     fi
-    
+
     rm /tmp/network_changed
 
     $sysdir/script/network/update_networking.sh check
-        
+
     check_timezone
 }
 
