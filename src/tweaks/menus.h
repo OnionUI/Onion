@@ -498,7 +498,7 @@ void menu_advanced(void *_)
                                               "MENU+UP/DOWN"},
                              .value = config_flag_get(".altBrightness"),
                              .action = action_setAltBrightness});
-        } 
+        }
         list_addItem(&_menu_advanced,
                      (ListItem){
                          .label = "Fast forward rate",
