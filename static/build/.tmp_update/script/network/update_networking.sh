@@ -72,7 +72,6 @@ disable_all_services() {
     disable_flag sshState
     disable_flag authsshState
     disable_flag telnetState
-    disable_flag authtelnetState
     disable_flag ftpState
     disable_flag authftpState
     disable_flag httpState
@@ -276,12 +275,8 @@ check_telnetstate() {
         else
             if wifi_enabled; then
                 sync
-                if flag_enabled authtelnetState; then
-                    telnet_authed
-                else
-                    log "Telnet: Starting telnet without auth"
-                    telnetd -l $netscript/telnetenv.sh
-                fi
+                log "Telnet: Starting telnet"
+                telnetd -l $netscript/telnetenv.sh
             else
                 disable_flag telnetState
             fi
@@ -290,21 +285,6 @@ check_telnetstate() {
         if is_running telnetd; then
             killall -9 telnetd
             log "Telnet: Killed"
-        fi
-    fi
-}
-
-# Called by above function on boot or when auth state is toggled in tweaks
-telnet_authed() {
-    if flag_enabled telnetState; then
-        if is_running_exact "telnetd -l /mnt/SDCARD/.tmp_update/script/telnetenv.sh" || flag_enabled authtelnetState; then
-            killall -9 telnetd
-            sleep 0.5
-            log "Telnet: Starting telnet with auth"
-            telnetd
-        else
-            killall -9 telnetd
-            telnetd -l $netscript/telnetenv.sh
         fi
     fi
 }
@@ -541,7 +521,7 @@ is_noauth_enabled() { # Used to check authMethod val for HTTPFS
 }
 
 print_usage() {
-    echo "Usage: $0 {check|ftp|telnet|http|ssh|ntp|hotspot|smbd|disableall} {toggle|authed} - {ntp|hotspot} only accept toggle."
+    echo "Usage: $0 {check|ftp|telnet|http|ssh|ntp|hotspot|smbd|disableall} {toggle|authed} - {ntp|hotspot|telnet} only accept toggle."
     exit 1
 }
 

@@ -35,7 +35,6 @@ static struct network_s {
     bool ntp;
     bool ntp_wait;
     bool auth_smbd;
-    bool auth_telnet;
     bool auth_ftp;
     bool auth_http;
     bool auth_ssh;
@@ -56,7 +55,6 @@ void network_loadState(void)
     network_state.ntp = config_flag_get(".ntpState");
     network_state.ntp_wait = config_flag_get(".ntpWait");
     network_state.auth_smbd = config_flag_get(".authsmbdState");
-    network_state.auth_telnet = config_flag_get(".authtelnetState");
     network_state.auth_ftp = config_flag_get(".authftpState");
     network_state.auth_http = config_flag_get(".authhttpState");
     network_state.auth_ssh = config_flag_get(".authsshState");
@@ -290,11 +288,6 @@ void network_setSmbdAuthState(void *pt)
     network_setState(&network_state.auth_smbd, ".authsmbdState", ((ListItem *)pt)->value);
     network_execServiceAuth("smbd");
 }
-void network_setTelnetAuthState(void *pt)
-{
-    network_setState(&network_state.auth_telnet, ".authtelnetState", ((ListItem *)pt)->value);
-    network_execServiceAuth("telnet");
-}
 
 void network_setFtpAuthState(void *pt)
 {
@@ -434,7 +427,7 @@ void menu_telnet(void *pt)
     ListItem *item = (ListItem *)pt;
     item->value = (int)network_state.telnet;
     if (!_menu_telnet._created) {
-        _menu_telnet = list_create(2, LIST_SMALL);
+        _menu_telnet = list_create(1, LIST_SMALL);
         strcpy(_menu_telnet.title, "Telnet");
         list_addItem(&_menu_telnet,
                      (ListItem){
@@ -442,13 +435,6 @@ void menu_telnet(void *pt)
                          .item_type = TOGGLE,
                          .value = (int)network_state.telnet,
                          .action = network_setTelnetState});
-        list_addItem(&_menu_telnet,
-                     (ListItem){
-                         .label = "Enable authentication",
-                         .item_type = TOGGLE,
-                         .disabled = !network_state.telnet,
-                         .value = (int)network_state.auth_telnet,
-                         .action = network_setTelnetAuthState});
     }
     menu_stack[++menu_level] = &_menu_telnet;
     header_changed = true;
@@ -594,13 +580,11 @@ void menu_network(void *_)
                          .action = menu_ssh});
         list_addItem(&_menu_network,
                      (ListItem){
-                         .label = "Telnet: Remote shell...",
+                         .label = "Telnet: Remote shell",
                          .item_type = TOGGLE,
                          .disabled = !settings.wifi_on,
-                         .alternative_arrow_action = true,
-                         .arrow_action = network_setTelnetState,
                          .value = (int)network_state.telnet,
-                         .action = menu_telnet});
+                         .action = network_setTelnetState});
         list_addItem(&_menu_network,
                      (ListItem){
                          .label = "FTP: File server...",
