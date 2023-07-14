@@ -422,24 +422,6 @@ void menu_http(void *pt)
     header_changed = true;
 }
 
-void menu_telnet(void *pt)
-{
-    ListItem *item = (ListItem *)pt;
-    item->value = (int)network_state.telnet;
-    if (!_menu_telnet._created) {
-        _menu_telnet = list_create(1, LIST_SMALL);
-        strcpy(_menu_telnet.title, "Telnet");
-        list_addItem(&_menu_telnet,
-                     (ListItem){
-                         .label = "Enable",
-                         .item_type = TOGGLE,
-                         .value = (int)network_state.telnet,
-                         .action = network_setTelnetState});
-    }
-    menu_stack[++menu_level] = &_menu_telnet;
-    header_changed = true;
-}
-
 void menu_ftp(void *pt)
 {
     ListItem *item = (ListItem *)pt;
@@ -580,13 +562,6 @@ void menu_network(void *_)
                          .action = menu_ssh});
         list_addItem(&_menu_network,
                      (ListItem){
-                         .label = "Telnet: Remote shell",
-                         .item_type = TOGGLE,
-                         .disabled = !settings.wifi_on,
-                         .value = (int)network_state.telnet,
-                         .action = network_setTelnetState});
-        list_addItem(&_menu_network,
-                     (ListItem){
                          .label = "FTP: File server...",
                          .item_type = TOGGLE,
                          .disabled = !settings.wifi_on,
@@ -594,6 +569,13 @@ void menu_network(void *_)
                          .arrow_action = network_setFtpState,
                          .value = (int)network_state.ftp,
                          .action = menu_ftp});
+        list_addItem(&_menu_network,
+                     (ListItem){
+                         .label = "Telnet: Remote shell",
+                         .item_type = TOGGLE,
+                         .disabled = !settings.wifi_on,
+                         .value = (int)network_state.telnet,
+                         .action = network_setTelnetState});
     }
     strcpy(_menu_network.items[0].label, ip_address_label);
     menu_stack[++menu_level] = &_menu_network;
