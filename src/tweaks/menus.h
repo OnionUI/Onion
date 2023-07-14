@@ -480,7 +480,7 @@ void menu_resetSettings(void *_)
 void menu_advanced(void *_)
 {
     if (!_menu_advanced._created) {
-        _menu_advanced = list_create(4, LIST_SMALL);
+        _menu_advanced = list_create(5, LIST_SMALL);
         strcpy(_menu_advanced.title, "Advanced");
         list_addItem(&_menu_advanced,
                      (ListItem){
@@ -488,6 +488,17 @@ void menu_advanced(void *_)
                          .item_type = TOGGLE,
                          .value = value_getSwapTriggers(),
                          .action = action_advancedSetSwapTriggers});
+        if (DEVICE_ID == MIYOO283) {
+            list_addItem(&_menu_advanced,
+                         (ListItem){
+                             .label = "Brightness control",
+                             .item_type = MULTIVALUE,
+                             .value_max = 1,
+                             .value_labels = {"SELECT+R2/L2",
+                                              "MENU+UP/DOWN"},
+                             .value = config_flag_get(".altBrightness"),
+                             .action = action_setAltBrightness});
+        } 
         list_addItem(&_menu_advanced,
                      (ListItem){
                          .label = "Fast forward rate",

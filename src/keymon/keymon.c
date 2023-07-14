@@ -489,6 +489,8 @@ int main(void)
                         if (DEVICE_ID == 354)
                             break; // disable this shortcut for MMP
                         // SELECT + L2 : brightness down
+                        if (exists("/mnt/SDCARD/.tmp_update/config/.altBrightness"))
+                            break;
                         if (settings.brightness > 0) {
                             settings_setBrightness(settings.brightness - 1,
                                                    true, false);
@@ -525,6 +527,8 @@ int main(void)
                         if (DEVICE_ID == 354)
                             break; // disable this shortcut for MMP
                         // SELECT + R2 : brightness up
+                        if (exists("/mnt/SDCARD/.tmp_update/config/.altBrightness"))
+                            break;
                         if (settings.brightness < MAX_BRIGHTNESS) {
                             settings_setBrightness(settings.brightness + 1,
                                                    true, false);
@@ -559,7 +563,7 @@ int main(void)
                 if (val == PRESSED && system_state == MODE_MAIN_UI)
                     temp_flag_set("launch_alt", false);
                 break;
-            case HW_BTN_VOLUME_DOWN:
+           case HW_BTN_VOLUME_DOWN:
                 if (comboKey_menu) {
                     // MENU + VOL DOWN : brightness down
                     if (val != RELEASED && settings.brightness > 0) {
@@ -582,6 +586,21 @@ int main(void)
                 if (val == RELEASED)
                     volDown_active = false;
                 osd_showVolumeBar(settings.volume, settings.mute);
+                break;
+            case HW_BTN_DOWN:
+                if (DEVICE_ID == 283) { 
+                    if (comboKey_menu) {
+                        if (exists("/mnt/SDCARD/.tmp_update/config/.altBrightness")) {
+                            // MENU + B DOWN : brightness down
+                            if (val != RELEASED && settings.brightness > 0) {
+                                settings_setBrightness(settings.brightness - 1, true,
+                                                       false);
+                                settings_changed = true;
+                            }
+                            osd_showBrightnessBar(settings.brightness);  
+                        }
+                    }   
+                }
                 break;
             case HW_BTN_VOLUME_UP:
                 if (comboKey_menu) {
@@ -610,6 +629,22 @@ int main(void)
                 if (val == RELEASED)
                     volUp_active = false;
                 osd_showVolumeBar(settings.volume, settings.mute);
+                break;
+             case HW_BTN_UP:
+                if (DEVICE_ID == 283) { 
+                    if (comboKey_menu) {
+                        if (exists("/mnt/SDCARD/.tmp_update/config/.altBrightness")) {
+                        // MENU + BTN UP : brightness up
+                            if (val != RELEASED &&
+                                settings.brightness < MAX_BRIGHTNESS) {
+                                settings_setBrightness(settings.brightness + 1, true,
+                                                       false);
+                                settings_changed = true;
+                            }
+                            osd_showBrightnessBar(settings.brightness);
+                        }
+                    }   
+                }
                 break;
             default:
                 break;
