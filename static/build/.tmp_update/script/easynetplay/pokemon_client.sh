@@ -19,7 +19,6 @@ hostip="192.168.100.100" # This should be the default unless the user has change
 # We'll need wifi up for this. Lets try and start it..
 
 check_wifi() {
-	ifconfig wlan1 down
 	if ifconfig wlan0 &>/dev/null; then
 		log "GLO::Pokemon_Netplay: Wi-Fi is up already"
 		build_infoPanel "WIFI" "Wifi up"
