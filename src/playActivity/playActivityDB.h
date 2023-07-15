@@ -375,7 +375,9 @@ void play_activity_stop(char *rom_file_path)
 void play_activity_stop_all(void)
 {
     print_debug("play_activity_stop_all()");
-    play_activity_db_execute("UPDATE play_activity SET play_time = (strftime('%s', 'now')) - created_at, updated_at = (strftime('%s', 'now')) WHERE play_time IS NULL;");
+    play_activity_db_execute(
+        "UPDATE play_activity SET play_time = (strftime('%s', 'now')) - created_at, updated_at = (strftime('%s', 'now')) WHERE play_time IS NULL;"
+        "DELETE FROM play_activity WHERE play_time < 0;");
 }
 
 #endif // PLAY_ACTIVITY_DB_H
