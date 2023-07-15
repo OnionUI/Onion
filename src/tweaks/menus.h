@@ -55,7 +55,7 @@ void menu_systemDisplay(void *_)
                          .value_formatter = formatter_meterWidth,
                          .value = value_meterWidth(),
                          .action = action_meterWidth});
-    }                      
+    }
     menu_stack[++menu_level] = &_menu_system_startup;
     header_changed = true;
 }

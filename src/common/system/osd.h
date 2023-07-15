@@ -140,17 +140,16 @@ void _print_bar(void)
     uint32_t *ofs = fb_addr;
     uint32_t i, curr,
         percentage = _bar_max > 0 ? _bar_value * DISPLAY_HEIGHT / _bar_max : 0;
-    
+
     int meterWidth;
-    if (config_get("display/meterWidth", CONFIG_INT, &meterWidth)==false)    
+    if (config_get("display/meterWidth", CONFIG_INT, &meterWidth) == false)
         meterWidth = 4;
-    
+
     ofs += DISPLAY_WIDTH - meterWidth;
     for (i = 0; i < DISPLAY_HEIGHT * 3; i++, ofs += DISPLAY_WIDTH) {
         curr = (i % DISPLAY_HEIGHT) < percentage ? _bar_color : 0;
         for (int i = 0; i < meterWidth; i++)
-             ofs[i] = curr;
-       
+            ofs[i] = curr;
     }
 }
 

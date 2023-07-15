@@ -63,7 +63,7 @@ int value_appShortcut(int button)
 int value_meterWidth(void)
 {
     int meterWidth;
-    if (config_get("display/meterWidth", CONFIG_INT, &meterWidth)==true)    
+    if (config_get("display/meterWidth", CONFIG_INT, &meterWidth) == true)
         return meterWidth;
     else
         return 4;
