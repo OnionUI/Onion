@@ -19,6 +19,10 @@ main() {
     init_system
     update_time
 
+    # Remount passwd/group to add our own users
+    mount -o bind $sysdir/config/passwd /etc/passwd
+    mount -o bind $sysdir/config/group  /etc/group 
+
     # Start the battery monitor
     batmon &
 
