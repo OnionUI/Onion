@@ -53,6 +53,13 @@
         }                                      \
     }
 
+#ifndef PATH_MAX
+#define PATH_MAX 4096
+#endif
+
+#define CONTENT_INT "%d"
+#define CONTENT_STR "%[^\n]"
+
 bool exists(const char *file_path);
 bool is_file(const char *file_path);
 bool is_dir(const char *file_path);
@@ -84,5 +91,7 @@ char *file_parseKeyValue(const char *file_path, const char *key_in,
 
 void file_changeKeyValue(const char *file_path, const char *key,
                          const char *replacement_line);
+
+bool file_path_relative_to(char *path_out, const char *path_from, const char *path_to);
 
 #endif // UTILS_FILE_H__

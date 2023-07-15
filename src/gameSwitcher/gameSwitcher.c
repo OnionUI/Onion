@@ -270,13 +270,13 @@ int getRomTotalTime(const char *rom_path)
     char *rom_path_slice = strstr(rom_path_clone, "Roms");
 
     if (rom_path_slice != NULL) {
-        ROM *romObject = rom_find_by_file_path(rom_path_slice);
+        int rom_id = rom_find_by_file_path(rom_path_slice, false);
 
-        if (romObject != NULL) {
+        if (rom_id != -1) {
             for (int i = 0; i < play_activities->count; i++) {
                 PlayActivity *playActivityObject = play_activities->play_activity[i];
 
-                if (romObject->id == playActivityObject->rom->id)
+                if (playActivityObject->rom->id == rom_id)
                     return playActivityObject->play_time_total;
             }
         }

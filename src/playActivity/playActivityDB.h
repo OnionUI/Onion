@@ -3,6 +3,7 @@
 
 #include <dirent.h>
 #include <libgen.h>
+#include <limits.h>
 #include <sqlite3/sqlite3.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,6 +17,7 @@
 
 #define PLAY_ACTIVITY_DB_NEW_FILE "/mnt/SDCARD/Saves/CurrentProfile/play_activity/play_activity_db.sqlite"
 #define ROMS_FOLDER "/mnt/SDCARD/Roms"
+#define CMD_TO_RUN "/mnt/SDCARD/.tmp_update/cmd_to_run.sh"
 
 typedef struct ROM ROM;
 typedef struct PlayActivity PlayActivity;
@@ -52,6 +54,9 @@ void play_activity_db_close()
 
 void play_activity_db_open(void)
 {
+    if (play_activity_db != NULL)
+        return;
+
     bool play_activity_db_created = is_file(PLAY_ACTIVITY_DB_NEW_FILE);
 
     mkdir("/mnt/SDCARD/Saves/CurrentProfile/play_activity/", 0777);
@@ -83,25 +88,6 @@ int play_activity_db_execute(char *sql)
     int rc = sqlite3_exec(play_activity_db, sql, NULL, NULL, NULL);
     play_activity_db_close();
     return rc;
-}
-
-bool play_activity_db_execute_exists(char *sql)
-{
-    printf_debug("play_activity_db_execute_exists(%s)\n", sql);
-    play_activity_db_open();
-
-    sqlite3_stmt *stmt;
-    bool result = false;
-
-    if (sqlite3_prepare_v2(play_activity_db, sql, -1, &stmt, NULL) == SQLITE_OK) {
-        if (sqlite3_step(stmt) == SQLITE_ROW) {
-            result = true;
-        }
-        sqlite3_finalize(stmt);
-    }
-
-    play_activity_db_close();
-    return result;
 }
 
 sqlite3_stmt *play_activity_db_prepare(char *sql)
@@ -186,88 +172,190 @@ void free_play_activities(PlayActivities *pa_ptr)
     free(pa_ptr);
 }
 
-ROM *rom_find_by_file_path(char *rom_file_path)
+void play_activity_fix_paths(void)
+{
+    play_activity_db_open();
+    sqlite3_stmt *stmt = NULL;
+
+    if (sqlite3_prepare_v2(play_activity_db, "SELECT id, file_path FROM rom WHERE file_path LIKE '/mnt/SDCARD/%%';", -1, &stmt, NULL) != SQLITE_OK) {
+        printf("%s: %s\n", sqlite3_errmsg(play_activity_db), sqlite3_sql(stmt));
+    }
+
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        int rom_id = sqlite3_column_int(stmt, 0);
+        char file_path[PATH_MAX];
+        strcpy(file_path, (const char *)sqlite3_column_text(stmt, 1));
+
+        if (strlen(file_path) == 0) {
+            continue;
+        }
+
+        char cache_path[PATH_MAX];
+        char cache_name[STR_MAX];
+        int cache_version = cache_get_path(cache_path, cache_name, file_path);
+
+        char rel_path[PATH_MAX];
+        if (!file_path_relative_to(rel_path, ROMS_FOLDER, file_path)) {
+            strcpy(rel_path, str_split(file_path, "../../Roms/"));
+        }
+
+        char *sql;
+        if (cache_version == -1) {
+            sql = sqlite3_mprintf("UPDATE rom SET file_path = %Q WHERE id = %d;", rel_path, rom_id);
+        }
+        else {
+            sql = sqlite3_mprintf("UPDATE rom SET file_path = %Q, type = %Q WHERE id = %d;", rel_path, cache_path, rom_id);
+        }
+        printf_debug("%s\n", sql);
+        sqlite3_exec(play_activity_db, sql, NULL, NULL, NULL);
+        sqlite3_free(sql);
+    }
+
+    sqlite3_finalize(stmt);
+    play_activity_db_close();
+}
+
+void play_activity_insert_rom(const char *rom_type, const char *rom_name, const char *file_path, const char *image_path)
+{
+    char rel_path[PATH_MAX];
+    if (!file_path_relative_to(rel_path, ROMS_FOLDER, file_path)) {
+        printf_debug("Error in file path: %s\n", file_path);
+        return;
+    }
+    char *sql = sqlite3_mprintf("INSERT INTO rom(type, name, file_path, image_path) VALUES(%Q, %Q, %Q, %Q);",
+                                rom_type, rom_name, rel_path, image_path);
+    play_activity_db_execute(sql);
+    sqlite3_free(sql);
+}
+
+void play_activity_insert_rom_from_cache(CacheDBItem *cache_db_item)
+{
+    play_activity_insert_rom(cache_db_item->cache_path, cache_db_item->name, cache_db_item->path, cache_db_item->imgpath);
+}
+
+int _get_rom_id(const char *rom_path)
+{
+    int rom_id = -1;
+
+    char *sql = sqlite3_mprintf("SELECT id FROM rom WHERE file_path=%Q LIMIT 1;", rom_path);
+    sqlite3_stmt *stmt = play_activity_db_prepare(sql);
+
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        rom_id = sqlite3_column_int(stmt, 0);
+    }
+
+    sqlite3_finalize(stmt);
+
+    return rom_id;
+}
+
+int rom_find_by_file_path(char *rom_file_path, bool create_not_found)
 {
     // Game existence in the DB check
-    printf_debug("rom_find_by_file_path(%s)\n", rom_file_path);
-    char *sql = sqlite3_mprintf("SELECT * FROM rom WHERE file_path LIKE '%%%q%%' LIMIT 1;", rom_file_path);
-    sqlite3_stmt *stmt = play_activity_db_prepare(sql);
-    sqlite3_free(sql);
-    if (sqlite3_step(stmt) != SQLITE_ROW) {
+    char rel_path[PATH_MAX];
+    if (!file_path_relative_to(rel_path, ROMS_FOLDER, rom_file_path)) {
+        printf_debug("rom_find_by_file_path(%s) - path not found\n", rom_file_path);
+        return -1;
+    }
 
-        // Game not found
-        // We try to add it in the DB
-        // Using the cache infos
-        printf_debug("ROM not found in the DB\n");
-        sqlite3_finalize(stmt);
-        stmt = NULL;
+    printf_debug("rom_find_by_file_path('%s') -> '%s'\n", rom_file_path, rel_path);
 
+    int rom_id = _get_rom_id(rel_path);
+
+    if (rom_id == -1 && create_not_found) {
         CacheDBItem *cache_db_item = cache_db_find(rom_file_path);
 
         if (cache_db_item == NULL) {
             printf_debug("ROM not found in the database. File path: %s\n", rom_file_path);
-            return NULL;
+            return -1;
         }
 
-        sql = sqlite3_mprintf("INSERT INTO rom(type, name, file_path, image_path) "
-                              "VALUES('%q', '%q', '%q', '%q');",
-                              cache_db_item->rom_type, cache_db_item->disp,
-                              cache_db_item->path, cache_db_item->imgpath);
-
+        play_activity_insert_rom_from_cache(cache_db_item);
         free(cache_db_item);
 
-        play_activity_db_execute(sql);
-        sqlite3_free(sql);
+        sqlite3_stmt *stmt = play_activity_db_prepare("SELECT id FROM rom WHERE ROWID = last_insert_rowid()");
 
-        sql = sqlite3_mprintf("SELECT * FROM rom WHERE file_path LIKE '%%%q%%' LIMIT 1;", rom_file_path);
-        stmt = play_activity_db_prepare(sql);
-        sqlite3_step(stmt);
-        sqlite3_free(sql);
-    }
-    else {
-        printf_debug("ROM already exists in the DB\n");
+        if (sqlite3_step(stmt) == SQLITE_ROW) {
+            rom_id = sqlite3_column_int(stmt, 0);
+        }
+
+        sqlite3_finalize(stmt);
     }
 
-    ROM *rom = (ROM *)malloc(sizeof(ROM));
-    rom->id = sqlite3_column_int(stmt, 0);
-    rom->type = strdup((const char *)sqlite3_column_text(stmt, 1));
-    rom->name = strdup((const char *)sqlite3_column_text(stmt, 2));
-    rom->file_path = strdup((const char *)sqlite3_column_text(stmt, 3));
-    rom->image_path = strdup((const char *)sqlite3_column_text(stmt, 4));
-
-    sqlite3_finalize(stmt);
-
-    return rom;
+    return rom_id;
 }
 
-int rom_get_latest_activity(void)
+bool _get_active_rom_path(char *rom_path_out)
+{
+    char *ptr;
+    char cmd[STR_MAX] = "";
+
+    FILE *fp;
+    file_get(fp, CMD_TO_RUN, CONTENT_STR, cmd);
+
+    if (strlen(cmd) == 0) {
+        return false;
+    }
+
+    if ((ptr = strrchr(cmd, '"')) != NULL) {
+        *ptr = '\0';
+    }
+
+    if ((ptr = strrchr(cmd, '"')) != NULL) {
+        strncpy(rom_path_out, ptr + 1, STR_MAX);
+        return true;
+    }
+
+    return false;
+}
+
+int _get_active_closed_activity(void)
 {
     int rom_id = -1;
-    const char *sql = "SELECT rom_id FROM play_activity ORDER BY updated_at DESC LIMIT 1;";
-    sqlite3_stmt *stmt = play_activity_db_prepare(sql);
-    sqlite3_free(sql);
-    if (sqlite3_step(stmt) == SQLITE_ROW) {
-        rom_id = sqlite3_column_int(stmt, 0);
+
+    char rom_path[STR_MAX];
+    bool rom_active = _get_active_rom_path(rom_path);
+
+    if (!rom_active) {
+        return -1;
     }
+
+    printf_debug("Last closed active rom: %s\n", rom_path);
+
+    int active_rom_id = rom_find_by_file_path(rom_path, false);
+    if (active_rom_id == -1) {
+        return -1;
+    }
+
+    char *sql = sqlite3_mprintf("SELECT * FROM play_activity WHERE rom_id = %d AND play_time IS NULL;", rom_id);
+    sqlite3_stmt *stmt = play_activity_db_prepare(sql);
+
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        // Activity is not closed
+        return -1;
+    }
+
+    sqlite3_free(sql);
     sqlite3_finalize(stmt);
+
     return rom_id;
 }
 
 void play_activity_start(char *rom_file_path)
 {
-    ROM *rom = rom_find_by_file_path(rom_file_path);
-    if (rom == NULL) {
+    int rom_id = rom_find_by_file_path(rom_file_path, true);
+    if (rom_id == -1) {
         exit(1);
     }
-    printf_debug("play_activity_start(%s)\n", rom->name);
-    play_activity_db_execute(sqlite3_mprintf("INSERT INTO play_activity(rom_id) VALUES(%d);", rom->id));
-    free(rom);
+    printf_debug("play_activity_start(%s)\n", rom_file_path);
+    play_activity_db_execute(sqlite3_mprintf("INSERT INTO play_activity(rom_id) VALUES(%d);", rom_id));
 }
 
 void play_activity_resume(void)
 {
-    int rom_id = rom_get_latest_activity();
+    int rom_id = _get_active_closed_activity();
     if (rom_id == -1) {
+        printf("Error: no active rom\n");
         exit(1);
     }
     printf_debug("play_activity_resume() - rom_id: %d\n", rom_id);
@@ -276,13 +364,12 @@ void play_activity_resume(void)
 
 void play_activity_stop(char *rom_file_path)
 {
-    ROM *rom = rom_find_by_file_path(rom_file_path);
-    if (rom == NULL) {
+    int rom_id = rom_find_by_file_path(rom_file_path, false);
+    if (rom_id == -1) {
         exit(1);
     }
-    printf_debug("play_activity_stop(%s)\n", rom->name);
-    play_activity_db_execute(sqlite3_mprintf("UPDATE play_activity SET play_time = (strftime('%%s', 'now')) - created_at, updated_at = (strftime('%%s', 'now')) WHERE rom_id = %d AND play_time IS NULL;", rom->id));
-    free(rom);
+    printf_debug("play_activity_stop(%s)\n", rom_file_path);
+    play_activity_db_execute(sqlite3_mprintf("UPDATE play_activity SET play_time = (strftime('%%s', 'now')) - created_at, updated_at = (strftime('%%s', 'now')) WHERE rom_id = %d AND play_time IS NULL;", rom_id));
 }
 
 void play_activity_stop_all(void)

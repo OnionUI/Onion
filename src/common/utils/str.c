@@ -189,3 +189,14 @@ void str_serializeTime(char *dest_str, int nTime)
         strcpy(dest_str, "0m");
     }
 }
+
+int str_count_char(const char *str, char ch)
+{
+    int i, count = 0;
+    for (i = 0; i <= strlen(str); i++) {
+        if (str[i] == ch) {
+            count++;
+        }
+    }
+    return count;
+}

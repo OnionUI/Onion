@@ -10,17 +10,12 @@
 
 #include "utils/str.h"
 
-typedef struct CacheDBItem CacheDBItem;
-
-struct CacheDBItem {
-    int id;
-    char *rom_type;
-    char *disp;
-    char *path;
-    char *imgpath;
-    int type;
-    char *ppath;
-};
+typedef struct CacheDBItem {
+    char cache_path[PATH_MAX];
+    char name[STR_MAX];
+    char path[PATH_MAX];
+    char imgpath[PATH_MAX];
+} CacheDBItem;
 
 sqlite3 *cache_db = NULL;
 
@@ -56,56 +51,77 @@ sqlite3_stmt *cache_db_prepare(char *cache_db_file_path, char *sql)
     return (stmt);
 }
 
-int cache_get_path(char *cache_db_file_path, const char *type)
+int cache_get_path_and_version(char *cache_db_file_path, const char *cache_dir, const char *dir_name)
 {
     // Check if "_cache6.db" file exists
-    char cache6_db_file_path[STR_MAX];
-    snprintf(cache6_db_file_path, STR_MAX - 1, "/mnt/SDCARD/Roms/%s/%s_cache6.db", type, type);
-
-    if (is_file(cache6_db_file_path) == 1) {
-        strncpy(cache_db_file_path, cache6_db_file_path, STR_MAX - 1);
+    snprintf(cache_db_file_path, PATH_MAX - 1, "%s/%s_cache6.db", cache_dir, dir_name);
+    if (is_file(cache_db_file_path) == 1) {
         return 6;
     }
 
     // Check if "_cache2.db" file exists
-    char cache2_db_file_path[STR_MAX];
-    snprintf(cache2_db_file_path, STR_MAX - 1, "/mnt/SDCARD/Roms/%s/%s_cache2.db", type, type);
-
-    if (is_file(cache2_db_file_path) == 1) {
-        strncpy(cache_db_file_path, cache2_db_file_path, STR_MAX - 1);
+    snprintf(cache_db_file_path, PATH_MAX - 1, "%s/%s_cache2.db", cache_dir, dir_name);
+    if (is_file(cache_db_file_path) == 1) {
         return 2;
     }
 
-    printf_debug("No cache database file found for %s\n", type);
+    printf_debug("No cache found at: '%s'\n", cache_db_file_path);
     return -1;
 }
 
-CacheDBItem *cache_db_find(char *cache_db_item_file_path)
+int cache_get_path(char *cache_path_out, char *cache_name_out, const char *rom_path)
 {
-    printf_debug("cache_db_find(%s)\n", cache_db_item_file_path);
+    cache_path_out[0] = '\0';
+
+    int cache_version = -1;
+    char *cache_dir = dirname(strdup((char *)rom_path));
+
+    while (strlen(cache_dir) > 16 && strcmp("Roms", cache_name_out) != 0) {
+        strcpy(cache_name_out, basename(cache_dir));
+        cache_version = cache_get_path_and_version(cache_path_out, cache_dir, cache_name_out);
+
+        if (cache_version != -1) {
+            break;
+        }
+
+        cache_dir = dirname(cache_dir);
+    }
+
+    return cache_version;
+}
+
+CacheDBItem *cache_db_find(const char *path_or_name)
+{
+    printf_debug("cache_db_find('%s', '%s')\n", path_or_name);
+
     CacheDBItem *cache_db_item = NULL;
-    char *type = basename(dirname(strdup((char *)cache_db_item_file_path)));
     char cache_db_file_path[STR_MAX];
+    char cache_type[STR_MAX];
 
-    int cache_version = cache_get_path(cache_db_file_path, type);
+    char *sql;
+    int cache_version = cache_get_path(cache_db_file_path, cache_type, path_or_name);
 
-    if (cache_version == -1) {
+    if (cache_version == 2) {
+        sql = sqlite3_mprintf("SELECT disp, path, imgpath FROM %q_roms WHERE path LIKE '%%%q' OR disp = %Q LIMIT 1;", cache_type, path_or_name, path_or_name);
+    }
+    else if (cache_version == 6) {
+        sql = sqlite3_mprintf("SELECT pinyin, path, imgpath FROM %q_roms WHERE path LIKE '%%%q' OR disp = %Q LIMIT 1;", cache_type, path_or_name, path_or_name);
+    }
+    else {
+        printf("No cache db found\n");
         return NULL;
     }
 
-    char *sql = sqlite3_mprintf("SELECT * FROM %q_roms WHERE path LIKE '%%%q%%' OR disp = %Q LIMIT 1;", type, cache_db_item_file_path, cache_db_item_file_path);
     sqlite3_stmt *stmt = cache_db_prepare(cache_db_file_path, sql);
+    sqlite3_free(sql);
 
     if (sqlite3_step(stmt) == SQLITE_ROW) {
-        printf_debug("cache item found: %s\n", strdup((const char *)sqlite3_column_text(stmt, 1)));
         cache_db_item = (CacheDBItem *)malloc(sizeof(CacheDBItem));
-        cache_db_item->id = sqlite3_column_int(stmt, 0);
-        cache_db_item->rom_type = type;
-        cache_db_item->disp = strdup((const char *)sqlite3_column_text(stmt, 1));
-        cache_db_item->path = strdup((const char *)sqlite3_column_text(stmt, 2));
-        cache_db_item->imgpath = strdup((const char *)sqlite3_column_text(stmt, 3));
-        cache_db_item->type = sqlite3_column_int(stmt, 4);
-        cache_db_item->ppath = strdup((const char *)sqlite3_column_text(stmt, 5));
+        strcpy(cache_db_item->cache_path, cache_db_file_path);
+        strcpy(cache_db_item->name, (const char *)sqlite3_column_text(stmt, 0));
+        strcpy(cache_db_item->path, (const char *)sqlite3_column_text(stmt, 1));
+        strcpy(cache_db_item->imgpath, (const char *)sqlite3_column_text(stmt, 2));
+        printf_debug("cache item found: %s\n", cache_db_item->name);
     }
     else {
         printf("Game not found in this cache db\n");
@@ -114,36 +130,6 @@ CacheDBItem *cache_db_find(char *cache_db_item_file_path)
     sqlite3_finalize(stmt);
 
     return cache_db_item;
-}
-
-bool cache_db_find_rom_path(char *rom_path, const char *rom_name, const char *type)
-{
-    printf_debug("cache_db_find_path(%s)\n", rom_name);
-    char cache_db_file_path[STR_MAX];
-
-    int cache_version = cache_get_path(cache_db_file_path, type);
-
-    if (cache_version == -1) {
-        return false;
-    }
-
-    bool found = false;
-    char *sql = sqlite3_mprintf("SELECT path FROM %q_roms WHERE path LIKE '%%%q%%' OR disp = '%q' LIMIT 1;", type, rom_name, rom_name);
-
-    sqlite3_stmt *stmt = cache_db_prepare(cache_db_file_path, sql);
-
-    if (sqlite3_step(stmt) == SQLITE_ROW) {
-        strncpy(rom_path, (const char *)sqlite3_column_text(stmt, 0), STR_MAX - 1);
-        printf_debug("Cache item found, rom path: %s\n", rom_path);
-        found = true;
-    }
-    else {
-        printf("Game not found in this cache db\n");
-    }
-
-    sqlite3_finalize(stmt);
-
-    return found;
 }
 
 #endif

@@ -2,6 +2,7 @@
 
 #include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -253,4 +254,35 @@ void file_changeKeyValue(const char *file_path, const char *key,
 
     remove(file_path);
     rename("temp", file_path);
+}
+
+bool file_path_relative_to(char *path_out, const char *dir_from, const char *file_to)
+{
+    path_out[0] = '\0';
+
+    char abs_from[PATH_MAX];
+    char abs_to[PATH_MAX];
+    if (realpath(dir_from, abs_from) == NULL || realpath(file_to, abs_to) == NULL) {
+        return false;
+    }
+
+    char *p1 = abs_from;
+    char *p2 = abs_to;
+    while (*p1 && (*p1 == *p2)) {
+        ++p1, ++p2;
+    }
+
+    if (*p2 == '/') {
+        ++p2;
+    }
+
+    if (strlen(p1) > 0) {
+        int num_parens = str_count_char(p1, '/') + 1;
+        for (int i = 0; i < num_parens; i++) {
+            strcat(path_out, "../");
+        }
+    }
+    strcat(path_out, p2);
+
+    return true;
 }
