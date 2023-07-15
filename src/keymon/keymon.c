@@ -489,7 +489,7 @@ int main(void)
                         if (DEVICE_ID == 354)
                             break; // disable this shortcut for MMP
                         // SELECT + L2 : brightness down
-                        if (config_flag_get(".altBrightness")) 
+                        if (config_flag_get(".altBrightness"))
                             break;
                         if (settings.brightness > 0) {
                             settings_setBrightness(settings.brightness - 1,
@@ -527,7 +527,7 @@ int main(void)
                         if (DEVICE_ID == 354)
                             break; // disable this shortcut for MMP
                         // SELECT + R2 : brightness up
-                        if (config_flag_get(".altBrightness")) 
+                        if (config_flag_get(".altBrightness"))
                             break;
                         if (settings.brightness < MAX_BRIGHTNESS) {
                             settings_setBrightness(settings.brightness + 1,
