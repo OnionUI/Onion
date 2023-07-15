@@ -489,7 +489,7 @@ int main(void)
                         if (DEVICE_ID == 354)
                             break; // disable this shortcut for MMP
                         // SELECT + L2 : brightness down
-                        if (exists("/mnt/SDCARD/.tmp_update/config/.altBrightness"))
+                        if (config_flag_get(".altBrightness")) 
                             break;
                         if (settings.brightness > 0) {
                             settings_setBrightness(settings.brightness - 1,
@@ -527,7 +527,7 @@ int main(void)
                         if (DEVICE_ID == 354)
                             break; // disable this shortcut for MMP
                         // SELECT + R2 : brightness up
-                        if (exists("/mnt/SDCARD/.tmp_update/config/.altBrightness"))
+                        if (config_flag_get(".altBrightness")) 
                             break;
                         if (settings.brightness < MAX_BRIGHTNESS) {
                             settings_setBrightness(settings.brightness + 1,
@@ -590,7 +590,7 @@ int main(void)
             case HW_BTN_DOWN:
                 if (DEVICE_ID == 283) {
                     if (comboKey_menu) {
-                        if (exists("/mnt/SDCARD/.tmp_update/config/.altBrightness")) {
+                        if (config_flag_get(".altBrightness")) {
                             // MENU + B DOWN : brightness down
                             if (val != RELEASED && settings.brightness > 0) {
                                 settings_setBrightness(settings.brightness - 1, true,
@@ -633,7 +633,7 @@ int main(void)
             case HW_BTN_UP:
                 if (DEVICE_ID == 283) {
                     if (comboKey_menu) {
-                        if (exists("/mnt/SDCARD/.tmp_update/config/.altBrightness")) {
+                        if (config_flag_get(".altBrightness")) {
                             // MENU + BTN UP : brightness up
                             if (val != RELEASED &&
                                 settings.brightness < MAX_BRIGHTNESS) {
