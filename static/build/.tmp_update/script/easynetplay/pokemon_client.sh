@@ -85,7 +85,6 @@ connect_to_host() {
     ip addr add 192.168.100.101/24 dev wlan0
     ip link set wlan0 up
     ip route add default via 192.168.100.100
-    ping 192.168.100.100 &
 	
 	log "GLO::Pokemon_Netplay: Added new network and connected"
     if [ $LOGGING -eq 1 ]; then
