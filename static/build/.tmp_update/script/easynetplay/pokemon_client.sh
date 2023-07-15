@@ -86,11 +86,6 @@ connect_to_host() {
     ip route add default via 192.168.100.100
 	
 	log "GLO::Pokemon_Netplay: Added new network and connected"
-    if [ $LOGGING -eq 1 ]; then
-        log "#############################Supplicant dump##################################"
-		cat /appconfigs/wpa_supplicant.conf >> $sysdir/logs/easy_netplay.log
-        log "#############################Supplicant dump##################################"
-    fi
 }
 
 
