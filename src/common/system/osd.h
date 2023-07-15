@@ -8,6 +8,7 @@
 
 #include "./clock.h"
 #include "./display.h"
+#include "utils/config.h"
 
 #define CHR_WIDTH (3 * 4 + 4)
 #define CHR_HEIGHT (5 * 4)
@@ -139,14 +140,17 @@ void _print_bar(void)
     uint32_t *ofs = fb_addr;
     uint32_t i, curr,
         percentage = _bar_max > 0 ? _bar_value * DISPLAY_HEIGHT / _bar_max : 0;
-
-    ofs += DISPLAY_WIDTH - 4;
+    
+    int meterWidth;
+    if (config_get("display/meterWidth", CONFIG_INT, &meterWidth)==false)    
+        meterWidth = 4;
+    
+    ofs += DISPLAY_WIDTH - meterWidth;
     for (i = 0; i < DISPLAY_HEIGHT * 3; i++, ofs += DISPLAY_WIDTH) {
         curr = (i % DISPLAY_HEIGHT) < percentage ? _bar_color : 0;
-        ofs[0] = curr;
-        ofs[1] = curr;
-        ofs[2] = curr;
-        ofs[3] = curr;
+        for (int i = 0; i < meterWidth; i++)
+             ofs[i] = curr;
+       
     }
 }
 

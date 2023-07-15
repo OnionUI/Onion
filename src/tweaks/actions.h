@@ -49,6 +49,11 @@ void action_setAppShortcut(void *pt)
     }
 }
 
+void action_meterWidth(void *pt)
+{
+    config_setNumber("display/meterWidth", ((ListItem *)pt)->value);
+}
+
 void action_setStartupAutoResume(void *pt)
 {
     settings.startup_auto_resume = ((ListItem *)pt)->value == 1;

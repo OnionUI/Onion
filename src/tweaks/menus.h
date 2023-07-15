@@ -42,6 +42,24 @@ void menu_free_all(void)
     menu_network_free_all();
 }
 
+void menu_systemDisplay(void *_)
+{
+    if (!_menu_system_startup._created) {
+        _menu_system_startup = list_create(1, LIST_SMALL);
+        strcpy(_menu_system_startup.title, "Display");
+        list_addItem(&_menu_system_startup,
+                     (ListItem){
+                         .label = "OSD bar size",
+                         .item_type = MULTIVALUE,
+                         .value_max = 15,
+                         .value_formatter = formatter_meterWidth,
+                         .value = value_meterWidth(),
+                         .action = action_meterWidth});
+    }                      
+    menu_stack[++menu_level] = &_menu_system_startup;
+    header_changed = true;
+}
+
 void menu_systemStartup(void *_)
 {
     if (!_menu_system_startup._created) {
@@ -151,8 +169,12 @@ void menu_datetime(void *_)
 void menu_system(void *_)
 {
     if (!_menu_system._created) {
-        _menu_system = list_create(4, LIST_SMALL);
+        _menu_system = list_create(5, LIST_SMALL);
         strcpy(_menu_system.title, "System");
+        list_addItem(&_menu_system,
+                     (ListItem){
+                         .label = "Display...",
+                         .action = menu_systemDisplay});
         list_addItem(&_menu_system,
                      (ListItem){
                          .label = "Startup...",
