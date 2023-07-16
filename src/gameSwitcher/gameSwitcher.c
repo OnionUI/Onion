@@ -36,6 +36,7 @@
 #include "utils/str.h"
 #include "utils/surfaceSetAlpha.h"
 
+#include "../playActivity/cacheDB.h"
 #include "../playActivity/playActivityDB.h"
 
 #define MAXHISTORY 100
@@ -80,9 +81,7 @@ static void sigHandler(int sig)
     }
 }
 
-static char sTotalTimePlayed[50];
-
-static PlayActivities *play_activities;
+static char sTotalTimePlayed[50] = "";
 
 // Game history list
 typedef struct {
@@ -96,6 +95,7 @@ typedef struct {
     int is_duplicate;
     SDL_Surface *romScreen;
     char romScreenPath[STR_MAX * 2];
+    char path[PATH_MAX];
 } Game_s;
 static Game_s game_list[MAXHISTORY];
 
@@ -110,6 +110,18 @@ static int gameNameScrollEnd = 20;
 
 static cJSON *json_root = NULL;
 static cJSON *json_items = NULL;
+
+void unloadRomScreen(int index)
+{
+    if (index < 0 || index >= game_list_len)
+        return;
+    Game_s *game = &game_list[index];
+
+    if (game->romScreen != NULL) {
+        SDL_FreeSurface(game->romScreen);
+        game->romScreen = NULL;
+    }
+}
 
 SDL_Surface *loadRomScreen(int index)
 {
@@ -137,6 +149,11 @@ SDL_Surface *loadRomScreen(int index)
         }
     }
 
+    unloadRomScreen(index + 5);
+    if (index > 5) {
+        unloadRomScreen(index - 5);
+    }
+
     return game->romScreen;
 }
 
@@ -145,14 +162,16 @@ void freeRomScreens()
     for (int i = 0; i < game_list_len; i++) {
         Game_s *game = &game_list[i];
 
-        if (game->romScreen != NULL)
+        if (game->romScreen != NULL) {
             SDL_FreeSurface(game->romScreen);
+            game->romScreen = NULL;
+        }
     }
 }
 
 static void *_loadRomScreensThread(void *_)
 {
-    for (int i = 0; i < game_list_len; i++) {
+    for (int i = 0; i < 10 && i < game_list_len; i++) {
         Game_s *game = &game_list[i];
 
         if (game->romScreen == NULL)
@@ -162,127 +181,16 @@ static void *_loadRomScreensThread(void *_)
     return NULL;
 }
 
-bool getGameNameFromCache(const char *cache_path, const char *rom_path,
-                          char *name_out)
+void getGameName(char *name_out, const char *rom_path)
 {
-    sqlite3 *db;
-    sqlite3_stmt *res;
-
-    int rc = sqlite3_open(cache_path, &db);
-
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
-        return false;
+    CacheDBItem *cache_item = cache_db_find(rom_path);
+    if (cache_item != NULL) {
+        strcpy(name_out, cache_item->name);
+        free(cache_item);
     }
-
-    char cache_path_clone[STR_MAX];
-    strcpy(cache_path_clone, cache_path);
-
-    char rom_path_clone[STR_MAX];
-    strcpy(rom_path_clone, rom_path);
-
-    char *rom_path_slice = strstr(rom_path_clone, "Roms");
-    if (rom_path_slice == NULL)
-        return false;
-
-    const char *sql =
-        sqlite3_mprintf("SELECT pinyin FROM '%q_roms' WHERE path LIKE '%%%q'",
-                        basename(dirname(cache_path_clone)), rom_path_slice);
-    printf_debug("query: %s\n", sql);
-
-    rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);
-
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "Failed to fetch data: %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
-        return false;
+    else {
+        strcpy(name_out, file_removeExtension(basename(strdup(rom_path))));
     }
-
-    rc = sqlite3_step(res);
-
-    if (rc == SQLITE_ROW)
-        strcpy(name_out, (const char *)sqlite3_column_text(res, 0));
-
-    sqlite3_finalize(res);
-    sqlite3_close(db);
-
-    return rc == SQLITE_ROW;
-}
-
-void moveToParentDir(char *file_path)
-{
-    char *c = &file_path[strlen(file_path)];
-
-    while (c > file_path && *c != '/')
-        c--;
-
-    if (*c == '/')
-        *c = '\0';
-
-    return;
-}
-
-void getGameName(const char *rom_path, char *name_out)
-{
-    char rom_path_clone[STR_MAX];
-    strcpy(rom_path_clone, rom_path);
-
-    char *base_name = basename(rom_path_clone);
-    char *dir_path = dirname(rom_path_clone);
-
-    char name_path[STR_MAX];
-    sprintf(name_path, "%s/.game_config/%s.name", dir_path, base_name);
-
-    if (is_file(name_path)) {
-        FILE *fp;
-        file_get(fp, name_path, "%[^\n]", name_out);
-        return;
-    }
-
-    char cache_dir[STR_MAX];
-    strcpy(cache_dir, dir_path);
-
-    char cache_path[STR_MAX * 2];
-
-    do {
-        snprintf(cache_path, STR_MAX * 2 - 1, "%s/%s_cache6.db", cache_dir,
-                 basename(cache_dir));
-
-        moveToParentDir(cache_dir);
-
-        if (!is_file(cache_path))
-            continue;
-
-        if (getGameNameFromCache(cache_path, rom_path, name_out))
-            return;
-    } while (strcmp("/mnt/SDCARD/Roms", cache_dir) > 0 &&
-             strlen(cache_dir) > 16);
-
-    strcpy(name_out, file_removeExtension(base_name));
-}
-
-int getRomTotalTime(const char *rom_path)
-{
-    char rom_path_clone[STR_MAX];
-    strcpy(rom_path_clone, rom_path);
-
-    char *rom_path_slice = strstr(rom_path_clone, "Roms");
-
-    if (rom_path_slice != NULL) {
-        ROM *romObject = rom_find_by_file_path(rom_path_slice);
-
-        if (romObject != NULL) {
-            for (int i = 0; i < play_activities->count; i++) {
-                PlayActivity *playActivityObject = play_activities->play_activity[i];
-
-                if (romObject->id == playActivityObject->rom->id)
-                    return playActivityObject->play_time_total;
-            }
-        }
-    }
-
-    return 0;
 }
 
 /**
@@ -322,34 +230,28 @@ void readHistory()
             continue;
 
         Game_s *game = &game_list[game_list_len];
-
-        sprintf(game->RACommand,
-                "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v "
-                "-L \"%s\" \"%s\"",
-                core_path, rom_path);
-
-        getGameName(rom_path, game->name);
-
-        strcpy(game->core, basename(core_path));
-        str_split(game->core, "_libretro");
-
         game->hash = FNV1A_Pippip_Yurii(rom_path, strlen(rom_path));
         game->jsonIndex = nbGame;
         game->romScreen = NULL;
         game->is_duplicate = 0;
+        game->totalTime[0] = '\0';
+        sprintf(game->RACommand, "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v -L \"%s\" \"%s\"", core_path, rom_path);
+        getGameName(game->name, rom_path);
+        strcpy(game->path, rom_path);
+        strcpy(game->core, basename(core_path));
+        str_split(game->core, "_libretro");
+        file_cleanName(game->shortname, game->name);
 
-        char shortname[STR_MAX];
-        str_removeParentheses(shortname, game->name);
-        strcpy(game->shortname, shortname);
-
-        int nTime = getRomTotalTime(rom_path);
-        str_serializeTime(game->totalTime, nTime);
-
-        printf_debug(
-            "Game loaded:\n\tname: '%s' (%s)\n\tcmd: '%s'\n\thash: %" PRIu32
-            "\n\tidx: %d\n\ttime: %s\n\n",
-            game->name, game->shortname, game->RACommand, game->hash,
-            game->jsonIndex, game->totalTime);
+        printf_debug("Game loaded:\n"
+                     "\tname: '%s' (%s)\n"
+                     "\tcmd: '%s'\n"
+                     "\thash: %" PRIu32 "\n"
+                     "\tidx: %d\n"
+                     "\n",
+                     game->name, game->shortname,
+                     game->RACommand,
+                     game->hash,
+                     game->jsonIndex);
 
         // Check for duplicates
         for (int i = 0; i < game_list_len; i++) {
@@ -372,8 +274,10 @@ void removeCurrentItem()
 
     printf_debug("removing: %s\n", game->name);
 
-    if (game->romScreen != NULL)
+    if (game->romScreen != NULL) {
         SDL_FreeSurface(game->romScreen);
+        game->romScreen = NULL;
+    }
 
     if (game->is_duplicate > 0) {
         // Check for duplicates
@@ -419,16 +323,16 @@ int main(void)
     signal(SIGINT, sigHandler);
     signal(SIGTERM, sigHandler);
 
-    play_activities = play_activity_find_all();
-    str_serializeTime(sTotalTimePlayed, play_activities->play_time_total);
+    SDL_InitDefault(true);
+
+    SDL_BlitSurface(theme_background(), NULL, screen, NULL);
+    SDL_BlitSurface(screen, NULL, video, NULL);
+    SDL_Flip(video);
 
     readHistory();
-    print_debug("Read ROM DB and history");
 
     settings_load();
     lang_load();
-
-    SDL_InitDefault(true);
 
     SDL_Color color_white = {255, 255, 255};
     SDL_Surface *transparent_bg = SDL_CreateRGBSurface(
@@ -473,14 +377,10 @@ int main(void)
     uint32_t brightness_timeout = 2000;
 
     char header_path[STR_MAX], footer_path[STR_MAX];
-    bool use_custom_header =
-        theme_getImagePath(theme()->path, "extra/gs-top-bar", header_path);
-    bool use_custom_footer =
-        theme_getImagePath(theme()->path, "extra/gs-bottom-bar", footer_path);
-    SDL_Surface *custom_header =
-        use_custom_header ? IMG_Load(header_path) : NULL;
-    SDL_Surface *custom_footer =
-        use_custom_footer ? IMG_Load(footer_path) : NULL;
+    bool use_custom_header = theme_getImagePath(theme()->path, "extra/gs-top-bar", header_path);
+    bool use_custom_footer = theme_getImagePath(theme()->path, "extra/gs-bottom-bar", footer_path);
+    SDL_Surface *custom_header = use_custom_header ? IMG_Load(header_path) : NULL;
+    SDL_Surface *custom_footer = use_custom_footer ? IMG_Load(footer_path) : NULL;
 
     int header_height = use_custom_header ? custom_header->h : 60;
     if (header_height == 1)
@@ -490,9 +390,7 @@ int main(void)
         footer_height = 0;
 
     SDL_Surface *current_bg = NULL;
-    SDL_Rect frame = {
-        theme()->frame.border_left, 0,
-        640 - theme()->frame.border_left - theme()->frame.border_right, 480};
+    SDL_Rect frame = {theme()->frame.border_left, 0, 640 - theme()->frame.border_left - theme()->frame.border_right, 480};
 
     while (!quit) {
         uint32_t ticks = SDL_GetTicks();
@@ -678,9 +576,7 @@ int main(void)
         if (acc_ticks >= time_step) {
             acc_ticks -= time_step;
 
-            if (!changed && !brightness_changed &&
-                (surfaceGameName == NULL ||
-                 surfaceGameName->w <= game_name_max_width))
+            if (!changed && !brightness_changed && (surfaceGameName == NULL || surfaceGameName->w <= game_name_max_width))
                 continue;
 
             if (changed) {
@@ -815,11 +711,16 @@ int main(void)
             if (view_mode == VIEW_NORMAL) {
                 char title_str[STR_MAX] = "GameSwitcher";
                 if (show_time && game_list_len > 0) {
+                    if (strlen(game->totalTime) == 0) {
+                        str_serializeTime(game->totalTime, play_activity_get_play_time(game->path));
+                    }
                     strcpy(title_str, game->totalTime);
 
                     if (show_total) {
-                        sprintf(title_str + strlen(title_str), " / %s",
-                                sTotalTimePlayed);
+                        if (strlen(sTotalTimePlayed) == 0) {
+                            str_serializeTime(sTotalTimePlayed, play_activity_get_total_play_time());
+                        }
+                        sprintf(title_str + strlen(title_str), " / %s", sTotalTimePlayed);
                     }
                 }
 
@@ -913,8 +814,6 @@ int main(void)
     SDL_FreeSurface(transparent_bg);
 
     freeRomScreens();
-
-    free_play_activities(play_activities);
 
     SDL_FreeSurface(screen);
     SDL_FreeSurface(video);

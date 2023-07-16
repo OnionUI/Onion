@@ -189,8 +189,10 @@ void suspend_exec(int timeout)
 {
     keyinput_disable();
 
+    // pause playActivity
+    system("playActivity stop_all");
+
     // suspend
-    system_clock_pause(true);
     suspend(0);
     rumble(0);
     setVolume(0);
@@ -252,8 +254,10 @@ void suspend_exec(int timeout)
     display_setBrightness(settings.brightness);
     setVolume(settings.mute ? 0 : settings.volume);
     if (!killexit) {
+        // resume processes
         resume();
-        system_clock_pause(false);
+        // resume playActivity
+        system("playActivity resume");
     }
 
     keyinput_enable();
