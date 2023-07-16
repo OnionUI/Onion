@@ -83,6 +83,7 @@ bool file_write(const char *path, const char *str, uint32_t len);
 void file_copy(const char *src_path, const char *dest_path);
 
 char *file_removeExtension(char *myStr);
+void file_cleanName(char *name_out, const char *file_name);
 
 const char *file_getExtension(const char *filename);
 

@@ -6,11 +6,13 @@
 
 void printUsage()
 {
-    printf("Usage: playActivity start [rom_path] -> Launch the counter for this rom\n"
+    printf("Usage: playActivity list             -> List all play activities\n"
+           "       playActivity start [rom_path] -> Launch the counter for this rom\n"
            "       playActivity resume           -> Resume the last rom as a new play activity\n"
            "       playActivity stop [rom_path]  -> Stop the counter for this rom\n"
            "       playActivity stop_all         -> Stop the counter for all roms\n"
-           "       playActivity migrate          -> Migrate the old database (prior to Onion 4.2.0) to SQLite\n");
+           "       playActivity migrate          -> Migrate the old database (prior to Onion 4.2.0) to SQLite\n"
+           "       playActivity fix_paths        -> Change all absolute paths to relative paths\n");
 }
 
 int main(int argc, char *argv[])
@@ -54,6 +56,9 @@ int main(int argc, char *argv[])
         }
         else if (strcmp(argv[i], "fix_paths") == 0) {
             play_activity_fix_paths();
+        }
+        else if (strcmp(argv[i], "list") == 0) {
+            play_activity_list_all();
         }
         else {
             printf("Error: Invalid argument '%s'\n", argv[1]);

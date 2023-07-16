@@ -1,8 +1,10 @@
 #include "file.h"
 
+#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <regex.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -149,6 +151,31 @@ char *file_removeExtension(char *myStr)
     if ((lastExt = strrchr(retStr, '.')) != NULL && *(lastExt + 1) != ' ')
         *lastExt = '\0';
     return retStr;
+}
+
+void file_cleanName(char *name_out, const char *file_name)
+{
+    char *name_without_ext = file_removeExtension(strdup(file_name));
+    char *no_underscores = str_replace(name_without_ext, "_", " ");
+    char *dot_ptr = strstr(no_underscores, ".");
+    if (dot_ptr != NULL) {
+        char *s = no_underscores;
+        while (isdigit(*s) && s < dot_ptr)
+            s++;
+        if (s != dot_ptr)
+            dot_ptr = no_underscores;
+        else {
+            dot_ptr++;
+            if (dot_ptr[0] == ' ')
+                dot_ptr++;
+        }
+    }
+    else {
+        dot_ptr = no_underscores;
+    }
+    str_removeParentheses(name_out, dot_ptr);
+    free(name_without_ext);
+    free(no_underscores);
 }
 
 const char *file_getExtension(const char *filename)

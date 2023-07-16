@@ -146,7 +146,7 @@ void renderPage(int current_page)
             strncpy(rom_name, rom->name, STR_MAX - 1);
         }
         else {
-            str_removeParentheses(rom_name, str_replace(file_removeExtension(rom->name), "_", " "));
+            file_cleanName(rom_name, rom->name);
         }
         renderText(rom_name, font30, color_white, (SDL_Rect){num_width + 100, 75 + 90 * row, 400, 40});
 

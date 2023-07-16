@@ -162,7 +162,7 @@ void migrateDB(void)
 
                 if (sqlite3_step(stmt) != SQLITE_ROW) {
                     // Rom not already inserted
-                    play_activity_insert_rom_from_cache(cache_db_item);
+                    __db_insert_rom_from_cache(cache_db_item);
 
                     if (sqlite3_prepare_v2(play_activity_db, "SELECT last_insert_rowid()", -1, &stmt, NULL) != SQLITE_OK) {
                         printf("%s: %s\n", sqlite3_errmsg(play_activity_db), sqlite3_sql(stmt));

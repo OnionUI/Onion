@@ -10,6 +10,8 @@
 
 #include "utils/str.h"
 
+#define CACHE_NOT_FOUND -1
+
 typedef struct CacheDBItem {
     char cache_path[PATH_MAX];
     char name[STR_MAX];
@@ -66,21 +68,21 @@ int cache_get_path_and_version(char *cache_db_file_path, const char *cache_dir, 
     }
 
     printf_debug("No cache found at: '%s'\n", cache_db_file_path);
-    return -1;
+    return CACHE_NOT_FOUND;
 }
 
 int cache_get_path(char *cache_path_out, char *cache_name_out, const char *rom_path)
 {
     cache_path_out[0] = '\0';
 
-    int cache_version = -1;
+    int cache_version = CACHE_NOT_FOUND;
     char *cache_dir = dirname(strdup((char *)rom_path));
 
     while (strlen(cache_dir) > 16 && strcmp("Roms", cache_name_out) != 0) {
         strcpy(cache_name_out, basename(cache_dir));
         cache_version = cache_get_path_and_version(cache_path_out, cache_dir, cache_name_out);
 
-        if (cache_version != -1) {
+        if (cache_version != CACHE_NOT_FOUND) {
             break;
         }
 
@@ -92,7 +94,7 @@ int cache_get_path(char *cache_path_out, char *cache_name_out, const char *rom_p
 
 CacheDBItem *cache_db_find(const char *path_or_name)
 {
-    printf_debug("cache_db_find('%s', '%s')\n", path_or_name);
+    printf_debug("cache_db_find('%s')\n", path_or_name);
 
     CacheDBItem *cache_db_item = NULL;
     char cache_db_file_path[STR_MAX];
