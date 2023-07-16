@@ -47,8 +47,12 @@ check_wifi() {
 
 # We'll need hotspot to host the local connection
 start_hotspot() { 
+    log "GLO::Pokemon_Netplay: Trying to start the Hotspot"
     if is_running hostapd; then
 		killall -9 hostapd
+	fi
+    if is_running dnsmasq; then
+		killall -9 dnsmasq
 	fi
 	
     enable_flag hotspotState
@@ -117,13 +121,6 @@ wait_for_client() {
     killall -9 wpa_supplicant
     killall -9 udhcpc
     
-
-    if [ $? -eq 0 ]; then
-        log "GLO::Pokemon_Netplay: Flushed STA list"
-    else
-        log "GLO::Pokemon_Netplay: Failed to flush STA list"
-    fi
-
     while true; do    
         sta_list=$($sysdir/bin/hostapd_cli all_sta 2>/dev/null)
         $sysdir/bin/hostapd_cli all_sta flush
@@ -189,6 +186,7 @@ wait_for_save_file() {
             if [ -f "$file" ]; then
                 if [ "$(basename "$file")" = "MISSING.srm" ]; then
                     build_infoPanel "Sync error" "Client advises they don't have a save file. \n Cannot continue."
+                    log "GLO::Pokemon_Netplay: The client started the GLO script without a save for their Rom."
                     sleep 1
                     cleanup
                 else
@@ -204,6 +202,7 @@ wait_for_save_file() {
 
         if [ $counter -ge 25 ]; then
             build_infoPanel "Sync error" "No save file was received. Exiting..."
+            log "GLO::Pokemon_Netplay: We ran out of time waiting for the client to send us their save file"
             sleep 1
             cleanup
         fi
@@ -229,6 +228,7 @@ rename_client_save() {
 # Download the cookie from the client so we know which second game to preload as GB2
 download_cookie() {
 	build_infoPanel "Downloading cookie"  "Retrieving info from client..." 
+    log "GLO::Pokemon_Netplay: Trying to pull the clients game info"
     local output_path="/mnt/SDCARD/RetroArch/retroarch.cookie.client"
     curl -o "$output_path" ftp://$client_ip/mnt/SDCARD/RetroArch/retroarch.cookie
 
@@ -284,17 +284,28 @@ read_cookie() {
 
 # Duplicate the rom to spoof the save loaded in on the host
 handle_roms() {
-  sync
-  
-  rom_extension="${client_rom##*.}"
-  client_rom_clone="${client_rom%.*}_client.$rom_extension"
-  cp "$client_rom" "$client_rom_clone"
+    sync
+
+    rom_extension="${client_rom##*.}"
+    client_rom_clone="${client_rom%.*}_client.$rom_extension"
+    cp "$client_rom" "$client_rom_clone"
+    if [ $? -eq 0 ]; then
+        log "GLO::Pokemon_Netplay: Successfully copied $client_rom to $client_rom_clone"
+    else
+        log "GLO::Pokemon_Netplay: Failed to copy $client_rom to $client_rom_clone"
+    fi
 }
 
 # Tell the client we're ready to accept connections
 ready_up() { 
     touch /tmp/host_ready
     curl -T "/tmp/host_ready" "ftp://$client_ip/tmp/host_ready" > /dev/null 2>&1
+
+    if [ $? -eq 0 ]; then
+        log "GLO::Pokemon_Netplay: Successfully transferred /tmp/host_ready to ftp://$client_ip/tmp/host_ready"
+    else
+        log "GLO::Pokemon_Netplay: Failed to transfer /tmp/host_ready to ftp://$client_ip/tmp/host_ready"
+    fi
 }
 
 # Set the screen and audio settings in TGB dual as these aren't default in Onion
@@ -339,7 +350,13 @@ start_retroarch() {
 wait_for_save_return() {
     build_infoPanel "Syncing" "Waiting for client to be ready for save sync"
     touch /tmp/ready_to_send
-    curl -T "/tmp/ready_to_send" "ftp://$client_ip/tmp/ready_to_send"
+    curl -T "/tmp/ready_to_send" "ftp://$client_ip/tmp/ready_to_send" > /dev/null 2>&1
+
+    if [ $? -eq 0 ]; then
+        log "GLO::Pokemon_Netplay: Successfully transferred /tmp/ready_to_send to ftp://$client_ip/tmp/ready_to_send"
+    else
+        log "GLO::Pokemon_Netplay: Failed to transfer /tmp/ready_to_send to ftp://$client_ip/tmp/ready_to_send"
+    fi
     
     while true; do
         sync
@@ -367,17 +384,18 @@ return_client_save() {
     build_infoPanel "Syncing" "Returning client save..."
     encoded_path=$(url_encode "${save_new_path/_client/}")
     log "GLO::Pokemon_Netplay: Returning client save: $save_new_path to ftp://$client_ip/${encoded_path}_rcvd"
-    curl -m 20 -T "$save_new_path" "ftp://$client_ip/${encoded_path}_rcvd" &
-    curl_pid=$!
+    curl -m 20 -T "$save_new_path" "ftp://$client_ip/${encoded_path}_rcvd"
 
-    wait "$curl_pid"
     curl_exit_status=$?
 
     if [ $curl_exit_status -eq 0 ]; then
+        log "GLO::Pokemon_Netplay: Successfully returned the client save."
         build_infoPanel "Syncing" "Client save returned!"
     else
+        log "GLO::Pokemon_Netplay: Failed to return the client save. Progress may have been lost. Curl exit code: $curl_exit_status"
         build_infoPanel "Syncing" "Failed to return the client save \n Progress has likely been lost \n Curl exit code: $curl_exit_status"
     fi
+
 }
 
 # Cleanup. If you don't call this you don't retransfer the saves - Users cannot under any circumstances miss this function.
@@ -408,6 +426,7 @@ cleanup() {
     rm "$tgb_dual_opts.bak"
     rm "$save_dir/MISSING.srm"
     rm "/tmp/MISSING.srm"
+    disable_flag hotspotState
 	
 	log "GLO::Pokemon_Netplay: Cleanup done"
  	exit
