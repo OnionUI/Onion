@@ -1,7 +1,10 @@
 #include "file.h"
 
+#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
+#include <regex.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -150,6 +153,31 @@ char *file_removeExtension(char *myStr)
     return retStr;
 }
 
+void file_cleanName(char *name_out, const char *file_name)
+{
+    char *name_without_ext = file_removeExtension(strdup(file_name));
+    char *no_underscores = str_replace(name_without_ext, "_", " ");
+    char *dot_ptr = strstr(no_underscores, ".");
+    if (dot_ptr != NULL) {
+        char *s = no_underscores;
+        while (isdigit(*s) && s < dot_ptr)
+            s++;
+        if (s != dot_ptr)
+            dot_ptr = no_underscores;
+        else {
+            dot_ptr++;
+            if (dot_ptr[0] == ' ')
+                dot_ptr++;
+        }
+    }
+    else {
+        dot_ptr = no_underscores;
+    }
+    str_removeParentheses(name_out, dot_ptr);
+    free(name_without_ext);
+    free(no_underscores);
+}
+
 const char *file_getExtension(const char *filename)
 {
     const char *dot = strrchr(filename, '.');
@@ -253,4 +281,35 @@ void file_changeKeyValue(const char *file_path, const char *key,
 
     remove(file_path);
     rename("temp", file_path);
+}
+
+bool file_path_relative_to(char *path_out, const char *dir_from, const char *file_to)
+{
+    path_out[0] = '\0';
+
+    char abs_from[PATH_MAX];
+    char abs_to[PATH_MAX];
+    if (realpath(dir_from, abs_from) == NULL || realpath(file_to, abs_to) == NULL) {
+        return false;
+    }
+
+    char *p1 = abs_from;
+    char *p2 = abs_to;
+    while (*p1 && (*p1 == *p2)) {
+        ++p1, ++p2;
+    }
+
+    if (*p2 == '/') {
+        ++p2;
+    }
+
+    if (strlen(p1) > 0) {
+        int num_parens = str_count_char(p1, '/') + 1;
+        for (int i = 0; i < num_parens; i++) {
+            strcat(path_out, "../");
+        }
+    }
+    strcat(path_out, p2);
+
+    return true;
 }
