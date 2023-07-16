@@ -27,4 +27,6 @@ int str_endsWith(const char *str, const char *suffix);
 void str_removeParentheses(char *str_out, const char *str_in);
 void str_serializeTime(char *dest_str, int nTime);
 
+int str_count_char(const char *str, char ch);
+
 #endif // UTILS_STR_H__

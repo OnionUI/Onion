@@ -481,6 +481,11 @@ update_time() {
     if [ -f $timepath ]; then
         currentTime=$(cat $timepath)
     fi
+    date +%s -s @$currentTime
+
+    # Ensure that all play activities are closed
+    playActivity stop_all
+
     #Add 4 hours to the current time
     hours=4
     if [ -f $sysdir/config/startup/addHours ]; then
