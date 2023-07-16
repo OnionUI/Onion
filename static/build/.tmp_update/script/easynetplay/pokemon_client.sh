@@ -8,6 +8,7 @@ miyoodir=/mnt/SDCARD/miyoo
 LOGGING=$([ -f $sysdir/config/.logging ] && echo 1 || echo 0)
 save_dir="/mnt/SDCARD/Saves/CurrentProfile/saves/TGB Dual/"
 tgb_dual_opts="/mnt/SDCARD/Saves/CurrentProfile/config/TGB Dual/TGB Dual.opt"
+tgb_dual_opts="/mnt/SDCARD/Saves/CurrentProfile/config/TGB Dual/TGB Dual.opt.bak"
 LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 WPACLI=/customer/app/wpa_cli
 hostip="192.168.100.100" # This should be the default unless the user has changed it..

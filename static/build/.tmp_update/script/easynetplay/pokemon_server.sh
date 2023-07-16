@@ -6,6 +6,7 @@ sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo
 save_dir="/mnt/SDCARD/Saves/CurrentProfile/saves/TGB Dual/"
 tgb_dual_opts="/mnt/SDCARD/Saves/CurrentProfile/config/TGB Dual/TGB Dual.opt"
+tgb_dual_opts="/mnt/SDCARD/Saves/CurrentProfile/config/TGB Dual/TGB Dual.opt.bak"
 LOGGING=$([ -f $sysdir/config/.logging ] && echo 1 || echo 0)
 LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 
