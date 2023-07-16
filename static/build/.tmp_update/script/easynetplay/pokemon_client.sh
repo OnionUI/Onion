@@ -351,6 +351,8 @@ cleanup() {
     rm "/tmp/ready_to_receive"
     rm "${save_file_matched}_rcvd"
     rm "$tgb_dual_opts.bak"
+    rm "$save_dir/MISSING.srm"
+    rm "/tmp/MISSING.srm"
 		
 	log "GLO::Pokemon_Netplay: Cleanup done"
 	exit

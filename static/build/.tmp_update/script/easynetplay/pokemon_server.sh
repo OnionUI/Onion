@@ -9,6 +9,7 @@ tgb_dual_opts="/mnt/SDCARD/Saves/CurrentProfile/config/TGB Dual/TGB Dual.opt"
 LOGGING=$([ -f $sysdir/config/.logging ] && echo 1 || echo 0)
 LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 
+
 ##########
 ##Setup.##
 ##########
@@ -187,7 +188,7 @@ wait_for_save_file() {
         for file in /tmp/*.srm; do
             if [ -f "$file" ]; then
                 if [ "$(basename "$file")" = "MISSING.srm" ]; then
-                    build_infoPanel "Sync error" "Client advises they don't have a save file. Cannot continue."
+                    build_infoPanel "Sync error" "Client advises they don't have a save file. \n Cannot continue."
                     sleep 1
                     cleanup
                 else
@@ -404,6 +405,8 @@ cleanup() {
     rm "/tmp/ready_to_send"
     rm "/tmp/ready_to_receive"
     rm "$tgb_dual_opts.bak"
+    rm "$save_dir/MISSING.srm"
+    rm "/tmp/MISSING.srm"
 	
 	log "GLO::Pokemon_Netplay: Cleanup done"
  	exit
