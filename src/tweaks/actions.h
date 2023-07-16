@@ -245,6 +245,11 @@ void action_advancedSetSwapTriggers(void *pt)
     stored_value_swap_triggers_changed = true;
 }
 
+void action_setAltBrightness(void *pt)
+{
+    config_flag_set(".altBrightness", ((ListItem *)pt)->value);
+}
+
 void action_advancedSetLcdVoltage(void *pt)
 {
     int value = 0x0e - ((ListItem *)pt)->value;
