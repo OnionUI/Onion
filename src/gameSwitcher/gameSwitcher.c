@@ -111,6 +111,18 @@ static int gameNameScrollEnd = 20;
 static cJSON *json_root = NULL;
 static cJSON *json_items = NULL;
 
+void unloadRomScreen(int index)
+{
+    if (index < 0 || index >= game_list_len)
+        return;
+    Game_s *game = &game_list[index];
+
+    if (game->romScreen != NULL) {
+        SDL_FreeSurface(game->romScreen);
+        game->romScreen = NULL;
+    }
+}
+
 SDL_Surface *loadRomScreen(int index)
 {
     if (index < 0 || index >= game_list_len)
@@ -137,6 +149,11 @@ SDL_Surface *loadRomScreen(int index)
         }
     }
 
+    unloadRomScreen(index + 5);
+    if (index > 5) {
+        unloadRomScreen(index - 5);
+    }
+
     return game->romScreen;
 }
 
@@ -145,14 +162,16 @@ void freeRomScreens()
     for (int i = 0; i < game_list_len; i++) {
         Game_s *game = &game_list[i];
 
-        if (game->romScreen != NULL)
+        if (game->romScreen != NULL) {
             SDL_FreeSurface(game->romScreen);
+            game->romScreen = NULL;
+        }
     }
 }
 
 static void *_loadRomScreensThread(void *_)
 {
-    for (int i = 0; i < game_list_len; i++) {
+    for (int i = 0; i < 10 && i < game_list_len; i++) {
         Game_s *game = &game_list[i];
 
         if (game->romScreen == NULL)
@@ -211,30 +230,28 @@ void readHistory()
             continue;
 
         Game_s *game = &game_list[game_list_len];
-
-        sprintf(game->RACommand,
-                "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v "
-                "-L \"%s\" \"%s\"",
-                core_path, rom_path);
-
-        getGameName(game->name, rom_path);
-        strcpy(game->path, rom_path);
-        strcpy(game->core, basename(core_path));
-        str_split(game->core, "_libretro");
-
         game->hash = FNV1A_Pippip_Yurii(rom_path, strlen(rom_path));
         game->jsonIndex = nbGame;
         game->romScreen = NULL;
         game->is_duplicate = 0;
         game->totalTime[0] = '\0';
-
+        sprintf(game->RACommand, "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v -L \"%s\" \"%s\"", core_path, rom_path);
+        getGameName(game->name, rom_path);
+        strcpy(game->path, rom_path);
+        strcpy(game->core, basename(core_path));
+        str_split(game->core, "_libretro");
         file_cleanName(game->shortname, game->name);
 
-        printf_debug(
-            "Game loaded:\n\tname: '%s' (%s)\n\tcmd: '%s'\n\thash: %" PRIu32
-            "\n\tidx: %d\n\tpath: %s\n\n",
-            game->name, game->shortname, game->RACommand, game->hash,
-            game->jsonIndex, game->path);
+        printf_debug("Game loaded:\n"
+                     "\tname: '%s' (%s)\n"
+                     "\tcmd: '%s'\n"
+                     "\thash: %" PRIu32 "\n"
+                     "\tidx: %d\n"
+                     "\n",
+                     game->name, game->shortname,
+                     game->RACommand,
+                     game->hash,
+                     game->jsonIndex);
 
         // Check for duplicates
         for (int i = 0; i < game_list_len; i++) {
@@ -257,8 +274,10 @@ void removeCurrentItem()
 
     printf_debug("removing: %s\n", game->name);
 
-    if (game->romScreen != NULL)
+    if (game->romScreen != NULL) {
         SDL_FreeSurface(game->romScreen);
+        game->romScreen = NULL;
+    }
 
     if (game->is_duplicate > 0) {
         // Check for duplicates
@@ -304,13 +323,16 @@ int main(void)
     signal(SIGINT, sigHandler);
     signal(SIGTERM, sigHandler);
 
+    SDL_InitDefault(true);
+
+    SDL_BlitSurface(theme_background(), NULL, screen, NULL);
+    SDL_BlitSurface(screen, NULL, video, NULL);
+    SDL_Flip(video);
+
     readHistory();
-    print_debug("Read ROM DB and history");
 
     settings_load();
     lang_load();
-
-    SDL_InitDefault(true);
 
     SDL_Color color_white = {255, 255, 255};
     SDL_Surface *transparent_bg = SDL_CreateRGBSurface(
@@ -355,14 +377,10 @@ int main(void)
     uint32_t brightness_timeout = 2000;
 
     char header_path[STR_MAX], footer_path[STR_MAX];
-    bool use_custom_header =
-        theme_getImagePath(theme()->path, "extra/gs-top-bar", header_path);
-    bool use_custom_footer =
-        theme_getImagePath(theme()->path, "extra/gs-bottom-bar", footer_path);
-    SDL_Surface *custom_header =
-        use_custom_header ? IMG_Load(header_path) : NULL;
-    SDL_Surface *custom_footer =
-        use_custom_footer ? IMG_Load(footer_path) : NULL;
+    bool use_custom_header = theme_getImagePath(theme()->path, "extra/gs-top-bar", header_path);
+    bool use_custom_footer = theme_getImagePath(theme()->path, "extra/gs-bottom-bar", footer_path);
+    SDL_Surface *custom_header = use_custom_header ? IMG_Load(header_path) : NULL;
+    SDL_Surface *custom_footer = use_custom_footer ? IMG_Load(footer_path) : NULL;
 
     int header_height = use_custom_header ? custom_header->h : 60;
     if (header_height == 1)
@@ -372,9 +390,7 @@ int main(void)
         footer_height = 0;
 
     SDL_Surface *current_bg = NULL;
-    SDL_Rect frame = {
-        theme()->frame.border_left, 0,
-        640 - theme()->frame.border_left - theme()->frame.border_right, 480};
+    SDL_Rect frame = {theme()->frame.border_left, 0, 640 - theme()->frame.border_left - theme()->frame.border_right, 480};
 
     while (!quit) {
         uint32_t ticks = SDL_GetTicks();
@@ -560,9 +576,7 @@ int main(void)
         if (acc_ticks >= time_step) {
             acc_ticks -= time_step;
 
-            if (!changed && !brightness_changed &&
-                (surfaceGameName == NULL ||
-                 surfaceGameName->w <= game_name_max_width))
+            if (!changed && !brightness_changed && (surfaceGameName == NULL || surfaceGameName->w <= game_name_max_width))
                 continue;
 
             if (changed) {
