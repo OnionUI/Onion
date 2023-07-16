@@ -9,11 +9,12 @@ export PATH="$sysdir/bin:$PATH"
 
 main() {
     set_tzid
+    get_password
     case "$1" in
         check) # runs the check function we use in runtime, will be called on boot
             check
             ;;
-        ftp | telnet | http | ssh)
+        ftp | telnet | http | ssh | smbd)
             service=$1
             case "$2" in
                 toggle)
@@ -27,14 +28,14 @@ main() {
                     ;;
             esac
             ;;
-        ntp | hotspot | smbd)
+        ntp | hotspot)
             service=$1
             case "$2" in
                 toggle)
                     check_${service}state
                     ;;
                 *)
-                    echo "Usage: $0 {ntp|hotspot|smbd} toggle"
+                    echo "Usage: $0 {ntp|hotspot} toggle"
                     exit 1
                     ;;
             esac
@@ -71,7 +72,6 @@ disable_all_services() {
     disable_flag sshState
     disable_flag authsshState
     disable_flag telnetState
-    disable_flag authtelnetState
     disable_flag ftpState
     disable_flag authftpState
     disable_flag httpState
@@ -127,26 +127,14 @@ check_smbdstate() {
             if wifi_enabled; then
                 sync
 
-                if [ ! -d "/var/lib/samba" ]; then
-                    mkdir -p /var/lib/samba
-                fi
+                mkdir -p \
+                    /var/lib/samba \
+                    /var/run/samba/ncalrpc \
+                    /var/private \
+                    /var/log/
 
-                if [ ! -d "/var/run/samba/ncalrpc" ]; then
-                    mkdir -p /var/run/samba/ncalrpc
-                fi
-
-                if [ ! -d "/var/private" ]; then
-                    mkdir -p /var/private
-                fi
-
-                if [ ! -d "/var/log/" ]; then
-                    mkdir -p /var/log/
-                fi
-
-                #unset preload or samba doesn't work correctly.
-                #dont env var all the libpaths for this shell, only the shell we open smbd in
-                LD_PRELOAD="" LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/mnt/SDCARD/.tmp_update/lib/samba:/mnt/SDCARD/.tmp_update/lib/samba/private" /mnt/SDCARD/.tmp_update/bin/samba/sbin/smbd --no-process-group -D &
-
+                update_smbconf
+                $netscript/start_smbd.sh $PASS &
                 log "Samba: Starting smbd at exit of tweaks.."
             else
                 disable_flag smbdState
@@ -157,6 +145,24 @@ check_smbdstate() {
             killall -9 smbd
             log "Samba: Killed"
         fi
+    fi
+}
+
+update_smbconf() {
+    if flag_enabled authsmbdState; then
+        sed -i -e '/guest only/s/1/0/g' -e 's/#alid users = onion/valid users = onion/g' $sysdir/config/smb.conf
+    else
+        sed -i -e '/guest only/s/0/1/g' -e 's/valid users = onion/#alid users = onion/g' $sysdir/config/smb.conf
+    fi
+}
+
+smbd_authed() {
+    if flag_enabled smbdState; then
+        update_smbconf
+        if is_running smbd; then
+            killall -9 smbd
+        fi
+        $netscript/start_smbd.sh $PASS &
     fi
 }
 
@@ -241,10 +247,7 @@ ssh_authed() {
         if is_running_exact "dropbear -R -B" || flag_enabled authsshState; then
             killall -9 dropbear
             log "SSH: Starting dropbear with auth"
-            file_path="$sysdir/config/.auth.txt"
-            password=$(awk 'NR==1 {print $2}' "$file_path")
-            dropbear -R -Y $password
-            log "SSH: Started dropbear with auth"
+            dropbear -R
         else
             log "SSH: Starting dropbear without auth"
             killall -9 dropbear
@@ -272,12 +275,8 @@ check_telnetstate() {
         else
             if wifi_enabled; then
                 sync
-                if flag_enabled authtelnetState; then
-                    telnet_authed
-                else
-                    log "Telnet: Starting telnet without auth"
-                    telnetd -l $netscript/telnetenv.sh
-                fi
+                log "Telnet: Starting telnet"
+                telnetd -l $netscript/telnetenv.sh
             else
                 disable_flag telnetState
             fi
@@ -286,21 +285,6 @@ check_telnetstate() {
         if is_running telnetd; then
             killall -9 telnetd
             log "Telnet: Killed"
-        fi
-    fi
-}
-
-# Called by above function on boot or when auth state is toggled in tweaks
-telnet_authed() {
-    if flag_enabled telnetState; then
-        if is_running_exact "telnetd -l /mnt/SDCARD/.tmp_update/script/telnetenv.sh" || flag_enabled authtelnetState; then
-            killall -9 telnetd
-            sleep 0.5
-            log "Telnet: Starting telnet with auth"
-            telnetd -l $netscript/telnetlogin.sh
-        else
-            killall -9 telnetd
-            telnetd -l $netscript/telnetenv.sh
         fi
     fi
 }
@@ -537,7 +521,7 @@ is_noauth_enabled() { # Used to check authMethod val for HTTPFS
 }
 
 print_usage() {
-    echo "Usage: $0 {check|ftp|telnet|http|ssh|ntp|hotspot|smbd|disableall} {toggle|authed} - {ntp|hotspot|smbd} only accept toggle."
+    echo "Usage: $0 {check|ftp|telnet|http|ssh|ntp|hotspot|smbd|disableall} {toggle|authed} - {ntp|hotspot|telnet} only accept toggle."
     exit 1
 }
 
@@ -581,6 +565,11 @@ log() {
     if [ $LOGGING -eq 1 ]; then
         echo -e "($scriptname) $(date):" $* | tee -a "$sysdir/logs/$scriptname.log"
     fi
+}
+
+get_password() {
+    # Get password from file for use with network services authentication
+    PASS=$(cat "$sysdir/config/.password.txt")
 }
 
 if [ $LOGGING -eq 1 ]; then

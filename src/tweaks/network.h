@@ -34,7 +34,7 @@ static struct network_s {
     bool hotspot;
     bool ntp;
     bool ntp_wait;
-    bool auth_telnet;
+    bool auth_smbd;
     bool auth_ftp;
     bool auth_http;
     bool auth_ssh;
@@ -54,7 +54,7 @@ void network_loadState(void)
     network_state.hotspot = config_flag_get(".hotspotState");
     network_state.ntp = config_flag_get(".ntpState");
     network_state.ntp_wait = config_flag_get(".ntpWait");
-    network_state.auth_telnet = config_flag_get(".authtelnetState");
+    network_state.auth_smbd = config_flag_get(".authsmbdState");
     network_state.auth_ftp = config_flag_get(".authftpState");
     network_state.auth_http = config_flag_get(".authhttpState");
     network_state.auth_ssh = config_flag_get(".authsshState");
@@ -65,8 +65,8 @@ void network_loadState(void)
 typedef struct {
     char name[STR_MAX - 11];
     char path[STR_MAX];
-    int browseable;     // 1 if browseable = yes, 0 otherwise
-    long browseablePos; // in file position for the browseable property
+    int available;     // 1 if available = yes, 0 otherwise
+    long availablePos; // in file position for the available property
 } Share;
 
 static Share *_network_shares = NULL;
@@ -96,8 +96,8 @@ void network_getSmbShares()
     char line[STR_MAX];
 
     bool found_shares = false;
-    bool is_browseable = false;
-    long browseablePos = -1;
+    bool is_available = false;
+    long availablePos = -1;
 
     while (fgets(line, sizeof(line), file) != NULL) {
         char *trimmedLine = strtok(line, "\n");
@@ -105,9 +105,9 @@ void network_getSmbShares()
             continue;
         }
 
-        if (strstr(trimmedLine, "browseable = ") != NULL) {
-            browseablePos = ftell(file) - strlen(trimmedLine) - 1;
-            is_browseable = strstr(trimmedLine, "1") != NULL;
+        if (strstr(trimmedLine, "available = ") != NULL) {
+            availablePos = ftell(file) - strlen(trimmedLine) - 1;
+            is_available = strstr(trimmedLine, "1") != NULL;
             continue;
         }
 
@@ -118,9 +118,9 @@ void network_getSmbShares()
 
         if (strncmp(trimmedLine, "[", 1) == 0 && strncmp(trimmedLine + strlen(trimmedLine) - 1, "]", 1) == 0) {
             if (found_shares) {
-                _network_shares[numShares - 1].browseable = is_browseable;
-                _network_shares[numShares - 1].browseablePos = browseablePos;
-                is_browseable = false;
+                _network_shares[numShares - 1].available = is_available;
+                _network_shares[numShares - 1].availablePos = availablePos;
+                is_available = false;
             }
 
             char *shareName = strtok(trimmedLine + 1, "]");
@@ -150,8 +150,8 @@ void network_getSmbShares()
     }
 
     if (found_shares) {
-        _network_shares[numShares - 1].browseable = is_browseable;
-        _network_shares[numShares - 1].browseablePos = browseablePos;
+        _network_shares[numShares - 1].available = is_available;
+        _network_shares[numShares - 1].availablePos = availablePos;
     }
 
     network_numShares = numShares;
@@ -159,7 +159,7 @@ void network_getSmbShares()
     fclose(file);
 }
 
-void network_toggleSmbBrowseable(void *item)
+void network_toggleSmbAvailable(void *item)
 {
     ListItem *listItem = (ListItem *)item;
     Share *share = (Share *)listItem->payload_ptr;
@@ -170,18 +170,18 @@ void network_toggleSmbBrowseable(void *item)
         return;
     }
 
-    if (fseek(file, share->browseablePos, SEEK_SET) != 0) {
-        printf("Failed to seek to the browseable property of share '%s'.\n", share->name);
+    if (fseek(file, share->availablePos, SEEK_SET) != 0) {
+        printf("Failed to seek to the available property of share '%s'.\n", share->name);
         fclose(file);
         return;
     }
 
     char line[STR_MAX];
     fgets(line, sizeof(line), file);
-    share->browseable = strstr(line, "1") == NULL; // toggle
+    share->available = strstr(line, "1") == NULL; // toggle
 
-    fseek(file, share->browseablePos, SEEK_SET);
-    fprintf(file, "browseable = %d\n", share->browseable);
+    fseek(file, share->availablePos, SEEK_SET);
+    fprintf(file, "available = %d\n", share->available);
     fflush(file);
 
     fclose(file);
@@ -283,10 +283,10 @@ void network_setNtpWaitState(void *pt)
     network_setState(&network_state.ntp_wait, ".ntpWait", ((ListItem *)pt)->value);
 }
 
-void network_setTelnetAuthState(void *pt)
+void network_setSmbdAuthState(void *pt)
 {
-    network_setState(&network_state.auth_telnet, ".authtelnetState", ((ListItem *)pt)->value);
-    network_execServiceAuth("telnet");
+    network_setState(&network_state.auth_smbd, ".authsmbdState", ((ListItem *)pt)->value);
+    network_execServiceAuth("smbd");
 }
 
 void network_setFtpAuthState(void *pt)
@@ -361,7 +361,7 @@ void menu_smbd(void *pt)
     if (!_menu_smbd._created) {
         network_getSmbShares();
 
-        _menu_smbd = list_create_sticky(1 + network_numShares, "Samba");
+        _menu_smbd = list_create_sticky(2 + network_numShares, "Samba");
 
         list_addItem(&_menu_smbd,
                      (ListItem){
@@ -370,13 +370,21 @@ void menu_smbd(void *pt)
                          .item_type = TOGGLE,
                          .value = (int)network_state.smbd,
                          .action = network_setSmbdState});
+        list_addItem(&_menu_smbd,
+                     (ListItem){
+                         .label = "Enable authentication",
+                         .sticky_note = "Enable password authentication",
+                         .item_type = TOGGLE,
+                         .disabled = !network_state.smbd,
+                         .value = (int)network_state.auth_smbd,
+                         .action = network_setSmbdAuthState});
 
         for (int i = 0; i < network_numShares; i++) {
             ListItem shareItem = {
                 .item_type = TOGGLE,
                 .disabled = !network_state.smbd,
-                .action = network_toggleSmbBrowseable, // set the action to the wrapper function
-                .value = _network_shares[i].browseable,
+                .action = network_toggleSmbAvailable, // set the action to the wrapper function
+                .value = _network_shares[i].available,
                 .payload_ptr = _network_shares + i // store a pointer to the share in the payload
             };
             snprintf(shareItem.label, STR_MAX - 1, "Share: %s", _network_shares[i].name);
@@ -411,31 +419,6 @@ void menu_http(void *pt)
                          .action = network_setHttpAuthState});
     }
     menu_stack[++menu_level] = &_menu_http;
-    header_changed = true;
-}
-
-void menu_telnet(void *pt)
-{
-    ListItem *item = (ListItem *)pt;
-    item->value = (int)network_state.telnet;
-    if (!_menu_telnet._created) {
-        _menu_telnet = list_create(2, LIST_SMALL);
-        strcpy(_menu_telnet.title, "Telnet");
-        list_addItem(&_menu_telnet,
-                     (ListItem){
-                         .label = "Enable",
-                         .item_type = TOGGLE,
-                         .value = (int)network_state.telnet,
-                         .action = network_setTelnetState});
-        list_addItem(&_menu_telnet,
-                     (ListItem){
-                         .label = "Enable authentication",
-                         .item_type = TOGGLE,
-                         .disabled = !network_state.telnet,
-                         .value = (int)network_state.auth_telnet,
-                         .action = network_setTelnetAuthState});
-    }
-    menu_stack[++menu_level] = &_menu_telnet;
     header_changed = true;
 }
 
@@ -579,15 +562,6 @@ void menu_network(void *_)
                          .action = menu_ssh});
         list_addItem(&_menu_network,
                      (ListItem){
-                         .label = "Telnet: Remote shell...",
-                         .item_type = TOGGLE,
-                         .disabled = !settings.wifi_on,
-                         .alternative_arrow_action = true,
-                         .arrow_action = network_setTelnetState,
-                         .value = (int)network_state.telnet,
-                         .action = menu_telnet});
-        list_addItem(&_menu_network,
-                     (ListItem){
                          .label = "FTP: File server...",
                          .item_type = TOGGLE,
                          .disabled = !settings.wifi_on,
@@ -595,6 +569,13 @@ void menu_network(void *_)
                          .arrow_action = network_setFtpState,
                          .value = (int)network_state.ftp,
                          .action = menu_ftp});
+        list_addItem(&_menu_network,
+                     (ListItem){
+                         .label = "Telnet: Remote shell",
+                         .item_type = TOGGLE,
+                         .disabled = !settings.wifi_on,
+                         .value = (int)network_state.telnet,
+                         .action = network_setTelnetState});
     }
     strcpy(_menu_network.items[0].label, ip_address_label);
     menu_stack[++menu_level] = &_menu_network;
