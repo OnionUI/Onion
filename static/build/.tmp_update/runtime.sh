@@ -19,6 +19,10 @@ main() {
     init_system
     update_time
 
+    # Remount passwd/group to add our own users
+    mount -o bind $sysdir/config/passwd /etc/passwd
+    mount -o bind $sysdir/config/group  /etc/group 
+
     # Start the battery monitor
     batmon &
 
@@ -131,16 +135,16 @@ set_prev_state() {
 clear_logs() {
     mkdir -p $sysdir/logs
 
-    cd $sysdir
+    cd $sysdir/logs
     rm -f \
-        ./logs/MainUI.log \
-        ./logs/gameSwitcher.log \
-        ./logs/keymon.log \
-        ./logs/game_list_options.log \
-        ./logs/network.log \
-        ./logs/dnsmasq.log \
-        ./logs/ftp.log \
-        ./logs/ra_quick_host.log \
+        ./MainUI.log \
+        ./gameSwitcher.log \
+        ./keymon.log \
+        ./game_list_options.log \
+        ./network.log \
+        ./dnsmasq.log \
+        ./ftp.log \
+        ./easy_netplay.log \
         2> /dev/null
 }
 
@@ -532,11 +536,11 @@ check_networking() {
         check_timezone
         return
     fi
-    
+
     rm /tmp/network_changed
 
     $sysdir/script/network/update_networking.sh check
-        
+
     check_timezone
 }
 

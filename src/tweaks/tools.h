@@ -12,10 +12,12 @@
 #include "theme/theme.h"
 #include "utils/msleep.h"
 
-#define NUM_TOOLS 7
+#define NUM_TOOLS 3
 
 static char tools_short_names[NUM_TOOLS][STR_MAX] = {
-    "favsort-az", "favsort-sys", "favfix", "recents", "dot_clean", "cue_gen", "build_short_rom_game_list"};
+    "dot_clean",
+    "cue_gen",
+    "build_short_rom_game_list"};
 static pthread_t thread_pt;
 static bool thread_active = false;
 static bool thread_success = false;
@@ -95,46 +97,24 @@ void _runCommandPopup(const char *tool_name, const char *_cmd)
     all_changed = true;
 }
 
-void tool_favoritesSortAlpha(void *pt)
-{
-    _runCommandPopup(tools_short_names[0], "./bin/tools favsort");
-}
-
-void tool_favoritesSortSystem(void *pt)
-{
-    _runCommandPopup(tools_short_names[1], "./bin/tools favsort2");
-}
-
-void tool_favoritesFix(void *pt)
-{
-    _runCommandPopup(tools_short_names[2], "./bin/tools favfix");
-}
-
-void tool_recentsRemoveApps(void *pt)
-{
-    _runCommandPopup(tools_short_names[3], "./bin/tools recents --clean_all");
-}
-
 void tool_removeMacFiles(void *pt)
 {
-    _runCommandPopup(tools_short_names[4],
-                     "/mnt/SDCARD/.tmp_update/script/dot-clean.sh");
+    _runCommandPopup(tools_short_names[4], "/mnt/SDCARD/.tmp_update/script/dot-clean.sh");
 }
 
 void tool_generateCueFiles(void *pt)
 {
-    _runCommandPopup(tools_short_names[5],
-                     "/mnt/SDCARD/.tmp_update/script/cue_gen.sh");
+    _runCommandPopup(tools_short_names[5], "/mnt/SDCARD/.tmp_update/script/cue_gen.sh");
 }
 
 void tool_buildShortRomGameList(void *pt)
 {
-    _runCommandPopup(tools_short_names[6],
-                     "./bin/gameNameList /mnt/SDCARD /mnt/SDCARD/BIOS/arcade_lists");
+    _runCommandPopup(tools_short_names[6], "./bin/gameNameList /mnt/SDCARD /mnt/SDCARD/BIOS/arcade_lists");
 }
 
 static void (*tools_pt[NUM_TOOLS])(void *) = {
-    tool_favoritesSortAlpha, tool_favoritesSortSystem, tool_favoritesFix,
-    tool_recentsRemoveApps, tool_removeMacFiles, tool_generateCueFiles, tool_buildShortRomGameList};
+    tool_removeMacFiles,
+    tool_generateCueFiles,
+    tool_buildShortRomGameList};
 
 #endif // TWEAKS_TOOLS_H__
