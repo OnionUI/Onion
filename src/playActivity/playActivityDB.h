@@ -407,8 +407,9 @@ int __db_get_active_closed_activity(void)
 
     printf_debug("Last closed active rom: %s\n", rom_path);
 
-    int active_rom_id = __db_rom_find_by_file_path(rom_path, false);
-    if (active_rom_id == ROM_NOT_FOUND) {
+    rom_id = __db_rom_find_by_file_path(rom_path, false);
+
+    if (rom_id == ROM_NOT_FOUND) {
         return ROM_NOT_FOUND;
     }
 
