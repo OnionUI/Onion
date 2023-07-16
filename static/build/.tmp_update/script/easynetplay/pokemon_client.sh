@@ -247,7 +247,7 @@ change_tgb_dual_opt() {
     current_value=$(grep 'tgbdual_single_screen_mp' "$tgb_dual_opts" | cut -d '"' -f 2)
     current_audio_value=$(grep 'tgbdual_audio_output' "$tgb_dual_opts" | cut -d '"' -f 2)
 
-    cp "$tgb_dual_opts" "$tgb_dual_opts.bak"
+    cp "$tgb_dual_opts" "$tgb_dual_opts_bk"
 
     if [ -z "$current_value" ]; then
         log "GLO::Pokemon_Netplay: The key 'tgbdual_single_screen_mp' was not found in the file, adding"
@@ -265,7 +265,7 @@ change_tgb_dual_opt() {
         sed -e 's|tgbdual_single_screen_mp = "'"$current_value"'"|tgbdual_single_screen_mp = "player 2 only"|' -e 's|tgbdual_audio_output = "'"$current_audio_value"'"|tgbdual_audio_output = "Game Boy #2"|' "$tgb_dual_opts" > "$tgb_dual_opts.tmp" && mv "$tgb_dual_opts.tmp" "$tgb_dual_opts"
     elif [ "$1" = "restore" ]; then
         log "GLO::Pokemon_Netplay: Restoring TGB opt original values..."
-        mv "$tgb_dual_opts.bak" "$tgb_dual_opts"
+        mv "$tgb_dual_opts_bk" "$tgb_dual_opts"
     else
         log "GLO::Pokemon_Netplay: Invalid argument for TGB Opt. Please use 'replace' or 'restore'."
     fi
