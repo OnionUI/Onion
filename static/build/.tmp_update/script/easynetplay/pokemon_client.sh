@@ -74,6 +74,7 @@ connect_to_host() {
 	
 	if [ $? -ne 0 ]; then
 		build_infoPanel "Failed"  "Failed to configure the network\n unable to continue." 
+        log "GLO::Pokemon_Netplay: Network configuration failed - unable to continue"
 		sleep 1
 		cleanup
 	fi
@@ -185,6 +186,7 @@ get_cookie_info() {
 send_saves() {
     missing=""
     build_infoPanel "Syncing saves" "Syncing our save files with the host"
+    log "GLO::Pokemon_Netplay: Syncing saves with the host"
     save_file_filename_full=$(basename "$local_rom")
     save_file_filename="${save_file_filename_full%.*}"
     save_file_matched=$(find "$save_dir" -name "$save_file_filename.srm" -not -name "*.rtc" -not -path "*/.netplay/*")
@@ -202,6 +204,7 @@ send_saves() {
 
     if [ "$missing" = "1" ]; then
         build_infoPanel "Save not found" "You don't have a save for this game, \n or we failed to find it. Cannot continue \n Notified host."
+        log "GLO::Pokemon_Netplay: The local client is missing the save file for this game, please check the TGB Dual directory."
         sleep 2
         cleanup
     fi
@@ -271,6 +274,7 @@ change_tgb_dual_opt() {
 start_retroarch() {
     sync
 	build_infoPanel "RetroArch" "Starting RetroArch..."
+    log "GLO::Pokemon_Netplay: Starting RetroArch loaded with $rom and $local_rom"
 	cd /mnt/SDCARD/RetroArch
     HOME=/mnt/SDCARD/RetroArch ./retroarch -C $hostip -v -L .retroarch/cores/tgbdual_libretro.so --subsystem "gb_link_2p" "$rom" "$local_rom"
 }
@@ -296,6 +300,7 @@ wait_for_save_return() {
 
         if [ $counter -ge 25 ]; then
             build_infoPanel "Error" "The Host didn't ready up, cannot continue..."
+            log "GLO::Pokemon_Netplay: We ran out of time waiting for the host to ready up, possibly due to host->client connecitivity"
             sleep 1
             cleanup
         fi
@@ -308,9 +313,11 @@ wait_for_save_return() {
     cp_exit_status=$?
 
     if [ $cp_exit_status -eq 0 ]; then
+        log "GLO::Pokemon_Netplay: Save successfully merged"
         build_infoPanel "Syncing save" "Save merged successfully"
         sleep 1
     else
+        log "GLO::Pokemon_Netplay: Failed to merge save, cp returned: $cp_exit_status"
         build_infoPanel "Syncing save" "Failed to merge save"
         sleep 1
     fi
@@ -346,6 +353,7 @@ cleanup() {
     restore_ftp
     
     # Remove some files we prepared and received
+    log "GLO::Pokemon_Netplay: Removing stale files"
     rm "/tmp/host_ready"
     rm "/tmp/ready_to_send"
     rm "/tmp/ready_to_receive"
@@ -501,8 +509,7 @@ restore_wifi_state() {
    
     ip_output=$(ip link set wlan0 down 2>&1)
     if [ $? -ne 0 ]; then
-        log "GLO::Pokemon_Netplay: Failed to bring down the interface."
-        log "GLO::Pokemon_Netplay: Output from 'ip link set down' command: $ip_output"
+        log "GLO::Pokemon_Netplay: Failed to bring down the interface. Output from 'ip link set down' command: $ip_output"
     fi
     
 	ip -4 addr show wlan0 | awk '/inet/ {print $2}' | while IFS= read -r ipaddr
@@ -512,14 +519,12 @@ restore_wifi_state() {
 	
     ip_output=$(ip addr add $old_ipv4 dev wlan0 2>&1)
     if [ $? -ne 0 ]; then
-        log "GLO::Pokemon_Netplay: Failed to assign the old IP address."
-        log "GLO::Pokemon_Netplay: Output from 'ip addr add' command: $ip_output"
+        log "GLO::Pokemon_Netplay: Failed to assign the old IP address. Output from 'ip addr add' command: $ip_output"
     fi
     
     ip_output=$(ip link set wlan0 up 2>&1)
     if [ $? -ne 0 ]; then
-        log "GLO::Pokemon_Netplay: Failed to bring up the interface."
-        log "GLO::Pokemon_Netplay: Output from 'ip link set up' command: $ip_output"
+        log "GLO::Pokemon_Netplay: Failed to bring up the interface. Output from 'ip link set up' command: $ip_output"
     fi
 }
 
@@ -552,8 +557,8 @@ do_sync_file() {
 udhcpc_control() {
 	if pgrep udhcpc > /dev/null; then
 		killall -9 udhcpc
+        log "GLO::Pokemon_Netplay: Old DHCP proc killed."
 	fi
-	log "GLO::Pokemon_Netplay: Old DHCP proc killed."
 	sleep 1
 	log "GLO::Pokemon_Netplay: Trying to start DHCP"
 	udhcpc -i wlan0 -s /etc/init.d/udhcpc.script > /dev/null 2>&1 &

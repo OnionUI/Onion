@@ -330,6 +330,7 @@ change_tgb_dual_opt() {
 start_retroarch() {
     sync
 	build_infoPanel "RetroArch" "Starting RetroArch..."
+    log "GLO::Pokemon_Netplay: Starting RetroArch loaded with $host_rom and $client_rom_clone"
 	cd /mnt/SDCARD/RetroArch
     HOME=/mnt/SDCARD/RetroArch ./retroarch -H -v -L .retroarch/cores/tgbdual_libretro.so --subsystem "gb_link_2p" "$host_rom" "$client_rom_clone"
 }
