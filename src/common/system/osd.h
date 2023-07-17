@@ -142,14 +142,14 @@ void _print_bar(void)
 {
 #ifdef PLATFORM_MIYOOMINI
     uint32_t *ofs = fb_addr;
-    uint32_t i, curr,
+    uint32_t i, j, curr,
         percentage = _bar_max > 0 ? _bar_value * DISPLAY_HEIGHT / _bar_max : 0;
 
     ofs += DISPLAY_WIDTH - meterWidth;
     for (i = 0; i < DISPLAY_HEIGHT * 3; i++, ofs += DISPLAY_WIDTH) {
         curr = (i % DISPLAY_HEIGHT) < percentage ? _bar_color : 0;
-        for (int i = 0; i < meterWidth; i++)
-            ofs[i] = curr;
+        for (j = 0; j < meterWidth; j++)
+            ofs[j] = curr;
     }
 #endif
 }
@@ -163,14 +163,11 @@ void _bar_restoreBufferBehind(void)
     _print_bar();
     if (_bar_savebuf) {
         uint32_t i, *ofs = fb_addr, *ofss = _bar_savebuf;
-        ofs += DISPLAY_WIDTH - 4;
-        ofss += DISPLAY_WIDTH - 4;
-        for (i = 0; i < DISPLAY_HEIGHT;
-             i++, ofs += DISPLAY_WIDTH, ofss += DISPLAY_WIDTH) {
-            ofs[0] = ofss[0];
-            ofs[1] = ofss[1];
-            ofs[2] = ofss[2];
-            ofs[3] = ofss[3];
+        ofs += DISPLAY_WIDTH - meterWidth;
+        ofss += DISPLAY_WIDTH - meterWidth;
+        for (i = 0; i < DISPLAY_HEIGHT; i++, ofs += DISPLAY_WIDTH, ofss += DISPLAY_WIDTH) {
+            for (j = 0; j < meterWidth; j++)
+                ofs[j] = ofss[j];
         }
         free(_bar_savebuf);
         _bar_savebuf = NULL;
@@ -185,14 +182,11 @@ void _bar_saveBufferBehind(void)
     if ((_bar_savebuf = (uint32_t *)malloc(DISPLAY_WIDTH * DISPLAY_HEIGHT *
                                            sizeof(uint32_t)))) {
         uint32_t i, *ofs = fb_addr, *ofss = _bar_savebuf;
-        ofs += DISPLAY_WIDTH - 4;
-        ofss += DISPLAY_WIDTH - 4;
-        for (i = 0; i < DISPLAY_HEIGHT;
-             i++, ofs += DISPLAY_WIDTH, ofss += DISPLAY_WIDTH) {
-            ofss[0] = ofs[0];
-            ofss[1] = ofs[1];
-            ofss[2] = ofs[2];
-            ofss[3] = ofs[3];
+        ofs += DISPLAY_WIDTH - meterWidth;
+        ofss += DISPLAY_WIDTH - meterWidth;
+        for (i = 0; i < DISPLAY_HEIGHT; i++, ofs += DISPLAY_WIDTH, ofss += DISPLAY_WIDTH) {
+            for (j = 0; j < meterWidth; j++)
+                ofss[j] = ofs[j];
         }
     }
 #endif
