@@ -17,7 +17,7 @@
     "/mnt/SDCARD/Saves/CurrentProfile/lists/content_history.lpl"
 #define DEFAULT_THEME_PATH "/mnt/SDCARD/Themes/Silky by DiMo/"
 
-static struct settings_s {
+typedef struct settings_s {
     int volume;
     char keymap[JSON_STRING_LEN];
     int mute;
@@ -54,50 +54,64 @@ static struct settings_s {
 
     char mainui_button_x[JSON_STRING_LEN];
     char mainui_button_y[JSON_STRING_LEN];
-} settings;
+} settings_s;
 
 static bool settings_loaded = false;
-
-void _settings_reset(void)
-{
+static settings_s settings;
+static settings_s __settings;
+static settings_s __default_settings = (settings_s){
     // MainUI settings
-    settings.volume = 20;
-    strcpy(settings.keymap, "L2,L,R2,R,X,A,B,Y");
-    settings.mute = 0;
-    settings.bgm_volume = 20;
-    settings.brightness = 7;
-    strcpy(settings.language, "en.lang");
-    settings.sleep_timer = 5;
-    settings.lumination = 7;
-    settings.hue = 10;
-    settings.saturation = 10;
-    settings.contrast = 10;
-    strcpy(settings.theme, DEFAULT_THEME_PATH);
-    settings.fontsize = 24;
-    settings.audiofix = 1;
-    settings.wifi_on = 0;
+    .volume = 20,
+    .keymap = "L2,L,R2,R,X,A,B,Y",
+    .mute = 0,
+    .bgm_volume = 20,
+    .brightness = 7,
+    .language = "en.lang",
+    .sleep_timer = 5,
+    .lumination = 7,
+    .hue = 10,
+    .saturation = 10,
+    .contrast = 10,
+    .theme = DEFAULT_THEME_PATH,
+    .fontsize = 24,
+    .audiofix = 1,
+    .wifi_on = 0,
     // Onion settings
-    settings.show_recents = false;
-    settings.show_expert = false;
-    settings.startup_auto_resume = true;
-    settings.menu_button_haptics = false;
-    settings.low_battery_autosave = true;
-    settings.low_battery_warning = true;
-    settings.low_battery_warn_at = 10;
-    settings.time_skip = 4;
-    settings.vibration = 2;
-    settings.startup_tab = 0;
-    settings.startup_application = 0;
+    .show_recents = false,
+    .show_expert = false,
+    .startup_auto_resume = true,
+    .menu_button_haptics = false,
+    .low_battery_autosave = true,
+    .low_battery_warning = true,
+    .low_battery_warn_at = 10,
+    .time_skip = 4,
+    .vibration = 2,
+    .startup_tab = 0,
+    .startup_application = 0,
     // Menu button actions
-    settings.mainui_single_press = 1;
-    settings.mainui_long_press = 0;
-    settings.mainui_double_press = 2;
-    settings.ingame_single_press = 1;
-    settings.ingame_long_press = 2;
-    settings.ingame_double_press = 3;
-    settings.disable_standby = false;
-    memset(settings.mainui_button_x, 0, JSON_STRING_LEN);
-    memset(settings.mainui_button_y, 0, JSON_STRING_LEN);
+    .mainui_single_press = 1,
+    .mainui_long_press = 0,
+    .mainui_double_press = 2,
+    .ingame_single_press = 1,
+    .ingame_long_press = 2,
+    .ingame_double_press = 3,
+    .disable_standby = false,
+    .mainui_button_x = "",
+    .mainui_button_y = ""};
+
+void _settings_clone(settings_s *dst, settings_s *src)
+{
+    *dst = *src;
+    strcpy(dst->keymap, src->keymap);
+    strcpy(dst->language, src->language);
+    strcpy(dst->theme, src->theme);
+    strcpy(dst->mainui_button_x, src->mainui_button_x);
+    strcpy(dst->mainui_button_y, src->mainui_button_y);
+}
+
+void _settings_reset(settings_s *_settings)
+{
+    _settings_clone(_settings, &__default_settings);
 }
 
 void _settings_load_keymap(void)
@@ -151,7 +165,7 @@ void _settings_load_mainui(void)
 
 void settings_load(void)
 {
-    _settings_reset();
+    _settings_reset(&settings);
 
     settings.startup_auto_resume = !config_flag_get(".noAutoStart");
     settings.menu_button_haptics = !config_flag_get(".noMenuHaptics");
@@ -187,6 +201,8 @@ void settings_load(void)
     _settings_load_keymap();
     _settings_load_mainui();
 
+    _settings_clone(&__settings, &settings);
+
     settings_loaded = true;
 }
 
@@ -221,8 +237,32 @@ void _settings_save_keymap(void)
     fclose(fp);
 }
 
+bool _settings_dirty_mainui(void)
+{
+    return settings.volume != __settings.volume ||
+           strcmp(settings.keymap, __settings.keymap) != 0 ||
+           settings.mute != __settings.mute ||
+           settings.bgm_volume != __settings.bgm_volume ||
+           settings.brightness != __settings.brightness ||
+           strcmp(settings.language, __settings.language) != 0 ||
+           settings.sleep_timer != __settings.sleep_timer ||
+           settings.lumination != __settings.lumination ||
+           settings.hue != __settings.hue ||
+           settings.saturation != __settings.saturation ||
+           settings.contrast != __settings.contrast ||
+           strcmp(settings.theme, __settings.theme) != 0 ||
+           settings.fontsize != __settings.fontsize ||
+           settings.audiofix != __settings.audiofix ||
+           settings.wifi_on != __settings.wifi_on;
+}
+
 void _settings_save_mainui(void)
 {
+    if (!_settings_dirty_mainui()) {
+        print_debug("Skipped saving system.json (not dirty)");
+        return;
+    }
+
     FILE *fp;
 
     if ((fp = fopen(MAIN_UI_SETTINGS, "w+")) == NULL)
