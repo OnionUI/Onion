@@ -189,8 +189,10 @@ void suspend_exec(int timeout)
 {
     keyinput_disable();
 
+    // pause playActivity
+    system("playActivity stop_all");
+
     // suspend
-    system_clock_pause(true);
     suspend(0);
     rumble(0);
     setVolume(0);
@@ -252,8 +254,10 @@ void suspend_exec(int timeout)
     display_setBrightness(settings.brightness);
     setVolume(settings.mute ? 0 : settings.volume);
     if (!killexit) {
+        // resume processes
         resume();
-        system_clock_pause(false);
+        // resume playActivity
+        system("playActivity resume");
     }
 
     keyinput_enable();
@@ -489,6 +493,8 @@ int main(void)
                         if (DEVICE_ID == 354)
                             break; // disable this shortcut for MMP
                         // SELECT + L2 : brightness down
+                        if (config_flag_get(".altBrightness"))
+                            break;
                         if (settings.brightness > 0) {
                             settings_setBrightness(settings.brightness - 1,
                                                    true, false);
@@ -525,6 +531,8 @@ int main(void)
                         if (DEVICE_ID == 354)
                             break; // disable this shortcut for MMP
                         // SELECT + R2 : brightness up
+                        if (config_flag_get(".altBrightness"))
+                            break;
                         if (settings.brightness < MAX_BRIGHTNESS) {
                             settings_setBrightness(settings.brightness + 1,
                                                    true, false);
@@ -583,6 +591,21 @@ int main(void)
                     volDown_active = false;
                 osd_showVolumeBar(settings.volume, settings.mute);
                 break;
+            case HW_BTN_DOWN:
+                if (DEVICE_ID == 283) {
+                    if (comboKey_menu) {
+                        if (config_flag_get(".altBrightness")) {
+                            // MENU + B DOWN : brightness down
+                            if (val != RELEASED && settings.brightness > 0) {
+                                settings_setBrightness(settings.brightness - 1, true,
+                                                       false);
+                                settings_changed = true;
+                            }
+                            osd_showBrightnessBar(settings.brightness);
+                        }
+                    }
+                }
+                break;
             case HW_BTN_VOLUME_UP:
                 if (comboKey_menu) {
                     // MENU + VOL UP : brightness up
@@ -610,6 +633,22 @@ int main(void)
                 if (val == RELEASED)
                     volUp_active = false;
                 osd_showVolumeBar(settings.volume, settings.mute);
+                break;
+            case HW_BTN_UP:
+                if (DEVICE_ID == 283) {
+                    if (comboKey_menu) {
+                        if (config_flag_get(".altBrightness")) {
+                            // MENU + BTN UP : brightness up
+                            if (val != RELEASED &&
+                                settings.brightness < MAX_BRIGHTNESS) {
+                                settings_setBrightness(settings.brightness + 1, true,
+                                                       false);
+                                settings_changed = true;
+                            }
+                            osd_showBrightnessBar(settings.brightness);
+                        }
+                    }
+                }
                 break;
             default:
                 break;

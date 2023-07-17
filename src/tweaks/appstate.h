@@ -15,20 +15,6 @@ bool isMenu(List *target)
     return menu_stack[menu_level]->_created && target->_created && menu_stack[menu_level]->_id == target->_id;
 }
 
-static List _menu_main;
-static List _menu_system;
-static List _menu_date_time;
-static List _menu_system_startup;
-static List _menu_button_action;
-static List _menu_button_action_mainui_menu;
-static List _menu_button_action_ingame_menu;
-static List _menu_user_interface;
-static List _menu_theme_overrides;
-static List _menu_battery_percentage;
-static List _menu_advanced;
-static List _menu_reset_settings;
-static List _menu_tools;
-
 static List _menu_network;
 static List _menu_wifi;
 static List _menu_telnet;
@@ -65,6 +51,42 @@ void menu_icons_free_all(void)
     list_free(&_menu_app_icons);
     list_free(&_menu_expert_icons);
     list_free(&_menu_temp);
+}
+
+static List _menu_main;
+static List _menu_system;
+static List _menu_date_time;
+static List _menu_system_display;
+static List _menu_system_startup;
+static List _menu_button_action;
+static List _menu_button_action_mainui_menu;
+static List _menu_button_action_ingame_menu;
+static List _menu_user_interface;
+static List _menu_theme_overrides;
+static List _menu_battery_percentage;
+static List _menu_advanced;
+static List _menu_reset_settings;
+static List _menu_tools;
+
+void menu_free_all(void)
+{
+    list_free(&_menu_main);
+    list_free(&_menu_system);
+    list_free(&_menu_date_time);
+    list_free(&_menu_system_display);
+    list_free(&_menu_system_startup);
+    list_free(&_menu_button_action);
+    list_free(&_menu_button_action_mainui_menu);
+    list_free(&_menu_button_action_ingame_menu);
+    list_free(&_menu_user_interface);
+    list_free(&_menu_theme_overrides);
+    list_free(&_menu_battery_percentage);
+    list_free(&_menu_advanced);
+    list_free(&_menu_reset_settings);
+    list_free(&_menu_tools);
+
+    menu_icons_free_all();
+    menu_network_free_all();
 }
 
 static bool quit = false;

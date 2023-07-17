@@ -60,6 +60,13 @@ int value_appShortcut(int button)
     return 0;
 }
 
+int value_meterWidth(void)
+{
+    int meterWidth = 4;
+    config_get("display/meterWidth", CONFIG_INT, &meterWidth);
+    return meterWidth;
+}
+
 int value_batteryPercentageVisible(void)
 {
     bool override_value = false;
