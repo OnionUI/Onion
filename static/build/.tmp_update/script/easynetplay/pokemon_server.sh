@@ -640,11 +640,11 @@ lets_go() {
     read_cookie
     sync_file Rom "$client_rom" "$romchksum" "$rom_url"
     handle_roms
-    pkill -9 pressMenu2Kill
     ready_up
     stripped_game_name
     confirm_join_panel "Join now?" "$game_name \n $game_name_client"
     change_tgb_dual_opt replace
+    pkill -9 pressMenu2Kill
     start_retroarch
     change_tgb_dual_opt restore
     wait_for_save_return

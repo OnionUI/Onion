@@ -604,8 +604,8 @@ lets_go() {
     stripped_game_name
     wait_for_host
     confirm_join_panel "Join now?" "Start the game on the host first! \n $game_name \n $game_name_client"
-    pkill -9 pressMenu2Kill
     change_tgb_dual_opt replace
+    pkill -9 pressMenu2Kill
     start_retroarch
     change_tgb_dual_opt restore
     wait_for_save_return
