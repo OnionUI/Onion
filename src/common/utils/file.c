@@ -313,3 +313,11 @@ bool file_path_relative_to(char *path_out, const char *dir_from, const char *fil
 
     return true;
 }
+
+FILE *file_open_ensure_path(const char *path, const char *mode)
+{
+    char *_path = strdup(path);
+    mkdirs(dirname(_path));
+    free(_path);
+    return fopen(path, mode);
+}
