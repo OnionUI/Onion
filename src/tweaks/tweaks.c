@@ -201,29 +201,23 @@ int main(int argc, char *argv[])
             }
 
             if (header_changed || battery_changed)
-                theme_renderHeader(screen, menu_stack[menu_level]->title,
-                                   false);
+                theme_renderHeader(screen, menu_stack[menu_level]->title, false);
 
             if (list_changed)
                 theme_renderList(screen, menu_stack[menu_level]);
 
             if (footer_changed) {
                 theme_renderFooter(screen);
-                theme_renderStandardHint(
-                    screen, lang_get(LANG_SELECT, LANG_FALLBACK_SELECT),
-                    lang_get(LANG_BACK, LANG_FALLBACK_BACK));
+                theme_renderStandardHint(screen, lang_get(LANG_SELECT, LANG_FALLBACK_SELECT), lang_get(LANG_BACK, LANG_FALLBACK_BACK));
             }
 
             if (footer_changed || list_changed)
-                theme_renderFooterStatus(screen,
-                                         menu_stack[menu_level]->active_pos + 1,
-                                         menu_stack[menu_level]->item_count);
+                theme_renderFooterStatus(screen, menu_stack[menu_level]->active_pos + 1, menu_stack[menu_level]->item_count);
 
             if (header_changed || battery_changed)
                 theme_renderHeaderBattery(screen, battery_percentage);
 
-            if (header_changed || list_changed || footer_changed ||
-                battery_changed) {
+            if (header_changed || list_changed || footer_changed || battery_changed) {
                 SDL_BlitSurface(screen, NULL, video, NULL);
                 SDL_Flip(video);
             }
@@ -254,6 +248,8 @@ int main(int argc, char *argv[])
     Mix_CloseAudio();
 
     network_freeSmbShares();
+
+    display_free();
 
     lang_free();
     menu_free_all();

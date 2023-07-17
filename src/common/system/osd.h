@@ -128,22 +128,22 @@ void print_value(uint32_t value, uint32_t color)
     }
 }
 
+static int meterWidth = 4;
 static bool osd_bar_activated = false;
 static int _bar_timer = 0;
 static int _bar_value = 0;
 static int _bar_max = 0;
 static uint32_t _bar_color = 0x00FFFFFF;
+#ifdef PLATFORM_MIYOOMINI
 static uint32_t *_bar_savebuf;
+#endif
 
 void _print_bar(void)
 {
+#ifdef PLATFORM_MIYOOMINI
     uint32_t *ofs = fb_addr;
     uint32_t i, curr,
         percentage = _bar_max > 0 ? _bar_value * DISPLAY_HEIGHT / _bar_max : 0;
-
-    int meterWidth;
-    if (config_get("display/meterWidth", CONFIG_INT, &meterWidth) == false)
-        meterWidth = 4;
 
     ofs += DISPLAY_WIDTH - meterWidth;
     for (i = 0; i < DISPLAY_HEIGHT * 3; i++, ofs += DISPLAY_WIDTH) {
@@ -151,10 +151,12 @@ void _print_bar(void)
         for (int i = 0; i < meterWidth; i++)
             ofs[i] = curr;
     }
+#endif
 }
 
 void _bar_restoreBufferBehind(void)
 {
+#ifdef PLATFORM_MIYOOMINI
     _bar_value = 0;
     _bar_max = 0;
     _bar_color = 0;
@@ -173,10 +175,12 @@ void _bar_restoreBufferBehind(void)
         free(_bar_savebuf);
         _bar_savebuf = NULL;
     }
+#endif
 }
 
 void _bar_saveBufferBehind(void)
 {
+#ifdef PLATFORM_MIYOOMINI
     // Save display area and clear
     if ((_bar_savebuf = (uint32_t *)malloc(DISPLAY_WIDTH * DISPLAY_HEIGHT *
                                            sizeof(uint32_t)))) {
@@ -191,6 +195,7 @@ void _bar_saveBufferBehind(void)
             ofss[3] = ofs[3];
         }
     }
+#endif
 }
 
 //
@@ -221,6 +226,8 @@ void osd_showBar(int value, int value_max, uint32_t color)
     _bar_max = value_max;
     _bar_color = color;
     osd_bar_activated = true;
+
+    config_get("display/meterWidth", CONFIG_INT, &meterWidth);
 
     if (osd_thread_active)
         return;

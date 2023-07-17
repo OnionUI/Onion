@@ -3,6 +3,7 @@
 
 #include "components/list.h"
 #include "system/axp.h"
+#include "system/osd.h"
 #include "system/rumble.h"
 #include "system/settings.h"
 #include "theme/resources.h"
@@ -52,6 +53,7 @@ void action_setAppShortcut(void *pt)
 void action_meterWidth(void *pt)
 {
     config_setNumber("display/meterWidth", ((ListItem *)pt)->value);
+    osd_showBrightnessBar(settings.brightness);
 }
 
 void action_setStartupAutoResume(void *pt)
