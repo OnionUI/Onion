@@ -319,7 +319,7 @@ int main(void)
 
     getDeviceModel();
 
-    if (DEVICE_ID == 354) {
+    if (DEVICE_ID == MIYOO354) {
         // set hardware poweroff time to 10s
         axp_write(0x36, axp_read(0x36) | 3);
     }
@@ -490,7 +490,7 @@ int main(void)
                             setVolumeRaw(0, -3);
                         break;
                     case SELECT:
-                        if (DEVICE_ID == 354)
+                        if (DEVICE_ID == MIYOO354)
                             break; // disable this shortcut for MMP
                         // SELECT + L2 : brightness down
                         if (config_flag_get(".altBrightness"))
@@ -528,7 +528,7 @@ int main(void)
                             setVolumeRaw(0, +3);
                         break;
                     case SELECT:
-                        if (DEVICE_ID == 354)
+                        if (DEVICE_ID == MIYOO354)
                             break; // disable this shortcut for MMP
                         // SELECT + R2 : brightness up
                         if (config_flag_get(".altBrightness"))
@@ -592,7 +592,7 @@ int main(void)
                 osd_showVolumeBar(settings.volume, settings.mute);
                 break;
             case HW_BTN_DOWN:
-                if (DEVICE_ID == 283) {
+                if (DEVICE_ID == MIYOO283) {
                     if (comboKey_menu) {
                         if (config_flag_get(".altBrightness")) {
                             // MENU + B DOWN : brightness down
@@ -635,7 +635,7 @@ int main(void)
                 osd_showVolumeBar(settings.volume, settings.mute);
                 break;
             case HW_BTN_UP:
-                if (DEVICE_ID == 283) {
+                if (DEVICE_ID == MIYOO283) {
                     if (comboKey_menu) {
                         if (config_flag_get(".altBrightness")) {
                             // MENU + BTN UP : brightness up
