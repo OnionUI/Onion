@@ -17,6 +17,10 @@ main() {
 
     process_changes
 
+    # Remove empty directories
+    find "$ra_dir/overlay" -empty -type d -delete
+    find "$ra_dir/filters/video" -empty -type d -delete
+
     echo "---"
     echo "Files deleted: $deletions ($skipped_deletions skipped / in use)"
     echo "Files moved: $moves ($fixed_configs configs amended)"
