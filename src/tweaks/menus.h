@@ -11,6 +11,7 @@
 
 #include "components/list.h"
 #include "system/device_model.h"
+#include "system/display.h"
 #include "utils/apps.h"
 
 #include "./actions.h"
@@ -22,24 +23,22 @@
 #include "./tools.h"
 #include "./values.h"
 
-void menu_free_all(void)
+void menu_systemDisplay(void *_)
 {
-    list_free(&_menu_main);
-    list_free(&_menu_system);
-    list_free(&_menu_date_time);
-    list_free(&_menu_system_startup);
-    list_free(&_menu_button_action);
-    list_free(&_menu_button_action_mainui_menu);
-    list_free(&_menu_button_action_ingame_menu);
-    list_free(&_menu_user_interface);
-    list_free(&_menu_theme_overrides);
-    list_free(&_menu_battery_percentage);
-    list_free(&_menu_advanced);
-    list_free(&_menu_reset_settings);
-    list_free(&_menu_tools);
-
-    menu_icons_free_all();
-    menu_network_free_all();
+    if (!_menu_system_display._created) {
+        display_init();
+        _menu_system_display = list_create_with_title(1, LIST_SMALL, "Display");
+        list_addItem(&_menu_system_display,
+                     (ListItem){
+                         .label = "OSD bar size",
+                         .item_type = MULTIVALUE,
+                         .value_max = 15,
+                         .value_formatter = formatter_meterWidth,
+                         .value = value_meterWidth(),
+                         .action = action_meterWidth});
+    }
+    menu_stack[++menu_level] = &_menu_system_display;
+    header_changed = true;
 }
 
 void menu_systemStartup(void *_)
@@ -151,8 +150,12 @@ void menu_datetime(void *_)
 void menu_system(void *_)
 {
     if (!_menu_system._created) {
-        _menu_system = list_create(4, LIST_SMALL);
+        _menu_system = list_create(5, LIST_SMALL);
         strcpy(_menu_system.title, "System");
+        list_addItem(&_menu_system,
+                     (ListItem){
+                         .label = "Display...",
+                         .action = menu_systemDisplay});
         list_addItem(&_menu_system,
                      (ListItem){
                          .label = "Startup...",
@@ -480,7 +483,7 @@ void menu_resetSettings(void *_)
 void menu_advanced(void *_)
 {
     if (!_menu_advanced._created) {
-        _menu_advanced = list_create(4, LIST_SMALL);
+        _menu_advanced = list_create(5, LIST_SMALL);
         strcpy(_menu_advanced.title, "Advanced");
         list_addItem(&_menu_advanced,
                      (ListItem){
@@ -488,6 +491,17 @@ void menu_advanced(void *_)
                          .item_type = TOGGLE,
                          .value = value_getSwapTriggers(),
                          .action = action_advancedSetSwapTriggers});
+        if (DEVICE_ID == MIYOO283) {
+            list_addItem(&_menu_advanced,
+                         (ListItem){
+                             .label = "Brightness control",
+                             .item_type = MULTIVALUE,
+                             .value_max = 1,
+                             .value_labels = {"SELECT+R2/L2",
+                                              "MENU+UP/DOWN"},
+                             .value = config_flag_get(".altBrightness"),
+                             .action = action_setAltBrightness});
+        }
         list_addItem(&_menu_advanced,
                      (ListItem){
                          .label = "Fast forward rate",

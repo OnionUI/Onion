@@ -3,6 +3,7 @@
 
 #include "components/list.h"
 #include "system/axp.h"
+#include "system/osd.h"
 #include "system/rumble.h"
 #include "system/settings.h"
 #include "theme/resources.h"
@@ -47,6 +48,12 @@ void action_setAppShortcut(void *pt)
     if (item->action_id == 1) {
         strcpy(sett_pt, "glo");
     }
+}
+
+void action_meterWidth(void *pt)
+{
+    config_setNumber("display/meterWidth", ((ListItem *)pt)->value);
+    osd_showBrightnessBar(settings.brightness);
 }
 
 void action_setStartupAutoResume(void *pt)
@@ -243,6 +250,11 @@ void action_advancedSetSwapTriggers(void *pt)
     int item_value = ((ListItem *)pt)->value;
     stored_value_swap_triggers = item_value;
     stored_value_swap_triggers_changed = true;
+}
+
+void action_setAltBrightness(void *pt)
+{
+    config_flag_set(".altBrightness", ((ListItem *)pt)->value);
 }
 
 void action_advancedSetLcdVoltage(void *pt)
