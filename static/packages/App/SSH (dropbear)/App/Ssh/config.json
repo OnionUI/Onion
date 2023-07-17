@@ -1,7 +1,0 @@
-{
-"label":"SSH",
-"icon":"ssh.png",
-"iconsel":"",
-"launch":"launch.sh",
-"description":"SSH/SFTP Server"
-}
