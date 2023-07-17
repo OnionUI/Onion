@@ -278,6 +278,7 @@ int main(int argc, char *argv[])
                     else {
                         g_show_theme_controls = true;
                     }
+
                     all_changed = true;
                     continue;
                     break;
@@ -289,27 +290,23 @@ int main(int argc, char *argv[])
                 if (!navigation_pressed) {
                     continue;
                 }
-                if ((navigating_forward && key_pressed == SW_BTN_RIGHT &&
-                     g_image_index == g_images_paths_count - 1) ||
-                    (!navigating_forward && key_pressed == SW_BTN_LEFT &&
-                     g_image_index == 0) ||
-                    (info_panel_mode && (key_pressed == SW_BTN_RIGHT ||
-                                         key_pressed == SW_BTN_LEFT))) {
+
+                if ((navigating_forward && key_pressed == SW_BTN_RIGHT && g_image_index == g_images_paths_count - 1) ||
+                    (!navigating_forward && key_pressed == SW_BTN_LEFT && g_image_index == 0) ||
+                    (info_panel_mode && (key_pressed == SW_BTN_RIGHT || key_pressed == SW_BTN_LEFT))) {
                     continue;
                 }
-                if (info_panel_mode // drawing info panel
-                    || (navigating_forward &&
-                        g_image_index ==
-                            g_images_paths_count - 1) // exit after last image
-                    || (!navigating_forward &&
-                        g_image_index == 0)) // or when navigating backwards
-                                             // from the first image
+
+                if (info_panel_mode                                                      // drawing info panel
+                    || (navigating_forward && g_image_index == g_images_paths_count - 1) // exit after last image
+                    || (!navigating_forward && g_image_index == 0))                      // or when navigating backwards from the first image
                 {
                     if (key_pressed == SW_BTN_B || key_pressed == SW_BTN_MENU)
                         canceled = true;
                     quit = true;
                     continue;
                 }
+
                 const int current_index = g_image_index;
                 navigating_forward ? g_image_index++ : g_image_index--;
                 SDL_BlitSurface(theme_background(), NULL, screen, NULL);
@@ -317,6 +314,7 @@ int main(int argc, char *argv[])
                                  g_images_paths_count, screen,
                                  getControlsAwareFrame(&themedFrame),
                                  &cache_used);
+
                 all_changed = true;
             }
         }
@@ -363,14 +361,13 @@ int main(int argc, char *argv[])
 
                     if (footer_changed) {
                         theme_renderFooter(screen);
-                        const char *a_btn_text =
-                            lang_get(LANG_NEXT, LANG_FALLBACK_NEXT);
-                        const char *b_btn_text =
-                            lang_get(LANG_BACK, LANG_FALLBACK_BACK);
+
+                        const char *a_btn_text = lang_get(LANG_NEXT, LANG_FALLBACK_NEXT);
+                        const char *b_btn_text = lang_get(LANG_BACK, LANG_FALLBACK_BACK);
+
                         if (info_panel_mode || g_images_paths_count == 1) {
                             a_btn_text = lang_get(LANG_OK, LANG_FALLBACK_OK);
-                            b_btn_text =
-                                lang_get(LANG_CANCEL, LANG_FALLBACK_CANCEL);
+                            b_btn_text = lang_get(LANG_CANCEL, LANG_FALLBACK_CANCEL);
                         }
                         else if (g_image_index == g_images_paths_count - 1) {
                             a_btn_text = lang_get(LANG_EXIT, LANG_FALLBACK_EXIT);
@@ -378,15 +375,14 @@ int main(int argc, char *argv[])
                         else if (g_image_index == 0) {
                             b_btn_text = lang_get(LANG_EXIT, LANG_FALLBACK_EXIT);
                         }
+
                         if (wait_confirm)
-                            theme_renderStandardHint(screen, a_btn_text,
-                                                     b_btn_text);
+                            theme_renderStandardHint(screen, a_btn_text, b_btn_text);
                     }
 
                     if (footer_changed && !info_panel_mode &&
                         g_images_paths_count > 1)
-                        theme_renderFooterStatus(screen, g_image_index + 1,
-                                                 g_images_paths_count);
+                        theme_renderFooterStatus(screen, g_image_index + 1, g_images_paths_count);
 
                     if (header_changed || battery_changed)
                         theme_renderHeaderBattery(screen, battery_percentage);
