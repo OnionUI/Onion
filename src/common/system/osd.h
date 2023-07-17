@@ -3,12 +3,12 @@
 
 #include <pthread.h>
 
+#include "utils/config.h"
 #include "utils/log.h"
 #include "utils/msleep.h"
 
 #include "./clock.h"
 #include "./display.h"
-#include "utils/config.h"
 
 #define CHR_WIDTH (3 * 4 + 4)
 #define CHR_HEIGHT (5 * 4)
@@ -142,8 +142,7 @@ void _print_bar(void)
 {
 #ifdef PLATFORM_MIYOOMINI
     uint32_t *ofs = fb_addr;
-    uint32_t i, j, curr,
-        percentage = _bar_max > 0 ? _bar_value * DISPLAY_HEIGHT / _bar_max : 0;
+    uint32_t i, j, curr, percentage = _bar_max > 0 ? _bar_value * DISPLAY_HEIGHT / _bar_max : 0;
 
     ofs += DISPLAY_WIDTH - meterWidth;
     for (i = 0; i < DISPLAY_HEIGHT * 3; i++, ofs += DISPLAY_WIDTH) {
@@ -162,7 +161,7 @@ void _bar_restoreBufferBehind(void)
     _bar_color = 0;
     _print_bar();
     if (_bar_savebuf) {
-        uint32_t i, *ofs = fb_addr, *ofss = _bar_savebuf;
+        uint32_t i, j, *ofs = fb_addr, *ofss = _bar_savebuf;
         ofs += DISPLAY_WIDTH - meterWidth;
         ofss += DISPLAY_WIDTH - meterWidth;
         for (i = 0; i < DISPLAY_HEIGHT; i++, ofs += DISPLAY_WIDTH, ofss += DISPLAY_WIDTH) {
@@ -181,7 +180,7 @@ void _bar_saveBufferBehind(void)
     // Save display area and clear
     if ((_bar_savebuf = (uint32_t *)malloc(DISPLAY_WIDTH * DISPLAY_HEIGHT *
                                            sizeof(uint32_t)))) {
-        uint32_t i, *ofs = fb_addr, *ofss = _bar_savebuf;
+        uint32_t i, j, *ofs = fb_addr, *ofss = _bar_savebuf;
         ofs += DISPLAY_WIDTH - meterWidth;
         ofss += DISPLAY_WIDTH - meterWidth;
         for (i = 0; i < DISPLAY_HEIGHT; i++, ofs += DISPLAY_WIDTH, ofss += DISPLAY_WIDTH) {
