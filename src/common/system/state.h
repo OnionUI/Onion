@@ -3,12 +3,13 @@
 
 #include <unistd.h>
 
-#include "./display.h"
-#include "./settings.h"
 #include "utils/file.h"
 #include "utils/flags.h"
 #include "utils/process.h"
 #include "utils/str.h"
+
+#include "./display.h"
+#include "./settings.h"
 
 typedef enum system_state_e {
     MODE_UNKNOWN,

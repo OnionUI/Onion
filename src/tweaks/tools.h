@@ -7,17 +7,13 @@
 #include <stdio.h>
 #include <sys/wait.h>
 
-#include "./appstate.h"
 #include "components/list.h"
 #include "theme/theme.h"
 #include "utils/msleep.h"
 
-#define NUM_TOOLS 3
+#include "./appstate.h"
+#include "./tools_defs.h"
 
-static char tools_short_names[NUM_TOOLS][STR_MAX] = {
-    "dot_clean",
-    "cue_gen",
-    "build_short_rom_game_list"};
 static pthread_t thread_pt;
 static bool thread_active = false;
 static bool thread_success = false;
