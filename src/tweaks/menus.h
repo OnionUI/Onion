@@ -47,6 +47,7 @@ void menu_systemStartup(void *_)
         _menu_system_startup = list_create_with_title(4, LIST_SMALL, "Startup");
 
         if (DEVICE_ID == MIYOO354) {
+            network_loadState();
             list_addItem(&_menu_system_startup,
                          (ListItem){
                              .label = "Check for updates",
