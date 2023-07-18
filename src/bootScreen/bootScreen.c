@@ -44,19 +44,37 @@ int main(int argc, char *argv[])
         background = theme_loadImage(theme_path, "extra/bootScreen");
     }
 
-    SDL_BlitSurface(background, NULL, screen, NULL);
+    char message_str[STR_MAX] = "";
+    if (argc > 2) {
+        strncpy(message_str, argv[2], STR_MAX - 1);
+    }
+
+    if (background) {
+        SDL_BlitSurface(background, NULL, screen, NULL);
+        SDL_FreeSurface(background);
+    }
 
     TTF_Init();
 
-    TTF_Font *font =
-        theme_loadFont(theme_path, theme()->hint.font, theme()->hint.size);
+    TTF_Font *font = theme_loadFont(theme_path, theme()->hint.font, 18);
     SDL_Color color = theme()->total.color;
 
-    const char *version_str =
-        file_read("/mnt/SDCARD/.tmp_update/onionVersion/version.txt");
-    SDL_Surface *version = TTF_RenderUTF8_Blended(font, version_str, color);
-    SDL_Rect rectVersion = {20, 450 - version->h / 2};
-    SDL_BlitSurface(version, NULL, screen, &rectVersion);
+    const char *version_str = file_read("/mnt/SDCARD/.tmp_update/onionVersion/version.txt");
+    if (strlen(version_str) > 0) {
+        SDL_Surface *version = TTF_RenderUTF8_Blended(font, version_str, color);
+        if (version) {
+            SDL_BlitSurface(version, NULL, screen, &(SDL_Rect){20, 450 - version->h / 2});
+            SDL_FreeSurface(version);
+        }
+    }
+
+    if (strlen(message_str) > 0) {
+        SDL_Surface *message = TTF_RenderUTF8_Blended(font, message_str, color);
+        if (message) {
+            SDL_BlitSurface(message, NULL, screen, &(SDL_Rect){620 - message->w, 450 - message->h / 2});
+            SDL_FreeSurface(message);
+        }
+    }
 
     if (bShowBat == 1) {
         SDL_Surface *battery = theme_batterySurface(battery_getPercentage());
@@ -79,8 +97,6 @@ int main(int argc, char *argv[])
     sleep(4); // for debugging purposes
 #endif
 
-    SDL_FreeSurface(background);
-    SDL_FreeSurface(version);
     SDL_FreeSurface(screen);
     SDL_FreeSurface(video);
     SDL_Quit();

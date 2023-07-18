@@ -12,14 +12,10 @@
 #include "system/system_utils.h"
 #include "utils/apps.h"
 
+#include "../tweaks/tools_defs.h"
 #include "./input_fd.h"
 
-#define NUM_TOOLS 6
-
-static char tools_short_names[NUM_TOOLS][STR_MAX] = {
-    "dot_clean", "cue_gen", "favsort-az", "favsort-sys", "favfix", "recents"};
-static MainUIState tools_states[NUM_TOOLS] = {FAVORITES, FAVORITES, FAVORITES,
-                                              RECENTS, GAMES};
+static MainUIState tools_states[NUM_TOOLS] = {GAMES, GAMES, GAMES};
 
 static SystemState menu_last_state = MODE_UNKNOWN;
 static int menu_last_pressed = 0;

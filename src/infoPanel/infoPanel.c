@@ -142,26 +142,19 @@ int main(int argc, char *argv[])
         if (argv[i][0] == '-') {
             if (strcmp(argv[i], "-t") == 0 || strcmp(argv[i], "--title") == 0)
                 strncpy(title_str, argv[++i], STR_MAX - 1);
-            else if (strcmp(argv[i], "-m") == 0 ||
-                     strcmp(argv[i], "--message") == 0)
+            else if (strcmp(argv[i], "-m") == 0 || strcmp(argv[i], "--message") == 0)
                 strncpy(message_str, argv[++i], STR_MAX - 1);
-            else if (strcmp(argv[i], "-i") == 0 ||
-                     strcmp(argv[i], "--image") == 0)
+            else if (strcmp(argv[i], "-i") == 0 || strcmp(argv[i], "--image") == 0)
                 strncpy(image_path, argv[++i], STR_MAX - 1);
-            else if (strcmp(argv[i], "-j") == 0 ||
-                     strcmp(argv[i], "--images-json") == 0)
+            else if (strcmp(argv[i], "-j") == 0 || strcmp(argv[i], "--images-json") == 0)
                 strncpy(images_json_path, argv[++i], STR_MAX - 1);
-            else if (strcmp(argv[i], "-d") == 0 ||
-                     strcmp(argv[i], "--directory") == 0)
+            else if (strcmp(argv[i], "-d") == 0 || strcmp(argv[i], "--directory") == 0)
                 strncpy(images_dir_path, argv[++i], STR_MAX - 1);
-            else if (strcmp(argv[i], "-s") == 0 ||
-                     strcmp(argv[i], "--show-theme-controls") == 0)
+            else if (strcmp(argv[i], "-s") == 0 || strcmp(argv[i], "--show-theme-controls") == 0)
                 g_show_theme_controls = true;
-            else if (strcmp(argv[i], "-a") == 0 ||
-                     strcmp(argv[i], "--auto") == 0)
+            else if (strcmp(argv[i], "-a") == 0 || strcmp(argv[i], "--auto") == 0)
                 wait_confirm = false;
-            else if (strcmp(argv[i], "-p") == 0 ||
-                     strcmp(argv[i], "--persistent") == 0) {
+            else if (strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "--persistent") == 0) {
                 wait_confirm = false;
                 is_persistent = true;
             }
@@ -184,8 +177,7 @@ int main(int argc, char *argv[])
 
     bool cache_used = false;
 
-    const SDL_Rect themedFrame = {theme()->frame.border_left, 0,
-                                  640 - theme()->frame.border_right, 480};
+    const SDL_Rect themedFrame = {theme()->frame.border_left, 0, 640 - theme()->frame.border_right, 480};
 
     if (exists(image_path)) {
         g_images_paths_count = 1;
@@ -286,6 +278,7 @@ int main(int argc, char *argv[])
                     else {
                         g_show_theme_controls = true;
                     }
+
                     all_changed = true;
                     continue;
                     break;
@@ -297,27 +290,23 @@ int main(int argc, char *argv[])
                 if (!navigation_pressed) {
                     continue;
                 }
-                if ((navigating_forward && key_pressed == SW_BTN_RIGHT &&
-                     g_image_index == g_images_paths_count - 1) ||
-                    (!navigating_forward && key_pressed == SW_BTN_LEFT &&
-                     g_image_index == 0) ||
-                    (info_panel_mode && (key_pressed == SW_BTN_RIGHT ||
-                                         key_pressed == SW_BTN_LEFT))) {
+
+                if ((navigating_forward && key_pressed == SW_BTN_RIGHT && g_image_index == g_images_paths_count - 1) ||
+                    (!navigating_forward && key_pressed == SW_BTN_LEFT && g_image_index == 0) ||
+                    (info_panel_mode && (key_pressed == SW_BTN_RIGHT || key_pressed == SW_BTN_LEFT))) {
                     continue;
                 }
-                if (info_panel_mode // drawing info panel
-                    || (navigating_forward &&
-                        g_image_index ==
-                            g_images_paths_count - 1) // exit after last image
-                    || (!navigating_forward &&
-                        g_image_index == 0)) // or when navigating backwards
-                                             // from the first image
+
+                if (info_panel_mode                                                      // drawing info panel
+                    || (navigating_forward && g_image_index == g_images_paths_count - 1) // exit after last image
+                    || (!navigating_forward && g_image_index == 0))                      // or when navigating backwards from the first image
                 {
                     if (key_pressed == SW_BTN_B || key_pressed == SW_BTN_MENU)
                         canceled = true;
                     quit = true;
                     continue;
                 }
+
                 const int current_index = g_image_index;
                 navigating_forward ? g_image_index++ : g_image_index--;
                 SDL_BlitSurface(theme_background(), NULL, screen, NULL);
@@ -325,6 +314,7 @@ int main(int argc, char *argv[])
                                  g_images_paths_count, screen,
                                  getControlsAwareFrame(&themedFrame),
                                  &cache_used);
+
                 all_changed = true;
             }
         }
@@ -342,63 +332,67 @@ int main(int argc, char *argv[])
         if (quit)
             break;
 
-        if (g_show_theme_controls) {
-            if (battery_hasChanged(ticks, &battery_percentage))
+        if (acc_ticks >= time_step) {
+            if (g_show_theme_controls && battery_hasChanged(ticks, &battery_percentage))
                 battery_changed = true;
 
-            if (acc_ticks >= time_step) {
-                if (header_changed || battery_changed) {
-                    if (strlen(title_str) > 0) {
-                        drawInfoPanel(screen, video, title_str, message_str);
-                    }
-                    else if (g_images_titles) {
-                        const char *title = g_images_titles[g_image_index];
-                        theme_renderHeader(screen, title, !title);
-                    }
-                    else {
-                        char *current_image_path = image_path;
-                        if (g_images_paths_count > 0 && g_images_paths &&
-                            g_image_index >= 0) {
-                            current_image_path = g_images_paths[g_image_index];
+            if (all_changed || header_changed || footer_changed || battery_changed) {
+                if (g_show_theme_controls) {
+                    if (header_changed || battery_changed) {
+                        if (strlen(title_str) > 0) {
+                            drawInfoPanel(screen, video, title_str, message_str);
                         }
-                        theme_renderHeader(
-                            screen,
-                            file_removeExtension(basename(current_image_path)),
-                            false);
+                        else if (g_images_titles) {
+                            const char *title = g_images_titles[g_image_index];
+                            theme_renderHeader(screen, title, !title);
+                        }
+                        else {
+                            char *current_image_path = image_path;
+                            if (g_images_paths_count > 0 && g_images_paths &&
+                                g_image_index >= 0) {
+                                current_image_path = g_images_paths[g_image_index];
+                            }
+                            theme_renderHeader(
+                                screen,
+                                file_removeExtension(basename(current_image_path)),
+                                false);
+                        }
+                    }
+
+                    if (footer_changed) {
+                        theme_renderFooter(screen);
+
+                        const char *a_btn_text = lang_get(LANG_NEXT, LANG_FALLBACK_NEXT);
+                        const char *b_btn_text = lang_get(LANG_BACK, LANG_FALLBACK_BACK);
+
+                        if (info_panel_mode || g_images_paths_count == 1) {
+                            a_btn_text = lang_get(LANG_OK, LANG_FALLBACK_OK);
+                            b_btn_text = lang_get(LANG_CANCEL, LANG_FALLBACK_CANCEL);
+                        }
+                        else if (g_image_index == g_images_paths_count - 1) {
+                            a_btn_text = lang_get(LANG_EXIT, LANG_FALLBACK_EXIT);
+                        }
+                        else if (g_image_index == 0) {
+                            b_btn_text = lang_get(LANG_EXIT, LANG_FALLBACK_EXIT);
+                        }
+
+                        if (wait_confirm)
+                            theme_renderStandardHint(screen, a_btn_text, b_btn_text);
+                    }
+
+                    if (footer_changed && !info_panel_mode &&
+                        g_images_paths_count > 1)
+                        theme_renderFooterStatus(screen, g_image_index + 1, g_images_paths_count);
+
+                    if (header_changed || battery_changed)
+                        theme_renderHeaderBattery(screen, battery_percentage);
+
+                    if (header_changed || footer_changed || battery_changed) {
+                        SDL_BlitSurface(screen, NULL, video, NULL);
+                        SDL_Flip(video);
                     }
                 }
-
-                if (footer_changed) {
-                    theme_renderFooter(screen);
-                    const char *a_btn_text =
-                        lang_get(LANG_NEXT, LANG_FALLBACK_NEXT);
-                    const char *b_btn_text =
-                        lang_get(LANG_BACK, LANG_FALLBACK_BACK);
-                    if (info_panel_mode || g_images_paths_count == 1) {
-                        a_btn_text = lang_get(LANG_OK, LANG_FALLBACK_OK);
-                        b_btn_text =
-                            lang_get(LANG_CANCEL, LANG_FALLBACK_CANCEL);
-                    }
-                    else if (g_image_index == g_images_paths_count - 1) {
-                        a_btn_text = lang_get(LANG_EXIT, LANG_FALLBACK_EXIT);
-                    }
-                    else if (g_image_index == 0) {
-                        b_btn_text = lang_get(LANG_EXIT, LANG_FALLBACK_EXIT);
-                    }
-                    if (wait_confirm)
-                        theme_renderStandardHint(screen, a_btn_text,
-                                                 b_btn_text);
-                }
-
-                if (footer_changed && !info_panel_mode &&
-                    g_images_paths_count > 1)
-                    theme_renderFooterStatus(screen, g_image_index + 1,
-                                             g_images_paths_count);
-
-                if (header_changed || battery_changed)
-                    theme_renderHeaderBattery(screen, battery_percentage);
-
-                if (header_changed || footer_changed || battery_changed) {
+                else {
                     SDL_BlitSurface(screen, NULL, video, NULL);
                     SDL_Flip(video);
                 }
@@ -407,13 +401,9 @@ int main(int argc, char *argv[])
                 footer_changed = false;
                 battery_changed = false;
                 all_changed = false;
-
-                acc_ticks -= time_step;
             }
-        }
-        else {
-            SDL_BlitSurface(screen, NULL, video, NULL);
-            SDL_Flip(video);
+
+            acc_ticks -= time_step;
         }
         msleep(4);
 

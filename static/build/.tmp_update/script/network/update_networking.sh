@@ -52,6 +52,11 @@ main() {
 # Standard check from runtime for startup.
 check() {
     log "Network Checker: Update networking"
+
+    if wifi_enabled; then
+        bootScreen Boot "Waiting for network..."
+    fi
+
     check_wifi
     check_ftpstate
     check_sshstate
@@ -61,9 +66,21 @@ check() {
     check_smbdstate
 
     if flag_enabled ntpWait; then
+        bootScreen Boot "Syncing time..."
         sync_time
     else
         sync_time &
+    fi
+
+    if flag_enabled checkUpdates; then
+        bootScreen Boot "Checking for updates..."
+        $sysdir/script/ota_update.sh check
+        if [ $? -eq 0 ]; then
+            bootScreen Boot "Update available!"
+        else
+            bootScreen Boot "Version is up to date"
+        fi
+        sleep 2
     fi
 }
 

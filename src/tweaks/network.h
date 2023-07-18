@@ -39,6 +39,7 @@ static struct network_s {
     bool auth_http;
     bool auth_ssh;
     bool manual_tz;
+    bool check_updates;
     bool loaded;
 } network_state;
 
@@ -59,6 +60,7 @@ void network_loadState(void)
     network_state.auth_http = config_flag_get(".authhttpState");
     network_state.auth_ssh = config_flag_get(".authsshState");
     network_state.manual_tz = config_flag_get(".manual_tz");
+    network_state.check_updates = config_flag_get(".checkUpdates");
     network_state.loaded = true;
 }
 
@@ -281,6 +283,11 @@ void network_setNtpState(void *pt)
 void network_setNtpWaitState(void *pt)
 {
     network_setState(&network_state.ntp_wait, ".ntpWait", ((ListItem *)pt)->value);
+}
+
+void network_setCheckUpdates(void *pt)
+{
+    network_setState(&network_state.check_updates, ".checkUpdates", ((ListItem *)pt)->value);
 }
 
 void network_setSmbdAuthState(void *pt)

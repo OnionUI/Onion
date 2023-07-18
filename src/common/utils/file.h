@@ -95,4 +95,6 @@ void file_changeKeyValue(const char *file_path, const char *key,
 
 bool file_path_relative_to(char *path_out, const char *path_from, const char *path_to);
 
+FILE *file_open_ensure_path(const char *path, const char *mode);
+
 #endif // UTILS_FILE_H__

@@ -1,6 +1,6 @@
 {
-	"label":	"Onion OTA update",
-	"icon":	"/mnt/SDCARD/Icons/Default/app/otaupdate.png",
-	"launch":	"launch.sh",
-	"description":	"Update Onion over internet"
+	"label": "Onion OTA update",
+	"icon": "/mnt/SDCARD/Icons/Default/app/pacman.png",
+	"launch": "launch.sh",
+	"description": "Update Onion over internet"
 }
