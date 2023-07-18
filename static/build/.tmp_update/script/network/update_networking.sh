@@ -430,12 +430,33 @@ sync_time() {
         attempts=0
         max_attempts=20
         ret_val=1
+
+        # wait for udhcpc for doing it's thing before we start 
+        # we could probably also not background udhcpc, but that'd need more testing
+        while [ $attempts -lt $max_attempts ]; do
+            ip=$(ifconfig wlan0 | grep 'inet addr:' | cut -d: -f2| cut -d' ' -f1)
+            if [ -z $ip]; then
+                attempts=$((attempts + 1))
+                log "NTPwait: Waiting for IP address since $attempts seconds"
+                if [ $attempts -ge $max_attempts ]; then
+                    log "NTPwait: Could not aquire an IP address"
+                    ret_val=1
+                    rm /tmp/ntp_run_once
+                    return "$ret_val"
+                fi
+            else
+				log "NTPwait: IP address aquired: $ip"
+                break
+            fi
+            sleep 1
+        done
+
+        attempts=0
         while true; do
             if [ -f /tmp/ntp_synced ] && [ ! -f /tmp/ntp_run_once ]; then
                 break
             fi
-            log "NTPwait: Attempt $attempts"
-
+            log "NTPwait: get_time attempt $attempts"
             if ping -q -c 1 google.com > /dev/null 2>&1; then
                 if get_time; then
                     ret_val=0
