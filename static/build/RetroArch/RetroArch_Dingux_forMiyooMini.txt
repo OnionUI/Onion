@@ -1,6 +1,8 @@
-RetroArch 1.14.0 (dingux build) for miyoomini
+RetroArch 1.15.0 (dingux build) for miyoomini / miyoomini+
 
 Based on the dingux version of RetroArch, with video/audio/input driver customized for miyoomini
+Cores are not included in the package, provide your own
+
 Specific differences from the dingux version are described below
 
 ---- Video, Scaling ----
@@ -65,7 +67,7 @@ oss:	Modified OSS driver exclusively for miyoomini
 sdl:	customSDL is used when AudioFix:OFF, stockSDL is used when AudioFix:ON
 	latancy changes from a minimum of 10 ms in increments of about 5 ms
 	Timing is a little rough, that makes judder a bit but slightly faster
-	Recommended to turn ON the VSync setting for Video (reduces judder)
+	Recommended to turn ON the VSync or GSync setting for Video (reduces judder)
 
 The latency default is 64 ms, a comfortable value with all drivers
 
@@ -75,6 +77,7 @@ To play sound with AudioFix:ON, set audio driver to oss or sdl and latancy to at
 However, due to the audioserver spec, the actual latancy is 340ms(fixed) + setting value, which is quite laggy,
 and it also increases judder when scrolling, but a solution to this latency problem is available now (latency_reduction.zip)
 With this, the latency setting can be lower than 96ms, read the readme in the zip for instructions on how to use
+*NOTE* From mini+, latency_reduction feature is built in and is no longer necessary to use
 
 ---- Input, Rumble ----
 
@@ -90,7 +93,13 @@ Settings > Input > Haptic Feedback/Vibration > Vibration Strength
 Vibration strength varies greatly depending on the production lot of the miyoomini,
 for devices that vibrate to the maximum, a setting of about 20% seems optimal
 
----- Multilingual support ----
+---- CPU Overclock/Underclock ---- (from 230416)
 
-If you want to make it multilingual, modify launch.sh or rename the executable to use retroarch_multilang
-But it is about 4MB larger, so it will consume more memory and increase startup time
+CPU clock is now set to the setting value during emulation if cpuclock.txt is placed in the same location as the retroarch binary
+
+The content is simply a 4-digit number(MHz), accepted from 100 to 2400
+miyoomini becomes unstable beyond about 1700, mini+ becomes unstable beyond about 2000, but check for yourself as there may be individual differences
+In case of miyoomini, if the device hangs beyond acceptable limits, the power button will not work and the battery should be removed
+For miyoomini+, press and hold the power button more than 6 seconds to shutdown
+
+If set below 1200, the emulator runs at a lower clock than stock (underclock).
