@@ -44,8 +44,17 @@ void menu_systemDisplay(void *_)
 void menu_systemStartup(void *_)
 {
     if (!_menu_system_startup._created) {
-        _menu_system_startup = list_create(3, LIST_SMALL);
-        strcpy(_menu_system_startup.title, "Startup");
+        _menu_system_startup = list_create_with_title(4, LIST_SMALL, "Startup");
+
+        if (DEVICE_ID == MIYOO354) {
+            list_addItem(&_menu_system_startup,
+                         (ListItem){
+                             .label = "Check for updates",
+                             .item_type = TOGGLE,
+                             .disabled = !settings.wifi_on,
+                             .value = (int)network_state.check_updates,
+                             .action = network_setCheckUpdates});
+        }
         list_addItem(&_menu_system_startup,
                      (ListItem){
                          .label = "Auto-resume last game",

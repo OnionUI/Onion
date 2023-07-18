@@ -21,7 +21,7 @@ main() {
 
     # Remount passwd/group to add our own users
     mount -o bind $sysdir/config/passwd /etc/passwd
-    mount -o bind $sysdir/config/group  /etc/group 
+    mount -o bind $sysdir/config/group /etc/group
 
     # Start the battery monitor
     batmon &
@@ -534,6 +534,8 @@ start_networking() {
 
     touch /tmp/network_changed
     sync
+
+    check_networking
 }
 
 check_networking() {
