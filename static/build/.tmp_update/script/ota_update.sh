@@ -198,7 +198,10 @@ apply_update() {
 	clear
 	if [ "$Mychoice" = "Yes" ]; then
 		echo "Applying update... "
+
+		umount /mnt/SDCARD/miyoo/app/MainUI 2> /dev/null
 		/mnt/SDCARD/.tmp_update/bin/freemma > NUL
+
 		# unzip -o "$sysdir/download/$Release_Version.zip" -d "/mnt/SDCARD"
 		7z x -aoa -o"/mnt/SDCARD" "$sysdir/download/$Release_Version.zip"
 
