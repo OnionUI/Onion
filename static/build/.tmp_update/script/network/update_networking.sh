@@ -67,7 +67,7 @@ check() {
 
     if wifi_enabled && flag_enabled ntpWait; then
         bootScreen Boot "Syncing time..."
-        sync_time && bootScreen Boot "Time synced! $(date)" || bootScreen Boot "Time sync failed!"
+        sync_time && bootScreen Boot "Time synced! $(date +"%H:%M")" || bootScreen Boot "Time sync failed!"
     else
         sync_time &
     fi
