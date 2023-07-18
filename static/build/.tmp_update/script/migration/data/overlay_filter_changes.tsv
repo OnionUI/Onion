@@ -1,0 +1,410 @@
+D	filters/video/GB-GBC/Dot Matrix 4x/Dot_Matrix_4x.filt
+D	filters/video/GB-GBC/Dot Matrix 4x/Dot_Matrix_4x_Dark_Grid.filt
+D	filters/video/GB-GBC/Dot Matrix 4x/Dot_Matrix_4x_GB_DMG_Grid.filt
+D	filters/video/GB-GBC/Dot Matrix 4x/Dot_Matrix_4x_GB_Greenscale_Grid.filt
+D	filters/video/GB-GBC/Dot Matrix 4x/Dot_Matrix_4x_GB_Light_Grid.filt
+D	filters/video/GB-GBC/Dot Matrix 4x/Dot_Matrix_4x_GB_Pocket_Grid.filt
+D	filters/video/GB-GBC/Dot Matrix 4x/Dot_Matrix_4x_GB_TI-83_Grid.filt
+D	filters/video/GB-GBC/Dot Matrix 4x/dot_matrix_4x.so
+D	filters/video/GB-GBC/Gameboy4x/Gameboy4x_DMG.filt
+D	filters/video/GB-GBC/Gameboy4x/Gameboy4x_Greenscale.filt
+D	filters/video/GB-GBC/Gameboy4x/Gameboy4x_Light.filt
+D	filters/video/GB-GBC/Gameboy4x/Gameboy4x_Pocket.filt
+D	filters/video/GB-GBC/Gameboy4x/Gameboy4x_TI-83.filt
+D	filters/video/GB-GBC/Gameboy4x/gameboy4x.so
+M	filters/video/GBA/Filters for overlays/GBAOffset.filt	filters/video/GBA/Filter for overlays/GBAOffset.filt
+A	filters/video/GBA/Filter for overlays/gbaoffset.so
+D	filters/video/GBA/Filters for overlays/gbaoffset.so
+M	filters/video/Grid2x.filt	filters/video/Grids/Grid2x.filt
+M	filters/video/Grid3x.filt	filters/video/Grids/Grid3x.filt
+M	filters/video/LCD2x/LCD2x.filt	filters/video/Grids/LCD2x/LCD2x.filt
+M	filters/video/LCD2x/LCD2x_dark.filt	filters/video/Grids/LCD2x/LCD2x_dark.filt
+M	filters/video/LCD2x/LCD2x_light.filt	filters/video/Grids/LCD2x/LCD2x_light.filt
+M	filters/video/LCD2x/lcd2x.so	filters/video/Grids/LCD2x/lcd2x.so
+M	filters/video/LCD2x/lcd2x_dark.so	filters/video/Grids/LCD2x/lcd2x_dark.so
+M	filters/video/LCD2x/lcd2x_light.so	filters/video/Grids/LCD2x/lcd2x_light.so
+M	filters/video/LCD3x/LCD3x_dark.filt	filters/video/Grids/LCD3x/LCD3x_dark.filt
+M	filters/video/LCD3x/LCD3x_light.filt	filters/video/Grids/LCD3x/LCD3x_light.filt
+M	filters/video/LCD3x/LCD3x_mosaic.filt	filters/video/Grids/LCD3x/LCD3x_mosaic.filt
+M	filters/video/LCD3x/LCD3x_stripe.filt	filters/video/Grids/LCD3x/LCD3x_stripe.filt
+M	filters/video/LCD3x/lcd3x_dark.so	filters/video/Grids/LCD3x/lcd3x_dark.so
+M	filters/video/LCD3x/lcd3x_light.so	filters/video/Grids/LCD3x/lcd3x_light.so
+M	filters/video/LCD3x/lcd3x_mosaic.so	filters/video/Grids/LCD3x/lcd3x_mosaic.so
+M	filters/video/LCD3x/lcd3x_stripe.so	filters/video/Grids/LCD3x/lcd3x_stripe.so
+M	filters/video/grid2x.so	filters/video/Grids/grid2x.so
+M	filters/video/grid3x.so	filters/video/Grids/grid3x.so
+M	filters/video/Normal2x/Normal2x.filt	filters/video/Normal/Normal2x.filt
+M	filters/video/Normal2x/Normal2x_Height.filt	filters/video/Normal/Normal2x_Height.filt
+M	filters/video/Normal2x/Normal2x_Width.filt	filters/video/Normal/Normal2x_Width.filt
+M	filters/video/Normal3x.filt	filters/video/Normal/Normal3x.filt
+M	filters/video/Normal4x.filt	filters/video/Normal/Normal4x.filt
+M	filters/video/Normal2x/normal2x.so	filters/video/Normal/normal2x.so
+M	filters/video/Normal2x/normal2x_height.so	filters/video/Normal/normal2x_height.so
+M	filters/video/Normal2x/normal2x_width.so	filters/video/Normal/normal2x_width.so
+M	filters/video/normal3x.so	filters/video/Normal/normal3x.so
+M	filters/video/normal4x.so	filters/video/Normal/normal4x.so
+A	filters/video/Offset_Custom/Offset_up10px.filt
+A	filters/video/Offset_Custom/Offset_up8px.filt
+A	filters/video/Offset_Custom/offset_up.so
+A	filters/video/Offset_Custom/readme.txt
+M	filters/video/2xBR.filt	filters/video/Upscale/2xBR.filt
+M	filters/video/2xSaI.filt	filters/video/Upscale/2xSaI.filt
+M	filters/video/2xbr.so	filters/video/Upscale/2xbr.so
+M	filters/video/2xsai.so	filters/video/Upscale/2xsai.so
+M	filters/video/EPX.filt	filters/video/Upscale/EPX.filt
+M	filters/video/LQ2x.filt	filters/video/Upscale/LQ2x.filt
+M	filters/video/epx.so	filters/video/Upscale/epx.so
+M	filters/video/lq2x.so	filters/video/Upscale/lq2x.so
+M	overlay/CRT/CRT_Basic.cfg	overlay/4-3/CRT/CRT_Basic.cfg
+A	overlay/4-3/CRT/CRT_Basic.png
+M	overlay/CRT/CRT_Checkerboard.cfg	overlay/4-3/CRT/CRT_Checkerboard.cfg
+A	overlay/4-3/CRT/CRT_Checkerboard.png
+M	overlay/CRT/CRT_Matrix.cfg	overlay/4-3/CRT/CRT_Matrix.cfg
+A	overlay/4-3/CRT/CRT_Matrix.png
+M	overlay/CRT/CRT_Scanlines.cfg	overlay/4-3/CRT/CRT_Scanlines.cfg
+A	overlay/4-3/CRT/CRT_Scanlines.png
+M	overlay/CRT/CRT_Scanlines_Colored.cfg	overlay/4-3/CRT/CRT_Scanlines_Colored.cfg
+A	overlay/4-3/CRT/CRT_Scanlines_Colored.png
+M	overlay/FC/horizontal-phosphors.cfg	overlay/4-3/CRT/horizontal-phosphors.cfg
+M	overlay/FC/horizontal-phosphors.png	overlay/4-3/CRT/horizontal-phosphors.png
+M	overlay/FC/horizontal-rgb.cfg	overlay/4-3/CRT/horizontal-rgb.cfg
+M	overlay/FC/horizontal-rgb.png	overlay/4-3/CRT/horizontal-rgb.png
+M	overlay/CRT/CRT_FrameOnly.cfg	overlay/4-3/Frames/CRT_FrameOnly.cfg
+A	overlay/4-3/Frames/CRT_FrameOnly.png
+M	overlay/bezels/arcade/default.cfg	overlay/4-3/Frames/default.cfg
+M	overlay/bezels/arcade/default.png	overlay/4-3/Frames/default.png
+M	overlay/FC/horizontal.cfg	overlay/4-3/Frames/horizontal.cfg
+M	overlay/FC/horizontal.png	overlay/4-3/Frames/horizontal.png
+M	overlay/FC/horizontal0.cfg	overlay/4-3/Frames/horizontal0.cfg
+M	overlay/FC/horizontal0.png	overlay/4-3/Frames/horizontal0.png
+M	overlay/Scanlines and Grids/Grid_2px_25.cfg	overlay/4-3/Grids_Scanlines/Grid_2px_25.cfg
+M	overlay/Scanlines and Grids/Grid_2px_25.png	overlay/4-3/Grids_Scanlines/Grid_2px_25.png
+A	overlay/4-3/Grids_Scanlines/Grid_GameGear_4x3_20.cfg
+A	overlay/4-3/Grids_Scanlines/Grid_GameGear_4x3_20.png
+M	overlay/Scanlines and Grids/Scanline_2px_100.cfg	overlay/4-3/Grids_Scanlines/Scanline_2px_100.cfg
+M	overlay/Scanlines and Grids/Scanline_2px_100.png	overlay/4-3/Grids_Scanlines/Scanline_2px_100.png
+M	overlay/Scanlines and Grids/Scanline_2px_100_Vignette.cfg	overlay/4-3/Grids_Scanlines/Scanline_2px_100_Vignette.cfg
+M	overlay/Scanlines and Grids/Scanline_2px_100_Vignette.png	overlay/4-3/Grids_Scanlines/Scanline_2px_100_Vignette.png
+M	overlay/Scanlines and Grids/Scanline_2px_50.cfg	overlay/4-3/Grids_Scanlines/Scanline_2px_50.cfg
+M	overlay/Scanlines and Grids/Scanline_2px_50.png	overlay/4-3/Grids_Scanlines/Scanline_2px_50.png
+M	overlay/Scanlines and Grids/Scanline_2px_50_Vignette.cfg	overlay/4-3/Grids_Scanlines/Scanline_2px_50_Vignette.cfg
+M	overlay/Scanlines and Grids/Scanline_2px_50_Vignette.png	overlay/4-3/Grids_Scanlines/Scanline_2px_50_Vignette.png
+M	overlay/Scanlines and Grids/Scanline_3px_100.cfg	overlay/4-3/Grids_Scanlines/Scanline_3px_100.cfg
+M	overlay/Scanlines and Grids/Scanline_3px_100.png	overlay/4-3/Grids_Scanlines/Scanline_3px_100.png
+M	overlay/Scanlines and Grids/Scanline_3px_100_Vignette.cfg	overlay/4-3/Grids_Scanlines/Scanline_3px_100_Vignette.cfg
+M	overlay/Scanlines and Grids/Scanline_3px_100_Vignette.png	overlay/4-3/Grids_Scanlines/Scanline_3px_100_Vignette.png
+M	overlay/Scanlines and Grids/Scanline_3px_50.cfg	overlay/4-3/Grids_Scanlines/Scanline_3px_50.cfg
+M	overlay/Scanlines and Grids/Scanline_3px_50.png	overlay/4-3/Grids_Scanlines/Scanline_3px_50.png
+M	overlay/Scanlines and Grids/Scanline_3px_50_Vignette.cfg	overlay/4-3/Grids_Scanlines/Scanline_3px_50_Vignette.cfg
+M	overlay/Scanlines and Grids/Scanline_3px_50_Vignette.png	overlay/4-3/Grids_Scanlines/Scanline_3px_50_Vignette.png
+M	overlay/FC/FC_miyoo.cfg	overlay/8-7/Scanline Frames/FC_miyoo.cfg
+M	overlay/FC/FC_miyoo.png	overlay/8-7/Scanline Frames/FC_miyoo.png
+M	overlay/FC/Hitachi37.cfg	overlay/8-7/Scanline Frames/Hitachi37.cfg
+M	overlay/FC/Hitachi37.png	overlay/8-7/Scanline Frames/Hitachi37.png
+M	overlay/FC/crtsony2950.cfg	overlay/8-7/Scanline Frames/crtsony2950.cfg
+M	overlay/FC/crtsony2950.png	overlay/8-7/Scanline Frames/crtsony2950.png
+M	overlay/FC/crtxsq.cfg	overlay/8-7/Scanline Frames/crtxsq.cfg
+M	overlay/FC/crtxsq.png	overlay/8-7/Scanline Frames/crtxsq.png
+M	overlay/FC/oldtv.cfg	overlay/8-7/Scanline Frames/oldtv.cfg
+M	overlay/FC/oldtv.png	overlay/8-7/Scanline Frames/oldtv.png
+M	overlay/FC/PCE.cfg	overlay/8-7/System Frames/PCE.cfg
+M	overlay/FC/PCE.png	overlay/8-7/System Frames/PCE.png
+M	overlay/FC/SFC.cfg	overlay/8-7/System Frames/SFC.cfg
+M	overlay/FC/SFC.png	overlay/8-7/System Frames/SFC.png
+M	overlay/FC/md.cfg	overlay/8-7/System Frames/md.cfg
+M	overlay/FC/md.png	overlay/8-7/System Frames/md.png
+M	overlay/FC/nes.cfg	overlay/8-7/System Frames/nes.cfg
+M	overlay/FC/nes.png	overlay/8-7/System Frames/nes.png
+M	overlay/FC/ps.cfg	overlay/8-7/System Frames/ps.cfg
+M	overlay/FC/ps.png	overlay/8-7/System Frames/ps.png
+M	overlay/FC/segams.cfg	overlay/8-7/System Frames/segams.cfg
+M	overlay/FC/segams.png	overlay/8-7/System Frames/segams.png
+M	overlay/FC/sfc1.cfg	overlay/8-7/System Frames/sfc1.cfg
+M	overlay/FC/sfc1.png	overlay/8-7/System Frames/sfc1.png
+A	overlay/Arcade-Vertical/CRT_Vertical.png
+M	overlay/FC/V-crt-miyoo.cfg	overlay/Arcade-Vertical/V-crt-miyoo.cfg
+M	overlay/FC/V-crt-miyoo.png	overlay/Arcade-Vertical/V-crt-miyoo.png
+M	overlay/FC/vertical-Ikaruga.cfg	overlay/Arcade-Vertical/vertical-Ikaruga.cfg
+M	overlay/FC/vertical-Ikaruga.png	overlay/Arcade-Vertical/vertical-Ikaruga.png
+M	overlay/FC/vertical-crt1.cfg	overlay/Arcade-Vertical/vertical-crt1.cfg
+M	overlay/FC/vertical-crt1.png	overlay/Arcade-Vertical/vertical-crt1.png
+M	overlay/FC/vertical-crt2.cfg	overlay/Arcade-Vertical/vertical-crt2.cfg
+M	overlay/FC/vertical-crt2.png	overlay/Arcade-Vertical/vertical-crt2.png
+M	overlay/FC/vertical-crt3.cfg	overlay/Arcade-Vertical/vertical-crt3.cfg
+M	overlay/FC/vertical-crt3.png	overlay/Arcade-Vertical/vertical-crt3.png
+M	overlay/FC/vertical1.cfg	overlay/Arcade-Vertical/vertical1.cfg
+M	overlay/FC/vertical1.png	overlay/Arcade-Vertical/vertical1.png
+M	overlay/FC/vertical2.cfg	overlay/Arcade-Vertical/vertical2.cfg
+M	overlay/FC/vertical2.png	overlay/Arcade-Vertical/vertical2.png
+M	overlay/FC/vertical3.cfg	overlay/Arcade-Vertical/vertical3.cfg
+M	overlay/FC/vertical3.png	overlay/Arcade-Vertical/vertical3.png
+M	overlay/FC/vertical4.cfg	overlay/Arcade-Vertical/vertical4.cfg
+M	overlay/FC/vertical4.png	overlay/Arcade-Vertical/vertical4.png
+D	overlay/CRT/CRT_Basic.png
+D	overlay/CRT/CRT_Checkerboard.png
+D	overlay/CRT/CRT_FrameOnly.png
+D	overlay/CRT/CRT_Matrix.png
+D	overlay/CRT/CRT_Scanlines.png
+D	overlay/CRT/CRT_Scanlines_2x.png
+D	overlay/CRT/CRT_Scanlines_Colored.png
+D	overlay/CRT/CRT_VerticalChecker.png
+D	overlay/CRT/CRT_VerticalChecker_Dark.png
+D	overlay/FC/H-crt.png
+D	overlay/FC/horizontal-cool.cfg
+D	overlay/FC/horizontal-cool.png
+D	overlay/FC/horizontal-crt.cfg
+D	overlay/FC/horizontal-crt.png
+M	overlay/GB-GBC/GBL.cfg	overlay/GB-GBC/Colorcast/GBL.cfg
+M	overlay/GB-GBC/GBL.png	overlay/GB-GBC/Colorcast/GBL.png
+M	overlay/GB-GBC/GBL_grid.cfg	overlay/GB-GBC/Colorcast/GBL_grid.cfg
+M	overlay/GB-GBC/GBL_grid.png	overlay/GB-GBC/Colorcast/GBL_grid.png
+M	overlay/GB-GBC/PAL GBL.cfg	overlay/GB-GBC/Colorcast/PAL GBL.cfg
+M	overlay/GB-GBC/PAL GBL.png	overlay/GB-GBC/Colorcast/PAL GBL.png
+M	overlay/GB-GBC/gbl_red_70.cfg	overlay/GB-GBC/Colorcast/gbl_red_70.cfg
+M	overlay/GB-GBC/gbl_red_70.png	overlay/GB-GBC/Colorcast/gbl_red_70.png
+M	overlay/GB-GBC/gbl_red_70_grid.cfg	overlay/GB-GBC/Colorcast/gbl_red_70_grid.cfg
+M	overlay/GB-GBC/gbl_red_70_grid.png	overlay/GB-GBC/Colorcast/gbl_red_70_grid.png
+M	overlay/GB-GBC/DMG-480P-mini.cfg	overlay/GB-GBC/Frame-Grid/DMG-480P-mini.cfg
+M	overlay/GB-GBC/DMG-480P-mini.png	overlay/GB-GBC/Frame-Grid/DMG-480P-mini.png
+M	overlay/GB-GBC/GB-shadow.cfg	overlay/GB-GBC/Frame-Grid/GB-shadow.cfg
+M	overlay/GB-GBC/GB-shadow2.cfg	overlay/GB-GBC/Frame-Grid/GB-shadow2.cfg
+M	"./overlay/GB-GBC/GBC-100%\346\267\261.cfg"	"./overlay/GB-GBC/Frame-Grid/GBC-100%\346\267\261.cfg"
+M	"./overlay/GB-GBC/GBC-100%\346\267\261.png"	"./overlay/GB-GBC/Frame-Grid/GBC-100%\346\267\261.png"
+M	overlay/GB-GBC/GBC-480P-final.cfg	overlay/GB-GBC/Frame-Grid/GBC-480P-final.cfg
+M	overlay/GB-GBC/GBC-480P-final.png	overlay/GB-GBC/Frame-Grid/GBC-480P-final.png
+M	"./overlay/GB-GBC/GBC-70%\346\267\261.cfg"	"./overlay/GB-GBC/Frame-Grid/GBC-70%\346\267\261.cfg"
+M	"./overlay/GB-GBC/GBC-70%\346\267\261.png"	"./overlay/GB-GBC/Frame-Grid/GBC-70%\346\267\261.png"
+M	overlay/GB-GBC/GBCL.cfg	overlay/GB-GBC/Frame-Grid/GBCL.cfg
+M	overlay/GB-GBC/GBCL.png	overlay/GB-GBC/Frame-Grid/GBCL.png
+M	overlay/GB-GBC/GBCL_grid.cfg	overlay/GB-GBC/Frame-Grid/GBCL_grid.cfg
+M	overlay/GB-GBC/GBCL_grid.png	overlay/GB-GBC/Frame-Grid/GBCL_grid.png
+M	overlay/GB-GBC/GB_sticker_grid.cfg	overlay/GB-GBC/Frame-Grid/GB_sticker_grid.cfg
+M	overlay/GB-GBC/GB_sticker_grid.png	overlay/GB-GBC/Frame-Grid/GB_sticker_grid.png
+M	overlay/GB-GBC/PAL GBP+D20.cfg	overlay/GB-GBC/Frame-Grid/PAL GBP+D20.cfg
+M	overlay/GB-GBC/PAL GBP+D20.png	overlay/GB-GBC/Frame-Grid/PAL GBP+D20.png
+M	overlay/GB-GBC/gb_grid.cfg	overlay/GB-GBC/Frame-Grid/gb_grid.cfg
+M	overlay/GB-GBC/gb_grid.png	overlay/GB-GBC/Frame-Grid/gb_grid.png
+M	overlay/GB-GBC/gb_grid_2.cfg	overlay/GB-GBC/Frame-Grid/gb_grid_2.cfg
+M	overlay/GB-GBC/gb_grid_2.png	overlay/GB-GBC/Frame-Grid/gb_grid_2.png
+M	overlay/GB-GBC/gbshadow.png	overlay/GB-GBC/Frame-Grid/gbshadow.png
+M	overlay/GB-GBC/gbshadow2.png	overlay/GB-GBC/Frame-Grid/gbshadow2.png
+M	overlay/GB-GBC/GB.cfg	overlay/GB-GBC/Frame/GB.cfg
+M	overlay/GB-GBC/GB.png	overlay/GB-GBC/Frame/GB.png
+M	overlay/GB-GBC/GB_sticker.cfg	overlay/GB-GBC/Frame/GB_sticker.cfg
+M	overlay/GB-GBC/GB_sticker.png	overlay/GB-GBC/Frame/GB_sticker.png
+M	overlay/bezels/gbc/default.png	overlay/GB-GBC/Frame/default2.png
+D	overlay/GB-GBC/GBC-grid.cfg
+D	overlay/GB-GBC/GBC-grid.png
+D	overlay/GB-GBC/GBC.cfg
+D	overlay/GB-GBC/GBC.png
+D	overlay/GB-GBC/GBCL1.cfg
+D	overlay/GB-GBC/GBCL1.png
+D	overlay/GB-GBC/GBC_grid.cfg
+D	overlay/GB-GBC/GBC_grid.png
+A	overlay/GB-GBC/Offset_(filter-required)/DMG_GBP.png
+M	overlay/GB-GBC/GBOffset (filter required)/GBP_Black.png	overlay/GB-GBC/Offset_(filter-required)/DMG_GBP_Noise.png
+A	overlay/GB-GBC/Offset_(filter-required)/GBC.png
+M	overlay/GB-GBC/GBOffset (filter required)/GBC_Black.cfg	overlay/GB-GBC/Offset_(filter-required)/GBC_Black.cfg
+M	overlay/GB-GBC/GBOffset (filter required)/GBC_Black.png	overlay/GB-GBC/Offset_(filter-required)/GBC_Black.png
+M	overlay/GB-GBC/GBOffset (filter required)/GBP_Black.cfg	overlay/GB-GBC/Offset_(filter-required)/GBP_Black.cfg
+A	overlay/GB-GBC/Offset_(filter-required)/GBP_Black.png
+M	overlay/GB-GBC/GB+TM1+GBP.cfg	overlay/GB-GBC/Photoreal/GB+TM1+GBP.cfg
+M	overlay/GB-GBC/GB+TM1+GBP.png	overlay/GB-GBC/Photoreal/GB+TM1+GBP.png
+M	overlay/GB-GBC/GB+TM1.cfg	overlay/GB-GBC/Photoreal/GB+TM1.cfg
+M	overlay/GB-GBC/GB+TM1.png	overlay/GB-GBC/Photoreal/GB+TM1.png
+M	overlay/GB-GBC/GB+TM2+GBP.cfg	overlay/GB-GBC/Photoreal/GB+TM2+GBP.cfg
+M	overlay/GB-GBC/GB+TM2+GBP.png	overlay/GB-GBC/Photoreal/GB+TM2+GBP.png
+M	overlay/GB-GBC/GB+TM2.cfg	overlay/GB-GBC/Photoreal/GB+TM2.cfg
+M	overlay/GB-GBC/GB+TM2.png	overlay/GB-GBC/Photoreal/GB+TM2.png
+M	overlay/GB-GBC/GB+TM3.cfg	overlay/GB-GBC/Photoreal/GB+TM3.cfg
+M	overlay/GB-GBC/GB+TM3.png	overlay/GB-GBC/Photoreal/GB+TM3.png
+M	overlay/GB-GBC/GB+TM4.cfg	overlay/GB-GBC/Photoreal/GB+TM4.cfg
+M	overlay/GB-GBC/GB+TM4.png	overlay/GB-GBC/Photoreal/GB+TM4.png
+M	overlay/GB-GBC/GB+TM5.cfg	overlay/GB-GBC/Photoreal/GB+TM5.cfg
+M	overlay/GB-GBC/GB+TM5.png	overlay/GB-GBC/Photoreal/GB+TM5.png
+M	overlay/GB-GBC/GBL-480P-mini.cfg	overlay/GB-GBC/Photoreal/GBL-480P-mini.cfg
+M	overlay/GB-GBC/GBL-480P-mini.png	overlay/GB-GBC/Photoreal/GBL-480P-mini.png
+M	overlay/GB-GBC/GBP+g7TSH.cfg	overlay/GB-GBC/Photoreal/GBP+g7TSH.cfg
+M	overlay/GB-GBC/GBP+g7TSH.png	overlay/GB-GBC/Photoreal/GBP+g7TSH.png
+M	overlay/GB-GBC/GBP+g7TSL.cfg	overlay/GB-GBC/Photoreal/GBP+g7TSL.cfg
+M	overlay/GB-GBC/GBP+g7TSL.png	overlay/GB-GBC/Photoreal/GBP+g7TSL.png
+M	overlay/GB-GBC/GBP+g7TSZ.cfg	overlay/GB-GBC/Photoreal/GBP+g7TSZ.cfg
+M	overlay/GB-GBC/GBP+g7TSZ.png	overlay/GB-GBC/Photoreal/GBP+g7TSZ.png
+M	overlay/GB-GBC/GBP-480P-mini.cfg	overlay/GB-GBC/Photoreal/GBP-480P-mini.cfg
+M	overlay/GB-GBC/GBP-480P-mini.png	overlay/GB-GBC/Photoreal/GBP-480P-mini.png
+D	overlay/GB-GBC/Retroid_pocket.cfg
+D	overlay/GB-GBC/Retroid_pocket.png
+D	overlay/GB-GBC/Retroid_pocket_grid.cfg
+D	overlay/GB-GBC/Retroid_pocket_grid.png
+D	overlay/GB-GBC/anbernic.cfg
+D	overlay/GB-GBC/anbernic.png
+D	overlay/GB-GBC/anbernic_grid.cfg
+D	overlay/GB-GBC/anbernic_grid.png
+D	overlay/GB-GBC/gbshadow.cfg
+D	overlay/GB-GBC/redanbernic.cfg
+D	overlay/GB-GBC/redanbernic.png
+D	overlay/GB-GBC/redanbernic_grid.cfg
+D	overlay/GB-GBC/redanbernic_grid.png
+D	overlay/GB-GBC/retroid_light.cfg
+D	overlay/GB-GBC/retroid_light.png
+D	overlay/GB-GBC/retroid_light_grid.cfg
+D	overlay/GB-GBC/retroid_light_grid.png
+D	overlay/GBA/GBAOffset (filter required)/GBA_3x_BorderOnly.png
+D	overlay/GBA/GBAOffset (filter required)/GBA_3x_Grid_100.png
+D	overlay/GBA/GBAOffset (filter required)/GBA_3x_Grid_12.png
+D	overlay/GBA/GBAOffset (filter required)/GBA_3x_Grid_25.png
+D	overlay/GBA/GBAOffset (filter required)/GBA_3x_Grid_50.png
+D	overlay/GBA/GBAOffset (filter required)/GBA_3x_Grid_75.png
+D	overlay/GBA/GBAOffset (filter required)/GBA_3x_Scanline_100.png
+D	overlay/GBA/GBAOffset (filter required)/GBA_3x_Scanline_12.png
+D	overlay/GBA/GBAOffset (filter required)/GBA_3x_Scanline_25.png
+D	overlay/GBA/GBAOffset (filter required)/GBA_3x_Scanline_50.png
+D	overlay/GBA/GBAOffset (filter required)/GBA_3x_Scanline_75.png
+D	overlay/GBA/GBAOffset (filter required)/GBA_3x_Scanline_85.png
+D	overlay/GBA/GBA_2x_pixel.cfg
+D	overlay/GBA/GBA_2x_pixel.png
+M	overlay/bezels/gba/Nintendo-Game-Boy-Advance.png	overlay/GBA/Nintendo-Game-Boy-Advance.png
+M	overlay/GBA/GBAOffset (filter required)/GBA_3x_BorderOnly.cfg	overlay/GBA/Offset_(filter-required)/GBA_3x_BorderOnly.cfg
+A	overlay/GBA/Offset_(filter-required)/GBA_3x_BorderOnly.png
+M	overlay/GBA/GBAOffset (filter required)/GBA_3x_Grid_12.cfg	overlay/GBA/Offset_(filter-required)/GBA_3x_Grid_12.cfg
+A	overlay/GBA/Offset_(filter-required)/GBA_3x_Grid_12.png
+M	overlay/GBA/GBAOffset (filter required)/GBA_3x_Grid_25.cfg	overlay/GBA/Offset_(filter-required)/GBA_3x_Grid_25.cfg
+A	overlay/GBA/Offset_(filter-required)/GBA_3x_Grid_25.png
+M	overlay/GBA/GBAOffset (filter required)/GBA_3x_Grid_50.cfg	overlay/GBA/Offset_(filter-required)/GBA_3x_Grid_50.cfg
+A	overlay/GBA/Offset_(filter-required)/GBA_3x_Grid_50.png
+M	overlay/GBA/GBAOffset (filter required)/GBA_3x_Grid_75.cfg	overlay/GBA/Offset_(filter-required)/GBA_3x_Grid_75.cfg
+A	overlay/GBA/Offset_(filter-required)/GBA_3x_Grid_75.png
+M	overlay/GBA/GBAOffset (filter required)/GBA_3x_Scanline_100.cfg	overlay/GBA/Offset_(filter-required)/GBA_3x_Scanline_100.cfg
+A	overlay/GBA/Offset_(filter-required)/GBA_3x_Scanline_100.png
+M	overlay/GBA/GBAOffset (filter required)/GBA_3x_Scanline_12.cfg	overlay/GBA/Offset_(filter-required)/GBA_3x_Scanline_12.cfg
+A	overlay/GBA/Offset_(filter-required)/GBA_3x_Scanline_12.png
+M	overlay/GBA/GBAOffset (filter required)/GBA_3x_Scanline_25.cfg	overlay/GBA/Offset_(filter-required)/GBA_3x_Scanline_25.cfg
+A	overlay/GBA/Offset_(filter-required)/GBA_3x_Scanline_25.png
+M	overlay/GBA/GBAOffset (filter required)/GBA_3x_Scanline_50.cfg	overlay/GBA/Offset_(filter-required)/GBA_3x_Scanline_50.cfg
+A	overlay/GBA/Offset_(filter-required)/GBA_3x_Scanline_50.png
+M	overlay/GBA/GBAOffset (filter required)/GBA_3x_Scanline_75.cfg	overlay/GBA/Offset_(filter-required)/GBA_3x_Scanline_75.cfg
+A	overlay/GBA/Offset_(filter-required)/GBA_3x_Scanline_75.png
+M	overlay/GBA/GBAOffset (filter required)/GBA_3x_Scanline_85.cfg	overlay/GBA/Offset_(filter-required)/GBA_3x_Scanline_85.cfg
+A	overlay/GBA/Offset_(filter-required)/GBA_3x_Scanline_85.png
+D	overlay/GBA/sp-border.cfg
+D	overlay/GBA/sp-border.png
+A	overlay/GG/Frame-4x3/GG_blue_4x3.png
+A	overlay/GG/Frame-4x3/GG_red_4x3.png
+A	overlay/GG/Frame-4x3/Gamegear_neu_4x3.cfg
+A	overlay/GG/Frame-4x3/Gamegear_neu_4x3.png
+A	overlay/GG/Frame-4x3/gg_flat_4x3.png
+A	overlay/GG/Frame-Grid-4x3/GG_blue_grid_4x3.cfg
+A	overlay/GG/Frame-Grid-4x3/GG_blue_grid_4x3.png
+A	overlay/GG/Frame-Grid-4x3/GG_red_grid_4x3.cfg
+A	overlay/GG/Frame-Grid-4x3/GG_red_grid_4x3.png
+A	overlay/GG/Frame-Grid-4x3/Gamegear_neu_grid_4x3.cfg
+A	overlay/GG/Frame-Grid-4x3/Gamegear_neu_grid_4x3.png
+A	overlay/GG/Frame-Grid-4x3/gg_flat_grid_4x3.cfg
+A	overlay/GG/Frame-Grid-4x3/gg_flat_grid_4x3.png
+M	overlay/GG/GG-480P-final.cfg	overlay/GG/Frame-Grid/GG-480P-final.cfg
+M	overlay/GG/GG-480P-final.png	overlay/GG/Frame-Grid/GG-480P-final.png
+M	overlay/GG/GG_beat_up.cfg	overlay/GG/Frame-Grid/GG_beat_up.cfg
+M	overlay/GG/GG_beat_up.png	overlay/GG/Frame-Grid/GG_beat_up.png
+M	overlay/GG/GG_blue_grid.cfg	overlay/GG/Frame-Grid/GG_blue_grid.cfg
+M	overlay/GG/GG_blue_grid.png	overlay/GG/Frame-Grid/GG_blue_grid.png
+M	overlay/GG/GG_red_grid.cfg	overlay/GG/Frame-Grid/GG_red_grid.cfg
+M	overlay/GG/GG_red_grid.png	overlay/GG/Frame-Grid/GG_red_grid.png
+M	overlay/GG/Gamegear_neu_grid.cfg	overlay/GG/Frame-Grid/Gamegear_neu_grid.cfg
+M	overlay/GG/Gamegear_neu_grid.png	overlay/GG/Frame-Grid/Gamegear_neu_grid.png
+M	overlay/GG/gg_flat_grid.cfg	overlay/GG/Frame-Grid/gg_flat_grid.cfg
+M	overlay/GG/gg_flat_grid.png	overlay/GG/Frame-Grid/gg_flat_grid.png
+M	overlay/GG/GG_blue.cfg	overlay/GG/Frame/GG_blue.cfg
+M	overlay/GG/GG_blue.png	overlay/GG/Frame/GG_blue.png
+M	overlay/GG/GG_red.cfg	overlay/GG/Frame/GG_red.cfg
+M	overlay/GG/GG_red.png	overlay/GG/Frame/GG_red.png
+M	overlay/GG/Gamegear_neu.cfg	overlay/GG/Frame/Gamegear_neu.cfg
+M	overlay/GG/Gamegear_neu.png	overlay/GG/Frame/Gamegear_neu.png
+M	overlay/GG/gg_flat.cfg	overlay/GG/Frame/gg_flat.cfg
+M	overlay/GG/gg_flat.png	overlay/GG/Frame/gg_flat.png
+M	overlay/GG/LYNX-480P-final.cfg	overlay/LYNX/LYNX-480P-final.cfg
+M	overlay/GG/LYNX-480P-final.png	overlay/LYNX/LYNX-480P-final.png
+M	overlay/NGP/NGPOffset (filter required)/NGP_Black.cfg	overlay/NGP/Offest_(filter-required)/NGP_Black.cfg
+M	overlay/NGP/NGPOffset (filter required)/NGP_Black.png	overlay/NGP/Offest_(filter-required)/NGP_Black.png
+D	overlay/POKE/POKE.cfg
+D	overlay/POKE/POKE.png
+D	overlay/SUPERVISION/SUPERVISION.cfg
+D	overlay/SUPERVISION/SUPERVISION.png
+M	overlay/NGP/WSC-480P-scan.cfg	overlay/WS/WSC-480P-scan.cfg
+M	overlay/NGP/WSC-480P-scan.png	overlay/WS/WSC-480P-scan.png
+D	overlay/bezels/EmuELEC-1080.png
+D	overlay/bezels/EmuELEC-1080_sl.png
+D	overlay/bezels/EmuELEC-1080_sl_1px.png
+D	overlay/bezels/atomiswave/default.cfg
+D	overlay/bezels/atomiswave/default.png
+D	overlay/bezels/cps1/default.cfg
+D	overlay/bezels/cps1/default.png
+D	overlay/bezels/cps2/default.cfg
+D	overlay/bezels/cps2/default.png
+D	overlay/bezels/cps3/default.cfg
+D	overlay/bezels/cps3/default.png
+D	overlay/bezels/default.cfg
+D	overlay/bezels/dreamcast/default.cfg
+D	overlay/bezels/dreamcast/default.png
+D	overlay/bezels/famicom/default.cfg
+D	overlay/bezels/famicom/default.png
+D	overlay/bezels/fbneo/default.cfg
+D	overlay/bezels/fbneo/default.png
+D	overlay/bezels/fds/default.cfg
+D	overlay/bezels/fds/default.png
+D	overlay/bezels/gb/default.cfg
+D	overlay/bezels/gb/default.png
+D	overlay/bezels/gbah/Nintendo-Game-Boy-Advance.png
+D	overlay/bezels/gbah/default.cfg
+D	overlay/bezels/gbc/default.cfg
+D	overlay/bezels/gbch/default.cfg
+D	overlay/bezels/gbch/default.png
+D	overlay/bezels/gbh/default.cfg
+D	overlay/bezels/gbh/default.png
+D	overlay/bezels/genesis/default.cfg
+D	overlay/bezels/genesis/default.png
+D	overlay/bezels/genh/default.cfg
+D	overlay/bezels/genh/default.png
+D	overlay/bezels/mame/default.cfg
+D	overlay/bezels/mame/default.png
+D	overlay/bezels/megadrive/default.cfg
+D	overlay/bezels/megadrive/default.png
+D	overlay/bezels/n64/default.cfg
+D	overlay/bezels/n64/default.png
+D	overlay/bezels/naomi/default.cfg
+D	overlay/bezels/naomi/default.png
+D	overlay/bezels/neocd/default.cfg
+D	overlay/bezels/neocd/default.png
+D	overlay/bezels/neogeo/default.cfg
+D	overlay/bezels/neogeo/default.png
+D	overlay/bezels/nes/default.cfg
+D	overlay/bezels/nes/default.png
+D	overlay/bezels/nesh/default.cfg
+D	overlay/bezels/nesh/default.png
+D	overlay/bezels/pcengine/default.cfg
+D	overlay/bezels/pcengine/default.png
+D	overlay/bezels/pcenginecd/default.cfg
+D	overlay/bezels/pcenginecd/default.png
+D	overlay/bezels/pgm/default.cfg
+D	overlay/bezels/pgm/default.png
+D	overlay/bezels/psx/default.cfg
+D	overlay/bezels/psx/default.png
+D	overlay/bezels/saturn/default.cfg
+D	overlay/bezels/saturn/default.png
+D	overlay/bezels/sega32x/default.cfg
+D	overlay/bezels/sega32x/default.png
+D	overlay/bezels/segacd/default.cfg
+D	overlay/bezels/segacd/default.png
+D	overlay/bezels/sfc/default.cfg
+D	overlay/bezels/sfc/default.png
+D	overlay/bezels/snes/default.cfg
+D	overlay/bezels/snes/default.png
+D	overlay/bezels/snesh/default.cfg
+D	overlay/bezels/snesh/default.png
+D	overlay/bezels/supergrafx/default.cfg
+D	overlay/bezels/supergrafx/default.png
+D	overlay/bezels/tg16/default.cfg
+D	overlay/bezels/tg16/default.png
+D	overlay/bezels/varcade/default.cfg
+D	overlay/bezels/varcade/default.png
+D	overlay/bezels/vertical/default.cfg
+D	overlay/bezels/vertical/vertical.png
