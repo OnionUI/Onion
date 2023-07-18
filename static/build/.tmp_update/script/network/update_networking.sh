@@ -65,20 +65,20 @@ check() {
     check_httpstate
     check_smbdstate
 
-    if flag_enabled ntpWait; then
+    if wifi_enabled && flag_enabled ntpWait; then
         bootScreen Boot "Syncing time..."
         sync_time
     else
         sync_time &
     fi
 
-    if flag_enabled checkUpdates; then
+    if wifi_enabled && flag_enabled checkUpdates; then
         bootScreen Boot "Checking for updates..."
         $sysdir/script/ota_update.sh check
         if [ $? -eq 0 ]; then
             bootScreen Boot "Update available!"
         else
-            bootScreen Boot "Version is up to date"
+            bootScreen Boot "No update found"
         fi
         sleep 2
     fi
