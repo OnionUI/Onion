@@ -25,17 +25,18 @@ jobs:
     - name: Get version
       run: |
         echo "BUILD_VERSION=$(make version)" >> $GITHUB_ENV
-        echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+        echo "SHA_SHORT=$(git log -n 1 --pretty=format:"%h" origin/main)" >> $GITHUB_ENV
+        echo "Onion-v${{ env.BUILD_VERSION }}-snapshot-${{ env.SHA_SHORT }}"
     - name: Build release
       shell: bash
       run: |
         source /root/.bashrc
-        VERSION_OVERRIDE=${{ env.BUILD_VERSION }}-dev-${{ env.SHA_SHORT }} make release
+        VERSION_OVERRIDE=${{ env.BUILD_VERSION }}-snapshot-${{ env.SHA_SHORT }} make release
     - uses: marvinpinto/action-automatic-releases@latest
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         automatic_release_tag: latest
         prerelease: true
-        title: "Onion V${{ env.BUILD_VERSION }}-dev"
+        title: "Onion V${{ env.BUILD_VERSION }}"
         files: |
-          release/Onion-v${{ env.BUILD_VERSION }}-dev-${{ env.SHA_SHORT }}.zip
+          release/Onion-v${{ env.BUILD_VERSION }}-snapshot-${{ env.SHA_SHORT }}.zip
