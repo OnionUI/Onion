@@ -67,7 +67,7 @@ check() {
 
     if wifi_enabled && flag_enabled ntpWait; then
         bootScreen Boot "Syncing time..."
-        sync_time
+        sync_time && bootScreen Boot "Time synced! $(date)" || bootScreen Boot "Time sync failed!"
     else
         sync_time &
     fi
@@ -428,7 +428,7 @@ sync_time() {
     if [ -f "$sysdir/config/.ntpState" ] && wifi_enabled; then
         attempts=0
         max_attempts=20
-
+        ret_val=1
         while true; do
             if [ ! -f "/tmp/ntp_run_once" ]; then
                 break
@@ -436,20 +436,23 @@ sync_time() {
 
             if ping -q -c 1 google.com > /dev/null 2>&1; then
                 if get_time; then
+                    ret_val=0
                     touch /tmp/ntp_synced
                 fi
                 break
             fi
-
             attempts=$((attempts + 1))
+			log "NTPwait: Attempt $attempts"
             if [ $attempts -eq $max_attempts ]; then
                 log "NTPwait: Ran out of time before we could sync, stopping."
+                ret_val=1
                 break
             fi
             sleep 1
         done
         rm /tmp/ntp_run_once
     fi
+    return "$ret_val"
 }
 
 check_ntpstate() { # This function checks if the timezone has changed, we call this in the main loop.
@@ -463,6 +466,13 @@ check_ntpstate() { # This function checks if the timezone has changed, we call t
 
 get_time() { # handles 2 types of network time, instant from an API or longer from an NTP server, if the instant API checks fails it will fallback to the longer ntp
     log "NTP: started time update"
+
+    # get_time() is sometimes called to early - make sure we have connectivity
+    if ! ping -c 1 1.1.1.1; then
+        log "NTP: no internet connectivity - exiting"
+        return 1
+    fi
+
     response=$(curl -s --connect-timeout 3 http://worldtimeapi.org/api/ip.txt)
     utc_datetime=$(echo "$response" | grep -o 'utc_datetime: [^.]*' | cut -d ' ' -f2 | sed "s/T/ /")
     if ! flag_enabled "manual_tz"; then
