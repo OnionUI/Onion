@@ -23,11 +23,15 @@ jobs:
       with:
         fetch-depth: 0
         submodules: recursive
-    - name: Get version
+    - name: Git config
       run: |
         git config --global --add safe.directory /__w/Onion/Onion
+    - name: Get version
+      run: |
         echo "BUILD_VERSION=$(make version)" >> $GITHUB_ENV
         echo "SHA_SHORT=$(git log -n 1 --pretty=format:"%h" origin/main)" >> $GITHUB_ENV
+    - name: Print version
+      run: |
         echo "Onion-v${{ env.BUILD_VERSION }}-snapshot-${{ env.SHA_SHORT }}"
     - name: Build release
       shell: bash
