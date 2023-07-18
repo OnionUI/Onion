@@ -21,10 +21,11 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
       with:
+        fetch-depth: 0
         submodules: recursive
     - name: Get version
       run: |
-        git fetch origin
+        git config --global --add safe.directory /__w/Onion/Onion
         echo "BUILD_VERSION=$(make version)" >> $GITHUB_ENV
         echo "SHA_SHORT=$(git log -n 1 --pretty=format:"%h" origin/main)" >> $GITHUB_ENV
         echo "Onion-v${{ env.BUILD_VERSION }}-snapshot-${{ env.SHA_SHORT }}"
