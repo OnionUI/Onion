@@ -281,8 +281,7 @@ read_cookie() {
 # Duplicate the rom to spoof the save loaded in on the host
 handle_roms() {
     check_stop
-    sync
-
+    
     rom_extension="${client_rom##*.}"
     client_rom_clone="${client_rom%.*}_client.$rom_extension"
     cp "$client_rom" "$client_rom_clone"
@@ -339,8 +338,7 @@ change_tgb_dual_opt() {
 
 # We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
 start_retroarch() {
-    check_stop
-    sync   
+    check_stop 
 	build_infoPanel_and_log "RetroArch" "Starting RetroArch..."
     log "GLO::Pokemon_Netplay: Starting RetroArch loaded with $host_rom and $client_rom_clone"
 	cd /mnt/SDCARD/RetroArch
@@ -443,6 +441,7 @@ notify_stop(){
 
 # Check stop, if the client tells us to stop we will.
 check_stop(){
+    sync
     if [ -e "/tmp/stop_now" ]; then
             build_infoPanel_and_log "Message from client" "The client has had a problem joining the session."
             sleep 2

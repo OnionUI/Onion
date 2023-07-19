@@ -128,7 +128,6 @@ download_cookie() {
 # Read the cookie and store the paths and checksums into a var.
 read_cookie() {
     check_stop
-	sync
 	while IFS= read -r line; do
 		case $line in
 			"[core]: "*)
@@ -216,12 +215,13 @@ backup_save() {
 
 # Wait for the host to tell us it's ready, this happens just before it starts its RA session and we look in /tmp for a file indicator (file removed in host script cleanup)
 wait_for_host() {
-    check_stop
+    
     local counter=0
 
     build_infoPanel_and_log "Ready" "Waiting for host to ready up"
     while true; do
         sync
+        check_stop
         for file in /tmp/host_ready; do
             if [ -f "$file" ]; then
                 build_infoPanel_and_log "Message from host" "Setup complete"
@@ -274,7 +274,6 @@ change_tgb_dual_opt() {
 # We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
 start_retroarch() {
     check_stop
-    sync
 	build_infoPanel_and_log "RetroArch" "Starting RetroArch..."
     log "GLO::Pokemon_Netplay: Starting RetroArch loaded with $rom and $local_rom"
 	cd /mnt/SDCARD/RetroArch
@@ -381,6 +380,7 @@ notify_stop(){
 
 # Check stop, if the client tells us to stop we will.
 check_stop(){
+    sync
     if [ -e "/tmp/stop_now" ]; then
             build_infoPanel_and_log "Message from client" "The host has had a problem setting up the session"
             sleep 2
