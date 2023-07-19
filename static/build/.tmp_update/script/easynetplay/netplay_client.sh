@@ -2,7 +2,7 @@
 # Script to:
 # Enable Wifi
 # Pull the cookie file from the host
-# Pull the core and the rom from the host based on what the cookie file gives us
+# Pull the core from the host based on what the cookie file gives us
 # Start retroarch with the above passed, and -C provided to connect.
 
 # Used within GLO as an addon script.
@@ -24,12 +24,11 @@ export hostip="192.168.100.100" # This should be the default unless the user has
 check_wifi() {
 	ifconfig wlan1 down
 	if ifconfig wlan0 &> /dev/null; then
-		log "GLO::Easy_Netplay: Wi-Fi is up already"
-		build_infoPanel "WIFI" "Wifi up"
+        build_infoPanel_and_log "WIFI" "Wifi up"
 		save_wifi_state
 	else
 		log "GLO::Easy_Netplay: Wi-Fi disabled, trying to enable before connecting.."
-		build_infoPanel "WIFI" "Wifi disabled, starting..."
+		build_infoPanel_and_log "WIFI" "Wifi disabled, starting..."
 
 		/customer/app/axp_test wifion
 		sleep 2
@@ -38,11 +37,9 @@ check_wifi() {
 		$miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
 
 		if is_running wpa_supplicant && ifconfig wlan0 > /dev/null 2>&1; then
-			log "GLO::Easy_Netplay: WiFi started"
-			build_infoPanel "WIFI" "Wifi started."
+			build_infoPanel_and_log "WIFI" "Wifi started."
 		else
-			log "GLO::Easy_Netplay: WiFi started"
-			build_infoPanel "WIFI" "Unable to start WiFi\n unable to continue."
+			build_infoPanel_and_log "WIFI" "Unable to start WiFi\n unable to continue."
 			sleep 1
 			cleanup
 		fi
@@ -53,11 +50,11 @@ check_wifi() {
 
 # Create a new network id, set it up and enable it, start udhcpc against it.
 connect_to_host() {
-	build_infoPanel "Connecting..." "Trying to join the hotspot..."
+	build_infoPanel_and_log "Connecting..." "Trying to join the hotspot..."
 
 	export new_id=$($WPACLI -i wlan0 add_network)
 	if [ -z "$new_id" ]; then
-		build_infoPanel "Failed" "Failed to create network\n unable to continue."
+		build_infoPanel_and_log "Failed" "Failed to create network\n unable to continue."
 		return 1
 	fi
 
@@ -77,26 +74,20 @@ connect_to_host() {
 	)
 
 	if [ $? -ne 0 ]; then
-		build_infoPanel "Failed" "Failed to configure the network\n unable to continue."
+		build_infoPanel_and_log "Failed" "Failed to configure the network\n unable to continue."
 		sleep 1
 		cleanup
 	fi
 
 	udhcpc_control
 
-	log "GLO::Easy_Netplay: Added new network and connected"
-	log "#############################Supplicant dump##################################"
-	if [ $LOGGING -eq 1 ]; then
-		cat /appconfigs/wpa_supplicant.conf >> $sysdir/logs/easy_netplay.log
-	fi
-	log "#############################Supplicant dump##################################"
 	sleep 0.5
 }
 
 # We'd better wait for an ip address to be assigned before going any further.
 wait_for_ip() {
 	local IP=$(ip route get 1 2> /dev/null | awk '{print $NF;exit}')
-	build_infoPanel "Connecting..." "Waiting for an IP..."
+	build_infoPanel_and_log "Connecting..." "Waiting for an IP..."
 	local counter=0
 
 	while [ -z "$IP" ]; do
@@ -105,40 +96,35 @@ wait_for_ip() {
 		counter=$((counter + 1))
 
 		if [ $counter -ge 20 ]; then
-			build_infoPanel "Failed to connect!" "Could not get an IP in 20 seconds."
-			log "GLO::Easy_Netplay: Failed to get an IP address within 20 seconds."
+			build_infoPanel_and_log "Failed to connect!" "Could not get an IP in 20 seconds."
 			sleep 1
 			cleanup
 		fi
 	done
 
-	build_infoPanel "Joined hotspot!" "IP: $IP"
-	log "GLO::Easy_Netplay: IP address assigned: $IP"
+	build_infoPanel_and_log "Joined hotspot!" "IP: $IP"
 	sleep 1
 }
 
 # Download the cookie from the host, check whether it downloaded and make sure it still exists on the client before we move on
 download_cookie() {
-	build_infoPanel "Downloading cookie" "Retrieving info from host..."
+	build_infoPanel_and_log "Downloading cookie" "Retrieving info from host..."
 	local output_path="/mnt/SDCARD/RetroArch/retroarch.cookie.client"
 	curl -o "$output_path" ftp://$hostip/mnt/SDCARD/RetroArch/retroarch.cookie
 
 	if [ $? -ne 0 ]; then
-		log "GLO::Easy_Netplay: Failed to download cookie file."
-		build_infoPanel "Failed" "Can't download the cookie, can't continue"
+		build_infoPanel_and_log "Failed" "Can't download the cookie, can't continue"
 		sleep 1
 		cleanup
 	fi
 
 	if [ ! -f $output_path ]; then
-		log "GLO::Easy_Netplay: We didn't get a cookie"
-		build_infoPanel "No cookie found" "Cookie has been eaten, can't continue"
+		build_infoPanel_and_log "No cookie found" "Cookie has been eaten, can't continue"
 		sleep 1
 		cleanup
 	fi
 
-	build_infoPanel "Success!" "Got the cookie"
-	log "GLO::Easy_Netplay: Cookie file downloaded successfully."
+	build_infoPanel_and_log "Success!" "Got the cookie"
 }
 
 # Read the cookie and store the paths and checksums into a var.
@@ -148,34 +134,27 @@ read_cookie() {
 		case $line in
 			"[core]: "*)
 				core="${line##"[core]: "}"
-				export core
 				;;
 			"[rom]: "*)
 				rom="${line##"[rom]: "}"
-				export rom
 				;;
 			"[coresize]: "*)
 				corecheck="${line##"[coresize]: "}"
-				export corecheck
 				;;
 			"[corechksum]: "*)
 				corecheck="${line##"[corechksum]: "}"
-				export corecheck
 				;;
 			"[romsize]: "*)
 				romcheck="${line##"[romsize]: "}"
-				export romcheck
 				;;
 			"[romchksum]: "*)
 				romcheck="${line##"[romchksum]: "}"
-				export romcheck
 				;;
 		esac
 		log "GLO::Easy_Netplay: $core $rom $coresize $corechksum $romsize $romchksum"
 	done < "/mnt/SDCARD/RetroArch/retroarch.cookie.client"
 
 	#url encode or curl complains
-	export rom_url=$(echo "$rom" | sed 's/ /%20/g')
 	export core_url=$(echo "$core" | sed 's/ /%20/g')
 
 	log "GLO::Easy_Netplay: Cookie file read"
@@ -189,56 +168,81 @@ sync_file() {
 	MAX_FILE_SIZE_BYTES=26214400
 
 	if [ -z "$file_path" ]; then
-		log "GLO::Easy_Netplay: Potentially starting a contentless $file_type."
-		return
+        build_infoPanel_and_log "Something went wrong" "We didn't receive a file path for the rom \n Cannot continue."
+        sleep 1
+        cleanup
 	fi
 
-	if [ -e "$file_path" ]; then
-		log "GLO::Easy_Netplay: $file_path exists."
+	if [ "$file_type" == "Rom" ]; then
+		if [ -e "$file_path" ]; then
+			log "GLO::Easy_Netplay: $file_path exists."
 
-		local file_size=$(stat -c%s "$file_path")
-		local file_chksum_actual
+			local file_size=$(stat -c%s "$file_path")
+			local file_chksum_actual
 
-		if [ "$file_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
-			file_chksum_actual=$file_size
+			if [ "$file_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
+				file_chksum_actual=$file_size
+			else
+				file_chksum_actual=$(cksum "$file_path" | awk '{ print $1 }')
+			fi
+
+			if [ "$file_checksum" -ne "$file_chksum_actual" ]; then
+				build_infoPanel_and_log "Checksum Mismatch" "The Rom exists but the checksum doesn't match \n Cannot continue."
+                cleanup
+			else
+				build_infoPanel_and_log "Rom Check Complete!" "Rom exists and checksums match!"
+			fi
 		else
-			file_chksum_actual=$(cksum "$file_path" | awk '{ print $1 }')
+			build_infoPanel_and_log "Rom Missing" "The Rom doesn't exist on the client \n Cannot continue."
+            sleep 1
+            cleanup
 		fi
+	else
+		if [ -e "$file_path" ]; then
+			log "GLO::Easy_Netplay: $file_path exists."
 
-		if [ "$file_checksum" -ne "$file_chksum_actual" ]; then
-			log "GLO::Easy_Netplay: Checksum doesn't match for $file_path. Renaming the existing file and syncing $file_type again."
-			build_infoPanel "Syncing" "$file_type checksums don't match, syncing"
-			sleep 0.5
+			local file_size=$(stat -c%s "$file_path")
+			local file_chksum_actual
+
+			if [ "$file_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
+				file_chksum_actual=$file_size
+			else
+				file_chksum_actual=$(cksum "$file_path" | awk '{ print $1 }')
+			fi
+
+			if [ "$file_checksum" -ne "$file_chksum_actual" ]; then
+				build_infoPanel_and_log "Syncing" "$file_type checksums don't match, syncing"
+				sleep 0.5
+				do_sync_file "$file_type" "$file_path" "$file_url"
+
+				if [ ! -e "$file_path" ]; then
+					build_infoPanel_and_log "Sync Failed" "Failed to download the $file_type file."
+					cleanup
+				else
+					build_infoPanel_and_log "Syncing" "$file_type synced."
+				fi
+
+			else
+				build_infoPanel_and_log "$file_type synced!" "$file_type checksums match, no sync required"
+			fi
+		else
+			build_infoPanel_and_log "Syncing" "$file_type doesn't exist locally; syncing with host."
 			do_sync_file "$file_type" "$file_path" "$file_url"
 
 			if [ ! -e "$file_path" ]; then
-				build_infoPanel "Sync Failed" "Failed to download the $file_type file."
+				build_infoPanel_and_log "Sync Failed" "Failed to download the $file_type file."
 				cleanup
 			else
-				build_infoPanel "Syncing" "$file_type synced."
+				build_infoPanel_and_log "Syncing" "$file_type synced."
 			fi
-
-		else
-			log "GLO::Easy_Netplay: $file_path exists and the checksum matches."
-			build_infoPanel "$file_type synced!" "$file_type checksums match, no sync required"
-		fi
-	else
-		build_infoPanel "Syncing" "$file_type doesn't exist locally; syncing with host."
-		log "GLO::Easy_Netplay: $file_path doesn't exist. Syncing."
-		do_sync_file "$file_type" "$file_path" "$file_url"
-
-		if [ ! -e "$file_path" ]; then
-			build_infoPanel "Sync Failed" "Failed to download the $file_type file."
-			cleanup
-		else
-			build_infoPanel "Syncing" "$file_type synced."
 		fi
 	fi
 }
 
+
 # We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
 start_retroarch() {
-	build_infoPanel "Starting RA" "Starting RetroArch"
+	build_infoPanel_and_log "Starting RA" "Starting RetroArch"
 	cd /mnt/SDCARD/RetroArch
 	HOME=/mnt/SDCARD/RetroArch ./retroarch -C $hostip -v -L "$core" "$rom"
 }
@@ -247,14 +251,24 @@ start_retroarch() {
 #Utilities#
 ###########
 
-build_infoPanel() {
+build_infoPanel_and_log() {
 	local title="$1"
 	local message="$2"
 
+	if [ $LOGGING -eq 1 ]; then
+		echo "$(date) GLO::Easy_Netplay: Stage: $title Message: $message" >> $sysdir/logs/easy_netplay.log
+	fi
+	
 	infoPanel --title "$title" --message "$message" --persistent &
 	touch /tmp/dismiss_info_panel
 	sync
 	sleep 0.5
+}
+
+log() {
+	if [ $LOGGING -eq 1 ]; then
+		echo "$(date)" $* >> $sysdir/logs/easy_netplay.log
+	fi
 }
 
 confirm_join_panel() {
@@ -267,7 +281,7 @@ confirm_join_panel() {
 	echo "retcode: $retcode"
 
 	if [ $retcode -ne 0 ]; then
-		build_infoPanel "Cancelled" "User cancelled, exiting."
+		build_infoPanel_and_log "Cancelled" "User cancelled, exiting."
 		cleanup
 		exit 1
 	fi
@@ -350,7 +364,7 @@ udhcpc_control() {
 	if is_running udhcpc; then
 		log "GLO::Easy_Netplay: DHCP started"
 	else
-		build_infoPanel "DHCP" "Unable to start DHCP client\n unable to continue."
+		build_infoPanel_and_log "DHCP" "Unable to start DHCP client\n unable to continue."
 	fi
 }
 
@@ -359,14 +373,8 @@ is_running() {
 	pgrep "$process_name" > /dev/null
 }
 
-log() {
-	if [ $LOGGING -eq 1 ]; then
-		echo "$(date)" $* >> $sysdir/logs/easy_netplay.log
-	fi
-}
-
 cleanup() {
-	build_infoPanel "Cleanup" "Cleaning up after netplay session..."
+	build_infoPanel_and_log "Cleanup" "Cleaning up after netplay session..."
 
 	pkill -9 pressMenu2Kill
 
@@ -410,8 +418,8 @@ lets_go() {
 	wait_for_ip
 	download_cookie
 	read_cookie
-	sync_file Rom "$rom" "$romchksum" "$rom_url"
-	sync_file Core "$core" "$corechksum" "$core_url"
+	sync_file Rom "$rom" "$romcheck" "$rom_url"
+	sync_file Core "$core" "$corecheck" "$core_url"
 	stripped_game_name
 	confirm_join_panel "Join now?" "$game_name"
 	pkill -9 pressMenu2Kill

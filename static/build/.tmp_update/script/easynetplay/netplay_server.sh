@@ -22,11 +22,9 @@ export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/p
 check_wifi() {
 	ifconfig wlan1 down
 	if ifconfig wlan0 &> /dev/null; then
-		log "GLO::Easy_Netplay: Wi-Fi is up already"
-		build_infoPanel "WIFI" "Wifi up"
+		build_infoPanel_and_log "WIFI" "Wifi up"
 	else
-		log "GLO::Easy_Netplay: Wi-Fi disabled, trying to enable before connecting.."
-		build_infoPanel "WIFI" "Wifi disabled, starting..."
+		build_infoPanel_and_log "WIFI" "Wifi disabled, starting..."
 
 		/customer/app/axp_test wifion
 		sleep 2
@@ -35,11 +33,9 @@ check_wifi() {
 		$miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
 
 		if is_running wpa_supplicant && ifconfig wlan0 > /dev/null 2>&1; then
-			log "GLO::Easy_Netplay: WiFi started"
-			build_infoPanel "WIFI" "Wifi started."
+			build_infoPanel_and_log "WIFI" "Wifi started."
 		else
-			log "GLO::Easy_Netplay: WiFi started"
-			build_infoPanel "WIFI" "Unable to start WiFi\n unable to continue."
+			build_infoPanel_and_log "WIFI" "Unable to start WiFi\n unable to continue."
 			sleep 1
 			cleanup
 		fi
@@ -68,7 +64,7 @@ start_hotspot() {
 
 	ifconfig wlan1 $hotspot0addr netmask $subnetmask
 
-	build_infoPanel "Hotspot" "Starting hotspot..."
+	build_infoPanel_and_log "Hotspot" "Starting hotspot..."
 
 	$sysdir/bin/hostapd -P /var/run/hostapd.pid -B -i wlan1 $sysdir/config/hostapd.conf &
 	$sysdir/bin/dnsmasq --conf-file=$sysdir/config/dnsmasq.conf -u root &
@@ -77,8 +73,7 @@ start_hotspot() {
 	if is_running hostapd; then
 		log "GLO::Easy_Netplay: Started with IP of: $hotspot0addr, subnet of: $subnetmask"
 	else
-		log "GLO::Easy_Netplay: Failed to start, please try turning off/on. If this doesn't resolve the issue reboot your device."
-		build_infoPanel "Hotspot" "Failed to start hotspot, exiting.."
+		build_infoPanel_and_log "Hotspot" "Failed to start hotspot, exiting.."
 		sleep 2
 		cleanup
 	fi
@@ -143,13 +138,13 @@ get_cookie_info() {
 
 # We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
 start_retroarch() {
-	build_infoPanel "RetroArch" "Starting RetroArch..."
+	build_infoPanel_and_log "RetroArch" "Starting RetroArch..."
 	cd /mnt/SDCARD/RetroArch
 	HOME=/mnt/SDCARD/RetroArch ./retroarch -H -v -L "$host_core" "$host_rom"
 }
 
 cleanup() {
-	build_infoPanel "Cleanup" "Cleaning up after netplay session..."
+	build_infoPanel_and_log "Cleanup" "Cleaning up after netplay session..."
 
 	pkill -9 pressMenu2Kill
 
@@ -180,14 +175,24 @@ cleanup() {
 #Utilities#
 ###########
 
-build_infoPanel() {
+build_infoPanel_and_log() {
 	local title="$1"
 	local message="$2"
 
+	if [ $LOGGING -eq 1 ]; then
+		echo "$(date) GLO::Easy_Netplay: Stage: $title Message: $message" >> $sysdir/logs/easy_netplay.log
+	fi
+	
 	infoPanel --title "$title" --message "$message" --persistent &
 	touch /tmp/dismiss_info_panel
 	sync
 	sleep 0.5
+}
+
+log() {
+	if [ $LOGGING -eq 1 ]; then
+		echo "$(date)" $* >> $sysdir/logs/easy_netplay.log
+	fi
 }
 
 restore_ftp() {
@@ -218,12 +223,6 @@ udhcpc_control() {
 is_running() {
 	process_name="$1"
 	pgrep "$process_name" > /dev/null
-}
-
-log() {
-	if [ $LOGGING -eq 1 ]; then
-		echo "$(date)" $* >> $sysdir/logs/easy_netplay.log
-	fi
 }
 
 #########
