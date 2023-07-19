@@ -40,7 +40,7 @@ static struct network_s {
     bool auth_ssh;
     bool manual_tz;
     bool check_updates;
-    bool disable_services_in_game;
+    bool keep_alive;
     bool loaded;
 } network_state;
 
@@ -62,7 +62,7 @@ void network_loadState(void)
     network_state.auth_ssh = config_flag_get(".authsshState");
     network_state.manual_tz = config_flag_get(".manual_tz");
     network_state.check_updates = config_flag_get(".checkUpdates");
-    network_state.disable_services_in_game = config_flag_get(".disableServicesInGame");
+    network_state.keep_alive = config_flag_get(".keepServicesAlive");
     network_state.loaded = true;
 }
 
@@ -292,9 +292,9 @@ void network_setCheckUpdates(void *pt)
     network_setState(&network_state.check_updates, ".checkUpdates", ((ListItem *)pt)->value);
 }
 
-void network_disableServicesInGame(void *pt)
+void network_keepServicesAlive(void *pt)
 {
-    network_setState(&network_state.disable_services_in_game, ".disableServicesInGame", ((ListItem *)pt)->value);
+    network_setState(&network_state.keep_alive, ".keepServicesAlive", !((ListItem *)pt)->value);
 }
 
 void network_setSmbdAuthState(void *pt)
@@ -594,8 +594,8 @@ void menu_network(void *_)
                      (ListItem){
                          .label = "Disable services in game",
                          .item_type = TOGGLE,
-                         .value = (int)network_state.disable_services_in_game,
-                         .action = network_disableServicesInGame});
+                         .value = !network_state.keep_alive,
+                         .action = network_keepServicesAlive});
     }
     strcpy(_menu_network.items[0].label, ip_address_label);
     menu_stack[++menu_level] = &_menu_network;

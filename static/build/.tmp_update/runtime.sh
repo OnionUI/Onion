@@ -323,7 +323,7 @@ launch_game() {
             retval=$?
         else
             # Kill services for maximum performance
-            if [ -f $sysdir/config/.disableServicesInGame ] && [ $is_game -eq 1 ]; then
+            if [ ! -f $sysdir/config/.keepServicesAlive ] && [ $is_game -eq 1 ]; then
                 for process in dropbear bftpd filebrowser telnetd smbd; do
                     if is_running $process; then
                         killall -9 $process
@@ -356,7 +356,7 @@ launch_game() {
 
     # Free memory
     $sysdir/bin/freemma
-    
+
     # Reset networking
     touch /tmp/network_changed
 
