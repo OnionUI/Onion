@@ -554,9 +554,9 @@ void menu_advanced(void *_)
                              .action = menu_resetSettings});
         }
         list_addItem(&_menu_advanced,
-                         (ListItem){
-                             .label = "Diagnostics...",
-                             .action = menu_diagnostics});
+                     (ListItem){
+                         .label = "Diagnostics...",
+                         .action = menu_diagnostics});
     }
     menu_stack[++menu_level] = &_menu_advanced;
     header_changed = true;
