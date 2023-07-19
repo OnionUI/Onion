@@ -559,10 +559,6 @@ void menu_tools(void *_)
         strcpy(_menu_tools.title, "Tools");
         list_addItem(&_menu_tools,
                      (ListItem){
-                         .label = "Remove OSX system files",
-                         .action = tool_removeMacFiles});
-        list_addItem(&_menu_tools,
-                     (ListItem){
                          .label = "Generate CUE files for PSX games",
                          .action = tool_generateCueFiles});
         list_addItem(&_menu_tools,

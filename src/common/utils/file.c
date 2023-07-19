@@ -148,7 +148,7 @@ char *file_removeExtension(char *myStr)
     if (retStr == NULL)
         return NULL;
     strcpy(retStr, myStr);
-    if ((lastExt = strrchr(retStr, '.')) != NULL && *(lastExt + 1) != ' ')
+    if ((lastExt = strrchr(retStr, '.')) != NULL && *(lastExt + 1) != ' ' && *(lastExt + 2) != '\0')
         *lastExt = '\0';
     return retStr;
 }

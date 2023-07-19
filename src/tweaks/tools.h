@@ -93,11 +93,6 @@ void _runCommandPopup(const char *tool_name, const char *_cmd)
     all_changed = true;
 }
 
-void tool_removeMacFiles(void *pt)
-{
-    _runCommandPopup(tools_short_names[4], "/mnt/SDCARD/.tmp_update/script/dot-clean.sh");
-}
-
 void tool_generateCueFiles(void *pt)
 {
     _runCommandPopup(tools_short_names[5], "/mnt/SDCARD/.tmp_update/script/cue_gen.sh");
@@ -109,7 +104,6 @@ void tool_buildShortRomGameList(void *pt)
 }
 
 static void (*tools_pt[NUM_TOOLS])(void *) = {
-    tool_removeMacFiles,
     tool_generateCueFiles,
     tool_buildShortRomGameList};
 

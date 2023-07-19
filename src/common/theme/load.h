@@ -13,7 +13,7 @@
 #define FALLBACK_PATH "/mnt/SDCARD/miyoo/app/"
 #define SYSTEM_RESOURCES "/mnt/SDCARD/.tmp_update/res/"
 #define THEME_OVERRIDES "/mnt/SDCARD/Saves/CurrentProfile/theme"
-#define DEFAULT_THEME_PATH "/mnt/SDCARD/Themes/Silky by DiMo/"
+#define FALLBACK_THEME_PATH "/mnt/SDCARD/miyoo/app/"
 
 int theme_getImagePath(const char *theme_path, const char *name, char *out_path)
 {
@@ -68,8 +68,8 @@ char *theme_getPath(char *theme_path)
 {
     file_parseKeyValue(SYSTEM_CONFIG, "theme", theme_path, ':', 0);
 
-    if (strcmp(theme_path, "./") == 0) {
-        strcpy(theme_path, DEFAULT_THEME_PATH);
+    if (strcmp(theme_path, "./") == 0 || !is_dir(theme_path)) {
+        strcpy(theme_path, FALLBACK_THEME_PATH);
     }
 
     return theme_path;

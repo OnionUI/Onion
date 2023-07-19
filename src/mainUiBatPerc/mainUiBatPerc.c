@@ -23,13 +23,17 @@
 
 void restoreRegularDisplay(void)
 {
-    char icon_path[STR_MAX + 20], icon_backup[STR_MAX], theme_path[STR_MAX];
+    print_debug(":: restoreRegularDisplay");
+
+    char icon_path[STR_MAX + 20],
+        icon_backup[STR_MAX],
+        theme_path[STR_MAX];
     theme_getPath(theme_path);
 
-    bool icon_exists =
-        theme_getImagePath(theme_path, "power-full-icon", icon_path) == 1;
-    bool backup_exists = theme_getImagePath(theme_path, "power-full-icon_back",
-                                            icon_backup) == 1;
+    printf_debug("theme_path: %s\n", theme_path);
+
+    bool icon_exists = theme_getImagePath(theme_path, "power-full-icon", icon_path) == 1;
+    bool backup_exists = theme_getImagePath(theme_path, "power-full-icon_back", icon_backup) == 1;
 
     // Restore regular battery display
     if (icon_exists && backup_exists) {
@@ -37,24 +41,32 @@ void restoreRegularDisplay(void)
         file_copy(icon_backup, icon_path);
         remove(icon_backup);
     }
+
+    printf_debug("icon_path: %s (exists: %d)\n", icon_path, icon_exists);
+    printf_debug("icon_backup: %s (exists: %d)\n", icon_backup, backup_exists);
 }
 
 void drawBatteryPercentage(void)
 {
+    print_debug(":: drawBatteryPercentage");
+
     char theme_path[STR_MAX];
     theme_getPath(theme_path);
+
+    printf_debug("theme_path: %s\n", theme_path);
 
     char icon_path[STR_MAX + 20];
     snprintf(icon_path, STR_MAX + 19, "%sskin/.batt-perc.png", theme_path);
 
+    printf_debug("icon_path: %s\n", icon_path);
+
     TTF_Init();
 
     int percentage = battery_getPercentage();
-    SDL_Surface *image =
-        theme_batterySurfaceWithBg(percentage, theme_background());
+    SDL_Surface *image = theme_batterySurfaceWithBg(percentage, theme_background());
 
     // Save custom battery icon
-    if (percentage != 500)
+    if (image != NULL && percentage != 500)
         IMG_Save(image, icon_path);
 
     SDL_FreeSurface(image);

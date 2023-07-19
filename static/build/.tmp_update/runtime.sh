@@ -33,10 +33,8 @@ main() {
     # Reapply theme
     system_theme="$(/customer/app/jsonval theme)"
     active_theme="$(cat $sysdir/config/active_theme)"
-    active_icon_pack="$(cat $sysdir/config/active_icon_pack)"
 
-    if [ "$system_theme" == "./" ] || [ "$system_theme" != "$active_theme" ] || [ ! -d "$system_theme" ] ||
-        [ [ "$active_icon_pack" != "" ] && [ ! -d "$active_icon_pack" ] ]; then
+    if [ "$system_theme" == "./" ] || [ "$system_theme" != "$active_theme" ] || [ ! -d "$system_theme" ]; then
         themeSwitcher --reapply_icons
     fi
 
@@ -265,10 +263,18 @@ launch_game() {
             rompath=$(echo "$rompath" | awk '{split($0,a,":"); print a[2]}')
         fi
 
+        orig_path="$rompath"
         romext=$(echo "$(basename "$rompath")" | awk -F. '{print tolower($NF)}')
-        romcfgpath="$(dirname "$rompath")/.game_config/$(basename "$rompath" ".$romext").cfg"
 
         if [ "$romext" != "miyoocmd" ]; then
+            if [ -f "$rompath" ]; then
+                rompath=$(realpath "$rompath")
+            fi
+            if [ "$rompath" != "$orig_path" ]; then
+                temp=$(cat $sysdir/cmd_to_run.sh)
+                echo "$temp" | sed "s:$orig_path:$rompath:" > $sysdir/cmd_to_run.sh
+            fi
+            romcfgpath="$(dirname "$rompath")/.game_config/$(basename "$rompath" ".$romext").cfg"
             log "rompath: $rompath (ext: $romext)"
             log "romcfgpath: $romcfgpath"
             is_game=1
@@ -307,8 +313,8 @@ launch_game() {
     log "----- COMMAND:"
     log "$(cat $sysdir/cmd_to_run.sh)"
 
-    if [ "$romext" == "miyoocmd" ]; then
-        if [ -f "$rompath" ]; then
+    if [ $is_game -eq 0 ] || [ -f "$rompath" ]; then
+        if [ "$romext" == "miyoocmd" ]; then
             emupath=$(dirname $(echo "$cmd" | awk '{ gsub(/"/, "", $2); st = index($2,".."); if (st) { print substr($2,0,st) } else { print $2 } }'))
             cd "$emupath"
 
@@ -316,28 +322,29 @@ launch_game() {
             "$rompath" "$rompath" "$emupath"
             retval=$?
         else
-            retval=1
+            # Kill services for maximum performance
+            if [ -f $sysdir/config/.disableServicesInGame ] && [ $is_game -eq 1 ]; then
+                for process in dropbear bftpd filebrowser telnetd smbd; do
+                    if is_running $process; then
+                        killall -9 $process
+                    fi
+                done
+            fi
+
+            # GAME LAUNCH
+            cd /mnt/SDCARD/RetroArch/
+            $sysdir/cmd_to_run.sh
+            retval=$?
         fi
     else
-        # Kill services for maximum performance
-        if [ -f $sysdir/config/.disableServicesInGame ] && [ $is_game -eq 1 ]; then
-            for process in dropbear bftpd filebrowser telnetd smbd; do
-                if is_running $process; then
-                    killall -9 $process
-                fi
-            done
-        fi
-
-        # GAME LAUNCH
-        cd /mnt/SDCARD/RetroArch/
-        $sysdir/cmd_to_run.sh
-        retval=$?
+        retval=255
     fi
 
     log "cmd retval: $retval"
 
-    if [ $retval -ge 128 ] && [ $retval -ne 143 ] && [ $retval -ne 255 ]; then
-        cd $sysdir
+    if [ $retval -eq 255 ]; then
+        infoPanel --title "File not found" --message "The requested file was not found." --auto
+    elif [ $retval -ge 128 ] && [ $retval -ne 143 ]; then
         infoPanel --title "Fatal error occurred" --message "The program exited unexpectedly.\n(Error code: $retval)" --auto
     fi
 
