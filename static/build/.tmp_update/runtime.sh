@@ -28,9 +28,11 @@ main() {
 
     # Reapply theme
     system_theme="$(/customer/app/jsonval theme)"
-    active_theme="$(cat ./config/active_theme)"
+    active_theme="$(cat $sysdir/config/active_theme)"
+    active_icon_pack="$(cat $sysdir/config/active_icon_pack)"
 
-    if [ "$system_theme" == "./" ] || [ "$system_theme" != "$active_theme" ] || [ ! -d "$system_theme" ]; then
+    if [ "$system_theme" == "./" ] || [ "$system_theme" != "$active_theme" ] || [ ! -d "$system_theme" ] ||
+        [ [ "$active_icon_pack" != "" ] && [ ! -d "$active_icon_pack" ] ]; then
         themeSwitcher --reapply_icons
     fi
 

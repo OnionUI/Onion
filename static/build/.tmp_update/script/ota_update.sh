@@ -36,7 +36,9 @@ main() {
 	check_connection
 	run_bootstrap
 
+	sleep 2
 	channel_choice
+
 	get_release_info
 	if [ $? -eq 1 ]; then
 		echo -ne "${YELLOW}"
