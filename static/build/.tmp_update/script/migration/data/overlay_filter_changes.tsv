@@ -55,22 +55,25 @@ M	filters/video/EPX.filt	filters/video/Upscale/EPX.filt
 M	filters/video/LQ2x.filt	filters/video/Upscale/LQ2x.filt
 M	filters/video/epx.so	filters/video/Upscale/epx.so
 M	filters/video/lq2x.so	filters/video/Upscale/lq2x.so
+D	overlay/CRT/CRT_Scanlines_2x.png
+D	overlay/CRT/CRT_VerticalChecker.png
+D	overlay/CRT/CRT_VerticalChecker_Dark.png
 M	overlay/CRT/CRT_Basic.cfg	overlay/4-3/CRT/CRT_Basic.cfg
-A	overlay/4-3/CRT/CRT_Basic.png
+M	overlay/CRT/CRT_Basic.png	overlay/4-3/CRT/CRT_Basic.png
 M	overlay/CRT/CRT_Checkerboard.cfg	overlay/4-3/CRT/CRT_Checkerboard.cfg
-A	overlay/4-3/CRT/CRT_Checkerboard.png
+M	overlay/CRT/CRT_Checkerboard.png	overlay/4-3/CRT/CRT_Checkerboard.png
 M	overlay/CRT/CRT_Matrix.cfg	overlay/4-3/CRT/CRT_Matrix.cfg
-A	overlay/4-3/CRT/CRT_Matrix.png
+M	overlay/CRT/CRT_Matrix.png	overlay/4-3/CRT/CRT_Matrix.png
 M	overlay/CRT/CRT_Scanlines.cfg	overlay/4-3/CRT/CRT_Scanlines.cfg
-A	overlay/4-3/CRT/CRT_Scanlines.png
+M	overlay/CRT/CRT_Scanlines.png	overlay/4-3/CRT/CRT_Scanlines.png
 M	overlay/CRT/CRT_Scanlines_Colored.cfg	overlay/4-3/CRT/CRT_Scanlines_Colored.cfg
-A	overlay/4-3/CRT/CRT_Scanlines_Colored.png
+M	overlay/CRT/CRT_Scanlines_Colored.png	overlay/4-3/CRT/CRT_Scanlines_Colored.png
 M	overlay/FC/horizontal-phosphors.cfg	overlay/4-3/CRT/horizontal-phosphors.cfg
 M	overlay/FC/horizontal-phosphors.png	overlay/4-3/CRT/horizontal-phosphors.png
 M	overlay/FC/horizontal-rgb.cfg	overlay/4-3/CRT/horizontal-rgb.cfg
 M	overlay/FC/horizontal-rgb.png	overlay/4-3/CRT/horizontal-rgb.png
 M	overlay/CRT/CRT_FrameOnly.cfg	overlay/4-3/Frames/CRT_FrameOnly.cfg
-A	overlay/4-3/Frames/CRT_FrameOnly.png
+M	overlay/CRT/CRT_FrameOnly.png	overlay/4-3/Frames/CRT_FrameOnly.png
 M	overlay/bezels/arcade/default.cfg	overlay/4-3/Frames/default.cfg
 M	overlay/bezels/arcade/default.png	overlay/4-3/Frames/default.png
 M	overlay/FC/horizontal.cfg	overlay/4-3/Frames/horizontal.cfg
@@ -140,15 +143,6 @@ M	overlay/FC/vertical3.cfg	overlay/Arcade-Vertical/vertical3.cfg
 M	overlay/FC/vertical3.png	overlay/Arcade-Vertical/vertical3.png
 M	overlay/FC/vertical4.cfg	overlay/Arcade-Vertical/vertical4.cfg
 M	overlay/FC/vertical4.png	overlay/Arcade-Vertical/vertical4.png
-D	overlay/CRT/CRT_Basic.png
-D	overlay/CRT/CRT_Checkerboard.png
-D	overlay/CRT/CRT_FrameOnly.png
-D	overlay/CRT/CRT_Matrix.png
-D	overlay/CRT/CRT_Scanlines.png
-D	overlay/CRT/CRT_Scanlines_2x.png
-D	overlay/CRT/CRT_Scanlines_Colored.png
-D	overlay/CRT/CRT_VerticalChecker.png
-D	overlay/CRT/CRT_VerticalChecker_Dark.png
 D	overlay/FC/H-crt.png
 D	overlay/FC/horizontal-cool.cfg
 D	overlay/FC/horizontal-cool.png

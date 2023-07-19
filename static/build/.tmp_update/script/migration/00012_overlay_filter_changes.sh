@@ -37,11 +37,13 @@ find_usages() {
 
         shortpath=$(echo "$line" | sed -e 's/.*\/config\///')
 
-        if [ "$overlay" != "" ]; then
+        if [ -f "$ra_dir/$overlay" ]; then
             echo "overlay	$overlay	$shortpath"
+            echo "overlay	$(dirname "$overlay")/$(get_info_value "$(cat "$ra_dir/$overlay")" "overlay0_overlay")	"
         fi
-        if [ "$filter" != "" ]; then
+        if [ -f "$ra_dir/$filter" ]; then
             echo "filter	$filter	$shortpath"
+            echo "filter	$(dirname "$filter")/$(get_info_value "$(cat "$ra_dir/$filter")" "filter").so	"
         fi
     done < /tmp/config_files.txt
 
