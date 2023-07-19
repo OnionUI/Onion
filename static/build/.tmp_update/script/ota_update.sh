@@ -26,7 +26,10 @@ main() {
 		IP=$(ip route get 1 | awk '{print $NF;exit}')
 		if [ "$IP" != "" ]; then
 			get_release_info
-			exit $?
+			if [ $? -eq 0 ]; then
+				touch "$sysdir/.updateAvailable"
+				exit 0
+			fi
 		fi
 		exit 1
 	fi
@@ -44,6 +47,8 @@ main() {
 		echo -ne "${YELLOW}"
 		read -n 1 -s -r -p "Press A to exit"
 		exit 3
+	else
+		touch "$sysdir/.updateAvailable"
 	fi
 
 	download_update

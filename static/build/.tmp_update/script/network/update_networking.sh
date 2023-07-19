@@ -69,20 +69,18 @@ check() {
 
     if wifi_enabled && flag_enabled ntpWait && [ $is_booting -eq 1 ]; then
         bootScreen Boot "Syncing time..."
-        check_ntpstate && bootScreen Boot "Time synced! $(date +"%H:%M")" || bootScreen Boot "Time sync failed!"
+        check_ntpstate && bootScreen Boot "Time synced: $(date +"%H:%M")" || bootScreen Boot "Time sync failed"
+        sleep 1
     else
         check_ntpstate &
     fi
 
-    if [ $is_booting -eq 1 ] && wifi_enabled && flag_enabled checkUpdates; then
-        bootScreen Boot "Checking for updates..."
-        $sysdir/script/ota_update.sh check
-        if [ $? -eq 0 ]; then
-            bootScreen Boot "Update available!"
-        else
-            bootScreen Boot "No update found"
-        fi
-        sleep 2
+    if [ -f "$sysdir/.updateAvailable" ] && [ $is_booting -eq 1 ]; then
+        bootScreen Boot "Update available!"
+        sleep 1
+    elif wifi_enabled && [ ! -f /tmp/update_checked ]; then
+        touch /tmp/update_checked
+        $sysdir/script/ota_update.sh check &
     fi
 }
 
@@ -436,7 +434,7 @@ check_ntpstate() {
 
         # wait for an ip address from dhcp before we start
         while true; do
-            ip=$(ifconfig wlan0 | grep 'inet addr:' | cut -d: -f2| cut -d' ' -f1)
+            ip=$(ifconfig wlan0 | grep 'inet addr:' | cut -d: -f2 | cut -d' ' -f1)
             if [ -z $ip ]; then
                 attempts=$((attempts + 1))
                 log "NTPwait: Waiting for IP address since $attempts seconds"
@@ -446,7 +444,7 @@ check_ntpstate() {
                     return "$ret_val"
                 fi
             else
-				log "NTPwait: IP address aquired: $ip"
+                log "NTPwait: IP address aquired: $ip"
                 break
             fi
             sleep 1
