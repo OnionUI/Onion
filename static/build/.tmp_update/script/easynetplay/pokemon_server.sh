@@ -7,9 +7,11 @@ miyoodir=/mnt/SDCARD/miyoo
 save_dir="/mnt/SDCARD/Saves/CurrentProfile/saves/TGB Dual/"
 tgb_dual_opts="/mnt/SDCARD/Saves/CurrentProfile/config/TGB Dual/TGB Dual.opt"
 tgb_dual_opts_bk="/mnt/SDCARD/Saves/CurrentProfile/config/TGB Dual/TGB Dual.opt.bak"
-LOGGING=$([ -f $sysdir/config/.logging ] && echo 1 || echo 0)
 LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 
+logfile=pokemon_link
+. $sysdir/script/log.sh
+program=$(basename "$0" .sh)
 
 ##########
 ##Setup.##
@@ -611,11 +613,6 @@ is_running() {
     pgrep "$process_name" > /dev/null
 }
 
-log() {
-	# if [ $LOGGING -eq 1 ]; then
-    	echo "$(date)" $* >> $sysdir/logs/pokemon_link.log
-	# fi
-}
 
 enable_flag() {
     flag="$1"

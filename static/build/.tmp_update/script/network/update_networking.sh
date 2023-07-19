@@ -7,6 +7,9 @@ netscript=/mnt/SDCARD/.tmp_update/script/network
 export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 export PATH="$sysdir/bin:$PATH"
 
+logfile=$(basename "$0" .sh)
+. $sysdir/script/log.sh
+
 main() {
     set_tzid
     get_password
@@ -590,15 +593,6 @@ is_running() {
 is_running_exact() {
     process_name="$1"
     pgrep -f "$process_name" > /dev/null
-}
-
-LOGGING=$([ -f $sysdir/config/.logging ] && echo 1 || echo 0)
-scriptname=$(basename "$0" .sh)
-
-log() {
-    if [ $LOGGING -eq 1 ]; then
-        echo -e "($scriptname) $(date):" $* | tee -a "$sysdir/logs/$scriptname.log"
-    fi
 }
 
 get_password() {

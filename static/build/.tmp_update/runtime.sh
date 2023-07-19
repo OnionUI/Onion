@@ -4,6 +4,9 @@ miyoodir=/mnt/SDCARD/miyoo
 export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 export PATH="$sysdir/bin:$PATH"
 
+logfile=$(basename "$0" .sh)
+. $sysdir/script/log.sh
+
 MODEL_MM=283
 MODEL_MMP=354
 
@@ -566,14 +569,6 @@ check_installer() {
         reboot
         sleep 10
         exit
-    fi
-}
-
-scriptname=$(basename "$0" .sh)
-
-log() {
-    if [ -f $sysdir/config/.logging ]; then
-        echo -e "($scriptname) $(date):" $* | tee -a "$sysdir/logs/$scriptname.log"
     fi
 }
 
