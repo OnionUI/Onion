@@ -16,6 +16,7 @@ main() {
     export DEVICE_ID=$([ $? -eq 0 ] && echo $MODEL_MMP || echo $MODEL_MM)
     echo -n "$DEVICE_ID" > /tmp/deviceModel
 
+    touch /tmp/is_booting
     check_installer
     clear_logs
 
@@ -115,7 +116,7 @@ main() {
 
     state_change check_switcher
     set_startup_tab
-
+    rm -rf /tmp/is_booting
     # Main runtime loop
     while true; do
         state_change check_main_ui
@@ -532,9 +533,6 @@ runifnecessary() {
 }
 
 start_networking() {
-    # Loop breaker for NTP
-    touch /tmp/ntp_run_once
-
     rm $sysdir/config/.hotspotState # dont start hotspot at boot
 
     touch /tmp/network_changed
