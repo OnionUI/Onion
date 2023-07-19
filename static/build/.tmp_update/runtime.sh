@@ -319,6 +319,15 @@ launch_game() {
             retval=1
         fi
     else
+        # Kill services for maximum performance
+        if [ -f $sysdir/config/.disableServicesInGame ] && [ $is_game -eq 1 ]; then
+            for process in dropbear bftpd filebrowser telnetd smbd; do
+                if is_running $process; then
+                    killall -9 $process
+                fi
+            done
+        fi
+
         # GAME LAUNCH
         cd /mnt/SDCARD/RetroArch/
         $sysdir/cmd_to_run.sh
@@ -340,6 +349,9 @@ launch_game() {
 
     # Free memory
     $sysdir/bin/freemma
+    
+    # Reset networking
+    touch /tmp/network_changed
 
     # TIMER END + SHUTDOWN CHECK
     if [ $is_game -eq 1 ]; then
@@ -356,6 +368,11 @@ launch_game() {
         set_prev_state "app"
         check_off_order "End"
     fi
+}
+
+is_running() {
+    process_name="$1"
+    pgrep "$process_name" > /dev/null
 }
 
 get_info_value() {
