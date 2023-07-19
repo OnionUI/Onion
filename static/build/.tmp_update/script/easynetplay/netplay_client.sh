@@ -169,7 +169,7 @@ sync_file() {
 
 	if [ -z "$file_path" ]; then
         build_infoPanel_and_log "Something went wrong" "We didn't receive a file path for the rom \n Cannot continue."
-        sleep 1
+        sleep 2
         cleanup
 	fi
 
@@ -188,13 +188,14 @@ sync_file() {
 
 			if [ "$file_checksum" -ne "$file_chksum_actual" ]; then
 				build_infoPanel_and_log "Checksum Mismatch" "The Rom exists but the checksum doesn't match \n Cannot continue."
+                sleep 2
                 cleanup
 			else
 				build_infoPanel_and_log "Rom Check Complete!" "Rom exists and checksums match!"
 			fi
 		else
 			build_infoPanel_and_log "Rom Missing" "The Rom doesn't exist on the client \n Cannot continue."
-            sleep 1
+            sleep 2
             cleanup
 		fi
 	else
@@ -217,6 +218,7 @@ sync_file() {
 
 				if [ ! -e "$file_path" ]; then
 					build_infoPanel_and_log "Sync Failed" "Failed to download the $file_type file."
+                    sleep 2
 					cleanup
 				else
 					build_infoPanel_and_log "Syncing" "$file_type synced."
@@ -231,6 +233,7 @@ sync_file() {
 
 			if [ ! -e "$file_path" ]; then
 				build_infoPanel_and_log "Sync Failed" "Failed to download the $file_type file."
+                sleep 2
 				cleanup
 			else
 				build_infoPanel_and_log "Syncing" "$file_type synced."

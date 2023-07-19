@@ -20,10 +20,10 @@ LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte
 check_wifi() {
 	if ifconfig wlan0 &>/dev/null; then
 		log "GLO::Pokemon_Netplay: Wi-Fi is up already"
-		build_infoPanel "WIFI" "Wifi up"
+		build_infoPanel_and_log "WIFI" "Wifi up"
 	else
 		log "GLO::Pokemon_Netplay: Wi-Fi disabled, trying to enable before connecting.."
-		build_infoPanel "WIFI" "Wifi disabled, starting..." 
+		build_infoPanel_and_log "WIFI" "Wifi disabled, starting..." 
 		
 		/customer/app/axp_test wifion
 		sleep 2
@@ -34,10 +34,10 @@ check_wifi() {
 		
 		if is_running wpa_supplicant && ifconfig wlan0 > /dev/null 2>&1; then
 			log "GLO::Pokemon_Netplay: WiFi started"
-			build_infoPanel "WIFI" "Wifi started."
+			build_infoPanel_and_log "WIFI" "Wifi started."
 		else
 			log "GLO::Pokemon_Netplay: WiFi started"
-			build_infoPanel "WIFI" "Unable to start WiFi\n unable to continue."
+			build_infoPanel_and_log "WIFI" "Unable to start WiFi\n unable to continue."
 			sleep 1
 			cleanup
 		fi
@@ -48,7 +48,7 @@ check_wifi() {
 
 # We'll need hotspot to host the local connection
 start_hotspot() { 
-    log "GLO::Pokemon_Netplay: Trying to start the Hotspot"
+    build_infoPanel_and_log "Hotspot" "Starting hotspot..." 
     if is_running hostapd; then
 		killall -9 hostapd
 	fi
@@ -58,7 +58,6 @@ start_hotspot() {
 	
     enable_flag hotspotState
     $sysdir/script/network/update_networking.sh hotspot toggle
-    build_infoPanel "Hotspot" "Starting hotspot..." 
 }
 
 
@@ -113,7 +112,7 @@ get_cookie_info() {
 
 # Wait for a hit on the sta list for someone joining the hotspot
 wait_for_client() {
-    build_infoPanel "Hotspot" "Waiting for a client to connect..."
+    build_infoPanel_and_log "Hotspot" "Waiting for a client to connect..."
 
     client_ip=""
     client_mac=""
@@ -122,13 +121,14 @@ wait_for_client() {
     killall -9 wpa_supplicant
     killall -9 udhcpc
     
+    sleep 1
+    
     while true; do    
         sta_list=$($sysdir/bin/hostapd_cli all_sta 2>/dev/null)
         $sysdir/bin/hostapd_cli all_sta flush
         
         if [ $? -ne 0 ]; then
-            log "GLO::Pokemon_Netplay: Could not connect to hostapd - retrying..."
-            build_infoPanel "Hotspot" "Hostapd hook failing, retrying."
+            build_infoPanel_and_log "Hotspot" "Hostapd hook failing, retrying."
             counter=$((counter + 1))
         fi
                 
@@ -141,7 +141,7 @@ wait_for_client() {
                     192.168.100.*)
                         log "$sta_list"
                         log "GLO::Pokemon_Netplay: A client has connected. IP: $client_ip"
-                        build_infoPanel "Hotspot" "A client has connected! \n IP: $client_ip"
+                        build_infoPanel_and_log "Hotspot" "A client has connected! \n IP: $client_ip"
                         break
                         ;;
                 esac
@@ -153,7 +153,7 @@ wait_for_client() {
 
         if [ $counter -ge 20 ]; then
             log "GLO::Pokemon_Netplay: No client has connected after 20 seconds."
-            build_infoPanel "Hotspot error" "No client has connected after 20 seconds. Exiting..."
+            build_infoPanel_and_log "Hotspot error" "No client has connected after 20 seconds. Exiting..."
             cleanup
         fi
     done
@@ -175,8 +175,7 @@ backup_save() {
 
 # The client will send us a save file, we'll pull the name from this, find it on the host and call duplicate_rename_rom - send to tmp 
 wait_for_save_file() {
-    build_infoPanel "Setting up" "Setting up session"
-    log "GLO::Pokemon_Netplay: Waiting for saves to be transferred from client"
+    build_infoPanel_and_log "Setting up" "Setting up session \n Waiting for save files."
     
     client_save_file=""
     counter=0
@@ -186,14 +185,13 @@ wait_for_save_file() {
         for file in /tmp/*.srm; do
             if [ -f "$file" ]; then
                 if [ "$(basename "$file")" = "MISSING.srm" ]; then
-                    build_infoPanel "Sync error" "Client advises they don't have a save file. \n Cannot continue."
-                    log "GLO::Pokemon_Netplay: The client started the GLO script without a save for their Rom."
+                    build_infoPanel_and_log "Sync error" "Client advises they don't have a save file. \n Cannot continue."
                     sleep 1
                     cleanup
                 else
                     client_save_file=$file
                 fi
-                log "GLO::Pokemon_Netplay: Received save from client: $file"
+                build_infoPanel_and_log "Synced!" "Received save from client"
                 break 2
             fi
         done
@@ -202,8 +200,7 @@ wait_for_save_file() {
         counter=$((counter + 1))
 
         if [ $counter -ge 25 ]; then
-            build_infoPanel "Sync error" "No save file was received. Exiting..."
-            log "GLO::Pokemon_Netplay: We ran out of time waiting for the client to send us their save file"
+            build_infoPanel_and_log "Sync error" "No save file was received. Exiting..."
             sleep 1
             cleanup
         fi
@@ -220,35 +217,31 @@ rename_client_save() {
         log "GLO::Pokemon_Netplay: Save file found and processed - old save path:$client_save_file, new save path:$save_new_path "
         sync
     else
-        build_infoPanel "Syncing" "Save file not found, cannot continue"
-        log "GLO::Pokemon_Netplay: Save file not found, cannot continue"
+        build_infoPanel_and_log "Syncing" "Save file not found, cannot continue"
         cleanup
     fi
 }
 
 # Download the cookie from the client so we know which second game to preload as GB2
 download_cookie() {
-	build_infoPanel "Downloading cookie"  "Retrieving info from client..." 
+	build_infoPanel_and_log "Downloading cookie"  "Retrieving info from client..." 
     log "GLO::Pokemon_Netplay: Trying to pull the clients game info"
     local output_path="/mnt/SDCARD/RetroArch/retroarch.cookie.client"
     curl -o "$output_path" ftp://$client_ip/mnt/SDCARD/RetroArch/retroarch.cookie
 
     if [ $? -ne 0 ]; then
-        log "GLO::Pokemon_Netplay: Failed to download cookie file."
-		build_infoPanel "Failed"  "Can't download the cookie, can't continue" 
+		build_infoPanel_and_log "Failed"  "Can't download the cookie, can't continue" 
 		sleep 1
         cleanup
     fi
 
     if [ ! -f $output_path ]; then
-        log "GLO::Pokemon_Netplay: We didn't get a cookie"
-		build_infoPanel "No cookie found"  "Cookie has been eaten, can't continue" 
+		build_infoPanel_and_log "No cookie found"  "Cookie has been eaten, can't continue" 
 		sleep 1
         cleanup
     fi
 	
-	build_infoPanel "Success!"  "Got the cookie" 
-    log "GLO::Pokemon_Netplay: Cookie file downloaded successfully."
+	build_infoPanel_and_log "Success!"  "Got the cookie" 
 }
 
 # Read the cookie and store the paths and checksums into a var - we only need the rom name the client wants us to load as the second rom
@@ -279,7 +272,6 @@ read_cookie() {
     log "GLO::Pokemon_Netplay: Cookie file read, we need to use: $client_rom"
     
     	#url encode or curl complains
-	rom_url=$(echo "$client_rom" | sed 's/ /%20/g')
 	core_url=$(echo "$core" | sed 's/ /%20/g')
 }
 
@@ -299,14 +291,7 @@ handle_roms() {
 
 # Tell the client we're ready to accept connections
 ready_up() { 
-    touch /tmp/host_ready
-    curl -T "/tmp/host_ready" "ftp://$client_ip/tmp/host_ready" > /dev/null 2>&1
-
-    if [ $? -eq 0 ]; then
-        log "GLO::Pokemon_Netplay: Successfully transferred /tmp/host_ready to ftp://$client_ip/tmp/host_ready"
-    else
-        log "GLO::Pokemon_Netplay: Failed to transfer /tmp/host_ready to ftp://$client_ip/tmp/host_ready"
-    fi
+    notify_peer "host_ready"
 }
 
 # Set the screen and audio settings in TGB dual as these aren't default in Onion
@@ -342,8 +327,8 @@ change_tgb_dual_opt() {
 
 # We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
 start_retroarch() {
-    sync
-	build_infoPanel "RetroArch" "Starting RetroArch..."
+    sync   
+	build_infoPanel_and_log "RetroArch" "Starting RetroArch..."
     log "GLO::Pokemon_Netplay: Starting RetroArch loaded with $host_rom and $client_rom_clone"
 	cd /mnt/SDCARD/RetroArch
     HOME=/mnt/SDCARD/RetroArch ./retroarch -H -v -L .retroarch/cores/tgbdual_libretro.so --subsystem "gb_link_2p" "$host_rom" "$client_rom_clone"
@@ -351,22 +336,16 @@ start_retroarch() {
 
 # Go into a waiting state for the client to be ready to accept the save
 wait_for_save_return() {
-    build_infoPanel "Syncing" "Waiting for client to be ready for save sync"
-    touch /tmp/ready_to_send
-    curl -T "/tmp/ready_to_send" "ftp://$client_ip/tmp/ready_to_send" > /dev/null 2>&1
+    local counter=0
 
-    if [ $? -eq 0 ]; then
-        log "GLO::Pokemon_Netplay: Successfully transferred /tmp/ready_to_send to ftp://$client_ip/tmp/ready_to_send"
-    else
-        log "GLO::Pokemon_Netplay: Failed to transfer /tmp/ready_to_send to ftp://$client_ip/tmp/ready_to_send"
-    fi
+    build_infoPanel_and_log "Syncing" "Waiting for client to be ready for save sync"
+    notify_peer "ready_to_send"
+    sync
     
     while true; do
-        sync
         for file in /tmp/ready_to_receive; do
             if [ -f "$file" ]; then
-                build_infoPanel "Message from client" "Client is ready for the save"
-                log "GLO::Pokemon_Netplay: Received notification - Client is ready to receive the save"
+                build_infoPanel_and_log "Message from client" "Client is ready for the save"
                 break 2
             fi
         done
@@ -375,35 +354,35 @@ wait_for_save_return() {
         counter=$((counter + 1))
 
         if [ $counter -ge 20 ]; then
-            build_infoPanel "Error" "The client didn't ready up, cannot continue..."
+            build_infoPanel_and_log "Error" "The client didn't ready up, cannot continue..."
             sleep 1
             cleanup
+            break
         fi
     done
 }
 
+
 # Push the clients save file back
 return_client_save() {
-    build_infoPanel "Syncing" "Returning client save..."
+    build_infoPanel_and_log "Syncing" "Returning client save..."
     encoded_path=$(url_encode "${save_new_path/_client/}")
     log "GLO::Pokemon_Netplay: Returning client save: $save_new_path to ftp://$client_ip/${encoded_path}_rcvd"
-    curl -m 20 -T "$save_new_path" "ftp://$client_ip/${encoded_path}_rcvd"
+    curl --connect-timeout 20 -T "$save_new_path" "ftp://$client_ip/${encoded_path}_rcvd"
 
     curl_exit_status=$?
 
     if [ $curl_exit_status -eq 0 ]; then
-        log "GLO::Pokemon_Netplay: Successfully returned the client save."
-        build_infoPanel "Syncing" "Client save returned!"
+        build_infoPanel_and_log "Syncing" "Client save returned!"
     else
-        log "GLO::Pokemon_Netplay: Failed to return the client save. Progress may have been lost. Curl exit code: $curl_exit_status"
-        build_infoPanel "Syncing" "Failed to return the client save \n Progress has likely been lost \n Curl exit code: $curl_exit_status"
+        build_infoPanel_and_log "Syncing" "Failed to return the client save \n Progress has likely been lost \n Curl exit code: $curl_exit_status"
     fi
-
 }
+
 
 # Cleanup. If you don't call this you don't retransfer the saves - Users cannot under any circumstances miss this function.
 cleanup() {
-	build_infoPanel "Cleanup" "Cleaning up after Pokemon session\n Do not power off!"
+	build_infoPanel_and_log "Cleanup" "Cleaning up after Pokemon session\n Do not power off!"
    
 	pkill -9 pressMenu2Kill
 
@@ -429,6 +408,7 @@ cleanup() {
     rm "$tgb_dual_opts.bak"
     rm "$save_dir/MISSING.srm"
     rm "/tmp/MISSING.srm"
+    rm "/tmp/stop_now"
     disable_flag hotspotState
 	
 	log "GLO::Pokemon_Netplay: Cleanup done"
@@ -439,14 +419,25 @@ cleanup() {
 #Utilities#
 ###########
 
+notify_peer() {
+    local notify_file="/tmp/$1"
+    touch "$notify_file"
+    sync
+    curl -T "$notify_file" "ftp://$client_ip/$notify_file" > /dev/null 2>&1
+    
+    if [ $? -eq 0 ]; then
+        log "GLO::Pokemon_Netplay: Successfully transferred $notify_file to ftp://$client_ip/$notify_file"
+    else
+        log "GLO::Pokemon_Netplay: Failed to transfer $notify_file to ftp://$client_ip/$notify_file"
+    fi
+}
+
 # Rename the new save back to the original one ready to be re-transferred
 remove_client_save_suffix() {
     if [ ! -z "$save_new_path" ]; then
         save_base_name=$(basename "$save_new_path" _client.srm)
         original_name="${save_base_name}.srm"
         original_path="/tmp/$original_name"
-
-        # Move the file
         mv "$save_new_path" "$original_path"
     fi
 }
@@ -455,13 +446,21 @@ confirm_join_panel() {
     local title="$1"
     local message="$2"
     
+    sync
+    
+    if [ -e "/tmp/stop_now" ]; then
+        build_infoPanel_and_log "Message from client" "The client advises they don't have this rom \n Can't continue."
+        sleep 2
+        cleanup
+    fi
+    
     infoPanel -t "$title" -m "$message"
     retcode=$?
 
     echo "retcode: $retcode"
 
     if [ $retcode -ne 0 ]; then
-        build_infoPanel "Cancelled" "User cancelled, exiting."
+        build_infoPanel_and_log "Cancelled" "User cancelled, exiting."
         cleanup
         exit 1
     fi
@@ -499,60 +498,89 @@ do_sync_file() {
 }
 
 sync_file() {
-    file_type="$1"
-    file_path="$2"
-    file_checksum="$3"
-    file_url="$4"
-    MAX_FILE_SIZE_BYTES=26214400
-	
+	file_type="$1"
+	file_path="$2"
+	file_checksum="$3"
+	file_url="$4"
+	MAX_FILE_SIZE_BYTES=26214400
 
-    if [ -z "$file_path" ]; then
-        log "GLO::Pokemon_Netplay: Potentially starting a contentless $file_type."
-        return
-    fi
+	if [ -z "$file_path" ]; then
+        build_infoPanel_and_log "Something went wrong" "We didn't receive a file path for the rom \n Cannot continue."
+        sleep 2
+        cleanup
+	fi
 
-    if [ -e "$file_path" ]; then
-        log "GLO::Pokemon_Netplay: $file_path exists."
-        
-        local file_size=$(stat -c%s "$file_path")
-        local file_chksum_actual
+	if [ "$file_type" == "Rom" ]; then
+		if [ -e "$file_path" ]; then
+			log "GLO::Pokemon_Netplay: $file_path exists."
 
-        if [ "$file_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
-            file_chksum_actual=$file_size
-        else
-            file_chksum_actual=$(cksum "$file_path" | awk '{ print $1 }')
-        fi
+			local file_size=$(stat -c%s "$file_path")
+			local file_chksum_actual
 
-        if [ "$file_checksum" -ne "$file_chksum_actual" ]; then
-            log "GLO::Pokemon_Netplay: Checksum doesn't match for $file_path. Renaming the existing file and syncing $file_type again."
-            build_infoPanel "Syncing"  "$file_type checksums don't match, syncing" 
-            sleep 0.5
-            do_sync_file "$file_type" "$file_path" "$file_url"
-            
-            sync
-            
-            if [ ! -e "$file_path" ]; then
-                build_infoPanel "Sync Failed"  "Failed to download the $file_type file." 
+			if [ "$file_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
+				file_chksum_actual=$file_size
+			else
+				file_chksum_actual=$(cksum "$file_path" | awk '{ print $1 }')
+			fi
+
+			if [ "$file_checksum" -ne "$file_chksum_actual" ]; then
+				build_infoPanel_and_log "Checksum Mismatch" "The Rom exists but the checksum doesn't match \n Cannot continue."
+                notify_peer "stop_now"
+                sleep 2
                 cleanup
-            else
-                build_infoPanel "Syncing"  "$file_type synced." 
-            fi
-
-        else
-            log "GLO::Pokemon_Netplay: $file_path exists and the checksum matches."
-        fi
-    else
-        build_infoPanel "Syncing"  "$file_type doesn't exist locally; syncing with host." 
-        log "GLO::Pokemon_Netplay: $file_path doesn't exist. Syncing."
-        do_sync_file "$file_type" "$file_path" "$file_url"
-        
-        if [ ! -e "$file_path" ]; then
-            build_infoPanel "Sync Failed"  "Failed to download the $file_type file." 
+			else
+				build_infoPanel_and_log "Rom Check Complete!" "Rom exists and checksums match!"
+			fi
+		else
+			build_infoPanel_and_log "Rom Missing" "The Rom doesn't exist on the client \n Cannot continue."
+            notify_peer "stop_now"
+            sleep 2
             cleanup
-        else
-            build_infoPanel "Syncing"  "$file_type synced." 
-        fi
-    fi
+		fi
+	else
+		if [ -e "$file_path" ]; then
+			log "GLO::Pokemon_Netplay: $file_path exists."
+
+			local file_size=$(stat -c%s "$file_path")
+			local file_chksum_actual
+
+			if [ "$file_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
+				file_chksum_actual=$file_size
+			else
+				file_chksum_actual=$(cksum "$file_path" | awk '{ print $1 }')
+			fi
+
+			if [ "$file_checksum" -ne "$file_chksum_actual" ]; then
+				build_infoPanel_and_log "Syncing" "$file_type checksums don't match, syncing"
+				sleep 0.5
+				do_sync_file "$file_type" "$file_path" "$file_url"
+
+				if [ ! -e "$file_path" ]; then
+					build_infoPanel_and_log "Sync Failed" "Failed to download the $file_type file."
+                    notify_peer "stop_now"
+                    sleep 2
+					cleanup
+				else
+					build_infoPanel_and_log "Syncing" "$file_type synced."
+				fi
+
+			else
+				build_infoPanel_and_log "$file_type synced!" "$file_type checksums match, no sync required"
+			fi
+		else
+			build_infoPanel_and_log "Syncing" "$file_type doesn't exist locally; syncing with host."
+			do_sync_file "$file_type" "$file_path" "$file_url"
+
+			if [ ! -e "$file_path" ]; then
+				build_infoPanel_and_log "Sync Failed" "Failed to download the $file_type file."
+                notify_peer "stop_now"
+                sleep 2
+				cleanup
+			else
+				build_infoPanel_and_log "Syncing" "$file_type synced."
+			fi
+		fi
+	fi
 }
 
 unpack_rom() {
@@ -571,14 +599,24 @@ url_encode() {
     echo "$1" | sed 's/ /%20/g'
 }
 
-build_infoPanel() {
-    local title="$1"
-    local message="$2"
-    
-    infoPanel --title "$title" --message "$message" --persistent &
-    touch /tmp/dismiss_info_panel
-    sync
-    sleep 0.5
+build_infoPanel_and_log() {
+	local title="$1"
+	local message="$2"
+
+	if [ $LOGGING -eq 1 ]; then
+		echo "$(date) GLO::Pokemon_Netplay: Stage: $title Message: $message" >> $sysdir/logs/easy_netplay.log
+	fi
+	
+	infoPanel --title "$title" --message "$message" --persistent &
+	touch /tmp/dismiss_info_panel
+	sync
+	sleep 0.5
+}
+
+log() {
+	if [ $LOGGING -eq 1 ]; then
+    	echo "$(date)" $* >> $sysdir/logs/pokemon_link.log
+	fi
 }
 
 restore_ftp(){
@@ -611,11 +649,6 @@ is_running() {
     pgrep "$process_name" > /dev/null
 }
 
-log() {
-	# if [ $LOGGING -eq 1 ]; then
-    	echo "$(date)" $* >> $sysdir/logs/pokemon_link.log
-	# fi
-}
 
 enable_flag() {
     flag="$1"
@@ -638,7 +671,7 @@ lets_go() {
     rename_client_save
     download_cookie
     read_cookie
-    sync_file Rom "$client_rom" "$romchksum" "$rom_url"
+    sync_file Rom "$client_rom" "$romcheck" "$rom_url"
     handle_roms
     ready_up
     stripped_game_name
