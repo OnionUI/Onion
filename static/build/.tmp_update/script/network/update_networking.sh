@@ -66,7 +66,6 @@ check() {
     check_smbdstate
 
     if wifi_enabled && flag_enabled ntpWait; then
-        bootScreen Boot "Syncing time..."
         sync_time && bootScreen Boot "Time synced! $(date +"%H:%M")" || bootScreen Boot "Time sync failed!"
     else
         sync_time &
@@ -428,11 +427,10 @@ sync_time() {
     if flag_enabled ntpState && wifi_enabled; then
         set_tzid
         attempts=0
-        max_attempts=20
+        max_attempts=10
         ret_val=1
 
-        # wait for udhcpc for doing it's thing before we start 
-        # we could probably also not background udhcpc, but that'd need more testing
+        # wait for an ip address from dhcp before we start
         while [ $attempts -lt $max_attempts ]; do
             ip=$(ifconfig wlan0 | grep 'inet addr:' | cut -d: -f2| cut -d' ' -f1)
             if [ -z $ip]; then
@@ -450,14 +448,14 @@ sync_time() {
             fi
             sleep 1
         done
-
+        bootScreen Boot "Syncing time..."
         attempts=0
         while true; do
             if [ -f /tmp/ntp_synced ] && [ ! -f /tmp/ntp_run_once ]; then
                 break
             fi
             log "NTPwait: get_time attempt $attempts"
-            if ping -q -c 1 google.com > /dev/null 2>&1; then
+            if ping -q -c 1 -W 1 google.com > /dev/null 2>&1; then
                 if get_time; then
                     ret_val=0
                     touch /tmp/ntp_synced
