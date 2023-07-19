@@ -66,6 +66,7 @@ check() {
     check_smbdstate
 
     if wifi_enabled && flag_enabled ntpWait; then
+        bootScreen Boot "Syncing time..."
         sync_time && bootScreen Boot "Time synced! $(date +"%H:%M")" || bootScreen Boot "Time sync failed!"
     else
         sync_time &
@@ -448,7 +449,6 @@ sync_time() {
             fi
             sleep 1
         done
-        bootScreen Boot "Syncing time..."
         attempts=0
         while true; do
             if [ -f /tmp/ntp_synced ] && [ ! -f /tmp/ntp_run_once ]; then
