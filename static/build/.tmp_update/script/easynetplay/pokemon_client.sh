@@ -11,6 +11,7 @@ tgb_dual_opts_bk="/mnt/SDCARD/Saves/CurrentProfile/config/TGB Dual/TGB Dual.opt.
 LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 WPACLI=/customer/app/wpa_cli
 hostip="192.168.100.100" # This should be the default unless the user has changed it..
+rm /tmp/stop_now
 
 ##########
 ##Setup.##
@@ -37,8 +38,7 @@ check_wifi() {
 			build_infoPanel_and_log "WIFI" "Wifi started."
 		else
 			build_infoPanel_and_log "WIFI" "Unable to start WiFi\n unable to continue."
-			sleep 1
-			cleanup
+			notify_stop
 		fi
 		
 		sleep 2 
@@ -72,8 +72,7 @@ connect_to_host() {
 	
 	if [ $? -ne 0 ]; then
 		build_infoPanel_and_log "Failed"  "Failed to configure the network\n unable to continue." 
-		sleep 1
-		cleanup
+		notify_stop
 	fi
     
     killall -9 udhcpc
@@ -98,8 +97,7 @@ wait_for_connectivity() {
 
         if [ $counter -ge 40 ]; then
             build_infoPanel_and_log "Failed to connect!"  "Could not reach $IP in 20 seconds."
-            sleep 1 
-            cleanup
+            notify_stop
         fi
     done
 
@@ -110,19 +108,18 @@ wait_for_connectivity() {
 
 # Download the cookie from the host, check whether it downloaded and make sure it still exists on the client before we move on
 download_cookie() {
+    check_stop
     local output_path="/mnt/SDCARD/RetroArch/retroarch.cookie.client"
     curl -o "$output_path" ftp://$hostip/mnt/SDCARD/RetroArch/retroarch.cookie
 
     if [ $? -ne 0 ]; then
 		build_infoPanel_and_log "Failed"  "Can't download the cookie, can't continue" 
-		sleep 1
-        cleanup
+		notify_stop
     fi
 
     if [ ! -f $output_path ]; then
 		build_infoPanel_and_log "No cookie found"  "Cookie has been eaten, can't continue" 
-		sleep 1
-        cleanup
+		notify_stop
     fi
 	
 	build_infoPanel_and_log "Success!"  "Got the cookie" 
@@ -130,6 +127,7 @@ download_cookie() {
 
 # Read the cookie and store the paths and checksums into a var.
 read_cookie() {
+    check_stop
 	sync
 	while IFS= read -r line; do
 		case $line in
@@ -163,6 +161,7 @@ read_cookie() {
 
 # Pull the cookie local info that the GLO script has generated to build the host side rom path
 get_cookie_info() {
+    check_stop
     COOKIE_FILE="/mnt/SDCARD/RetroArch/retroarch.cookie"
 
     if [ -f "$COOKIE_FILE" ]; then
@@ -171,10 +170,18 @@ get_cookie_info() {
     else
         log "GLO::Pokemon_Netplay: No cookie found!"
     fi
+    
+    # Check the rom actually exists before we go any further
+    sync
+    if [ ! -f "$local_rom" ]; then
+        build_infoPanel_and_log "No rom file found" "Youre trying to start a session for a game \n that doesn't exist! How? \n Can't continue.." 
+        notify_stop
+    fi
 }
 
 # Push our saves over to the host - The save will be found based on the rom we've started GLO on and it will look in the $save_dir path for it (see line13) - Backs up first
 send_saves() {
+    check_stop
     missing=""
     build_infoPanel_and_log "Syncing saves" "Syncing our save files with the host"
     save_file_filename_full=$(basename "$local_rom")
@@ -194,14 +201,14 @@ send_saves() {
 
     if [ "$missing" = "1" ]; then
         build_infoPanel_and_log "Save not found" "You don't have a save for this game, \n or we failed to find it. Cannot continue \n Notified host."
-        sleep 2
-        cleanup
+        notify_stop
     fi
 }
 
 
 # Backup local save file
 backup_save() {
+    check_stop
     log "GLO::Pokemon_Netplay: Backing up save file to: ${save_file_matched}_bkup"
     cp "$save_file_matched" "${save_file_matched}_bkup"
     sync
@@ -209,6 +216,7 @@ backup_save() {
 
 # Wait for the host to tell us it's ready, this happens just before it starts its RA session and we look in /tmp for a file indicator (file removed in host script cleanup)
 wait_for_host() {
+    check_stop
     local counter=0
 
     build_infoPanel_and_log "Ready" "Waiting for host to ready up"
@@ -226,9 +234,7 @@ wait_for_host() {
 
         if [ $counter -ge 25 ]; then
             build_infoPanel_and_log "Error" "The host didn't ready up, cannot continue..."
-            sleep 1
-            cleanup
-            break
+            notify_stop
         fi
     done
 }
@@ -267,6 +273,7 @@ change_tgb_dual_opt() {
 
 # We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
 start_retroarch() {
+    check_stop
     sync
 	build_infoPanel_and_log "RetroArch" "Starting RetroArch..."
     log "GLO::Pokemon_Netplay: Starting RetroArch loaded with $rom and $local_rom"
@@ -364,6 +371,22 @@ cleanup() {
 ###########
 #Utilities#
 ###########
+
+# Use the safe word
+notify_stop(){
+    notify_peer "stop_now"
+    sleep 2 
+    cleanup
+}
+
+# Check stop, if the client tells us to stop we will.
+check_stop(){
+    if [ -e "/tmp/stop_now" ]; then
+            build_infoPanel_and_log "Message from client" "The host has had a problem setting up the session"
+            sleep 2
+            cleanup
+    fi
+}
 
 # URL encode helper
 url_encode() {
@@ -528,7 +551,7 @@ confirm_join_panel() {
     local message="$2"
     
     sync
-        
+            
     infoPanel -t "$title" -m "$message"
     retcode=$?
 

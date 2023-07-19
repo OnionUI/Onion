@@ -9,7 +9,7 @@ tgb_dual_opts="/mnt/SDCARD/Saves/CurrentProfile/config/TGB Dual/TGB Dual.opt"
 tgb_dual_opts_bk="/mnt/SDCARD/Saves/CurrentProfile/config/TGB Dual/TGB Dual.opt.bak"
 LOGGING=$([ -f $sysdir/config/.logging ] && echo 1 || echo 0)
 LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
-
+rm /tmp/stop_now
 
 ##########
 ##Setup.##
@@ -38,8 +38,7 @@ check_wifi() {
 		else
 			log "GLO::Pokemon_Netplay: WiFi started"
 			build_infoPanel_and_log "WIFI" "Unable to start WiFi\n unable to continue."
-			sleep 1
-			cleanup
+			notify_stop
 		fi
 		
 		sleep 2 
@@ -63,6 +62,7 @@ start_hotspot() {
 
 # We'll need FTP to host the cookie to the client - use the built in FTP, it allows us to curl (errors on bftpd re: path)
 start_ftp() {
+    check_stop
     if is_running bftpd; then
         log "GLO::Pokemon_Netplay: FTP already running, killing to rebind"
         bftpd_p=$(ps | grep bftpd | grep -v grep | awk '{for(i=4;i<=NF;++i) printf $i" "}')
@@ -77,6 +77,7 @@ start_ftp() {
 
 # Pull the cookie local info that the GLO script has generated to build the host side rom path
 get_cookie_info() {
+    check_stop
     COOKIE_FILE="/mnt/SDCARD/RetroArch/retroarch.cookie"
     MAX_FILE_SIZE_BYTES=26214400
 
@@ -112,6 +113,7 @@ get_cookie_info() {
 
 # Wait for a hit on the sta list for someone joining the hotspot
 wait_for_client() {
+    check_stop
     build_infoPanel_and_log "Hotspot" "Waiting for a client to connect..."
 
     client_ip=""
@@ -164,6 +166,7 @@ wait_for_client() {
 
 # Backup the save we're going to use before we do anythign else
 backup_save() {
+    check_stop
     save_file_filename_full=$(basename "$host_rom")
     save_file_filename="${save_file_filename_full%.*}"
     save_file_matched=$(find "$save_dir" -name "$save_file_filename.srm" -not -name "*.rtc" -not -path "*/.netplay/*")
@@ -175,6 +178,7 @@ backup_save() {
 
 # The client will send us a save file, we'll pull the name from this, find it on the host and call duplicate_rename_rom - send to tmp 
 wait_for_save_file() {
+    check_stop
     build_infoPanel_and_log "Setting up" "Setting up session \n Waiting for save files."
     
     client_save_file=""
@@ -186,8 +190,7 @@ wait_for_save_file() {
             if [ -f "$file" ]; then
                 if [ "$(basename "$file")" = "MISSING.srm" ]; then
                     build_infoPanel_and_log "Sync error" "Client advises they don't have a save file. \n Cannot continue."
-                    sleep 1
-                    cleanup
+                    notify_stop
                 else
                     client_save_file=$file
                 fi
@@ -201,14 +204,14 @@ wait_for_save_file() {
 
         if [ $counter -ge 25 ]; then
             build_infoPanel_and_log "Sync error" "No save file was received. Exiting..."
-            sleep 1
-            cleanup
+            notify_stop
         fi
     done
 }
 
 # Prep the clients save file
 rename_client_save() {
+    check_stop
     if [ ! -z "$client_save_file" ]; then
         save_base_name=$(basename "$client_save_file" .srm)
         save_new_name="${save_base_name}_client.srm"
@@ -224,6 +227,7 @@ rename_client_save() {
 
 # Download the cookie from the client so we know which second game to preload as GB2
 download_cookie() {
+    check_stop
 	build_infoPanel_and_log "Downloading cookie"  "Retrieving info from client..." 
     log "GLO::Pokemon_Netplay: Trying to pull the clients game info"
     local output_path="/mnt/SDCARD/RetroArch/retroarch.cookie.client"
@@ -231,14 +235,12 @@ download_cookie() {
 
     if [ $? -ne 0 ]; then
 		build_infoPanel_and_log "Failed"  "Can't download the cookie, can't continue" 
-		sleep 1
-        cleanup
+		notify_stop
     fi
 
     if [ ! -f $output_path ]; then
 		build_infoPanel_and_log "No cookie found"  "Cookie has been eaten, can't continue" 
-		sleep 1
-        cleanup
+		notify_stop
     fi
 	
 	build_infoPanel_and_log "Success!"  "Got the cookie" 
@@ -246,6 +248,7 @@ download_cookie() {
 
 # Read the cookie and store the paths and checksums into a var - we only need the rom name the client wants us to load as the second rom
 read_cookie() {
+    check_stop
 	sync
 	while IFS= read -r line; do
 		case $line in
@@ -277,6 +280,7 @@ read_cookie() {
 
 # Duplicate the rom to spoof the save loaded in on the host
 handle_roms() {
+    check_stop
     sync
 
     rom_extension="${client_rom##*.}"
@@ -290,12 +294,20 @@ handle_roms() {
 }
 
 # Tell the client we're ready to accept connections
-ready_up() { 
-    notify_peer "host_ready"
+ready_up() {
+    check_stop
+    ping -c 5 192.168.100.100 > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        notify_peer "host_ready"
+    else
+        build_infoPanel_and_log "Error" "No connectivity to 192.168.100.100, \n is the client still connected?"
+        notify_stop
+    fi
 }
 
 # Set the screen and audio settings in TGB dual as these aren't default in Onion
 change_tgb_dual_opt() {
+    check_stop
     current_value=$(grep 'tgbdual_single_screen_mp' "$tgb_dual_opts" | cut -d '"' -f 2)
     current_audio_value=$(grep 'tgbdual_audio_output' "$tgb_dual_opts" | cut -d '"' -f 2)
 
@@ -327,6 +339,7 @@ change_tgb_dual_opt() {
 
 # We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
 start_retroarch() {
+    check_stop
     sync   
 	build_infoPanel_and_log "RetroArch" "Starting RetroArch..."
     log "GLO::Pokemon_Netplay: Starting RetroArch loaded with $host_rom and $client_rom_clone"
@@ -336,6 +349,7 @@ start_retroarch() {
 
 # Go into a waiting state for the client to be ready to accept the save
 wait_for_save_return() {
+    check_stop
     local counter=0
 
     build_infoPanel_and_log "Syncing" "Waiting for client to be ready for save sync"
@@ -365,6 +379,7 @@ wait_for_save_return() {
 
 # Push the clients save file back
 return_client_save() {
+    check_stop
     build_infoPanel_and_log "Syncing" "Returning client save..."
     encoded_path=$(url_encode "${save_new_path/_client/}")
     log "GLO::Pokemon_Netplay: Returning client save: $save_new_path to ftp://$client_ip/${encoded_path}_rcvd"
@@ -418,6 +433,22 @@ cleanup() {
 ###########
 #Utilities#
 ###########
+
+# Use the safe word
+notify_stop(){
+    notify_peer "stop_now"
+    sleep 2 
+    cleanup
+}
+
+# Check stop, if the client tells us to stop we will.
+check_stop(){
+    if [ -e "/tmp/stop_now" ]; then
+            build_infoPanel_and_log "Message from client" "The client has had a problem joining the session."
+            sleep 2
+            cleanup
+    fi
+}
 
 notify_peer() {
     local notify_file="/tmp/$1"
