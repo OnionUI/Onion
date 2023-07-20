@@ -56,7 +56,7 @@ main() {
 # Standard check from runtime for startup.
 check() {
     log "Network Checker: Update networking"
-    if wifi_enabled && [ $is_booting -eq 1 ]; then
+    if wifi_enabled && [ "$is_booting" -eq 1 ]; then
         bootScreen Boot "Waiting for network..."
     fi
 
@@ -427,48 +427,55 @@ check_hotspotstate() {
 check_ntpstate() {
     if flag_enabled ntpState && wifi_enabled && [ ! -f "$sysdir/config/.hotspotState" ]; then
         set_tzid
+        if [ -f /tmp/ntp_synced ] && [ ! "$is_booting" -eq 1 ]; then
+            return 0
+        fi
         attempts=0
         max_wait_ip=10
         max_attempts=3
         ret_val=1
-
+        got_ip=0
         # wait for an ip address from dhcp before we start
         while true; do
             ip=$(ifconfig wlan0 | grep 'inet addr:' | cut -d: -f2 | cut -d' ' -f1)
-            if [ -z $ip ]; then
+            if [ -z "$ip" ]; then
                 attempts=$((attempts + 1))
                 log "NTPwait: Waiting for IP address since $attempts seconds"
                 if [ $attempts -ge $max_wait_ip ]; then
                     log "NTPwait: Could not aquire an IP address"
                     ret_val=1
-                    return "$ret_val"
+                    got_ip=0 
                 fi
             else
                 log "NTPwait: IP address aquired: $ip"
+                got_ip=1
                 break
             fi
             sleep 1
         done
         attempts=0
-        while true; do
-            log "NTPwait: get_time attempt $attempts"
-            if ping -q -c 1 -W 1 google.com > /dev/null 2>&1; then
-                if get_time; then
-                    ret_val=0
+        if [ "$got_ip" -eq 1 ]; then
+            while true; do
+                log "NTPwait: get_time attempt $attempts"
+                if ping -q -c 1 -W 1 google.com > /dev/null 2>&1; then
+                    if get_time; then
+                        ret_val=0
+                        break
+                    fi
+                else
+                    log "NTPwait: Can't reach google."
+                fi
+                attempts=$((attempts + 1))
+                if [ $attempts -eq $max_attempts ]; then
+                    log "NTPwait: Ran out of time before we could sync, stopping."
+                    ret_val=1
                     break
                 fi
-            else
-                log "NTPwait: Can't reach google."
-            fi
-            attempts=$((attempts + 1))
-            if [ $attempts -eq $max_attempts ]; then
-                log "NTPwait: Ran out of time before we could sync, stopping."
-                ret_val=1
-                break
-            fi
-            sleep 1
-        done
+                sleep 1
+            done
+        fi
     fi
+    touch /tmp/ntp_synced
     return "$ret_val"
 }
 
