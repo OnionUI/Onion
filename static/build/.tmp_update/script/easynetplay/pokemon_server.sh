@@ -19,10 +19,8 @@ rm /tmp/stop_now
 
 check_wifi() {
 	if ifconfig wlan0 &>/dev/null; then
-		log "GLO::Pokemon_Netplay: Wi-Fi is up already"
 		build_infoPanel_and_log "WIFI" "Wifi up"
 	else
-		log "GLO::Pokemon_Netplay: Wi-Fi disabled, trying to enable before connecting.."
 		build_infoPanel_and_log "WIFI" "Wifi disabled, starting..." 
 		
 		/customer/app/axp_test wifion
@@ -33,10 +31,8 @@ check_wifi() {
         udhcpc_control
 		
 		if is_running wpa_supplicant && ifconfig wlan0 > /dev/null 2>&1; then
-			log "GLO::Pokemon_Netplay: WiFi started"
 			build_infoPanel_and_log "WIFI" "Wifi started."
 		else
-			log "GLO::Pokemon_Netplay: WiFi started"
 			build_infoPanel_and_log "WIFI" "Unable to start WiFi\n unable to continue."
 			notify_stop
 		fi
