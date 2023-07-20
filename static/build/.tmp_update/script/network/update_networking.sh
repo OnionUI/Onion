@@ -427,9 +427,15 @@ check_hotspotstate() {
 check_ntpstate() {
     if flag_enabled ntpState && wifi_enabled && [ ! -f "$sysdir/config/.hotspotState" ]; then
         set_tzid
-        if [ -f /tmp/ntp_synced ]; then
-            return 0
+        [ -f /tmp/ntp_synced ] && return 0
+
+        if [ -f /tmp/ntp_failed ]; then
+            # only run once on boot, but don't prevent more checks later on state_change
+            # effectively only running every second time this is called while off network
+            rm /tmp/ntp_failed
+            return 1
         fi
+
         attempts=0
         max_wait_ip=10
         max_attempts=3
@@ -469,13 +475,13 @@ check_ntpstate() {
                 if [ $attempts -eq $max_attempts ]; then
                     log "NTPwait: Ran out of time before we could sync, stopping."
                     ret_val=1
+                    touch /tmp/ntp_failed
                     break
                 fi
                 sleep 1
             done
         fi
     fi
-    touch /tmp/ntp_synced
     return "$ret_val"
 }
 
@@ -508,6 +514,7 @@ get_time() { # handles 2 types of network time, instant from an API or longer fr
         if date -u -s "$utc_datetime" > /dev/null 2>&1; then
             hwclock -w
             log "NTP: Time successfully aquired using API"
+            touch /tmp/ntp_synced
             return 0
         fi
     fi

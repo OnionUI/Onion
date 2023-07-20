@@ -90,6 +90,7 @@ main() {
     fi
 
     start_networking
+    rm -rf /tmp/is_booting
 
     # Auto launch
     if [ ! -f $sysdir/config/.noAutoStart ]; then
@@ -114,7 +115,6 @@ main() {
 
     state_change check_switcher
     set_startup_tab
-    rm -rf /tmp/is_booting
     # Main runtime loop
     while true; do
         state_change check_main_ui
@@ -358,7 +358,7 @@ launch_game() {
     $sysdir/bin/freemma
 
     # Reset networking if needed
-    if [ -f "$sysdir/config/.keepServicesAlive_" ]; then
+    if [ ! -f "$sysdir/config/.keepServicesAlive" ]; then
         flag=0
         services="smbd ssh ftp telnet http"
         for service in $services; do
@@ -573,7 +573,7 @@ start_networking() {
 }
 
 check_networking() {
-    if [ $DEVICE_ID -ne $MODEL_MMP ] || [ ! -f /tmp/network_changed ]; then
+    if [ $DEVICE_ID -ne $MODEL_MMP ] || [ ! -f /tmp/network_changed ] && [ -f /tmp/ntp_synced ]; then
         check_timezone
         return
     fi
