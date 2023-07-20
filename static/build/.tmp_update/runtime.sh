@@ -357,8 +357,15 @@ launch_game() {
     # Free memory
     $sysdir/bin/freemma
 
-    # Reset networking
-    touch /tmp/network_changed
+    # Reset networking if needed
+    if [ -f "$sysdir/config/.keepServicesAlive" ]; then
+        flag=0
+        services="smbd ssh ftp telnet http"
+        for service in $services; do
+            [ -f "$sysdir/config/.${service}State" ] && flag=1
+        done
+        [ $flag -eq 1 ] && touch /tmp/network_changed
+    fi
 
     # TIMER END + SHUTDOWN CHECK
     if [ $is_game -eq 1 ]; then

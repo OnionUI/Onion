@@ -427,7 +427,7 @@ check_hotspotstate() {
 check_ntpstate() {
     if flag_enabled ntpState && wifi_enabled && [ ! -f "$sysdir/config/.hotspotState" ]; then
         set_tzid
-        if [ -f /tmp/ntp_synced ] && [ ! "$is_booting" -eq 1 ]; then
+        if [ -f /tmp/ntp_synced ]; then
             return 0
         fi
         attempts=0
