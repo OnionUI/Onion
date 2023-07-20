@@ -368,7 +368,7 @@ int updateSqlliteCache(char* base_dir_path) {
     for (int i = 0; i < systems_count ; i++){
         char cache_path[STR_MAX*3];
         //a bit of assumption here on the path, to be perfected
-        snprintf(cache_path, STR_MAX*3 -1, "%s/Roms/%s/%s_cache2.db", base_dir_path, matching_folders[i], matching_folders[i]);
+        snprintf(cache_path, STR_MAX*3 -1, "%s/Roms/%s/%s_cache6.db", base_dir_path, matching_folders[i], matching_folders[i]);
 
         if (!is_file(cache_path))
             continue; //skip this db, the update cache not found
