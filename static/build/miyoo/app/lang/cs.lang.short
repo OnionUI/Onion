@@ -1,0 +1,22 @@
+{
+	"88":	"ZVOLIT",
+	"89":	"ZPĚT",
+	"90":	"NAVIGACE",
+	"91":	"MENU",
+	"92":	"Pokračovat",
+	"93":	"Uložit",
+	"94":	"Načíst",
+	"95":	"Hlasitost",
+	"96":	"Odejít do menu",
+	"97":	"Stav %d/%d",
+	"98":	"Prázdné",
+	"99":	"Žádný náhled",
+	"100":	"Načtení selhalo",
+	"101":	"Uložení selhalo",
+	"102":	"Slot %d uložen",
+	"103":  "Celá obrazovka",
+	"104":  "ZAPNUTO",
+	"105":  "VYPNUTO",
+	"106":  "Pokročilé",
+    "138":  "Netplay"	
+}
