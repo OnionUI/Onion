@@ -436,6 +436,11 @@ check_ntpstate() {
             return 1
         fi
 
+        # Try once for good luck (this is faster - when it works)
+        if get_time; then
+            return 0
+        fi
+
         attempts=0
         max_wait_ip=10
         max_attempts=3
@@ -450,7 +455,7 @@ check_ntpstate() {
                 if [ $attempts -ge $max_wait_ip ]; then
                     log "NTPwait: Could not aquire an IP address"
                     ret_val=1
-                    got_ip=0 
+                    got_ip=0
                 fi
             else
                 log "NTPwait: IP address aquired: $ip"

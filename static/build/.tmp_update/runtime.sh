@@ -306,6 +306,15 @@ launch_game() {
             echo "$temp" | sed 's/\$/\\\$/g' > $sysdir/cmd_to_run.sh
         fi
 
+        # Kill services for maximum performance
+        if [ ! -f $sysdir/config/.keepServicesAlive ]; then
+            for process in dropbear bftpd filebrowser telnetd smbd; do
+                if is_running $process; then
+                    killall -9 $process
+                fi
+            done
+        fi
+
         playActivity start "$rompath"
     fi
 
@@ -324,27 +333,18 @@ launch_game() {
             "$rompath" "$rompath" "$emupath"
             retval=$?
         else
-            # Kill services for maximum performance
-            if [ ! -f $sysdir/config/.keepServicesAlive ] && [ $is_game -eq 1 ]; then
-                for process in dropbear bftpd filebrowser telnetd smbd; do
-                    if is_running $process; then
-                        killall -9 $process
-                    fi
-                done
-            fi
-
             # GAME LAUNCH
             cd /mnt/SDCARD/RetroArch/
             $sysdir/cmd_to_run.sh
             retval=$?
         fi
     else
-        retval=255
+        retval=404
     fi
 
     log "cmd retval: $retval"
 
-    if [ $retval -eq 255 ]; then
+    if [ $retval -eq 404 ]; then
         infoPanel --title "File not found" --message "The requested file was not found." --auto
     elif [ $retval -ge 128 ] && [ $retval -ne 143 ]; then
         infoPanel --title "Fatal error occurred" --message "The program exited unexpectedly.\n(Error code: $retval)" --auto
@@ -359,16 +359,6 @@ launch_game() {
     # Free memory
     $sysdir/bin/freemma
 
-    # Reset networking if needed
-    if [ ! -f "$sysdir/config/.keepServicesAlive" ]; then
-        flag=0
-        services="smbd ssh ftp telnet http"
-        for service in $services; do
-            [ -f "$sysdir/config/.${service}State" ] && flag=1
-        done
-        [ $flag -eq 1 ] && touch /tmp/network_changed
-    fi
-
     # TIMER END + SHUTDOWN CHECK
     if [ $is_game -eq 1 ]; then
         if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
@@ -377,6 +367,16 @@ launch_game() {
 
         cd $sysdir
         playActivity stop "$rompath"
+
+        # Reset networking if needed
+        if [ ! -f "$sysdir/config/.keepServicesAlive" ]; then
+            for service in smbd http ssh ftp telnet; do
+                if [ -f "$sysdir/config/.${service}State" ]; then
+                    touch /tmp/network_changed
+                    break
+                fi
+            done
+        fi
 
         set_prev_state "game"
         check_off_order "End_Save"
