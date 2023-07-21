@@ -1,0 +1,6 @@
+{
+  "label": "CloudSync by EmuDeck",
+  "icon": "/mnt/SDCARD/App/EmuDeckCloudSync/icon.png",
+  "launch": "launch.sh",
+  "description": "Sync your saved games to the cloud"
+}

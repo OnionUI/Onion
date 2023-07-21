@@ -76,6 +76,16 @@ main() {
 
     # Bind arcade name library to customer path
     mount -o bind $miyoodir/lib/libgamename.so /customer/lib/libgamename.so
+    
+    #Startup scripts
+    mkdir -p "$sysdir/startup" 
+    startup_scripts=$(find "$sysdir/startup" -type f -name "*.sh")
+       
+    for startup_script in $startup_scripts; do
+    
+      sh "$startup_script"
+      
+    done
 
     # Set filebrowser branding to "Onion" and apply custom theme
     if [ -f "$sysdir/config/filebrowser/first.run" ]; then
@@ -354,10 +364,32 @@ launch_game() {
 
         cd $sysdir
         playActivity stop "$rompath"
-
+        
+        # EmuDeck CloudSync
+        # Always upload in the background when exiting of a game
+        # this will create a .pending_upload used to prevent Onion to shutdown if there's a pending upload
+        if [ -f /mnt/SDCARD/App/EmuDeckCloudSync/functions.sh ]; then
+            . /mnt/SDCARD/App/EmuDeckCloudSync/functions.sh
+            #CloudSync Upload
+            if emudeck_check_internet_connection && [ "$cloudEnabled" = true ]; then
+                   { emudeck_cloud_upload; }                
+            fi
+        fi
+        
         set_prev_state "game"
         check_off_order "End_Save"
     else
+        # EmuDeck CloudSync
+        # Always upload in the background when exiting of a game
+        # this will create a .pending_upload used to prevent Onion to shutdown if there's a pending upload
+        if [ -f /mnt/SDCARD/App/EmuDeckCloudSync/functions.sh ]; then
+            . /mnt/SDCARD/App/EmuDeckCloudSync/functions.sh
+            #CloudSync Upload
+            if emudeck_check_internet_connection && [ "$cloudEnabled" = true ]; then
+                   { emudeck_cloud_upload; } &
+            fi
+        fi
+
         set_prev_state "app"
         check_off_order "End"
     fi
@@ -392,7 +424,24 @@ launch_switcher() {
 }
 
 check_off_order() {
-    if [ -f /tmp/.offOrder ]; then
+    if  [ -f /tmp/.offOrder ] ; then
+        # EmuDeck CloudSync, if we have internet connection
+        # we stop the power off if there's an upload in progress
+        if [ -f /mnt/SDCARD/App/EmuDeckCloudSync/functions.sh ]; then
+            . /mnt/SDCARD/App/EmuDeckCloudSync/functions.sh
+            if emudeck_check_internet_connection && [ "$cloudEnabled" = true ]; then
+                timestamp=$(date +%s)
+                echo $timestamp > $EmuDeckPath/.pending_upload
+                if [ -f $EmuDeckPath/.pending_upload ]; then
+                    infoPanel --images-json /mnt/SDCARD/App/EmuDeckCloudSync/uploading.json --persistent &
+                    while [ -f $EmuDeckPath/.pending_upload ]; do
+                        emudeck_cloud_upload
+                    done
+                    touch /tmp/dismiss_info_panel
+                fi
+            fi
+        fi
+
         bootScreen "$1" &
         sleep 1 # Allow the bootScreen to be displayed
         shutdown
