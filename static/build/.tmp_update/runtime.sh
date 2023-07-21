@@ -426,6 +426,7 @@ mainui_target=$miyoodir/app/MainUI
 
 mount_main_ui() {
     mainui_mode=$([ -f $sysdir/config/.showExpert ] && echo "expert" || echo "clean")
+    [ -f $sysdir/config/.swapABXY ] && mainui_mode="${mainui_mode}-abxy"
     mainui_srcname="MainUI-$DEVICE_ID-$mainui_mode"
     mainui_mount=$(basename "$(cat /proc/self/mountinfo | grep $mainui_target | cut -d' ' -f4)")
 
@@ -437,7 +438,7 @@ mount_main_ui() {
         if [ ! -f $mainui_target ]; then
             touch $mainui_target
         fi
-
+        
         mount -o bind "$sysdir/bin/$mainui_srcname" $mainui_target
     fi
 }

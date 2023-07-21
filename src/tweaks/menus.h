@@ -270,7 +270,7 @@ void menu_buttonActionInGameMenu(void *_)
 void menu_buttonAction(void *_)
 {
     if (!_menu_button_action._created) {
-        _menu_button_action = list_create(6, LIST_SMALL);
+        _menu_button_action = list_create(7, LIST_SMALL);
         strcpy(_menu_button_action.title, "Button shortcuts");
         list_addItem(&_menu_button_action,
                      (ListItem){
@@ -306,6 +306,12 @@ void menu_buttonAction(void *_)
                          .value_formatter = formatter_appShortcut,
                          .action_id = 1,
                          .action = action_setAppShortcut});
+        list_addItem(&_menu_button_action,
+                     (ListItem){
+                         .label = "MainUI: Swap A/B and X/Y",
+                         .item_type = TOGGLE,
+                         .value = (int)settings.swap_abxy,
+                         .action = action_swapABXY});
         list_addItem(&_menu_button_action,
                      (ListItem){
                          .label = "Power single press",
