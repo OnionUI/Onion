@@ -216,7 +216,12 @@ void free_play_activities(PlayActivities *pa_ptr)
 void __ensure_rel_path(char *rel_path, const char *rom_path)
 {
     if (!file_path_relative_to(rel_path, ROMS_FOLDER, rom_path)) {
-        strcpy(rel_path, str_split(strdup((const char *)rom_path), "../../Roms/"));
+        if (strstr(rom_path, "../../Roms/") != NULL) {
+            strcpy(rel_path, str_split(strdup((const char *)rom_path), "../../Roms/"));
+        }
+        else {
+            strcpy(rel_path, str_replace(strdup((const char *)rom_path), "/mnt/SDCARD/Roms/", ""));
+        }
     }
 }
 
