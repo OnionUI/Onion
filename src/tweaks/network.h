@@ -40,6 +40,7 @@ static struct network_s {
     bool auth_ssh;
     bool manual_tz;
     bool check_updates;
+    bool keep_alive;
     bool loaded;
 } network_state;
 
@@ -61,6 +62,7 @@ void network_loadState(void)
     network_state.auth_ssh = config_flag_get(".authsshState");
     network_state.manual_tz = config_flag_get(".manual_tz");
     network_state.check_updates = config_flag_get(".checkUpdates");
+    network_state.keep_alive = config_flag_get(".keepServicesAlive");
     network_state.loaded = true;
 }
 
@@ -288,6 +290,11 @@ void network_setNtpWaitState(void *pt)
 void network_setCheckUpdates(void *pt)
 {
     network_setState(&network_state.check_updates, ".checkUpdates", ((ListItem *)pt)->value);
+}
+
+void network_keepServicesAlive(void *pt)
+{
+    network_setState(&network_state.keep_alive, ".keepServicesAlive", !((ListItem *)pt)->value);
 }
 
 void network_setSmbdAuthState(void *pt)
@@ -526,7 +533,7 @@ void menu_wifi(void *_)
 void menu_network(void *_)
 {
     if (!_menu_network._created) {
-        _menu_network = list_create(7, LIST_SMALL);
+        _menu_network = list_create(8, LIST_SMALL);
         strcpy(_menu_network.title, "Network");
 
         network_loadState();
@@ -583,6 +590,12 @@ void menu_network(void *_)
                          .disabled = !settings.wifi_on,
                          .value = (int)network_state.telnet,
                          .action = network_setTelnetState});
+        list_addItem(&_menu_network,
+                     (ListItem){
+                         .label = "Disable services in game",
+                         .item_type = TOGGLE,
+                         .value = !network_state.keep_alive,
+                         .action = network_keepServicesAlive});
     }
     strcpy(_menu_network.items[0].label, ip_address_label);
     menu_stack[++menu_level] = &_menu_network;

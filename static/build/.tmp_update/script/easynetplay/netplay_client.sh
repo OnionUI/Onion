@@ -10,11 +10,13 @@
 # Env setup
 sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo
-LOGGING=$([ -f $sysdir/config/.logging ] && echo 1 || echo 0)
 export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 export WPACLI=/customer/app/wpa_cli
 export hostip="192.168.100.100" # This should be the default unless the user has changed it..
 
+logfile=easy_netplay.log
+. $sysdir/script/log.sh
+program=$(basename "$0" .sh)
 ##########
 ##Setup.##
 ##########

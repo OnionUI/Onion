@@ -44,18 +44,8 @@ void menu_systemDisplay(void *_)
 void menu_systemStartup(void *_)
 {
     if (!_menu_system_startup._created) {
-        _menu_system_startup = list_create_with_title(4, LIST_SMALL, "Startup");
+        _menu_system_startup = list_create_with_title(3, LIST_SMALL, "Startup");
 
-        if (DEVICE_ID == MIYOO354) {
-            network_loadState();
-            list_addItem(&_menu_system_startup,
-                         (ListItem){
-                             .label = "Check for updates",
-                             .item_type = TOGGLE,
-                             .disabled = !settings.wifi_on,
-                             .value = (int)network_state.check_updates,
-                             .action = network_setCheckUpdates});
-        }
         list_addItem(&_menu_system_startup,
                      (ListItem){
                          .label = "Auto-resume last game",
@@ -490,10 +480,25 @@ void menu_resetSettings(void *_)
     header_changed = true;
 }
 
+void menu_diagnostics(void *_)
+{
+    if (!_menu_diagnostics._created) {
+        _menu_diagnostics = list_create_with_title(1, LIST_SMALL, "Diagnostics");
+        list_addItem(&_menu_diagnostics,
+                     (ListItem){
+                         .label = "Enable logging",
+                         .item_type = TOGGLE,
+                         .value = (int)settings.enable_logging,
+                         .action = action_setEnableLogging});
+    }
+    menu_stack[++menu_level] = &_menu_diagnostics;
+    header_changed = true;
+}
+
 void menu_advanced(void *_)
 {
     if (!_menu_advanced._created) {
-        _menu_advanced = list_create(5, LIST_SMALL);
+        _menu_advanced = list_create(6, LIST_SMALL);
         strcpy(_menu_advanced.title, "Advanced");
         list_addItem(&_menu_advanced,
                      (ListItem){
@@ -537,6 +542,10 @@ void menu_advanced(void *_)
                              .label = "Reset settings...",
                              .action = menu_resetSettings});
         }
+        list_addItem(&_menu_advanced,
+                     (ListItem){
+                         .label = "Diagnostics...",
+                         .action = menu_diagnostics});
     }
     menu_stack[++menu_level] = &_menu_advanced;
     header_changed = true;

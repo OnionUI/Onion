@@ -67,6 +67,7 @@ static List _menu_battery_percentage;
 static List _menu_advanced;
 static List _menu_reset_settings;
 static List _menu_tools;
+static List _menu_diagnostics;
 
 void menu_free_all(void)
 {
@@ -84,6 +85,7 @@ void menu_free_all(void)
     list_free(&_menu_advanced);
     list_free(&_menu_reset_settings);
     list_free(&_menu_tools);
+    list_free(&_menu_diagnostics);
 
     menu_icons_free_all();
     menu_network_free_all();

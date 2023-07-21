@@ -4,6 +4,9 @@ miyoodir=/mnt/SDCARD/miyoo
 export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 export PATH="$sysdir/bin:$PATH"
 
+logfile=$(basename "$0" .sh)
+. $sysdir/script/log.sh
+
 MODEL_MM=283
 MODEL_MMP=354
 
@@ -13,6 +16,7 @@ main() {
     export DEVICE_ID=$([ $? -eq 0 ] && echo $MODEL_MMP || echo $MODEL_MM)
     echo -n "$DEVICE_ID" > /tmp/deviceModel
 
+    touch /tmp/is_booting
     check_installer
     clear_logs
 
@@ -86,6 +90,7 @@ main() {
     fi
 
     start_networking
+    rm -rf /tmp/is_booting
 
     # Auto launch
     if [ ! -f $sysdir/config/.noAutoStart ]; then
@@ -110,7 +115,6 @@ main() {
 
     state_change check_switcher
     set_startup_tab
-
     # Main runtime loop
     while true; do
         state_change check_main_ui
@@ -302,6 +306,15 @@ launch_game() {
             echo "$temp" | sed 's/\$/\\\$/g' > $sysdir/cmd_to_run.sh
         fi
 
+        # Kill services for maximum performance
+        if [ ! -f $sysdir/config/.keepServicesAlive ]; then
+            for process in dropbear bftpd filebrowser telnetd smbd; do
+                if is_running $process; then
+                    killall -9 $process
+                fi
+            done
+        fi
+
         playActivity start "$rompath"
     fi
 
@@ -326,12 +339,12 @@ launch_game() {
             retval=$?
         fi
     else
-        retval=255
+        retval=404
     fi
 
     log "cmd retval: $retval"
 
-    if [ $retval -eq 255 ]; then
+    if [ $retval -eq 404 ]; then
         infoPanel --title "File not found" --message "The requested file was not found." --auto
     elif [ $retval -ge 128 ] && [ $retval -ne 143 ]; then
         infoPanel --title "Fatal error occurred" --message "The program exited unexpectedly.\n(Error code: $retval)" --auto
@@ -355,12 +368,27 @@ launch_game() {
         cd $sysdir
         playActivity stop "$rompath"
 
+        # Reset networking if needed
+        if [ ! -f "$sysdir/config/.keepServicesAlive" ]; then
+            for service in smbd http ssh ftp telnet; do
+                if [ -f "$sysdir/config/.${service}State" ]; then
+                    touch /tmp/network_changed
+                    break
+                fi
+            done
+        fi
+
         set_prev_state "game"
         check_off_order "End_Save"
     else
         set_prev_state "app"
         check_off_order "End"
     fi
+}
+
+is_running() {
+    process_name="$1"
+    pgrep "$process_name" > /dev/null
 }
 
 get_info_value() {
@@ -538,9 +566,6 @@ runifnecessary() {
 }
 
 start_networking() {
-    # Loop breaker for NTP
-    touch /tmp/ntp_run_once
-
     rm $sysdir/config/.hotspotState # dont start hotspot at boot
 
     touch /tmp/network_changed
@@ -550,7 +575,7 @@ start_networking() {
 }
 
 check_networking() {
-    if [ $DEVICE_ID -ne $MODEL_MMP ] || [ ! -f /tmp/network_changed ]; then
+    if [ $DEVICE_ID -ne $MODEL_MMP ] || [ ! -f /tmp/network_changed ] && [ -f /tmp/ntp_synced ]; then
         check_timezone
         return
     fi
@@ -575,14 +600,6 @@ check_installer() {
         reboot
         sleep 10
         exit
-    fi
-}
-
-scriptname=$(basename "$0" .sh)
-
-log() {
-    if [ -f $sysdir/config/.logging ]; then
-        echo -e "($scriptname) $(date):" $* | tee -a "$sysdir/logs/$scriptname.log"
     fi
 }
 
