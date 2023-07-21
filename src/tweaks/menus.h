@@ -555,6 +555,10 @@ void menu_tools(void *_)
                      (ListItem){
                          .label = "Generate game list for short name roms",
                          .action = tool_buildShortRomGameList});
+        list_addItem(&_menu_tools,
+                     (ListItem){
+                         .label = "Generate miyoogamelist with digest names",
+                         .action = tool_generateMiyoogamelists});
     }
     menu_stack[++menu_level] = &_menu_tools;
     header_changed = true;
