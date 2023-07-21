@@ -483,8 +483,7 @@ void menu_resetSettings(void *_)
 void menu_diagnostics(void *_)
 {
     if (!_menu_diagnostics._created) {
-        _menu_diagnostics = list_create(1, LIST_SMALL);
-        strcpy(_menu_diagnostics.title, "Diagnostics");
+        _menu_diagnostics = list_create_with_title(1, LIST_SMALL, "Diagnostics");
         list_addItem(&_menu_diagnostics,
                      (ListItem){
                          .label = "Enable logging",

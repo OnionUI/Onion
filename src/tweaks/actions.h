@@ -87,6 +87,9 @@ void action_setDisableStandby(void *pt)
 void action_setEnableLogging(void *pt)
 {
     settings.enable_logging = ((ListItem *)pt)->value == 1;
+    char new_value[22];
+    sprintf(new_value, "log_to_file = %s", settings.enable_logging ? "\"true\"" : "\"false\"");
+    file_changeKeyValue(RETROARCH_CONFIG, "log_to_file =", new_value );
 }
 
 void action_setMenuButtonHaptics(void *pt)
