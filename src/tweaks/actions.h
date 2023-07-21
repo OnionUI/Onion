@@ -84,6 +84,11 @@ void action_setDisableStandby(void *pt)
     settings.disable_standby = ((ListItem *)pt)->value == 1;
 }
 
+void action_swapABXY(void *pt)
+{
+    settings.swap_abxy = ((ListItem *)pt)->value == 1;
+}
+
 void action_setMenuButtonHaptics(void *pt)
 {
     settings.menu_button_haptics = ((ListItem *)pt)->value == 1;
