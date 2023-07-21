@@ -3,12 +3,28 @@
 rootdir="/mnt/SDCARD/Emu"
 out='miyoogamelist.xml'
 
+clean_name() {
+    # move article to the start of the name, if present
+    article=$(echo "$1" | sed -e 's/.*, \(A\|The\|An\).*/\1/')
+    name="$article $(echo "$1" | sed -e 's/, \(A\|The\|An\)//')"
+
+    # change " - " to ": " for subtitles
+    name=$(echo "$name" | sed -e 's/ - /: /')
+
+    # remove everything in brackets
+    name=$(echo "$name" | sed -e 's/(.*)//')
+    name=$(echo "$name" | sed -e 's/\[.*\]//')
+
+    # trim
+    echo "$name" | awk '{$1=$1};1'
+}
+
 generate_miyoogamelist() {
     rompath=$1
     imgpath=$2
     extlist=$3
 
-    cd $rompath
+    cd "$rompath"
 
     # create backup of previous miyoogamelist.xml
     if [ -f "$out" ]; then
@@ -31,7 +47,7 @@ generate_miyoogamelist() {
         fi
 
         filename="${rom%.*}"
-        digest=$(echo "$rom" | grep -oE "^([^(\[]*)" | awk '{$1=$1};1')
+        digest=$(clean_name "$filename")
 
         cat <<EOF >>$out
     <game>
