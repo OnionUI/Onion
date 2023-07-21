@@ -1,9 +1,15 @@
 #!/bin/sh
 
-rootdir="/mnt/SDCARD/Roms"
+rootdir="/mnt/SDCARD/Emu"
 out='miyoogamelist.xml'
 
 generate_miyoogamelist() {
+    rompath=$1
+    imgpath=$2
+    extlist=$3
+
+    cd $rompath
+
     # create backup of previous miyoogamelist.xml
     if [ -f "$out" ]; then
         mv "$out" "$out.bak"
@@ -19,20 +25,19 @@ generate_miyoogamelist() {
             continue
         fi
 
-        # .xml, .bak & .db files are no games
-        # .bin files are no games, .cue files are!
-        if echo "$rom" | grep -qE "\.(xml|bak|db|bin)$"; then
+        # ignore non-game files
+        if ! echo "$rom" | grep -qE "\.($extlist)$"; then
             continue
         fi
 
         filename="${rom%.*}"
-        digest=$(echo "$rom" | grep -oE "^([^(]*)" | awk '{$1=$1};1')
+        digest=$(echo "$rom" | grep -oE "^([^(\[]*)" | awk '{$1=$1};1')
 
         cat <<EOF >>$out
     <game>
         <path>./$rom</path>
         <name>$digest</name>
-        <image>./Imgs/$filename.png</image>
+        <image>$imgpath/$filename.png</image>
     </game>
 EOF
     done
@@ -48,6 +53,13 @@ for system in "$rootdir"/*; do
         fi
 
         cd "$system"
-        generate_miyoogamelist
+
+        # read info from config.json
+        rompath=$(grep -E '"rompath":' config.json | sed -e 's/^.*:\s*"\(.*\)",*/\1/')
+        extlist=$(grep -E '"extlist":' config.json | sed -e 's/^.*:\s*"\(.*\)",*/\1/')
+        imgpath=$(grep -E '"imgpath":' config.json | sed -e 's/^.*:\s*"\(.*\)",*/\1/')
+        imgpath=".${imgpath#$rompath}"
+
+        generate_miyoogamelist "$rompath" "$imgpath" "$extlist"
     fi
 done
