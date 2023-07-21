@@ -1,8 +1,9 @@
 {
-  "screenscraper_username": "",
-  "screenscraper_password": "",
+  "screenscraper_username": "true",
+  "screenscraper_password": "true",
   "Retroarch_enabled": "true",
   "Screenscraper_enabled": "true",
   "Launchbox_enabled": "true",
-  "ScrapeInBackground": "false"
+  "ScrapeInBackground": "false",
+  "MediaType": "box-v2"
 }
