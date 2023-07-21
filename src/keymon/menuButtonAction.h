@@ -15,8 +15,6 @@
 #include "../tweaks/tools_defs.h"
 #include "./input_fd.h"
 
-static MainUIState tools_states[NUM_TOOLS] = {GAMES, GAMES, GAMES};
-
 static SystemState menu_last_state = MODE_UNKNOWN;
 static int menu_last_pressed = 0;
 static int menu_long_press_timeout = 700;
@@ -29,14 +27,14 @@ void _action_runApp(const char *app_dir_name)
     kill_mainUI();
 }
 
-void _action_runTool(const char *tool_name, MainUIState return_state)
+void _action_runTool(const char *tool_name)
 {
     FILE *fp;
     char cmd[STR_MAX * 4];
     sprintf(cmd, "cd /mnt/SDCARD/.tmp_update; ./bin/tweaks --apply_tool \"%s\"",
             tool_name);
     file_put_sync(fp, "/tmp/cmd_to_run.sh", "%s", cmd);
-    write_mainui_state(return_state, 0, 10);
+    write_mainui_state(MAIN_MENU, 0, 10);
     kill_mainUI();
 }
 
@@ -63,7 +61,7 @@ void applyExtraButtonShortcut(int button)
     else if (strncmp(action, "tool:", 5) == 0) {
         for (i = 0; i < NUM_TOOLS; i++)
             if (strcmp(action + 5, tools_short_names[i]) == 0) {
-                _action_runTool(tools_short_names[i], tools_states[i]);
+                _action_runTool(tools_short_names[i]);
                 return;
             }
     }
