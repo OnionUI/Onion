@@ -306,7 +306,7 @@ int __db_get_rom_id_by_path(const char *rom_path)
     return rom_id;
 }
 
-int __db_rom_find_by_file_path(const char *rom_path, bool create_not_found)
+int __db_rom_find_by_file_path(const char *rom_path, bool create_or_update)
 {
     printf_debug("rom_find_by_file_path('%s')\n", rom_path);
 
@@ -317,6 +317,13 @@ int __db_rom_find_by_file_path(const char *rom_path, bool create_not_found)
         rom_id = __db_get_orphan_rom_id(rom_path);
         if (rom_id != ROM_NOT_FOUND) {
             update_orphan = true;
+        }
+    }
+    else if (create_or_update) {
+        CacheDBItem *cache_db_item = cache_db_find(rom_path);
+        if (cache_db_item != NULL) {
+            __db_update_rom_from_cache(rom_id, cache_db_item);
+            free(cache_db_item);
         }
     }
 
@@ -332,7 +339,7 @@ int __db_rom_find_by_file_path(const char *rom_path, bool create_not_found)
             __db_update_rom(rom_id, "", rom_name, rom_path, "");
         }
     }
-    else if (rom_id == ROM_NOT_FOUND && create_not_found) {
+    else if (rom_id == ROM_NOT_FOUND && create_or_update) {
         CacheDBItem *cache_db_item = cache_db_find(rom_path);
 
         if (cache_db_item != NULL) {
@@ -348,11 +355,11 @@ int __db_rom_find_by_file_path(const char *rom_path, bool create_not_found)
     return rom_id;
 }
 
-int play_activity_transaction_rom_find_by_file_path(const char *rom_path, bool create_not_found)
+int play_activity_transaction_rom_find_by_file_path(const char *rom_path, bool create_or_update)
 {
     int retval;
     play_activity_db_open();
-    retval = __db_rom_find_by_file_path(rom_path, create_not_found);
+    retval = __db_rom_find_by_file_path(rom_path, create_or_update);
     play_activity_db_close();
     return retval;
 }
