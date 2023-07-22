@@ -57,7 +57,7 @@ connect_to_host() {
 		return 1
 	fi
 	
-	log "GLO::Pokemon_Netplay: Added new network with id $new_id"
+	log "Added new network with id $new_id"
 
 	net_setup=$($WPACLI -i wlan0 <<-EOF
 	set_network $new_id ssid "MiyooMini+APOnionOS"
@@ -83,7 +83,7 @@ connect_to_host() {
     ip link set wlan0 up
     ip route add default via 192.168.100.100
 	
-	log "GLO::Pokemon_Netplay: Added new network and connected"
+	log "Added new network and connected"
 }
 
 
@@ -151,12 +151,12 @@ read_cookie() {
 				;;
 		esac
 	done <"/mnt/SDCARD/RetroArch/retroarch.cookie.client"
-    log "GLO::Pokemon_Netplay: $core $rom"
+    log "$core $rom"
 	
 	#url encode or curl complains
 	export core_url=$(echo "$core" | sed 's/ /%20/g')
 
-	log "GLO::Pokemon_Netplay: Cookie file read"
+	log "Cookie file read"
 }
 
 # Pull the cookie local info that the GLO script has generated to build the host side rom path
@@ -168,7 +168,7 @@ get_cookie_info() {
         local_rom=$(grep '\[rom\]' "$COOKIE_FILE" | cut -d ':' -f 2 | xargs) 
         local_rom_ext="${local_rom##*.}"
     else
-        log "GLO::Pokemon_Netplay: No cookie found!"
+        log "No cookie found!"
     fi
     
     # Check the rom actually exists before we go any further
@@ -209,7 +209,7 @@ send_saves() {
 # Backup local save file
 backup_save() {
     check_stop
-    log "GLO::Pokemon_Netplay: Backing up save file to: ${save_file_matched}_bkup"
+    log "Backing up save file to: ${save_file_matched}_bkup"
     cp "$save_file_matched" "${save_file_matched}_bkup"
     sync
 }
@@ -248,27 +248,27 @@ change_tgb_dual_opt() {
 
     if [ "$1" = "replace" ]; then
         cp "$tgb_dual_opts" "$tgb_dual_opts_bk"
-        log "GLO::Pokemon_Netplay: The current TGB Opt value is: $current_value"
-        log "GLO::Pokemon_Netplay: Replacing TGB Opt value with 'player 2 only' and audio output to 'Game Boy #2'..."
+        log "The current TGB Opt value is: $current_value"
+        log "Replacing TGB Opt value with 'player 2 only' and audio output to 'Game Boy #2'..."
         
         if [ -z "$current_value" ]; then
-            log "GLO::Pokemon_Netplay: The key 'tgbdual_single_screen_mp' was not found in the file, adding"
+            log "The key 'tgbdual_single_screen_mp' was not found in the file, adding"
             echo -e "\ntgbdual_single_screen_mp = \"player 2 only\"" >> "$tgb_dual_opts"
         else
             sed -i 's|tgbdual_single_screen_mp = "'"$current_value"'"|tgbdual_single_screen_mp = "player 2 only"|' "$tgb_dual_opts"
         fi
 
         if [ -z "$current_audio_value" ]; then
-            log "GLO::Pokemon_Netplay: The key 'tgbdual_audio_output' was not found in the file, adding"
+            log "The key 'tgbdual_audio_output' was not found in the file, adding"
             echo -e 'tgbdual_audio_output = "Game Boy #2"' >> "$tgb_dual_opts"
         else
            sed -i 's|tgbdual_audio_output = "'"$current_audio_value"'"|tgbdual_audio_output = "Game Boy #2"|' "$tgb_dual_opts"
         fi 
     elif [ "$1" = "restore" ]; then
-        log "GLO::Pokemon_Netplay: Restoring TGB opt original values..."
+        log "Restoring TGB opt original values..."
         mv "$tgb_dual_opts_bk" "$tgb_dual_opts"
     else
-        log "GLO::Pokemon_Netplay: Invalid argument for TGB Opt. Please use 'replace' or 'restore'."
+        log "Invalid argument for TGB Opt. Please use 'replace' or 'restore'."
     fi
 }
 
@@ -276,7 +276,7 @@ change_tgb_dual_opt() {
 start_retroarch() {
     check_stop
 	build_infoPanel_and_log "RetroArch" "Starting RetroArch..."
-    log "GLO::Pokemon_Netplay: Starting RetroArch loaded with $rom and $local_rom"
+    log "Starting RetroArch loaded with $rom and $local_rom"
 	cd /mnt/SDCARD/RetroArch
     HOME=/mnt/SDCARD/RetroArch ./retroarch -C $hostip -v -L .retroarch/cores/tgbdual_libretro.so --subsystem "gb_link_2p" "$rom" "$local_rom"
 }
@@ -292,7 +292,7 @@ wait_for_save_return() {
         for file in /tmp/ready_to_send; do
             if [ -f "$file" ]; then
                 build_infoPanel_and_log "Message from Host" "Host is ready to send save"
-                log "GLO::Pokemon_Netplay: Received notification \n Host is ready to send the save"
+                log "Received notification \n Host is ready to send the save"
                 break 2
             fi
         done
@@ -302,7 +302,7 @@ wait_for_save_return() {
 
         if [ $counter -ge 20 ]; then
             build_infoPanel_and_log "Error" "The Host didn't ready up, cannot continue..."
-            log "GLO::Pokemon_Netplay: We ran out of time waiting for the host to ready up, possibly due to host->client connecitivity"
+            log "We ran out of time waiting for the host to ready up, possibly due to host->client connecitivity"
             sleep 1
             cleanup
         fi
@@ -354,7 +354,7 @@ cleanup() {
     restore_ftp
     
     # Remove some files we prepared and received
-    log "GLO::Pokemon_Netplay: Removing stale files"
+    log "Removing stale files"
     rm "/tmp/host_ready"
     rm "/tmp/ready_to_send"
     rm "/tmp/ready_to_receive"
@@ -364,7 +364,7 @@ cleanup() {
     rm "/tmp/MISSING.srm"
     rm "/tmp/stop_now"
 		
-	log "GLO::Pokemon_Netplay: Cleanup done"
+	log "Cleanup done"
 	exit
 }
 
@@ -402,9 +402,9 @@ notify_peer() {
     curl -T "$notify_file" "ftp://$hostip/$notify_file" > /dev/null 2>&1
     
     if [ $? -eq 0 ]; then
-        log "GLO::Pokemon_Netplay: Successfully transferred $notify_file to ftp://$hostip/$notify_file"
+        log "Successfully transferred $notify_file to ftp://$hostip/$notify_file"
     else
-        log "GLO::Pokemon_Netplay: Failed to transfer $notify_file to ftp://$hostip/$notify_file"
+        log "Failed to transfer $notify_file to ftp://$hostip/$notify_file"
     fi
 }
 
@@ -424,7 +424,7 @@ sync_file() {
 
 	if [ "$file_type" == "Rom" ]; then
 		if [ -e "$file_path" ]; then
-			log "GLO::Pokemon_Netplay: $file_path exists."
+			log "$file_path exists."
 
 			local file_size=$(stat -c%s "$file_path")
 			local file_chksum_actual
@@ -451,7 +451,7 @@ sync_file() {
 		fi
 	else
 		if [ -e "$file_path" ]; then
-			log "GLO::Pokemon_Netplay: $file_path exists."
+			log "$file_path exists."
 
 			local file_size=$(stat -c%s "$file_path")
 			local file_chksum_actual
@@ -498,20 +498,20 @@ sync_file() {
 # We'll need FTP to transfer files
 start_ftp() {
     if is_running bftpd; then
-        log "GLO::Pokemon_Netplay: FTP already running, killing to rebind"
+        log "FTP already running, killing to rebind"
         bftpd_p=$(ps | grep bftpd | grep -v grep | awk '{for(i=4;i<=NF;++i) printf $i" "}')
         killall -9 bftpd
         killall -9 tcpsvd
         tcpsvd -E 0.0.0.0 21 ftpd -w / &
     else
         tcpsvd -E 0.0.0.0 21 ftpd -w / &
-        log "GLO::Pokemon_Netplay: Starting FTP server"
+        log "Starting FTP server"
     fi
 }
 
 # This will restore the users original ftp state
 restore_ftp(){
-    log "GLO::Pokemon_Netplay: Restoring original FTP server"
+    log "Restoring original FTP server"
     killall -9 tcpsvd
     if flag_enabled ftpState; then
         if flag_enabled authftpState; then 
@@ -531,7 +531,7 @@ build_infoPanel_and_log() {
 	local title="$1"
 	local message="$2"
 
-	log "GLO::Pokemon_Netplay: Stage: $title Message: $message"
+	log "Info Panel: \n\tStage: $title\n\tMessage: $message"
 	
 	infoPanel --title "$title" --message "$message" --persistent &
 	touch /tmp/dismiss_info_panel
@@ -569,19 +569,19 @@ save_wifi_state() {
 	export old_ipv4=$(ip -4 addr show $IFACE | grep -o 'inet [^ ]*' | cut -d ' ' -f 2)
 	ip addr del $old_ip/$old_mask dev $IFACE
     if [ -z "$old_id" ]; then
-        log "GLO::Pokemon_Netplay: old_id is not set"
+        log "old_id is not set"
         old_id=0
     fi
 }
 
 restore_wifi_state() {
     if [ -z "$old_ipv4" ]; then
-        log "GLO::Pokemon_Netplay: Old IP address not found."
+        log "Old IP address not found."
     fi
    
     ip_output=$(ip link set wlan0 down 2>&1)
     if [ $? -ne 0 ]; then
-        log "GLO::Pokemon_Netplay: Failed to bring down the interface. Output from 'ip link set down' command: $ip_output"
+        log "Failed to bring down the interface. Output from 'ip link set down' command: $ip_output"
     fi
     
 	ip -4 addr show wlan0 | awk '/inet/ {print $2}' | while IFS= read -r ipaddr
@@ -591,12 +591,12 @@ restore_wifi_state() {
 	
     ip_output=$(ip addr add $old_ipv4 dev wlan0 2>&1)
     if [ $? -ne 0 ]; then
-        log "GLO::Pokemon_Netplay: Failed to assign the old IP address. Output from 'ip addr add' command: $ip_output"
+        log "Failed to assign the old IP address. Output from 'ip addr add' command: $ip_output"
     fi
     
     ip_output=$(ip link set wlan0 up 2>&1)
     if [ $? -ne 0 ]; then
-        log "GLO::Pokemon_Netplay: Failed to bring up the interface. Output from 'ip link set up' command: $ip_output"
+        log "Failed to bring up the interface. Output from 'ip link set up' command: $ip_output"
     fi
 }
 
@@ -613,29 +613,29 @@ do_sync_file() {
 
     if [ -e "$file_path" ]; then
         mv "$file_path" "${file_path}_old"
-        log "GLO::Pokemon_Netplay: Existing $file_type file moved to ${file_path}_old"
+        log "Existing $file_type file moved to ${file_path}_old"
     fi
 
-    log "GLO::Pokemon_Netplay: Starting to download $file_type from $file_url"
+    log "Starting to download $file_type from $file_url"
     curl -o "$file_path" "ftp://$hostip/$file_url" > /dev/null 2>&1
 
     if [ $? -eq 0 ]; then
-        log "GLO::Pokemon_Netplay: $file_type download completed"
+        log "$file_type download completed"
     else
-        log "GLO::Pokemon_Netplay: $file_type download failed"
+        log "$file_type download failed"
     fi
 }
 
 udhcpc_control() {
 	if pgrep udhcpc > /dev/null; then
 		killall -9 udhcpc
-        log "GLO::Pokemon_Netplay: Old DHCP proc killed."
+        log "Old DHCP proc killed."
 	fi
 	sleep 1
-	log "GLO::Pokemon_Netplay: Trying to start DHCP"
+	log "Trying to start DHCP"
 	udhcpc -i wlan0 -s /etc/init.d/udhcpc.script > /dev/null 2>&1 &
 	if is_running udhcpc; then
-		log "GLO::Pokemon_Netplay: DHCP started"
+		log "DHCP started"
 	else
 		build_infoPanel_and_log "DHCP" "Unable to start DHCP client\n unable to continue."
 	fi
