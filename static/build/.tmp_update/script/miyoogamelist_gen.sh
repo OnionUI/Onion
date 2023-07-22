@@ -5,15 +5,15 @@ out='miyoogamelist.xml'
 
 clean_name() {
     # move article to the start of the name, if present
-    article=$(echo "$1" | sed -e 's/.*, \(A\|The\|An\).*/\1/')
+    article=$(echo "$1" | sed -ne 's/.*, \(A\|The\|An\).*/\1/p')
     name="$article $(echo "$1" | sed -e 's/, \(A\|The\|An\)//')"
 
     # change " - " to ": " for subtitles
     name=$(echo "$name" | sed -e 's/ - /: /')
 
     # remove everything in brackets
-    name=$(echo "$name" | sed -e 's/(.*)//')
-    name=$(echo "$name" | sed -e 's/\[.*\]//')
+    name=$(echo "$name" | sed -e 's/([^)]*)//g')
+    name=$(echo "$name" | sed -e 's/\[[^]]*\]//g')
 
     # trim
     echo "$name" | awk '{$1=$1};1'
