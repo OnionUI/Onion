@@ -78,7 +78,7 @@ int cache_get_path(char *cache_path_out, char *cache_name_out, const char *rom_p
     int cache_version = CACHE_NOT_FOUND;
     char *cache_dir = dirname(strdup((char *)rom_path));
 
-    while (strlen(cache_dir) > 16 && strcmp("Roms", cache_name_out) != 0) {
+    while (strlen(cache_dir) > 16) {
         strcpy(cache_name_out, basename(cache_dir));
         cache_version = cache_get_path_and_version(cache_path_out, cache_dir, cache_name_out);
 
@@ -87,6 +87,10 @@ int cache_get_path(char *cache_path_out, char *cache_name_out, const char *rom_p
         }
 
         cache_dir = dirname(cache_dir);
+
+        if (strcmp("Roms", basename(cache_dir)) == 0) {
+            break;
+        }
     }
 
     return cache_version;
@@ -100,14 +104,26 @@ CacheDBItem *cache_db_find(const char *path_or_name)
     char cache_db_file_path[STR_MAX];
     char cache_type[STR_MAX];
 
+    char rel_path[PATH_MAX];
+    if (!file_path_relative_to(rel_path, "/mnt/SDCARD/Roms", path_or_name)) {
+        if (strstr(path_or_name, "../../Roms/") != NULL) {
+            strcpy(rel_path, str_split(strdup((const char *)path_or_name), "../../Roms/"));
+        }
+        else {
+            strcpy(rel_path, str_replace(strdup((const char *)path_or_name), "/mnt/SDCARD/Roms/", ""));
+        }
+    }
+
     char *sql;
     int cache_version = cache_get_path(cache_db_file_path, cache_type, path_or_name);
 
+    char *game_name = file_removeExtension(basename(strdup(path_or_name)));
+
     if (cache_version == 2) {
-        sql = sqlite3_mprintf("SELECT disp, path, imgpath FROM %q_roms WHERE path LIKE '%%%q' OR disp = %Q LIMIT 1;", cache_type, path_or_name, path_or_name);
+        sql = sqlite3_mprintf("SELECT disp, path, imgpath FROM %q_roms WHERE path LIKE '%%%q' OR disp = %Q LIMIT 1;", cache_type, rel_path, game_name);
     }
     else if (cache_version == 6) {
-        sql = sqlite3_mprintf("SELECT pinyin, path, imgpath FROM %q_roms WHERE path LIKE '%%%q' OR disp = %Q LIMIT 1;", cache_type, path_or_name, path_or_name);
+        sql = sqlite3_mprintf("SELECT pinyin, path, imgpath FROM %q_roms WHERE path LIKE '%%%q' OR disp = %Q LIMIT 1;", cache_type, rel_path, game_name);
     }
     else {
         printf("No cache db found\n");
