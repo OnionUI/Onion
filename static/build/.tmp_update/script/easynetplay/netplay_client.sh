@@ -14,9 +14,10 @@ export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/p
 export WPACLI=/customer/app/wpa_cli
 export hostip="192.168.100.100" # This should be the default unless the user has changed it..
 
-logfile=easy_netplay.log
+logfile=easy_netplay
 . $sysdir/script/log.sh
 program=$(basename "$0" .sh)
+
 ##########
 ##Setup.##
 ##########
@@ -29,7 +30,7 @@ check_wifi() {
         build_infoPanel_and_log "WIFI" "Wifi up"
 		save_wifi_state
 	else
-		log "GLO::Easy_Netplay: Wi-Fi disabled, trying to enable before connecting.."
+		log "Wi-Fi disabled, trying to enable before connecting.."
 		build_infoPanel_and_log "WIFI" "Wifi disabled, starting..."
 
 		/customer/app/axp_test wifion
@@ -60,7 +61,7 @@ connect_to_host() {
 		return 1
 	fi
 
-	log "GLO::Easy_Netplay: Added new network with id $new_id"
+	log "Added new network with id $new_id"
 
 	net_setup=$(
 		$WPACLI -i wlan0 <<- EOF
@@ -153,13 +154,13 @@ read_cookie() {
 				romcheck="${line##"[romchksum]: "}"
 				;;
 		esac
-		log "GLO::Easy_Netplay: $core $rom $coresize $corechksum $romsize $romchksum"
+		log "$core $rom $coresize $corechksum $romsize $romchksum"
 	done < "/mnt/SDCARD/RetroArch/retroarch.cookie.client"
 
 	#url encode or curl complains
 	export core_url=$(echo "$core" | sed 's/ /%20/g')
 
-	log "GLO::Easy_Netplay: Cookie file read"
+	log "Cookie file read"
 }
 
 sync_file() {
@@ -177,7 +178,7 @@ sync_file() {
 
 	if [ "$file_type" == "Rom" ]; then
 		if [ -e "$file_path" ]; then
-			log "GLO::Easy_Netplay: $file_path exists."
+			log "$file_path exists."
 
 			local file_size=$(stat -c%s "$file_path")
 			local file_chksum_actual
@@ -202,7 +203,7 @@ sync_file() {
 		fi
 	else
 		if [ -e "$file_path" ]; then
-			log "GLO::Easy_Netplay: $file_path exists."
+			log "$file_path exists."
 
 			local file_size=$(stat -c%s "$file_path")
 			local file_chksum_actual
@@ -260,20 +261,12 @@ build_infoPanel_and_log() {
 	local title="$1"
 	local message="$2"
 
-	if [ $LOGGING -eq 1 ]; then
-		echo "$(date) GLO::Easy_Netplay: Stage: $title Message: $message" >> $sysdir/logs/easy_netplay.log
-	fi
+	log "Info Panel: \n\tStage: $title\n\tMessage: $message"
 	
 	infoPanel --title "$title" --message "$message" --persistent &
 	touch /tmp/dismiss_info_panel
 	sync
 	sleep 0.5
-}
-
-log() {
-	if [ $LOGGING -eq 1 ]; then
-		echo "$(date)" $* >> $sysdir/logs/easy_netplay.log
-	fi
 }
 
 confirm_join_panel() {
@@ -306,13 +299,13 @@ save_wifi_state() {
 
 restore_wifi_state() {
 	if [ -z "$old_ipv4" ]; then
-		log "GLO::Easy_Netplay: Old IP address not found."
+		log "Old IP address not found."
 	fi
 
 	ip_output=$(ip link set wlan0 down 2>&1)
 	if [ $? -ne 0 ]; then
-		log "GLO::Easy_Netplay: Failed to bring down the interface."
-		log "GLO::Easy_Netplay: Output from 'ip link set down' command: $ip_output"
+		log "Failed to bring down the interface."
+		log "Output from 'ip link set down' command: $ip_output"
 	fi
 
 	ip -4 addr show wlan0 | awk '/inet/ {print $2}' | while IFS= read -r line; do
@@ -321,14 +314,14 @@ restore_wifi_state() {
 
 	ip_output=$(ip addr add $old_ipv4 dev wlan0 2>&1)
 	if [ $? -ne 0 ]; then
-		log "GLO::Easy_Netplay: Failed to assign the old IP address."
-		log "GLO::Easy_Netplay: Output from 'ip addr add' command: $ip_output"
+		log "Failed to assign the old IP address."
+		log "Output from 'ip addr add' command: $ip_output"
 	fi
 
 	ip_output=$(ip link set wlan0 up 2>&1)
 	if [ $? -ne 0 ]; then
-		log "GLO::Easy_Netplay: Failed to bring up the interface."
-		log "GLO::Easy_Netplay: Output from 'ip link set up' command: $ip_output"
+		log "Failed to bring up the interface."
+		log "Output from 'ip link set up' command: $ip_output"
 	fi
 }
 
@@ -345,16 +338,16 @@ do_sync_file() {
 
 	if [ -e "$file_path" ]; then
 		mv "$file_path" "${file_path}_old"
-		log "GLO::Easy_Netplay: Existing $file_type file moved to ${file_path}_old"
+		log "Existing $file_type file moved to ${file_path}_old"
 	fi
 
-	log "GLO::Easy_Netplay: Starting to download $file_type from $file_url"
+	log "Starting to download $file_type from $file_url"
 	curl -o "$file_path" "ftp://$hostip/$file_url" > /dev/null 2>&1
 
 	if [ $? -eq 0 ]; then
-		log "GLO::Easy_Netplay: $file_type download completed"
+		log "$file_type download completed"
 	else
-		log "GLO::Easy_Netplay: $file_type download failed"
+		log "$file_type download failed"
 	fi
 }
 
@@ -362,12 +355,12 @@ udhcpc_control() {
 	if pgrep udhcpc > /dev/null; then
 		killall -9 udhcpc
 	fi
-	log "GLO::Easy_Netplay: Old DHCP proc killed."
+	log "Old DHCP proc killed."
 	sleep 1
-	log "GLO::Easy_Netplay: Trying to start DHCP"
+	log "Trying to start DHCP"
 	udhcpc -i wlan0 -s /etc/init.d/udhcpc.script > /dev/null 2>&1 &
 	if is_running udhcpc; then
-		log "GLO::Easy_Netplay: DHCP started"
+		log "DHCP started"
 	else
 		build_infoPanel_and_log "DHCP" "Unable to start DHCP client\n unable to continue."
 	fi
@@ -398,7 +391,7 @@ cleanup() {
 	)
 
 	if [ $? -ne 0 ]; then
-		log "GLO::Easy_Netplay: Failed to configure the network"
+		log "Failed to configure the network"
 		cleanup
 	fi
 
@@ -408,7 +401,7 @@ cleanup() {
 
 	restore_wifi_state
 
-	log "GLO::Easy_Netplay: Cleanup done"
+	log "Cleanup done"
 	exit
 }
 
