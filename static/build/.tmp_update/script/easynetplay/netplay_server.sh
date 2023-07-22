@@ -12,7 +12,7 @@ sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo
 export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 
-logfile=easy_netplay.log
+logfile=easy_netplay
 . $sysdir/script/log.sh
 program=$(basename "$0" .sh)
 

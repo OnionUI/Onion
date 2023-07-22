@@ -14,7 +14,7 @@ export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/p
 export WPACLI=/customer/app/wpa_cli
 export hostip="192.168.100.100" # This should be the default unless the user has changed it..
 
-logfile=easy_netplay.log
+logfile=easy_netplay
 . $sysdir/script/log.sh
 program=$(basename "$0" .sh)
 
