@@ -633,7 +633,7 @@ build_infoPanel_and_log() {
 	local title="$1"
 	local message="$2"
 
-	log
+	log "GLO::Pokemon_Netplay: Stage: $title Message: $message"
 	
 	infoPanel --title "$title" --message "$message" --persistent &
 	touch /tmp/dismiss_info_panel
