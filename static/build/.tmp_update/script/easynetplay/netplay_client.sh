@@ -17,6 +17,7 @@ export hostip="192.168.100.100" # This should be the default unless the user has
 logfile=easy_netplay.log
 . $sysdir/script/log.sh
 program=$(basename "$0" .sh)
+
 ##########
 ##Setup.##
 ##########
@@ -260,20 +261,12 @@ build_infoPanel_and_log() {
 	local title="$1"
 	local message="$2"
 
-	if [ $LOGGING -eq 1 ]; then
-		echo "$(date) GLO::Easy_Netplay: Stage: $title Message: $message" >> $sysdir/logs/easy_netplay.log
-	fi
+	log
 	
 	infoPanel --title "$title" --message "$message" --persistent &
 	touch /tmp/dismiss_info_panel
 	sync
 	sleep 0.5
-}
-
-log() {
-	if [ $LOGGING -eq 1 ]; then
-		echo "$(date)" $* >> $sysdir/logs/easy_netplay.log
-	fi
 }
 
 confirm_join_panel() {
