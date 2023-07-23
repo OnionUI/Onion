@@ -4,19 +4,27 @@ rootdir="/mnt/SDCARD/Emu"
 out='miyoogamelist.xml'
 
 clean_name() {
-    # move article to the start of the name, if present
-    article=$(echo "$1" | sed -ne 's/.*, \(A\|The\|An\).*/\1/p')
-    name="$article $(echo "$1" | sed -e 's/, \(A\|The\|An\)//')"
+    name="$1"
 
-    # change " - " to ": " for subtitles
-    name=$(echo "$name" | sed -e 's/ - /: /')
-
+    ### REMOVE NON-ESSENTIALS ###
     # remove everything in brackets
     name=$(echo "$name" | sed -e 's/([^)]*)//g')
     name=$(echo "$name" | sed -e 's/\[[^]]*\]//g')
 
     # trim
-    echo "$name" | awk '{$1=$1};1'
+    name=$(echo "$name" | awk '{$1=$1};1')
+
+    ### FORMAT ###
+    # move article to the start of the name, if present
+    article=$(echo "$name" | sed -ne 's/.*, \(A\|The\|An\).*/\1/p')
+    if [ ! -z $article ]; then
+        name="$article $(echo "$name" | sed -e 's/, \(A\|The\|An\)//')"
+    fi
+
+    # change " - " to ": " for subtitles
+    name=$(echo "$name" | sed -e 's/ - /: /')
+
+    echo "$name"
 }
 
 generate_miyoogamelist() {
