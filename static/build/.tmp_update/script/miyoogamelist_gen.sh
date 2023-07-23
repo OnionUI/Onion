@@ -11,6 +11,9 @@ clean_name() {
     name=$(echo "$name" | sed -e 's/([^)]*)//g')
     name=$(echo "$name" | sed -e 's/\[[^]]*\]//g')
 
+    # remove rankings
+    name=$(echo "$name" | sed -e 's/^[0-9]\+\.//')
+
     # trim
     name=$(echo "$name" | awk '{$1=$1};1')
 
