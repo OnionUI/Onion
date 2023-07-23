@@ -4,19 +4,36 @@ rootdir="/mnt/SDCARD/Emu"
 out='miyoogamelist.xml'
 
 clean_name() {
+    name="$1"
+    extlist="$2"
+
+    ### REMOVE NON-ESSENTIALS ###
+    # remove file extensions
+    while echo "$name" | grep -qE "\.($extlist)$"; do
+        name="${name%.*}"
+    done
+
+    # remove everything in brackets
+    name=$(echo "$name" | sed -e 's/([^)]*)//g')
+    name=$(echo "$name" | sed -e 's/\[[^]]*\]//g')
+
+    # remove rankings
+    name=$(echo "$name" | sed -e 's/^[0-9]\+\.//')
+
+    # trim
+    name=$(echo "$name" | awk '{$1=$1};1')
+
+    ### FORMAT ###
     # move article to the start of the name, if present
-    article=$(echo "$1" | sed -e 's/.*, \(A\|The\|An\).*/\1/')
-    name="$article $(echo "$1" | sed -e 's/, \(A\|The\|An\)//')"
+    article=$(echo "$name" | sed -ne 's/.*, \(A\|The\|An\).*/\1/p')
+    if [ ! -z $article ]; then
+        name="$article $(echo "$name" | sed -e 's/, \(A\|The\|An\)//')"
+    fi
 
     # change " - " to ": " for subtitles
     name=$(echo "$name" | sed -e 's/ - /: /')
 
-    # remove everything in brackets
-    name=$(echo "$name" | sed -e 's/(.*)//')
-    name=$(echo "$name" | sed -e 's/\[.*\]//')
-
-    # trim
-    echo "$name" | awk '{$1=$1};1'
+    echo "$name"
 }
 
 generate_miyoogamelist() {
@@ -47,7 +64,7 @@ generate_miyoogamelist() {
         fi
 
         filename="${rom%.*}"
-        digest=$(clean_name "$filename")
+        digest=$(clean_name "$rom" "$extlist")
 
         cat <<EOF >>$out
     <game>
