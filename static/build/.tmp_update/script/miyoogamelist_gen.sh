@@ -5,8 +5,14 @@ out='miyoogamelist.xml'
 
 clean_name() {
     name="$1"
+    extlist="$2"
 
     ### REMOVE NON-ESSENTIALS ###
+    # remove file extensions
+    while echo "$name" | grep -qE "\.($extlist)$"; do
+        name="${name%.*}"
+    done
+
     # remove everything in brackets
     name=$(echo "$name" | sed -e 's/([^)]*)//g')
     name=$(echo "$name" | sed -e 's/\[[^]]*\]//g')
@@ -58,7 +64,7 @@ generate_miyoogamelist() {
         fi
 
         filename="${rom%.*}"
-        digest=$(clean_name "$filename")
+        digest=$(clean_name "$rom" "$extlist")
 
         cat <<EOF >>$out
     <game>
