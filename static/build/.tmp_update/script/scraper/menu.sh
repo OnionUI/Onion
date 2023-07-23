@@ -29,7 +29,7 @@ Menu_Config()
     Option1="Select your scraping sources"
     Option2="Modify your Screenscraper.fr account"
     Option3="Change the scraped media type"
-    Option4="Toggle scraping in background ?"
+    Option4="Toggle background scraping"
     Option5="Back to Main Menu"
     
     Mychoice=$( echo -e "$Option1\n$Option2\n$Option3\n$Option4\n$Option5" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "      --== CONFIGURATION MENU ==--" -b "Press A to validate your choice.")
@@ -283,7 +283,7 @@ Launch_Scraping ()
 	
 	if [ "$(ip r)" = "" ]; then 
 		echo "You must be connected to wifi to use Scraper"
-		sleep 3
+		read -n 1 -s -r -p "Press A to continue"
 		exit
 	fi
 
