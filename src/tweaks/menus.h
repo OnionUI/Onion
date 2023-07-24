@@ -312,8 +312,7 @@ void menu_buttonAction(void *_)
 void menu_batteryPercentage(void *_)
 {
     if (!_menu_battery_percentage._created) {
-        _menu_battery_percentage = list_create(6, LIST_SMALL);
-        strcpy(_menu_battery_percentage.title, "Battery percentage");
+        _menu_battery_percentage = list_create_with_title(7, LIST_SMALL, "Battery percentage");
         list_addItem(&_menu_battery_percentage,
                      (ListItem){
                          .label = "Visible",
@@ -340,17 +339,25 @@ void menu_batteryPercentage(void *_)
                          .action = action_batteryPercentageFontSize});
         list_addItem(&_menu_battery_percentage,
                      (ListItem){
-                         .label = "Position",
+                         .label = "Text alignment",
                          .item_type = MULTIVALUE,
-                         .value_max = 2,
-                         .value_labels = {"-", "Left", "Right"},
+                         .value_max = 3,
+                         .value_labels = {"-", "Left", "Center", "Right"},
                          .value = value_batteryPercentagePosition(),
                          .action = action_batteryPercentagePosition});
         list_addItem(&_menu_battery_percentage,
                      (ListItem){
+                         .label = "Fixed position",
+                         .item_type = MULTIVALUE,
+                         .value_max = 2,
+                         .value_labels = THEME_TOGGLE_LABELS,
+                         .value = value_batteryPercentageFixed(),
+                         .action = action_batteryPercentageFixed});
+        list_addItem(&_menu_battery_percentage,
+                     (ListItem){
                          .label = "Horizontal offset",
                          .item_type = MULTIVALUE,
-                         .value_max = 21,
+                         .value_max = BATTPERC_MAX_OFFSET * 2 + 1,
                          .value_formatter = formatter_positionOffset,
                          .value = value_batteryPercentageOffsetX(),
                          .action = action_batteryPercentageOffsetX});
@@ -358,7 +365,7 @@ void menu_batteryPercentage(void *_)
                      (ListItem){
                          .label = "Vertical offset",
                          .item_type = MULTIVALUE,
-                         .value_max = 21,
+                         .value_max = BATTPERC_MAX_OFFSET * 2 + 1,
                          .value_formatter = formatter_positionOffset,
                          .value = value_batteryPercentageOffsetY(),
                          .action = action_batteryPercentageOffsetY});
