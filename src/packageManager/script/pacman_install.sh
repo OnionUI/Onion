@@ -17,20 +17,20 @@ set_json_value() {
 
 cd "$datadir"
 
-config=$(find "./$package" -name config.json -print0)
-preserved_label=$(cat "$config" | get_json_value label)
-preserved_imgpath=$(cat "$config" | get_json_value imgpath)
+config=$(find "./$package" -name config.json -print | head -n 1)
+config="/mnt/SDCARD/$(echo "$config" | sed "s:./$package::g")"
+preserved_label=""
+preserved_imgpath=""
 
-echo "label: $preserved_label"
-echo "imgpath: $preserved_imgpath"
-
-exit
+if [ -f "$config" ]; then
+    preserved_label=$(cat "$config" | get_json_value label)
+    preserved_imgpath=$(cat "$config" | get_json_value imgpath)
+fi
 
 for FILE in ./"$package"/*; do
     cp -rf "$FILE" "/mnt/SDCARD/"
 done
 
-config="/mnt/SDCARD/$(echo "$config" | sed "s:./$package::g")"
 if [ -f "$config" ]; then
     if [ -n "$preserved_label" ]; then
         set_json_value label "$preserved_label" "$config"
