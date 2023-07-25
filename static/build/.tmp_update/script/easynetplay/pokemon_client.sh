@@ -16,7 +16,6 @@ rm /tmp/stop_now
 logfile=pokemon_link
 . $sysdir/script/log.sh
 program=$(basename "$0" .sh)
-. $sysdir/script/easynetplay/netplay_global.sh
 
 ##########
 ##Setup.##
