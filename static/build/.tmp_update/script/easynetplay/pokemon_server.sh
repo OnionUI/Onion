@@ -153,9 +153,9 @@ wait_for_client() {
         sleep 1
         counter=$((counter + 1))
 
-        if [ $counter -ge 20 ]; then
-            log "No client has connected after 20 seconds."
-            build_infoPanel_and_log "Hotspot error" "No client has connected after 20 seconds. Exiting..."
+        if [ $counter -ge 30 ]; then
+            log "No client has connected"
+            build_infoPanel_and_log "Hotspot error" "No client has connected. Exiting..."
             cleanup
         fi
     done

@@ -23,9 +23,12 @@ program=$(basename "$0" .sh)
 # We'll need wifi up for this. Lets try and start it..
 
 check_wifi() {
+    ifconfig wlan1 down
+    $WPACLI save_config
+    save_wifi_state
+    sync
 	if ifconfig wlan0 &>/dev/null; then
 		build_infoPanel_and_log "WIFI" "Wifi up"
-		save_wifi_state
 	else
 		build_infoPanel_and_log "WIFI" "Wifi disabled, starting..." 
 		
@@ -52,6 +55,7 @@ connect_to_host() {
 	build_infoPanel_and_log "Connecting..." "Trying to join the hotspot..."
 
 	export new_id=$($WPACLI -i wlan0 add_network)
+    
 	if [ -z "$new_id" ]; then
 		build_infoPanel_and_log "Failed"  "Failed to create network\n unable to continue." 
 		return 1
@@ -59,16 +63,17 @@ connect_to_host() {
 	
 	log "Added new network with id $new_id"
 
-	net_setup=$($WPACLI -i wlan0 <<-EOF
-	set_network $new_id ssid "MiyooMini+APOnionOS"
-	set_network $new_id psk "onionos+"
-	disable_network all
-	select_network $new_id
-	enable_network $new_id
-	save_config
-	reconfigure
-	quit
-	EOF
+	net_setup=$(
+		$WPACLI -i wlan0 <<- EOF
+			set_network $new_id ssid "MiyooMini+APOnionOS"
+			set_network $new_id psk "onionos+"
+			disable_network all
+			select_network $new_id
+			enable_network $new_id
+			save_config
+			reconfigure
+			quit
+		EOF
 	)
 	
 	if [ $? -ne 0 ]; then
@@ -76,12 +81,12 @@ connect_to_host() {
 		notify_stop
 	fi
     
-    killall -9 udhcpc
-    sleep 1
     ip addr flush dev wlan0
     ip addr add 192.168.100.101/24 dev wlan0
-    ip link set wlan0 up
     ip route add default via 192.168.100.100
+    
+    killall -9 udhcpc
+    sleep 1
 	
 	log "Added new network and connected"
 }
@@ -92,13 +97,12 @@ wait_for_connectivity() {
     build_infoPanel_and_log "Connecting..."  "Trying to reach $hostip..."
     counter=0
 
-    while ! ping -c 1 -W 1 $hostip > /dev/null 2>&1; do
-        sleep 0.5
+    while ! ping -c 2 -W 2 $hostip > /dev/null 2>&1; do
         counter=$((counter+1))
 
-        if [ $counter -ge 40 ]; then
-            build_infoPanel_and_log "Failed to connect!"  "Could not reach $IP in 20 seconds."
-            notify_stop
+        if [ $counter -ge 20 ]; then
+            build_infoPanel_and_log "Failed to connect!"  "Could not reach $hostip"
+            cleanup
         fi
     done
 
@@ -463,9 +467,6 @@ sync_file() {
 				else
 					build_infoPanel_and_log "Syncing" "$file_type synced."
 				fi
-
-			else
-				build_infoPanel_and_log "$file_type synced!" "$file_type checksums match, no sync required"
 			fi
 		else
 			build_infoPanel_and_log "Syncing" "$file_type doesn't exist locally; syncing with host."
@@ -476,8 +477,6 @@ sync_file() {
                 notify_peer "stop_now"
                 sleep 2
 				cleanup
-			else
-				build_infoPanel_and_log "Syncing" "$file_type synced."
 			fi
 		fi
 	fi
@@ -560,29 +559,34 @@ save_wifi_state() {
 
 restore_wifi_state() {
     cp /tmp/wpa_supplicant.conf_bk /appconfigs/wpa_supplicant.conf
-    if [ -z "$old_ipv4" ]; then
-        log "Old IP address not found."
-    fi
-   
-    ip_output=$(ip link set wlan0 down 2>&1)
-    if [ $? -ne 0 ]; then
-        log "Failed to bring down the interface. Output from 'ip link set down' command: $ip_output"
-    fi
-    
-	ip -4 addr show wlan0 | awk '/inet/ {print $2}' | while IFS= read -r ipaddr
-	do
-		ip addr del "$ipaddr" dev wlan0
+    sync
+	if [ -z "$old_ipv4" ]; then
+		log "Old IP address not found."
+	fi
+
+	ip_output=$(ip link set wlan0 down 2>&1)
+	if [ $? -ne 0 ]; then
+		log "Failed to bring down the interface."
+		log "Output from 'ip link set down' command: $ip_output"
+	fi
+
+	ip -4 addr show wlan0 | awk '/inet/ {print $2}' | while IFS= read -r line; do
+		ip addr del "$line" dev wlan0
 	done
-	
-    ip_output=$(ip addr add $old_ipv4 dev wlan0 2>&1)
-    if [ $? -ne 0 ]; then
-        log "Failed to assign the old IP address. Output from 'ip addr add' command: $ip_output"
-    fi
+
+	ip_output=$(ip addr add $old_ipv4 dev wlan0 2>&1)
+	if [ $? -ne 0 ]; then
+		log "Failed to assign the old IP address."
+		log "Output from 'ip addr add' command: $ip_output"
+	fi
+
+	ip_output=$(ip link set wlan0 up 2>&1)
+	if [ $? -ne 0 ]; then
+		log "Failed to bring up the interface."
+		log "Output from 'ip link set up' command: $ip_output"
+	fi
     
-    ip_output=$(ip link set wlan0 up 2>&1)
-    if [ $? -ne 0 ]; then
-        log "Failed to bring up the interface. Output from 'ip link set up' command: $ip_output"
-    fi
+    $WPACLI reconfigure
 }
 
 do_sync_file() {
