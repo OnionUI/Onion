@@ -26,9 +26,11 @@ program=$(basename "$0" .sh)
 
 check_wifi() {
 	ifconfig wlan1 down
+    $WPACLI save_config
+    save_wifi_state
+    sync
 	if ifconfig wlan0 &> /dev/null; then
         build_infoPanel_and_log "WIFI" "Wifi up"
-		save_wifi_state
 	else
 		log "Wi-Fi disabled, trying to enable before connecting.."
 		build_infoPanel_and_log "WIFI" "Wifi disabled, starting..."
@@ -55,10 +57,10 @@ check_wifi() {
 connect_to_host() {
 	build_infoPanel_and_log "Connecting..." "Trying to join the hotspot..."
 
-	export new_id=$($WPACLI -i wlan0 add_network)
+	new_id=$($WPACLI -i wlan0 add_network)
 	if [ -z "$new_id" ]; then
 		build_infoPanel_and_log "Failed" "Failed to create network\n unable to continue."
-		return 1
+		cleanup
 	fi
 
 	log "Added new network with id $new_id"
@@ -89,24 +91,47 @@ connect_to_host() {
 
 # We'd better wait for an ip address to be assigned before going any further.
 wait_for_ip() {
-	local IP=$(ip route get 1 2> /dev/null | awk '{print $NF;exit}')
-	build_infoPanel_and_log "Connecting..." "Waiting for an IP..."
-	local counter=0
+    ip addr flush dev wlan0
+    IP=""
+    build_infoPanel_and_log "Connecting..." "Waiting for an IP..."
+    local counter=0
 
-	while [ -z "$IP" ]; do
-		IP=$(ip route get 1 2> /dev/null | awk '{print $NF;exit}')
-		sleep 1
-		counter=$((counter + 1))
+    while [ -z "$IP" ]; do
+        IP=$(ip route get 1 2> /dev/null | awk '{print $NF;exit}')
+        sleep 1
+        counter=$((counter + 1))
 
-		if [ $counter -ge 20 ]; then
-			build_infoPanel_and_log "Failed to connect!" "Could not get an IP in 20 seconds."
-			sleep 1
-			cleanup
-		fi
-	done
+        if [ $counter -eq 10 ]; then
+            build_infoPanel_and_log "Fallback" "Using static IP..."
+            killall -9 udhcpc 
+            ip addr flush dev wlan0
+            RAND_IP=$((101 + RANDOM % 150))
+            ip addr add 192.168.100.$RAND_IP/24 dev wlan0
+            ip route add default via 192.168.100.100
+        elif [ $counter -ge 20 ]; then
+            build_infoPanel_and_log "Failed to connect!" "Could not get an IP in 20 seconds.\n Try again"
+            sleep 1
+            cleanup
+        fi
+    done
+}
 
-	build_infoPanel_and_log "Joined hotspot!" "IP: $IP"
-	sleep 1
+wait_for_connectivity() {
+    build_infoPanel_and_log "Connecting..."  "Trying to reach $hostip..."
+    counter=0
+
+    while ! ping -c 1 -W 1 $hostip > /dev/null 2>&1; do
+        sleep 0.5
+        counter=$((counter+1))
+
+        if [ $counter -ge 40 ]; then
+            build_infoPanel_and_log "Failed to connect!"  "Could not reach $IP in 20 seconds."
+            notify_stop
+        fi
+    done
+
+    build_infoPanel_and_log "Joined hotspot!"  "Successfully reached the Hotspot! \n IP: $hostip" 
+    sleep 1
 }
 
 # Download the cookie from the host, check whether it downloaded and make sure it still exists on the client before we move on
@@ -193,8 +218,6 @@ sync_file() {
 				build_infoPanel_and_log "Checksum Mismatch" "The Rom exists but the checksum doesn't match \n Cannot continue."
                 sleep 2
                 cleanup
-			else
-				build_infoPanel_and_log "Rom Check Complete!" "Rom exists and checksums match!"
 			fi
 		else
 			build_infoPanel_and_log "Rom Missing" "The Rom doesn't exist on the client \n Cannot continue."
@@ -227,8 +250,6 @@ sync_file() {
 					build_infoPanel_and_log "Syncing" "$file_type synced."
 				fi
 
-			else
-				build_infoPanel_and_log "$file_type synced!" "$file_type checksums match, no sync required"
 			fi
 		else
 			build_infoPanel_and_log "Syncing" "$file_type doesn't exist locally; syncing with host."
@@ -256,6 +277,10 @@ start_retroarch() {
 ###########
 #Utilities#
 ###########
+
+wifi_disabled() {
+    [ $(/customer/app/jsonval wifi) -eq 0 ]
+}
 
 build_infoPanel_and_log() {
 	local title="$1"
@@ -286,18 +311,21 @@ confirm_join_panel() {
 }
 
 stripped_game_name() {
-	export game_name=$(awk -F'/' '/\[rom\]:/ {print $NF}' /mnt/SDCARD/RetroArch/retroarch.cookie.client | sed 's/\(.*\)\..*/\1/')
+	game_name=$(awk -F'/' '/\[rom\]:/ {print $NF}' /mnt/SDCARD/RetroArch/retroarch.cookie.client | sed 's/\(.*\)\..*/\1/')
 }
 
-# If we're currently connected to wifi, save the network ID so we can reconnect after we're done with retroarch - save the IP address and subnet so we can restore these.
+# If we're currently connected to wifi, make a backup of the wpa_supplicant.conf to restore later
 save_wifi_state() {
-	export IFACE=wlan0
-	export old_id=$(wpa_cli -i $IFACE list_networks | awk '/CURRENT/ {print $1}')
-	export old_ipv4=$(ip -4 addr show $IFACE | grep -o 'inet [^ ]*' | cut -d ' ' -f 2)
-	ip addr del $old_ip/$old_mask dev $IFACE
+	IFACE=wlan0
+	cp /appconfigs/wpa_supplicant.conf /tmp/wpa_supplicant.conf_bk
+	old_ipv4=$(ip -4 addr show $IFACE | grep -o 'inet [^ ]*' | cut -d ' ' -f 2)
+	ip addr del $old_ipv4/$old_mask dev $IFACE
 }
 
+# try and reset the IP and supp conf
 restore_wifi_state() {
+    cp /tmp/wpa_supplicant.conf_bk /appconfigs/wpa_supplicant.conf
+    sync
 	if [ -z "$old_ipv4" ]; then
 		log "Old IP address not found."
 	fi
@@ -323,6 +351,8 @@ restore_wifi_state() {
 		log "Failed to bring up the interface."
 		log "Output from 'ip link set up' command: $ip_output"
 	fi
+    
+    $WPACLI reconfigure
 }
 
 do_sync_file() {
@@ -372,38 +402,22 @@ is_running() {
 }
 
 cleanup() {
-	build_infoPanel_and_log "Cleanup" "Cleaning up after netplay session..."
+    build_infoPanel_and_log "Cleanup" "Cleaning up after netplay session..."
 
-	pkill -9 pressMenu2Kill
+    pkill -9 pressMenu2Kill
+    
+    if is_running infoPanel; then
+        killall -9 infoPanel
+    fi
+        
+    sync
+    
+    restore_wifi_state
 
-	if is_running infoPanel; then
-		killall -9 infoPanel
-	fi
-
-	net_setup=$(
-		$WPACLI -i $IFACE <<- EOF
-			remove_network $new_id
-			select_network $old_id
-			enable_network $old_id
-			save_config
-			quit
-		EOF
-	)
-
-	if [ $? -ne 0 ]; then
-		log "Failed to configure the network"
-		cleanup
-	fi
-
-	udhcpc_control
-
-	sleep 1
-
-	restore_wifi_state
-
-	log "Cleanup done"
-	exit
+    log "Cleanup done"
+    exit
 }
+
 
 #########
 ##Main.##
@@ -414,6 +428,7 @@ lets_go() {
 	check_wifi
 	connect_to_host
 	wait_for_ip
+    wait_for_connectivity
 	download_cookie
 	read_cookie
 	sync_file Rom "$rom" "$romcheck" "$rom_url"

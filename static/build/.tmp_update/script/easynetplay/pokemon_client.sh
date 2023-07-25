@@ -333,19 +333,6 @@ cleanup() {
 	if is_running infoPanel; then
 		killall -9 infoPanel
 	fi
-	
-	net_setup=$($WPACLI -i $IFACE <<-EOF
-	remove_network $new_id
-	select_network $old_id
-	enable_network $old_id
-	save_config
-	quit
-	EOF
-	)
-	
-	if [ $? -ne 0 ]; then
-        build_infoPanel_and_log "Cleanup" "Failed to configure the network"
-	fi
     
     udhcpc_control
     sleep 1
@@ -363,6 +350,7 @@ cleanup() {
     rm "$save_dir/MISSING.srm"
     rm "/tmp/MISSING.srm"
     rm "/tmp/stop_now"
+    rm "/tmp/wpa_supplicant.conf_bk"
 		
 	log "Cleanup done"
 	exit
@@ -564,17 +552,14 @@ stripped_game_name() {
 
 # If we're currently connected to wifi, save the network ID so we can reconnect after we're done with retroarch - save the IP address and subnet so we can restore these.
 save_wifi_state() {
-    export IFACE=wlan0
-    export old_id=$(wpa_cli -i $IFACE list_networks | awk '/CURRENT/ {print $1}')
-	export old_ipv4=$(ip -4 addr show $IFACE | grep -o 'inet [^ ]*' | cut -d ' ' -f 2)
-	ip addr del $old_ip/$old_mask dev $IFACE
-    if [ -z "$old_id" ]; then
-        log "old_id is not set"
-        old_id=0
-    fi
+    IFACE=wlan0
+    cp /appconfigs/wpa_supplicant.conf /tmp/wpa_supplicant.conf_bk
+	old_ipv4=$(ip -4 addr show $IFACE | grep -o 'inet [^ ]*' | cut -d ' ' -f 2)
+	ip addr del $old_ipv4/$old_mask dev $IFACE
 }
 
 restore_wifi_state() {
+    cp /tmp/wpa_supplicant.conf_bk /appconfigs/wpa_supplicant.conf
     if [ -z "$old_ipv4" ]; then
         log "Old IP address not found."
     fi
