@@ -365,7 +365,7 @@ wait_for_save_return() {
         sleep 1
         counter=$((counter + 1))
 
-        if [ $counter -ge 20 ]; then
+        if [ $counter -ge 30 ]; then
             build_infoPanel_and_log "Error" "The client didn't ready up, cannot continue..."
             sleep 1
             cleanup
@@ -373,7 +373,6 @@ wait_for_save_return() {
         fi
     done
 }
-
 
 # Push the clients save file back
 return_client_save() {

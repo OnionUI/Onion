@@ -305,7 +305,7 @@ wait_for_save_return() {
         sleep 1
         counter=$((counter + 1))
 
-        if [ $counter -ge 20 ]; then
+        if [ $counter -ge 30 ]; then
             build_infoPanel_and_log "Error" "The Host didn't ready up, cannot continue..."
             log "We ran out of time waiting for the host to ready up, possibly due to host->client connecitivity"
             sleep 1
