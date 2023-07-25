@@ -12,9 +12,11 @@ WPACLI=/customer/app/wpa_cli
 hostip="192.168.100.100" # This should be the default unless the user has changed it..
 rm /tmp/stop_now
 
+## Source global utils
 logfile=pokemon_link
 . $sysdir/script/log.sh
 program=$(basename "$0" .sh)
+. $sysdir/script/easynetplay/netplay_global.sh
 
 ##########
 ##Setup.##
@@ -432,8 +434,6 @@ sync_file() {
                 notify_peer "stop_now"
                 sleep 2
                 cleanup
-			else
-				build_infoPanel_and_log "Rom Check Complete!" "Rom exists and checksums match!"
 			fi
 		else
 			build_infoPanel_and_log "Rom Missing" "A rom requested doesn't exist on the local client \n Cannot continue."
