@@ -558,8 +558,6 @@ sync_file() {
                 notify_peer "stop_now"
                 sleep 2
                 cleanup
-			else
-				build_infoPanel_and_log "Rom Check Complete!" "Rom exists and checksums match!"
 			fi
 		else
 			build_infoPanel_and_log "Rom Missing" "The Rom doesn't exist on the client \n Cannot continue."
