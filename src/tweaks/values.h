@@ -80,8 +80,7 @@ int value_batteryPercentageVisible(void)
 int value_batteryPercentageFontFamily(void)
 {
     char override_value[JSON_STRING_LEN];
-    bool has_override = theme_getOverride("batteryPercentage", "font",
-                                          &override_value, cJSON_String);
+    bool has_override = theme_getOverride("batteryPercentage", "font", &override_value, cJSON_String);
 
     if (!has_override)
         return 0;
@@ -99,8 +98,7 @@ int value_batteryPercentageFontFamily(void)
 int value_batteryPercentageFontSize(void)
 {
     int override_value = 0;
-    bool has_override = theme_getOverride("batteryPercentage", "size",
-                                          &override_value, cJSON_Number);
+    bool has_override = theme_getOverride("batteryPercentage", "size", &override_value, cJSON_Number);
     if (!has_override)
         return 0;
 
@@ -116,32 +114,42 @@ int value_batteryPercentageFontSize(void)
 
 int value_batteryPercentagePosition(void)
 {
-    bool override_value = false;
-    bool has_override = theme_getOverride("batteryPercentage", "onleft",
-                                          &override_value, cJSON_True);
+    char override_value[JSON_STRING_LEN];
+    bool has_override = theme_getOverride("batteryPercentage", "textAlign", override_value, cJSON_String);
     if (!has_override)
         return 0;
-    return override_value ? 1 : 2;
+    if (strcmp("center", override_value) == 0)
+        return 2;
+    if (strcmp("right", override_value) == 0)
+        return 3;
+    return 1;
+}
+
+int value_batteryPercentageFixed(void)
+{
+    bool override_value;
+    bool has_override = theme_getOverride("batteryPercentage", "fixed", &override_value, cJSON_True);
+    if (!has_override)
+        return 0;
+    return override_value ? 2 : 1;
 }
 
 int value_batteryPercentageOffsetX(void)
 {
     int override_value = 0;
-    bool has_override = theme_getOverride("batteryPercentage", "offsetX",
-                                          &override_value, cJSON_Number);
+    bool has_override = theme_getOverride("batteryPercentage", "offsetX", &override_value, cJSON_Number);
     if (!has_override)
         return 0;
-    return override_value + 11;
+    return override_value + 1 + BATTPERC_MAX_OFFSET;
 }
 
 int value_batteryPercentageOffsetY(void)
 {
     int override_value = 0;
-    bool has_override = theme_getOverride("batteryPercentage", "offsetY",
-                                          &override_value, cJSON_Number);
+    bool has_override = theme_getOverride("batteryPercentage", "offsetY", &override_value, cJSON_Number);
     if (!has_override)
         return 0;
-    return override_value + 11;
+    return override_value + 1 + BATTPERC_MAX_OFFSET;
 }
 
 int value_hideLabelsIcons(void)

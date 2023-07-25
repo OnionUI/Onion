@@ -44,6 +44,7 @@ static bool is_suspended = false;
 
 static void sigHandler(int sig);
 void cleanup(void);
+void saveFakeAxpResult(int current_percentage);
 bool isCharging(void);
 int updateADCValue(int);
 int getBatPercMMP(void);
