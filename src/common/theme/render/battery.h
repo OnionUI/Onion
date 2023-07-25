@@ -56,6 +56,9 @@ SDL_Surface *theme_batterySurfaceWithBg(int percentage, SDL_Surface *background)
         img_width = icon->w;
         img_height = icon->h;
     }
+    else if (style->fixed || style->textAlign == CENTER) {
+        img_width = icon->w > text->w ? icon->w : text->w;
+    }
 
     if (img_width % 2 != 0)
         img_width += 1;
@@ -67,17 +70,41 @@ SDL_Surface *theme_batterySurfaceWithBg(int percentage, SDL_Surface *background)
     if (img_height < 48)
         img_height = 48;
 
-    SDL_Surface *image = SDL_CreateRGBSurface(
-        0, img_width, img_height, 32, 0x00FF0000, 0x0000FF00, 0x000000FF,
-        0xFF000000); /* important */
+    SDL_Surface *image = SDL_CreateRGBSurface(0, img_width, img_height, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
 
     SDL_Rect rect_icon = {0, (img_height - icon->h) / 2};
-    SDL_Rect rect_text = {icon->w + SPACER + style->offsetX,
-                          (img_height - text->h) / 2 + offsetY};
+    SDL_Rect rect_text = {0, (img_height - text->h) / 2 + offsetY};
 
-    if (visible && style->onleft) {
-        rect_text.x = style->offsetX;
-        rect_icon.x = text->w + SPACER;
+    if (visible) {
+        if (style->fixed) {
+            switch (style->textAlign) {
+            case RIGHT:
+                rect_text.x = icon->w - text->w + style->offsetX;
+                break;
+            case CENTER:
+                rect_text.x = (icon->w - text->w) / 2 + style->offsetX;
+                break;
+            case LEFT:
+            default:
+                rect_text.x = style->offsetX;
+                break;
+            }
+        }
+        else {
+            switch (style->textAlign) {
+            case RIGHT:
+                rect_icon.x = text->w + SPACER;
+                rect_text.x = style->offsetX;
+                break;
+            case CENTER:
+                rect_text.x = (icon->w - text->w) / 2 + style->offsetX;
+                break;
+            case LEFT:
+            default:
+                rect_text.x = icon->w + SPACER + style->offsetX;
+                break;
+            }
+        }
     }
 
     icon = SDL_ConvertSurface(icon, image->format, 0);
