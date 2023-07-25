@@ -153,9 +153,9 @@ wait_for_client() {
         sleep 1
         counter=$((counter + 1))
 
-        if [ $counter -ge 20 ]; then
-            log "No client has connected after 20 seconds."
-            build_infoPanel_and_log "Hotspot error" "No client has connected after 20 seconds. Exiting..."
+        if [ $counter -ge 30 ]; then
+            log "No client has connected"
+            build_infoPanel_and_log "Hotspot error" "No client has connected. Exiting..."
             cleanup
         fi
     done
@@ -365,7 +365,7 @@ wait_for_save_return() {
         sleep 1
         counter=$((counter + 1))
 
-        if [ $counter -ge 20 ]; then
+        if [ $counter -ge 30 ]; then
             build_infoPanel_and_log "Error" "The client didn't ready up, cannot continue..."
             sleep 1
             cleanup
@@ -373,7 +373,6 @@ wait_for_save_return() {
         fi
     done
 }
-
 
 # Push the clients save file back
 return_client_save() {
@@ -558,8 +557,6 @@ sync_file() {
                 notify_peer "stop_now"
                 sleep 2
                 cleanup
-			else
-				build_infoPanel_and_log "Rom Check Complete!" "Rom exists and checksums match!"
 			fi
 		else
 			build_infoPanel_and_log "Rom Missing" "The Rom doesn't exist on the client \n Cannot continue."
