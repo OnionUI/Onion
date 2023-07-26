@@ -10,8 +10,6 @@ YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 NC='\033[0m' # No Color
 
-rm $sysdir/cmd_to_run.sh 2> /dev/null
-
 # Repository name :
 GITHUB_REPOSITORY=OnionUI/Onion
 
@@ -33,6 +31,8 @@ main() {
 		fi
 		exit 1
 	fi
+
+	rm $sysdir/cmd_to_run.sh 2> /dev/null
 
 	check_available_space
 	enable_wifi

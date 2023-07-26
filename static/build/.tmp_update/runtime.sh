@@ -240,7 +240,7 @@ check_game() {
 }
 
 check_is_game() {
-    echo "$1" | grep -q "retroarch/cores" || echo "$1" | grep -q "/../../Roms/"
+    echo "$1" | grep -q "retroarch/cores" || echo "$1" | grep -q "/../../Roms/" || echo "$1" | grep -q "/mnt/SDCARD/Roms/"
 }
 
 launch_game() {
@@ -272,7 +272,8 @@ launch_game() {
             fi
             if [ "$rompath" != "$orig_path" ]; then
                 temp=$(cat $sysdir/cmd_to_run.sh)
-                echo "$temp" | sed "s:$orig_path:$rompath:" > $sysdir/cmd_to_run.sh
+                cmd_replaced=$(echo "$temp" | rev | sed 's/^"[^"]*"//g' | rev)"\"$rompath\""
+                echo "$cmd_replaced" > $sysdir/cmd_to_run.sh
             fi
             romcfgpath="$(dirname "$rompath")/.game_config/$(basename "$rompath" ".$romext").cfg"
             log "rompath: $rompath (ext: $romext)"
@@ -346,7 +347,7 @@ launch_game() {
 
     if [ $retval -eq 404 ]; then
         infoPanel --title "File not found" --message "The requested file was not found." --auto
-    elif [ $retval -ge 128 ] && [ $retval -ne 143 ]; then
+    elif [ $retval -ge 128 ] && [ $retval -ne 143 ] && [ $retval -ne 255 ]; then
         infoPanel --title "Fatal error occurred" --message "The program exited unexpectedly.\n(Error code: $retval)" --auto
     fi
 
