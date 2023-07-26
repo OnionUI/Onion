@@ -14,6 +14,7 @@ proc rearrangeTitleArticle(input: string): string =
             if parts[i+1].contains(re"\b(the|an|a)\b"):
                 swap(parts[i], parts[i + 1])
     var res = parts.join(", ")
+    res = res.replace(re"^\d+\.\s*", "")
     res = res.replace("_", " ")
     result = res.replace(" - ", ": ")
  
