@@ -2,9 +2,21 @@ import std/db_sqlite
 import os
 import strutils
 import re
+import std/unicode
 
 var directories: seq[string] = @[]
 
+proc rearrangeTitleArticle(input: string): string =
+    var parts = input.split(",")
+    if parts.len > 1:
+        let lastIndex = parts.len - 1
+        for i in 0 ..< lastIndex:
+            if parts[i+1].contains(re"\b(the|an|a)\b"):
+                swap(parts[i], parts[i + 1])
+    var res = parts.join(", ")
+    res = res.replace("_", " ")
+    result = res.replace(" - ", ": ")
+ 
 
 for dir in walkDir("Roms", relative = false):
     if os.dirExists(dir.path):
@@ -20,7 +32,7 @@ for dir in directories:
     echo "Working on " & tableName
     try:
         for x in db.fastRows(sql"SELECT * FROM ?", tableName):
-            let name =  x[1].replace(re"\(.*?\)", "")
+            let name =  rearrangeTitleArticle(x[1]) 
             echo "old name: " % x[1] & ", new name: " & name
             let id = x[0]
             db.exec(sql"UPDATE ? SET disp = ?, pinyin = ?, cpinyin = ? WHERE id = ?", tableName, name, name, name, id)
