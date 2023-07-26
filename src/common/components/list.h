@@ -40,6 +40,7 @@ typedef struct ListItem {
     void *preview_ptr;
     char preview_path[STR_MAX];
     char sticky_note[STR_MAX];
+    char info_note[STR_MAX];
 } ListItem;
 
 typedef struct List {
@@ -117,30 +118,39 @@ List list_create(int max_items, ListType list_type)
                   ._id = list_id_incr++};
 }
 
-List list_create_with_title(int max_items, ListType list_type, const char *title)
+List list_createWithTitle(int max_items, ListType list_type, const char *title)
 {
-    List list = list_create(max_items, LIST_SMALL);
+    List list = list_create(max_items, list_type);
     strncpy(list.title, title, STR_MAX - 1);
     return list;
 }
 
-List list_create_sticky(int max_items, const char *title)
+List list_createWithSticky(int max_items, const char *title)
 {
-    List list = list_create_with_title(max_items, LIST_SMALL, title);
+    List list = list_createWithTitle(max_items, LIST_SMALL, title);
     list.scroll_height = 5;
     list.has_sticky = true;
     return list;
 }
 
-void list_addItem(List *list, ListItem item)
+ListItem *list_addItem(List *list, ListItem item)
 {
     item._reset_value = item.value;
     item._id = list->item_count;
+    memset(item.info_note, 0, STR_MAX);
     list->items[item._id] = item;
     list->item_count++;
     if (item.disabled && list->active_pos == item._id) {
         list->active_pos = item._id + 1;
     }
+    return &(list->items[item._id]);
+}
+
+ListItem *list_addItemWithInfoNote(List *list, ListItem item, const char *info_note)
+{
+    ListItem *_item = list_addItem(list, item);
+    strcpy(_item->info_note, info_note);
+    return _item;
 }
 
 ListItem *list_currentItem(List *list)
@@ -353,6 +363,16 @@ bool list_activateItem(List *list)
         item->action((void *)item);
 
     return old_value != item->value;
+}
+
+bool list_hasInfoNote(List *list)
+{
+    ListItem *item = list_currentItem(list);
+
+    if (item == NULL || strlen(item->info_note) == 0)
+        return false;
+
+    return true;
 }
 
 bool list_resetCurrentItem(List *list)

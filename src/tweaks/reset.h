@@ -12,9 +12,6 @@
 
 #define RESET_CONFIGS_PAK "/mnt/SDCARD/.tmp_update/config/configs.pak"
 
-static bool _disable_confirm = false;
-static SDL_Surface *background_cache = NULL;
-
 bool _confirmReset(const char *title_str, const char *message_str)
 {
     bool retval = false;

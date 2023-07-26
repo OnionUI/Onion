@@ -1,0 +1,39 @@
+#ifndef TWEAKS_INFO_DIALOG_H__
+#define TWEAKS_INFO_DIALOG_H__
+
+#include "system/keymap_sw.h"
+#include "theme/render/dialog.h"
+#include "theme/sound.h"
+
+#include "./appstate.h"
+
+void showInfoDialog(List *list)
+{
+    ListItem *item = list_currentItem(list);
+
+    bool confirm_quit = false;
+    SDLKey changed_key = SDLK_UNKNOWN;
+
+    keys_enabled = false;
+
+    background_cache = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
+    SDL_BlitSurface(screen, NULL, background_cache, NULL);
+
+    theme_renderDialog(screen, item->label, item->info_note, false);
+    SDL_BlitSurface(screen, NULL, video, NULL);
+    SDL_Flip(video);
+
+    while (!confirm_quit) {
+        if (updateKeystate(keystate, &confirm_quit, true, &changed_key)) {
+            if (changed_key != SDLK_UNKNOWN && keystate[changed_key] == PRESSED) {
+                confirm_quit = true;
+                sound_change();
+            }
+        }
+    }
+
+    keys_enabled = true;
+    all_changed = true;
+}
+
+#endif // TWEAKS_INFO_DIALOG_H__

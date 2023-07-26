@@ -23,6 +23,7 @@
 #include "utils/sdl_init.h"
 
 #include "./appstate.h"
+#include "./info_dialog.h"
 #include "./menus.h"
 
 #define FRAMES_PER_SECOND 60
@@ -112,35 +113,34 @@ int main(int argc, char *argv[])
                 menu_combo_pressed = true;
 
             if (keystate[SW_BTN_UP] >= PRESSED) {
-                key_changed = list_keyUp(menu_stack[menu_level],
-                                         keystate[SW_BTN_UP] == REPEATING);
+                key_changed = list_keyUp(menu_stack[menu_level], keystate[SW_BTN_UP] == REPEATING);
             }
             else if (keystate[SW_BTN_DOWN] >= PRESSED) {
-                key_changed = list_keyDown(menu_stack[menu_level],
-                                           keystate[SW_BTN_DOWN] == REPEATING);
+                key_changed = list_keyDown(menu_stack[menu_level], keystate[SW_BTN_DOWN] == REPEATING);
             }
             else if (keystate[SW_BTN_LEFT] >= PRESSED) {
-                key_changed = list_keyLeft(menu_stack[menu_level],
-                                           keystate[SW_BTN_LEFT] == REPEATING);
+                key_changed = list_keyLeft(menu_stack[menu_level], keystate[SW_BTN_LEFT] == REPEATING);
             }
             else if (keystate[SW_BTN_RIGHT] >= PRESSED) {
-                key_changed =
-                    list_keyRight(menu_stack[menu_level],
-                                  keystate[SW_BTN_RIGHT] == REPEATING);
+                key_changed = list_keyRight(menu_stack[menu_level], keystate[SW_BTN_RIGHT] == REPEATING);
             }
             else if (keystate[SW_BTN_Y] == PRESSED) {
                 key_changed = list_resetCurrentItem(menu_stack[menu_level]);
+            }
+            else if (keystate[SW_BTN_SELECT] == PRESSED) {
+                if (list_hasInfoNote(menu_stack[menu_level])) {
+                    sound_change();
+                    showInfoDialog(menu_stack[menu_level]);
+                }
             }
             else if (keystate[SW_BTN_A] == PRESSED) {
                 if (list_currentItem(menu_stack[menu_level])->action != NULL) {
                     sound_change();
                     skip_next_change = true;
                 }
-                key_changed =
-                    list_activateItem(menu_stack[menu_level]) || header_changed;
+                key_changed = list_activateItem(menu_stack[menu_level]) || header_changed;
             }
-            else if (changed_key == SW_BTN_MENU &&
-                     keystate[SW_BTN_MENU] == RELEASED) {
+            else if (changed_key == SW_BTN_MENU && keystate[SW_BTN_MENU] == RELEASED) {
                 if (!menu_combo_pressed)
                     quit = true;
                 menu_combo_pressed = false;

@@ -27,7 +27,7 @@ void menu_systemDisplay(void *_)
 {
     if (!_menu_system_display._created) {
         display_init();
-        _menu_system_display = list_create_with_title(1, LIST_SMALL, "Display");
+        _menu_system_display = list_createWithTitle(1, LIST_SMALL, "Display");
         list_addItem(&_menu_system_display,
                      (ListItem){
                          .label = "OSD bar size",
@@ -44,7 +44,7 @@ void menu_systemDisplay(void *_)
 void menu_systemStartup(void *_)
 {
     if (!_menu_system_startup._created) {
-        _menu_system_startup = list_create_with_title(3, LIST_SMALL, "Startup");
+        _menu_system_startup = list_createWithTitle(3, LIST_SMALL, "Startup");
 
         list_addItem(&_menu_system_startup,
                      (ListItem){
@@ -150,8 +150,7 @@ void menu_datetime(void *_)
 void menu_system(void *_)
 {
     if (!_menu_system._created) {
-        _menu_system = list_create(5, LIST_SMALL);
-        strcpy(_menu_system.title, "System");
+        _menu_system = list_createWithTitle(6, LIST_SMALL, "System");
         list_addItem(&_menu_system,
                      (ListItem){
                          .label = "Display...",
@@ -164,20 +163,37 @@ void menu_system(void *_)
                      (ListItem){
                          .label = "Date and time...",
                          .action = menu_datetime});
-        list_addItem(&_menu_system,
-                     (ListItem){
-                         .label = "Save and exit when battery <4%",
-                         .item_type = TOGGLE,
-                         .value = (int)settings.low_battery_autosave,
-                         .action = action_setLowBatteryAutoSave});
-        list_addItem(&_menu_system,
-                     (ListItem){
-                         .label = "Vibration intensity",
-                         .item_type = MULTIVALUE,
-                         .value_max = 3,
-                         .value_labels = {"Off", "Low", "Normal", "High"},
-                         .value = settings.vibration,
-                         .action = action_setVibration});
+        list_addItemWithInfoNote(&_menu_system,
+                                 (ListItem){
+                                     .label = "Low battery warning",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 5,
+                                     .value_formatter = formatter_battWarn,
+                                     .value = settings.low_battery_warn_at / 5,
+                                     .action = action_setLowBatteryWarnAt},
+                                 "Show a red battery icon warning in the\n"
+                                 "top right corner, when battery is at or\n"
+                                 "below this value.");
+        list_addItemWithInfoNote(&_menu_system,
+                                 (ListItem){
+                                     .label = "Low batt.: Save and exit",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 5,
+                                     .value_formatter = formatter_battExit,
+                                     .value = settings.low_battery_autosave_at,
+                                     .action = action_setLowBatteryAutoSave},
+                                 "Set the battery percentage at which the\n"
+                                 "system should save and exit RetroArch.");
+        list_addItemWithInfoNote(&_menu_system,
+                                 (ListItem){
+                                     .label = "Vibration intensity",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 3,
+                                     .value_labels = {"Off", "Low", "Normal", "High"},
+                                     .value = settings.vibration,
+                                     .action = action_setVibration},
+                                 "Set the vibration strength for haptic\n"
+                                 "feedback, when pressing system shortcuts.");
     }
     menu_stack[++menu_level] = &_menu_system;
     header_changed = true;
@@ -188,33 +204,39 @@ void menu_buttonActionMainUIMenu(void *_)
     if (!_menu_button_action_mainui_menu._created) {
         _menu_button_action_mainui_menu = list_create(3, LIST_SMALL);
         strcpy(_menu_button_action_mainui_menu.title, "MainUI: Menu button");
-        list_addItem(&_menu_button_action_mainui_menu,
-                     (ListItem){
-                         .label = "Single press",
-                         .item_type = MULTIVALUE,
-                         .value_max = 2,
-                         .value_labels = BUTTON_MAINUI_LABELS,
-                         .value = settings.mainui_single_press,
-                         .action_id = 0,
-                         .action = action_setMenuButtonKeymap});
-        list_addItem(&_menu_button_action_mainui_menu,
-                     (ListItem){
-                         .label = "Long press",
-                         .item_type = MULTIVALUE,
-                         .value_max = 2,
-                         .value_labels = BUTTON_MAINUI_LABELS,
-                         .value = settings.mainui_long_press,
-                         .action_id = 1,
-                         .action = action_setMenuButtonKeymap});
-        list_addItem(&_menu_button_action_mainui_menu,
-                     (ListItem){
-                         .label = "Double press",
-                         .item_type = MULTIVALUE,
-                         .value_max = 2,
-                         .value_labels = BUTTON_MAINUI_LABELS,
-                         .value = settings.mainui_double_press,
-                         .action_id = 2,
-                         .action = action_setMenuButtonKeymap});
+        list_addItemWithInfoNote(&_menu_button_action_mainui_menu,
+                                 (ListItem){
+                                     .label = "Single press",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 2,
+                                     .value_labels = BUTTON_MAINUI_LABELS,
+                                     .value = settings.mainui_single_press,
+                                     .action_id = 0,
+                                     .action = action_setMenuButtonKeymap},
+                                 "Set the action for single pressing\n"
+                                 "the menu button while in MainUI.");
+        list_addItemWithInfoNote(&_menu_button_action_mainui_menu,
+                                 (ListItem){
+                                     .label = "Long press",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 2,
+                                     .value_labels = BUTTON_MAINUI_LABELS,
+                                     .value = settings.mainui_long_press,
+                                     .action_id = 1,
+                                     .action = action_setMenuButtonKeymap},
+                                 "Set the action for long pressing\n"
+                                 "the menu button while in MainUI.");
+        list_addItemWithInfoNote(&_menu_button_action_mainui_menu,
+                                 (ListItem){
+                                     .label = "Double press",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 2,
+                                     .value_labels = BUTTON_MAINUI_LABELS,
+                                     .value = settings.mainui_double_press,
+                                     .action_id = 2,
+                                     .action = action_setMenuButtonKeymap},
+                                 "Set the action for double pressing\n"
+                                 "the menu button while in MainUI.");
     }
     menu_stack[++menu_level] = &_menu_button_action_mainui_menu;
     header_changed = true;
@@ -223,35 +245,40 @@ void menu_buttonActionMainUIMenu(void *_)
 void menu_buttonActionInGameMenu(void *_)
 {
     if (!_menu_button_action_ingame_menu._created) {
-        _menu_button_action_ingame_menu = list_create(3, LIST_SMALL);
-        strcpy(_menu_button_action_ingame_menu.title, "In-game: Menu button");
-        list_addItem(&_menu_button_action_ingame_menu,
-                     (ListItem){
-                         .label = "Single press",
-                         .item_type = MULTIVALUE,
-                         .value_max = 3,
-                         .value_labels = BUTTON_INGAME_LABELS,
-                         .value = settings.ingame_single_press,
-                         .action_id = 3,
-                         .action = action_setMenuButtonKeymap});
-        list_addItem(&_menu_button_action_ingame_menu,
-                     (ListItem){
-                         .label = "Long press",
-                         .item_type = MULTIVALUE,
-                         .value_max = 3,
-                         .value_labels = BUTTON_INGAME_LABELS,
-                         .value = settings.ingame_long_press,
-                         .action_id = 4,
-                         .action = action_setMenuButtonKeymap});
-        list_addItem(&_menu_button_action_ingame_menu,
-                     (ListItem){
-                         .label = "Double press",
-                         .item_type = MULTIVALUE,
-                         .value_max = 3,
-                         .value_labels = BUTTON_INGAME_LABELS,
-                         .value = settings.ingame_double_press,
-                         .action_id = 5,
-                         .action = action_setMenuButtonKeymap});
+        _menu_button_action_ingame_menu = list_createWithTitle(3, LIST_SMALL, "In-game: Menu button");
+        list_addItemWithInfoNote(&_menu_button_action_ingame_menu,
+                                 (ListItem){
+                                     .label = "Single press",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 3,
+                                     .value_labels = BUTTON_INGAME_LABELS,
+                                     .value = settings.ingame_single_press,
+                                     .action_id = 3,
+                                     .action = action_setMenuButtonKeymap},
+                                 "Set the action for single pressing\n"
+                                 "the menu button while in-game.");
+        list_addItemWithInfoNote(&_menu_button_action_ingame_menu,
+                                 (ListItem){
+                                     .label = "Long press",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 3,
+                                     .value_labels = BUTTON_INGAME_LABELS,
+                                     .value = settings.ingame_long_press,
+                                     .action_id = 4,
+                                     .action = action_setMenuButtonKeymap},
+                                 "Set the action for long pressing\n"
+                                 "the menu button while in-game.");
+        list_addItemWithInfoNote(&_menu_button_action_ingame_menu,
+                                 (ListItem){
+                                     .label = "Double press",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 3,
+                                     .value_labels = BUTTON_INGAME_LABELS,
+                                     .value = settings.ingame_double_press,
+                                     .action_id = 5,
+                                     .action = action_setMenuButtonKeymap},
+                                 "Set the action for double pressing\n"
+                                 "the menu button while in-game.");
     }
     menu_stack[++menu_level] = &_menu_button_action_ingame_menu;
     header_changed = true;
@@ -260,14 +287,15 @@ void menu_buttonActionInGameMenu(void *_)
 void menu_buttonAction(void *_)
 {
     if (!_menu_button_action._created) {
-        _menu_button_action = list_create(6, LIST_SMALL);
-        strcpy(_menu_button_action.title, "Button shortcuts");
-        list_addItem(&_menu_button_action,
-                     (ListItem){
-                         .label = "Menu single press vibration",
-                         .item_type = TOGGLE,
-                         .value = (int)settings.menu_button_haptics,
-                         .action = action_setMenuButtonHaptics});
+        _menu_button_action = list_createWithTitle(6, LIST_SMALL, "Button shortcuts");
+        list_addItemWithInfoNote(&_menu_button_action,
+                                 (ListItem){
+                                     .label = "Menu single press vibration",
+                                     .item_type = TOGGLE,
+                                     .value = (int)settings.menu_button_haptics,
+                                     .action = action_setMenuButtonHaptics},
+                                 "Enable haptic feedback for menu button\n"
+                                 "single and double press.");
         list_addItem(&_menu_button_action,
                      (ListItem){
                          .label = "In-game: Menu button...",
@@ -278,32 +306,36 @@ void menu_buttonAction(void *_)
                          .action = menu_buttonActionMainUIMenu});
 
         getInstalledApps(true);
-        list_addItem(&_menu_button_action,
-                     (ListItem){
-                         .label = "MainUI: X button",
-                         .item_type = MULTIVALUE,
-                         .value_max = installed_apps_count + NUM_TOOLS,
-                         .value = value_appShortcut(0),
-                         .value_formatter = formatter_appShortcut,
-                         .action_id = 0,
-                         .action = action_setAppShortcut});
-        list_addItem(&_menu_button_action,
-                     (ListItem){
-                         .label = "MainUI: Y button",
-                         .item_type = MULTIVALUE,
-                         .value_max = installed_apps_count + NUM_TOOLS + 1,
-                         .value = value_appShortcut(1),
-                         .value_formatter = formatter_appShortcut,
-                         .action_id = 1,
-                         .action = action_setAppShortcut});
-        list_addItem(&_menu_button_action,
-                     (ListItem){
-                         .label = "Power single press",
-                         .item_type = MULTIVALUE,
-                         .value_max = 1,
-                         .value_labels = {"Standby", "Shutdown"},
-                         .value = (int)settings.disable_standby,
-                         .action = action_setDisableStandby});
+        list_addItemWithInfoNote(&_menu_button_action,
+                                 (ListItem){
+                                     .label = "MainUI: X button",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = installed_apps_count + NUM_TOOLS,
+                                     .value = value_appShortcut(0),
+                                     .value_formatter = formatter_appShortcut,
+                                     .action_id = 0,
+                                     .action = action_setAppShortcut},
+                                 "Set the X button action in MainUI.");
+        list_addItemWithInfoNote(&_menu_button_action,
+                                 (ListItem){
+                                     .label = "MainUI: Y button",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = installed_apps_count + NUM_TOOLS + 1,
+                                     .value = value_appShortcut(1),
+                                     .value_formatter = formatter_appShortcut,
+                                     .action_id = 1,
+                                     .action = action_setAppShortcut},
+                                 "Set the Y button action in MainUI.");
+        list_addItemWithInfoNote(&_menu_button_action,
+                                 (ListItem){
+                                     .label = "Power single press",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 1,
+                                     .value_labels = {"Standby", "Shutdown"},
+                                     .value = (int)settings.disable_standby,
+                                     .action = action_setDisableStandby},
+                                 "Change the power button single press\n"
+                                 "action to either 'standby' or 'shutdown'.");
     }
     menu_stack[++menu_level] = &_menu_button_action;
     header_changed = true;
@@ -312,7 +344,7 @@ void menu_buttonAction(void *_)
 void menu_batteryPercentage(void *_)
 {
     if (!_menu_battery_percentage._created) {
-        _menu_battery_percentage = list_create_with_title(7, LIST_SMALL, "Battery percentage");
+        _menu_battery_percentage = list_createWithTitle(7, LIST_SMALL, "Battery percentage");
         list_addItem(&_menu_battery_percentage,
                      (ListItem){
                          .label = "Visible",
@@ -420,7 +452,7 @@ void menu_userInterface(void *_)
 {
     if (!_menu_user_interface._created) {
         _menu_user_interface = list_create(4, LIST_SMALL);
-        strcpy(_menu_user_interface.title, "User interface");
+        strcpy(_menu_user_interface.title, "Appearance");
         list_addItem(&_menu_user_interface,
                      (ListItem){
                          .label = "Show recents",
@@ -435,16 +467,12 @@ void menu_userInterface(void *_)
                          .action = action_setShowExpert});
         list_addItem(&_menu_user_interface,
                      (ListItem){
-                         .label = "Low battery warning",
-                         .item_type = MULTIVALUE,
-                         .value_max = 5,
-                         .value_formatter = formatter_battWarn,
-                         .value = settings.low_battery_warn_at / 5,
-                         .action = action_setLowBatteryWarnAt});
-        list_addItem(&_menu_user_interface,
-                     (ListItem){
                          .label = "Theme overrides...",
                          .action = menu_themeOverrides});
+        list_addItem(&_menu_user_interface,
+                     (ListItem){
+                         .label = "Icons packs...",
+                         .action = menu_icons});
     }
     menu_stack[++menu_level] = &_menu_user_interface;
     header_changed = true;
@@ -490,7 +518,7 @@ void menu_resetSettings(void *_)
 void menu_diagnostics(void *_)
 {
     if (!_menu_diagnostics._created) {
-        _menu_diagnostics = list_create_with_title(1, LIST_SMALL, "Diagnostics");
+        _menu_diagnostics = list_createWithTitle(1, LIST_SMALL, "Diagnostics");
         list_addItem(&_menu_diagnostics,
                      (ListItem){
                          .label = "Enable logging",
@@ -602,8 +630,7 @@ void *_get_menu_icon(const char *name)
 void menu_main(void)
 {
     if (!_menu_main._created) {
-        _menu_main = list_create(7, LIST_LARGE);
-        strcpy(_menu_main.title, "Tweaks");
+        _menu_main = list_createWithTitle(6, LIST_LARGE, "Tweaks");
         list_addItem(&_menu_main,
                      (ListItem){
                          .label = "System",
@@ -626,8 +653,8 @@ void menu_main(void)
                          .icon_ptr = _get_menu_icon("tweaks_menu_button")});
         list_addItem(&_menu_main,
                      (ListItem){
-                         .label = "User interface",
-                         .description = "Extra menus, low batt. warn., theme",
+                         .label = "Appearance",
+                         .description = "Menu visibility, theme overrides",
                          .action = menu_userInterface,
                          .icon_ptr = _get_menu_icon("tweaks_user_interface")});
         list_addItem(&_menu_main,
@@ -642,12 +669,6 @@ void menu_main(void)
                          .description = "Favorites, clean files",
                          .action = menu_tools,
                          .icon_ptr = _get_menu_icon("tweaks_tools")});
-        list_addItem(&_menu_main,
-                     (ListItem){
-                         .label = "Icons",
-                         .description = "Change system icons",
-                         .action = menu_icons,
-                         .icon_ptr = _get_menu_icon("tweaks_icons")});
     }
     menu_level = 0;
     menu_stack[0] = &_menu_main;

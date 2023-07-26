@@ -76,7 +76,7 @@ void action_setVibration(void *pt)
 
 void action_setLowBatteryAutoSave(void *pt)
 {
-    settings.low_battery_autosave = ((ListItem *)pt)->value == 1;
+    settings.low_battery_autosave_at = ((ListItem *)pt)->value;
 }
 
 void action_setDisableStandby(void *pt)
