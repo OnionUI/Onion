@@ -15,6 +15,7 @@ proc rearrangeTitleArticle(input: string): string =
                 swap(parts[i], parts[i + 1])
     var res = parts.join(", ")
     res = res.replace(re"^\d+\.\s*", "")
+    res = res.replace(re"\.\w{2,3}(?!\s)", "")
     res = res.replace("_", " ")
     result = res.replace(" - ", ": ")
  
