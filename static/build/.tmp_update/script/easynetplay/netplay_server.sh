@@ -10,8 +10,11 @@
 # Env setup
 sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo
-LOGGING=$([ -f $sysdir/config/.logging ] && echo 1 || echo 0)
 export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
+
+logfile=easy_netplay
+. $sysdir/script/log.sh
+program=$(basename "$0" .sh)
 
 ##########
 ##Setup.##
@@ -71,7 +74,7 @@ start_hotspot() {
 	ip route add default via $gateway0addr
 
 	if is_running hostapd; then
-		log "GLO::Easy_Netplay: Started with IP of: $hotspot0addr, subnet of: $subnetmask"
+		log "Started with IP of: $hotspot0addr, subnet of: $subnetmask"
 	else
 		build_infoPanel_and_log "Hotspot" "Failed to start hotspot, exiting.."
 		sleep 2
@@ -90,14 +93,14 @@ start_hotspot() {
 # We'll need FTP to host the cookie to the client - use the built in FTP, it allows us to curl (errors on bftpd re: path)
 start_ftp() {
 	if is_running bftpd; then
-		log "GLO::Easy_Netplay: FTP already running, killing to rebind"
+		log "FTP already running, killing to rebind"
 		bftpd_p=$(ps | grep bftpd | grep -v grep | awk '{for(i=4;i<=NF;++i) printf $i" "}')
 		killall -9 bftpd
 		killall -9 tcpsvd
 		tcpsvd -E 0.0.0.0 21 ftpd -w / &
 	else
 		tcpsvd -E 0.0.0.0 21 ftpd -w / &
-		log "GLO::Easy_Netplay: Starting FTP server"
+		log "Starting FTP server"
 	fi
 }
 
@@ -114,10 +117,10 @@ get_cookie_info() {
 			core_size=$(stat -c%s "$host_core")
 			if [ "$core_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
 				echo "[coresize]: $core_size" >> "$COOKIE_FILE"
-				log "GLO::Easy_Netplay: Writing core size"
+				log "Writing core size"
 			else
 				echo "[corechksum]: $(cksum "$host_core" | cut -f 1 -d ' ')" >> "$COOKIE_FILE"
-				log "GLO::Easy_Netplay: Writing core checksum"
+				log "Writing core checksum"
 			fi
 		fi
 
@@ -125,14 +128,14 @@ get_cookie_info() {
 			rom_size=$(stat -c%s "$host_rom")
 			if [ "$rom_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
 				echo "[romsize]: $rom_size" >> "$COOKIE_FILE"
-				log "GLO::Easy_Netplay: Writing rom size"
+				log "Writing rom size"
 			else
 				echo "[romchksum]: $(cksum "$host_rom" | cut -f 1 -d ' ')" >> "$COOKIE_FILE"
-				log "GLO::Easy_Netplay: Writing rom checksum"
+				log "Writing rom checksum"
 			fi
 		fi
 	else
-		log "GLO::Easy_Netplay: No cookie found!"
+		log "No cookie found!"
 	fi
 }
 
@@ -166,7 +169,7 @@ cleanup() {
 
 	restore_ftp
 
-	log "GLO::Easy_Netplay: Cleanup done"
+	log "Cleanup done"
 	exit
 
 }
@@ -179,9 +182,7 @@ build_infoPanel_and_log() {
 	local title="$1"
 	local message="$2"
 
-	if [ $LOGGING -eq 1 ]; then
-		echo "$(date) GLO::Easy_Netplay: Stage: $title Message: $message" >> $sysdir/logs/easy_netplay.log
-	fi
+	log "Info Panel: \n\tStage: $title\n\tMessage: $message"
 	
 	infoPanel --title "$title" --message "$message" --persistent &
 	touch /tmp/dismiss_info_panel
@@ -189,14 +190,8 @@ build_infoPanel_and_log() {
 	sleep 0.5
 }
 
-log() {
-	if [ $LOGGING -eq 1 ]; then
-		echo "$(date)" $* >> $sysdir/logs/easy_netplay.log
-	fi
-}
-
 restore_ftp() {
-	log "GLO::Easy_Netplay: Restoring original FTP server"
+	log "Restoring original FTP server"
 	killall -9 tcpsvd
 	if flag_enabled ftpState; then
 		if flag_enabled authftpState; then

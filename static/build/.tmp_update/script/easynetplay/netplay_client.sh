@@ -10,10 +10,13 @@
 # Env setup
 sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo
-LOGGING=$([ -f $sysdir/config/.logging ] && echo 1 || echo 0)
 export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 export WPACLI=/customer/app/wpa_cli
 export hostip="192.168.100.100" # This should be the default unless the user has changed it..
+
+logfile=easy_netplay
+. $sysdir/script/log.sh
+program=$(basename "$0" .sh)
 
 ##########
 ##Setup.##
@@ -23,11 +26,13 @@ export hostip="192.168.100.100" # This should be the default unless the user has
 
 check_wifi() {
 	ifconfig wlan1 down
+    $WPACLI save_config
+    save_wifi_state
+    sync
 	if ifconfig wlan0 &> /dev/null; then
         build_infoPanel_and_log "WIFI" "Wifi up"
-		save_wifi_state
 	else
-		log "GLO::Easy_Netplay: Wi-Fi disabled, trying to enable before connecting.."
+		log "Wi-Fi disabled, trying to enable before connecting.."
 		build_infoPanel_and_log "WIFI" "Wifi disabled, starting..."
 
 		/customer/app/axp_test wifion
@@ -52,13 +57,13 @@ check_wifi() {
 connect_to_host() {
 	build_infoPanel_and_log "Connecting..." "Trying to join the hotspot..."
 
-	export new_id=$($WPACLI -i wlan0 add_network)
+	new_id=$($WPACLI -i wlan0 add_network)
 	if [ -z "$new_id" ]; then
 		build_infoPanel_and_log "Failed" "Failed to create network\n unable to continue."
-		return 1
+		cleanup
 	fi
 
-	log "GLO::Easy_Netplay: Added new network with id $new_id"
+	log "Added new network with id $new_id"
 
 	net_setup=$(
 		$WPACLI -i wlan0 <<- EOF
@@ -86,24 +91,47 @@ connect_to_host() {
 
 # We'd better wait for an ip address to be assigned before going any further.
 wait_for_ip() {
-	local IP=$(ip route get 1 2> /dev/null | awk '{print $NF;exit}')
-	build_infoPanel_and_log "Connecting..." "Waiting for an IP..."
-	local counter=0
+    ip addr flush dev wlan0
+    IP=""
+    build_infoPanel_and_log "Connecting..." "Waiting for an IP..."
+    local counter=0
 
-	while [ -z "$IP" ]; do
-		IP=$(ip route get 1 2> /dev/null | awk '{print $NF;exit}')
-		sleep 1
-		counter=$((counter + 1))
+    while [ -z "$IP" ]; do
+        IP=$(ip route get 1 2> /dev/null | awk '{print $NF;exit}')
+        sleep 1
+        counter=$((counter + 1))
 
-		if [ $counter -ge 20 ]; then
-			build_infoPanel_and_log "Failed to connect!" "Could not get an IP in 20 seconds."
-			sleep 1
-			cleanup
-		fi
-	done
+        if [ $counter -eq 10 ]; then
+            build_infoPanel_and_log "Fallback" "Using static IP..."
+            killall -9 udhcpc 
+            ip addr flush dev wlan0
+            RAND_IP=$((101 + RANDOM % 150))
+            ip addr add 192.168.100.$RAND_IP/24 dev wlan0
+            ip route add default via 192.168.100.100
+        elif [ $counter -ge 20 ]; then
+            build_infoPanel_and_log "Failed to connect!" "Could not get an IP in 20 seconds.\n Try again"
+            sleep 1
+            cleanup
+        fi
+    done
+}
 
-	build_infoPanel_and_log "Joined hotspot!" "IP: $IP"
-	sleep 1
+wait_for_connectivity() {
+    build_infoPanel_and_log "Connecting..."  "Trying to reach $hostip..."
+    counter=0
+
+    while ! ping -c 1 -W 1 $hostip > /dev/null 2>&1; do
+        sleep 0.5
+        counter=$((counter+1))
+
+        if [ $counter -ge 40 ]; then
+            build_infoPanel_and_log "Failed to connect!"  "Could not reach $IP in 20 seconds."
+            notify_stop
+        fi
+    done
+
+    build_infoPanel_and_log "Joined hotspot!"  "Successfully reached the Hotspot! \n IP: $hostip" 
+    sleep 1
 }
 
 # Download the cookie from the host, check whether it downloaded and make sure it still exists on the client before we move on
@@ -151,13 +179,13 @@ read_cookie() {
 				romcheck="${line##"[romchksum]: "}"
 				;;
 		esac
-		log "GLO::Easy_Netplay: $core $rom $coresize $corechksum $romsize $romchksum"
+		log "$core $rom $coresize $corechksum $romsize $romchksum"
 	done < "/mnt/SDCARD/RetroArch/retroarch.cookie.client"
 
 	#url encode or curl complains
 	export core_url=$(echo "$core" | sed 's/ /%20/g')
 
-	log "GLO::Easy_Netplay: Cookie file read"
+	log "Cookie file read"
 }
 
 sync_file() {
@@ -175,7 +203,7 @@ sync_file() {
 
 	if [ "$file_type" == "Rom" ]; then
 		if [ -e "$file_path" ]; then
-			log "GLO::Easy_Netplay: $file_path exists."
+			log "$file_path exists."
 
 			local file_size=$(stat -c%s "$file_path")
 			local file_chksum_actual
@@ -190,8 +218,6 @@ sync_file() {
 				build_infoPanel_and_log "Checksum Mismatch" "The Rom exists but the checksum doesn't match \n Cannot continue."
                 sleep 2
                 cleanup
-			else
-				build_infoPanel_and_log "Rom Check Complete!" "Rom exists and checksums match!"
 			fi
 		else
 			build_infoPanel_and_log "Rom Missing" "The Rom doesn't exist on the client \n Cannot continue."
@@ -200,7 +226,7 @@ sync_file() {
 		fi
 	else
 		if [ -e "$file_path" ]; then
-			log "GLO::Easy_Netplay: $file_path exists."
+			log "$file_path exists."
 
 			local file_size=$(stat -c%s "$file_path")
 			local file_chksum_actual
@@ -224,8 +250,6 @@ sync_file() {
 					build_infoPanel_and_log "Syncing" "$file_type synced."
 				fi
 
-			else
-				build_infoPanel_and_log "$file_type synced!" "$file_type checksums match, no sync required"
 			fi
 		else
 			build_infoPanel_and_log "Syncing" "$file_type doesn't exist locally; syncing with host."
@@ -254,24 +278,20 @@ start_retroarch() {
 #Utilities#
 ###########
 
+wifi_disabled() {
+    [ $(/customer/app/jsonval wifi) -eq 0 ]
+}
+
 build_infoPanel_and_log() {
 	local title="$1"
 	local message="$2"
 
-	if [ $LOGGING -eq 1 ]; then
-		echo "$(date) GLO::Easy_Netplay: Stage: $title Message: $message" >> $sysdir/logs/easy_netplay.log
-	fi
+	log "Info Panel: \n\tStage: $title\n\tMessage: $message"
 	
 	infoPanel --title "$title" --message "$message" --persistent &
 	touch /tmp/dismiss_info_panel
 	sync
 	sleep 0.5
-}
-
-log() {
-	if [ $LOGGING -eq 1 ]; then
-		echo "$(date)" $* >> $sysdir/logs/easy_netplay.log
-	fi
 }
 
 confirm_join_panel() {
@@ -291,26 +311,29 @@ confirm_join_panel() {
 }
 
 stripped_game_name() {
-	export game_name=$(awk -F'/' '/\[rom\]:/ {print $NF}' /mnt/SDCARD/RetroArch/retroarch.cookie.client | sed 's/\(.*\)\..*/\1/')
+	game_name=$(awk -F'/' '/\[rom\]:/ {print $NF}' /mnt/SDCARD/RetroArch/retroarch.cookie.client | sed 's/\(.*\)\..*/\1/')
 }
 
-# If we're currently connected to wifi, save the network ID so we can reconnect after we're done with retroarch - save the IP address and subnet so we can restore these.
+# If we're currently connected to wifi, make a backup of the wpa_supplicant.conf to restore later
 save_wifi_state() {
-	export IFACE=wlan0
-	export old_id=$(wpa_cli -i $IFACE list_networks | awk '/CURRENT/ {print $1}')
-	export old_ipv4=$(ip -4 addr show $IFACE | grep -o 'inet [^ ]*' | cut -d ' ' -f 2)
-	ip addr del $old_ip/$old_mask dev $IFACE
+	IFACE=wlan0
+	cp /appconfigs/wpa_supplicant.conf /tmp/wpa_supplicant.conf_bk
+	old_ipv4=$(ip -4 addr show $IFACE | grep -o 'inet [^ ]*' | cut -d ' ' -f 2)
+	ip addr del $old_ipv4/$old_mask dev $IFACE
 }
 
+# try and reset the IP and supp conf
 restore_wifi_state() {
+    cp /tmp/wpa_supplicant.conf_bk /appconfigs/wpa_supplicant.conf
+    sync
 	if [ -z "$old_ipv4" ]; then
-		log "GLO::Easy_Netplay: Old IP address not found."
+		log "Old IP address not found."
 	fi
 
 	ip_output=$(ip link set wlan0 down 2>&1)
 	if [ $? -ne 0 ]; then
-		log "GLO::Easy_Netplay: Failed to bring down the interface."
-		log "GLO::Easy_Netplay: Output from 'ip link set down' command: $ip_output"
+		log "Failed to bring down the interface."
+		log "Output from 'ip link set down' command: $ip_output"
 	fi
 
 	ip -4 addr show wlan0 | awk '/inet/ {print $2}' | while IFS= read -r line; do
@@ -319,15 +342,17 @@ restore_wifi_state() {
 
 	ip_output=$(ip addr add $old_ipv4 dev wlan0 2>&1)
 	if [ $? -ne 0 ]; then
-		log "GLO::Easy_Netplay: Failed to assign the old IP address."
-		log "GLO::Easy_Netplay: Output from 'ip addr add' command: $ip_output"
+		log "Failed to assign the old IP address."
+		log "Output from 'ip addr add' command: $ip_output"
 	fi
 
 	ip_output=$(ip link set wlan0 up 2>&1)
 	if [ $? -ne 0 ]; then
-		log "GLO::Easy_Netplay: Failed to bring up the interface."
-		log "GLO::Easy_Netplay: Output from 'ip link set up' command: $ip_output"
+		log "Failed to bring up the interface."
+		log "Output from 'ip link set up' command: $ip_output"
 	fi
+    
+    $WPACLI reconfigure
 }
 
 do_sync_file() {
@@ -343,16 +368,16 @@ do_sync_file() {
 
 	if [ -e "$file_path" ]; then
 		mv "$file_path" "${file_path}_old"
-		log "GLO::Easy_Netplay: Existing $file_type file moved to ${file_path}_old"
+		log "Existing $file_type file moved to ${file_path}_old"
 	fi
 
-	log "GLO::Easy_Netplay: Starting to download $file_type from $file_url"
+	log "Starting to download $file_type from $file_url"
 	curl -o "$file_path" "ftp://$hostip/$file_url" > /dev/null 2>&1
 
 	if [ $? -eq 0 ]; then
-		log "GLO::Easy_Netplay: $file_type download completed"
+		log "$file_type download completed"
 	else
-		log "GLO::Easy_Netplay: $file_type download failed"
+		log "$file_type download failed"
 	fi
 }
 
@@ -360,12 +385,12 @@ udhcpc_control() {
 	if pgrep udhcpc > /dev/null; then
 		killall -9 udhcpc
 	fi
-	log "GLO::Easy_Netplay: Old DHCP proc killed."
+	log "Old DHCP proc killed."
 	sleep 1
-	log "GLO::Easy_Netplay: Trying to start DHCP"
+	log "Trying to start DHCP"
 	udhcpc -i wlan0 -s /etc/init.d/udhcpc.script > /dev/null 2>&1 &
 	if is_running udhcpc; then
-		log "GLO::Easy_Netplay: DHCP started"
+		log "DHCP started"
 	else
 		build_infoPanel_and_log "DHCP" "Unable to start DHCP client\n unable to continue."
 	fi
@@ -377,38 +402,22 @@ is_running() {
 }
 
 cleanup() {
-	build_infoPanel_and_log "Cleanup" "Cleaning up after netplay session..."
+    build_infoPanel_and_log "Cleanup" "Cleaning up after netplay session..."
 
-	pkill -9 pressMenu2Kill
+    pkill -9 pressMenu2Kill
+    
+    if is_running infoPanel; then
+        killall -9 infoPanel
+    fi
+        
+    sync
+    
+    restore_wifi_state
 
-	if is_running infoPanel; then
-		killall -9 infoPanel
-	fi
-
-	net_setup=$(
-		$WPACLI -i $IFACE <<- EOF
-			remove_network $new_id
-			select_network $old_id
-			enable_network $old_id
-			save_config
-			quit
-		EOF
-	)
-
-	if [ $? -ne 0 ]; then
-		log "GLO::Easy_Netplay: Failed to configure the network"
-		cleanup
-	fi
-
-	udhcpc_control
-
-	sleep 1
-
-	restore_wifi_state
-
-	log "GLO::Easy_Netplay: Cleanup done"
-	exit
+    log "Cleanup done"
+    exit
 }
+
 
 #########
 ##Main.##
@@ -419,6 +428,7 @@ lets_go() {
 	check_wifi
 	connect_to_host
 	wait_for_ip
+    wait_for_connectivity
 	download_cookie
 	read_cookie
 	sync_file Rom "$rom" "$romcheck" "$rom_url"

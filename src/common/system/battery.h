@@ -90,7 +90,7 @@ bool battery_isCharging(void)
     }
     return false;
 #else
-    return true;
+    return false;
 #endif
 }
 

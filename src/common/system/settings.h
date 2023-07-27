@@ -51,6 +51,7 @@ typedef struct settings_s {
     int ingame_long_press;
     int ingame_double_press;
     bool disable_standby;
+    bool enable_logging;
 
     char mainui_button_x[JSON_STRING_LEN];
     char mainui_button_y[JSON_STRING_LEN];
@@ -96,6 +97,7 @@ static settings_s __default_settings = (settings_s){
     .ingame_long_press = 2,
     .ingame_double_press = 3,
     .disable_standby = false,
+    .enable_logging = false,
     .mainui_button_x = "",
     .mainui_button_y = ""};
 
@@ -174,6 +176,7 @@ void settings_load(void)
     settings.low_battery_autosave = !config_flag_get(".noLowBatteryAutoSave");
     settings.mute = config_flag_get(".muteVolume");
     settings.disable_standby = config_flag_get(".disableStandby");
+    settings.enable_logging = config_flag_get(".logging");
 
     if (config_flag_get(".noBatteryWarning")) // flag is deprecated, but keep compatibility
         settings.low_battery_warn_at = 0;
@@ -300,6 +303,7 @@ void settings_save(void)
     config_flag_set(".noLowBatteryAutoSave", !settings.low_battery_autosave);
     config_flag_set(".muteVolume", settings.mute);
     config_flag_set(".disableStandby", settings.disable_standby);
+    config_flag_set(".logging", settings.enable_logging);
     config_setNumber("battery/warnAt", settings.low_battery_warn_at);
     config_setNumber("startup/app", settings.startup_application);
     config_setNumber("startup/addHours", settings.time_skip);

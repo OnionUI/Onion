@@ -6,12 +6,16 @@ filebrowserdb=$sysdir/config/filebrowser/filebrowser.db
 netscript=/mnt/SDCARD/.tmp_update/script/network
 export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 export PATH="$sysdir/bin:$PATH"
+is_booting=$([ -f /tmp/is_booting ] && echo 1 || echo 0)
+
+logfile=$(basename "$0" .sh)
+. $sysdir/script/log.sh
 
 main() {
     set_tzid
     get_password
     case "$1" in
-        check) # runs the check function we use in runtime, will be called on boot
+        check) # called by runtime.sh::check_networking
             check
             ;;
         ftp | telnet | http | ssh | smbd)
@@ -52,8 +56,7 @@ main() {
 # Standard check from runtime for startup.
 check() {
     log "Network Checker: Update networking"
-
-    if wifi_enabled; then
+    if wifi_enabled && [ "$is_booting" -eq 1 ]; then
         bootScreen Boot "Waiting for network..."
     fi
 
@@ -61,26 +64,23 @@ check() {
     check_ftpstate
     check_sshstate
     check_telnetstate
-    check_ntpstate
     check_httpstate
     check_smbdstate
 
-    if wifi_enabled && flag_enabled ntpWait; then
+    if wifi_enabled && flag_enabled ntpWait && [ $is_booting -eq 1 ]; then
         bootScreen Boot "Syncing time..."
-        sync_time
+        check_ntpstate && bootScreen Boot "Time synced: $(date +"%H:%M")" || bootScreen Boot "Time sync failed"
+        sleep 1
     else
-        sync_time &
+        check_ntpstate &
     fi
 
-    if wifi_enabled && flag_enabled checkUpdates; then
-        bootScreen Boot "Checking for updates..."
-        $sysdir/script/ota_update.sh check
-        if [ $? -eq 0 ]; then
-            bootScreen Boot "Update available!"
-        else
-            bootScreen Boot "No update found"
-        fi
-        sleep 2
+    if [ -f "$sysdir/.updateAvailable" ] && [ $is_booting -eq 1 ]; then
+        bootScreen Boot "Update available!"
+        sleep 1
+    elif wifi_enabled && [ ! -f /tmp/update_checked ]; then
+        touch /tmp/update_checked
+        $sysdir/script/ota_update.sh check &
     fi
 }
 
@@ -424,45 +424,75 @@ check_hotspotstate() {
 # This will work but it will not export the TZ var across all opens shells so you may find the hwclock (and clock app, retroarch time etc) are correct but terminal time is not.
 # It does set TZ on the tty that Main is running in so this is ok
 
-sync_time() {
-    if [ -f "$sysdir/config/.ntpState" ] && wifi_enabled; then
+check_ntpstate() {
+    if flag_enabled ntpState && wifi_enabled && [ ! -f "$sysdir/config/.hotspotState" ]; then
+        set_tzid
+        [ -f /tmp/ntp_synced ] && return 0
+
+        if [ -f /tmp/ntp_failed ]; then
+            # only run once on boot, but don't prevent more checks later on state_change
+            # effectively only running every second time this is called while off network
+            rm /tmp/ntp_failed
+            return 1
+        fi
+
+        # Try once for good luck (this is faster - when it works)
+        if get_time; then
+            return 0
+        fi
+
         attempts=0
-        max_attempts=20
-
+        max_wait_ip=10
+        max_attempts=3
+        ret_val=1
+        got_ip=0
+        # wait for an ip address from dhcp before we start
         while true; do
-            if [ ! -f "/tmp/ntp_run_once" ]; then
-                break
-            fi
-
-            if ping -q -c 1 google.com > /dev/null 2>&1; then
-                if get_time; then
-                    touch /tmp/ntp_synced
+            ip=$(ifconfig wlan0 | grep 'inet addr:' | cut -d: -f2 | cut -d' ' -f1)
+            if [ -z "$ip" ]; then
+                attempts=$((attempts + 1))
+                log "NTPwait: Waiting for IP address since $attempts seconds"
+                if [ $attempts -ge $max_wait_ip ]; then
+                    log "NTPwait: Could not aquire an IP address"
+                    ret_val=1
+                    got_ip=0
                 fi
-                break
-            fi
-
-            attempts=$((attempts + 1))
-            if [ $attempts -eq $max_attempts ]; then
-                log "NTPwait: Ran out of time before we could sync, stopping."
+            else
+                log "NTPwait: IP address aquired: $ip"
+                got_ip=1
                 break
             fi
             sleep 1
         done
-        rm /tmp/ntp_run_once
-    fi
-}
-
-check_ntpstate() { # This function checks if the timezone has changed, we call this in the main loop.
-    if flag_enabled ntpState && wifi_enabled && [ ! -f "$sysdir/config/.hotspotState" ]; then
-        set_tzid
-        if [ ! -f /tmp/ntp_synced ] && get_time; then
-            touch /tmp/ntp_synced
+        attempts=0
+        if [ "$got_ip" -eq 1 ]; then
+            while true; do
+                log "NTPwait: get_time attempt $attempts"
+                if ping -q -c 1 -W 1 google.com > /dev/null 2>&1; then
+                    if get_time; then
+                        ret_val=0
+                        break
+                    fi
+                else
+                    log "NTPwait: Can't reach google."
+                fi
+                attempts=$((attempts + 1))
+                if [ $attempts -eq $max_attempts ]; then
+                    log "NTPwait: Ran out of time before we could sync, stopping."
+                    ret_val=1
+                    touch /tmp/ntp_failed
+                    break
+                fi
+                sleep 1
+            done
         fi
     fi
+    return "$ret_val"
 }
 
 get_time() { # handles 2 types of network time, instant from an API or longer from an NTP server, if the instant API checks fails it will fallback to the longer ntp
     log "NTP: started time update"
+
     response=$(curl -s --connect-timeout 3 http://worldtimeapi.org/api/ip.txt)
     utc_datetime=$(echo "$response" | grep -o 'utc_datetime: [^.]*' | cut -d ' ' -f2 | sed "s/T/ /")
     if ! flag_enabled "manual_tz"; then
@@ -488,6 +518,8 @@ get_time() { # handles 2 types of network time, instant from an API or longer fr
         fi
         if date -u -s "$utc_datetime" > /dev/null 2>&1; then
             hwclock -w
+            log "NTP: Time successfully aquired using API"
+            touch /tmp/ntp_synced
             return 0
         fi
     fi
@@ -497,6 +529,7 @@ get_time() { # handles 2 types of network time, instant from an API or longer fr
 
     ntpdate -t 3 -u time.google.com
     if [ $? -eq 0 ]; then
+        log "NTP: Time successfully aquired using NTP"
         return 0
     fi
 
@@ -573,15 +606,6 @@ is_running() {
 is_running_exact() {
     process_name="$1"
     pgrep -f "$process_name" > /dev/null
-}
-
-LOGGING=$([ -f $sysdir/config/.logging ] && echo 1 || echo 0)
-scriptname=$(basename "$0" .sh)
-
-log() {
-    if [ $LOGGING -eq 1 ]; then
-        echo -e "($scriptname) $(date):" $* | tee -a "$sysdir/logs/$scriptname.log"
-    fi
 }
 
 get_password() {

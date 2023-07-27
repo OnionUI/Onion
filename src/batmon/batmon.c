@@ -23,14 +23,23 @@ int main(int argc, char *argv[])
 
     while (!quit) {
         if (battery_isCharging()) {
-            is_charging = true;
-            current_percentage = 500;
+            if (!is_charging) {
+                if (DEVICE_ID == MIYOO354) {
+                    current_percentage = getBatPercMMP();
+                }
+                else {
+                    current_percentage = 500;
+                    saveFakeAxpResult(current_percentage);
+                }
+                is_charging = true;
+            }
         }
         else if (is_charging) {
             is_charging = false;
             if (DEVICE_ID == MIYOO283) {
                 adc_value_g = updateADCValue(0);
                 current_percentage = batteryPercentage(adc_value_g);
+                saveFakeAxpResult(current_percentage);
             }
             else if (DEVICE_ID == MIYOO354) {
                 current_percentage = getBatPercMMP();
@@ -63,6 +72,9 @@ int main(int argc, char *argv[])
                     is_suspended, current_percentage, warn_at);
                 old_percentage = current_percentage;
                 file_put_sync(fp, "/tmp/percBat", "%d", current_percentage);
+                if (DEVICE_ID == MIYOO283) {
+                    saveFakeAxpResult(current_percentage);
+                }
             }
         }
         else {
@@ -115,6 +127,17 @@ void cleanup(void)
     close(sar_fd);
 }
 
+void saveFakeAxpResult(int current_percentage)
+{
+    FILE *fp;
+    if ((fp = fopen("/tmp/.axp_result", "w+"))) {
+        fprintf(fp, "{\"battery\":%d, \"voltage\":%d, \"charging\":%d}", current_percentage, adc_value_g, current_percentage == 500 ? 3 : 0);
+        fflush(fp);
+        fsync(fileno(fp));
+        fclose(fp);
+    }
+}
+
 int updateADCValue(int value)
 {
     if (battery_isCharging())
@@ -140,18 +163,15 @@ int updateADCValue(int value)
 
 int getBatPercMMP()
 {
-    char *cmd = "cd /customer/app/ ; ./axp_test";
-    int batJsonSize = 100;
-    char buf[batJsonSize];
+    char buf[100] = "";
     int battery_number;
 
+    system("cd /customer/app/ ; ./axp_test > /tmp/.axp_result");
+
     FILE *fp;
-    fp = popen(cmd, "r");
-    if (fgets(buf, batJsonSize, fp) != NULL) {
-        sscanf(buf, "{\"battery\":%d, \"voltage\":%*d, \"charging\":%*d}",
-               &battery_number);
-    }
-    pclose(fp);
+    file_get(fp, "/tmp/.axp_result", CONTENT_STR, buf);
+    sscanf(buf, "{\"battery\":%d, \"voltage\":%*d, \"charging\":%*d}", &battery_number);
+
     return battery_number;
 }
 

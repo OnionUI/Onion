@@ -111,6 +111,8 @@ static int gameNameScrollEnd = 20;
 static cJSON *json_root = NULL;
 static cJSON *json_items = NULL;
 
+static bool __initial_romscreens_loaded = false;
+
 void unloadRomScreen(int index)
 {
     if (index < 0 || index >= game_list_len)
@@ -149,9 +151,11 @@ SDL_Surface *loadRomScreen(int index)
         }
     }
 
-    unloadRomScreen(index + 5);
-    if (index > 5) {
-        unloadRomScreen(index - 5);
+    if (__initial_romscreens_loaded) {
+        unloadRomScreen(index + 5);
+        if (index > 5) {
+            unloadRomScreen(index - 5);
+        }
     }
 
     return game->romScreen;
@@ -177,6 +181,8 @@ static void *_loadRomScreensThread(void *_)
         if (game->romScreen == NULL)
             loadRomScreen(i);
     }
+
+    __initial_romscreens_loaded = true;
 
     return NULL;
 }

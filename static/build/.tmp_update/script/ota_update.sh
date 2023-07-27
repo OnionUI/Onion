@@ -10,8 +10,6 @@ YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 NC='\033[0m' # No Color
 
-rm $sysdir/cmd_to_run.sh 2> /dev/null
-
 # Repository name :
 GITHUB_REPOSITORY=OnionUI/Onion
 
@@ -26,10 +24,15 @@ main() {
 		IP=$(ip route get 1 | awk '{print $NF;exit}')
 		if [ "$IP" != "" ]; then
 			get_release_info
-			exit $?
+			if [ $? -eq 0 ]; then
+				touch "$sysdir/.updateAvailable"
+				exit 0
+			fi
 		fi
 		exit 1
 	fi
+
+	rm $sysdir/cmd_to_run.sh 2> /dev/null
 
 	check_available_space
 	enable_wifi
@@ -44,6 +47,8 @@ main() {
 		echo -ne "${YELLOW}"
 		read -n 1 -s -r -p "Press A to exit"
 		exit 3
+	else
+		touch "$sysdir/.updateAvailable"
 	fi
 
 	download_update

@@ -44,18 +44,8 @@ void menu_systemDisplay(void *_)
 void menu_systemStartup(void *_)
 {
     if (!_menu_system_startup._created) {
-        _menu_system_startup = list_create_with_title(4, LIST_SMALL, "Startup");
+        _menu_system_startup = list_create_with_title(3, LIST_SMALL, "Startup");
 
-        if (DEVICE_ID == MIYOO354) {
-            network_loadState();
-            list_addItem(&_menu_system_startup,
-                         (ListItem){
-                             .label = "Check for updates",
-                             .item_type = TOGGLE,
-                             .disabled = !settings.wifi_on,
-                             .value = (int)network_state.check_updates,
-                             .action = network_setCheckUpdates});
-        }
         list_addItem(&_menu_system_startup,
                      (ListItem){
                          .label = "Auto-resume last game",
@@ -322,8 +312,7 @@ void menu_buttonAction(void *_)
 void menu_batteryPercentage(void *_)
 {
     if (!_menu_battery_percentage._created) {
-        _menu_battery_percentage = list_create(6, LIST_SMALL);
-        strcpy(_menu_battery_percentage.title, "Battery percentage");
+        _menu_battery_percentage = list_create_with_title(7, LIST_SMALL, "Battery percentage");
         list_addItem(&_menu_battery_percentage,
                      (ListItem){
                          .label = "Visible",
@@ -350,17 +339,25 @@ void menu_batteryPercentage(void *_)
                          .action = action_batteryPercentageFontSize});
         list_addItem(&_menu_battery_percentage,
                      (ListItem){
-                         .label = "Position",
+                         .label = "Text alignment",
                          .item_type = MULTIVALUE,
-                         .value_max = 2,
-                         .value_labels = {"-", "Left", "Right"},
+                         .value_max = 3,
+                         .value_labels = {"-", "Left", "Center", "Right"},
                          .value = value_batteryPercentagePosition(),
                          .action = action_batteryPercentagePosition});
         list_addItem(&_menu_battery_percentage,
                      (ListItem){
+                         .label = "Fixed position",
+                         .item_type = MULTIVALUE,
+                         .value_max = 2,
+                         .value_labels = THEME_TOGGLE_LABELS,
+                         .value = value_batteryPercentageFixed(),
+                         .action = action_batteryPercentageFixed});
+        list_addItem(&_menu_battery_percentage,
+                     (ListItem){
                          .label = "Horizontal offset",
                          .item_type = MULTIVALUE,
-                         .value_max = 21,
+                         .value_max = BATTPERC_MAX_OFFSET * 2 + 1,
                          .value_formatter = formatter_positionOffset,
                          .value = value_batteryPercentageOffsetX(),
                          .action = action_batteryPercentageOffsetX});
@@ -368,7 +365,7 @@ void menu_batteryPercentage(void *_)
                      (ListItem){
                          .label = "Vertical offset",
                          .item_type = MULTIVALUE,
-                         .value_max = 21,
+                         .value_max = BATTPERC_MAX_OFFSET * 2 + 1,
                          .value_formatter = formatter_positionOffset,
                          .value = value_batteryPercentageOffsetY(),
                          .action = action_batteryPercentageOffsetY});
@@ -490,10 +487,25 @@ void menu_resetSettings(void *_)
     header_changed = true;
 }
 
+void menu_diagnostics(void *_)
+{
+    if (!_menu_diagnostics._created) {
+        _menu_diagnostics = list_create_with_title(1, LIST_SMALL, "Diagnostics");
+        list_addItem(&_menu_diagnostics,
+                     (ListItem){
+                         .label = "Enable logging",
+                         .item_type = TOGGLE,
+                         .value = (int)settings.enable_logging,
+                         .action = action_setEnableLogging});
+    }
+    menu_stack[++menu_level] = &_menu_diagnostics;
+    header_changed = true;
+}
+
 void menu_advanced(void *_)
 {
     if (!_menu_advanced._created) {
-        _menu_advanced = list_create(5, LIST_SMALL);
+        _menu_advanced = list_create(6, LIST_SMALL);
         strcpy(_menu_advanced.title, "Advanced");
         list_addItem(&_menu_advanced,
                      (ListItem){
@@ -537,6 +549,10 @@ void menu_advanced(void *_)
                              .label = "Reset settings...",
                              .action = menu_resetSettings});
         }
+        list_addItem(&_menu_advanced,
+                     (ListItem){
+                         .label = "Diagnostics...",
+                         .action = menu_diagnostics});
     }
     menu_stack[++menu_level] = &_menu_advanced;
     header_changed = true;
@@ -555,6 +571,10 @@ void menu_tools(void *_)
                      (ListItem){
                          .label = "Generate game list for short name roms",
                          .action = tool_buildShortRomGameList});
+        list_addItem(&_menu_tools,
+                     (ListItem){
+                         .label = "Generate miyoogamelist with digest names",
+                         .action = tool_generateMiyoogamelists});
     }
     menu_stack[++menu_level] = &_menu_tools;
     header_changed = true;
