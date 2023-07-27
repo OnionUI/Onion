@@ -80,6 +80,15 @@ void formatter_battWarn(void *pt, char *out_label)
         sprintf(out_label, "< %d%%", item->value * 5);
 }
 
+void formatter_battExit(void *pt, char *out_label)
+{
+    ListItem *item = (ListItem *)pt;
+    if (item->value == 0)
+        strcpy(out_label, "Off");
+    else
+        sprintf(out_label, "< %d%%", item->value);
+}
+
 static const int num_font_families = 5;
 static const char font_families[][STR_MAX] = {
     "BPreplayBold.otf", "Exo-2-Bold-Italic_Universal.ttf",

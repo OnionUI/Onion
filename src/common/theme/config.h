@@ -156,12 +156,13 @@ bool theme_applyConfig(Theme_s *config, const char *config_path,
     json_getInt(json_batteryPercentage, "offsetY", &config->batteryPercentage.offsetY);
 
     char textAlign_str[JSON_STRING_LEN];
-    config->batteryPercentage.textAlign = LEFT;
     if (json_getString(json_batteryPercentage, "textAlign", textAlign_str)) {
         if (strcmp("center", textAlign_str) == 0)
             config->batteryPercentage.textAlign = CENTER;
         else if (strcmp("right", textAlign_str) == 0)
             config->batteryPercentage.textAlign = RIGHT;
+        else
+            config->batteryPercentage.textAlign = LEFT;
     }
     else {
         bool depr_onleft = false;
