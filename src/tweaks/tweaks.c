@@ -103,6 +103,8 @@ int main(int argc, char *argv[])
     bool key_changed = false;
     SDLKey changed_key;
 
+    bool show_help_tooltip = !config_flag_get(".tweaksHelpCompleted");
+
     while (!quit) {
         uint32_t ticks = SDL_GetTicks();
         acc_ticks += ticks - last_ticks;
@@ -179,6 +181,16 @@ int main(int argc, char *argv[])
 
         if (quit)
             break;
+
+        if (show_help_tooltip) {
+            show_help_tooltip = false;
+            config_flag_set(".tweaksHelpCompleted", true);
+            __showInfoDialog("Welcome to Tweaks!",
+                             ":: TOOLTIPS ::\n"
+                             " \n"
+                             "Press SELECT to view a tooltip\n"
+                             "describing the selected option.");
+        }
 
         if (battery_hasChanged(ticks, &battery_percentage))
             battery_changed = true;

@@ -7,10 +7,8 @@
 
 #include "./appstate.h"
 
-void showInfoDialog(List *list)
+void __showInfoDialog(const char *title, const char *message)
 {
-    ListItem *item = list_currentItem(list);
-
     bool confirm_quit = false;
     SDLKey changed_key = SDLK_UNKNOWN;
 
@@ -19,7 +17,7 @@ void showInfoDialog(List *list)
     background_cache = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
     SDL_BlitSurface(screen, NULL, background_cache, NULL);
 
-    theme_renderDialog(screen, item->label, item->info_note, false);
+    theme_renderDialog(screen, title, message, false);
     SDL_BlitSurface(screen, NULL, video, NULL);
     SDL_Flip(video);
 
@@ -34,6 +32,12 @@ void showInfoDialog(List *list)
 
     keys_enabled = true;
     all_changed = true;
+}
+
+void showInfoDialog(List *list)
+{
+    ListItem *item = list_currentItem(list);
+    __showInfoDialog(item->label, item->info_note);
 }
 
 #endif // TWEAKS_INFO_DIALOG_H__
