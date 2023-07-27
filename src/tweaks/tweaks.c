@@ -189,7 +189,9 @@ int main(int argc, char *argv[])
                              ":: TOOLTIPS ::\n"
                              " \n"
                              "Press SELECT to view a tooltip\n"
-                             "describing the selected option.");
+                             "describing the selected option."
+                             " \n"
+                             "Press any button to close");
         }
 
         if (battery_hasChanged(ticks, &battery_percentage))
