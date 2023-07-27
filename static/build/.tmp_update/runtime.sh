@@ -125,6 +125,7 @@ main() {
 }
 
 state_change() {
+    log "state change: $1"
     runifnecessary "keymon" keymon
     check_networking
     touch /tmp/state_changed
@@ -583,9 +584,12 @@ check_networking() {
         return
     fi
 
-    rm /tmp/network_changed
-
-    $sysdir/script/network/update_networking.sh check
+    if pgrep -f update_networking.sh; then
+        log "update_networking already running"
+    else
+        rm /tmp/network_changed
+        $sysdir/script/network/update_networking.sh check
+    fi
 
     check_timezone
 }
