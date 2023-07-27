@@ -510,18 +510,24 @@ get_time() { # handles 2 types of network time, instant from an API or longer fr
     fi
 
     if [ ! -z "$utc_datetime" ]; then
+        playActivity stop_all
+
         if [ ! -z "$utc_offset" ]; then
             echo "$utc_offset" | sed 's/\+/_/' | sed 's/-/+/' | sed 's/_/-/' > $sysdir/config/.tz
             cp $sysdir/config/.tz $sysdir/config/.tz_sync
             sync
             set_tzid
         fi
+
         if date -u -s "$utc_datetime" > /dev/null 2>&1; then
             hwclock -w
             log "NTP: Time successfully aquired using API"
             touch /tmp/ntp_synced
+            playActivity resume
             return 0
         fi
+
+        playActivity resume
     fi
 
     log "NTP: Failed to get time via timeapi.io as well, falling back to NTP."
