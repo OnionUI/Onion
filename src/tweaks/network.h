@@ -592,7 +592,7 @@ void menu_network(void *_)
                                      .action = menu_smbd},
                                  "Samba is a file sharing protocol that provides\n"
                                  "integrated sharing of files and directories\n"
-                                 "between your Miyoo Mini plus and your PC.\n"
+                                 "between your Miyoo Mini Plus and your PC.\n"
                                  "It enables easy access, allowing you to share,\n"
                                  "access, and modify files as if they were stored\n"
                                  "locally on your PC.");
