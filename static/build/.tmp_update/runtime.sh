@@ -261,7 +261,9 @@ launch_game() {
         rompath=$(echo "$cmd" | awk '{ st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3)}')
 
         if echo "$rompath" | grep -q ":"; then
+            launch=$(echo "$rompath" | awk '{split($0,a,":"); print a[1]}')
             rompath=$(echo "$rompath" | awk '{split($0,a,":"); print a[2]}')
+            echo "LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so \"$launch\" \"$rompath\"" > $sysdir/cmd_to_run.sh
         fi
 
         orig_path="$rompath"
