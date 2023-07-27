@@ -6,10 +6,30 @@
 #include "theme/resources.h"
 #include "utils/surfaceSetAlpha.h"
 
-static int dialog_progress = 0;
+#define DIALOG_WIDTH 548
+#define DIALOG_HEIGHT 30
+#define DIALOG_LINE_BENCHMARK "access, and modify files as if they were stored"
 
-void theme_renderDialog(SDL_Surface *screen, const char *title_str,
-                        const char *message_str, bool show_hint)
+static int dialog_progress = 0;
+static int dialog_font_size = 0;
+
+int __get_font_size()
+{
+    if (dialog_font_size == 0) {
+        int w = 0, h = 0;
+        if (TTF_SizeUTF8(resource_getFont(TITLE), DIALOG_LINE_BENCHMARK, &w, &h) == 0) {
+            double scale_x = (double)DIALOG_WIDTH / w;
+            double scale_y = (double)DIALOG_HEIGHT / h;
+            dialog_font_size = (int)((scale_x > scale_y ? scale_y : scale_x) * theme()->title.size);
+        }
+        else {
+            dialog_font_size = theme()->title.size;
+        }
+    }
+    return dialog_font_size;
+}
+
+void theme_renderDialog(SDL_Surface *screen, const char *title_str, const char *message_str, bool show_hint)
 {
     SDL_Surface *transparent_bg = SDL_CreateRGBSurface(
         0, 640, 480, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
@@ -22,40 +42,33 @@ void theme_renderDialog(SDL_Surface *screen, const char *title_str,
 
     SDL_BlitSurface(pop_bg, NULL, screen, &center_rect);
 
-    SDL_Surface *title = TTF_RenderUTF8_Blended(
-        resource_getFont(TITLE), title_str, theme()->total.color);
+    SDL_Surface *title = TTF_RenderUTF8_Blended(resource_getFont(TITLE), title_str, theme()->total.color);
     if (title) {
-        SDL_Rect title_rect = {320 - title->w / 2,
-                               center_rect.y + 30 - title->h / 2};
+        SDL_Rect title_rect = {320 - title->w / 2, center_rect.y + 30 - title->h / 2};
         SDL_BlitSurface(title, NULL, screen, &title_rect);
         SDL_FreeSurface(title);
     }
 
-    SDL_Surface *textbox =
-        theme_textboxSurface(message_str, resource_getFont(TITLE),
-                             theme()->grid.color, ALIGN_CENTER);
+    TTF_Font *temp_font = theme_loadFont(theme()->path, theme()->title.font, __get_font_size());
+    SDL_Surface *textbox = theme_textboxSurface(message_str, temp_font, theme()->grid.color, ALIGN_CENTER);
+    TTF_CloseFont(temp_font);
     if (textbox) {
-        SDL_Rect textbox_rect = {320 - textbox->w / 2,
-                                 (show_hint ? 210 : 240) - textbox->h / 2};
+        SDL_Rect textbox_rect = {320 - textbox->w / 2, (show_hint ? 210 : 240) - textbox->h / 2};
         SDL_BlitSurface(textbox, NULL, screen, &textbox_rect);
         SDL_FreeSurface(textbox);
     }
 
     if (show_hint) {
-        SDL_Rect hint_rect = {center_rect.x + 60,
-                              center_rect.y + pop_bg->h - 60};
+        SDL_Rect hint_rect = {center_rect.x + 60, center_rect.y + pop_bg->h - 60};
 
         SDL_Surface *button_a = resource_getSurface(BUTTON_A);
         SDL_Rect button_a_rect = {hint_rect.x, hint_rect.y - button_a->h / 2};
         SDL_BlitSurface(button_a, NULL, screen, &button_a_rect);
         hint_rect.x += button_a->w + 5;
 
-        SDL_Surface *label_ok = TTF_RenderUTF8_Blended(
-            resource_getFont(HINT), lang_get(LANG_OK, LANG_FALLBACK_OK),
-            theme()->hint.color);
+        SDL_Surface *label_ok = TTF_RenderUTF8_Blended(resource_getFont(HINT), lang_get(LANG_OK, LANG_FALLBACK_OK), theme()->hint.color);
         if (label_ok) {
-            SDL_Rect label_ok_rect = {hint_rect.x,
-                                      hint_rect.y - label_ok->h / 2};
+            SDL_Rect label_ok_rect = {hint_rect.x, hint_rect.y - label_ok->h / 2};
             SDL_BlitSurface(label_ok, NULL, screen, &label_ok_rect);
             hint_rect.x += label_ok->w + 30;
             SDL_FreeSurface(label_ok);
@@ -66,9 +79,7 @@ void theme_renderDialog(SDL_Surface *screen, const char *title_str,
         SDL_BlitSurface(button_b, NULL, screen, &button_b_rect);
         hint_rect.x += button_b->w + 5;
 
-        SDL_Surface *label_cancel = TTF_RenderUTF8_Blended(
-            resource_getFont(HINT), lang_get(LANG_CANCEL, LANG_FALLBACK_CANCEL),
-            theme()->hint.color);
+        SDL_Surface *label_cancel = TTF_RenderUTF8_Blended(resource_getFont(HINT), lang_get(LANG_CANCEL, LANG_FALLBACK_CANCEL), theme()->hint.color);
         if (label_cancel) {
             SDL_Rect label_cancel_rect = {hint_rect.x,
                                           hint_rect.y - label_cancel->h / 2};

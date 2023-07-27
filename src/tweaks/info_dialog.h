@@ -23,7 +23,7 @@ void __showInfoDialog(const char *title, const char *message)
 
     while (!confirm_quit) {
         if (updateKeystate(keystate, &confirm_quit, true, &changed_key)) {
-            if (changed_key != SDLK_UNKNOWN && keystate[changed_key] == PRESSED) {
+            if ((changed_key == SW_BTN_A || changed_key == SW_BTN_B || changed_key == SW_BTN_SELECT) && keystate[changed_key] == PRESSED) {
                 confirm_quit = true;
                 sound_change();
             }
