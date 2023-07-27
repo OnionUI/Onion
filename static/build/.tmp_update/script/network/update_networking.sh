@@ -150,9 +150,8 @@ check_smbdstate() {
                     /var/private \
                     /var/log/
 
-                update_smbconf
                 $netscript/start_smbd.sh $PASS &
-                log "Samba: Starting smbd at exit of tweaks.."
+                log "Samba: Starting smbd.."
             else
                 disable_flag smbdState
             fi
@@ -162,14 +161,6 @@ check_smbdstate() {
             killall -9 smbd
             log "Samba: Killed"
         fi
-    fi
-}
-
-update_smbconf() {
-    if flag_enabled authsmbdState; then
-        sed -i -e '/guest only/s/1/0/g' -e 's/#alid users = onion/valid users = onion/g' $sysdir/config/smb.conf
-    else
-        sed -i -e '/guest only/s/0/1/g' -e 's/valid users = onion/#alid users = onion/g' $sysdir/config/smb.conf
     fi
 }
 
@@ -436,11 +427,6 @@ check_ntpstate() {
             return 1
         fi
 
-        # Try once for good luck (this is faster - when it works)
-        if get_time; then
-            return 0
-        fi
-
         attempts=0
         max_wait_ip=10
         max_attempts=3
@@ -456,6 +442,7 @@ check_ntpstate() {
                     log "NTPwait: Could not aquire an IP address"
                     ret_val=1
                     got_ip=0
+                    break
                 fi
             else
                 log "NTPwait: IP address aquired: $ip"
@@ -493,7 +480,7 @@ check_ntpstate() {
 get_time() { # handles 2 types of network time, instant from an API or longer from an NTP server, if the instant API checks fails it will fallback to the longer ntp
     log "NTP: started time update"
 
-    response=$(curl -s --connect-timeout 3 http://worldtimeapi.org/api/ip.txt)
+    response=$(curl -s -m 3 http://worldtimeapi.org/api/ip.txt)
     utc_datetime=$(echo "$response" | grep -o 'utc_datetime: [^.]*' | cut -d ' ' -f2 | sed "s/T/ /")
     if ! flag_enabled "manual_tz"; then
         utc_offset="UTC$(echo "$response" | grep -o 'utc_offset: [^.]*' | cut -d ' ' -f2)"
@@ -501,18 +488,18 @@ get_time() { # handles 2 types of network time, instant from an API or longer fr
 
     if [ -z "$utc_datetime" ]; then
         log "NTP: Failed to get time from worldtimeapi.org, trying timeapi.io"
-        utc_datetime=$(curl -s -k --connect-timeout 5 https://timeapi.io/api/Time/current/zone?timeZone=UTC | grep -o '"dateTime":"[^.]*' | cut -d '"' -f4 | sed 's/T/ /')
+        utc_datetime=$(curl -s -k -m 5 https://timeapi.io/api/Time/current/zone?timeZone=UTC | grep -o '"dateTime":"[^.]*' | cut -d '"' -f4 | sed 's/T/ /')
         if ! flag_enabled "manual_tz"; then
-            ip_address=$(curl -s -k --connect-timeout 5 https://api.ipify.org)
-            utc_offset_seconds=$(curl -s -k --connect-timeout 5 https://timeapi.io/api/TimeZone/ip?ipAddress=$ip_address | jq '.currentUtcOffset.seconds')
+            ip_address=$(curl -s -k -m 5 https://api.ipify.org)
+            utc_offset_seconds=$(curl -s -k -m 5 https://timeapi.io/api/TimeZone/ip?ipAddress=$ip_address | jq '.currentUtcOffset.seconds')
             utc_offset="$(convert_seconds_to_utc_offset $utc_offset_seconds)"
         fi
     fi
 
-    if [ ! -z "$utc_datetime" ]; then
+    if [ -n "$utc_datetime" ]; then
         playActivity stop_all
 
-        if [ ! -z "$utc_offset" ]; then
+        if [ -n "$utc_offset" ]; then
             echo "$utc_offset" | sed 's/\+/_/' | sed 's/-/+/' | sed 's/_/-/' > $sysdir/config/.tz
             cp $sysdir/config/.tz $sysdir/config/.tz_sync
             sync
