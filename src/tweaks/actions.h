@@ -76,7 +76,7 @@ void action_setVibration(void *pt)
 
 void action_setLowBatteryAutoSave(void *pt)
 {
-    settings.low_battery_autosave = ((ListItem *)pt)->value == 1;
+    settings.low_battery_autosave_at = ((ListItem *)pt)->value;
 }
 
 void action_setDisableStandby(void *pt)
@@ -201,7 +201,7 @@ void action_batteryPercentageOffsetX(void *pt)
 
 void action_batteryPercentageOffsetY(void *pt)
 {
-    int theme_value = resources.theme_back.batteryPercentage.offsetX;
+    int theme_value = resources.theme_back.batteryPercentage.offsetY;
     int item_value = ((ListItem *)pt)->value;
     int new_value = item_value == 0 ? theme_value : item_value - 1 - BATTPERC_MAX_OFFSET;
     resources.theme.batteryPercentage.offsetY = new_value;
