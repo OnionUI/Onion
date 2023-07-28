@@ -125,6 +125,7 @@ main() {
 }
 
 state_change() {
+    log "state change: $1"
     runifnecessary "keymon" keymon
     check_networking
     touch /tmp/state_changed
@@ -260,7 +261,9 @@ launch_game() {
         rompath=$(echo "$cmd" | awk '{ st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3)}')
 
         if echo "$rompath" | grep -q ":"; then
+            launch=$(echo "$rompath" | awk '{split($0,a,":"); print a[1]}')
             rompath=$(echo "$rompath" | awk '{split($0,a,":"); print a[2]}')
+            echo "LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so \"$launch\" \"$rompath\"" > $sysdir/cmd_to_run.sh
         fi
 
         orig_path="$rompath"
@@ -581,9 +584,12 @@ check_networking() {
         return
     fi
 
-    rm /tmp/network_changed
-
-    $sysdir/script/network/update_networking.sh check
+    if pgrep -f update_networking.sh; then
+        log "update_networking already running"
+    else
+        rm /tmp/network_changed
+        $sysdir/script/network/update_networking.sh check
+    fi
 
     check_timezone
 }
