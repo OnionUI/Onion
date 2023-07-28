@@ -1,0 +1,3 @@
+Host *
+    UserKnownHostsFile /mnt/SDCARD/.tmp_update/config/known_hosts
+    IdentityFile /var/OnionKey
