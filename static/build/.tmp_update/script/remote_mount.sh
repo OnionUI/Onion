@@ -20,7 +20,7 @@ SERVERADDR=""
 USERNAME=""
 LOCALDIR=""
 REMOTEDIR=""
-breakout="0"
+BREAKOUT="0"
 
 
 # Entry point
@@ -119,7 +119,7 @@ add_new_mount() {
     echo -e "${YELLOW}Type \"q\" at any point in this process to exit to main menu\n"
     echo -e "${YELLOW}Press Y to bring up the keyboard\n"
     prompt_user "${BLUE}What's the server address?${NC}" SERVERADDR
-    if [ "$breakout" -eq 1 ]; then main_menu; return; fi
+    if [ "$BREAKOUT" -eq 1 ]; then main_menu; return; fi
 
     if ! ping -c 1 -W 1 "$SERVERADDR" > /dev/null; then
         echo -e "${RED}Error, remote device not responding${NC}"
@@ -128,21 +128,21 @@ add_new_mount() {
     fi
     
     prompt_user "${BLUE}What's the username to connect with?${NC}" USERNAME
-    if [ "$breakout" -eq 1 ]; then main_menu; return; fi
+    if [ "$BREAKOUT" -eq 1 ]; then main_menu; return; fi
     
     clear
     
     echo -e "${NC}Now, what's the local directory? \n \nExamples would include: \n /mnt/SDCARD/Roms/GB or \n /mnt/SDCARD/Roms/GBA \n"
     
     prompt_user "${BLUE}Enter the directory to mount in${NC}" LOCALDIR
-    if [ "$breakout" -eq 1 ]; then main_menu; return; fi
+    if [ "$BREAKOUT" -eq 1 ]; then main_menu; return; fi
     
     clear
     
     echo -e "${NC}Now, what's the remote directory? \n \nExamples would include: \n C:/Users/XK/Roms/GB or \n /home/XK/Roms/GBA \n"
     
     prompt_user "${BLUE}Enter the directory to mount${NC}" REMOTEDIR
-    if [ "$breakout" -eq 1 ]; then main_menu; return; fi
+    if [ "$BREAKOUT" -eq 1 ]; then main_menu; return; fi
     
     clear
     
@@ -393,7 +393,7 @@ prompt_user() {
         
         if [ "$response" == "q" ]; then
             echo "Returning to main menu..."
-            breakout=1
+            BREAKOUT=1
             main_menu
             break
         fi
