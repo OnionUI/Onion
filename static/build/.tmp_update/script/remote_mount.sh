@@ -46,7 +46,7 @@ main() {
 
 # Build main menu with Shellect
 main_menu() {
-    local choice=$(echo -e "Add a new mount\nConnect to stored mount\nUnmount a folder\nDelete and unmount\nShow mount status\nShow brief mount status\nClear mount file\nGenerate SSH Key\nHelp\nExit" | $SHELLECT -t "Select option:" -b "Press A to select")
+    local choice=$(echo -e "Add a new mount\nConnect to stored mount\nUnmount a folder\nDelete and unmount\nShow mount status\nShow brief mount status\nClear mount file\nGenerate SSH Key\nHelp\nExit" | $SHELLECT -t "Remote mount control - Select option:" -b "Press A to select")
     
     case "$choice" in
     "Add a new mount")
