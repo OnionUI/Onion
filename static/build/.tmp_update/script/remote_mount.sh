@@ -22,9 +22,12 @@ LOCALDIR=""
 REMOTEDIR=""
 BREAKOUT="0"
 
-
 # Entry point
 main() {
+    if [ ! -f $CONFIG_FILE ] || [ ! -s $CONFIG_FILE ]; then
+        echo '[]' > $CONFIG_FILE
+    fi
+    
     if [ -e "$APPDIR/.firstrun" ]; then
         clear
         create_banner "INFO" 
@@ -148,10 +151,6 @@ add_new_mount() {
     
     echo -e "${GREEN}Saving options to file..."
     
-    if [ ! -f $CONFIG_FILE ] || [ ! -s $CONFIG_FILE ]; then
-        echo '[]' > $CONFIG_FILE
-    fi
-
     mount_json=$(jq -n \
                     --arg sa "$SERVERADDR" \
                     --arg un "$USERNAME" \
@@ -186,6 +185,7 @@ mount_stored() {
     local_dir=$(echo -e "$selected_json" | jq -r '.local_dir')
 
     generate_sshfs_cmdline "$username" "$server_address" "$remote_dir" "$local_dir"
+    main_menu
 }
 
 # Menu item to unmount a folder that we already have mounted.
@@ -344,7 +344,6 @@ generate_sshfs_cmdline() {
         killall -9 ssh
         fusermount -u "$LOCALDIR"
     fi
-    main_menu
 }
 
 read_and_store(){
