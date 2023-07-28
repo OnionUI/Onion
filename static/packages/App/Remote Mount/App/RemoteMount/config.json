@@ -1,6 +1,6 @@
 {
-	"label": "Mount remote directory",
+	"label": "Mount remote SSH directory",
 	"icon": "/mnt/SDCARD/Icons/Default/app/remote_mnt.png",
 	"launch": "launch.sh",
-	"description": "Mount a server stored directory"
+	"description": "Mount server stored directory via SSHFS"
 }
