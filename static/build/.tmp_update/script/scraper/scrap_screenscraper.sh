@@ -303,6 +303,8 @@ if [ -f "$ScraperConfigFile" ]; then
     userSS=$(echo "$config" | jq -r '.screenscraper_username')
     passSS=$(echo "$config" | jq -r '.screenscraper_password')
     ScrapeInBackground=$(echo "$config" | jq -r '.ScrapeInBackground')
+	MediaType=$(echo "$config" | jq -r '.MediaType')
+
 	u=$(echo "U2FsdGVkX18PKpoEvELyE+5xionDX8iRxAIxJj4FN1U=" | openssl enc -aes-256-cbc -d -a -pbkdf2 -iter 10000 -salt -pass pass:"3x0tVD3jZvElZWRt3V67QQ==")
 	p=$(echo "U2FsdGVkX1/ydn2FWrwYcFVc5gVYgc5kVaJ5jDOeOKE=" |openssl enc -aes-256-cbc -d -a -pbkdf2 -iter 10000 -salt -pass pass:"RuA29ch3zVoodAItmvKKmZ+4Au+5owgvV/ztqRu4NjI=")
 
@@ -424,7 +426,7 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
         
         echo Searching on screenscraper ...
         api_result=$(curl -k -s "$url") 
-
+		
     	
     
     	
@@ -467,22 +469,21 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
         fi
         
         # Here we choose the kind of media that we want :
-            # sstitle	        Screenshot Title	(recommended)
+            # sstitle	        Screenshot of Title Screen	(recommended)
             # ss	            Screenshot	(recommended)
             # fanart	        Fan Art	
             # screenmarquee	    Screen Marquee	
             # steamgrid	        HD Logos	
             # wheel	            Wheel	
             # wheel-hd	        HD Logos	
-            # box-2D	        Case: Front	(default) (recommended)
+            # box-2D	        Box Art	(default) (recommended)
             # box-2D-side   	Box: Side	
             # box-2D-back   	Box: Back	
             # box-texture   	Box: Texture	
             # support-texture	Stand: Texture	
-            
-         # TODO : let user choose his media type in options
-        
-        MediaType="box-2D"
+            # box-3d            Box 3D Art
+			# mixrbv1			RecalBox Mix V1
+			# mixrbv2			RecalBox Mix V2
 
 		# TODO: Allow the user to set their regional preferences
 		# Get the URL of media in this order : world, us, usa, na, eu, uk, oceania, au, nz, jp and then the first entry available
