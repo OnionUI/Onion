@@ -13,6 +13,12 @@
 #include "utils/json.h"
 #include "utils/str.h"
 
+typedef enum TextAlign {
+    LEFT,
+    CENTER,
+    RIGHT
+} Theme_TextAlign;
+
 typedef struct Theme_BatteryPercentage {
     bool visible;
     char font[STR_MAX];
@@ -20,7 +26,8 @@ typedef struct Theme_BatteryPercentage {
     SDL_Color color;
     int offsetX;
     int offsetY;
-    bool onleft;
+    Theme_TextAlign textAlign;
+    bool fixed;
 } BatteryPercentage_s;
 
 typedef struct Theme_Frame {
@@ -124,14 +131,10 @@ bool theme_applyConfig(Theme_s *config, const char *config_path,
     }
 
     json_fontStyle(json_title, &config->title, NULL);
-    json_fontStyle(json_hint, &config->hint,
-                   use_fallbacks ? &config->title : NULL);
-    json_fontStyle(json_currentpage, &config->currentpage,
-                   use_fallbacks ? &config->hint : NULL);
-    json_fontStyle(json_total, &config->total,
-                   use_fallbacks ? &config->hint : NULL);
-    json_fontStyle(json_list, &config->list,
-                   use_fallbacks ? &config->title : NULL);
+    json_fontStyle(json_hint, &config->hint, use_fallbacks ? &config->title : NULL);
+    json_fontStyle(json_currentpage, &config->currentpage, use_fallbacks ? &config->hint : NULL);
+    json_fontStyle(json_total, &config->total, use_fallbacks ? &config->hint : NULL);
+    json_fontStyle(json_list, &config->list, use_fallbacks ? &config->title : NULL);
 
     json_getString(json_grid, "font", config->grid.font);
     json_getInt(json_grid, "grid1x4", &config->grid.grid1x4);
@@ -139,24 +142,35 @@ bool theme_applyConfig(Theme_s *config, const char *config_path,
     json_color(json_grid, "color", &config->grid.color);
     json_color(json_grid, "selectedcolor", &config->grid.selectedcolor);
 
-    json_getBool(json_batteryPercentage, "visible",
-                 &config->batteryPercentage.visible);
-    if (!json_getString(json_batteryPercentage, "font",
-                        config->batteryPercentage.font) &&
-        use_fallbacks)
+    json_getBool(json_batteryPercentage, "visible", &config->batteryPercentage.visible);
+
+    if (!json_getString(json_batteryPercentage, "font", config->batteryPercentage.font) && use_fallbacks)
         strcpy(config->batteryPercentage.font, config->hint.font);
-    json_getInt(json_batteryPercentage, "size",
-                &config->batteryPercentage.size);
-    if (!json_color(json_batteryPercentage, "color",
-                    &config->batteryPercentage.color) &&
-        use_fallbacks)
+
+    json_getInt(json_batteryPercentage, "size", &config->batteryPercentage.size);
+
+    if (!json_color(json_batteryPercentage, "color", &config->batteryPercentage.color) && use_fallbacks)
         config->batteryPercentage.color = config->hint.color;
-    json_getInt(json_batteryPercentage, "offsetX",
-                &config->batteryPercentage.offsetX);
-    json_getInt(json_batteryPercentage, "offsetY",
-                &config->batteryPercentage.offsetY);
-    json_getBool(json_batteryPercentage, "onleft",
-                 &config->batteryPercentage.onleft);
+
+    json_getInt(json_batteryPercentage, "offsetX", &config->batteryPercentage.offsetX);
+    json_getInt(json_batteryPercentage, "offsetY", &config->batteryPercentage.offsetY);
+
+    char textAlign_str[JSON_STRING_LEN];
+    if (json_getString(json_batteryPercentage, "textAlign", textAlign_str)) {
+        if (strcmp("center", textAlign_str) == 0)
+            config->batteryPercentage.textAlign = CENTER;
+        else if (strcmp("right", textAlign_str) == 0)
+            config->batteryPercentage.textAlign = RIGHT;
+        else
+            config->batteryPercentage.textAlign = LEFT;
+    }
+    else {
+        bool depr_onleft = false;
+        if (json_getBool(json_batteryPercentage, "onleft", &depr_onleft))
+            config->batteryPercentage.textAlign = depr_onleft ? RIGHT : LEFT;
+    }
+
+    json_getBool(json_batteryPercentage, "fixed", &config->batteryPercentage.fixed);
 
     json_getInt(json_frame, "border-left", &config->frame.border_left);
     json_getInt(json_frame, "border-right", &config->frame.border_right);
@@ -180,7 +194,8 @@ Theme_s theme_loadFromPath(const char *theme_path, bool apply_overrides)
                               .color = {255, 255, 255},
                               .offsetX = 0,
                               .offsetY = 0,
-                              .onleft = false},
+                              .textAlign = LEFT,
+                              .fixed = false},
         .frame = {.border_left = 0, .border_right = 0},
         .title = {.font = FALLBACK_FONT, .size = 36, .color = {255, 255, 255}},
         .hint = {.font = FALLBACK_FONT, .size = 40, .color = {255, 255, 255}},

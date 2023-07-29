@@ -76,12 +76,20 @@ void action_setVibration(void *pt)
 
 void action_setLowBatteryAutoSave(void *pt)
 {
-    settings.low_battery_autosave = ((ListItem *)pt)->value == 1;
+    settings.low_battery_autosave_at = ((ListItem *)pt)->value;
 }
 
 void action_setDisableStandby(void *pt)
 {
     settings.disable_standby = ((ListItem *)pt)->value == 1;
+}
+
+void action_setEnableLogging(void *pt)
+{
+    settings.enable_logging = ((ListItem *)pt)->value == 1;
+    char new_value[22];
+    sprintf(new_value, "log_to_file = %s", settings.enable_logging ? "\"true\"" : "\"false\"");
+    file_changeKeyValue(RETROARCH_CONFIG, "log_to_file =", new_value);
 }
 
 void action_setMenuButtonHaptics(void *pt)
@@ -150,14 +158,31 @@ void action_batteryPercentageFontSize(void *pt)
 
 void action_batteryPercentagePosition(void *pt)
 {
-    static bool applied_values[] = {false, true, false};
-    applied_values[0] = resources.theme_back.batteryPercentage.onleft;
+    static Theme_TextAlign applied_values[] = {LEFT, LEFT, CENTER, RIGHT};
+    applied_values[0] = resources.theme_back.batteryPercentage.textAlign;
     int item_value = ((ListItem *)pt)->value;
-    resources.theme.batteryPercentage.onleft = applied_values[item_value];
+    resources.theme.batteryPercentage.textAlign = applied_values[item_value];
 
-    static int value_types[] = {cJSON_NULL, cJSON_True, cJSON_False};
-    theme_changeOverride("batteryPercentage", "onleft", NULL,
-                         value_types[item_value]);
+    theme_changeOverride("batteryPercentage", "onleft", NULL, cJSON_NULL);
+
+    static char *value_types[] = {"", "left", "center", "right"};
+    if (item_value != 0)
+        theme_changeOverride("batteryPercentage", "textAlign", value_types[item_value], cJSON_String);
+    else
+        theme_changeOverride("batteryPercentage", "textAlign", NULL, cJSON_NULL);
+
+    battery_changed = true;
+}
+
+void action_batteryPercentageFixed(void *pt)
+{
+    static bool applied_values[] = {false, false, true};
+    applied_values[0] = resources.theme_back.batteryPercentage.fixed;
+    int item_value = ((ListItem *)pt)->value;
+    resources.theme.batteryPercentage.fixed = applied_values[item_value];
+
+    static int value_types[] = {cJSON_NULL, cJSON_False, cJSON_True};
+    theme_changeOverride("batteryPercentage", "fixed", NULL, value_types[item_value]);
 
     battery_changed = true;
 }
@@ -166,24 +191,22 @@ void action_batteryPercentageOffsetX(void *pt)
 {
     int theme_value = resources.theme_back.batteryPercentage.offsetX;
     int item_value = ((ListItem *)pt)->value;
-    int new_value = item_value == 0 ? theme_value : item_value - 11;
+    int new_value = item_value == 0 ? theme_value : item_value - 1 - BATTPERC_MAX_OFFSET;
     resources.theme.batteryPercentage.offsetX = new_value;
 
-    theme_changeOverride("batteryPercentage", "offsetX", &new_value,
-                         item_value == 0 ? cJSON_NULL : cJSON_Number);
+    theme_changeOverride("batteryPercentage", "offsetX", &new_value, item_value == 0 ? cJSON_NULL : cJSON_Number);
 
     battery_changed = true;
 }
 
 void action_batteryPercentageOffsetY(void *pt)
 {
-    int theme_value = resources.theme_back.batteryPercentage.offsetX;
+    int theme_value = resources.theme_back.batteryPercentage.offsetY;
     int item_value = ((ListItem *)pt)->value;
-    int new_value = item_value == 0 ? theme_value : item_value - 11;
+    int new_value = item_value == 0 ? theme_value : item_value - 1 - BATTPERC_MAX_OFFSET;
     resources.theme.batteryPercentage.offsetY = new_value;
 
-    theme_changeOverride("batteryPercentage", "offsetY", &new_value,
-                         item_value == 0 ? cJSON_NULL : cJSON_Number);
+    theme_changeOverride("batteryPercentage", "offsetY", &new_value, item_value == 0 ? cJSON_NULL : cJSON_Number);
 
     battery_changed = true;
 }

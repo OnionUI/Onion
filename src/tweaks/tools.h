@@ -95,16 +95,22 @@ void _runCommandPopup(const char *tool_name, const char *_cmd)
 
 void tool_generateCueFiles(void *pt)
 {
-    _runCommandPopup(tools_short_names[5], "/mnt/SDCARD/.tmp_update/script/cue_gen.sh");
+    _runCommandPopup(tools_short_names[0], "/mnt/SDCARD/.tmp_update/script/cue_gen.sh");
 }
 
 void tool_buildShortRomGameList(void *pt)
 {
-    _runCommandPopup(tools_short_names[6], "./bin/gameNameList /mnt/SDCARD /mnt/SDCARD/BIOS/arcade_lists");
+    _runCommandPopup(tools_short_names[1], "./bin/gameNameList /mnt/SDCARD /mnt/SDCARD/BIOS/arcade_lists");
+}
+
+void tool_generateMiyoogamelists(void *pt)
+{
+    _runCommandPopup(tools_short_names[2], "/mnt/SDCARD/.tmp_update/script/miyoogamelist_gen.sh");
 }
 
 static void (*tools_pt[NUM_TOOLS])(void *) = {
     tool_generateCueFiles,
-    tool_buildShortRomGameList};
+    tool_buildShortRomGameList,
+    tool_generateMiyoogamelists};
 
 #endif // TWEAKS_TOOLS_H__

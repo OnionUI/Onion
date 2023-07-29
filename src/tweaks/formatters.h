@@ -9,6 +9,8 @@
 
 #include "./tools.h"
 
+#define BATTPERC_MAX_OFFSET 48
+
 #define BUTTON_MAINUI_LABELS                          \
     {                                                 \
         "Context menu", "GameSwitcher", "Resume game" \
@@ -78,6 +80,15 @@ void formatter_battWarn(void *pt, char *out_label)
         sprintf(out_label, "< %d%%", item->value * 5);
 }
 
+void formatter_battExit(void *pt, char *out_label)
+{
+    ListItem *item = (ListItem *)pt;
+    if (item->value == 0)
+        strcpy(out_label, "Off");
+    else
+        sprintf(out_label, "< %d%%", item->value);
+}
+
 static const int num_font_families = 5;
 static const char font_families[][STR_MAX] = {
     "BPreplayBold.otf", "Exo-2-Bold-Italic_Universal.ttf",
@@ -117,7 +128,7 @@ void formatter_positionOffset(void *pt, char *out_label)
     if (item->value == 0)
         strcpy(out_label, "-");
     else
-        sprintf(out_label, "%d px", item->value - 11);
+        sprintf(out_label, "%d px", item->value - 1 - BATTPERC_MAX_OFFSET);
 }
 
 void formatter_meterWidth(void *pt, char *out_label)

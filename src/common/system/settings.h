@@ -37,8 +37,7 @@ typedef struct settings_s {
     bool show_expert;
     bool startup_auto_resume;
     bool menu_button_haptics;
-    bool low_battery_autosave;
-    bool low_battery_warning;
+    int low_battery_autosave_at;
     int low_battery_warn_at;
     int time_skip;
     int vibration;
@@ -51,6 +50,7 @@ typedef struct settings_s {
     int ingame_long_press;
     int ingame_double_press;
     bool disable_standby;
+    bool enable_logging;
 
     char mainui_button_x[JSON_STRING_LEN];
     char mainui_button_y[JSON_STRING_LEN];
@@ -81,8 +81,7 @@ static settings_s __default_settings = (settings_s){
     .show_expert = false,
     .startup_auto_resume = true,
     .menu_button_haptics = false,
-    .low_battery_autosave = true,
-    .low_battery_warning = true,
+    .low_battery_autosave_at = 4,
     .low_battery_warn_at = 10,
     .time_skip = 4,
     .vibration = 2,
@@ -96,6 +95,7 @@ static settings_s __default_settings = (settings_s){
     .ingame_long_press = 2,
     .ingame_double_press = 3,
     .disable_standby = false,
+    .enable_logging = false,
     .mainui_button_x = "",
     .mainui_button_y = ""};
 
@@ -171,9 +171,12 @@ void settings_load(void)
     settings.menu_button_haptics = !config_flag_get(".noMenuHaptics");
     settings.show_recents = config_flag_get(".showRecents");
     settings.show_expert = config_flag_get(".showExpert");
-    settings.low_battery_autosave = !config_flag_get(".noLowBatteryAutoSave");
     settings.mute = config_flag_get(".muteVolume");
     settings.disable_standby = config_flag_get(".disableStandby");
+    settings.enable_logging = config_flag_get(".logging");
+
+    if (config_flag_get(".noLowBatteryAutoSave")) // flag is deprecated, but keep compatibility
+        settings.low_battery_autosave_at = 0;
 
     if (config_flag_get(".noBatteryWarning")) // flag is deprecated, but keep compatibility
         settings.low_battery_warn_at = 0;
@@ -182,6 +185,7 @@ void settings_load(void)
         settings.vibration = 0;
 
     config_get("battery/warnAt", CONFIG_INT, &settings.low_battery_warn_at);
+    config_get("battery/exitAt", CONFIG_INT, &settings.low_battery_autosave_at);
     config_get("startup/app", CONFIG_INT, &settings.startup_application);
     config_get("startup/addHours", CONFIG_INT, &settings.time_skip);
     config_get("vibration", CONFIG_INT, &settings.vibration);
@@ -297,16 +301,18 @@ void settings_save(void)
     config_flag_set(".noMenuHaptics", !settings.menu_button_haptics);
     config_flag_set(".showRecents", settings.show_recents);
     config_flag_set(".showExpert", settings.show_expert);
-    config_flag_set(".noLowBatteryAutoSave", !settings.low_battery_autosave);
     config_flag_set(".muteVolume", settings.mute);
     config_flag_set(".disableStandby", settings.disable_standby);
+    config_flag_set(".logging", settings.enable_logging);
     config_setNumber("battery/warnAt", settings.low_battery_warn_at);
+    config_setNumber("battery/exitAt", settings.low_battery_autosave_at);
     config_setNumber("startup/app", settings.startup_application);
     config_setNumber("startup/addHours", settings.time_skip);
     config_setNumber("vibration", settings.vibration);
     config_setNumber("startup/tab", settings.startup_tab);
 
     // remove deprecated flags
+    remove(CONFIG_PATH ".noLowBatteryAutoSave");
     remove(CONFIG_PATH ".noBatteryWarning");
     remove(CONFIG_PATH ".noVibration");
     remove(CONFIG_PATH ".menuInverted");

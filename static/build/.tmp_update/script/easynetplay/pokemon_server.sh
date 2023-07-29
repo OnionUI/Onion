@@ -7,8 +7,12 @@ miyoodir=/mnt/SDCARD/miyoo
 save_dir="/mnt/SDCARD/Saves/CurrentProfile/saves/TGB Dual/"
 tgb_dual_opts="/mnt/SDCARD/Saves/CurrentProfile/config/TGB Dual/TGB Dual.opt"
 tgb_dual_opts_bk="/mnt/SDCARD/Saves/CurrentProfile/config/TGB Dual/TGB Dual.opt.bak"
-LOGGING=$([ -f $sysdir/config/.logging ] && echo 1 || echo 0)
 LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
+
+logfile=pokemon_link
+. $sysdir/script/log.sh
+program=$(basename "$0" .sh)
+
 rm /tmp/stop_now
 
 ##########
@@ -60,14 +64,14 @@ start_hotspot() {
 start_ftp() {
     check_stop
     if is_running bftpd; then
-        log "GLO::Pokemon_Netplay: FTP already running, killing to rebind"
+        log "FTP already running, killing to rebind"
         bftpd_p=$(ps | grep bftpd | grep -v grep | awk '{for(i=4;i<=NF;++i) printf $i" "}')
         killall -9 bftpd
         killall -9 tcpsvd
         tcpsvd -E 0.0.0.0 21 ftpd -w / &
     else
         tcpsvd -E 0.0.0.0 21 ftpd -w / &
-        log "GLO::Pokemon_Netplay: Starting FTP server"
+        log "Starting FTP server"
     fi
 }
 
@@ -85,10 +89,10 @@ get_cookie_info() {
             core_size=$(stat -c%s "$host_core")
             if [ "$core_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
                 echo "[coresize]: $core_size" >> "$COOKIE_FILE"
-				log "GLO::Pokemon_Netplay: Writing core size"
+				log "Writing core size"
             else
                 echo "[corechksum]: $(cksum "$host_core" | cut -f 1 -d ' ')" >> "$COOKIE_FILE"
-				log "GLO::Pokemon_Netplay: Writing core checksum"
+				log "Writing core checksum"
             fi
         fi
 
@@ -96,14 +100,14 @@ get_cookie_info() {
             rom_size=$(stat -c%s "$host_rom")
             if [ "$rom_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
                 echo "[romsize]: $rom_size" >> "$COOKIE_FILE"
-				log "GLO::Pokemon_Netplay: Writing rom size"
+				log "Writing rom size"
             else
                 echo "[romchksum]: $(cksum "$host_rom" | cut -f 1 -d ' ')" >> "$COOKIE_FILE"
-				log "GLO::Pokemon_Netplay: Writing rom checksum"
+				log "Writing rom checksum"
             fi
         fi
     else
-        log "GLO::Pokemon_Netplay: No cookie found!"
+        log "No cookie found!"
     fi
 }
 
@@ -138,7 +142,7 @@ wait_for_client() {
                 case "$client_ip" in
                     192.168.100.*)
                         log "$sta_list"
-                        log "GLO::Pokemon_Netplay: A client has connected. IP: $client_ip"
+                        log "A client has connected. IP: $client_ip"
                         build_infoPanel_and_log "Hotspot" "A client has connected! \n IP: $client_ip"
                         break
                         ;;
@@ -149,15 +153,15 @@ wait_for_client() {
         sleep 1
         counter=$((counter + 1))
 
-        if [ $counter -ge 20 ]; then
-            log "GLO::Pokemon_Netplay: No client has connected after 20 seconds."
-            build_infoPanel_and_log "Hotspot error" "No client has connected after 20 seconds. Exiting..."
+        if [ $counter -ge 30 ]; then
+            log "No client has connected"
+            build_infoPanel_and_log "Hotspot error" "No client has connected. Exiting..."
             cleanup
         fi
     done
     
     sleep 1
-    log "GLO::Pokemon_Netplay: $client_ip has joined the hotspot"    
+    log "$client_ip has joined the hotspot"    
 }
 
 # Backup the save we're going to use before we do anythign else
@@ -166,7 +170,7 @@ backup_save() {
     save_file_filename_full=$(basename "$host_rom")
     save_file_filename="${save_file_filename_full%.*}"
     save_file_matched=$(find "$save_dir" -name "$save_file_filename.srm" -not -name "*.rtc" -not -path "*/.netplay/*")
-    log "GLO::Pokemon_Netplay: Backing up save file to: $(basename "${save_file_matched}")_bkup"
+    log "Backing up save file to: $(basename "${save_file_matched}")_bkup"
     sleep 1
     cp "$save_file_matched" "${save_file_matched}_bkup"
     sync
@@ -213,7 +217,7 @@ rename_client_save() {
         save_new_name="${save_base_name}_client.srm"
         save_new_path="/mnt/SDCARD/Saves/CurrentProfile/saves/TGB Dual/$save_new_name"
         mv "$client_save_file" "$save_new_path"
-        log "GLO::Pokemon_Netplay: Save file found and processed - old save path:$client_save_file, new save path:$save_new_path "
+        log "Save file found and processed - old save path:$client_save_file, new save path:$save_new_path "
         sync
     else
         build_infoPanel_and_log "Syncing" "Save file not found, cannot continue"
@@ -225,7 +229,7 @@ rename_client_save() {
 download_cookie() {
     check_stop
 	build_infoPanel_and_log "Downloading cookie"  "Retrieving info from client..." 
-    log "GLO::Pokemon_Netplay: Trying to pull the clients game info"
+    log "Trying to pull the clients game info"
     local output_path="/mnt/SDCARD/RetroArch/retroarch.cookie.client"
     curl -o "$output_path" ftp://$client_ip/mnt/SDCARD/RetroArch/retroarch.cookie
 
@@ -268,7 +272,7 @@ read_cookie() {
 				;;
 		esac
 	done <"/mnt/SDCARD/RetroArch/retroarch.cookie.client"
-    log "GLO::Pokemon_Netplay: Cookie file read, we need to use: $client_rom"
+    log "Cookie file read, we need to use: $client_rom"
     
     	#url encode or curl complains
 	core_url=$(echo "$core" | sed 's/ /%20/g')
@@ -282,9 +286,9 @@ handle_roms() {
     client_rom_clone="${client_rom%.*}_client.$rom_extension"
     cp "$client_rom" "$client_rom_clone"
     if [ $? -eq 0 ]; then
-        log "GLO::Pokemon_Netplay: Successfully copied $client_rom to $client_rom_clone"
+        log "Successfully copied $client_rom to $client_rom_clone"
     else
-        log "GLO::Pokemon_Netplay: Failed to copy $client_rom to $client_rom_clone"
+        log "Failed to copy $client_rom to $client_rom_clone"
     fi
 }
 
@@ -308,27 +312,27 @@ change_tgb_dual_opt() {
 
     if [ "$1" = "replace" ]; then
         cp "$tgb_dual_opts" "$tgb_dual_opts_bk"
-        log "GLO::Pokemon_Netplay: The current TGB Opt value is: $current_value"
-        log "GLO::Pokemon_Netplay: Replacing TGB Opt value with 'player 1 only' and audio output to 'Game Boy #1'..."
+        log "The current TGB Opt value is: $current_value"
+        log "Replacing TGB Opt value with 'player 1 only' and audio output to 'Game Boy #1'..."
         
         if [ -z "$current_value" ]; then
-            log "GLO::Pokemon_Netplay: The key 'tgbdual_single_screen_mp' was not found in the file, adding"
+            log "The key 'tgbdual_single_screen_mp' was not found in the file, adding"
             echo -e "\ntgbdual_single_screen_mp = \"player 1 only\"" >> "$tgb_dual_opts"
         else
             sed -i 's|tgbdual_single_screen_mp = "'"$current_value"'"|tgbdual_single_screen_mp = "player 1 only"|' "$tgb_dual_opts"
         fi
 
         if [ -z "$current_audio_value" ]; then
-            log "GLO::Pokemon_Netplay: The key 'tgbdual_audio_output' was not found in the file, adding"
+            log "The key 'tgbdual_audio_output' was not found in the file, adding"
             echo 'tgbdual_audio_output = "Game Boy #1"' >> "$tgb_dual_opts"
         else
            sed -i 's|tgbdual_audio_output = "'"$current_audio_value"'"|tgbdual_audio_output = "Game Boy #1"|' "$tgb_dual_opts"
         fi 
     elif [ "$1" = "restore" ]; then
-        log "GLO::Pokemon_Netplay: Restoring TGB opt original values..."
+        log "Restoring TGB opt original values..."
         mv "$tgb_dual_opts_bk" "$tgb_dual_opts"
     else
-        log "GLO::Pokemon_Netplay: Invalid argument for TGB Opt. Please use 'replace' or 'restore'."
+        log "Invalid argument for TGB Opt. Please use 'replace' or 'restore'."
     fi
 }
 
@@ -336,7 +340,7 @@ change_tgb_dual_opt() {
 start_retroarch() {
     check_stop 
 	build_infoPanel_and_log "RetroArch" "Starting RetroArch..."
-    log "GLO::Pokemon_Netplay: Starting RetroArch loaded with $host_rom and $client_rom_clone"
+    log "Starting RetroArch loaded with $host_rom and $client_rom_clone"
 	cd /mnt/SDCARD/RetroArch
     HOME=/mnt/SDCARD/RetroArch ./retroarch -H -v -L .retroarch/cores/tgbdual_libretro.so --subsystem "gb_link_2p" "$host_rom" "$client_rom_clone"
 }
@@ -361,7 +365,7 @@ wait_for_save_return() {
         sleep 1
         counter=$((counter + 1))
 
-        if [ $counter -ge 20 ]; then
+        if [ $counter -ge 30 ]; then
             build_infoPanel_and_log "Error" "The client didn't ready up, cannot continue..."
             sleep 1
             cleanup
@@ -370,13 +374,12 @@ wait_for_save_return() {
     done
 }
 
-
 # Push the clients save file back
 return_client_save() {
     check_stop
     build_infoPanel_and_log "Syncing" "Returning client save..."
     encoded_path=$(url_encode "${save_new_path/_client/}")
-    log "GLO::Pokemon_Netplay: Returning client save: $save_new_path to ftp://$client_ip/${encoded_path}_rcvd"
+    log "Returning client save: $save_new_path to ftp://$client_ip/${encoded_path}_rcvd"
     curl --connect-timeout 20 -T "$save_new_path" "ftp://$client_ip/${encoded_path}_rcvd"
 
     curl_exit_status=$?
@@ -420,7 +423,7 @@ cleanup() {
     rm "/tmp/stop_now"
     disable_flag hotspotState
 	
-	log "GLO::Pokemon_Netplay: Cleanup done"
+	log "Cleanup done"
  	exit
 }
 
@@ -452,9 +455,9 @@ notify_peer() {
     curl -T "$notify_file" "ftp://$client_ip/$notify_file" > /dev/null 2>&1
     
     if [ $? -eq 0 ]; then
-        log "GLO::Pokemon_Netplay: Successfully transferred $notify_file to ftp://$client_ip/$notify_file"
+        log "Successfully transferred $notify_file to ftp://$client_ip/$notify_file"
     else
-        log "GLO::Pokemon_Netplay: Failed to transfer $notify_file to ftp://$client_ip/$notify_file"
+        log "Failed to transfer $notify_file to ftp://$client_ip/$notify_file"
     fi
 }
 
@@ -510,16 +513,16 @@ do_sync_file() {
 
     if [ -e "$file_path" ]; then
         mv "$file_path" "${file_path}_old"
-        log "GLO::Pokemon_Netplay: Existing $file_type file moved to ${file_path}_old"
+        log "Existing $file_type file moved to ${file_path}_old"
     fi
 
-    log "GLO::Pokemon_Netplay: Starting to download $file_type from $file_url"
+    log "Starting to download $file_type from $file_url"
     curl -o "$file_path" "ftp://$client_ip/$file_url"
 
     if [ $? -eq 0 ]; then
-        log "GLO::Pokemon_Netplay: $file_type download completed"
+        log "$file_type download completed"
     else
-        log "GLO::Pokemon_Netplay: $file_type download failed"
+        log "$file_type download failed"
     fi
 }
 
@@ -538,7 +541,7 @@ sync_file() {
 
 	if [ "$file_type" == "Rom" ]; then
 		if [ -e "$file_path" ]; then
-			log "GLO::Pokemon_Netplay: $file_path exists."
+			log "$file_path exists."
 
 			local file_size=$(stat -c%s "$file_path")
 			local file_chksum_actual
@@ -554,8 +557,6 @@ sync_file() {
                 notify_peer "stop_now"
                 sleep 2
                 cleanup
-			else
-				build_infoPanel_and_log "Rom Check Complete!" "Rom exists and checksums match!"
 			fi
 		else
 			build_infoPanel_and_log "Rom Missing" "The Rom doesn't exist on the client \n Cannot continue."
@@ -565,7 +566,7 @@ sync_file() {
 		fi
 	else
 		if [ -e "$file_path" ]; then
-			log "GLO::Pokemon_Netplay: $file_path exists."
+			log "$file_path exists."
 
 			local file_size=$(stat -c%s "$file_path")
 			local file_chksum_actual
@@ -617,7 +618,7 @@ unpack_rom() {
   if [ -f "$file" ]; then
     7z x "$file" -o"$folder" > /dev/null 2>&1
   else
-    log "GLO::Pokemon_Netplay: File '$file' not found - cannot continue"
+    log "File '$file' not found - cannot continue"
   fi
 }
     
@@ -629,9 +630,7 @@ build_infoPanel_and_log() {
 	local title="$1"
 	local message="$2"
 
-	if [ $LOGGING -eq 1 ]; then
-		echo "$(date) GLO::Pokemon_Netplay: Stage: $title Message: $message" >> $sysdir/logs/easy_netplay.log
-	fi
+	log "Info Panel: \n\tStage: $title\n\tMessage: $message"
 	
 	infoPanel --title "$title" --message "$message" --persistent &
 	touch /tmp/dismiss_info_panel
@@ -639,14 +638,8 @@ build_infoPanel_and_log() {
 	sleep 0.5
 }
 
-log() {
-	if [ $LOGGING -eq 1 ]; then
-    	echo "$(date)" $* >> $sysdir/logs/pokemon_link.log
-	fi
-}
-
 restore_ftp(){
-    log "GLO::Pokemon_Netplay: Restoring original FTP server"
+    log "Restoring original FTP server"
     killall -9 tcpsvd
     if flag_enabled ftpState; then
         if flag_enabled authftpState; then 
