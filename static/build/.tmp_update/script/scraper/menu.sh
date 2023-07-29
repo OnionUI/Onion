@@ -27,16 +27,18 @@ ScraperConfigFile=/mnt/SDCARD/.tmp_update/config/scraper.json
 Menu_Config()
 {
     Option1="Select your scraping sources"
-    Option2="Modify your screenscraper.fr account."
-    Option3="Scraping in background ?"
-    Option4="Back to Main Menu"
+    Option2="Modify your Screenscraper.fr account"
+    Option3="Change the scraped media type"
+    Option4="Toggle background scraping"
+    Option5="Back to Main Menu"
     
-    Mychoice=$( echo -e "$Option1\n$Option2\n$Option3\n$Option4" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "      --== CONFIGURATION MENU ==--" -b "Press A to validate your choice.")
+    Mychoice=$( echo -e "$Option1\n$Option2\n$Option3\n$Option4\n$Option5" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "      --== CONFIGURATION MENU ==--" -b "Press A to validate your choice.")
 
     [ "$Mychoice" = "$Option1" ] && Menu_Config_ScrapingSelection
     [ "$Mychoice" = "$Option2" ] && Menu_Config_ScreenscraperAccount
-    [ "$Mychoice" = "$Option3" ] && Menu_Config_BackgroundScraping
-    [ "$Mychoice" = "Back to Main Menu" ] && Menu_Main
+    [ "$Mychoice" = "$Option3" ] && Menu_Config_MediaType
+    [ "$Mychoice" = "$Option4" ] && Menu_Config_BackgroundScraping    
+    [ "$Mychoice" = "$Option5" ] && Menu_Main
 }
 
 Menu_Config_ScreenscraperAccount()
@@ -147,6 +149,69 @@ Menu_Config_BackgroundScraping()
         Menu_Config
 }
 
+Menu_Config_MediaType()
+{
+    # Check if the configuration file exists
+    if [ ! -f "$ScraperConfigFile" ]; then
+      echo "Error: configuration file not found"
+      read -n 1 -s -r -p "Press A to continue"
+      exit 1
+    fi
+    
+    clear
+    echo -e 
+    echo -e "====================================================\n\n"
+    echo -e "The Media Type affects the style of the graphics \nand images returned in ScreenScraper results.\n\n"
+    echo -e "To prevent other scraping sources from overriding\nthis setting, deactivate them.\n\n"    
+    echo -e "====================================================\n\n\n"
+    read -n 1 -s -r -p "Press A to continue"
+    clear
+    
+    config=$(cat "$ScraperConfigFile")
+    MediaType=$(echo "$config" | jq -r '.MediaType')
+
+    	Mychoice=$( echo -e "Box Art (default)\nScreenshot - Title Screen\nScreenshot - In Game\nWheel\nMarquee\nScreenscraper Mix V1\nScreenscraper Mix V2" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "Media Type ? (currently: $MediaType)" -b "Press A to validate your choice.")
+        # TODO : add a new option to display tail of the log
+
+        # TODO: Create a dictionary so we can support display and system names throughout the utility
+        case "$Mychoice" in
+            "Box Art (default)")
+                MediaType="box-2d"
+                ;;
+            # Issues = Issues retrieving type, should define fallback regions for the type (see: https://github.com/zayamatias/EmulationStation/blob/52706db98a4affb2c1653e6ea3ae767d19f3ca78/es-app/src/scrapers/ScreenScraper.h#L23C11-L23C12)
+            # "Box Art 3D")
+            #     MediaType="box-3d"
+            #     ;;
+            "Screenshot - Title Screen")
+                MediaType="sstitle"
+                ;;
+            "Screenshot - In Game")
+                MediaType="ss"
+                ;;
+            "Wheel")
+                MediaType="wheel"
+                ;;
+            "Marquee")
+                MediaType="screenmarqueesmall"
+                ;;
+            "Screenscraper Mix V1")
+                MediaType="mixrbv1"
+                ;;
+            "Screenscraper Mix V2")
+                MediaType="mixrbv2"
+                ;;
+            *)
+                false
+                ;;                
+        esac
+
+        config=$(cat $ScraperConfigFile)
+        config=$(echo "$config" | jq --arg MediaType "$MediaType" '.MediaType = $MediaType')
+        echo "$config" > $ScraperConfigFile
+        
+        Menu_Config
+}
+
 Menu_Config_ScrapingSelection()
 {
     clear
@@ -218,7 +283,7 @@ Launch_Scraping ()
 	
 	if [ "$(ip r)" = "" ]; then 
 		echo "You must be connected to wifi to use Scraper"
-		sleep 3
+		read -n 1 -s -r -p "Press A to continue"
 		exit
 	fi
 
