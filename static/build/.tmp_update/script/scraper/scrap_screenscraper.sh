@@ -485,25 +485,42 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 			# mixrbv1			RecalBox Mix V1
 			# mixrbv2			RecalBox Mix V2
 
-        # TODO : Restructure queries to enable fallback for regions, media types, etc (see: Sraper.cpp in https://github.com/zayamatias/EmulationStation)
-        
-        # Get the URL of media in this order : world, us, usa, eu and then the first entry available
-        url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "wor") | .url' | head -n 1)
-        if [ -z "$url" ]; then
-          url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "us") | .url' | head -n 1)
-          if [ -z "$url" ]; then
-              url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "usa") | .url' | head -n 1)
-              if [ -z "$url" ]; then
-                  url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "eu") | .url' | head -n 1)
-                  if [ -z "$url" ]; then
-                    url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | .url' | head -n 1)
-                  fi
-              fi
-          fi
-        fi
-        
+		# TODO: Allow the user to set their regional preferences
+		# Get the URL of media in this order : world, us, usa, na, eu, uk, oceania, au, nz, jp and then the first entry available
+		url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "wor") | .url' | head -n 1)
+		if [ -z "$url" ]; then
+			url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "us") | .url' | head -n 1)
+			if [ -z "$url" ]; then
+				url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "usa") | .url' | head -n 1)
+				if [ -z "$url" ]; then
+					url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "na") | .url' | head -n 1)
+					if [ -z "$url" ]; then
+						url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "eu") | .url' | head -n 1)
+						if [ -z "$url" ]; then
+							url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "uk") | .url' | head -n 1)
+							if [ -z "$url" ]; then
+								url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "oceania") | .url' | head -n 1)
+								if [ -z "$url" ]; then
+									url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "au") | .url' | head -n 1)
+									if [ -z "$url" ]; then
+										url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "nz") | .url' | head -n 1)
+											if [ -z "$url" ]; then
+												url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "jp") | .url' | head -n 1)
+											if [ -z "$url" ]; then
+												url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | .url' | head -n 1)
+											fi
+										fi
+									fi
+								fi
+							fi
+						fi
+					fi
+				fi
+			fi
+		fi
         
         # TODO : if default media not found search in other media types
+
     
     
         if [ -z "$url" ]; then
