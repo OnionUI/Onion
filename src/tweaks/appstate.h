@@ -102,6 +102,9 @@ static bool keys_enabled = true;
 static bool reset_menus = false;
 static bool skip_next_change = false;
 
+static bool _disable_confirm = false;
+static SDL_Surface *background_cache = NULL;
+
 static char ip_address_label[STR_MAX];
 
 static void sigHandler(int sig)
