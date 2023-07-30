@@ -1,6 +1,7 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -24,21 +25,27 @@ int main(int argc, char *argv[])
     char theme_path[STR_MAX];
     theme_getPath(theme_path);
 
-    SDL_Surface *video =
-        SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE | SDL_DOUBLEBUF);
-    SDL_Surface *screen =
-        SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
+    SDL_Surface *video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE | SDL_DOUBLEBUF);
+    SDL_Surface *screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
 
     SDL_Surface *background;
-    int bShowBat = 0;
+    bool show_battery = false;
+    bool show_version = true;
 
     if (argc > 1 && strcmp(argv[1], "End_Save") == 0) {
         background = theme_loadImage(theme_path, "extra/Screen_Off_Save");
-        bShowBat = 1;
+        show_battery = true;
     }
     else if (argc > 1 && strcmp(argv[1], "End") == 0) {
         background = theme_loadImage(theme_path, "extra/Screen_Off");
-        bShowBat = 1;
+        show_battery = true;
+    }
+    else if (argc > 1 && strcmp(argv[1], "lowBat") == 0) {
+        background = theme_loadImage(theme_path, "extra/lowBat");
+        if (!background) {
+            show_battery = true;
+        }
+        show_version = false;
     }
     else {
         background = theme_loadImage(theme_path, "extra/bootScreen");
@@ -59,12 +66,14 @@ int main(int argc, char *argv[])
     TTF_Font *font = theme_loadFont(theme_path, theme()->hint.font, 18);
     SDL_Color color = theme()->total.color;
 
-    const char *version_str = file_read("/mnt/SDCARD/.tmp_update/onionVersion/version.txt");
-    if (strlen(version_str) > 0) {
-        SDL_Surface *version = TTF_RenderUTF8_Blended(font, version_str, color);
-        if (version) {
-            SDL_BlitSurface(version, NULL, screen, &(SDL_Rect){20, 450 - version->h / 2});
-            SDL_FreeSurface(version);
+    if (show_version) {
+        const char *version_str = file_read("/mnt/SDCARD/.tmp_update/onionVersion/version.txt");
+        if (strlen(version_str) > 0) {
+            SDL_Surface *version = TTF_RenderUTF8_Blended(font, version_str, color);
+            if (version) {
+                SDL_BlitSurface(version, NULL, screen, &(SDL_Rect){20, 450 - version->h / 2});
+                SDL_FreeSurface(version);
+            }
         }
     }
 
@@ -76,7 +85,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (bShowBat == 1) {
+    if (show_battery) {
         SDL_Surface *battery = theme_batterySurface(battery_getPercentage());
         SDL_Rect battery_rect = {596 - battery->w / 2, 30 - battery->h / 2};
         SDL_BlitSurface(battery, NULL, screen, &battery_rect);
