@@ -385,6 +385,9 @@ install_core() {
         $sysdir/bin/prompt \
         /mnt/SDCARD/miyoo/app/.isExpert
 
+    # Remove old lang files
+    rm -rf /mnt/SDCARD/miyoo/app/lang_backup 2> /dev/null
+
     # Onion core installation / update.
     cd /
     unzip_progress "$CORE_PACKAGE_FILE" "$msg" /mnt/SDCARD
