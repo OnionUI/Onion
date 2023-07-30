@@ -283,7 +283,9 @@ run_installation() {
 
     echo "Finishing up - Get ready!" >> /tmp/.update_msg
 
-    refresh_roms
+    if [ $reset_configs -eq 1 ]; then
+        refresh_roms
+    fi
 
     #########################################################################################
     #                                  Installation is done                                 #
@@ -323,7 +325,7 @@ run_installation() {
         if [ $reset_configs -eq 1 ]; then
             packageManager --confirm
         else
-            packageManager --confirm --reapply
+            packageManager --confirm --auto_update
         fi
         free_mma
 
