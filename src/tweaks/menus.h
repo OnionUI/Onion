@@ -666,13 +666,13 @@ void menu_diagnostics(void *_)
             ListItem diagItem = {
                 .label = "",
                 .payload_ptr = &scripts[i].filename,
-                .action = action_runDiagnosticScript
-            };
+                .action = action_runDiagnosticScript};
 
             const char *prefix = "";
             if (strncmp(scripts[i].filename, "util", 4) == 0) {
                 prefix = "Util: ";
-            } else if (strncmp(scripts[i].filename, "fix", 3) == 0) {
+            }
+            else if (strncmp(scripts[i].filename, "fix", 3) == 0) {
                 prefix = "Fix: ";
             }
 
