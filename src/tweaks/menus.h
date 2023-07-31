@@ -2,13 +2,13 @@
 #define TWEAKS_MENUS_H__
 
 #include <SDL/SDL_image.h>
+#include <dirent.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-#include <dirent.h>
 
 #include "components/list.h"
 #include "system/device_model.h"
@@ -31,14 +31,15 @@
 #define DIAG_MAX_PATH_LENGTH (strlen(DIAG_SCRIPT_PATH) + DIAG_MAX_FILENAME_LENGTH + 2)
 
 typedef struct {
-    char label[DIAG_MAX_LABEL_LENGTH]; 
-    char tooltip[DIAG_MAX_TOOLTIP_LENGTH]; 
+    char label[DIAG_MAX_LABEL_LENGTH];
+    char tooltip[DIAG_MAX_TOOLTIP_LENGTH];
     char filename[DIAG_MAX_FILENAME_LENGTH]; // store the filename/path so we can call it later as the payload
 } DiagMenuEntry;
 
 static int diags_numScripts;
 
-void get_diagnostics_menu_entries(DiagMenuEntry **entries, int *count) {
+void get_diagnostics_menu_entries(DiagMenuEntry **entries, int *count)
+{
     DIR *dir;
     struct dirent *ent;
     *count = 0;
@@ -89,7 +90,8 @@ void get_diagnostics_menu_entries(DiagMenuEntry **entries, int *count) {
             }
         }
         closedir(dir);
-    } else {
+    }
+    else {
         printf("Could not open directory\n");
     }
 }
