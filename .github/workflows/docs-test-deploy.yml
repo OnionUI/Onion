@@ -12,7 +12,9 @@ jobs:
   test-deploy:
     name: Test Docusaurus deployment
     runs-on: ubuntu-latest
-    working-directory: ./website
+    defaults:
+      run:
+        working-directory: 'website'
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
