@@ -24,25 +24,18 @@
 #include "./tools.h"
 #include "./values.h"
 
-#define DIAG_SCRIPT_PATH "/mnt/SDCARD/.tmp_update/script/diagnostics"
-#define DIAG_MAX_LABEL_LENGTH 64
-#define DIAG_MAX_TOOLTIP_LENGTH 128
-#define DIAG_MAX_FILENAME_LENGTH 256
-#define DIAG_MAX_PATH_LENGTH (strlen(DIAG_SCRIPT_PATH) + DIAG_MAX_FILENAME_LENGTH + 2)
-
 typedef struct {
     char label[DIAG_MAX_LABEL_LENGTH];
     char tooltip[DIAG_MAX_TOOLTIP_LENGTH];
     char filename[DIAG_MAX_FILENAME_LENGTH]; // store the filename/path so we can call it later as the payload
-} DiagMenuEntry;
+} diagScripts;
 
 static int diags_numScripts;
 
-void get_diagnostics_menu_entries(DiagMenuEntry **entries, int *count)
+void diags_getEntries(diagScripts **scripts)
 {
     DIR *dir;
     struct dirent *ent;
-    *count = 0;
     diags_numScripts = 0;
 
     if ((dir = opendir(DIAG_SCRIPT_PATH)) != NULL) {
@@ -57,7 +50,7 @@ void get_diagnostics_menu_entries(DiagMenuEntry **entries, int *count)
             FILE *file = fopen(path, "r");
             if (file != NULL) {
                 char line[STR_MAX];
-                DiagMenuEntry entry = {0};
+                diagScripts entry = {0};
 
                 while (fgets(line, sizeof(line), file)) {
                     line[strcspn(line, "\n")] = 0;
@@ -75,16 +68,16 @@ void get_diagnostics_menu_entries(DiagMenuEntry **entries, int *count)
 
                 fclose(file);
 
-                if (entry.label[0] && entry.tooltip[0]) {
+                 if (entry.label[0] && entry.tooltip[0]) {
                     sprintf(entry.filename, "%s", ent->d_name);
-                    (*count)++;
-                    *entries = realloc(*entries, (*count) * sizeof(DiagMenuEntry));
-                    if (*entries == NULL) {
+                    diags_numScripts++;
+                    *scripts = realloc(*scripts, diags_numScripts * sizeof(diagScripts));
+                    if (*scripts == NULL) {
                         printf("Memory allocation failed...\n");
                         return;
                     }
 
-                    (*entries)[*count - 1] = entry;
+                    (*scripts)[diags_numScripts - 1] = entry;
                     diags_numScripts++;
                 }
             }
@@ -94,6 +87,31 @@ void get_diagnostics_menu_entries(DiagMenuEntry **entries, int *count)
     else {
         printf("Could not open directory\n");
     }
+}
+
+void diags_freeEntries(diagScripts *scripts)
+{
+    if (scripts != NULL) {
+        free(scripts);
+        scripts = NULL;
+    }
+}
+
+char* prase_Newlines(const char *input) { // helper function to parse /n in the scripts 
+    char *output = malloc(strlen(input) + 1);
+    if (!output) return NULL;
+
+    int j = 0;
+    for (int i = 0; input[i] != '\0'; i++) {
+        if (input[i] == '\\' && input[i + 1] == 'n') {
+            output[j++] = '\n';
+            i++;
+        } else {
+            output[j++] = input[i];
+        }
+    }
+    output[j] = '\0';
+    return output;
 }
 
 void menu_systemStartup(void *_)
@@ -631,12 +649,11 @@ void menu_resetSettings(void *_)
 void menu_diagnostics(void *_)
 {
     if (!_menu_diagnostics._created) {
-        DiagMenuEntry *entries = NULL;
-        int count = 0;
+        diagScripts *scripts = NULL;
         
-        get_diagnostics_menu_entries(&entries, &count);
+        diags_getEntries(&scripts);
         
-        _menu_diagnostics = list_createWithTitle(1 + count, LIST_SMALL, "Diagnostics");
+        _menu_diagnostics = list_createWithTitle(1 + diags_numScripts, LIST_SMALL, "Diagnostics");
         list_addItem(&_menu_diagnostics,
                      (ListItem){
                          .label = "Enable logging",
@@ -644,15 +661,18 @@ void menu_diagnostics(void *_)
                          .value = (int)settings.enable_logging,
                          .action = action_setEnableLogging});
 
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < diags_numScripts; i++) {
             ListItem diagItem = {
+                .label = "",
                 .item_type = ACTION,
-                .payload_ptr = entries[i].filename // payload for the item
+                .payload_ptr = &scripts[i].filename,
+                .action = action_runDiagnosticScript
             };
-            snprintf(diagItem.label, DIAG_MAX_LABEL_LENGTH - 1, "Script: %.54s", entries[i].label);
-            list_addItem(&_menu_diagnostics, diagItem);
+            snprintf(diagItem.label, DIAG_MAX_LABEL_LENGTH - 1, "Script: %.54s", scripts[i].label);
+            char *parsed_Tooltip = prase_Newlines(scripts[i].tooltip);
+            list_addItemWithInfoNote(&_menu_diagnostics, diagItem, parsed_Tooltip);
+            free(parsed_Tooltip);
         }
-        
     }
     
     menu_stack[++menu_level] = &_menu_diagnostics;

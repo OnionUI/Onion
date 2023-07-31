@@ -16,6 +16,12 @@
 #include "./appstate.h"
 #include "./values.h"
 
+#define DIAG_SCRIPT_PATH "/mnt/SDCARD/.tmp_update/script/diagnostics"
+#define DIAG_MAX_LABEL_LENGTH 64
+#define DIAG_MAX_TOOLTIP_LENGTH 128
+#define DIAG_MAX_FILENAME_LENGTH 256
+#define DIAG_MAX_PATH_LENGTH (strlen(DIAG_SCRIPT_PATH) + DIAG_MAX_FILENAME_LENGTH + 2)
+
 void action_setAppShortcut(void *pt)
 {
     ListItem *item = (ListItem *)pt;
@@ -90,6 +96,23 @@ void action_setEnableLogging(void *pt)
     char new_value[22];
     sprintf(new_value, "log_to_file = %s", settings.enable_logging ? "\"true\"" : "\"false\"");
     file_changeKeyValue(RETROARCH_CONFIG, "log_to_file =", new_value);
+}
+
+void action_runDiagnosticScript(void *payload_ptr)
+{
+    char *filename = (char *)payload_ptr;
+    char script_path[DIAG_MAX_PATH_LENGTH];
+    snprintf(script_path, sizeof(script_path), "%s/%s", DIAG_SCRIPT_PATH, filename);
+
+    FILE *logfile = fopen("/mnt/SDCARD/commands.log", "a");
+    if (logfile) {
+        fprintf(logfile, "Running command: %s\n", script_path);
+        fclose(logfile);
+    } else {
+        printf("Error: Could not open log file for writing\n");
+    }
+
+    system(script_path);
 }
 
 void action_setMenuButtonHaptics(void *pt)
