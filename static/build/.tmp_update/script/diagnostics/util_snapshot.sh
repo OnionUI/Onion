@@ -1,7 +1,7 @@
 ## Add your menulabel and tooltip for tweaks below, don't put them at the top of the file.
 
 menulabel="System log snapshot"
-tooltip="Take a snapshot of the \n system logs and export them \n to SD:logdump.7z"
+tooltip="Take a snapshot of the system logs \n and export them to SD:logdump.7z"
 
 # Tweaks diags script to pull a system snapshot
 

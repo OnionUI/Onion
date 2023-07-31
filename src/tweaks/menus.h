@@ -675,7 +675,6 @@ void menu_diagnostics(void *_)
 }
 
 
-
 void menu_advanced(void *_)
 {
     if (!_menu_advanced._created) {
