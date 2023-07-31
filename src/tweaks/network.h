@@ -573,9 +573,9 @@ void menu_network(void *_)
                                  "Samba is a file sharing protocol that provides\n"
                                  "integrated sharing of files and directories\n"
                                  "between your Miyoo Mini Plus and your PC.\n"
-                                 "It enables easy access, allowing you to share,\n"
-                                 "access, and modify files as if they were stored\n"
-                                 "locally on your PC.");
+                                 " \n"
+                                 "Username: onion\n"
+                                 "Password: onion\n");
         list_addItemWithInfoNote(&_menu_network,
                                  (ListItem){
                                      .label = "HTTP: Web-based file sync...",
