@@ -137,7 +137,8 @@ get_release_info() {
 		"${BLUE}==================================${NC}\n"
 	echo -ne "\n\n" \
 		"${BLUE}======== Online Version  =========${NC}\n" \
-		" Version: $Release_FullVersion  (Channel: $channel)\n" \
+		" Version: $Release_FullVersion \n" \
+		" Channel: $channel \n" \
 		" Size:    $Release_size \n" \
 		" URL:     $Release_url \n" \
 		"${BLUE}==================================${NC}\n\n\n"
@@ -163,7 +164,7 @@ download_update() {
 	clear
 	if [ "$Mychoice" = "Yes" ]; then
 
-		echo -ne "\n${BLUE}=================== CHECKDISK ===================${NC}\n"
+		echo -ne "\n${BLUE}================== CHECKDISK ==================${NC}\n"
 		/mnt/SDCARD/.tmp_update/script/stop_audioserver.sh > nul 2> nul # we need a maximum of memory available to run fsck.fat
 		/mnt/SDCARD/.tmp_update/bin/freemma > NUL
 		echo -ne "\n" \
@@ -180,7 +181,7 @@ download_update() {
 		sync
 		wget --no-check-certificate $Release_url -O "$sysdir/download/$Release_Version.zip"
 		echo -ne "\n\n" \
-			"${GREEN}=================== Download done ===================${NC}\n"
+			"${GREEN}================== Download done ==================${NC}\n"
 		sync
 		sleep 2
 	else

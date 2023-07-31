@@ -239,7 +239,7 @@ bool checkAppInstalled(const char *basePath, int base_len, int level,
     return is_installed;
 }
 
-void loadResources(bool reapply_all)
+void loadResources(bool auto_update)
 {
     DIR *dp;
     struct dirent *ep;
@@ -265,7 +265,7 @@ void loadResources(bool reapply_all)
                 bool is_installed =
                     checkAppInstalled(basePath, strlen(basePath), 0, false);
                 bool is_complete =
-                    !reapply_all && is_installed
+                    !auto_update && is_installed
                         ? checkAppInstalled(basePath, strlen(basePath), 0, true)
                         : false;
 
@@ -726,13 +726,13 @@ void callPackageInstaller(const char *data_path, const char *package_name,
 int main(int argc, char *argv[])
 {
     bool show_confirm = false;
-    bool reapply_all = false;
+    bool auto_update = false;
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--confirm") == 0)
             show_confirm = true;
-        else if (strcmp(argv[i], "--reapply") == 0)
-            reapply_all = true;
+        else if (strcmp(argv[i], "--auto_update") == 0)
+            auto_update = true;
         else {
             printf("unknown argument: %s\n", argv[i]);
             return EXIT_FAILURE;
@@ -763,16 +763,15 @@ int main(int argc, char *argv[])
     font25 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 25);
     font35 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 35);
 
-    SDL_Surface *loadingScreen = IMG_Load("res/loading.png");
-    SDL_BlitSurface(loadingScreen, NULL, screen, NULL);
-    SDL_BlitSurface(screen, NULL, video, NULL);
-    SDL_Flip(video);
-    SDL_FreeSurface(loadingScreen);
+    if (!auto_update) {
+        SDL_Surface *loadingScreen = IMG_Load("res/loading.png");
+        SDL_BlitSurface(loadingScreen, NULL, screen, NULL);
+        SDL_BlitSurface(screen, NULL, video, NULL);
+        SDL_Flip(video);
+        SDL_FreeSurface(loadingScreen);
+    }
 
-    loadResources(reapply_all);
-
-    if (reapply_all)
-        apply_singleIcon("/mnt/SDCARD/App/PackageManager/config.json");
+    loadResources(auto_update);
 
     SDL_Rect rectSelection = {14, 84, 593, 49};
 
@@ -782,8 +781,14 @@ int main(int argc, char *argv[])
 
     bool apply_changes = false;
 
-    bool show_reinstall = reapply_all && totalInstalls() > 0;
+    bool show_reinstall = auto_update && totalInstalls() > 0;
     SDL_Surface *reinstall_surface = IMG_Load("res/start_alt.png");
+
+    if (auto_update) {
+        apply_singleIcon("/mnt/SDCARD/App/PackageManager/config.json");
+        quit = true;
+        apply_changes = true;
+    }
 
     while (!quit) {
         if (updateKeystate(keystate, &quit, true, NULL)) {
@@ -899,7 +904,7 @@ int main(int argc, char *argv[])
                     if (show_confirm) {
                         if (apply_changes) {
                             if (changesTotal() > 0 ||
-                                (reapply_all &&
+                                (auto_update &&
                                  package_installed_count[0] > 0) ||
                                 confirmDoNothing(keystate))
                                 quit = true;
@@ -1046,8 +1051,7 @@ int main(int argc, char *argv[])
         // installation
         char cmd[STR_MAX * 2 + 100];
 
-        SDL_Surface *surfaceBackground =
-            IMG_Load("/mnt/SDCARD/.tmp_update/res/waitingBG.png");
+        SDL_Surface *surfaceBackground = IMG_Load("/mnt/SDCARD/.tmp_update/res/waitingBG.png");
         SDL_Surface *surfaceMessage;
 
         for (int nT = 0; nT < tab_count; nT++) {
@@ -1062,7 +1066,7 @@ int main(int argc, char *argv[])
                 Package *package = &packages[nT][nLayer];
 
                 bool should_apply =
-                    reapply_all || (package->installed && !package->complete) ||
+                    auto_update || (package->installed && !package->complete) ||
                     package->changed;
                 bool should_install = package->installed != package->changed ||
                                       (package->installed &&
@@ -1084,8 +1088,7 @@ int main(int argc, char *argv[])
                     SDL_Flip(video);
 
                     sprintf(cmd,
-                            "/mnt/SDCARD/.tmp_update/script/pacman_install.sh "
-                            "\"%s\" \"%s\"",
+                            "/mnt/SDCARD/.tmp_update/script/pacman_install.sh \"%s\" \"%s\"",
                             data_path, package->name);
                     system(cmd);
                     sync();
@@ -1098,8 +1101,7 @@ int main(int argc, char *argv[])
 
                     // app removal
                     char pathAppUninstall[1000];
-                    sprintf(pathAppUninstall, "%s/%s", data_path,
-                            package->name);
+                    sprintf(pathAppUninstall, "%s/%s", data_path, package->name);
                     appUninstall(pathAppUninstall, strlen(pathAppUninstall));
                 }
             }
