@@ -8,6 +8,7 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <dirent.h>
 
 #include "components/list.h"
 #include "system/device_model.h"
@@ -22,6 +23,76 @@
 #include "./reset.h"
 #include "./tools.h"
 #include "./values.h"
+
+#define DIAG_SCRIPT_PATH "/mnt/SDCARD/.tmp_update/script/diagnostics"
+#define DIAG_MAX_LABEL_LENGTH 48
+#define DIAG_MAX_TOOLTIP_LENGTH 128
+#define DIAG_MAX_FILENAME_LENGTH 128
+#define DIAG_MAX_PATH_LENGTH (strlen(DIAG_SCRIPT_PATH) + DIAG_MAX_FILENAME_LENGTH + 2)
+
+typedef struct {
+    char label[DIAG_MAX_LABEL_LENGTH]; 
+    char tooltip[DIAG_MAX_TOOLTIP_LENGTH]; 
+    char filename[DIAG_MAX_FILENAME_LENGTH]; // store the filename/path so we can call it later as the payload
+} DiagMenuEntry;
+
+static int diags_numScripts;
+
+void get_diagnostics_menu_entries(DiagMenuEntry **entries, int *count) {
+    DIR *dir;
+    struct dirent *ent;
+    *count = 0;
+    diags_numScripts = 0;
+
+    if ((dir = opendir(DIAG_SCRIPT_PATH)) != NULL) {
+        while ((ent = readdir(dir)) != NULL) {
+            char path[DIAG_MAX_PATH_LENGTH];
+            snprintf(path, sizeof(path), "%s/%s", DIAG_SCRIPT_PATH, ent->d_name);
+
+            if (ent->d_type != DT_REG) {
+                continue;
+            }
+
+            FILE *file = fopen(path, "r");
+            if (file != NULL) {
+                char line[STR_MAX];
+                DiagMenuEntry entry = {0};
+
+                while (fgets(line, sizeof(line), file)) {
+                    line[strcspn(line, "\n")] = 0;
+                    if (strcmp(line, "# IGNORE") == 0) { // looks for # IGNORE in the scripts
+                        break;
+                    }
+
+                    if (sscanf(line, "menulabel=\"%255[^\"]\"", entry.label) == 1) { // looks for menulabel="" in the scripts to label the tweaks menu item
+                        continue;
+                    }
+                    if (sscanf(line, "tooltip=\"%255[^\"]\"", entry.tooltip) == 1) { // looks for tooltip="" in the scripts to label the tweaks tooltip text
+                        continue;
+                    }
+                }
+
+                fclose(file);
+
+                if (entry.label[0] && entry.tooltip[0]) {
+                    sprintf(entry.filename, "%s", ent->d_name);
+                    (*count)++;
+                    *entries = realloc(*entries, (*count) * sizeof(DiagMenuEntry));
+                    if (*entries == NULL) {
+                        printf("Memory allocation failed...\n");
+                        return;
+                    }
+
+                    (*entries)[*count - 1] = entry;
+                    diags_numScripts++;
+                }
+            }
+        }
+        closedir(dir);
+    } else {
+        printf("Could not open directory\n");
+    }
+}
 
 void menu_systemStartup(void *_)
 {
