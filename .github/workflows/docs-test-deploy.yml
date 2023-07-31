@@ -1,4 +1,4 @@
-name: Test deployment
+name: Test Docusaurus deployment
 
 on:
   pull_request:
@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'website/'
+  workflow_dispatch:
 
 jobs:
   test-deploy:
