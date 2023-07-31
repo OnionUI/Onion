@@ -372,6 +372,12 @@ launch_game() {
         cd $sysdir
         playActivity stop "$rompath"
 
+        if [ -f /tmp/.lowBat ]; then
+            bootScreen lowBat
+            sleep 3
+            touch /tmp/.offOrder
+        fi
+
         # Reset networking if needed
         if [ ! -f "$sysdir/config/.keepServicesAlive" ]; then
             for service in smbd http ssh ftp telnet; do
