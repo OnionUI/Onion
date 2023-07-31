@@ -81,7 +81,8 @@ void diags_getEntries(void)
             }
         }
         closedir(dir);
-    } else {
+    }
+    else {
         printf("Could not open directory\n");
     }
 }
@@ -94,16 +95,19 @@ void diags_freeEntries(void)
     }
 }
 
-char* parse_newLines(const char *input) { // helper function to parse /n in the scripts 
+char *parse_newLines(const char *input)
+{ // helper function to parse /n in the scripts
     char *output = malloc(strlen(input) + 1);
-    if (!output) return NULL;
+    if (!output)
+        return NULL;
 
     int j = 0;
     for (int i = 0; input[i] != '\0'; i++) {
         if (input[i] == '\\' && input[i + 1] == 'n') {
             output[j++] = '\n';
             i++;
-        } else {
+        }
+        else {
             output[j++] = input[i];
         }
     }
@@ -661,8 +665,7 @@ void menu_diagnostics(void *_)
                 .label = "",
                 .item_type = ACTION,
                 .payload_ptr = &scripts[i].filename,
-                .action = action_runDiagnosticScript
-            };
+                .action = action_runDiagnosticScript};
             snprintf(diagItem.label, DIAG_MAX_LABEL_LENGTH - 1, "Script: %.54s", scripts[i].label);
             char *parsed_Tooltip = parse_newLines(scripts[i].tooltip);
             list_addItemWithInfoNote(&_menu_diagnostics, diagItem, parsed_Tooltip);
@@ -673,8 +676,6 @@ void menu_diagnostics(void *_)
     menu_stack[++menu_level] = &_menu_diagnostics;
     header_changed = true;
 }
-
-
 
 void menu_advanced(void *_)
 {
