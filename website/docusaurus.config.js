@@ -9,6 +9,7 @@ const config = {
   title: 'Onion',
   tagline: 'OS overhaul for Miyoo Mini',
   favicon: 'img/favicon.png',
+  trailingSlash: false,
 
   // Set the production url of your site here
   url: 'https://your-docusaurus-test-site.com',
@@ -19,7 +20,7 @@ const config = {
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'OnionUI', // Usually your GitHub org/user name.
-  projectName: 'Onion', // Usually your repo name.
+  projectName: 'onionui.github.io', // Usually your repo name.
 
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
