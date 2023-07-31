@@ -31,8 +31,9 @@ typedef struct {
 } diagScripts;
 
 static int diags_numScripts;
+static diagScripts *scripts = NULL;
 
-void diags_getEntries(diagScripts **scripts)
+void diags_getEntries(void)
 {
     DIR *dir;
     struct dirent *ent;
@@ -54,42 +55,38 @@ void diags_getEntries(diagScripts **scripts)
 
                 while (fgets(line, sizeof(line), file)) {
                     line[strcspn(line, "\n")] = 0;
-                    if (strcmp(line, "# IGNORE") == 0) { // looks for # IGNORE in the scripts
+                    if (strcmp(line, "# IGNORE") == 0) {
                         break;
                     }
-
-                    if (sscanf(line, "menulabel=\"%255[^\"]\"", entry.label) == 1) { // looks for menulabel="" in the scripts to label the tweaks menu item
+                    if (sscanf(line, "menulabel=\"%255[^\"]\"", entry.label) == 1) {
                         continue;
                     }
-                    if (sscanf(line, "tooltip=\"%255[^\"]\"", entry.tooltip) == 1) { // looks for tooltip="" in the scripts to label the tweaks tooltip text
+                    if (sscanf(line, "tooltip=\"%255[^\"]\"", entry.tooltip) == 1) {
                         continue;
                     }
                 }
 
                 fclose(file);
 
-                 if (entry.label[0] && entry.tooltip[0]) {
+                if (entry.label[0] && entry.tooltip[0]) {
                     sprintf(entry.filename, "%s", ent->d_name);
                     diags_numScripts++;
-                    *scripts = realloc(*scripts, diags_numScripts * sizeof(diagScripts));
-                    if (*scripts == NULL) {
+                    scripts = realloc(scripts, diags_numScripts * sizeof(diagScripts));
+                    if (scripts == NULL) {
                         printf("Memory allocation failed...\n");
                         return;
                     }
-
-                    (*scripts)[diags_numScripts - 1] = entry;
-                    diags_numScripts++;
+                    scripts[diags_numScripts - 1] = entry;
                 }
             }
         }
         closedir(dir);
-    }
-    else {
+    } else {
         printf("Could not open directory\n");
     }
 }
 
-void diags_freeEntries(diagScripts *scripts)
+void diags_freeEntries(void)
 {
     if (scripts != NULL) {
         free(scripts);
@@ -97,7 +94,7 @@ void diags_freeEntries(diagScripts *scripts)
     }
 }
 
-char* prase_Newlines(const char *input) { // helper function to parse /n in the scripts 
+char* parse_newLines(const char *input) { // helper function to parse /n in the scripts 
     char *output = malloc(strlen(input) + 1);
     if (!output) return NULL;
 
@@ -649,10 +646,8 @@ void menu_resetSettings(void *_)
 void menu_diagnostics(void *_)
 {
     if (!_menu_diagnostics._created) {
-        diagScripts *scripts = NULL;
-        
-        diags_getEntries(&scripts);
-        
+        diags_getEntries();
+
         _menu_diagnostics = list_createWithTitle(1 + diags_numScripts, LIST_SMALL, "Diagnostics");
         list_addItem(&_menu_diagnostics,
                      (ListItem){
@@ -669,15 +664,16 @@ void menu_diagnostics(void *_)
                 .action = action_runDiagnosticScript
             };
             snprintf(diagItem.label, DIAG_MAX_LABEL_LENGTH - 1, "Script: %.54s", scripts[i].label);
-            char *parsed_Tooltip = prase_Newlines(scripts[i].tooltip);
+            char *parsed_Tooltip = parse_newLines(scripts[i].tooltip);
             list_addItemWithInfoNote(&_menu_diagnostics, diagItem, parsed_Tooltip);
             free(parsed_Tooltip);
         }
     }
-    
+
     menu_stack[++menu_level] = &_menu_diagnostics;
     header_changed = true;
 }
+
 
 
 void menu_advanced(void *_)
