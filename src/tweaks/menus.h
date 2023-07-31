@@ -33,7 +33,8 @@ typedef struct {
 static int diags_numScripts;
 static diagScripts *scripts = NULL;
 
-void diags_getEntries(void) {
+void diags_getEntries(void)
+{
     DIR *dir;
     struct dirent *ent;
     diags_numScripts = 0;
