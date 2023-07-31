@@ -663,10 +663,19 @@ void menu_diagnostics(void *_)
         for (int i = 0; i < diags_numScripts; i++) {
             ListItem diagItem = {
                 .label = "",
-                .item_type = ACTION,
                 .payload_ptr = &scripts[i].filename,
-                .action = action_runDiagnosticScript};
-            snprintf(diagItem.label, DIAG_MAX_LABEL_LENGTH - 1, "Script: %.54s", scripts[i].label);
+                .action = action_runDiagnosticScript
+            };
+
+            const char *prefix = "";
+            if (strncmp(scripts[i].filename, "util", 4) == 0) {
+                prefix = "Util:";
+            } else if (strncmp(scripts[i].filename, "fix", 3) == 0) {
+                prefix = "Fix:";
+            }
+
+            snprintf(diagItem.label, DIAG_MAX_LABEL_LENGTH - 1, "%s%.54s", prefix, scripts[i].label);
+
             char *parsed_Tooltip = parse_newLines(scripts[i].tooltip);
             list_addItemWithInfoNote(&_menu_diagnostics, diagItem, parsed_Tooltip);
             free(parsed_Tooltip);
