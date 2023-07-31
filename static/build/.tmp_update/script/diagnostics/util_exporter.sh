@@ -1,4 +1,4 @@
-## Add your menulabel and tooltip for tweaks below, don't put them at the top of the file - Add # Ignore for the file to be ignored (If it's a util only such as export)
+# Add # Ignore for the file to be ignored (If it's a util only such as export)
 
 # IGNORE
 

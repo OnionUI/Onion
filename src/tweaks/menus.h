@@ -25,16 +25,15 @@
 #include "./values.h"
 
 typedef struct {
+    char filename[DIAG_MAX_FILENAME_LENGTH]; // store the filename/path so we can call it later as the payload
     char label[DIAG_MAX_LABEL_LENGTH];
     char tooltip[DIAG_MAX_TOOLTIP_LENGTH];
-    char filename[DIAG_MAX_FILENAME_LENGTH]; // store the filename/path so we can call it later as the payload
 } diagScripts;
 
 static int diags_numScripts;
 static diagScripts *scripts = NULL;
 
-void diags_getEntries(void)
-{
+void diags_getEntries(void) {
     DIR *dir;
     struct dirent *ent;
     diags_numScripts = 0;
@@ -54,14 +53,16 @@ void diags_getEntries(void)
                 diagScripts entry = {0};
 
                 while (fgets(line, sizeof(line), file)) {
-                    line[strcspn(line, "\n")] = 0;
+                    line[strcspn(line, "\n")] = 0; // remove newline
                     if (strcmp(line, "# IGNORE") == 0) {
                         break;
                     }
-                    if (sscanf(line, "menulabel=\"%255[^\"]\"", entry.label) == 1) {
+                    if (sscanf(line, "menulabel=\"%64[^\"]\"", entry.label) == 1) {
+                        entry.label[DIAG_MAX_LABEL_LENGTH - 1] = '\0';
                         continue;
                     }
-                    if (sscanf(line, "tooltip=\"%255[^\"]\"", entry.tooltip) == 1) {
+                    if (sscanf(line, "tooltip=\"%192[^\"]\"", entry.tooltip) == 1) {
+                        entry.tooltip[DIAG_MAX_TOOLTIP_LENGTH - 1] = '\0';
                         continue;
                     }
                 }
@@ -69,7 +70,7 @@ void diags_getEntries(void)
                 fclose(file);
 
                 if (entry.label[0] && entry.tooltip[0]) {
-                    sprintf(entry.filename, "%s", ent->d_name);
+                    snprintf(entry.filename, sizeof(entry.filename), "%s", ent->d_name);
                     diags_numScripts++;
                     scripts = realloc(scripts, diags_numScripts * sizeof(diagScripts));
                     if (scripts == NULL) {
@@ -86,6 +87,7 @@ void diags_getEntries(void)
         printf("Could not open directory\n");
     }
 }
+
 
 void diags_freeEntries(void)
 {
