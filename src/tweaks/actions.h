@@ -108,7 +108,8 @@ void action_runDiagnosticScript(void *payload_ptr)
     if (logfile) {
         fprintf(logfile, "Running command: %s\n", script_path);
         fclose(logfile);
-    } else {
+    }
+    else {
         printf("Error: Could not open log file for writing\n");
     }
 
