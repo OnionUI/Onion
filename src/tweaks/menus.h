@@ -25,9 +25,9 @@
 #include "./values.h"
 
 #define DIAG_SCRIPT_PATH "/mnt/SDCARD/.tmp_update/script/diagnostics"
-#define DIAG_MAX_LABEL_LENGTH 48
+#define DIAG_MAX_LABEL_LENGTH 64
 #define DIAG_MAX_TOOLTIP_LENGTH 128
-#define DIAG_MAX_FILENAME_LENGTH 128
+#define DIAG_MAX_FILENAME_LENGTH 256
 #define DIAG_MAX_PATH_LENGTH (strlen(DIAG_SCRIPT_PATH) + DIAG_MAX_FILENAME_LENGTH + 2)
 
 typedef struct {
@@ -631,21 +631,34 @@ void menu_resetSettings(void *_)
 void menu_diagnostics(void *_)
 {
     if (!_menu_diagnostics._created) {
-        _menu_diagnostics = list_createWithTitle(1, LIST_SMALL, "Diagnostics");
-        list_addItemWithInfoNote(&_menu_diagnostics,
-                                 (ListItem){
-                                     .label = "Enable logging",
-                                     .item_type = TOGGLE,
-                                     .value = (int)settings.enable_logging,
-                                     .action = action_setEnableLogging},
-                                 "Enables logging to files for most of\n"
-                                 "the Onion system.\n"
-                                 " \n"
-                                 "Find the logs at 'SD:/.tmp_update/logs'.");
+        DiagMenuEntry *entries = NULL;
+        int count = 0;
+        
+        get_diagnostics_menu_entries(&entries, &count);
+        
+        _menu_diagnostics = list_createWithTitle(1 + count, LIST_SMALL, "Diagnostics");
+        list_addItem(&_menu_diagnostics,
+                     (ListItem){
+                         .label = "Enable logging",
+                         .item_type = TOGGLE,
+                         .value = (int)settings.enable_logging,
+                         .action = action_setEnableLogging});
+
+        for (int i = 0; i < count; i++) {
+            ListItem diagItem = {
+                .item_type = ACTION,
+                .payload_ptr = entries[i].filename // payload for the item
+            };
+            snprintf(diagItem.label, DIAG_MAX_LABEL_LENGTH - 1, "Script: %.54s", entries[i].label);
+            list_addItem(&_menu_diagnostics, diagItem);
+        }
+        
     }
+    
     menu_stack[++menu_level] = &_menu_diagnostics;
     header_changed = true;
 }
+
 
 void menu_advanced(void *_)
 {
