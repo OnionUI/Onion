@@ -1,4 +1,4 @@
-name: Test Docusaurus deployment
+name: Test Docs deployment
 
 on:
   pull_request:
