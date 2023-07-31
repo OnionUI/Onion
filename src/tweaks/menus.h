@@ -88,7 +88,6 @@ void diags_getEntries(void) {
     }
 }
 
-
 void diags_freeEntries(void)
 {
     if (scripts != NULL) {
