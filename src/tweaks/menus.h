@@ -668,10 +668,10 @@ void menu_diagnostics(void *_)
 
             const char *prefix = "";
             if (strncmp(scripts[i].filename, "util", 4) == 0) {
-                prefix = "Util:";
+                prefix = "Util: ";
             }
             else if (strncmp(scripts[i].filename, "fix", 3) == 0) {
-                prefix = "Fix:";
+                prefix = "Fix: ";
             }
 
             snprintf(diagItem.label, DIAG_MAX_LABEL_LENGTH - 1, "%s%.54s", prefix, scripts[i].label);
