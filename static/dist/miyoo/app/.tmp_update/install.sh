@@ -283,7 +283,9 @@ run_installation() {
 
     echo "Finishing up - Get ready!" >> /tmp/.update_msg
 
-    refresh_roms
+    if [ $reset_configs -eq 1 ]; then
+        refresh_roms
+    fi
 
     #########################################################################################
     #                                  Installation is done                                 #
@@ -323,7 +325,7 @@ run_installation() {
         if [ $reset_configs -eq 1 ]; then
             packageManager --confirm
         else
-            packageManager --confirm --reapply
+            packageManager --confirm --auto_update
         fi
         free_mma
 
@@ -384,6 +386,9 @@ install_core() {
         $sysdir/bin/batmon \
         $sysdir/bin/prompt \
         /mnt/SDCARD/miyoo/app/.isExpert
+
+    # Remove old lang files
+    rm -rf /mnt/SDCARD/miyoo/app/lang_backup 2> /dev/null
 
     # Onion core installation / update.
     cd /
