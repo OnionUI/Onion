@@ -2,8 +2,7 @@ name: Test Docusaurus deployment
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
     paths:
       - 'website/'
   workflow_dispatch:
