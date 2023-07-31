@@ -12,6 +12,7 @@ jobs:
   test-deploy:
     name: Test Docusaurus deployment
     runs-on: ubuntu-latest
+    working-directory: ./website
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -19,8 +20,6 @@ jobs:
           node-version: 18
           cache: yarn
       - name: Install dependencies
-        working-directory: ./website
         run: yarn install --frozen-lockfile
       - name: Test build website
-        working-directory: ./website
         run: yarn build
