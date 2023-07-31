@@ -68,7 +68,7 @@ void diags_getEntries(diagScripts **scripts)
 
                 fclose(file);
 
-                 if (entry.label[0] && entry.tooltip[0]) {
+                if (entry.label[0] && entry.tooltip[0]) {
                     sprintf(entry.filename, "%s", ent->d_name);
                     diags_numScripts++;
                     *scripts = realloc(*scripts, diags_numScripts * sizeof(diagScripts));
@@ -97,16 +97,19 @@ void diags_freeEntries(diagScripts *scripts)
     }
 }
 
-char* prase_Newlines(const char *input) { // helper function to parse /n in the scripts 
+char *prase_Newlines(const char *input)
+{ // helper function to parse /n in the scripts
     char *output = malloc(strlen(input) + 1);
-    if (!output) return NULL;
+    if (!output)
+        return NULL;
 
     int j = 0;
     for (int i = 0; input[i] != '\0'; i++) {
         if (input[i] == '\\' && input[i + 1] == 'n') {
             output[j++] = '\n';
             i++;
-        } else {
+        }
+        else {
             output[j++] = input[i];
         }
     }
@@ -650,9 +653,9 @@ void menu_diagnostics(void *_)
 {
     if (!_menu_diagnostics._created) {
         diagScripts *scripts = NULL;
-        
+
         diags_getEntries(&scripts);
-        
+
         _menu_diagnostics = list_createWithTitle(1 + diags_numScripts, LIST_SMALL, "Diagnostics");
         list_addItem(&_menu_diagnostics,
                      (ListItem){
@@ -666,19 +669,17 @@ void menu_diagnostics(void *_)
                 .label = "",
                 .item_type = ACTION,
                 .payload_ptr = &scripts[i].filename,
-                .action = action_runDiagnosticScript
-            };
+                .action = action_runDiagnosticScript};
             snprintf(diagItem.label, DIAG_MAX_LABEL_LENGTH - 1, "Script: %.54s", scripts[i].label);
             char *parsed_Tooltip = prase_Newlines(scripts[i].tooltip);
             list_addItemWithInfoNote(&_menu_diagnostics, diagItem, parsed_Tooltip);
             free(parsed_Tooltip);
         }
     }
-    
+
     menu_stack[++menu_level] = &_menu_diagnostics;
     header_changed = true;
 }
-
 
 void menu_advanced(void *_)
 {
