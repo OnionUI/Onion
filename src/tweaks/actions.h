@@ -18,8 +18,8 @@
 
 #define DIAG_SCRIPT_PATH "/mnt/SDCARD/.tmp_update/script/diagnostics"
 #define DIAG_MAX_LABEL_LENGTH 64
-#define DIAG_MAX_TOOLTIP_LENGTH 192
-#define DIAG_MAX_FILENAME_LENGTH 256
+#define DIAG_MAX_TOOLTIP_LENGTH 256
+#define DIAG_MAX_FILENAME_LENGTH 64
 #define DIAG_MAX_PATH_LENGTH (strlen(DIAG_SCRIPT_PATH) + DIAG_MAX_FILENAME_LENGTH + 2)
 
 void action_setAppShortcut(void *pt)
@@ -100,7 +100,8 @@ void action_setEnableLogging(void *pt)
 
 void action_runDiagnosticScript(void *payload_ptr)
 {
-    char *filename = (char *)payload_ptr;
+    ListItem *item = (ListItem *)payload_ptr;
+    char *filename = (char *)item->payload_ptr;
     char script_path[DIAG_MAX_PATH_LENGTH];
     snprintf(script_path, sizeof(script_path), "%s/%s", DIAG_SCRIPT_PATH, filename);
 

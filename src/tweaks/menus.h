@@ -41,10 +41,17 @@ void diags_getEntries(void)
 
     if ((dir = opendir(DIAG_SCRIPT_PATH)) != NULL) {
         while ((ent = readdir(dir)) != NULL) {
-            char path[DIAG_MAX_PATH_LENGTH];
-            snprintf(path, sizeof(path), "%s/%s", DIAG_SCRIPT_PATH, ent->d_name);
+            size_t path_size = strlen(DIAG_SCRIPT_PATH) + strlen(ent->d_name) + 2;
+            char *path = (char *)malloc(path_size);
+            if (path == NULL) {
+                printf("Memory allocation failed...\n");
+                return;
+            }
+
+            snprintf(path, path_size, "%s/%s", DIAG_SCRIPT_PATH, ent->d_name);
 
             if (ent->d_type != DT_REG) {
+                free(path);
                 continue;
             }
 
@@ -52,9 +59,11 @@ void diags_getEntries(void)
             if (file != NULL) {
                 char line[STR_MAX];
                 diagScripts entry = {0};
+                strncpy(entry.filename, ent->d_name, sizeof(entry.filename) - 1);
+                entry.filename[DIAG_MAX_FILENAME_LENGTH - 1] = '\0';
 
                 while (fgets(line, sizeof(line), file)) {
-                    line[strcspn(line, "\n")] = 0; // remove newline
+                    line[strcspn(line, "\n")] = 0;
                     if (strcmp(line, "# IGNORE") == 0) {
                         break;
                     }
@@ -62,7 +71,7 @@ void diags_getEntries(void)
                         entry.label[DIAG_MAX_LABEL_LENGTH - 1] = '\0';
                         continue;
                     }
-                    if (sscanf(line, "tooltip=\"%192[^\"]\"", entry.tooltip) == 1) {
+                    if (sscanf(line, "tooltip=\"%256[^\"]\"", entry.tooltip) == 1) {
                         entry.tooltip[DIAG_MAX_TOOLTIP_LENGTH - 1] = '\0';
                         continue;
                     }
@@ -71,7 +80,6 @@ void diags_getEntries(void)
                 fclose(file);
 
                 if (entry.label[0] && entry.tooltip[0]) {
-                    snprintf(entry.filename, sizeof(entry.filename), "%s", ent->d_name);
                     diags_numScripts++;
                     scripts = realloc(scripts, diags_numScripts * sizeof(diagScripts));
                     if (scripts == NULL) {
@@ -81,6 +89,8 @@ void diags_getEntries(void)
                     scripts[diags_numScripts - 1] = entry;
                 }
             }
+
+            free(path);
         }
         closedir(dir);
     }
@@ -649,24 +659,27 @@ void menu_resetSettings(void *_)
     header_changed = true;
 }
 
-void menu_diagnostics(void *_)
+void menu_diagnostics(void *pt)
 {
     if (!_menu_diagnostics._created) {
         diags_getEntries();
 
         _menu_diagnostics = list_createWithTitle(1 + diags_numScripts, LIST_SMALL, "Diagnostics");
-        list_addItem(&_menu_diagnostics,
-                     (ListItem){
-                         .label = "Enable logging",
-                         .item_type = TOGGLE,
-                         .value = (int)settings.enable_logging,
-                         .action = action_setEnableLogging});
+
+        ListItem loggingItem = {
+            .label = "Enable logging",
+            .item_type = TOGGLE,
+            .value = (int)settings.enable_logging,
+            .action = action_setEnableLogging
+        };
+        list_addItem(&_menu_diagnostics, loggingItem);
 
         for (int i = 0; i < diags_numScripts; i++) {
             ListItem diagItem = {
                 .label = "",
-                .payload_ptr = &scripts[i].filename,
-                .action = action_runDiagnosticScript};
+                .payload_ptr = &scripts[i].filename, // storing filename in payload pointer
+                .action = action_runDiagnosticScript
+            };
 
             const char *prefix = "";
             if (strncmp(scripts[i].filename, "util", 4) == 0) {
@@ -676,7 +689,7 @@ void menu_diagnostics(void *_)
                 prefix = "Fix: ";
             }
 
-            snprintf(diagItem.label, DIAG_MAX_LABEL_LENGTH - 1, "%s%.54s", prefix, scripts[i].label);
+            snprintf(diagItem.label, DIAG_MAX_LABEL_LENGTH - 1, "%s%.62s", prefix, scripts[i].label);
 
             char *parsed_Tooltip = parse_newLines(scripts[i].tooltip);
             list_addItemWithInfoNote(&_menu_diagnostics, diagItem, parsed_Tooltip);
