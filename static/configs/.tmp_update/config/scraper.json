@@ -5,5 +5,5 @@
   "Screenscraper_enabled": "true",
   "Launchbox_enabled": "true",
   "ScrapeInBackground": "false",
-  "MediaType": "box-2d"
+  "MediaType": "box-2D"
 }

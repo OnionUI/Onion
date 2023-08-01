@@ -176,11 +176,11 @@ Menu_Config_MediaType()
         # TODO: Create a dictionary so we can support display and system names throughout the utility
         case "$Mychoice" in
             "Box Art (default)")
-                MediaType="box-2d"
+                MediaType="box-2D"
                 ;;
             # Issues = Issues retrieving type, should define fallback regions for the type (see: https://github.com/zayamatias/EmulationStation/blob/52706db98a4affb2c1653e6ea3ae767d19f3ca78/es-app/src/scrapers/ScreenScraper.h#L23C11-L23C12)
             "Box Art - 3D")
-                MediaType="box-3d"
+                MediaType="box-3D"
                 ;;
             "Screenshot - Title Screen")
                 MediaType="sstitle"
@@ -302,7 +302,7 @@ Launch_Scraping ()
     Screenscraper_enabled=$(echo "$config" | jq -r '.Screenscraper_enabled')
     Launchbox_enabled=$(echo "$config" | jq -r '.Launchbox_enabled')
     ScrapeInBackground=$(echo "$config" | jq -r '.ScrapeInBackground')
-    
+    MediaType=$(echo "$config" | jq -r '.MediaType')
     
     
     [ "$onerom" = "1" ] && onerom="$romname" || onerom=""

@@ -481,7 +481,7 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
             # box-2D-back   	Box: Back	
             # box-texture   	Box: Texture	
             # support-texture	Stand: Texture	
-            # box-3d            Box 3D Art
+            # box-3D            Box 3D Art
 			# mixrbv1			RecalBox Mix V1
 			# mixrbv2			RecalBox Mix V2
 
