@@ -1,6 +1,7 @@
 ---
 slug: /features
 sidebar_position: 2
+description: Overview of the most important features
 ---
 
 <p align="center">
