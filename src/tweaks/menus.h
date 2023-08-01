@@ -670,16 +670,14 @@ void menu_diagnostics(void *pt)
             .label = "Enable logging",
             .item_type = TOGGLE,
             .value = (int)settings.enable_logging,
-            .action = action_setEnableLogging
-        };
+            .action = action_setEnableLogging};
         list_addItem(&_menu_diagnostics, loggingItem);
 
         for (int i = 0; i < diags_numScripts; i++) {
             ListItem diagItem = {
                 .label = "",
                 .payload_ptr = &scripts[i].filename, // storing filename in payload pointer
-                .action = action_runDiagnosticScript
-            };
+                .action = action_runDiagnosticScript};
 
             const char *prefix = "";
             if (strncmp(scripts[i].filename, "util", 4) == 0) {
