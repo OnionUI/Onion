@@ -1,9 +1,10 @@
 import React from 'react';
 import clsx from 'clsx';
-import styles from './styles.module.css';
+import LinkItem from '@docusaurus/theme-classic/lib/theme/Footer/LinkItem'
+import styles from './styles.module.scss';
 
 type FeatureItem = {
-  title: string;
+  title: string | JSX.Element;
   icon: string;
   description: JSX.Element;
 };
@@ -19,7 +20,7 @@ const FeatureList: FeatureItem[] = [
     ),
   },
   {
-    title: 'Ports Collection',
+    title: <LinkItem item={{ label: "Ports Collection", href: "https://github.com/OnionUI/Ports-Collection/blob/main/README.md" }} />,
     icon: require('@site/static/img/icons/ports.png').default,
     description: (
       <>
@@ -28,7 +29,7 @@ const FeatureList: FeatureItem[] = [
     ),
   },
   {
-    title: 'Themes',
+    title: <LinkItem item={{ label: "Themes", href: "https://github.com/OnionUI/Themes/blob/main/README.md" }} />,
     icon: require('@site/static/img/icons/themes.png').default,
     description: (
       <>

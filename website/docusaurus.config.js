@@ -52,6 +52,21 @@ const config = {
     ],
   ],
 
+  themes: [
+    [
+      // @ts-ignore
+      require.resolve("@easyops-cn/docusaurus-search-local"),
+      /** @type {import("@easyops-cn/docusaurus-search-local").PluginOptions} */
+      // @ts-ignore
+      ({
+        hashed: true,
+        language: ["en", "zh"],
+        highlightSearchTermsOnTargetPage: true,
+        explicitSearchResultPath: true,
+      }),
+    ],
+  ],
+
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
@@ -60,7 +75,7 @@ const config = {
         logo: {
           alt: 'Onion Logo',
           src: 'img/onion_logo_purple.svg',
-          // srcDark: 'img/onion_logo.svg',
+          srcDark: 'img/onion_logo.svg',
         },
         items: [
           {
@@ -137,7 +152,7 @@ const config = {
             title: 'Donate ❤️',
             items: [
               {
-                label: 'Ko-fi',
+                label: 'Support us on Ko-fi',
                 href: 'https://ko-fi.com/Aemiii91',
               },
               {
@@ -172,7 +187,11 @@ const config = {
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} The Onion UI Development Team. Built with Docusaurus.`,
+        copyright: `
+          <span class="keep-together">Copyright © ${new Date().getFullYear()} The Onion UI Development Team.</span>
+          <span class="keep-together">Built with <a href="https://docusaurus.io/" target="_blank">Docusaurus</a>.</span>
+          <span class="keep-together"><a href="https://icons8.com/icons/stickers" target="_blank">Sticker icons</a> by <a href="https://icons8.com" target="_blank">Icons8</a>.</span>
+        `,
       },
       prism: {
         theme: lightCodeTheme,

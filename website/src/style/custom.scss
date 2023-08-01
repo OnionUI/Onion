@@ -21,15 +21,12 @@ $onion-green: #9af791;
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
   --ifm-heading-font-family: 'Exo 2', sans-serif;
-}
-
-.footer--dark {
-  --ifm-footer-background-color: #3c3f50;
+  --ifm-navbar-search-input-icon: url('data:image/svg+xml;utf8,<svg fill="%237147c2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" height="16px" width="16px"><path d="M6.02945,10.20327a4.17382,4.17382,0,1,1,4.17382-4.17382A4.15609,4.15609,0,0,1,6.02945,10.20327Zm9.69195,4.2199L10.8989,9.59979A5.88021,5.88021,0,0,0,12.058,6.02856,6.00467,6.00467,0,1,0,9.59979,10.8989l4.82338,4.82338a.89729.89729,0,0,0,1.29912,0,.89749.89749,0,0,0-.00087-1.29909Z" /></svg>');
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-  --ifm-color-primary: #{lighten($onion-purple, 10%)};
+  --ifm-color-primary: #{lighten($onion-purple, 15%)};
   --ifm-color-primary-dark: #{$onion-purple};
   --ifm-color-primary-darker: #{darken($onion-purple, 10%)};
   --ifm-color-primary-darkest: #{darken($onion-purple, 20%)};
@@ -38,6 +35,17 @@ $onion-green: #9af791;
   --ifm-color-primary-lightest: #{lighten($onion-purple, 30%)};
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
   --ifm-navbar-background-color: #242630;
+  --ifm-navbar-search-input-icon: url('data:image/svg+xml;utf8,<svg fill="%239d80d5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" height="16px" width="16px"><path d="M6.02945,10.20327a4.17382,4.17382,0,1,1,4.17382-4.17382A4.15609,4.15609,0,0,1,6.02945,10.20327Zm9.69195,4.2199L10.8989,9.59979A5.88021,5.88021,0,0,0,12.058,6.02856,6.00467,6.00467,0,1,0,9.59979,10.8989l4.82338,4.82338a.89729.89729,0,0,0,1.29912,0,.89749.89749,0,0,0-.00087-1.29909Z" /></svg>');
+}
+
+.footer {
+  a {
+    color: inherit;
+  }
+}
+
+.footer--dark {
+  --ifm-footer-background-color: #3c3f50;
 }
 
 h1,
@@ -47,6 +55,10 @@ h4,
 h5,
 h6 {
   font-style: italic;
+}
+
+.keep-together {
+  display: inline-block;
 }
 
 .hero {

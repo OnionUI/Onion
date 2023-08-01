@@ -22,9 +22,10 @@
 
   .buttons {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    column-gap: 1rem;
+    gap: 1rem;
   }
 
   a {
