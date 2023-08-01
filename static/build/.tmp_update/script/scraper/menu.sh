@@ -162,7 +162,7 @@ Menu_Config_MediaType()
     echo -e 
     echo -e "====================================================\n\n"
     echo -e "The Media Type affects the style of the graphics \nand images returned in ScreenScraper results.\n\n"
-    echo -e "To prevent other scraping sources from overriding\nthis setting, deactivate them.\n\n"    
+    echo -e "To prevent other scraping sources from overriding\nthis setting, ensure to deactivate them.\n\n"    
     echo -e "====================================================\n\n\n"
     read -n 1 -s -r -p "Press A to continue"
     clear
@@ -170,7 +170,7 @@ Menu_Config_MediaType()
     config=$(cat "$ScraperConfigFile")
     MediaType=$(echo "$config" | jq -r '.MediaType')
 
-    	Mychoice=$( echo -e "Box Art (default)\nScreenshot - Title Screen\nScreenshot - In Game\nWheel\nMarquee\nScreenscraper Mix V1\nScreenscraper Mix V2" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "Media Type ? (currently: $MediaType)" -b "Press A to validate your choice.")
+    	Mychoice=$( echo -e "Box Art (default)\nBox Art - 3D\nScreenshot - Title Screen\nScreenshot - In Game\nWheel\nMarquee\nScreenscraper Mix V1\nScreenscraper Mix V2" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "Media Type ? (currently: $MediaType)" -b "Press A to validate your choice.")
         # TODO : add a new option to display tail of the log
 
         # TODO: Create a dictionary so we can support display and system names throughout the utility
@@ -179,9 +179,9 @@ Menu_Config_MediaType()
                 MediaType="box-2d"
                 ;;
             # Issues = Issues retrieving type, should define fallback regions for the type (see: https://github.com/zayamatias/EmulationStation/blob/52706db98a4affb2c1653e6ea3ae767d19f3ca78/es-app/src/scrapers/ScreenScraper.h#L23C11-L23C12)
-            # "Box Art 3D")
-            #     MediaType="box-3d"
-            #     ;;
+            "Box Art - 3D")
+                MediaType="box-3d"
+                ;;
             "Screenshot - Title Screen")
                 MediaType="sstitle"
                 ;;
