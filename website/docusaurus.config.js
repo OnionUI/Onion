@@ -196,6 +196,7 @@ const config = {
       prism: {
         theme: lightCodeTheme,
         darkTheme: darkCodeTheme,
+        additionalLanguages: ['powershell', 'bash'],
       },
       colorMode: {
         defaultMode: 'dark',

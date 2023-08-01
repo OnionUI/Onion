@@ -51,7 +51,7 @@ export default function Home(): JSX.Element {
                     <b>Windows user?</b> Try <Link href='https://github.com/schmurtzm/Onion-Desktop-Tools/blob/main/README.md'>Onion Desktop Tools</Link> for easy SD card preparation and installation.
                 </CenteredNote>
                 <HomepageFeatures />
-            </main >
-        </Layout >
+            </main>
+        </Layout>
     );
 }
