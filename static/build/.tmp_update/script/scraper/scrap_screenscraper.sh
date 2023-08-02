@@ -32,7 +32,7 @@ Scrap_notrequired=0
 
 CurrentSystem=$1
 CurrentRom="$2"
-
+Overwrite="$3"
 
 Screenscraper_information () {
 clear 
@@ -422,7 +422,7 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
     #echo $romNameTrimmed # for debugging
 
 
-	if [ -f "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png" ]; then
+	if [ -f "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png" ] && [ "$Overwrite" = "" ]; then
 		echo -e "${YELLOW}already Scraped !${NONE}"
 		let Scrap_notrequired++;
 	
