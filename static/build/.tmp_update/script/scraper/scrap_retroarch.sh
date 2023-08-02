@@ -257,7 +257,7 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
     	    WgetResult=$?
     
     	    if [ $WgetResult = 0 ] ; then
-            	wget -q  "http://thumbnails.libretro.com/$remoteSystemNoSpace/Named_Boxarts/$romNameNoExtensionNoSpace.png" -P "/mnt/SDCARD/Roms/$CurrentSystem/Imgs" -O "$romNameNoExtension.png"
+            	wget -q "http://thumbnails.libretro.com/$remoteSystemNoSpace/Named_Boxarts/$romNameNoExtensionNoSpace.png" -O "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png"
             	##TODO : make an option to select boxart or screenshot
             	## IF you want an in game screenshot instead of boxart, 
             	#wget  -O "$romNameNoExtension.png" "http://thumbnails.libretro.com/$remoteSystemNoSpace/Named_Snaps/$romNameNoExtensionNoSpace.png" -P "/mnt/SDCARD/Roms/$CurrentSystem/Imgs"

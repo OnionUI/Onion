@@ -533,7 +533,7 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
         # echo -e "Downloading Images for $romNameNoExtension \nScreenscraper ID : $gameIDSS \n url :$url\n\n"        # for debugging
 
         url=$(echo "$url" | sed 's/"$/\&maxwidth=250\&maxheight=360"/')
-        urlcmd=$(echo "wget -q --no-check-certificate "$url" -P \"/mnt/SDCARD/Roms/$CurrentSystem/Imgs\" -O \"$romNameNoExtension.png\"")
+        urlcmd=$(echo "wget -q --no-check-certificate "$url" -O \"/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png\"")
         
         # directl download trigger an error
         #wget --no-check-certificate "$url" -P "/mnt/SDCARD/Roms/$CurrentSystem/Imgs" -O "$romNameNoExtension.png"

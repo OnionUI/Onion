@@ -313,7 +313,7 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 		if ! [ "$urlMediaBox" = "null" ]; then
             mediaextension="${urlMediaBox##*.}"
             #echo "wget --no-check-certificate "$urlMediaBox" -P \"/mnt/SDCARD/Roms/$CurrentSystem/Imgs\" -O \"$romNameNoExtension.png\""      # for debugging
-             wget -q --no-check-certificate "$urlMediaBox" -P "/mnt/SDCARD/Roms/$CurrentSystem/Imgs" -O "$romNameNoExtension.$mediaextension"
+             wget -q --no-check-certificate "$urlMediaBox" -O "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.$mediaextension"
              
 			 if [ -f "$romNameNoExtension.$mediaextension" ]; then
 				 if ! [ "$mediaextension" = "png" ]; then
