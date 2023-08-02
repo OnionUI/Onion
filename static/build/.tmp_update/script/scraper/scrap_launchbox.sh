@@ -32,7 +32,7 @@ Scrap_notrequired=0
 
 CurrentSystem=$1
 CurrentRom="$2"
-Overwrite="$3"
+Overwrite=$3
 
 get_launchbox_alias(){
 	#find the corresponding platform for launchbox scraping
@@ -293,7 +293,7 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
     #echo romNameTrimmed= $romNameTrimmed
 
 
-	if [ -f "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png" ] && [ "$Overwrite" = "" ]; then
+	if [ -f "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png" ] && [ "$Overwrite" != "1" ]; then
 		echo -e "${YELLOW}already Scraped !${NONE}"
 		let Scrap_notrequired++;
 	else
