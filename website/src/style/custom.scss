@@ -1,0 +1,179 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+$onion-purple: #7147c2;
+$onion-green: #9af791;
+
+/* You can override the default Infima variables here. */
+:root {
+  --ifm-color-primary: #{$onion-purple};
+  --ifm-color-primary-dark: #{darken($onion-purple, 10%)};
+  --ifm-color-primary-darker: #{darken($onion-purple, 15%)};
+  --ifm-color-primary-darkest: #{darken($onion-purple, 20%)};
+  --ifm-color-primary-light: #{lighten($onion-purple, 10%)};
+  --ifm-color-primary-lighter: #{lighten($onion-purple, 15%)};
+  --ifm-color-primary-lightest: #{lighten($onion-purple, 20%)};
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --ifm-heading-font-family: 'Exo 2', sans-serif;
+  --ifm-navbar-search-input-icon: url('data:image/svg+xml;utf8,<svg fill="%237147c2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" height="16px" width="16px"><path d="M6.02945,10.20327a4.17382,4.17382,0,1,1,4.17382-4.17382A4.15609,4.15609,0,0,1,6.02945,10.20327Zm9.69195,4.2199L10.8989,9.59979A5.88021,5.88021,0,0,0,12.058,6.02856,6.00467,6.00467,0,1,0,9.59979,10.8989l4.82338,4.82338a.89729.89729,0,0,0,1.29912,0,.89749.89749,0,0,0-.00087-1.29909Z" /></svg>');
+}
+
+:where(.button--secondary) {
+  --ifm-button-background-color: rgba(0, 0, 0, .2);
+  --ifm-button-border-color: rgba(0, 0, 0, .2);
+
+  &:hover {
+    --ifm-button-background-color: rgba(0, 0, 0, .3);
+    --ifm-button-border-color: rgba(0, 0, 0, .3);
+  }
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme='dark'] {
+  --ifm-color-primary: #{lighten($onion-purple, 15%)};
+  --ifm-color-primary-dark: #{$onion-purple};
+  --ifm-color-primary-darker: #{darken($onion-purple, 10%)};
+  --ifm-color-primary-darkest: #{darken($onion-purple, 20%)};
+  --ifm-color-primary-light: #{lighten($onion-purple, 20%)};
+  --ifm-color-primary-lighter: #{lighten($onion-purple, 25%)};
+  --ifm-color-primary-lightest: #{lighten($onion-purple, 30%)};
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  --ifm-navbar-background-color: #242630;
+  --ifm-navbar-search-input-icon: url('data:image/svg+xml;utf8,<svg fill="%239d80d5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" height="16px" width="16px"><path d="M6.02945,10.20327a4.17382,4.17382,0,1,1,4.17382-4.17382A4.15609,4.15609,0,0,1,6.02945,10.20327Zm9.69195,4.2199L10.8989,9.59979A5.88021,5.88021,0,0,0,12.058,6.02856,6.00467,6.00467,0,1,0,9.59979,10.8989l4.82338,4.82338a.89729.89729,0,0,0,1.29912,0,.89749.89749,0,0,0-.00087-1.29909Z" /></svg>');
+
+  .button,
+  .button.button--secondary {
+    color: #fff;
+  }
+
+  :where(.button--secondary) {
+    --ifm-button-background-color: rgba(255, 255, 255, .2);
+    --ifm-button-border-color: rgba(255, 255, 255, .2);
+
+    &:hover {
+      --ifm-button-background-color: rgba(255, 255, 255, .3);
+      --ifm-button-border-color: rgba(255, 255, 255, .3);
+    }
+  }
+}
+
+.footer {
+  a {
+    color: inherit;
+  }
+}
+
+.footer--dark {
+  --ifm-footer-background-color: #3c3f50;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-style: italic;
+}
+
+.keep-together {
+  display: inline-block;
+}
+
+.hero {
+  .button--primary {
+    background-color: #{$onion-green};
+    color: #000;
+
+    &:hover {
+      background-color: #{lighten($onion-green, 10%)};
+    }
+  }
+
+  .button--secondary {
+    background-color: rgba(255, 255, 255, .2);
+    border-color: rgba(255, 255, 255, .2);
+    color: #fff;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, .3);
+    }
+  }
+}
+
+
+// Agnolia Search
+
+:root {
+  --aa-search-input-height: 44px;
+  --aa-input-icon-size: 20px;
+  --aa-base-unit: 16;
+  --aa-spacing-factor: 1;
+  --aa-spacing: calc(var(--aa-base-unit)*var(--aa-spacing-factor)*1px);
+  --aa-spacing-half: calc(var(--aa-spacing)/2);
+  --aa-panel-max-height: 650px;
+  --aa-base-z-index: 9999;
+  --aa-font-size: calc(var(--aa-base-unit)*1px);
+  --aa-font-family: inherit;
+  --aa-font-weight-medium: 500;
+  --aa-font-weight-semibold: 600;
+  --aa-font-weight-bold: 700;
+  --aa-icon-size: 20px;
+  --aa-icon-stroke-width: 1.6;
+  --aa-icon-color-rgb: 119, 119, 163;
+  --aa-icon-color-alpha: 1;
+  --aa-action-icon-size: 20px;
+  --aa-text-color-rgb: 38, 38, 39;
+  --aa-text-color-alpha: 1;
+  --aa-primary-color-rgb: 62, 52, 211;
+  --aa-primary-color-alpha: 0.2;
+  --aa-muted-color-rgb: 128, 126, 163;
+  --aa-muted-color-alpha: 0.6;
+  --aa-panel-border-color-rgb: 128, 126, 163;
+  --aa-panel-border-color-alpha: 0.3;
+  --aa-input-border-color-rgb: 128, 126, 163;
+  --aa-input-border-color-alpha: 0.8;
+  --aa-background-color-rgb: 255, 255, 255;
+  --aa-background-color-alpha: 1;
+  --aa-input-background-color-rgb: 255, 255, 255;
+  --aa-input-background-color-alpha: 1;
+  --aa-selected-color-rgb: 179, 173, 214;
+  --aa-selected-color-alpha: 0.205;
+  --aa-description-highlight-background-color-rgb: 245, 223, 77;
+  --aa-description-highlight-background-color-alpha: 0.5;
+  --aa-detached-media-query: (max-width:680px);
+  --aa-detached-modal-media-query: (min-width:680px);
+  --aa-detached-modal-max-width: 680px;
+  --aa-detached-modal-max-height: 500px;
+  --aa-overlay-color-rgb: 115, 114, 129;
+  --aa-overlay-color-alpha: 0.4;
+  --aa-panel-shadow: 0 0 0 1px rgba(35, 38, 59, 0.1), 0 6px 16px -4px rgba(35, 38, 59, 0.15);
+  --aa-scrollbar-width: 13px;
+  --aa-scrollbar-track-background-color-rgb: 234, 234, 234;
+  --aa-scrollbar-track-background-color-alpha: 1;
+  --aa-scrollbar-thumb-background-color-rgb: var(--aa-background-color-rgb);
+  --aa-scrollbar-thumb-background-color-alpha: 1;
+}
+
+body.dark,
+body[data-theme=dark] {
+  --aa-text-color-rgb: 183, 192, 199;
+  --aa-primary-color-rgb: 113, 71, 194;
+  --aa-muted-color-rgb: 113, 71, 194;
+  --aa-input-background-color-rgb: 0, 3, 9;
+  --aa-background-color-rgb: 21, 24, 42;
+  --aa-selected-color-rgb: 113, 71, 194;
+  --aa-selected-color-alpha: 0.25;
+  --aa-description-highlight-background-color-rgb: 0 255 255;
+  --aa-description-highlight-background-color-alpha: 0.25;
+  --aa-icon-color-rgb: 119, 119, 163;
+  --aa-panel-shadow: inset 1px 1px 0 0 #2c2e40, 0 3px 8px 0 #000309;
+  --aa-scrollbar-track-background-color-rgb: 44, 46, 64;
+  --aa-scrollbar-thumb-background-color-rgb: var(--aa-background-color-rgb);
+}

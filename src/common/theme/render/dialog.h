@@ -6,8 +6,8 @@
 #include "theme/resources.h"
 #include "utils/surfaceSetAlpha.h"
 
-#define DIALOG_WIDTH 548
-#define DIALOG_HEIGHT 30
+#define DIALOG_WIDTH 450
+#define DIALOG_LINE_HEIGHT 30
 #define DIALOG_LINE_BENCHMARK "access, and modify files as if they were stored"
 
 static int dialog_progress = 0;
@@ -19,7 +19,7 @@ int __get_font_size()
         int w = 0, h = 0;
         if (TTF_SizeUTF8(resource_getFont(TITLE), DIALOG_LINE_BENCHMARK, &w, &h) == 0) {
             double scale_x = (double)DIALOG_WIDTH / w;
-            double scale_y = (double)DIALOG_HEIGHT / h;
+            double scale_y = (double)DIALOG_LINE_HEIGHT / h;
             dialog_font_size = (int)((scale_x > scale_y ? scale_y : scale_x) * theme()->title.size);
         }
         else {
@@ -44,47 +44,61 @@ void theme_renderDialog(SDL_Surface *screen, const char *title_str, const char *
 
     SDL_Surface *title = TTF_RenderUTF8_Blended(resource_getFont(TITLE), title_str, theme()->total.color);
     if (title) {
-        SDL_Rect title_rect = {320 - title->w / 2, center_rect.y + 30 - title->h / 2};
+        SDL_Rect title_rect = {320 - title->w / 2, center_rect.y + 25 - title->h / 2};
         SDL_BlitSurface(title, NULL, screen, &title_rect);
         SDL_FreeSurface(title);
     }
 
-    TTF_Font *temp_font = theme_loadFont(theme()->path, theme()->title.font, __get_font_size());
-    SDL_Surface *textbox = theme_textboxSurface(message_str, temp_font, theme()->grid.color, ALIGN_CENTER);
-    TTF_CloseFont(temp_font);
+    SDL_Surface *textbox = theme_textboxSurface(message_str, resource_getFont(TITLE), theme()->grid.color, ALIGN_CENTER);
+    if (textbox->w > DIALOG_WIDTH || textbox->h > 6 * DIALOG_LINE_HEIGHT) {
+        SDL_FreeSurface(textbox);
+        TTF_Font *temp_font = theme_loadFont(theme()->path, theme()->title.font, __get_font_size());
+        textbox = theme_textboxSurface(message_str, temp_font, theme()->grid.color, ALIGN_CENTER);
+        TTF_CloseFont(temp_font);
+    }
     if (textbox) {
-        SDL_Rect textbox_rect = {320 - textbox->w / 2, (show_hint ? 210 : 240) - textbox->h / 2};
+        SDL_Rect textbox_rect = {320 - textbox->w / 2, center_rect.y + 160 - textbox->h / 2};
         SDL_BlitSurface(textbox, NULL, screen, &textbox_rect);
         SDL_FreeSurface(textbox);
     }
 
-    if (show_hint) {
-        SDL_Rect hint_rect = {center_rect.x + 60, center_rect.y + pop_bg->h - 60};
+    SDL_Surface *button_a = resource_getSurface(BUTTON_A);
+    if (show_hint && button_a->w < 640) {
+        SDL_Rect hint_rect = {center_rect.x + pop_bg->w - 30, center_rect.y + pop_bg->h - 60};
 
-        SDL_Surface *button_a = resource_getSurface(BUTTON_A);
-        SDL_Rect button_a_rect = {hint_rect.x, hint_rect.y - button_a->h / 2};
-        SDL_BlitSurface(button_a, NULL, screen, &button_a_rect);
-        hint_rect.x += button_a->w + 5;
-
+        SDL_Surface *button_b = resource_getSurface(BUTTON_B);
         SDL_Surface *label_ok = TTF_RenderUTF8_Blended(resource_getFont(HINT), lang_get(LANG_OK, LANG_FALLBACK_OK), theme()->hint.color);
+        SDL_Surface *label_cancel = TTF_RenderUTF8_Blended(resource_getFont(HINT), lang_get(LANG_CANCEL, LANG_FALLBACK_CANCEL), theme()->hint.color);
+
+        hint_rect.x -= button_a->w + 5;
         if (label_ok) {
+            hint_rect.x -= label_ok->w + 30;
+        }
+
+        hint_rect.x -= button_b->w + 5;
+        if (label_cancel) {
+            hint_rect.x -= label_cancel->w + 30;
+        }
+
+        if (label_ok) {
+            SDL_Rect button_a_rect = {hint_rect.x, hint_rect.y - button_a->h / 2};
+            hint_rect.x += button_a->w + 5;
+            SDL_BlitSurface(button_a, NULL, screen, &button_a_rect);
+
             SDL_Rect label_ok_rect = {hint_rect.x, hint_rect.y - label_ok->h / 2};
-            SDL_BlitSurface(label_ok, NULL, screen, &label_ok_rect);
             hint_rect.x += label_ok->w + 30;
+            SDL_BlitSurface(label_ok, NULL, screen, &label_ok_rect);
             SDL_FreeSurface(label_ok);
         }
 
-        SDL_Surface *button_b = resource_getSurface(BUTTON_B);
-        SDL_Rect button_b_rect = {hint_rect.x, hint_rect.y - button_b->h / 2};
-        SDL_BlitSurface(button_b, NULL, screen, &button_b_rect);
-        hint_rect.x += button_b->w + 5;
-
-        SDL_Surface *label_cancel = TTF_RenderUTF8_Blended(resource_getFont(HINT), lang_get(LANG_CANCEL, LANG_FALLBACK_CANCEL), theme()->hint.color);
         if (label_cancel) {
-            SDL_Rect label_cancel_rect = {hint_rect.x,
-                                          hint_rect.y - label_cancel->h / 2};
-            SDL_BlitSurface(label_cancel, NULL, screen, &label_cancel_rect);
+            SDL_Rect button_b_rect = {hint_rect.x, hint_rect.y - button_b->h / 2};
+            hint_rect.x += button_b->w + 5;
+            SDL_BlitSurface(button_b, NULL, screen, &button_b_rect);
+
+            SDL_Rect label_cancel_rect = {hint_rect.x, hint_rect.y - label_cancel->h / 2};
             hint_rect.x += label_cancel->w + 30;
+            SDL_BlitSurface(label_cancel, NULL, screen, &label_cancel_rect);
             SDL_FreeSurface(label_cancel);
         }
     }

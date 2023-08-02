@@ -67,19 +67,7 @@ void menu_systemStartup(void *_)
 void menu_systemDisplay(void *_)
 {
     if (!_menu_system_display._created) {
-        display_init();
         _menu_system_display = list_createWithTitle(1, LIST_SMALL, "Display");
-        list_addItemWithInfoNote(&_menu_system_display,
-                                 (ListItem){
-                                     .label = "OSD bar size",
-                                     .item_type = MULTIVALUE,
-                                     .value_max = 15,
-                                     .value_formatter = formatter_meterWidth,
-                                     .value = value_meterWidth(),
-                                     .action = action_meterWidth},
-                                 "Set the width of the 'OSD bar' shown\n"
-                                 "in the left side of the display when\n"
-                                 "adjusting brightness, or volume (MMP).");
     }
     menu_stack[++menu_level] = &_menu_system_display;
     header_changed = true;
@@ -114,17 +102,17 @@ void menu_datetime(void *_)
         if (DEVICE_ID == MIYOO354 || network_state.ntp) {
             list_addItemWithInfoNote(&_menu_date_time,
                                      (ListItem){
-                                         .label = "Set automatically from network",
+                                         .label = "Set automatically via internet",
                                          .item_type = TOGGLE,
                                          .value = (int)network_state.ntp,
                                          .action = network_setNtpState},
-                                     "Use the network connection to sync\n"
+                                     "Use the internet connection to sync\n"
                                      "date and time on startup.");
         }
         if (DEVICE_ID == MIYOO354) {
             list_addItemWithInfoNote(&_menu_date_time,
                                      (ListItem){
-                                         .label = "Wait for NTP synchronization",
+                                         .label = "Wait for sync on startup",
                                          .item_type = TOGGLE,
                                          .disabled = !network_state.ntp,
                                          .value = (int)network_state.ntp_wait,
@@ -186,10 +174,10 @@ void menu_system(void *_)
                      (ListItem){
                          .label = "Startup...",
                          .action = menu_systemStartup});
-        list_addItem(&_menu_system,
-                     (ListItem){
-                         .label = "Display...",
-                         .action = menu_systemDisplay});
+        // list_addItem(&_menu_system,
+        //              (ListItem){
+        //                  .label = "Display...",
+        //                  .action = menu_systemDisplay});
         list_addItem(&_menu_system,
                      (ListItem){
                          .label = "Date and time...",
@@ -484,7 +472,7 @@ void menu_themeOverrides(void *_)
 void menu_userInterface(void *_)
 {
     if (!_menu_user_interface._created) {
-        _menu_user_interface = list_createWithTitle(4, LIST_SMALL, "Appearance");
+        _menu_user_interface = list_createWithTitle(5, LIST_SMALL, "Appearance");
         list_addItemWithInfoNote(&_menu_user_interface,
                                  (ListItem){
                                      .label = "Show recents",
@@ -501,6 +489,18 @@ void menu_userInterface(void *_)
                                      .action = action_setShowExpert},
                                  "Toggle the visibility of the expert tab\n"
                                  "in the main menu.");
+        display_init();
+        list_addItemWithInfoNote(&_menu_user_interface,
+                                 (ListItem){
+                                     .label = "OSD bar size",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 15,
+                                     .value_formatter = formatter_meterWidth,
+                                     .value = value_meterWidth(),
+                                     .action = action_meterWidth},
+                                 "Set the width of the 'OSD bar' shown\n"
+                                 "in the left side of the display when\n"
+                                 "adjusting brightness, or volume (MMP).");
         list_addItem(&_menu_user_interface,
                      (ListItem){
                          .label = "Theme overrides...",
