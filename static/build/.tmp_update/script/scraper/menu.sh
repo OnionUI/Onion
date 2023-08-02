@@ -227,40 +227,39 @@ Menu_Config_ScrapingSelection()
     
     
     # Recovering the values of variables
-    Retroarch_enabled=$(echo "$json" | jq -r '.Retroarch_enabled')
     Screenscraper_enabled=$(echo "$json" | jq -r '.Screenscraper_enabled')
     Launchbox_enabled=$(echo "$json" | jq -r '.Launchbox_enabled')
-    
+    Retroarch_enabled=$(echo "$json" | jq -r '.Retroarch_enabled')
 
-    [ "$Retroarch_enabled" = "true" ] && Retroarch="[x] Retroarch" || Retroarch="[ ] Retroarch"
+
     [ "$Screenscraper_enabled" = "true" ] && Screenscraper="[x] Screenscraper" || Screenscraper="[ ] Screenscraper"
     [ "$Launchbox_enabled" = "true" ] && Launchbox="[x] Launchbox" || Launchbox="[ ] Launchbox"
-    
+    [ "$Retroarch_enabled" = "true" ] && Retroarch="[x] Retroarch" || Retroarch="[ ] Retroarch"    
     
     
     while true; do
     
         Mychoice=$( echo -e "$Retroarch\n$Screenscraper\n$Launchbox\nBack to Configuration Menu" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "      --== SCRAPER SELECTION ==--" -b "Press A to validate your choice.")
         
-        [ "$Mychoice" = "[ ] Retroarch" ] && Retroarch="[x] Retroarch"
-        [ "$Mychoice" = "[x] Retroarch" ] && Retroarch="[ ] Retroarch"
-        [ "$Mychoice" = "[ ] Launchbox" ] && Launchbox="[x] Launchbox"
-        [ "$Mychoice" = "[x] Launchbox" ] && Launchbox="[ ] Launchbox"
         [ "$Mychoice" = "[ ] Screenscraper" ] && Screenscraper="[x] Screenscraper"
         [ "$Mychoice" = "[x] Screenscraper" ] && Screenscraper="[ ] Screenscraper"
+        [ "$Mychoice" = "[ ] Launchbox" ] && Launchbox="[x] Launchbox"
+        [ "$Mychoice" = "[x] Launchbox" ] && Launchbox="[ ] Launchbox"
+        [ "$Mychoice" = "[ ] Retroarch" ] && Retroarch="[x] Retroarch"
+        [ "$Mychoice" = "[x] Retroarch" ] && Retroarch="[ ] Retroarch"
+
         [ "$Mychoice" = "Back to Configuration Menu" ] && break
     
     done
     
-    
-    [ "$Retroarch" = "[x] Retroarch" ] && Retroarch_enabled="true" || Retroarch_enabled="false"
+
+    [ "$Screenscraper" = "[x] Screenscraper" ] && Screenscraper_enabled="true" || Screenscraper_enabled="false"    
     [ "$Launchbox" = "[x] Launchbox" ] && Launchbox_enabled="true" || Launchbox_enabled="false"
-    [ "$Screenscraper" = "[x] Screenscraper" ] && Screenscraper_enabled="true" || Screenscraper_enabled="false"
-    
+    [ "$Retroarch" = "[x] Retroarch" ] && Retroarch_enabled="true" || Retroarch_enabled="false"
+   
 
     # Modify the JSON string with the new variable values
-    json=$(echo "$json" | jq --arg Retroarch "$Retroarch_enabled" --arg Screenscraper "$Screenscraper_enabled" --arg Launchbox "$Launchbox_enabled" '. + { Retroarch_enabled: $Retroarch, Screenscraper_enabled: $Screenscraper, Launchbox_enabled: $Launchbox }')
-    
+    json=$(echo "$json" | jq --arg Screenscraper "$Screenscraper_enabled" --arg Launchbox "$Launchbox_enabled" --arg Retroarch "$Retroarch_enabled" '. + { Retroarch_enabled: $Retroarch, Screenscraper_enabled: $Screenscraper, Launchbox_enabled: $Launchbox }')
 
     # Rewrite the modified JSON content to the file
     #echo "$json"    # for debugging
@@ -298,9 +297,9 @@ Launch_Scraping ()
     config=$(cat "$ScraperConfigFile")
     
     # Get the values of the "Retroarch_enabled", "Screenscraper_enabled" and "Launchbox_enabled" keys
-    Retroarch_enabled=$(echo "$config" | jq -r '.Retroarch_enabled')
     Screenscraper_enabled=$(echo "$config" | jq -r '.Screenscraper_enabled')
     Launchbox_enabled=$(echo "$config" | jq -r '.Launchbox_enabled')
+    Retroarch_enabled=$(echo "$config" | jq -r '.Retroarch_enabled')
     ScrapeInBackground=$(echo "$config" | jq -r '.ScrapeInBackground')
     MediaType=$(echo "$config" | jq -r '.MediaType')
     
