@@ -32,7 +32,7 @@ Scrap_notrequired=0
 
 CurrentSystem=$1
 CurrentRom="$2"
-Overwrite=$3
+
 
 get_ra_alias(){
 	# find the corresponding remoteSystem for Retroarch scraping
@@ -246,10 +246,9 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
      
     
     if [ $startcapture == true ]; then
-
-
+    		
     	FILE=/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png
-    	if [ -f "$FILE" ] && [ "$Overwrite" != "1" ]; then
+    	if [ -f "$FILE" ]; then
     		echo -e "${YELLOW}already Scraped !${NONE}"
     		let Scrap_notrequired++;
     	else

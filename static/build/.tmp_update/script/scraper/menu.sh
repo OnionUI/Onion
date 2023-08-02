@@ -301,30 +301,30 @@ Launch_Scraping ()
     
     
     [ "$onerom" = "1" ] && onerom="$romname" || onerom=""
-
+    
     # Check the value of each variable and run the corresponding script if the value is "true"
 
     if [ "$Screenscraper_enabled" = "true" ]; then
         if [ "$ScrapeInBackground" = "true" ]; then
-            echo "/mnt/SDCARD/.tmp_update/script/scraper/scrap_screenscraper.sh $CurrentSystem" \"$onerom\" $overwrite >>/tmp/scraper_script.sh
+            echo "/mnt/SDCARD/.tmp_update/script/scraper/scrap_screenscraper.sh $CurrentSystem" \"$onerom\" >>/tmp/scraper_script.sh
         else
-            /mnt/SDCARD/.tmp_update/script/scraper/scrap_screenscraper.sh $CurrentSystem "$onerom" $overwrite
+            /mnt/SDCARD/.tmp_update/script/scraper/scrap_screenscraper.sh $CurrentSystem "$onerom"
         fi
     fi
     if [ -f "$romimage" ] && ! [ "$onerom" = "" ] ; then echo exiting $romimage; exit; fi;  # exit if only one rom must be scraped and is already found
 
     if [ "$Launchbox_enabled" = "true" ]; then
         if [ "$ScrapeInBackground" = "true" ]; then
-            echo "/mnt/SDCARD/.tmp_update/script/scraper/scrap_launchbox.sh $CurrentSystem" \"$onerom\" $overwrite >>/tmp/scraper_script.sh
+            echo "/mnt/SDCARD/.tmp_update/script/scraper/scrap_launchbox.sh $CurrentSystem" \"$onerom\" >>/tmp/scraper_script.sh
         else
-            /mnt/SDCARD/.tmp_update/script/scraper/scrap_launchbox.sh $CurrentSystem "$onerom" $overwrite
+            /mnt/SDCARD/.tmp_update/script/scraper/scrap_launchbox.sh $CurrentSystem "$onerom"
         fi
     fi
     if [ -f "$romimage" ] && ! [ "$onerom" = "" ] ; then  echo exiting $romimage ;  exit;fi;
     
     if [ "$Retroarch_enabled" = "true" ]; then
         if [ "$ScrapeInBackground" = "true" ]; then
-            echo "/mnt/SDCARD/.tmp_update/script/scraper/scrap_retroarch.sh $CurrentSystem" \"$onerom\" $overwrite >>/tmp/scraper_script.sh
+            echo "/mnt/SDCARD/.tmp_update/script/scraper/scrap_retroarch.sh $CurrentSystem" \"$onerom\" >>/tmp/scraper_script.sh
         else
             /mnt/SDCARD/.tmp_update/script/scraper/scrap_retroarch.sh $CurrentSystem "$onerom"
         fi
@@ -431,24 +431,15 @@ Option5="Exit"
 
 Mychoice=$( echo -e "$Option1\n$Option2\n$Option3\n$Option4\nExit" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "           --== MAIN MENU ==--" -b "                     Menu : Exit        A : Validate ")
 
-[ "$Mychoice" = "$Option1" ] && (onerom=0; Overwrite_Media_Selection;)
+[ "$Mychoice" = "$Option1" ] && (onerom=0; Launch_Scraping;)
 [ "$Mychoice" = "$Option2" ] && (onerom=1; Launch_Scraping;)
 [ "$Mychoice" = "$Option3" ] && Delete_Rom_Cover
 [ "$Mychoice" = "$Option4" ] && Menu_Config
 [ "$Mychoice" = "$Option5" ] && exit
 
+
 }
 
-Overwrite_Media_Selection ()
-{
-    Option1="Keep extisting media"
-    Option2="Overwrite any scraped media"
-    
-    Mychoice=$( echo -e "$Option1\n$Option2" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "Do you wish to add to or overwrite your \npreviously scraped media ?" -b "Press A to validate your choice.")
-
-    [ "$Mychoice" = "$Option1" ] && (overwrite=0; onerom=0; Launch_Scraping)
-    [ "$Mychoice" = "$Option2" ] && (overwrite=1; onerom=0; Launch_Scraping)
-}
 
 
 Menu_Main
