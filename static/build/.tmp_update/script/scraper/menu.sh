@@ -178,7 +178,6 @@ Menu_Config_SSMediaPreferences()
             "Box Art (default)")
                 MediaType="box-2D"
                 ;;
-            # Issues = Issues retrieving type, should define fallback regions for the type (see: https://github.com/zayamatias/EmulationStation/blob/52706db98a4affb2c1653e6ea3ae767d19f3ca78/es-app/src/scrapers/ScreenScraper.h#L23C11-L23C12)
             "Box Art - 3D")
                 MediaType="box-3D"
                 ;;
@@ -231,15 +230,13 @@ Menu_Config_ScrapingSelection()
     Launchbox_enabled=$(echo "$json" | jq -r '.Launchbox_enabled')
     Retroarch_enabled=$(echo "$json" | jq -r '.Retroarch_enabled')
 
-
     [ "$Screenscraper_enabled" = "true" ] && Screenscraper="[x] Screenscraper" || Screenscraper="[ ] Screenscraper"
     [ "$Launchbox_enabled" = "true" ] && Launchbox="[x] Launchbox" || Launchbox="[ ] Launchbox"
     [ "$Retroarch_enabled" = "true" ] && Retroarch="[x] Retroarch" || Retroarch="[ ] Retroarch"    
     
-    
     while true; do
     
-        Mychoice=$( echo -e "$Retroarch\n$Screenscraper\n$Launchbox\nBack to Configuration Menu" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "      --== SCRAPER SELECTION ==--" -b "Press A to validate your choice.")
+        Mychoice=$( echo -e "$Screenscraper\n$Launchbox\n$Retroarch\nBack to Configuration Menu" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "      --== SCRAPER SELECTION ==--" -b "Press A to validate your choice.")
         
         [ "$Mychoice" = "[ ] Screenscraper" ] && Screenscraper="[x] Screenscraper"
         [ "$Mychoice" = "[x] Screenscraper" ] && Screenscraper="[ ] Screenscraper"
@@ -252,14 +249,13 @@ Menu_Config_ScrapingSelection()
     
     done
     
-
     [ "$Screenscraper" = "[x] Screenscraper" ] && Screenscraper_enabled="true" || Screenscraper_enabled="false"    
     [ "$Launchbox" = "[x] Launchbox" ] && Launchbox_enabled="true" || Launchbox_enabled="false"
     [ "$Retroarch" = "[x] Retroarch" ] && Retroarch_enabled="true" || Retroarch_enabled="false"
    
 
     # Modify the JSON string with the new variable values
-    json=$(echo "$json" | jq --arg Screenscraper "$Screenscraper_enabled" --arg Launchbox "$Launchbox_enabled" --arg Retroarch "$Retroarch_enabled" '. + { Retroarch_enabled: $Retroarch, Screenscraper_enabled: $Screenscraper, Launchbox_enabled: $Launchbox }')
+    json=$(echo "$json" | jq --arg Screenscraper "$Screenscraper_enabled" --arg Launchbox "$Launchbox_enabled" --arg Retroarch "$Retroarch_enabled" '. + { Screenscraper_enabled: $Screenscraper, Launchbox_enabled: $Launchbox, Retroarch_enabled: $Retroarch }')
 
     # Rewrite the modified JSON content to the file
     #echo "$json"    # for debugging
