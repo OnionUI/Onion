@@ -341,7 +341,8 @@ if [ "$userStored" = "false" ] && ! [ "$ScrapeInBackground" = "true" ]; then
             break
             
         elif [ "$Mychoice" = "Screenscraper information" ]; then
-            Screenscraper_information
+            clear
+			Screenscraper_information
         else
             break
         fi
@@ -416,8 +417,8 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 	if [ -f "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png" ]; then
 		echo -e "${YELLOW}already Scraped !${NONE}"
 		let Scrap_notrequired++;
+	
 	else
-
         url="https://www.screenscraper.fr/api2/jeuInfos.php?devid=${u#???}&devpassword=${p%??}&softname=onion&output=json&ssid=${userSS}&sspassword=${passSS}&crc=&systemeid=${ssID}&romtype=rom&romnom=${romNameTrimmed}.zip"
         # TODO : search by CRC/MD5/shal or gameid
         # TODO : managing multithread for users who have it.
@@ -489,7 +490,7 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 			# mixrbv1			RecalBox Mix V1
 			# mixrbv2			RecalBox Mix V2
 
-		# TODO: Allow the user to set their regional preferences
+		# TODO: Use the region defined in the rom's name to dictate which meida the user should receive, unless overridden
 		# Get the URL of media in this order : world, us, usa, na, eu, uk, oceania, au, nz, jp and then the first entry available
 		url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "wor") | .url' | head -n 1)
 		if [ -z "$url" ]; then
@@ -497,36 +498,24 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 			if [ -z "$url" ]; then
 				url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "usa") | .url' | head -n 1)
 				if [ -z "$url" ]; then
-					url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "na") | .url' | head -n 1)
+					url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "eu") | .url' | head -n 1)
 					if [ -z "$url" ]; then
-						url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "eu") | .url' | head -n 1)
+						url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "uk") | .url' | head -n 1)
 						if [ -z "$url" ]; then
-							url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "uk") | .url' | head -n 1)
+							url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "au") | .url' | head -n 1)
 							if [ -z "$url" ]; then
-								url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "oceania") | .url' | head -n 1)
+								url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "nz") | .url' | head -n 1)
 								if [ -z "$url" ]; then
-									url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "au") | .url' | head -n 1)
-									if [ -z "$url" ]; then
-										url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "nz") | .url' | head -n 1)
-											if [ -z "$url" ]; then
-												url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "jp") | .url' | head -n 1)
-											if [ -z "$url" ]; then
-												url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | .url' | head -n 1)
-											fi
-										fi
-									fi
+									url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "jp") | .url' | head -n 1)
 								fi
 							fi
 						fi
 					fi
 				fi
 			fi
-		fi
-        
+		fi        
         # TODO : if default media not found search in other media types
-
-    
-    
+        
         if [ -z "$url" ]; then
             echo -e "${YELLOW}Game match but no media found!${NONE}"
             let Scrap_Fail++;
@@ -534,23 +523,23 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
         fi
         
         # echo -e "Downloading Images for $romNameNoExtension \nScreenscraper ID : $gameIDSS \n url :$url\n\n"        # for debugging
-        
+
         url=$(echo "$url" | sed 's/"$/\&maxwidth=250\&maxheight=360"/')
         urlcmd=$(echo "wget -q --no-check-certificate "$url" -P \"/mnt/SDCARD/Roms/$CurrentSystem/Imgs\" -O \"$romNameNoExtension.png\"")
         
         # directl download trigger an error
         #wget --no-check-certificate "$url" -P "/mnt/SDCARD/Roms/$CurrentSystem/Imgs" -O "$romNameNoExtension.png"
         #wget $urlcmd
+
         echo $urlcmd>/tmp/rundl.sh
         sh /tmp/rundl.sh
+
         echo -e "${GREEN}Scraped!${NONE}"
         let Scrap_Success++;
         
         
         # echo -e "\n\n ==$url== \n\n"
         #pngscale "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png" "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png"
-
-          
     fi
    
 

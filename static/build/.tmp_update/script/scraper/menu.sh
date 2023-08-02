@@ -308,16 +308,7 @@ Launch_Scraping ()
     [ "$onerom" = "1" ] && onerom="$romname" || onerom=""
     
     # Check the value of each variable and run the corresponding script if the value is "true"
-    
-    if [ "$Retroarch_enabled" = "true" ]; then
-        if [ "$ScrapeInBackground" = "true" ]; then
-            echo "/mnt/SDCARD/.tmp_update/script/scraper/scrap_retroarch.sh $CurrentSystem" \"$onerom\" >>/tmp/scraper_script.sh
-        else
-            /mnt/SDCARD/.tmp_update/script/scraper/scrap_retroarch.sh $CurrentSystem "$onerom"
-        fi
-    fi
-    if [ -f "$romimage" ] && ! [ "$onerom" = "" ] ; then echo exiting $romimage; exit; fi;  # exit if only one rom must be scraped and is already found
-    
+
     if [ "$Screenscraper_enabled" = "true" ]; then
         if [ "$ScrapeInBackground" = "true" ]; then
             echo "/mnt/SDCARD/.tmp_update/script/scraper/scrap_screenscraper.sh $CurrentSystem" \"$onerom\" >>/tmp/scraper_script.sh
@@ -326,9 +317,7 @@ Launch_Scraping ()
         fi
     fi
     if [ -f "$romimage" ] && ! [ "$onerom" = "" ] ; then echo exiting $romimage; exit; fi;  # exit if only one rom must be scraped and is already found
-    
-    if [ -f "$romimage" ] && ! [ "$onerom" = "" ] ; then  echo exiting $romimage ;  exit;fi;
-    
+
     if [ "$Launchbox_enabled" = "true" ]; then
         if [ "$ScrapeInBackground" = "true" ]; then
             echo "/mnt/SDCARD/.tmp_update/script/scraper/scrap_launchbox.sh $CurrentSystem" \"$onerom\" >>/tmp/scraper_script.sh
@@ -336,7 +325,16 @@ Launch_Scraping ()
             /mnt/SDCARD/.tmp_update/script/scraper/scrap_launchbox.sh $CurrentSystem "$onerom"
         fi
     fi
-	
+    if [ -f "$romimage" ] && ! [ "$onerom" = "" ] ; then  echo exiting $romimage ;  exit;fi;
+    
+    if [ "$Retroarch_enabled" = "true" ]; then
+        if [ "$ScrapeInBackground" = "true" ]; then
+            echo "/mnt/SDCARD/.tmp_update/script/scraper/scrap_retroarch.sh $CurrentSystem" \"$onerom\" >>/tmp/scraper_script.sh
+        else
+            /mnt/SDCARD/.tmp_update/script/scraper/scrap_retroarch.sh $CurrentSystem "$onerom"
+        fi
+    fi
+
 	rm -f /tmp/stay_awake
     exit
 }
