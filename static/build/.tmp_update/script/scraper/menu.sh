@@ -27,21 +27,21 @@ ScraperConfigFile=/mnt/SDCARD/.tmp_update/config/scraper.json
 Menu_Config()
 {
     Option1="Select your scraping sources"
-    Option2="Modify your Screenscraper.fr account"
-    Option3="Change the scraped media type"
-    Option4="Toggle background scraping"
+    Option2="Toggle background scraping"
+    Option3="Screenscraper: account settings"
+    Option4="Screenscraper: media preferences"
     Option5="Back to Main Menu"
     
     Mychoice=$( echo -e "$Option1\n$Option2\n$Option3\n$Option4\n$Option5" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "      --== CONFIGURATION MENU ==--" -b "Press A to validate your choice.")
 
     [ "$Mychoice" = "$Option1" ] && Menu_Config_ScrapingSelection
-    [ "$Mychoice" = "$Option2" ] && Menu_Config_ScreenscraperAccount
-    [ "$Mychoice" = "$Option3" ] && Menu_Config_MediaType
-    [ "$Mychoice" = "$Option4" ] && Menu_Config_BackgroundScraping    
+    [ "$Mychoice" = "$Option2" ] && Menu_Config_BackgroundScraping
+    [ "$Mychoice" = "$Option3" ] && Menu_Config_SSAccountSettings
+    [ "$Mychoice" = "$Option4" ] && Menu_Config_SSMediaPreferences
     [ "$Mychoice" = "$Option5" ] && Menu_Main
 }
 
-Menu_Config_ScreenscraperAccount()
+Menu_Config_SSAccountSettings()
 {
     
     echo "-------------------------------------------------"
@@ -149,7 +149,7 @@ Menu_Config_BackgroundScraping()
         Menu_Config
 }
 
-Menu_Config_MediaType()
+Menu_Config_SSMediaPreferences()
 {
     # Check if the configuration file exists
     if [ ! -f "$ScraperConfigFile" ]; then
