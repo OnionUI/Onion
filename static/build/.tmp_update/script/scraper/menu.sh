@@ -329,6 +329,7 @@ Launch_Scraping ()
             /mnt/SDCARD/.tmp_update/script/scraper/scrap_retroarch.sh $CurrentSystem "$onerom"
         fi
     fi
+    if [ -f "$romimage" ] && ! [ "$onerom" = "" ] ; then  echo exiting $romimage ;  exit;fi;
 
 	rm -f /tmp/stay_awake
     exit
