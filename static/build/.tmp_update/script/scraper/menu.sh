@@ -301,7 +301,6 @@ Launch_Scraping ()
     
     
     [ "$onerom" = "1" ] && onerom="$romname" || onerom=""
-    [ "$overwrite" = "1" ] && overwrite="1" || overwrite=""
 
     # Check the value of each variable and run the corresponding script if the value is "true"
 
@@ -309,7 +308,7 @@ Launch_Scraping ()
         if [ "$ScrapeInBackground" = "true" ]; then
             echo "/mnt/SDCARD/.tmp_update/script/scraper/scrap_screenscraper.sh $CurrentSystem" \"$onerom\" $overwrite >>/tmp/scraper_script.sh
         else
-            /mnt/SDCARD/.tmp_update/script/scraper/scrap_screenscraper.sh $CurrentSystem "$onerom"
+            /mnt/SDCARD/.tmp_update/script/scraper/scrap_screenscraper.sh $CurrentSystem "$onerom" $overwrite
         fi
     fi
     if [ -f "$romimage" ] && ! [ "$onerom" = "" ] ; then echo exiting $romimage; exit; fi;  # exit if only one rom must be scraped and is already found
@@ -318,7 +317,7 @@ Launch_Scraping ()
         if [ "$ScrapeInBackground" = "true" ]; then
             echo "/mnt/SDCARD/.tmp_update/script/scraper/scrap_launchbox.sh $CurrentSystem" \"$onerom\" $overwrite >>/tmp/scraper_script.sh
         else
-            /mnt/SDCARD/.tmp_update/script/scraper/scrap_launchbox.sh $CurrentSystem "$onerom"
+            /mnt/SDCARD/.tmp_update/script/scraper/scrap_launchbox.sh $CurrentSystem "$onerom" $overwrite
         fi
     fi
     if [ -f "$romimage" ] && ! [ "$onerom" = "" ] ; then  echo exiting $romimage ;  exit;fi;
