@@ -338,18 +338,26 @@ if [ "$userStored" = "false" ] && ! [ "$ScrapeInBackground" = "true" ]; then
             config=$(cat $ScraperConfigFile)
             config=$(echo "$config" | jq --arg user "$userSS" --arg pass "$passSS" '.screenscraper_username = $user | .screenscraper_password = $pass')
             echo "$config" > $ScraperConfigFile
+
             break
             
         elif [ "$Mychoice" = "Screenscraper information" ]; then
             clear
 			Screenscraper_information
         else
-            break
+            clear
+			break
         fi
+
     done
 fi
 		
+clear
+echo -e "\n*****************************************************"
+echo -e "******************* SCREENSCRAPER *******************"
+echo -e "*****************************************************\n\n"
 
+echo -e "Scraping $CurrentSystem...\n"
 
 ####################################################################################################################################
  #ls /mnt/SDCARD/Roms/$CurrentSystem
