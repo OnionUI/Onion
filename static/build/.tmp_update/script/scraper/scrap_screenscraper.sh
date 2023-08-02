@@ -427,9 +427,6 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
         echo Searching on screenscraper ...
         api_result=$(curl -k -s "$url") 
 		
-    	
-    
-    	
         # Don't check art if screenscraper is closed
         if echo $api_result | grep -q "API closed"; then
         	echo -e "The Screenscraper API is currently down, please try again later."
@@ -437,7 +434,15 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
         	let Scrap_Fail++;
         	break;
         fi
-        
+
+        # Don't check art if max threads for leechers is used
+        if echo $api_result | grep -q "The maximum threads"; then
+        	echo -e "The Screenscraper API is too busy for non-users. please try again later (or register)."
+        	echo -e "Press the ${RED}A button${NONE} to finish"
+        	let Scrap_Fail++;
+        	break;
+        fi
+
         # Don't check art after a failed curl request
         if [[ "$api_result" == "" ]]; then
             echo -e "${RED}Request failed${NONE}"
@@ -457,7 +462,6 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
         fi
     	
     
-        
         gameIDSS=$(echo $api_result | jq -r '.response.jeu.id')
     	echo "gameID = $gameIDSS"
     	
