@@ -123,7 +123,8 @@ void *runScript(void *payload_ptr)
         if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
             list_updateStickyNote(item, "Script successfully completed."); // good run
             list_changed = true;
-        } else {
+        }
+        else {
             list_updateStickyNote(item, "Script failed!"); // displays if the script is bad (syntax, other errors, none-zero)
             list_changed = true;
         }
