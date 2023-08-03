@@ -38,151 +38,151 @@ get_launchbox_alias(){
 	#find the corresponding platform for launchbox scraping
 	case $1 in				
 		ADVMAME)
-			 platform="mame";;
+			 platform="Arcade";;
 		AMIGA)
-			 platform="amiga";;
-		# AMIGACD)
-			 # platform="";;
+			 platform="Commodore Amiga";;
+		AMIGACD)
+			 platform="Commodore Amiga CD32";;
 		ARCADE)
-			 platform="mame";;
+			 platform="Arcade";;
 		# ARDUBOY)
 			 # platform="";;
 		ATARI)
-			 platform="atari2600";;
+			 platform="Atari 2600";;
 		ATARIST)
-			 platform="atarist";;
+			 platform="Atari ST";;
 		# CHAI)
 			 # platform="";;
 		COLECO)
-			 platform="colecovision";;
-		# COMMODORE)
-			 # platform="";;
+			 platform="ColecoVision";;
+		COMMODORE)
+			 platform="Commodore 64";;
 		CPC)
-			 platform="amstradcpc";;
-		# CPS1)
-			 # platform="";;
-		# CPS2)
-			 # platform="";;
-		# CPS3)
-			 # platform="";;
-		# DAPHNE)
-			 # platform="";;
-		# DOS)
-			 # platform="";;
+			 platform="Amstrad CPC";;
+		CPS1)
+			 platform="Arcade";;
+		CPS2)
+			 platform="Arcade";;
+		CPS3)
+			 platform="Arcade";;
+		DAPHNE)
+			 platform="Arcade";;
+		DOS)
+			 platform="MS-DOS";;
 		# EASYRPG)
 			 # platform="";;
 		# EBK)
 			 # platform="";;
-		# EIGHTHUNDRED)
-			 # platform="";;
-		# FAIRCHILD)
-			 # platform="";;
-		# FBA2012)
-			 # platform="";;
-		# FBALPHA)
-			 # platform="";;
-		# FBNEO)
-			 # platform="";;
+		EIGHTHUNDRED)
+			 platform="Atari 800";;
+		FAIRCHILD)
+			 platform="Fairchild Channel F";;
+		FBA2012)
+			 platform="Arcade";;
+		FBALPHA)
+			 platform="Arcade";;
+		FBNEO)
+			 platform="Arcade";;
 		FC)
-			 platform="nes";;
-		# FDS)
-			 # platform="";;
-		# FIFTYTWOHUNDRED)
-			 # platform="";;
+			 platform="Nintendo Entertainment System";;
+		FDS)
+			 platform="Nintendo Famicom Disk System";;
+		FIFTYTWOHUNDRED)
+			 platform="Atari 5200";;
 		GB)
-			 platform="gb";;
+			 platform="Nintendo Game Boy";;
 		GBA)
-			 platform="gba";;
+			 platform="Nintendo Game Boy Advance";;
 		GBC)
-			 platform="gbc";;
+			 platform="Nintendo Game Boy Color";;
 		GG)
-			 platform="gamegear";;
+			 platform="Sega Game Gear";;
 		# GME)
 			 # platform="";;
 		GW)
-			 platform="gameandwatch";;
+			 platform="Nintendo Game & Watch";;
 		INTELLIVISION)
-			 platform="intellivision";;
-		# JAGUAR)
-			 # platform="";;
+			 platform="Mattel Intellivision";;
+		JAGUAR)
+			 platform="Atari Jaguar";;
 		# JAVA)
 			 # platform="";;
 		# LUTRO)
 			 # platform="";;
 		LYNX)
-			 platform="lynx";;
+			 platform="Atari Lynx";;
 		MAME2000)
-			 platform="mame";;
+			 platform="Arcade";;
 		MAME2003)
-			 platform="mame";;
+			 platform="Arcade";;
 		MBA)
-			 platform="mame";;
+			 platform="Arcade";;
 		MD)
-			 platform="genesis";;
+			 platform="Sega Genesis";;
 		MDHACKS)
-			 platform="genesis";;
-		# MEGADUCK)
-			 # platform="";;
+			 platform="Sega Genesis";;
+		MEGADUCK)
+			 platform="Mega Duck";;
 		# MICROW8)
 			 # platform="";;
 		MS)
-			 platform="mastersystem";;
+			 platform="Sega Master System";;
 		MSX)
-			 platform="MSX";;
+			 platform="Microsoft MSX";;
 		NEOCD)
-			 platform="neogeocd";;
+			 platform="SNK Neo Geo CD";;
 		NEOGEO)
-			 platform="neogeo";;
+			 platform="SNK Neo Geo AES";;
 		NGP)
-			 platform="ngp";;
-		# ODYSSEY)
-			 # platform="";;
-		# OPENBOR)
-			 # platform="";;
+			 platform="SNK Neo Geo Pocket";;
+		ODYSSEY)
+			 platform="Magnavox Odyssey";;
+		OPENBOR)
+			 platform="OpenBOR";;
 		# PALM)
 			 # platform="";;
 		PANASONIC)
-			 platform="3do";;
+			 platform="3DO Interactive Multiplayer";;
 		PCE)
-			 platform="pcengine";;
-		# PCECD)
-			 # platform="";;
-		# PCEIGHTYEIGHT)
-			 # platform="";;
-		# PCFX)
-			 # platform="";;
-		# PCNINETYEIGHT)
-			 # platform="";;
+			 platform="NEC TurboGrafx-16";;
+		PCECD)
+			 platform="NEC TurboGrafx-CD";;
+		PCEIGHTYEIGHT)
+			 platform="NEC PC-8801";;
+		PCFX)
+			 platform="NEC PC-FX";;
+		PCNINETYEIGHT)
+			 platform="NEC PC-9801";;
 		# PICO)
 			 # platform="";;
-		# POKE)
-			 # platform="";;
+		POKE)
+			 platform="Nintendo Pokemon Mini";;
 		# PORTS)
 			 # platform="";;
-		# PS)
-			 # platform="";;
-		# SATELLAVIEW)
-			 # platform="";;
+		PS)
+			 platform="Sony Playstation";;
+		SATELLAVIEW)
+			 platform="Nintendo Satellaview";;
 		SCUMMVM)
-			 platform="scummvm";;
+			 platform="ScummVM";;
 		SEGACD)
-			 platform="segacd";;
-		# SEGASGONE)
-			 # platform="";;
-		# SEVENTYEIGHTHUNDRED)
-			 # platform="";;
-		# SFC)
-			 # platform="";;
-		# SGB)
-			 # platform="";;
-		# SGFX)
-			 # platform="";;
+			 platform="Sega CD";;
+		SEGASGONE)
+			 platform="Sega Model 1";;
+		SEVENTYEIGHTHUNDRED)
+			 platform="Atari 7800";;
+		SFC)
+			 platform="Super Nintendo Entertainment System";;
+		SGB)
+			 platform="Nintendo Game Boy Color";;
+		SGFX)
+			 platform="PC Engine SuperGrafx";;
 		# SUFAMI)
 			 # platform="";;
-		# SUPERVISION)
-			 # platform="";;
-		# THIRTYTWOX)
-			 # platform="sega32x";;
+		SUPERVISION)
+			 platform="Watara Supervision";;
+		THIRTYTWOX)
+			 platform="Sega 32X";;
 		# THOMSON)
 			 # platform="";;
 		# TI83)
@@ -192,27 +192,27 @@ get_launchbox_alias(){
 		# UZEBOX)
 			 # platform="";;
 		VB)
-			 platform="virtualboy";;
+			 platform="Nintendo Virtual Boy";;
 		VECTREX)
-			 platform="vectrex";;
-		# VIC20)
-			 # platform="";;
-		# VIDEOPAC)
-			 # platform="";;
-		VMU)
-			 platform="dreamcast";;
-		# WS)
-			 # platform="";;
-		# X68000)
-			 # platform="";;
-		# XONE)
-			 # platform="";;
-		# ZXEIGHTYONE)
-			 # platform="";;
-		# ZXS)
-			# platform="";;
+			 platform="GCE Vectrex";;
+		VIC20)
+			 platform="Commodore VIC-20";;
+		VIDEOPAC)
+			 platform="Philips Videopac+";;
+		# VMU)
+			 # platform="dreamcast";;
+		WS)
+			 platform="WonderSwan";;
+		X68000)
+			 platform="Sharp X68000";;
+		XONE)
+			 platform="Sharp X1";;
+		ZXEIGHTYONE)
+			 platform="Sinclair ZX-81";;
+		ZXS)
+			platform="Sinclair ZX Spectrum";;
 		zxspectrum)
-			platform="zxspectrum";;
+			platform="Sinclair ZX Spectrum";;
 		*)
 			echo "unknown system, exiting."
 			exit
@@ -231,8 +231,6 @@ echo "Scraping $CurrentSystem..."
 mkdir -p /mnt/SDCARD/Roms/$CurrentSystem/Imgs > /dev/null
 get_launchbox_alias $CurrentSystem
 
-
-#content=$(cat /mnt/SDCARD/.tmp_update/script/scraper/metadata.json)   # finally faster to parse file from SD card than from memory.
  
 # =================
 #this is a trick to manage spaces from find command, do not indent or modify
@@ -241,19 +239,8 @@ IFS='
 set -f
 # =================
 
-
-
 if ! [ -z "$CurrentRom" ]; then
- #   CurrentRom_noapostrophe=${CurrentRom//\'/\\\'}    # replacing   '   by    \'
- #   romfilter="-name  '*$CurrentRom_noapostrophe*'"
- #   
- #   CurrentRom="Link's"
- #   romfilter="-name  '*$CurrentRom*'"
- #   
- #   romfilter="-name  '*Link's*'"
     romfilter="-name \"*$CurrentRom*\""
-    #romfilter="-name  '*$CurrentRom*'"
-    
 fi
 
 
@@ -280,47 +267,169 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 
     
     # we put "The" at the beginning of the rom name
-    if echo "$variable" | grep -q ", The"; then
+    if echo "$romNameTrimmed" | grep -q ", The"; then
         romNameTrimmed="${romNameTrimmed/, The/}"
         romNameTrimmed="The $romNameTrimmed"
     fi
 
     romNameTrimmed="${romNameTrimmed//","/}"
-    
-    
-    # For debugging
-    #echo romNameNoExtension= $romNameNoExtension
-    #echo romNameTrimmed= $romNameTrimmed
-
+     # For debugging
+     # echo romNameNoExtension= $romNameNoExtension
+     # echo romNameTrimmed= $romNameTrimmed
+	
+	romNameTrimmed=${romNameTrimmed// /%}
+	romNameTrimmed=${romNameTrimmed//\'/%}
+	
+	 # echo romNameTrimmed percent= $romNameTrimmed
 
 	if [ -f "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png" ]; then
 		echo -e "${YELLOW}already Scraped !${NONE}"
 		let Scrap_notrequired++;
 	else
         	
-        #box2dfront=$(jq -r --arg games "$games" '.platform."3do".games[$games].medias.box2dfront' fichier.json)
-		urlMediaBox=$( cat /mnt/SDCARD/.tmp_update/script/scraper/metadata.json | jq -r ".platform.\"$platform\".games.\"$romNameTrimmed\".medias.box2dfront" )    
-		#urlMediaSs=   $( echo $content | jq -r  ".platform.$CurrentSystem.games.\"$romNameTrimmed\".medias.screenshot" )
-    	#urlMediaWheel=$( echo $content | jq -r  ".platform.$CurrentSystem.games.\"$romNameTrimmed\".medias.wheel" )
-		
-        ## TODO : split database for each system
-        ## TODO : if media not found search in other media types
-        ## TODO : more permissive search
-        
-        #echo $content | jq -r  ".platform.GB.games."Super Mario Land".medias.box2dfront" 
-			
+	   urlMediaBox=$(sqlite3 "/mnt/SDCARD/.tmp_update/script/scraper/launchbox_database/$platform.db" "SELECT Images.FileName 
+	   FROM Games JOIN Images ON Games.DatabaseID = Images.DatabaseID 
+	   WHERE Games.Name LIKE '%${romNameTrimmed}' AND Images.Type = 'Box - Front' 
+	   ORDER BY CASE 
+				  WHEN Region = '' THEN 1
+				  WHEN Region = 'World' THEN 2
+				  WHEN Region = 'United States' THEN 3
+				  WHEN Region = 'North America' THEN 4
+				  WHEN Region = 'Europe' THEN 5
+				  ELSE 6 
+				END
+				;" | head -n 1)
 
-		if ! [ "$urlMediaBox" = "null" ]; then
+
+		if [ -z "$urlMediaBox" ]; then   # we manage the special case of "&" wich can be "and" too
+			if echo "$romNameTrimmed" | grep -q "and"; then
+			  romNameTrimmed_And=${romNameTrimmed//and/&}
+			  # echo romNameTrimmed andwithsymbol= $romNameTrimmed_And
+               urlMediaBox=$(sqlite3 "/mnt/SDCARD/.tmp_update/script/scraper/launchbox_database/$platform.db" "SELECT Images.FileName 
+               FROM Games JOIN Images ON Games.DatabaseID = Images.DatabaseID 
+               WHERE Games.Name LIKE '%${romNameTrimmed_And}' AND Images.Type = 'Box - Front' 
+               ORDER BY CASE 
+                          WHEN Region = '' THEN 1
+                          WHEN Region = 'World' THEN 2
+                          WHEN Region = 'United States' THEN 3
+                          WHEN Region = 'North America' THEN 4
+                          WHEN Region = 'Europe' THEN 5
+                          ELSE 6 
+                        END 
+              ;" | head -n 1 )
+			fi
+		fi
+		
+		if [ -z "$urlMediaBox" ]; then   # we manage the special case of "&" wich can be " " too
+			if echo "$romNameTrimmed" | grep -q "and"; then
+			  romNameTrimmed_WithoutAnd=${romNameTrimmed//and/%}
+			  # echo romNameTrimmed andwithsymbol= $romNameTrimmed_WithoutAnd
+               urlMediaBox=$(sqlite3 "/mnt/SDCARD/.tmp_update/script/scraper/launchbox_database/$platform.db" "SELECT Images.FileName 
+               FROM Games JOIN Images ON Games.DatabaseID = Images.DatabaseID 
+               WHERE Games.Name LIKE '%${romNameTrimmed_WithoutAnd}' AND Images.Type = 'Box - Front' 
+               ORDER BY CASE 
+                          WHEN Region = '' THEN 1
+                          WHEN Region = 'World' THEN 2
+                          WHEN Region = 'United States' THEN 3
+                          WHEN Region = 'North America' THEN 4
+                          WHEN Region = 'Europe' THEN 5
+                          ELSE 6 
+                        END 
+              ;" | head -n 1 )
+			fi
+		fi
+############################## same searchs but  more permissive search : romname*  , could find some false positive, if you have "Football" it could find "Football Pro"  ##############################
+
+
+			if [ -z "$urlMediaBox" ]; then  
+			   urlMediaBox=$(sqlite3 "/mnt/SDCARD/.tmp_update/script/scraper/launchbox_database/$platform.db" "SELECT Images.FileName 
+			   FROM Games JOIN Images ON Games.DatabaseID = Images.DatabaseID 
+			   WHERE Games.Name LIKE '%${romNameTrimmed}%' AND Images.Type = 'Box - Front' 
+			   ORDER BY CASE 
+						  WHEN Region = '' THEN 1
+						  WHEN Region = 'World' THEN 2
+						  WHEN Region = 'United States' THEN 3
+						  WHEN Region = 'North America' THEN 4
+						  WHEN Region = 'Europe' THEN 5
+						  ELSE 6 
+						END
+						;" | head -n 1)
+			fi
+			
+			if [ -z "$urlMediaBox" ]; then   # we manage the special case of "&" wich can be "and" too
+				if echo "$romNameTrimmed" | grep -q "and"; then
+				  romNameTrimmed_And=${romNameTrimmed//and/&}
+			
+			# echo romNameTrimmed andwithsymbol= $romNameTrimmed_And
+				   urlMediaBox=$(sqlite3 "/mnt/SDCARD/.tmp_update/script/scraper/launchbox_database/$platform.db" "SELECT Images.FileName 
+				   FROM Games JOIN Images ON Games.DatabaseID = Images.DatabaseID 
+				   WHERE Games.Name LIKE '%${romNameTrimmed_And}%' AND Images.Type = 'Box - Front' 
+				   ORDER BY CASE 
+							  WHEN Region = '' THEN 1
+							  WHEN Region = 'World' THEN 2
+							  WHEN Region = 'United States' THEN 3
+							  WHEN Region = 'North America' THEN 4
+							  WHEN Region = 'Europe' THEN 5
+							  ELSE 6 
+							END 
+				  ;" | head -n 1 )
+				fi
+		fi
+
+		if [ -z "$urlMediaBox" ]; then   # we manage the special case of "&" wich can be " " too
+			if echo "$romNameTrimmed" | grep -q "and"; then
+			  romNameTrimmed_WithoutAnd=${romNameTrimmed//and/%}
+			  # echo romNameTrimmed andwithsymbol= $romNameTrimmed_WithoutAnd
+               urlMediaBox=$(sqlite3 "/mnt/SDCARD/.tmp_update/script/scraper/launchbox_database/$platform.db" "SELECT Images.FileName 
+               FROM Games JOIN Images ON Games.DatabaseID = Images.DatabaseID 
+               WHERE Games.Name LIKE '%${romNameTrimmed_WithoutAnd}%' AND Images.Type = 'Box - Front' 
+               ORDER BY CASE 
+                          WHEN Region = '' THEN 1
+                          WHEN Region = 'World' THEN 2
+                          WHEN Region = 'United States' THEN 3
+                          WHEN Region = 'North America' THEN 4
+                          WHEN Region = 'Europe' THEN 5
+                          ELSE 6 
+                        END 
+              ;" | head -n 1 )
+			fi
+		fi
+		
+		
+		
+#########################################################
+		# TO DO : manage other media types from options : https://docs.google.com/spreadsheets/d/1jFWhlt4MPcPGox45OCBAQVUrCOviDbh5P0DgoOlQ1vI/edit?usp=sharing
+			# Banner , # Box - 3D , # Box - Front , # Screenshot - Gameplay , # Screenshot - Game Title , # Clear Logo
+			
+#########################################################
+			# TO DO :  Manage regions priority : 
+				# Europe , # Spain , # North America , # World , # Canada , # Japan , # France , # Germany , # Australia , # China , # United States , # United Kingdom ,
+				# Russia , # Oceania , # Brazil , # Italy , # Korea , # The Netherlands , # Sweden , # Asia , # South America , # Greece , # Finland , # Norway , # Hong Kong
+				
+#########################################################
+
+        ## TODO : The SQL search request could be improved.
+
+#########################################################        
+
+
+		if ! [ -z "$urlMediaBox" ]; then
+			
             mediaextension="${urlMediaBox##*.}"
-            #echo "wget --no-check-certificate "$urlMediaBox" -P \"/mnt/SDCARD/Roms/$CurrentSystem/Imgs\" -O \"$romNameNoExtension.png\""      # for debugging
-             wget -q --no-check-certificate "$urlMediaBox" -P "/mnt/SDCARD/Roms/$CurrentSystem/Imgs" -O "$romNameNoExtension.$mediaextension"
+            # echo "wget --no-check-certificate "http://images.launchbox-app.com/${urlMediaBox}" -P \"/mnt/SDCARD/Roms/$CurrentSystem/Imgs\" -O \"$romNameNoExtension.png\""      # for debugging
+             wget -q --no-check-certificate "http://images.launchbox-app.com/${urlMediaBox}" -P "/mnt/SDCARD/Roms/$CurrentSystem/Imgs" -O "$romNameNoExtension.$mediaextension"
              
-			 if [ -f "$romNameNoExtension.$mediaextension" ]; then
-				 if ! [ "$mediaextension" = "png" ]; then
+			 if [ -f "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.$mediaextension" ]; then
+				 if ! [ "$mediaextension" = "png" ]; then   # if the image is a jpg we convert it thanks to Eggs tool or ImageMagick
 					filename=$(basename -- "$urlMediaBox")
 					#magick "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.$mediaextension" -resize 250x360 "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png"
 					jpgconverstion=$(jpg2png "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.$mediaextension")
-					jpgconverstion=$(echo "$jpgconverstion" | awk -F "[ :]" '{printf("w:%d h:%d -> w:%d h:%d\n", $2, $4, $6, $8)}')
+					if [ $? -eq 0 ]; then  # we manage jpg2png crash on big images due to GFX  memory limit
+						jpgconverstion=$(echo "$jpgconverstion" | awk -F "[ :]" '{printf("w:%d h:%d -> w:%d h:%d\n", $2, $4, $6, $8)}')
+					else
+						jpg2png_stb "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.$mediaextension" "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png" 250 360
+					fi
+					
 					echo "jpg to png :  $jpgconverstion"
 					rm "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.$mediaextension"
 				else
@@ -339,6 +448,7 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 		    #echo -e "Couldn't find a match for $romNameTrimmed, ${YELLOW}skipping${NONE}"    # for debugging
 		    let Scrap_Fail++;
 		fi
+		unset urlMediaBox
 							
 	fi		
 
