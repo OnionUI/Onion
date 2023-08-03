@@ -1,0 +1,27 @@
+name: Test Docs deployment
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'website/**/*'
+  workflow_dispatch:
+
+jobs:
+  test-deploy:
+    name: Test Docusaurus deployment
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 'website'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: yarn
+          cache-dependency-path: '**/yarn.lock'
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: Test build website
+        run: yarn build
