@@ -12,13 +12,17 @@
 #include "utils/config.h"
 #include "utils/file.h"
 #include "utils/msleep.h"
+#include <pthread.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
 
 #include "./appstate.h"
 #include "./values.h"
 
 #define DIAG_SCRIPT_PATH "/mnt/SDCARD/.tmp_update/script/diagnostics"
 #define DIAG_MAX_LABEL_LENGTH 64
-#define DIAG_MAX_TOOLTIP_LENGTH 256
 #define DIAG_MAX_FILENAME_LENGTH 64
 #define DIAG_MAX_PATH_LENGTH (strlen(DIAG_SCRIPT_PATH) + DIAG_MAX_FILENAME_LENGTH + 2)
 
@@ -98,23 +102,48 @@ void action_setEnableLogging(void *pt)
     file_changeKeyValue(RETROARCH_CONFIG, "log_to_file =", new_value);
 }
 
-void action_runDiagnosticScript(void *payload_ptr)
-{
+void *runScript(void *payload_ptr) { // to background the running of the script so the UI isnt blocked
     ListItem *item = (ListItem *)payload_ptr;
     char *filename = (char *)item->payload_ptr;
-    char script_path[DIAG_MAX_PATH_LENGTH];
+    char script_path[DIAG_MAX_PATH_LENGTH + 1];
+    snprintf(script_path, sizeof(script_path), "%s/%s", DIAG_SCRIPT_PATH, filename);
+    
+    list_updateStickyNote(item, "Script running...");
+
+    pid_t pid = fork();
+    if (pid == 0) {
+        execl("/bin/sh", "sh", "-c", script_path, (char *)NULL);
+        exit(EXIT_FAILURE);
+    } else if (pid > 0) {
+        int status;
+        waitpid(pid, &status, 0);
+
+        if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+            list_updateStickyNote(item, "Script successfully completed");
+        } else {
+            list_updateStickyNote(item, "Script failed to start...");
+        }
+    } else {
+        list_updateStickyNote(item, "Failed to run script...");
+    }
+
+    return NULL;
+}
+
+void action_runDiagnosticScript(void *payload_ptr) { // run the script based on what the payload_ptr gives us
+    ListItem *item = (ListItem *)payload_ptr;
+    char *filename = (char *)item->payload_ptr;
+    char script_path[DIAG_MAX_PATH_LENGTH + 1];
     snprintf(script_path, sizeof(script_path), "%s/%s", DIAG_SCRIPT_PATH, filename);
 
-    FILE *logfile = fopen("/mnt/SDCARD/commands.log", "a");
-    if (logfile) {
-        fprintf(logfile, "Running command: %s\n", script_path);
-        fclose(logfile);
-    }
-    else {
-        printf("Error: Could not open log file for writing\n");
+    list_updateStickyNote(item, "Script starting...");
+
+    pthread_t thread;
+    if (pthread_create(&thread, NULL, runScript, payload_ptr) != 0) {
+        list_updateStickyNote(item, "Failed to run script...");
     }
 
-    system(script_path);
+    pthread_detach(thread);
 }
 
 void action_setMenuButtonHaptics(void *pt)

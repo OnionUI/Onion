@@ -160,6 +160,10 @@ ListItem *list_currentItem(List *list)
     return &list->items[list->active_pos];
 }
 
+void list_updateStickyNote(ListItem *item, const char *message) {
+    strncpy(item->sticky_note, message, STR_MAX - 1);
+}
+
 void _list_scroll(List *list, int pos)
 {
     pos = _list_modulo(pos, list->item_count);

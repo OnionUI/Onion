@@ -27,7 +27,7 @@
 typedef struct {
     char filename[DIAG_MAX_FILENAME_LENGTH]; // store the filename/path so we can call it later as the payload
     char label[DIAG_MAX_LABEL_LENGTH];
-    char tooltip[DIAG_MAX_TOOLTIP_LENGTH];
+    char tooltip[STR_MAX];
 } diagScripts;
 
 static int diags_numScripts;
@@ -72,7 +72,7 @@ void diags_getEntries(void)
                         continue;
                     }
                     if (sscanf(line, "tooltip=\"%256[^\"]\"", entry.tooltip) == 1) {
-                        entry.tooltip[DIAG_MAX_TOOLTIP_LENGTH - 1] = '\0';
+                        entry.tooltip[STR_MAX - 1] = '\0';
                         continue;
                     }
                 }
@@ -664,20 +664,23 @@ void menu_diagnostics(void *pt)
     if (!_menu_diagnostics._created) {
         diags_getEntries();
 
-        _menu_diagnostics = list_createWithTitle(1 + diags_numScripts, LIST_SMALL, "Diagnostics");
+        _menu_diagnostics = list_createWithSticky(1 + diags_numScripts, "Diagnostics");
 
         ListItem loggingItem = {
             .label = "Enable logging",
             .item_type = TOGGLE,
             .value = (int)settings.enable_logging,
-            .action = action_setEnableLogging};
+            .action = action_setEnableLogging,
+        };
+        strncpy(loggingItem.sticky_note, "Enable global logging", STR_MAX - 1);
         list_addItem(&_menu_diagnostics, loggingItem);
 
         for (int i = 0; i < diags_numScripts; i++) {
             ListItem diagItem = {
                 .label = "",
                 .payload_ptr = &scripts[i].filename, // storing filename in payload pointer
-                .action = action_runDiagnosticScript};
+                .action = action_runDiagnosticScript,
+            };
 
             const char *prefix = "";
             if (strncmp(scripts[i].filename, "util", 4) == 0) {
@@ -688,6 +691,7 @@ void menu_diagnostics(void *pt)
             }
 
             snprintf(diagItem.label, DIAG_MAX_LABEL_LENGTH - 1, "%s%.62s", prefix, scripts[i].label);
+            strncpy(diagItem.sticky_note, "Idle: Script not running", STR_MAX - 1);
 
             char *parsed_Tooltip = parse_newLines(scripts[i].tooltip);
             list_addItemWithInfoNote(&_menu_diagnostics, diagItem, parsed_Tooltip);
@@ -698,6 +702,8 @@ void menu_diagnostics(void *pt)
     menu_stack[++menu_level] = &_menu_diagnostics;
     header_changed = true;
 }
+
+
 
 void menu_advanced(void *_)
 {
