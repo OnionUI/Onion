@@ -1,6 +1,58 @@
 #!/bin/sh
 #echo $0 $*    # for debugging
 
+
+# Function to execute the SQL query and fetch the result
+execute_sql_query() {
+  local query="$1"
+  sqlite3 "/mnt/SDCARD/.tmp_update/script/scraper/launchbox_database/$platform.db" "$query" | head -n 1
+}
+
+# Function to retrieve the URL of the media box
+get_url_media_box() {
+  local romName="$1"
+	  
+	if ! echo "$romName" | grep -q "and"; then
+	  local query="SELECT Images.FileName 
+				   FROM Games JOIN Images ON Games.DatabaseID = Images.DatabaseID 
+				   WHERE Games.Name LIKE '%$romName' 
+				   AND Images.Type = 'Box - Front' 
+				   ORDER BY CASE 
+							  WHEN Region = '' THEN 1
+							  WHEN Region = 'World' THEN 2
+							  WHEN Region = 'United States' THEN 3
+							  WHEN Region = 'North America' THEN 4
+							  WHEN Region = 'Europe' THEN 5
+							  ELSE 6 
+							END 
+				  ;"
+	else   # if the rom name contains "and" then we do a more complete search :
+	  romNameTrimmed_Ampersand=${romNameTrimmed//and/&}
+	  romNameTrimmed_WithoutAnd=${romNameTrimmed//and/%}
+	  local query="SELECT Images.FileName 
+				   FROM Games JOIN Images ON Games.DatabaseID = Images.DatabaseID 
+				   WHERE (Games.Name LIKE '%$romName' OR Games.Name LIKE '%$romNameTrimmed_Ampersand' OR Games.Name LIKE '%$romNameTrimmed_WithoutAnd')
+				   AND Images.Type = 'Box - Front' 
+				   ORDER BY CASE 
+							  WHEN Region = '' THEN 1
+							  WHEN Region = 'World' THEN 2
+							  WHEN Region = 'United States' THEN 3
+							  WHEN Region = 'North America' THEN 4
+							  WHEN Region = 'Europe' THEN 5
+							  ELSE 6 
+							END 
+				  ;"
+	fi
+
+    
+			  
+  urlMediaBox=$(execute_sql_query "$query")
+  
+  unset $romNameTrimmed_Ampersand
+  unset $romNameTrimmed_WithoutAnd
+}
+
+
 if [ -z "$1" ]
 then
   echo -e "\nusage : scrap_screenscraper.sh emu_folder_name [rom_name]\nexample : scrap_screenscraper.sh SFC\n"
@@ -33,191 +85,102 @@ Scrap_notrequired=0
 CurrentSystem=$1
 CurrentRom="$2"
 
-
-get_launchbox_alias(){
-	#find the corresponding platform for launchbox scraping
-	case $1 in				
-		ADVMAME)
-			 platform="Arcade";;
-		AMIGA)
-			 platform="Commodore Amiga";;
-		AMIGACD)
-			 platform="Commodore Amiga CD32";;
-		ARCADE)
-			 platform="Arcade";;
-		# ARDUBOY)
-			 # platform="";;
-		ATARI)
-			 platform="Atari 2600";;
-		ATARIST)
-			 platform="Atari ST";;
-		# CHAI)
-			 # platform="";;
-		COLECO)
-			 platform="ColecoVision";;
-		COMMODORE)
-			 platform="Commodore 64";;
-		CPC)
-			 platform="Amstrad CPC";;
-		CPS1)
-			 platform="Arcade";;
-		CPS2)
-			 platform="Arcade";;
-		CPS3)
-			 platform="Arcade";;
-		DAPHNE)
-			 platform="Arcade";;
-		DOS)
-			 platform="MS-DOS";;
-		# EASYRPG)
-			 # platform="";;
-		# EBK)
-			 # platform="";;
-		EIGHTHUNDRED)
-			 platform="Atari 800";;
-		FAIRCHILD)
-			 platform="Fairchild Channel F";;
-		FBA2012)
-			 platform="Arcade";;
-		FBALPHA)
-			 platform="Arcade";;
-		FBNEO)
-			 platform="Arcade";;
-		FC)
-			 platform="Nintendo Entertainment System";;
-		FDS)
-			 platform="Nintendo Famicom Disk System";;
-		FIFTYTWOHUNDRED)
-			 platform="Atari 5200";;
-		GB)
-			 platform="Nintendo Game Boy";;
-		GBA)
-			 platform="Nintendo Game Boy Advance";;
-		GBC)
-			 platform="Nintendo Game Boy Color";;
-		GG)
-			 platform="Sega Game Gear";;
-		# GME)
-			 # platform="";;
-		GW)
-			 platform="Nintendo Game & Watch";;
-		INTELLIVISION)
-			 platform="Mattel Intellivision";;
-		JAGUAR)
-			 platform="Atari Jaguar";;
-		# JAVA)
-			 # platform="";;
-		# LUTRO)
-			 # platform="";;
-		LYNX)
-			 platform="Atari Lynx";;
-		MAME2000)
-			 platform="Arcade";;
-		MAME2003)
-			 platform="Arcade";;
-		MBA)
-			 platform="Arcade";;
-		MD)
-			 platform="Sega Genesis";;
-		MDHACKS)
-			 platform="Sega Genesis";;
-		MEGADUCK)
-			 platform="Mega Duck";;
-		# MICROW8)
-			 # platform="";;
-		MS)
-			 platform="Sega Master System";;
-		MSX)
-			 platform="Microsoft MSX";;
-		NEOCD)
-			 platform="SNK Neo Geo CD";;
-		NEOGEO)
-			 platform="SNK Neo Geo AES";;
-		NGP)
-			 platform="SNK Neo Geo Pocket";;
-		ODYSSEY)
-			 platform="Magnavox Odyssey";;
-		OPENBOR)
-			 platform="OpenBOR";;
-		# PALM)
-			 # platform="";;
-		PANASONIC)
-			 platform="3DO Interactive Multiplayer";;
-		PCE)
-			 platform="NEC TurboGrafx-16";;
-		PCECD)
-			 platform="NEC TurboGrafx-CD";;
-		PCEIGHTYEIGHT)
-			 platform="NEC PC-8801";;
-		PCFX)
-			 platform="NEC PC-FX";;
-		PCNINETYEIGHT)
-			 platform="NEC PC-9801";;
-		# PICO)
-			 # platform="";;
-		POKE)
-			 platform="Nintendo Pokemon Mini";;
-		# PORTS)
-			 # platform="";;
-		PS)
-			 platform="Sony Playstation";;
-		SATELLAVIEW)
-			 platform="Nintendo Satellaview";;
-		SCUMMVM)
-			 platform="ScummVM";;
-		SEGACD)
-			 platform="Sega CD";;
-		SEGASGONE)
-			 platform="Sega Model 1";;
-		SEVENTYEIGHTHUNDRED)
-			 platform="Atari 7800";;
-		SFC)
-			 platform="Super Nintendo Entertainment System";;
-		SGB)
-			 platform="Nintendo Game Boy Color";;
-		SGFX)
-			 platform="PC Engine SuperGrafx";;
-		# SUFAMI)
-			 # platform="";;
-		SUPERVISION)
-			 platform="Watara Supervision";;
-		THIRTYTWOX)
-			 platform="Sega 32X";;
-		# THOMSON)
-			 # platform="";;
-		# TI83)
-			 # platform="";;
-		# TIC)
-			 # platform="";;
-		# UZEBOX)
-			 # platform="";;
-		VB)
-			 platform="Nintendo Virtual Boy";;
-		VECTREX)
-			 platform="GCE Vectrex";;
-		VIC20)
-			 platform="Commodore VIC-20";;
-		VIDEOPAC)
-			 platform="Philips Videopac+";;
-		# VMU)
-			 # platform="dreamcast";;
-		WS)
-			 platform="WonderSwan";;
-		X68000)
-			 platform="Sharp X68000";;
-		XONE)
-			 platform="Sharp X1";;
-		ZXEIGHTYONE)
-			 platform="Sinclair ZX-81";;
-		ZXS)
-			platform="Sinclair ZX Spectrum";;
-		zxspectrum)
-			platform="Sinclair ZX Spectrum";;
-		*)
-			echo "unknown system, exiting."
-			exit
-		;;
-	esac
+get_launchbox_alias() {
+  # find the corresponding platform for launchbox scraping
+  case $1 in
+    ADVMAME)              platform="Arcade";;
+    AMIGA)                platform="Commodore Amiga";;
+    AMIGACD)              platform="Commodore Amiga CD32";;
+    ARCADE)               platform="Arcade";;
+    # ARDUBOY)            platform="";;
+    ATARI)                platform="Atari 2600";;
+    ATARIST)              platform="Atari ST";;
+    # CHAI)               platform="";;
+    COLECO)               platform="ColecoVision";;
+    COMMODORE)            platform="Commodore 64";;
+    CPC)                  platform="Amstrad CPC";;
+    CPS1)                 platform="Arcade";;
+    CPS2)                 platform="Arcade";;
+    CPS3)                 platform="Arcade";;
+    DAPHNE)               platform="Arcade";;
+    DOS)                  platform="MS-DOS";;
+    # EASYRPG)            platform="";;
+    # EBK)                platform="";;
+    EIGHTHUNDRED)         platform="Atari 800";;
+    FAIRCHILD)            platform="Fairchild Channel F";;
+    FBA2012)              platform="Arcade";;
+    FBALPHA)              platform="Arcade";;
+    FBNEO)                platform="Arcade";;
+    FC)                   platform="Nintendo Entertainment System";;
+    FDS)                  platform="Nintendo Famicom Disk System";;
+    FIFTYTWOHUNDRED)      platform="Atari 5200";;
+    GB)                   platform="Nintendo Game Boy";;
+    GBA)                  platform="Nintendo Game Boy Advance";;
+    GBC)                  platform="Nintendo Game Boy Color";;
+    GG)                   platform="Sega Game Gear";;
+    # GME)                platform="";;
+    GW)                   platform="Nintendo Game & Watch";;
+    INTELLIVISION)        platform="Mattel Intellivision";;
+    JAGUAR)               platform="Atari Jaguar";;
+    # JAVA)               platform="";;
+    # LUTRO)              platform="";;
+    LYNX)                 platform="Atari Lynx";;
+    MAME2000)             platform="Arcade";;
+    MAME2003)             platform="Arcade";;
+    MBA)                  platform="Arcade";;
+    MD)                   platform="Sega Genesis";;
+    MDHACKS)              platform="Sega Genesis";;
+    MEGADUCK)             platform="Mega Duck";;
+    # MICROW8)            platform="";;
+    MS)                   platform="Sega Master System";;
+    MSX)                  platform="Microsoft MSX";;
+    NEOCD)                platform="SNK Neo Geo CD";;
+    NEOGEO)               platform="SNK Neo Geo AES";;
+    NGP)                  platform="SNK Neo Geo Pocket";;
+    ODYSSEY)              platform="Magnavox Odyssey";;
+    OPENBOR)              platform="OpenBOR";;
+    # PALM)               platform="";;
+    PANASONIC)            platform="3DO Interactive Multiplayer";;
+    PCE)                  platform="NEC TurboGrafx-16";;
+    PCECD)                platform="NEC TurboGrafx-CD";;
+    PCEIGHTYEIGHT)        platform="NEC PC-8801";;
+    PCFX)                 platform="NEC PC-FX";;
+    PCNINETYEIGHT)        platform="NEC PC-9801";;
+    # PICO)               platform="";;
+    POKE)                 platform="Nintendo Pokemon Mini";;
+    # PORTS)              platform="";;
+    PS)                   platform="Sony Playstation";;
+    SATELLAVIEW)          platform="Nintendo Satellaview";;
+    SCUMMVM)              platform="ScummVM";;
+    SEGACD)               platform="Sega CD";;
+    SEGASGONE)            platform="Sega Model 1";;
+    SEVENTYEIGHTHUNDRED)  platform="Atari 7800";;
+    SFC)                  platform="Super Nintendo Entertainment System";;
+    SGB)                  platform="Nintendo Game Boy Color";;
+    SGFX)                 platform="PC Engine SuperGrafx";;
+    # SUFAMI)             platform="";;
+    SUPERVISION)          platform="Watara Supervision";;
+    THIRTYTWOX)           platform="Sega 32X";;
+    # THOMSON)            platform="";;
+    # TI83)               platform="";;
+    # TIC)                platform="";;
+    # UZEBOX)             platform="";;
+    VB)                   platform="Nintendo Virtual Boy";;
+    VECTREX)              platform="GCE Vectrex";;
+    VIC20)                platform="Commodore VIC-20";;
+    VIDEOPAC)             platform="Philips Videopac+";;
+    # VMU)                platform="dreamcast";;
+    WS)                   platform="WonderSwan";;
+    X68000)               platform="Sharp X68000";;
+    XONE)                 platform="Sharp X1";;
+    ZXEIGHTYONE)          platform="Sinclair ZX-81";;
+    ZXS)                  platform="Sinclair ZX Spectrum";;
+    zxspectrum)           platform="Sinclair ZX Spectrum";;
+    *)
+      echo "unknown system, exiting."
+      exit
+      ;;
+  esac
 }
 
 
@@ -287,116 +250,19 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 		let Scrap_notrequired++;
 	else
         	
-	   urlMediaBox=$(sqlite3 "/mnt/SDCARD/.tmp_update/script/scraper/launchbox_database/$platform.db" "SELECT Images.FileName 
-	   FROM Games JOIN Images ON Games.DatabaseID = Images.DatabaseID 
-	   WHERE Games.Name LIKE '%${romNameTrimmed}' AND Images.Type = 'Box - Front' 
-	   ORDER BY CASE 
-				  WHEN Region = '' THEN 1
-				  WHEN Region = 'World' THEN 2
-				  WHEN Region = 'United States' THEN 3
-				  WHEN Region = 'North America' THEN 4
-				  WHEN Region = 'Europe' THEN 5
-				  ELSE 6 
-				END
-				;" | head -n 1)
 
 
-		if [ -z "$urlMediaBox" ]; then   # we manage the special case of "&" wich can be "and" too
-			if echo "$romNameTrimmed" | grep -q "and"; then
-			  romNameTrimmed_And=${romNameTrimmed//and/&}
-			  # echo romNameTrimmed andwithsymbol= $romNameTrimmed_And
-               urlMediaBox=$(sqlite3 "/mnt/SDCARD/.tmp_update/script/scraper/launchbox_database/$platform.db" "SELECT Images.FileName 
-               FROM Games JOIN Images ON Games.DatabaseID = Images.DatabaseID 
-               WHERE Games.Name LIKE '%${romNameTrimmed_And}' AND Images.Type = 'Box - Front' 
-               ORDER BY CASE 
-                          WHEN Region = '' THEN 1
-                          WHEN Region = 'World' THEN 2
-                          WHEN Region = 'United States' THEN 3
-                          WHEN Region = 'North America' THEN 4
-                          WHEN Region = 'Europe' THEN 5
-                          ELSE 6 
-                        END 
-              ;" | head -n 1 )
-			fi
-		fi
-		
-		if [ -z "$urlMediaBox" ]; then   # we manage the special case of "&" wich can be " " too
-			if echo "$romNameTrimmed" | grep -q "and"; then
-			  romNameTrimmed_WithoutAnd=${romNameTrimmed//and/%}
-			  # echo romNameTrimmed andwithsymbol= $romNameTrimmed_WithoutAnd
-               urlMediaBox=$(sqlite3 "/mnt/SDCARD/.tmp_update/script/scraper/launchbox_database/$platform.db" "SELECT Images.FileName 
-               FROM Games JOIN Images ON Games.DatabaseID = Images.DatabaseID 
-               WHERE Games.Name LIKE '%${romNameTrimmed_WithoutAnd}' AND Images.Type = 'Box - Front' 
-               ORDER BY CASE 
-                          WHEN Region = '' THEN 1
-                          WHEN Region = 'World' THEN 2
-                          WHEN Region = 'United States' THEN 3
-                          WHEN Region = 'North America' THEN 4
-                          WHEN Region = 'Europe' THEN 5
-                          ELSE 6 
-                        END 
-              ;" | head -n 1 )
-			fi
-		fi
-############################## same searchs but  more permissive search : romname*  , could find some false positive, if you have "Football" it could find "Football Pro"  ##############################
+	urlMediaBox=""
+	get_url_media_box "$romNameTrimmed"
+	
+	
+###### same searchs but  more permissive search : romname*  , could find some false positive, if you have "Football" it could find "Football Pro"  ######
 
-
-			if [ -z "$urlMediaBox" ]; then  
-			   urlMediaBox=$(sqlite3 "/mnt/SDCARD/.tmp_update/script/scraper/launchbox_database/$platform.db" "SELECT Images.FileName 
-			   FROM Games JOIN Images ON Games.DatabaseID = Images.DatabaseID 
-			   WHERE Games.Name LIKE '%${romNameTrimmed}%' AND Images.Type = 'Box - Front' 
-			   ORDER BY CASE 
-						  WHEN Region = '' THEN 1
-						  WHEN Region = 'World' THEN 2
-						  WHEN Region = 'United States' THEN 3
-						  WHEN Region = 'North America' THEN 4
-						  WHEN Region = 'Europe' THEN 5
-						  ELSE 6 
-						END
-						;" | head -n 1)
-			fi
+	if [ -z "$urlMediaBox" ]; then  
+		get_url_media_box "${romNameTrimmed}%"
+	fi
 			
-			if [ -z "$urlMediaBox" ]; then   # we manage the special case of "&" wich can be "and" too
-				if echo "$romNameTrimmed" | grep -q "and"; then
-				  romNameTrimmed_And=${romNameTrimmed//and/&}
-			
-			# echo romNameTrimmed andwithsymbol= $romNameTrimmed_And
-				   urlMediaBox=$(sqlite3 "/mnt/SDCARD/.tmp_update/script/scraper/launchbox_database/$platform.db" "SELECT Images.FileName 
-				   FROM Games JOIN Images ON Games.DatabaseID = Images.DatabaseID 
-				   WHERE Games.Name LIKE '%${romNameTrimmed_And}%' AND Images.Type = 'Box - Front' 
-				   ORDER BY CASE 
-							  WHEN Region = '' THEN 1
-							  WHEN Region = 'World' THEN 2
-							  WHEN Region = 'United States' THEN 3
-							  WHEN Region = 'North America' THEN 4
-							  WHEN Region = 'Europe' THEN 5
-							  ELSE 6 
-							END 
-				  ;" | head -n 1 )
-				fi
-		fi
 
-		if [ -z "$urlMediaBox" ]; then   # we manage the special case of "&" wich can be " " too
-			if echo "$romNameTrimmed" | grep -q "and"; then
-			  romNameTrimmed_WithoutAnd=${romNameTrimmed//and/%}
-			  # echo romNameTrimmed andwithsymbol= $romNameTrimmed_WithoutAnd
-               urlMediaBox=$(sqlite3 "/mnt/SDCARD/.tmp_update/script/scraper/launchbox_database/$platform.db" "SELECT Images.FileName 
-               FROM Games JOIN Images ON Games.DatabaseID = Images.DatabaseID 
-               WHERE Games.Name LIKE '%${romNameTrimmed_WithoutAnd}%' AND Images.Type = 'Box - Front' 
-               ORDER BY CASE 
-                          WHEN Region = '' THEN 1
-                          WHEN Region = 'World' THEN 2
-                          WHEN Region = 'United States' THEN 3
-                          WHEN Region = 'North America' THEN 4
-                          WHEN Region = 'Europe' THEN 5
-                          ELSE 6 
-                        END 
-              ;" | head -n 1 )
-			fi
-		fi
-		
-		
-		
 #########################################################
 		# TO DO : manage other media types from options : https://docs.google.com/spreadsheets/d/1jFWhlt4MPcPGox45OCBAQVUrCOviDbh5P0DgoOlQ1vI/edit?usp=sharing
 			# Banner , # Box - 3D , # Box - Front , # Screenshot - Gameplay , # Screenshot - Game Title , # Clear Logo
