@@ -123,7 +123,8 @@ void *runScript(void *payload_ptr)
         if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
             list_updateStickyNote(item, "Script successfully completed"); // good run
             list_changed = true;
-        } else {
+        }
+        else {
             list_updateStickyNote(item, "Script failed"); // displays if the script is bad (syntax, other errors, none-zero)
             list_changed = true;
         }
@@ -136,7 +137,6 @@ void *runScript(void *payload_ptr)
     return NULL;
 }
 
-
 void action_runDiagnosticScript(void *payload_ptr)
 { // run the script based on what the payload_ptr gives us
     ListItem *item = (ListItem *)payload_ptr;
@@ -146,7 +146,7 @@ void action_runDiagnosticScript(void *payload_ptr)
 
     pthread_t thread;
     if (pthread_create(&thread, NULL, runScript, payload_ptr) != 0) {
-        list_updateStickyNote(item, "Failed to run script..."); // threading issues 
+        list_updateStickyNote(item, "Failed to run script..."); // threading issues
         list_changed = true;
     }
 
