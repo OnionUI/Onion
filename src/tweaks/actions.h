@@ -17,7 +17,6 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-
 #include "./appstate.h"
 #include "./values.h"
 
@@ -102,20 +101,22 @@ void action_setEnableLogging(void *pt)
     file_changeKeyValue(RETROARCH_CONFIG, "log_to_file =", new_value);
 }
 
-void *runScript(void *payload_ptr) { // to background the running of the script so the UI isnt blocked
+void *runScript(void *payload_ptr)
+{ // to background the running of the script so the UI isnt blocked
     ListItem *item = (ListItem *)payload_ptr;
     char *filename = (char *)item->payload_ptr;
     char script_path[DIAG_MAX_PATH_LENGTH + 1];
     snprintf(script_path, sizeof(script_path), "%s/%s", DIAG_SCRIPT_PATH, filename);
-    
+
     list_updateStickyNote(item, "Script running...");
     list_changed = true;
-    
+
     pid_t pid = fork();
     if (pid == 0) {
         execl("/bin/sh", "sh", "-c", script_path, (char *)NULL);
         exit(EXIT_FAILURE);
-    } else if (pid > 0) {
+    }
+    else if (pid > 0) {
         int status;
         waitpid(pid, &status, 0);
 
@@ -126,15 +127,18 @@ void *runScript(void *payload_ptr) { // to background the running of the script 
             list_updateStickyNote(item, "Script failed"); // displays if the script is bad (syntax, other errors, none-zero)
             list_changed = true;
         }
-    } else {
-        list_updateStickyNote(item, "Failed to run script...");
+    }
+    else {
+        list_updateStickyNote(item, "Failed to run script..."); // case when fork fails
         list_changed = true;
     }
 
     return NULL;
 }
 
-void action_runDiagnosticScript(void *payload_ptr) { // run the script based on what the payload_ptr gives us
+
+void action_runDiagnosticScript(void *payload_ptr)
+{ // run the script based on what the payload_ptr gives us
     ListItem *item = (ListItem *)payload_ptr;
     char *filename = (char *)item->payload_ptr;
     char script_path[DIAG_MAX_PATH_LENGTH + 1];

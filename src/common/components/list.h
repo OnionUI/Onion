@@ -160,7 +160,8 @@ ListItem *list_currentItem(List *list)
     return &list->items[list->active_pos];
 }
 
-void list_updateStickyNote(ListItem *item, const char *message) {
+void list_updateStickyNote(ListItem *item, const char *message)
+{
     strncpy(item->sticky_note, message, STR_MAX - 1);
 }
 
