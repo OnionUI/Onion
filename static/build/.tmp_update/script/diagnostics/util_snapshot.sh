@@ -109,7 +109,7 @@ system_healthcheck () {
 ##################
 
 get_netserv_status() { # Just checks if these exist - will need upkeep in this format
-    services=".smbdState_ .authsmbdState_ .authftpState_ .authhttpState_ .authsshState_ .ftpState_ .hotspotState_ .httpState_ .ntpState_ .smbdState_ .sshState_ .telnetState_"
+    services=".smbdState_ .authftpState_ .authhttpState_ .authsshState_ .ftpState_ .hotspotState_ .httpState_ .ntpState_ .smbdState_ .sshState_ .telnetState_"
 
     for file in $services; do
         if [ -e "$sysdir/config/$file" ]; then
