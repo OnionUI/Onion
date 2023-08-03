@@ -4,5 +4,6 @@
   "Retroarch_enabled": "true",
   "Screenscraper_enabled": "true",
   "Launchbox_enabled": "true",
-  "ScrapeInBackground": "false"
+  "ScrapeInBackground": "false",
+  "MediaType": "box-2D"
 }

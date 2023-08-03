@@ -303,6 +303,8 @@ if [ -f "$ScraperConfigFile" ]; then
     userSS=$(echo "$config" | jq -r '.screenscraper_username')
     passSS=$(echo "$config" | jq -r '.screenscraper_password')
     ScrapeInBackground=$(echo "$config" | jq -r '.ScrapeInBackground')
+	MediaType=$(echo "$config" | jq -r '.MediaType')
+
 	u=$(echo "U2FsdGVkX18PKpoEvELyE+5xionDX8iRxAIxJj4FN1U=" | openssl enc -aes-256-cbc -d -a -pbkdf2 -iter 10000 -salt -pass pass:"3x0tVD3jZvElZWRt3V67QQ==")
 	p=$(echo "U2FsdGVkX1/ydn2FWrwYcFVc5gVYgc5kVaJ5jDOeOKE=" |openssl enc -aes-256-cbc -d -a -pbkdf2 -iter 10000 -salt -pass pass:"RuA29ch3zVoodAItmvKKmZ+4Au+5owgvV/ztqRu4NjI=")
 
@@ -336,17 +338,26 @@ if [ "$userStored" = "false" ] && ! [ "$ScrapeInBackground" = "true" ]; then
             config=$(cat $ScraperConfigFile)
             config=$(echo "$config" | jq --arg user "$userSS" --arg pass "$passSS" '.screenscraper_username = $user | .screenscraper_password = $pass')
             echo "$config" > $ScraperConfigFile
+
             break
             
         elif [ "$Mychoice" = "Screenscraper information" ]; then
-            Screenscraper_information
+            clear
+			Screenscraper_information
         else
-            break
+            clear
+			break
         fi
+
     done
 fi
 		
+clear
+echo -e "\n*****************************************************"
+echo -e "******************* SCREENSCRAPER *******************"
+echo -e "*****************************************************\n\n"
 
+echo -e "Scraping $CurrentSystem...\n"
 
 ####################################################################################################################################
  #ls /mnt/SDCARD/Roms/$CurrentSystem
@@ -414,8 +425,8 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 	if [ -f "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png" ]; then
 		echo -e "${YELLOW}already Scraped !${NONE}"
 		let Scrap_notrequired++;
+	
 	else
-
         url="https://www.screenscraper.fr/api2/jeuInfos.php?devid=${u#???}&devpassword=${p%??}&softname=onion&output=json&ssid=${userSS}&sspassword=${passSS}&crc=&systemeid=${ssID}&romtype=rom&romnom=${romNameTrimmed}.zip"
         # TODO : search by CRC/MD5/shal or gameid
         # TODO : managing multithread for users who have it.
@@ -424,10 +435,7 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
         
         echo Searching on screenscraper ...
         api_result=$(curl -k -s "$url") 
-
-    	
-    
-    	
+		
         # Don't check art if screenscraper is closed
         if echo $api_result | grep -q "API closed"; then
         	echo -e "The Screenscraper API is currently down, please try again later."
@@ -435,7 +443,15 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
         	let Scrap_Fail++;
         	break;
         fi
-        
+
+        # Don't check art if max threads for leechers is used
+        if echo $api_result | grep -q "The maximum threads"; then
+        	echo -e "The Screenscraper API is too busy for non-users. please try again later (or register)."
+        	echo -e "Press the ${RED}A button${NONE} to finish"
+        	let Scrap_Fail++;
+        	break;
+        fi
+
         # Don't check art after a failed curl request
         if [[ "$api_result" == "" ]]; then
             echo -e "${RED}Request failed${NONE}"
@@ -455,7 +471,6 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
         fi
     	
     
-        
         gameIDSS=$(echo $api_result | jq -r '.response.jeu.id')
     	echo "gameID = $gameIDSS"
     	
@@ -467,41 +482,48 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
         fi
         
         # Here we choose the kind of media that we want :
-            # sstitle	        Screenshot Title	(recommended)
+            # sstitle	        Screenshot of Title Screen	(recommended)
             # ss	            Screenshot	(recommended)
             # fanart	        Fan Art	
             # screenmarquee	    Screen Marquee	
             # steamgrid	        HD Logos	
             # wheel	            Wheel	
             # wheel-hd	        HD Logos	
-            # box-2D	        Case: Front	(default) (recommended)
+            # box-2D	        Box Art	(default) (recommended)
             # box-2D-side   	Box: Side	
             # box-2D-back   	Box: Back	
             # box-texture   	Box: Texture	
             # support-texture	Stand: Texture	
-            
-         # TODO : let user choose his media type in options
-        
-        MediaType="box-2D"
-        # Get the URL of media in this order : world, us, usa, eu and then the first entry available
-        url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "wor") | .url' | head -n 1)
-        if [ -z "$url" ]; then
-          url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "us") | .url' | head -n 1)
-          if [ -z "$url" ]; then
-              url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "usa") | .url' | head -n 1)
-              if [ -z "$url" ]; then
-                  url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "eu") | .url' | head -n 1)
-                  if [ -z "$url" ]; then
-                    url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | .url' | head -n 1)
-                  fi
-              fi
-          fi
-        fi
-        
-        
+            # box-3D            Box 3D Art
+			# mixrbv1			RecalBox Mix V1
+			# mixrbv2			RecalBox Mix V2
+
+		# TODO: Use the region defined in the rom's name to dictate which meida the user should receive, unless overridden
+		# Get the URL of media in this order : world, us, usa, na, eu, uk, oceania, au, nz, jp and then the first entry available
+		url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "wor") | .url' | head -n 1)
+		if [ -z "$url" ]; then
+			url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "us") | .url' | head -n 1)
+			if [ -z "$url" ]; then
+				url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "usa") | .url' | head -n 1)
+				if [ -z "$url" ]; then
+					url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "eu") | .url' | head -n 1)
+					if [ -z "$url" ]; then
+						url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "uk") | .url' | head -n 1)
+						if [ -z "$url" ]; then
+							url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "au") | .url' | head -n 1)
+							if [ -z "$url" ]; then
+								url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "nz") | .url' | head -n 1)
+								if [ -z "$url" ]; then
+									url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "jp") | .url' | head -n 1)
+								fi
+							fi
+						fi
+					fi
+				fi
+			fi
+		fi        
         # TODO : if default media not found search in other media types
-    
-    
+        
         if [ -z "$url" ]; then
             echo -e "${YELLOW}Game match but no media found!${NONE}"
             let Scrap_Fail++;
@@ -509,23 +531,23 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
         fi
         
         # echo -e "Downloading Images for $romNameNoExtension \nScreenscraper ID : $gameIDSS \n url :$url\n\n"        # for debugging
-        
+
         url=$(echo "$url" | sed 's/"$/\&maxwidth=250\&maxheight=360"/')
         urlcmd=$(echo "wget -q --no-check-certificate "$url" -P \"/mnt/SDCARD/Roms/$CurrentSystem/Imgs\" -O \"$romNameNoExtension.png\"")
         
         # directl download trigger an error
         #wget --no-check-certificate "$url" -P "/mnt/SDCARD/Roms/$CurrentSystem/Imgs" -O "$romNameNoExtension.png"
         #wget $urlcmd
+
         echo $urlcmd>/tmp/rundl.sh
         sh /tmp/rundl.sh
+
         echo -e "${GREEN}Scraped!${NONE}"
         let Scrap_Success++;
         
         
         # echo -e "\n\n ==$url== \n\n"
         #pngscale "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png" "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png"
-
-          
     fi
    
 

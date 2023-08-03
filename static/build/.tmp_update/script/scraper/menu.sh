@@ -27,19 +27,21 @@ ScraperConfigFile=/mnt/SDCARD/.tmp_update/config/scraper.json
 Menu_Config()
 {
     Option1="Select your scraping sources"
-    Option2="Modify your screenscraper.fr account."
-    Option3="Scraping in background ?"
-    Option4="Back to Main Menu"
+    Option2="Toggle background scraping"
+    Option3="Screenscraper: account settings"
+    Option4="Screenscraper: media preferences"
+    Option5="Back to Main Menu"
     
-    Mychoice=$( echo -e "$Option1\n$Option2\n$Option3\n$Option4" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "      --== CONFIGURATION MENU ==--" -b "Press A to validate your choice.")
+    Mychoice=$( echo -e "$Option1\n$Option2\n$Option3\n$Option4\n$Option5" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "      --== CONFIGURATION MENU ==--" -b "Press A to validate your choice.")
 
     [ "$Mychoice" = "$Option1" ] && Menu_Config_ScrapingSelection
-    [ "$Mychoice" = "$Option2" ] && Menu_Config_ScreenscraperAccount
-    [ "$Mychoice" = "$Option3" ] && Menu_Config_BackgroundScraping
-    [ "$Mychoice" = "Back to Main Menu" ] && Menu_Main
+    [ "$Mychoice" = "$Option2" ] && Menu_Config_BackgroundScraping
+    [ "$Mychoice" = "$Option3" ] && Menu_Config_SSAccountSettings
+    [ "$Mychoice" = "$Option4" ] && Menu_Config_SSMediaPreferences
+    [ "$Mychoice" = "$Option5" ] && Menu_Main
 }
 
-Menu_Config_ScreenscraperAccount()
+Menu_Config_SSAccountSettings()
 {
     
     echo "-------------------------------------------------"
@@ -147,6 +149,68 @@ Menu_Config_BackgroundScraping()
         Menu_Config
 }
 
+Menu_Config_SSMediaPreferences()
+{
+    # Check if the configuration file exists
+    if [ ! -f "$ScraperConfigFile" ]; then
+      echo "Error: configuration file not found"
+      read -n 1 -s -r -p "Press A to continue"
+      exit 1
+    fi
+    
+    clear
+    echo -e 
+    echo -e "====================================================\n\n"
+    echo -e "The Media Type affects the style of the graphics \nand images returned in ScreenScraper results.\n\n"
+    echo -e "To prevent other scraping sources from overriding\nthis setting, ensure to deactivate them.\n\n"    
+    echo -e "====================================================\n\n\n"
+    read -n 1 -s -r -p "Press A to continue"
+    clear
+    
+    config=$(cat "$ScraperConfigFile")
+    MediaType=$(echo "$config" | jq -r '.MediaType')
+
+    	Mychoice=$( echo -e "Box Art (default)\nBox Art - 3D\nScreenshot - Title Screen\nScreenshot - In Game\nWheel\nMarquee\nScreenscraper Mix V1\nScreenscraper Mix V2" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "Media Type ? (currently: $MediaType)" -b "Press A to validate your choice.")
+        # TODO : add a new option to display tail of the log
+
+        # TODO: Create a dictionary so we can support display and system names throughout the utility
+        case "$Mychoice" in
+            "Box Art (default)")
+                MediaType="box-2D"
+                ;;
+            "Box Art - 3D")
+                MediaType="box-3D"
+                ;;
+            "Screenshot - Title Screen")
+                MediaType="sstitle"
+                ;;
+            "Screenshot - In Game")
+                MediaType="ss"
+                ;;
+            "Wheel")
+                MediaType="wheel"
+                ;;
+            "Marquee")
+                MediaType="screenmarqueesmall"
+                ;;
+            "Screenscraper Mix V1")
+                MediaType="mixrbv1"
+                ;;
+            "Screenscraper Mix V2")
+                MediaType="mixrbv2"
+                ;;
+            *)
+                false
+                ;;                
+        esac
+
+        config=$(cat $ScraperConfigFile)
+        config=$(echo "$config" | jq --arg MediaType "$MediaType" '.MediaType = $MediaType')
+        echo "$config" > $ScraperConfigFile
+        
+        Menu_Config
+}
+
 Menu_Config_ScrapingSelection()
 {
     clear
@@ -162,40 +226,36 @@ Menu_Config_ScrapingSelection()
     
     
     # Recovering the values of variables
-    Retroarch_enabled=$(echo "$json" | jq -r '.Retroarch_enabled')
     Screenscraper_enabled=$(echo "$json" | jq -r '.Screenscraper_enabled')
     Launchbox_enabled=$(echo "$json" | jq -r '.Launchbox_enabled')
-    
+    Retroarch_enabled=$(echo "$json" | jq -r '.Retroarch_enabled')
 
-    [ "$Retroarch_enabled" = "true" ] && Retroarch="[x] Retroarch" || Retroarch="[ ] Retroarch"
     [ "$Screenscraper_enabled" = "true" ] && Screenscraper="[x] Screenscraper" || Screenscraper="[ ] Screenscraper"
     [ "$Launchbox_enabled" = "true" ] && Launchbox="[x] Launchbox" || Launchbox="[ ] Launchbox"
-    
-    
+    [ "$Retroarch_enabled" = "true" ] && Retroarch="[x] Retroarch" || Retroarch="[ ] Retroarch"    
     
     while true; do
     
-        Mychoice=$( echo -e "$Retroarch\n$Screenscraper\n$Launchbox\nBack to Configuration Menu" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "      --== SCRAPER SELECTION ==--" -b "Press A to validate your choice.")
+        Mychoice=$( echo -e "$Screenscraper\n$Launchbox\n$Retroarch\nBack to Configuration Menu" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "      --== SCRAPER SELECTION ==--" -b "Press A to validate your choice.")
         
-        [ "$Mychoice" = "[ ] Retroarch" ] && Retroarch="[x] Retroarch"
-        [ "$Mychoice" = "[x] Retroarch" ] && Retroarch="[ ] Retroarch"
-        [ "$Mychoice" = "[ ] Launchbox" ] && Launchbox="[x] Launchbox"
-        [ "$Mychoice" = "[x] Launchbox" ] && Launchbox="[ ] Launchbox"
         [ "$Mychoice" = "[ ] Screenscraper" ] && Screenscraper="[x] Screenscraper"
         [ "$Mychoice" = "[x] Screenscraper" ] && Screenscraper="[ ] Screenscraper"
+        [ "$Mychoice" = "[ ] Launchbox" ] && Launchbox="[x] Launchbox"
+        [ "$Mychoice" = "[x] Launchbox" ] && Launchbox="[ ] Launchbox"
+        [ "$Mychoice" = "[ ] Retroarch" ] && Retroarch="[x] Retroarch"
+        [ "$Mychoice" = "[x] Retroarch" ] && Retroarch="[ ] Retroarch"
+
         [ "$Mychoice" = "Back to Configuration Menu" ] && break
     
     done
     
-    
-    [ "$Retroarch" = "[x] Retroarch" ] && Retroarch_enabled="true" || Retroarch_enabled="false"
+    [ "$Screenscraper" = "[x] Screenscraper" ] && Screenscraper_enabled="true" || Screenscraper_enabled="false"    
     [ "$Launchbox" = "[x] Launchbox" ] && Launchbox_enabled="true" || Launchbox_enabled="false"
-    [ "$Screenscraper" = "[x] Screenscraper" ] && Screenscraper_enabled="true" || Screenscraper_enabled="false"
-    
+    [ "$Retroarch" = "[x] Retroarch" ] && Retroarch_enabled="true" || Retroarch_enabled="false"
+   
 
     # Modify the JSON string with the new variable values
-    json=$(echo "$json" | jq --arg Retroarch "$Retroarch_enabled" --arg Screenscraper "$Screenscraper_enabled" --arg Launchbox "$Launchbox_enabled" '. + { Retroarch_enabled: $Retroarch, Screenscraper_enabled: $Screenscraper, Launchbox_enabled: $Launchbox }')
-    
+    json=$(echo "$json" | jq --arg Screenscraper "$Screenscraper_enabled" --arg Launchbox "$Launchbox_enabled" --arg Retroarch "$Retroarch_enabled" '. + { Screenscraper_enabled: $Screenscraper, Launchbox_enabled: $Launchbox, Retroarch_enabled: $Retroarch }')
 
     # Rewrite the modified JSON content to the file
     #echo "$json"    # for debugging
@@ -218,7 +278,7 @@ Launch_Scraping ()
 	
 	if [ "$(ip r)" = "" ]; then 
 		echo "You must be connected to wifi to use Scraper"
-		sleep 3
+		read -n 1 -s -r -p "Press A to continue"
 		exit
 	fi
 
@@ -233,26 +293,17 @@ Launch_Scraping ()
     config=$(cat "$ScraperConfigFile")
     
     # Get the values of the "Retroarch_enabled", "Screenscraper_enabled" and "Launchbox_enabled" keys
-    Retroarch_enabled=$(echo "$config" | jq -r '.Retroarch_enabled')
     Screenscraper_enabled=$(echo "$config" | jq -r '.Screenscraper_enabled')
     Launchbox_enabled=$(echo "$config" | jq -r '.Launchbox_enabled')
+    Retroarch_enabled=$(echo "$config" | jq -r '.Retroarch_enabled')
     ScrapeInBackground=$(echo "$config" | jq -r '.ScrapeInBackground')
-    
+    MediaType=$(echo "$config" | jq -r '.MediaType')
     
     
     [ "$onerom" = "1" ] && onerom="$romname" || onerom=""
     
     # Check the value of each variable and run the corresponding script if the value is "true"
-    
-    if [ "$Retroarch_enabled" = "true" ]; then
-        if [ "$ScrapeInBackground" = "true" ]; then
-            echo "/mnt/SDCARD/.tmp_update/script/scraper/scrap_retroarch.sh $CurrentSystem" \"$onerom\" >>/tmp/scraper_script.sh
-        else
-            /mnt/SDCARD/.tmp_update/script/scraper/scrap_retroarch.sh $CurrentSystem "$onerom"
-        fi
-    fi
-    if [ -f "$romimage" ] && ! [ "$onerom" = "" ] ; then echo exiting $romimage; exit; fi;  # exit if only one rom must be scraped and is already found
-    
+
     if [ "$Screenscraper_enabled" = "true" ]; then
         if [ "$ScrapeInBackground" = "true" ]; then
             echo "/mnt/SDCARD/.tmp_update/script/scraper/scrap_screenscraper.sh $CurrentSystem" \"$onerom\" >>/tmp/scraper_script.sh
@@ -261,9 +312,7 @@ Launch_Scraping ()
         fi
     fi
     if [ -f "$romimage" ] && ! [ "$onerom" = "" ] ; then echo exiting $romimage; exit; fi;  # exit if only one rom must be scraped and is already found
-    
-    if [ -f "$romimage" ] && ! [ "$onerom" = "" ] ; then  echo exiting $romimage ;  exit;fi;
-    
+
     if [ "$Launchbox_enabled" = "true" ]; then
         if [ "$ScrapeInBackground" = "true" ]; then
             echo "/mnt/SDCARD/.tmp_update/script/scraper/scrap_launchbox.sh $CurrentSystem" \"$onerom\" >>/tmp/scraper_script.sh
@@ -271,7 +320,17 @@ Launch_Scraping ()
             /mnt/SDCARD/.tmp_update/script/scraper/scrap_launchbox.sh $CurrentSystem "$onerom"
         fi
     fi
-	
+    if [ -f "$romimage" ] && ! [ "$onerom" = "" ] ; then  echo exiting $romimage ;  exit;fi;
+    
+    if [ "$Retroarch_enabled" = "true" ]; then
+        if [ "$ScrapeInBackground" = "true" ]; then
+            echo "/mnt/SDCARD/.tmp_update/script/scraper/scrap_retroarch.sh $CurrentSystem" \"$onerom\" >>/tmp/scraper_script.sh
+        else
+            /mnt/SDCARD/.tmp_update/script/scraper/scrap_retroarch.sh $CurrentSystem "$onerom"
+        fi
+    fi
+    if [ -f "$romimage" ] && ! [ "$onerom" = "" ] ; then  echo exiting $romimage ;  exit;fi;
+
 	rm -f /tmp/stay_awake
     exit
 }
