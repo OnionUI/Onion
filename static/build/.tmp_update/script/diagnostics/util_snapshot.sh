@@ -1,7 +1,7 @@
 ## Add your menulabel and tooltip for tweaks below, don't put them at the top of the file.
 
 menulabel="System log snapshot"
-tooltip="Take a snapshot of the system logs \n and export them to SD:logdump.7z \n \n Attach these logs to your issue \n or send directly to a dev"
+tooltip="Take a snapshot of the system logs \n and export them to SD:log_export.7z \n \n Attach these logs to your issue \n or send directly to a dev"
 
 # Tweaks diags script to pull a system snapshot
 
@@ -27,9 +27,10 @@ sync
 ## LOGGING FUNCTION ##
 ##################
 
-log() {
-    echo "$1" > /tmp/log_status
-}
+## Source global utils
+logfile=util_snapshot
+. $sysdir/script/log.sh
+program=$(basename "$0" .sh)
 
 ##################
 ## MAIN ##
@@ -159,7 +160,7 @@ check_hostapd_conf() {
     fi
 }
 
-check_dnsmasq_conf() { # This file can either be 251 or 187 depending on the state of .logging. 
+check_dnsmasq_conf() { # This file can either be 251 or 187 depending on the state of .logging. (In a future feature where the dnsmasq log entry is removed)
     file_path="$sysdir/config/dnsmasq.conf"
     file_size=$(stat -c%s "$file_path")
 
