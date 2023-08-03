@@ -703,8 +703,6 @@ void menu_diagnostics(void *pt)
     header_changed = true;
 }
 
-
-
 void menu_advanced(void *_)
 {
     if (!_menu_advanced._created) {
