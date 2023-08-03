@@ -121,10 +121,10 @@ void *runScript(void *payload_ptr)
         waitpid(pid, &status, 0);
 
         if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
-            list_updateStickyNote(item, "Script successfully completed"); // good run
+            list_updateStickyNote(item, "Script successfully completed."); // good run
             list_changed = true;
         } else {
-            list_updateStickyNote(item, "Script failed"); // displays if the script is bad (syntax, other errors, none-zero)
+            list_updateStickyNote(item, "Script failed!"); // displays if the script is bad (syntax, other errors, none-zero)
             list_changed = true;
         }
     }

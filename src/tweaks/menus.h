@@ -665,16 +665,17 @@ void menu_diagnostics(void *pt)
         diags_getEntries();
 
         _menu_diagnostics = list_createWithSticky(1 + diags_numScripts, "Diagnostics");
-
-        ListItem loggingItem = {
-            .label = "Enable logging",
-            .item_type = TOGGLE,
-            .value = (int)settings.enable_logging,
-            .action = action_setEnableLogging,
-        };
-        strncpy(loggingItem.sticky_note, "Enable global logging", STR_MAX - 1);
-        list_addItem(&_menu_diagnostics, loggingItem);
-
+        list_addItemWithInfoNote(&_menu_diagnostics,
+                                 (ListItem){
+                                    .label = "Enable logging",
+                                    .sticky_note = "Enable global logging",
+                                    .item_type = TOGGLE,
+                                    .value = (int)settings.enable_logging,
+                                    .action = action_setEnableLogging},
+                                 "Enable global logging, \n"
+                                 "for system & networking. \n \n"
+                                 "Logs will be generated in, \n"
+                                 "SD: /.tmp_update/logs.");
         for (int i = 0; i < diags_numScripts; i++) {
             ListItem diagItem = {
                 .label = "",
