@@ -678,7 +678,7 @@ void menu_diagnostics(void *pt)
         for (int i = 0; i < diags_numScripts; i++) {
             ListItem diagItem = {
                 .label = "",
-                .payload_ptr = &scripts[i].filename, // storing filename in payload pointer
+                .payload_ptr = &scripts[i].filename,
                 .action = action_runDiagnosticScript,
             };
 
@@ -702,8 +702,6 @@ void menu_diagnostics(void *pt)
     menu_stack[++menu_level] = &_menu_diagnostics;
     header_changed = true;
 }
-
-
 
 void menu_advanced(void *_)
 {

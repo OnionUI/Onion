@@ -109,7 +109,8 @@ void *runScript(void *payload_ptr) { // to background the running of the script 
     snprintf(script_path, sizeof(script_path), "%s/%s", DIAG_SCRIPT_PATH, filename);
     
     list_updateStickyNote(item, "Script running...");
-
+    list_changed = true;
+    
     pid_t pid = fork();
     if (pid == 0) {
         execl("/bin/sh", "sh", "-c", script_path, (char *)NULL);
@@ -119,12 +120,15 @@ void *runScript(void *payload_ptr) { // to background the running of the script 
         waitpid(pid, &status, 0);
 
         if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
-            list_updateStickyNote(item, "Script successfully completed");
+            list_updateStickyNote(item, "Script successfully completed"); // good run
+            list_changed = true;
         } else {
-            list_updateStickyNote(item, "Script failed to start...");
+            list_updateStickyNote(item, "Script failed"); // displays if the script is bad (syntax, other errors, none-zero)
+            list_changed = true;
         }
     } else {
         list_updateStickyNote(item, "Failed to run script...");
+        list_changed = true;
     }
 
     return NULL;
@@ -136,11 +140,10 @@ void action_runDiagnosticScript(void *payload_ptr) { // run the script based on 
     char script_path[DIAG_MAX_PATH_LENGTH + 1];
     snprintf(script_path, sizeof(script_path), "%s/%s", DIAG_SCRIPT_PATH, filename);
 
-    list_updateStickyNote(item, "Script starting...");
-
     pthread_t thread;
     if (pthread_create(&thread, NULL, runScript, payload_ptr) != 0) {
-        list_updateStickyNote(item, "Failed to run script...");
+        list_updateStickyNote(item, "Failed to run script..."); // threading issues 
+        list_changed = true;
     }
 
     pthread_detach(thread);
