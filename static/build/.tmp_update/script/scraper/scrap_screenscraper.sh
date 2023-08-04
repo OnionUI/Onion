@@ -92,8 +92,6 @@ https://www.screenscraper.fr/faq.php
 
 -----------------------------------
 
-
-
 EOF
 
 read -n 1 -s -r -p "Press A to continue"
@@ -101,183 +99,152 @@ clear
 }
 
 
-get_sc_id(){
-	#SS ID systems for screenscraper scraping
-	case $1 in
-		ADVMAME)
-			 ssID="75";;	#Mame
-		AMIGA)
-			 ssID="64";;	# ""Commodore : Amiga"
-		AMIGACD)
-			 ssID="134";;	# "Commodore : Amiga CD"
-		ARCADE)   #Mame
-			 ssID="75";;	# "Mame"
-		ARDUBOY)
-			 ssID="263";;	# "Arduboy"
-		ATARI)   #Atari 2600
-			 ssID="26";;	# "Atari : Atari 2600"
-		ATARIST)
-			 ssID="42";;	# "Atari : Atari ST"
-		# CHAI) # chailove
-			 # ssID="";;
-		COLECO)
-			 ssID="183";;	# "Coleco"
-		COMMODORE)     #  Commodore 64/VIC-20/PET
-			 ssID="66";;	# "Commodore : Commodore 64"
-		CPC)   #Amstrad CPC
-			 ssID="65";;	# "Amstrad : CPC"
-		CPS1)
-			 ssID="6";;	# "Capcom : Capcom Play System"
-		CPS2)
-			 ssID="7";;	# "Capcom : Capcom Play System 2"
-		CPS3)
-			 ssID="8";;	# "Capcom : Capcom Play System 3"
-		DAPHNE)
-			 ssID="49";;	# "Daphne"
-		DOS)
-			 ssID="135";;
-		EASYRPG)
-			 ssID="231";;
-		EBK)
-			 ssID="93";;
-		EIGHTHUNDRED)  # Atari 800 / Atari 8bit
-			 ssID="43";;
-		FAIRCHILD)  # Fairchild Channel F
-			 ssID="80";;
-		FBA2012)
-			 ssID="75";;
-		FBALPHA)
-			 ssID="75";;
-		FBNEO)
-			 ssID="";;
-		FC)  # NES
-			 ssID="3";;
-		FDS)   # Famicom Disk System
-			 ssID="106";;
-		FIFTYTWOHUNDRED)   # Atari 5200
-			 ssID="40";;
-		GB)
-			 ssID="9";;
-		GBA)
-			 ssID="12";;
-		GBC)
-			 ssID="10";;
-		GG)
-			 ssID="21";;  # "Sega - Game Gear"
-		GW)   #  Nintendo - Game & Watch
-			 ssID="52";;
-		INTELLIVISION)
-			 ssID="115";;
-		JAGUAR)
-			 ssID="27";;
-		LUTRO)
-			 ssID="206";;
-		LYNX)
-			 ssID="28";;
-		MAME2000)
-			 ssID="75";;
-		MAME2003)
-			 ssID="75";;
-		MBA)
-			 ssID="75";;
-		MD)   # "Sega - Mega Drive - Genesis"
-			 ssID="1";;
-		MDHACKS)
-			 ssID="1";;
-		MEGADUCK)
-			 ssID="90";;
-		# MICROW8)
-			 # ssID="";;
-		MS)
-			 ssID="2";;
-		MSX)
-			 ssID="113";;
-		NEOCD)
-			 ssID="70";;
-		NEOGEO)
-			 ssID="142";;
-		NGP)
-			 ssID="25";;
-		ODYSSEY)  # Videopac / Magnavox Odyssey 2
-			 ssID="104";;
-		OPENBOR)
-			 ssID="214";;
-		PALM)
-			 ssID="219";;
-		PANASONIC)   #3DO
-			 ssID="29";;
-		PCE)   # NEC TurboGrafx-16 / PC Engine
-			 ssID="31";;
-		PCECD)
-			 ssID="114";;
-		PCEIGHTYEIGHT)   # NEC - PC-8000 & PC-8800 series / NEC PC-8801
-			 ssID="221";;
-		PCFX)   # NEC - PC-FX 
-			 ssID="72";;
-		PCNINETYEIGHT)  # NEC - PC-98 / NEC PC-9801
-			 ssID="208";;
-		PICO)
-			 ssID="234";;
-		# POKE)
-			 # ssID="";;
-		PORTS)   # "Microsoft : PC Win9X"
-			 ssID="137";;
-		PS)
-			 ssID="57";;
-		SATELLAVIEW)
-			 ssID="107";;
-		SCUMMVM)
-			 ssID="123";;
-		SEGACD)
-			 ssID="20";;
-		SEGASGONE)   # Sega SG-1000
-			 ssID="109";;
-		SEVENTYEIGHTHUNDRED)  # Atari 7800
-			 ssID="41";;
-		SFC)
-			 ssID="4";;
-		SGB)
-			 ssID="127";;
-		SGFX)   #  NEC - PC Engine SuperGrafx
-			 ssID="105";;
-		SUFAMI)
-			 ssID="108";;
-		SUPERVISION)
-			 ssID="207";;
-		THIRTYTWOX)   # Sega - 32X 
-			 ssID="19";;
-		THOMSON)
-			 ssID="141";;
-		# TI83)
-			 # ssID="";;
-		TIC)   # TIC-80
-			 ssID="222";;
-		UZEBOX)
-			 ssID="216";;
-		VB)
-			 ssID="11";;
-		VECTREX)
-			 ssID="102";;
-		VIC20) # Commodore : Vic-20
-			 ssID="73";;
-		VIDEOPAC)
-			 ssID="104";;
-		VMU)   # dreamcast (useless)
-			 ssID="23";;
-		WS)  # Bandai WonderSwan & Color
-			 ssID="45";;
-		X68000)
-			 ssID="79";;
-		XONE)   # Sharp X1
-			 ssID="220";;
-		ZXEIGHTYONE) # Sinclair - ZX-81
-			 ssID="77";;
-		ZXS)  # Sinclair ZX Spectrum
-			 ssID="76";;
-		*)
-			 echo -n "unknown"
-		;;
-	esac
+
+# Function to search on screenscraper with retry logic
+search_on_screenscraper() {
+    local retry_count=0
+    local max_retries=5
+
+    while true; do
+		# TODO : managing multithread for users who have it.
+        api_result=$(curl -k -s "$url")
+        
+        # Don't check art if max threads for leechers is used
+        if echo "$api_result" | grep -q "The maximum threads"; then
+            if [ "$retry_count" -ge "$max_retries" ]; then
+                echo "The Screenscraper API is too busy for non-users. Please try again later (or register)."
+                echo "Press any key to finish"
+                read dummy
+                break
+            else
+                let retry_count++
+                echo "Retrying API call ($retry_count / $max_retries)..."
+                sleep_duration=$((5 + retry_count))
+                sleep "$sleep_duration"
+            fi
+        else
+            break  # we have a result, we exit 
+        fi
+    done
+
+    # Don't check art if screenscraper is closed
+    if echo "$api_result" | grep -q "API closed"; then
+        echo -e "${RED}The Screenscraper API is currently down, please try again later.{NONE}"
+        let Scrap_Fail++
+        read -n 1 -s -r -p "Press A to exit"
+        return
+    fi
+
+    # Don't check art after a failed curl request
+    if [ -z "$api_result" ]; then
+        echo -e "${RED}Request failed${NONE}"
+        echo "Request failed for $romNameNoExtensionTrimmed" >> /mnt/SDCARD/.tmp_update/logs/scrap.log
+        let Scrap_Fail++
+        return
+    fi
+    
+    # Don't check art if screenscraper can't find a match
+    if echo "$api_result" | grep -q "^Erreur"; then
+        echo -e "${RED}No match found${NONE}"
+        echo "Couldn't find a match for $romNameNoExtensionTrimmed" >> /mnt/SDCARD/.tmp_update/logs/scrap.log
+        let Scrap_Fail++
+        return
+    fi
+
+    gameIDSS=$(echo "$api_result" | jq -r '.response.jeu.id')
+	if ! [ "$gameIDSS" -eq "$gameIDSS" ] 2> /dev/null; then
+		gameIDSS=$(echo "$api_result" | jq -r '.jeu.id')
+	fi
+}
+
+
+
+
+get_ssID() {
+  case $1 in
+    ADVMAME)            ssID="75";;    # Mame
+    AMIGA)              ssID="64";;    # Commodore Amiga
+    AMIGACD)            ssID="134";;   # Commodore Amiga CD
+    ARCADE)             ssID="75";;    # Mame
+    ARDUBOY)            ssID="263";;   # Arduboy
+    ATARI)              ssID="26";;    # Atari 2600
+    ATARIST)            ssID="42";;    # Atari ST
+    COLECO)             ssID="183";;   # Coleco
+    COMMODORE)          ssID="66";;    # Commodore 64
+    CPC)                ssID="65";;    # Amstrad CPC
+    CPS1)               ssID="6";;     # Capcom Play System
+    CPS2)               ssID="7";;     # Capcom Play System 2
+    CPS3)               ssID="8";;     # Capcom Play System 3
+    DAPHNE)             ssID="49";;    # Daphne
+    DOS)                ssID="135";;   # DOS
+    EASYRPG)            ssID="231";;   # EasyRPG
+    EBK)                ssID="93";;    # EBK
+    EIGHTHUNDRED)       ssID="43";;    # Atari 800
+    FAIRCHILD)          ssID="80";;    # Fairchild Channel F
+    FBA2012)            ssID="75";;    # FBA2012
+    FBALPHA)            ssID="75";;    # FBAlpha
+    FBNEO)              ssID="";;      # FBNeo (Empty)
+    FC)                 ssID="3";;     # NES (Famicom)
+    FDS)                ssID="106";;   # Famicom Disk System
+    FIFTYTWOHUNDRED)    ssID="40";;    # Atari 5200
+    GB)                 ssID="9";;     # Game Boy
+    GBA)                ssID="12";;    # Game Boy Advance
+    GBC)                ssID="10";;    # Game Boy Color
+    GG)                 ssID="21";;    # Sega Game Gear
+    GW)                 ssID="52";;    # Nintendo Game & Watch
+    INTELLIVISION)      ssID="115";;   # Intellivision
+    JAGUAR)             ssID="27";;    # Atari Jaguar
+    LUTRO)              ssID="206";;   # Lutro
+    LYNX)               ssID="28";;    # Atari Lynx
+    MAME2000)           ssID="75";;    # Mame 2000
+    MAME2003)           ssID="75";;    # Mame 2003
+    MBA)                ssID="75";;    # MBA
+    MD)                 ssID="1";;     # Sega Genesis (Mega Drive)
+    MDHACKS)            ssID="1";;     # Sega Genesis (Mega Drive) Hacks
+    MEGADUCK)           ssID="90";;    # Megaduck
+    MS)                 ssID="2";;     # Sega Master System
+    MSX)                ssID="113";;   # MSX
+    NEOCD)              ssID="70";;    # Neo Geo CD
+    NEOGEO)             ssID="142";;   # Neo Geo AES
+    NGP)                ssID="25";;    # Neo Geo Pocket
+    ODYSSEY)            ssID="104";;   # Videopac / Magnavox Odyssey 2
+    OPENBOR)            ssID="214";;   # OpenBOR
+    PALM)               ssID="219";;   # Palm
+    PANASONIC)          ssID="29";;    # 3DO
+    PCE)                ssID="31";;    # NEC TurboGrafx-16 / PC Engine
+    PCECD)              ssID="114";;   # NEC TurboGrafx-CD
+    PCEIGHTYEIGHT)      ssID="221";;   # NEC PC-8000 & PC-8800 series / NEC PC-8801
+    PCFX)               ssID="72";;    # NEC PC-FX
+    PCNINETYEIGHT)      ssID="208";;   # NEC PC-98 / NEC PC-9801
+    PICO)               ssID="234";;   # PICO
+    PORTS)              ssID="137";;   # PC Win9X
+    PS)                 ssID="57";;    # Sony Playstation
+    SATELLAVIEW)        ssID="107";;   # Satellaview
+    SCUMMVM)            ssID="123";;   # ScummVM
+    SEGACD)             ssID="20";;    # Sega CD
+    SEGASGONE)          ssID="109";;   # Sega SG-1000
+    SEVENTYEIGHTHUNDRED) ssID="41";;    # Atari 7800
+    SFC)                ssID="4";;     # Super Nintendo (SNES)
+    SGB)                ssID="127";;   # Super Game Boy
+    SGFX)               ssID="105";;   # NEC PC Engine SuperGrafx
+    SUFAMI)             ssID="108";;   # Sufami Turbo
+    SUPERVISION)        ssID="207";;   # Supervision
+    THIRTYTWOX)         ssID="19";;    # Sega 32X
+    THOMSON)            ssID="141";;   # Thomson
+    TIC)                ssID="222";;   # TIC-80
+    UZEBOX)             ssID="216";;   # Uzebox
+    VB)                 ssID="11";;    # Virtual Boy
+    VECTREX)            ssID="102";;   # Vectrex
+    VIC20)              ssID="73";;    # Commodore VIC-20
+    VIDEOPAC)           ssID="104";;   # Videopac
+    VMU)                ssID="23";;    # Dreamcast VMU (useless)
+    WS)                 ssID="45";;    # Bandai WonderSwan & Color
+    X68000)             ssID="79";;    # Sharp X68000
+    XONE)               ssID="220";;   # Sharp X1
+    ZXEIGHTYONE)        ssID="77";;    # Sinclair ZX-81
+    ZXS)                ssID="76";;    # Sinclair ZX Spectrum
+    *)                  echo -n "unknown platform"
+  esac
 }
 
 
@@ -351,6 +318,8 @@ if [ "$userStored" = "false" ] && ! [ "$ScrapeInBackground" = "true" ]; then
 
     done
 fi
+
+
 		
 clear
 echo -e "\n*****************************************************"
@@ -361,7 +330,7 @@ echo -e "Scraping $CurrentSystem...\n"
 
 ####################################################################################################################################
  #ls /mnt/SDCARD/Roms/$CurrentSystem
- get_sc_id $CurrentSystem
+ get_ssID $CurrentSystem
 
  #ls /mnt/SDCARD/Roms/$CurrentSystem
  mkdir -p /mnt/SDCARD/Roms/$CurrentSystem/Imgs > /dev/null
@@ -400,6 +369,7 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 	! -path '*/Imgs/*' ! -path '*/.game_config/*' $romfilter"); do
 	
     echo "-------------------------------------------------"
+	gameIDSS=""
     let romcount++;
     
     # Cleaning up names
@@ -427,60 +397,28 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 		let Scrap_notrequired++;
 	
 	else
-        url="https://www.screenscraper.fr/api2/jeuInfos.php?devid=${u#???}&devpassword=${p%??}&softname=onion&output=json&ssid=${userSS}&sspassword=${passSS}&crc=&systemeid=${ssID}&romtype=rom&romnom=${romNameTrimmed}.zip"
-        # TODO : search by CRC/MD5/shal or gameid
-        # TODO : managing multithread for users who have it.
-        
-        #ID Game
-        
-        echo Searching on screenscraper ...
-        api_result=$(curl -k -s "$url") 
 		
-        # Don't check art if screenscraper is closed
-        if echo $api_result | grep -q "API closed"; then
-        	echo -e "The Screenscraper API is currently down, please try again later."
-        	echo -e "Press the ${RED}A button${NONE} to finish"
-        	let Scrap_Fail++;
-        	break;
-        fi
-
-        # Don't check art if max threads for leechers is used
-        if echo $api_result | grep -q "The maximum threads"; then
-        	echo -e "The Screenscraper API is too busy for non-users. please try again later (or register)."
-        	echo -e "Press the ${RED}A button${NONE} to finish"
-        	let Scrap_Fail++;
-        	break;
-        fi
-
-        # Don't check art after a failed curl request
-        if [[ "$api_result" == "" ]]; then
-            echo -e "${RED}Request failed${NONE}"
-        	# echo -e "Request failed to send for $romNameNoExtensionTrimmed, ${YELLOW}skipping${NONE}"    # for debugging
-        	echo "Request failed for $romNameNoExtensionTrimmed" >> /mnt/SDCARD/.tmp_update/logs/scrap.log
-        	let Scrap_Fail++;
-        	continue;
-        fi
-        
-        # Don't check art if screenscraper can't find a match
-        if echo $api_result | grep -q "^Erreur"; then
-        	#echo -e "Couldn't find a match for $romNameNoExtensionTrimmed, ${YELLOW}skipping${NONE}"   € for debugging
-        	echo -e "${RED}No match found${NONE}"
-        	echo "Couldn't find a match for $romNameNoExtensionTrimmed" >> /mnt/SDCARD/.tmp_update/logs/scrap.log
-        	let Scrap_Fail++;
-        	continue;
-        fi
-    	
-    
-        gameIDSS=$(echo $api_result | jq -r '.response.jeu.id')
-    	echo "gameID = $gameIDSS"
+		
+		url="https://www.screenscraper.fr/api2/jeuInfos.php?devid=${u#???}&devpassword=${p%??}&softname=onion&output=json&ssid=${userSS}&sspassword=${passSS}&crc=&systemeid=${ssID}&romtype=rom&romnom=${romNameTrimmed}.zip"
+    	search_on_screenscraper
     	
     	# Don't check art if we didn't get screenscraper game ID
         if ! [ "$gameIDSS" -eq "$gameIDSS" ] 2> /dev/null; then
-            echo -e "${RED}Failed to get game ID${NONE}"
-            let Scrap_Fail++;
-            continue;
+			# Last chance : we search thanks to rom checksum
+			echo CRC check...
+			CRC=$(xcrc "$file")
+			url="https://www.screenscraper.fr/api2/jeuInfos.php?devid=${u#???}&devpassword=${p%??}&softname=onion&output=json&ssid=${userSS}&sspassword=${passSS}&&crc=${CRC}&systemeid=&romtype=rom&romnom=&romtaille=10"
+			search_on_screenscraper
+			if ! [ "$gameIDSS" -eq "$gameIDSS" ] 2> /dev/null; then	
+				echo -e "${RED}Failed to get game ID${NONE}"
+				let Scrap_Fail++;
+				continue;
+			fi
+			RealgameName=$(echo "$api_result" | jq -r '.response.jeu.noms[0].text')
+			echo Real name found : "$RealgameName"
         fi
-        
+		
+        echo "gameID = $gameIDSS"
         # Here we choose the kind of media that we want :
             # sstitle	        Screenshot of Title Screen	(recommended)
             # ss	            Screenshot	(recommended)
