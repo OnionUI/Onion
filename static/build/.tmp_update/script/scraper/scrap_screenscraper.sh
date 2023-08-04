@@ -292,33 +292,34 @@ if [ "$userStored" = "false" ] && ! [ "$ScrapeInBackground" = "true" ]; then
 	    Mychoice=$( echo -e "No\nYes\nScreenscraper information" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "Add your screenscraper account ?" -b "Press A to validate your choice.")
         
         if [ "$Mychoice" = "Yes" ]; then
-            clear
-            echo -e "Press X to display the keyboard and \nenter your screenscraper username\n\n"
+			clear
+			echo -ne "\e[?25h"  # display the cursor
+			echo -e "Press X to display the keyboard and \nenter your screenscraper username\n\n"
 			readline -m "username: "
 			userSS=$(cat /tmp/readline.txt)
 			rm /tmp/readline.txt
-            # read -p "username : " userSS
-            clear
-            
-            echo -e "Press X to display the keyboard and \nenter your screenscraper password\n\n"
+			# read -p "username : " userSS
+			clear
+			echo -ne "\e[?25h"  # display the cursor
+			echo -e "Press X to display the keyboard and \nenter your screenscraper password\n\n"
 			readline -m "password: "
 			passSS=$(cat /tmp/readline.txt)
 			rm /tmp/readline.txt
-            # read -p "password : " passSS
-            clear
-            
-            ScraperConfigFile=/mnt/SDCARD/.tmp_update/config/scraper.json
-            config=$(cat $ScraperConfigFile)
-            config=$(echo "$config" | jq --arg user "$userSS" --arg pass "$passSS" '.screenscraper_username = $user | .screenscraper_password = $pass')
-            echo "$config" > $ScraperConfigFile
+			# read -p "password : " passSS
+			clear
 
-            break
-            
+			ScraperConfigFile=/mnt/SDCARD/.tmp_update/config/scraper.json
+			config=$(cat $ScraperConfigFile)
+			config=$(echo "$config" | jq --arg user "$userSS" --arg pass "$passSS" '.screenscraper_username = $user | .screenscraper_password = $pass')
+			echo "$config" > $ScraperConfigFile
+
+			break
+
         elif [ "$Mychoice" = "Screenscraper information" ]; then
-            clear
+			clear
 			Screenscraper_information
         else
-            clear
+			clear
 			break
         fi
 

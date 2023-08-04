@@ -78,6 +78,7 @@ Menu_Config_SSAccountSettings()
 			case "$Mychoice" in
 				*Username\ :*)
 					clear
+					echo -ne "\e[?25h"  # display the cursor
 					echo -e "Press X to display the keyboard and \nenter your screenscraper username\n\n"
 					readline -m "username: "
 					userSS=$(cat /tmp/readline.txt)
@@ -87,6 +88,7 @@ Menu_Config_SSAccountSettings()
 					;;
 				*Password\ :*)
 					clear
+					echo -ne "\e[?25h"  # display the cursor
 					echo -e "Press X to display the keyboard and \nenter your screenscraper password\n\n"
 					readline -m "password: "
 					passSS=$(cat /tmp/readline.txt)
