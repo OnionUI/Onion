@@ -79,12 +79,18 @@ Menu_Config_SSAccountSettings()
 				*Username\ :*)
 					clear
 					echo -e "Press X to display the keyboard and \nenter your screenscraper username\n\n"
-					read -p "username : " userSS
+					readline -m "username: "
+					userSS=$(cat /tmp/readline.txt)
+					rm /tmp/readline.txt
+
+
 					;;
 				*Password\ :*)
 					clear
 					echo -e "Press X to display the keyboard and \nenter your screenscraper password\n\n"
-					read -p "password : " passSS
+					readline -m "password: "
+					passSS=$(cat /tmp/readline.txt)
+					rm /tmp/readline.txt
 					;;
 				*Screenscraper\ information*)
 					Screenscraper_information
