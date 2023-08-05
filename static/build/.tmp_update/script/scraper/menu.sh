@@ -82,6 +82,7 @@ Menu_Config_SSAccountSettings()
 					echo -e "Press X to display the keyboard and \nenter your screenscraper username\n\n"
 					readline -m "username: "
 					userSS=$(cat /tmp/readline.txt)
+					userSS="${userSS// /}"  # removing spaces
 					rm /tmp/readline.txt
 
 
@@ -92,6 +93,7 @@ Menu_Config_SSAccountSettings()
 					echo -e "Press X to display the keyboard and \nenter your screenscraper password\n\n"
 					readline -m "password: "
 					passSS=$(cat /tmp/readline.txt)
+					passSS="${passSS// /}"  # removing spaces
 					rm /tmp/readline.txt
 					;;
 				*Screenscraper\ information*)

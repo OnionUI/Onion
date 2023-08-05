@@ -297,6 +297,7 @@ if [ "$userStored" = "false" ] && ! [ "$ScrapeInBackground" = "true" ]; then
 			echo -e "Press X to display the keyboard and \nenter your screenscraper username\n\n"
 			readline -m "username: "
 			userSS=$(cat /tmp/readline.txt)
+			userSS="${userSS// /}"  # removing spaces
 			rm /tmp/readline.txt
 			# read -p "username : " userSS
 			clear
@@ -304,6 +305,7 @@ if [ "$userStored" = "false" ] && ! [ "$ScrapeInBackground" = "true" ]; then
 			echo -e "Press X to display the keyboard and \nenter your screenscraper password\n\n"
 			readline -m "password: "
 			passSS=$(cat /tmp/readline.txt)
+			passSS="${passSS// /}"  # removing spaces
 			rm /tmp/readline.txt
 			# read -p "password : " passSS
 			clear
