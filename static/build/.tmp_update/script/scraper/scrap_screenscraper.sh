@@ -489,8 +489,13 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
         echo $urlcmd>/tmp/rundl.sh
         sh /tmp/rundl.sh
 
-        echo -e "${GREEN}Scraped!${NONE}"
-        let Scrap_Success++;
+		if [ -f "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png" ]; then
+			echo -e "${GREEN}Scraped!${NONE}"
+			let Scrap_Success++;
+		else
+			echo -e "${RED}Download failed.${NONE}"
+			let Scrap_Fail++;
+		fi
         
         
         # echo -e "\n\n ==$url== \n\n"
