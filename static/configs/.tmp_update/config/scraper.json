@@ -5,5 +5,13 @@
   "Screenscraper_enabled": "true",
   "Launchbox_enabled": "true",
   "ScrapeInBackground": "false",
-  "MediaType": "box-2D"
+  "MediaType": "box-2D",
+  "RetroarchMediaType":"",
+  "ScreenscraperMediaType":"'LaunchBoxMediaType",
+  "LaunchBoxMediaType": "box2dfront"
 }
+
+
+RetroarchMediaType=$(echo "$config" | jq -r ('RetroarchMediaType'))
+ScreenscraperMediaType=$(echo "$config" | jq -r ('ScreenscraperMediaType')
+LaunchBoxMediaType=$(echo "$config" | jq -r ('LaunchBoxMediaType')
