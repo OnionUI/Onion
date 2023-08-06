@@ -102,6 +102,7 @@ system_healthcheck () {
     write_info "System.json state:" "cat /appconfigs/system.json" $sysinfo_file
     write_info "Keymap state:" "cat $sysdir/config/keymap.json" $sysinfo_file    
     write_info "Config folder dump" "ls -alhR $sysdir/config/" $sysinfo_file 
+    dmesg > "$workingdir/sysinfo/dmesg.log"
 }
 
 ##################
