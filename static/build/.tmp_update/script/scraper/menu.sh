@@ -37,7 +37,7 @@ Menu_Config()
     [ "$Mychoice" = "$Option1" ] && Menu_Config_ScrapingSelection
     [ "$Mychoice" = "$Option2" ] && Menu_Config_BackgroundScraping
     [ "$Mychoice" = "$Option3" ] && Menu_Config_SSAccountSettings
-    [ "$Mychoice" = "$Option4" ] && Menu_Config_SSMediaPreferences
+    [ "$Mychoice" = "$Option4" ] && Menu_Config_MediaType
     [ "$Mychoice" = "$Option5" ] && Menu_Main
 }
 
@@ -171,16 +171,28 @@ Menu_Config_SSMediaPreferences()
     clear
     echo -e 
     echo -e "====================================================\n\n"
-    echo -e "The Media Type affects the style of the graphics \nand images returned in ScreenScraper results.\n\n"
-    echo -e "To prevent other scraping sources from overriding\nthis setting, ensure to deactivate them.\n\n"    
+    echo -e "All the media types are not available on\neach scraper engine.\n\n"
+    echo -e "	SS = Screenscraper" 
+    echo -e "	LB = Launchbox" 
+    echo -e "	RA = Retroarch\n\n"
+  
     echo -e "====================================================\n\n\n"
     read -n 1 -s -r -p "Press A to continue"
     clear
-    
+    test="test\r\nte\rst"
     config=$(cat "$ScraperConfigFile")
     MediaType=$(echo "$config" | jq -r '.MediaType')
 
-    	Mychoice=$( echo -e "Box Art (default)\nBox Art - 3D\nScreenshot - Title Screen\nScreenshot - In Game\nWheel\nMarquee\nScreenscraper Mix V1\nScreenscraper Mix V2" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "Media Type ? (currently: $MediaType)" -b "Press A to validate your choice.")
+Mychoice=$( echo -e "
+Box Art                    (available on SS,LB,RA)
+Screenshot - Title Screen  (available on SS,LB,RA)
+Screenshot - In Game       (available on SS,LB,RA)
+Box Art - 3D               (available on SS,LB)
+Wheel                      (available on SS,LB)
+Marquee                    (available on SS,LB)
+Screenscraper Mix V1       (available on SS)
+Screenscraper Mix V2       (available on SS)
+" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "Media $test Type ?     (currently: $MediaType)" -b "Press $test A to valid\r\nate your choice.")
         # TODO : add a new option to display tail of the log
 
         # TODO: Create a dictionary so we can support display and system names throughout the utility
@@ -237,73 +249,45 @@ Menu_Config_MediaType()
 
     # retrieve current media settings
     config=$(cat "$ScraperConfigFile")
-    RetroarchMediaType=$(echo "$config" | jq -r ('RetroarchMediaType')
-    ScreenscraperMediaType=$(echo "$config" | jq -r ('ScreenscraperMediaType')
-    LaunchBoxMediaType=$(echo "$config" | jq -r ('LaunchBoxMediaType')
+    RetroarchMediaType=$(echo "$config" | jq -r '.RetroarchMediaType')
+    ScreenscraperMediaType=$(echo "$config" | jq -r '.ScreenscraperMediaType')
+    LaunchBoxMediaType=$(echo "$config" | jq -r '.LaunchboxMediaType')
 
     # Display Welcome
     clear
     echo -e 
     echo -e "====================================================\n\n"
-    echo -e "The Media Type affects the style of the graphics \nand images returned in ScreenScraper results.\n\n"
-    echo -e "To prevent other scraping sources from overriding\nthis setting, deactivate them.\n\n"    
+    echo -e "All the media types are not available on\neach scraper engine.\n\n"
+    echo -e "	SS = Screenscraper" 
+    echo -e "	LB = Launchbox" 
+    echo -e "	RA = Retroarch\n\n"
+  
     echo -e "====================================================\n\n\n"
-
-    echo -e "Current Settings:\n"
-    echo -e "-------------------------------------------------"
-    echo -e "Rectroarch:    $RetroarchMediaTypee\n"
-    echo -e "Screenscraper: $ScreenscraperMediaType\n"
-    echo -e "LaunchBox:     $LaunchBoxMediaType\n\n"
     read -n 1 -s -r -p "Press A to continue"
     clear
 
-    # Retroarch
-    Option01="Box Art (default)"
-    Option02="Screenshot - Title Screen"
-    Option03="Screenshot - In Game"
- 
-    Mychoice=$( echo -e "$Option1\n$Option2\n$Option3\n$Option4\n$Option5" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t \
-    "Retroarch scraping media type? (currently: $RetroarchMediaType))" -b "Press A to validate your choice.")
-    
-    [ "$Mychoice" = "$Option01" ]  && MediaType="Named_Boxarts"
-    [ "$Mychoice" = "$Option02" ]  && MediaType="Named_Snaps"
-    [ "$Mychoice" = "$Option03" ]  && MediaType="Named_Titles"
-    clear
+
 
     # Screenscreaper.fr
-    Option01="Box Art (default)"
-    Option02="Screenshot - Title Screen"
-    Option03="Screenshot - In Game"
-    Option04="Wheel"
-    Option05="Marquee"
-    Option06="Screenscraper Mix V1"
-    Option07="Screenscraper Mix V2"
-    Option08="Box Art 3D"
+    Option01="Box Art                    (available on SS,LB,RA)"
+    Option02="Screenshot - Title Screen  (available on SS,LB,RA)"
+    Option03="Screenshot - In Game       (available on SS,LB,RA)"
+    Option04="Box Art - 3D               (available on SS,LB)"
+    Option05="Wheel                      (available on SS,LB)"
+    Option06="Marquee                    (available on SS,LB)"
+    Option07="Screenscraper Mix V1       (available on SS)"
+    Option08="Screenscraper Mix V2       (available on SS)"
 
-    Mychoice=$( echo -e "$Option1\n$Option2\n$Option3\n'$Option4\n$Option5'n$Option6\n$Option7\n'$Option8\n$Option9'n$Option1" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t\ \
-    "Screenscraper scraping media type ? (currently) $ScreenscraperMediaType)" -b "Press A to validate your choice.")
+    Mychoice=$( echo -e "$Option01\n$Option02\n$Option03\n$Option04\n$Option05n$Option06\n$Option07\n$Option08\n" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t\ "Screenscraper scraping media type ? (currently) $ScreenscraperMediaType)" -b "Press A to validate your choice.")
     
-    [ "$Mychoice" = "$Option1" ]  && MediaType="box-2d"
-    [ "$Mychoice" = "$Option2" ]  && MediaType="sstitle"
-    [ "$Mychoice" = "$Option3" ]  && MediaType="ss"        
-    [ "$Mychoice" = "$Option4" ]  && MediaType="wheel"
-    [ "$Mychoice" = "$Option5" ]  && MediaType="screenmarqueesmall"
-    [ "$Mychoice" = "$Option6" ]  && MediaType="mixrbv1" 
-    [ "$Mychoice" = "$Option7" ]  && MediaType="mixrbv2" 
-    [ "$Mychoice" = "$Option" ]  && MediaType="box-3D" 
-    clear
-
-    # Launchbox - libretro.org
-    Option1="Box Art (default)"
-    Option2="Screenshot - Title Screen"
-    Option3="Screenshot - In Game"
-
-    Mychoice=$( echo -e "$Option1\n$Option2\n$Option3\n$Option4\n$Option5" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t \
-    "Launchbox scraping type ? (currently: $RetroarchMediaType)" -b "Press A to validate your choice.")
-
-    [ "$Mychoice" = "$Option1" ]  && MediaType="box2dfront"
-    [ "$Mychoice" = "$Option2" ]  && MediaType="wheel"
-    [ "$Mychoice" = "$Option3" ]  && MediaType="screem"
+    [ "$Mychoice" = "$Option01" ]  && SSmediaType="box-2d"                 && LBmediaType="Box - Front"                      && RAmediaType="Named_Boxarts"  
+    [ "$Mychoice" = "$Option02" ]  && SSmediaType="sstitle"                && LBmediaType="Screenshot - Game Title"          && RAmediaType="Named_Titles"  
+    [ "$Mychoice" = "$Option03" ]  && SSmediaType="ss"                     && LBmediaType="Screenshot - Gameplay"            && RAmediaType="Named_Snaps"  
+    [ "$Mychoice" = "$Option04" ]  && SSmediaType="box-3D"                 && LBmediaType="Box - 3D"                         && RAmediaType=""  
+    [ "$Mychoice" = "$Option05" ]  && SSmediaType="wheel"                  && LBmediaType="Clear Logo"                       && RAmediaType=""  
+    [ "$Mychoice" = "$Option06" ]  && SSmediaType="screenmarqueesmall"     && LBmediaType="Banner"                           && RAmediaType=""  
+    [ "$Mychoice" = "$Option07" ]  && SSmediaType="mixrbv1"                && LBmediaType=""                                 && RAmediaType=""  
+    [ "$Mychoice" = "$Option08" ]  && SSmediaType="mixrbv2"                && LBmediaType=""                                 && RAmediaType=""  
     clear
 
     # TODO: Create a dictionary so we can support display and system names throughout the utility
@@ -311,15 +295,12 @@ Menu_Config_MediaType()
 
 
     config=$(cat $ScraperConfigFile)
-    config=$(echo "$config" | jq --arg RetroarchMediaType "$MediaType" '.RetroarchMediaType = $RetroarchMediaType')
-    config=$(echo "$config" | jq --arg ScreenscraperMediaType "$MediaType" '.ScreenscraperMediaType = $ScreenscraperMediaType')
-    config=$(echo "$config" | jq --arg LaunchboxMediaType "$MediaType" '.LaunchboxMediaType = $LaunchboxMediaType')        
+    config=$(echo "$config" | jq --arg RAmediaType "$RAmediaType" '.RetroarchMediaType = $RAmediaType')
+    config=$(echo "$config" | jq --arg LBmediaType "$LBmediaType" '.LaunchboxMediaType = $LBmediaType')
+    config=$(echo "$config" | jq --arg SSmediaType "$SSmediaType" '.ScreenscraperMediaType = $SSmediaType')        
     echo "$config" > $ScraperConfigFile
     
     Menu_Config
-
-
-
 
 
 

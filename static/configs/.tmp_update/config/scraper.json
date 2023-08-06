@@ -5,8 +5,7 @@
   "Screenscraper_enabled": "true",
   "Launchbox_enabled": "true",
   "ScrapeInBackground": "false",
-  "MediaType": "box-2D",
-  "ScreenscraperMediaType":"'box-2D",
-  "LaunchBoxMediaType": "box2dfront",
-  "RetroarchMediaType":"LaunchBoxMediaType"
+  "RetroarchMediaType": "Named_Boxarts",
+  "ScreenscraperMediaType": "box-2d",
+  "LaunchboxMediaType": "Box - Front"
 }
