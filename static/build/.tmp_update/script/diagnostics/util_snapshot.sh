@@ -78,7 +78,31 @@ write_header() {
 ## SYSTEM LOGS ##
 ##################
 
-actual_uptime() {
+get_lcd_voltage() { # Check LCD voltage incase it's been changed by user
+    conf_dir="$sysdir/config/.lcdvolt"
+    enabled="$conf_dir"
+    disabled="${conf_dir}_"
+
+    if [ -f "$enabled" ]; then
+        registerValueHex=$(cat "$enabled")
+    elif [ -f "$disabled" ]; then
+        registerValueHex=$(cat "$disabled")
+    else
+        echo "No LCD voltage file found."
+        return 1
+    fi
+
+    if [ -z "$registerValueHex" ]; then
+        echo "LCD voltage config file is empty."
+        return 1
+    fi
+
+    registerValueDec=$(printf "%d" "0x$registerValueHex")
+    voltage_tenths=$((16 + registerValueDec))
+    echo "$((voltage_tenths / 10)).$((voltage_tenths % 10)) volts."
+}
+
+actual_uptime() { 
     uptime=$(cut -d. -f1 /proc/uptime)
     
     uptime_days=$((uptime / 60 / 60 / 24))
@@ -102,6 +126,7 @@ system_healthcheck () {
     write_info "Disk Space Information:" "df -h" $sysinfo_file
     write_info "System swapfile" "cat /proc/swaps" $sysinfo_file
     write_info "List of Running Processes:" "ps aux" $sysinfo_file
+    write_info "LCD Voltage:" "get_lcd_voltage" $sysinfo_file
     write_info "Framebuffer info:" "cat /proc/mi_modules/fb/mi_fb0" $sysinfo_file
     write_info "More framebuffer info:" "fbset" $sysinfo_file
     write_info "System.json state:" "cat /appconfigs/system.json" $sysinfo_file
