@@ -39,6 +39,7 @@ program=$(basename "$0" .sh)
 main() {
      log "Generating system snapshot, please wait"
      snapshot
+     log "Starting exporter"
      $diagsdir/util_exporter.sh
 }
 
@@ -51,6 +52,7 @@ snapshot() {
     wifi_healthcheck
     export_ra_cfg
     create_dir_logs
+    create_appcfg_list
     log "Snapshot generated"
     sleep 0.5
 }
@@ -62,8 +64,10 @@ snapshot() {
 write_info() {
     write_header "$1" $3
     echo -e "$1\n" >> $3
+    log "Executing command $2 and appending output to $3"
     eval $2 >> $3
     echo -e "\n\n" >> $3
+    log "Finished writing information for $1 to $3"
 }
 
 write_header() {
@@ -86,6 +90,7 @@ actual_uptime() {
 }
 
 system_healthcheck () {
+    log "Generating system healthcheck"
     write_info "Onion version:" "cat $sysdir/onionVersion/version.txt" $sysinfo_file
     write_info "Firmware version:" "/etc/fw_printenv miyoo_version" $sysinfo_file
     write_info "Device model:" "cat /tmp/deviceModel" $sysinfo_file
@@ -103,6 +108,7 @@ system_healthcheck () {
     write_info "Keymap state:" "cat $sysdir/config/keymap.json" $sysinfo_file    
     write_info "Config folder dump" "ls -alhR $sysdir/config/" $sysinfo_file 
     dmesg > "$workingdir/sysinfo/dmesg.log"
+    log "Finished generating healthcheck"
 }
 
 ##################
@@ -110,6 +116,7 @@ system_healthcheck () {
 ##################
 
 get_netserv_status() { # Just checks if these exist - will need upkeep in this format
+    log "Checking system services"
     services=".smbdState_ .authftpState_ .authhttpState_ .authsshState_ .ftpState_ .hotspotState_ .httpState_ .ntpState_ .smbdState_ .sshState_ .telnetState_"
 
     for file in $services; do
@@ -127,6 +134,7 @@ get_netserv_status() { # Just checks if these exist - will need upkeep in this f
 # If this returns as failed, it means the wpa_supplicant.conf file is invalid and will cause wpa_supplicant to error out when it's called.
 
 wpa_supplicant_health_check() {
+    log "Running wpa_supplicant health checks"
     if [[ -f "$wpa_conf_path" ]]; then
         echo "File $wpa_conf_path exists."
         if grep -Fxq "ctrl_interface=/var/run/wpa_supplicant" "$wpa_conf_path" && grep -Fxq "update_config=1" "$wpa_conf_path"; then
@@ -150,7 +158,16 @@ wpa_supplicant_contains_networks() {
     fi
 }
 
+get_wpa_supplicant() { # print the file aswell but remove the users ssid/psk - worth doing a full formatting check on the file incase syntax is broken by someone manually editing.
+  if [ ! -f "$wpa_conf_path" ]; then
+    echo "File not found: $wpa_conf_path"
+  fi
+
+  sed 's/ssid="[^"]*"/ssid="redacted"/g; s/psk="[^"]*"/psk="redacted"/g' "$wpa_conf_path"
+}
+
 check_hostapd_conf() {
+    log "Checking hostapd.conf"
     file_path="$sysdir/config/hostapd.conf"
     file_size=$(stat -c%s "$file_path")
 
@@ -162,6 +179,7 @@ check_hostapd_conf() {
 }
 
 check_dnsmasq_conf() { # This file can either be 251 or 187 depending on the state of .logging. (In a future feature where the dnsmasq log entry is removed)
+    log "Checking dnsmasq.conf"
     file_path="$sysdir/config/dnsmasq.conf"
     file_size=$(stat -c%s "$file_path")
 
@@ -173,17 +191,18 @@ check_dnsmasq_conf() { # This file can either be 251 or 187 depending on the sta
 }
 
 wifi_healthcheck() {
-    
+    log "Generating wifi healthcheck"
     write_info "Network service:" "get_netserv_status" $networkinfo_file
     write_info "Checking size of hostapd.conf:" "check_hostapd_conf" $networkinfo_file
     write_info "Checking size of dnsmasq.conf" "check_dnsmasq_conf" $networkinfo_file
     write_info "Wpa_supplicant.conf health:" "wpa_supplicant_health_check" $networkinfo_file 
     write_info "Wpa_supplicant.conf ssid count:" "wpa_supplicant_contains_networks" $networkinfo_file
+    write_info "Wpa_supplicant.conf sanitised dump:" "get_wpa_supplicant" $networkinfo_file
     write_info "WiFi Status:" "ifconfig" $networkinfo_file
-    write_info "Internet Access State:" "ping -q -c 1 -W 1 google.com >/dev/null && echo The Internet is up. || echo The Internet seems down." $networkinfo_file
-    write_info "WiFi Adaptors detailed:" "iw phy" $networkinfo_file
+    write_info "Internet Access State:" "ping -q -c 3 -W 1 google.com >/dev/null && echo The Internet is up. || echo The Internet seems down." $networkinfo_file
     write_info "WiFi connection health:" "cat /proc/net/wireless" $networkinfo_file
-
+    write_info "WiFi Adaptors detailed:" "iw phy" $networkinfo_file
+    log "Finished generating wifi healthcheck"
 }
 
 ##################
@@ -194,7 +213,22 @@ export_ra_cfg() {
     cp $ra_cfg_file $workingdir/ra_cfg/retroarch_config.cfg
 }
 
+create_appcfg_list() {
+    appcfg_dir="/appconfigs"
+    log "Generating directory listing for $appcfg_dir"
+
+    if [ -d "$appcfg_dir" ]; then
+        log_file="$log_dir/appconfigs.log"
+        echo "Directory Listing of $appcfg_dir:" > "$log_file"
+        ls -alhR "$appcfg_dir" >> "$log_file"
+        log "Directory listing for $appcfg_dir has been saved to $log_file"
+    else
+        log "Directory $appcfg_dir does not exist"
+    fi
+}
+
 create_dir_logs() { # Currently creates a list of roms which can take a while depending on the number of roms.
+    log "Generating directory listings"
     for dir in "$base_dir"/*; do
         if [ -d "$dir" ]; then
             dir_name=$(basename "$dir")

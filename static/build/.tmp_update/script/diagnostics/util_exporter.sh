@@ -39,7 +39,6 @@ exporter() {
         log "Failed to export"
     fi
     
-    rm /tmp/log_status
     exit
 }
 
