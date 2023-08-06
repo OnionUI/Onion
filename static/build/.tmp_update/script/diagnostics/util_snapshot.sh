@@ -124,6 +124,7 @@ system_healthcheck () {
     write_info "CPU Temperature:" "cat /sys/devices/virtual/mstar/msys/TEMP_R" $sysinfo_file
     write_info "RAM Information:" "cat /proc/meminfo" $sysinfo_file
     write_info "Disk Space Information:" "df -h" $sysinfo_file
+    write_info "Mount points" "mount" $sysinfo_file
     write_info "System swapfile" "cat /proc/swaps" $sysinfo_file
     write_info "List of Running Processes:" "ps aux" $sysinfo_file
     write_info "LCD Voltage:" "get_lcd_voltage" $sysinfo_file
