@@ -171,8 +171,11 @@ Menu_Config_SSMediaPreferences()
     clear
     echo -e 
     echo -e "====================================================\n\n"
-    echo -e "The Media Type affects the style of the graphics \nand images returned in ScreenScraper results.\n\n"
-    echo -e "To prevent other scraping sources from overriding\nthis setting, ensure to deactivate them.\n\n"    
+    echo -e "All the media types are not available on\neach scraper engine.\n\n"
+    echo -e "	SS = Screenscraper" 
+    echo -e "	LB = Launchbox" 
+    echo -e "	RA = Retroarch\n\n"
+  
     echo -e "====================================================\n\n\n"
     read -n 1 -s -r -p "Press A to continue"
     clear
@@ -180,7 +183,16 @@ Menu_Config_SSMediaPreferences()
     config=$(cat "$ScraperConfigFile")
     MediaType=$(echo "$config" | jq -r '.MediaType')
 
-    	Mychoice=$( echo -e "Box Art (default)\nBox Art - 3D\nScreenshot - Title Screen\nScreenshot - In Game\nWheel\nMarquee\nScreenscraper Mix V1\nScreenscraper Mix V2" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "Media Type ? (currently: $MediaType)" -b "Press A to validate your choice.")
+Mychoice=$( echo -e "
+Box Art                    (available on SS,LB,RA)
+Screenshot - Title Screen  (available on SS,LB,RA)
+Screenshot - In Game       (available on SS,LB,RA)
+Box Art - 3D               (available on SS,LB)
+Wheel                      (available on SS,LB)
+Marquee                    (available on SS,LB)
+Screenscraper Mix V1       (available on SS)
+Screenscraper Mix V2       (available on SS)
+" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "Media Type ?     (currently: $MediaType)" -b "Press A to validate your choice.")
         # TODO : add a new option to display tail of the log
 
         # TODO: Create a dictionary so we can support display and system names throughout the utility
@@ -237,9 +249,9 @@ Menu_Config_MediaType()
 
     # retrieve current media settings
     config=$(cat "$ScraperConfigFile")
-    RetroarchMediaType=$(echo "$config" | jq -r ('RetroarchMediaType')
-    ScreenscraperMediaType=$(echo "$config" | jq -r ('ScreenscraperMediaType')
-    LaunchBoxMediaType=$(echo "$config" | jq -r ('LaunchBoxMediaType')
+    RetroarchMediaType=$(echo "$config" | jq -r '.RetroarchMediaType')
+    ScreenscraperMediaType=$(echo "$config" | jq -r '.ScreenscraperMediaType')
+    LaunchBoxMediaType=$(echo "$config" | jq -r '.LaunchboxMediaType')
 
     # Display Welcome
     clear
