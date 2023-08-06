@@ -235,6 +235,7 @@ create_dir_logs() { # Currently creates a list of roms which can take a while de
             log_file="$log_dir/$dir_name.log"
             echo "Directory Listing of $dir:" > "$log_file"
             ls -alhR "$dir" >> "$log_file"
+            log "Directory listing for $dir has been saved to $log_file"
         fi
     done
 }
