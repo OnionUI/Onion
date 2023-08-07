@@ -1,0 +1,21 @@
+# Define an array of regions in the order of priority
+regions=("wor" "us" "usa" "eu" "na" "oceania" "uk" "au" "nz" "jp")
+
+# Initialize url as an empty string
+url=""
+
+# Iterate over the regions array
+for region in "${regions[@]}"; do
+  # Get the URL of media for the current region
+  url=$(echo $api_result | jq --arg MediaType "$ScreenscraperMediaType" --arg Region "$region" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == $Region) | .url' | head -n 1)
+  
+  # If a URL is found, break the loop
+  if [ -n "$url" ]; then
+    break
+  fi
+done
+
+# If no URL is found for the specified regions, get the first available URL
+if [ -z "$url" ]; then
+  url=$(echo $api_result | jq --arg MediaType "$ScreenscraperMediaType" '.response.jeu.medias[] | select(.type == $MediaType) | .url' | head -n 1)
+fi

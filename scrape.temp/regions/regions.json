@@ -1,0 +1,453 @@
+{
+  "Data": {
+    "regions": {
+      "region": [
+        {
+          "id": 23356,
+          "nomcourt": "za",
+          "nom_fr": "Afrique du sud",
+          "nom_de": "Südafrika",
+          "nom_en": "South Africa",
+          "nom_es": "Africa del Sur",
+          "nom_it": "Sud Africa",
+          "nom_pt": "África do Sul",
+          "parent": 23362
+        },
+        {
+          "id": 115,
+          "nomcourt": "de",
+          "nom_fr": "Allemagne",
+          "nom_de": "Deutschland",
+          "nom_en": "Germany",
+          "nom_es": "Alemania",
+          "nom_pt": "Alemanha",
+          "parent": 48
+        },
+        {
+          "id": 114,
+          "nomcourt": "asi",
+          "nom_fr": "Asie",
+          "nom_de": "Asien",
+          "nom_en": "Asia",
+          "nom_es": "Asia",
+          "nom_pt": "Ásia",
+          "parent": 0
+        },
+        {
+          "id": 61,
+          "nomcourt": "au",
+          "nom_fr": "Australie",
+          "nom_de": "Australien",
+          "nom_en": "Australia",
+          "nom_es": "Australia",
+          "nom_pt": "Austrália",
+          "parent": 3824
+        },
+        {
+          "id": 63,
+          "nomcourt": "br",
+          "nom_fr": "Brésil",
+          "nom_de": "Brasilien",
+          "nom_en": "Brazil",
+          "nom_es": "Brasil",
+          "nom_pt": "Brasil",
+          "parent": 3257
+        },
+        {
+          "id": 3891,
+          "nomcourt": "bg",
+          "nom_fr": "Bulgarie",
+          "nom_de": "Bulgarien",
+          "nom_en": "Bulgary",
+          "nom_es": "Bulgaria",
+          "nom_pt": "Bulgaria",
+          "parent": 48
+        },
+        {
+          "id": 121,
+          "nomcourt": "ca",
+          "nom_fr": "Canada",
+          "nom_de": "Kanada",
+          "nom_en": "Canada",
+          "nom_es": "Canadá",
+          "nom_pt": "Canadá",
+          "parent": 3257
+        },
+        {
+          "id": 3822,
+          "nomcourt": "cl",
+          "nom_fr": "Chili",
+          "nom_de": "Chile",
+          "nom_en": "Chile",
+          "nom_es": "Chile",
+          "nom_pt": "Chile",
+          "parent": 3257
+        },
+        {
+          "id": 56,
+          "nomcourt": "cn",
+          "nom_fr": "Chine",
+          "nom_de": "China",
+          "nom_en": "China",
+          "nom_es": "China",
+          "nom_pt": "China",
+          "parent": 114
+        },
+        {
+          "id": 23362,
+          "nomcourt": "afr",
+          "nom_fr": "Continent Africain",
+          "nom_de": "afrikanischen Kontinent",
+          "nom_en": "African continent",
+          "nom_es": "continente africano",
+          "nom_it": "continente africano",
+          "nom_pt": "continente africano",
+          "parent": 0
+        },
+        {
+          "id": 3257,
+          "nomcourt": "ame",
+          "nom_fr": "Continent Américain",
+          "nom_de": "Amerikanischen Kontinent",
+          "nom_en": "American continent",
+          "nom_es": "Continente americano",
+          "nom_pt": "Continente americano",
+          "parent": 0
+        },
+        {
+          "id": 58,
+          "nomcourt": "kr",
+          "nom_fr": "Corée",
+          "nom_de": "Korea",
+          "nom_en": "Korea",
+          "nom_es": "Corea",
+          "nom_pt": "Coreia",
+          "parent": 114
+        },
+        {
+          "id": 3603,
+          "nomcourt": "cus",
+          "nom_fr": "Custom",
+          "nom_de": "Maßgeschneidert",
+          "nom_en": "Custom",
+          "nom_es": "Personalizado",
+          "nom_pt": "Personalizado",
+          "parent": 0
+        },
+        {
+          "id": 282,
+          "nomcourt": "dk",
+          "nom_fr": "Danemark",
+          "nom_de": "Dänemark",
+          "nom_en": "Denmark",
+          "nom_es": "Dinamarca",
+          "nom_pt": "Dinamarca",
+          "parent": 48
+        },
+        {
+          "id": 23353,
+          "nomcourt": "ae",
+          "nom_fr": "Emirats arabes unis",
+          "nom_de": "Vereinigte Arabische Emirate",
+          "nom_en": "United Arab Emirates",
+          "nom_es": "Emiratos Árabes Unidos",
+          "nom_it": "Emirati Arabi Uniti",
+          "nom_pt": "Emirados Árabes Unidos",
+          "parent": 3826
+        },
+        {
+          "id": 122,
+          "nomcourt": "sp",
+          "nom_fr": "Espagne",
+          "nom_de": "Spanien",
+          "nom_en": "Spain",
+          "nom_es": "España",
+          "nom_pt": "Espanha",
+          "parent": 48
+        },
+        {
+          "id": 48,
+          "nomcourt": "eu",
+          "nom_fr": "Europe",
+          "nom_de": "Europa",
+          "nom_en": "Europe",
+          "nom_es": "Europa",
+          "nom_pt": "Europa",
+          "parent": 0
+        },
+        {
+          "id": 283,
+          "nomcourt": "fi",
+          "nom_fr": "Finlande",
+          "nom_de": "Finnland",
+          "nom_en": "Finland",
+          "nom_es": "Finlandia",
+          "nom_pt": "Finlândia",
+          "parent": 48
+        },
+        {
+          "id": 45,
+          "nomcourt": "fr",
+          "nom_fr": "France",
+          "nom_de": "Frankreich",
+          "nom_en": "France",
+          "nom_es": "Francia",
+          "nom_pt": "França",
+          "parent": 48
+        },
+        {
+          "id": 3892,
+          "nomcourt": "gr",
+          "nom_fr": "Grèce",
+          "nom_de": "Griechenland",
+          "nom_en": "Greece",
+          "nom_es": "Grecia",
+          "nom_pt": "Grecia",
+          "parent": 48
+        },
+        {
+          "id": 3821,
+          "nomcourt": "hu",
+          "nom_fr": "Hongrie",
+          "nom_de": "Ungarn",
+          "nom_en": "Hungary",
+          "nom_es": "Hungría",
+          "nom_pt": "Hungria",
+          "parent": 48
+        },
+        {
+          "id": 3827,
+          "nomcourt": "il",
+          "nom_fr": "Israel",
+          "nom_de": "Israel",
+          "nom_en": "Israel",
+          "nom_es": "Israel",
+          "nom_pt": "Israel",
+          "parent": 3826
+        },
+        {
+          "id": 118,
+          "nomcourt": "it",
+          "nom_fr": "Italie",
+          "nom_de": "Italien",
+          "nom_en": "Italy",
+          "nom_es": "Italia",
+          "nom_pt": "Itália",
+          "parent": 48
+        },
+        {
+          "id": 47,
+          "nomcourt": "jp",
+          "nom_fr": "Japon",
+          "nom_de": "Japan",
+          "nom_en": "Japan",
+          "nom_es": "Japón",
+          "nom_pt": "Japão",
+          "parent": 114
+        },
+        {
+          "id": 3832,
+          "nomcourt": "kw",
+          "nom_fr": "Koweït",
+          "nom_de": "Kuwait",
+          "nom_en": "Kuwait",
+          "nom_es": "Kuwait",
+          "nom_pt": "Kuwait",
+          "parent": 3826
+        },
+        {
+          "id": 23359,
+          "nomcourt": "mex",
+          "nom_fr": "Mexique",
+          "nom_de": "Mexiko",
+          "nom_en": "Mexico",
+          "nom_es": "México",
+          "nom_it": "Messico",
+          "nom_pt": "México",
+          "parent": 3257
+        },
+        {
+          "id": 57,
+          "nomcourt": "wor",
+          "nom_fr": "Monde",
+          "nom_de": "World",
+          "nom_en": "World",
+          "nom_es": "Mundo",
+          "nom_pt": "Mundo",
+          "parent": 0
+        },
+        {
+          "id": 3826,
+          "nomcourt": "mor",
+          "nom_fr": "Moyen-Orient",
+          "nom_de": "Naher Osten",
+          "nom_en": "Middle East",
+          "nom_es": "Oriente Medio",
+          "nom_pt": "Médio Oriente",
+          "parent": 0
+        },
+        {
+          "id": 3884,
+          "nomcourt": "no",
+          "nom_fr": "Norvège",
+          "nom_de": "Norwegen",
+          "nom_en": "Norway",
+          "nom_es": "Noruega",
+          "nom_pt": "Noruega",
+          "parent": 48
+        },
+        {
+          "id": 3825,
+          "nomcourt": "nz",
+          "nom_fr": "Nouvelle-Zélande",
+          "nom_de": "Neuseeland",
+          "nom_en": "New Zealand",
+          "nom_es": "Nueva Zelanda",
+          "nom_pt": "Nova Zelândia",
+          "parent": 3824
+        },
+        {
+          "id": 3824,
+          "nomcourt": "oce",
+          "nom_fr": "Océanie",
+          "nom_de": "Ozeanien",
+          "nom_en": "Oceania",
+          "nom_es": "Oceanía",
+          "nom_pt": "Oceânia",
+          "parent": 0
+        },
+        {
+          "id": 130,
+          "nomcourt": "nl",
+          "nom_fr": "Pays-Bas",
+          "nom_de": "Niederlande",
+          "nom_en": "Netherlands",
+          "nom_es": "Holanda",
+          "nom_pt": "Holanda",
+          "parent": 48
+        },
+        {
+          "id": 3828,
+          "nomcourt": "pe",
+          "nom_fr": "Pérou",
+          "nom_de": "Peru",
+          "nom_en": "Peru",
+          "nom_es": "Perú",
+          "nom_pt": "Peru",
+          "parent": 3257
+        },
+        {
+          "id": 3595,
+          "nomcourt": "pl",
+          "nom_fr": "Pologne",
+          "nom_de": "Polen",
+          "nom_en": "Poland",
+          "nom_es": "Polonia",
+          "nom_pt": "Polônia",
+          "parent": 48
+        },
+        {
+          "id": 3780,
+          "nomcourt": "pt",
+          "nom_fr": "Portugal",
+          "nom_de": "Portugal",
+          "nom_en": "Portugal",
+          "nom_es": "Portugal",
+          "nom_pt": "Portugal",
+          "parent": 48
+        },
+        {
+          "id": 3820,
+          "nomcourt": "cz",
+          "nom_fr": "République Tchèque",
+          "nom_de": "Tschechien",
+          "nom_en": "Czech republic",
+          "nom_es": "República Checa",
+          "nom_pt": "República Checa",
+          "parent": 48
+        },
+        {
+          "id": 3289,
+          "nomcourt": "uk",
+          "nom_fr": "Royaume-Uni",
+          "nom_de": "Großbritannien",
+          "nom_en": "United Kingdom",
+          "nom_es": "Reino Unido",
+          "nom_pt": "Reino Unido",
+          "parent": 48
+        },
+        {
+          "id": 126,
+          "nomcourt": "ru",
+          "nom_fr": "Russie",
+          "nom_de": "Russland",
+          "nom_en": "Russia",
+          "nom_es": "Rusia",
+          "nom_pt": "Rússia",
+          "parent": 0
+        },
+        {
+          "id": 20240,
+          "nomcourt": "ss",
+          "nom_fr": "ScreenScraper",
+          "nom_de": "ScreenScraper",
+          "nom_en": "ScreenScraper",
+          "nom_es": "ScreenScraper",
+          "nom_it": "ScreenScraper",
+          "nom_pt": "ScreenScraper",
+          "parent": 0
+        },
+        {
+          "id": 3823,
+          "nomcourt": "sk",
+          "nom_fr": "Slovaquie",
+          "nom_de": "Slowakei",
+          "nom_en": "Slovakia",
+          "nom_es": "Eslovaquia",
+          "nom_pt": "Eslováquia",
+          "parent": 48
+        },
+        {
+          "id": 116,
+          "nomcourt": "se",
+          "nom_fr": "Suede",
+          "nom_de": "Schweden",
+          "nom_en": "Sweden",
+          "nom_es": "Suecia",
+          "nom_pt": "Suécia",
+          "parent": 48
+        },
+        {
+          "id": 112,
+          "nomcourt": "tw",
+          "nom_fr": "Taiwan",
+          "nom_de": "Taiwan",
+          "nom_en": "Taiwan",
+          "nom_es": "Taiwan",
+          "nom_pt": "Taiwan",
+          "parent": 114
+        },
+        {
+          "id": 3829,
+          "nomcourt": "tr",
+          "nom_fr": "Turquie",
+          "nom_de": "Türkei",
+          "nom_en": "Turkey",
+          "nom_es": "Turquía",
+          "nom_pt": "Turquia",
+          "parent": 3826
+        },
+        {
+          "id": 46,
+          "nomcourt": "us",
+          "nom_fr": "USA",
+          "nom_de": "USA",
+          "nom_en": "USA",
+          "nom_es": "EUA",
+          "nom_pt": "EUA",
+          "parent": 3257
+        }
+      ]
+    }
+  }
+}
