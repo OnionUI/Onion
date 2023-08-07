@@ -451,11 +451,10 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 		# Get the URL of media in this order : world, us, usa, na, eu, uk, oceania, au, nz, jp and then the first entry available
 
         # TODO: the following list, calculated_regions, to be poulated by our new function final_fallback_region to be also defined and configurable
-        # by the user with a default value provided if if user confgifguration not provided
-        
+        # by the user with a default value provided if if user confgifguration not provides  
         preferrered_region="fr" # user configurable with default value
-        calculated_regions=("wor" "us" "usa" "eu" "uk" "au" "nz" "jp") # calculated by the function which uses the preffed_region and JSON
-        final_fallback_region="your_region_here"  # user configurable with default value
+        calculated_regions=("us" "eu" "uk" "au" "nz" "jp") # calculated by the function which uses the preffed_region and JSON
+        final_fallback_region="wo"  # user configurable with default value
         
         # This is the sequenced final list of regions to execute the retrieval on
         composite_reason_list=$preferred_region
@@ -473,7 +472,7 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 
         # TODO : if default media not found search in other media types
 
-        if [ -z "$url" ]; then
+        if [ -z "$url" ]; then 
             echo -e "${YELLOW}Game match but no media found!${NONE}"
             let Scrap_Fail++
             continue
