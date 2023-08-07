@@ -445,36 +445,38 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 			# mixrbv1			RecalBox Mix V1
 			# mixrbv2			RecalBox Mix V2
 
+
+
 		# TODO: Use the region defined in the rom's name to dictate which meida the user should receive, unless overridden
 		# Get the URL of media in this order : world, us, usa, na, eu, uk, oceania, au, nz, jp and then the first entry available
-		url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "wor") | .url' | head -n 1)
-		if [ -z "$url" ]; then
-			url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "us") | .url' | head -n 1)
-			if [ -z "$url" ]; then
-				url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "usa") | .url' | head -n 1)
-				if [ -z "$url" ]; then
-					url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "eu") | .url' | head -n 1)
-					if [ -z "$url" ]; then
-						url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "uk") | .url' | head -n 1)
-						if [ -z "$url" ]; then
-							url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "au") | .url' | head -n 1)
-							if [ -z "$url" ]; then
-								url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "nz") | .url' | head -n 1)
-								if [ -z "$url" ]; then
-									url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "jp") | .url' | head -n 1)
-								fi
-							fi
-						fi
-					fi
-				fi
-			fi
-		fi        
-        # TODO : if default media not found search in other media types
+
+        # TODO: the following list, calculated_regions, to be poulated by our new function final_fallback_region to be also defined and configurable
+        # by the user with a default value provided if if user confgifguration not provided
         
+        preferrered_region="fr" # user configurable with default value
+        calculated_regions=("wor" "us" "usa" "eu" "uk" "au" "nz" "jp") # calculated by the function which uses the preffed_region and JSON
+        final_fallback_region="your_region_here"  # user configurable with default value
+        
+        # This is the sequenced final list of regions to execute the retrieval on
+        composite_reason_list=$preferred_region
+        composite_reason_list+=("$salculated_regions")
+        composite_reason_list+=("$final_fallback_region")  # Appending the final fallback region to the calculated_regions array
+
+        url=""
+
+        for region in "${composite_reason_list[@]}"; do
+            url=$(echo $api_result | jq --arg MediaType "$MediaType" --arg Region "$region" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == $region) | .url' | head -n 1)
+            if [ -n "$url" ]; then
+                break
+            fi
+        done
+
+        # TODO : if default media not found search in other media types
+
         if [ -z "$url" ]; then
             echo -e "${YELLOW}Game match but no media found!${NONE}"
-            let Scrap_Fail++;
-            continue;
+            let Scrap_Fail++
+            continue
         fi
         
         # echo -e "Downloading Images for $romNameNoExtension \nScreenscraper ID : $gameIDSS \n url :$url\n\n"        # for debugging
