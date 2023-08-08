@@ -7,5 +7,7 @@
   "ScrapeInBackground": "false",
   "RetroarchMediaType": "Named_Boxarts",
   "ScreenscraperMediaType": "box-2d",
-  "LaunchboxMediaType": "Box - Front"
+  "LaunchboxMediaType": "Box - Front",
+  "PreferredRegion": "",
+  "FallbackRegion": "wor"
 }
