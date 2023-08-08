@@ -447,30 +447,32 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 
 
 
-		# TODO: Use the region defined in the rom's name to dictate which meida the user should receive, unless overridden
-		# Get the URL of media in this order : world, us, usa, na, eu, uk, oceania, au, nz, jp and then the first entry available
-
         # TODO: the following list, calculated_regions, to be poulated by our new function final_fallback_region to be also defined and configurable
         # by the user with a default value provided if if user confgifguration not provides  
-        preferrered_region="fr" # user configurable with default value
-        calculated_regions=("us" "eu" "uk" "au" "nz" "jp") # calculated by the function which uses the preffed_region and JSON
+
+        # grab the regional configuration from the JSON file
+        regionsData="/mnt/SDCARD/.tmp_update/config/regions.json"
+
+        # retrieve the region information from various data sources
+        preferred_region="fr" # user configurable with default value
+        calculated_regions=$(./find_parent_regions.sh "$regionsData" "$preferred_region")
         final_fallback_region="wo"  # user configurable with default value
-        
-        # This is the sequenced final list of regions to execute the retrieval on
-        composite_reason_list=$preferred_region
-        composite_reason_list+=("$salculated_regions")
-        composite_reason_list+=("$final_fallback_region")  # Appending the final fallback region to the calculated_regions array
+
+        # sequence final list of regions to execute the retrieval on
+        composite_reason_list="$preferred_region $calculated_regions $final_fallback_region"
 
         url=""
 
-        for region in "${composite_reason_list[@]}"; do
-            url=$(echo $api_result | jq --arg MediaType "$MediaType" --arg Region "$region" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == $region) | .url' | head -n 1)
+        set -- $composite_reason_list
+        for region do
+            url=$(echo "$api_result" | jq --arg MediaType "$MediaType" --arg Region "$region" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == $region) | .url' | head -n 1)
             if [ -n "$url" ]; then
                 break
             fi
         done
 
         # TODO : if default media not found search in other media types
+
 
         if [ -z "$url" ]; then 
             echo -e "${YELLOW}Game match but no media found!${NONE}"
