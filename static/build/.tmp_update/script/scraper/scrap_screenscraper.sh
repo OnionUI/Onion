@@ -108,6 +108,7 @@ search_on_screenscraper() {
     while true; do
 		# TODO : managing multithread for users who have it.
         api_result=$(curl -k -s "$url")
+		
         
         # Don't check art if max threads for leechers is used
         if echo "$api_result" | grep -q "The maximum threads"; then
@@ -379,6 +380,7 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 	
     echo "-------------------------------------------------"
 	gameIDSS=""
+	url=""
     let romcount++;
     
     # Cleaning up names
@@ -406,8 +408,7 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 		let Scrap_notrequired++;
 	
 	else
-		
-		
+
 		url="https://www.screenscraper.fr/api2/jeuInfos.php?devid=${u#???}&devpassword=${p%??}&softname=onion&output=json&ssid=${userSS}&sspassword=${passSS}&crc=&systemeid=${ssID}&romtype=rom&romnom=${romNameTrimmed}.zip"
     	search_on_screenscraper
     	
@@ -460,13 +461,15 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 
         # sequence final list of regions to execute the retrieval on
         composite_reason_list="$preferred_region $calculated_regions $final_fallback_region"
+		
+		# we keep only media section for faster search
+		api_result=$(echo "$api_result" | jq '.response.jeu.medias')   # 0.00s instead of 0.25s
 
-        url=""
 
         set -- $composite_reason_list
         for region do
-            url=$(echo "$api_result" | jq --arg MediaType "$MediaType" --arg Region "$region" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == $region) | .url' | head -n 1)
-            if [ -n "$url" ]; then
+            MediaURL=$(echo "$api_result" | jq --arg MediaType "$MediaType" --arg Region "$region" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == $region) | .url' | head -n 1)
+            if [ -n "$MediaURL" ]; then
                 break
             fi
         done
@@ -474,19 +477,19 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
         # TODO : if default media not found search in other media types
 
 
-        if [ -z "$url" ]; then 
+        if [ -z "$MediaURL" ]; then 
             echo -e "${YELLOW}Game match but no media found!${NONE}"
             let Scrap_Fail++
             continue
         fi
         
-        # echo -e "Downloading Images for $romNameNoExtension \nScreenscraper ID : $gameIDSS \n url :$url\n\n"        # for debugging
+        # echo -e "Downloading Images for $romNameNoExtension \nScreenscraper ID : $gameIDSS \n url :$MediaURL\n\n"        # for debugging
 
-        url=$(echo "$url" | sed 's/"$/\&maxwidth=250\&maxheight=360"/')
-        urlcmd=$(echo "wget -q --no-check-certificate "$url" -P \"/mnt/SDCARD/Roms/$CurrentSystem/Imgs\" -O \"$romNameNoExtension.png\"")
+        MediaURL=$(echo "$MediaURL" | sed 's/"$/\&maxwidth=250\&maxheight=360"/')
+        urlcmd=$(echo "wget -q --no-check-certificate "$MediaURL" -P \"/mnt/SDCARD/Roms/$CurrentSystem/Imgs\" -O \"$romNameNoExtension.png\"")
         
         # directl download trigger an error
-        #wget --no-check-certificate "$url" -P "/mnt/SDCARD/Roms/$CurrentSystem/Imgs" -O "$romNameNoExtension.png"
+        #wget --no-check-certificate "$MediaURL" -P "/mnt/SDCARD/Roms/$CurrentSystem/Imgs" -O "$romNameNoExtension.png"
         #wget $urlcmd
 
         echo $urlcmd>/tmp/rundl.sh
@@ -501,7 +504,7 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 		fi
         
         
-        # echo -e "\n\n ==$url== \n\n"
+        # echo -e "\n\n ==$MediaURL== \n\n"
         #pngscale "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png" "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png"
     fi
    

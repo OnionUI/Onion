@@ -26,19 +26,23 @@ ScraperConfigFile=/mnt/SDCARD/.tmp_update/config/scraper.json
 
 Menu_Config()
 {
-    Option1="Select your scraping sources"
-    Option2="Toggle background scraping"
-    Option3="Screenscraper: account settings"
-    Option4="Screenscraper: media preferences"
-    Option5="Back to Main Menu"
+    Option1="Media preferences"
+	Option2="Region selection"
+	Option3="Scraping sources"
+    Option4="Screenscraper: account settings"
+    Option5="Toggle background scraping"
+    Option6="Back to Main Menu"
     
-    Mychoice=$( echo -e "$Option1\n$Option2\n$Option3\n$Option4\n$Option5" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "      --== CONFIGURATION MENU ==--" -b "Press A to validate your choice.")
+    Mychoice=$( echo -e "$Option1\n$Option2\n$Option3\n$Option4\n$Option5\n$Option6" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "      --== CONFIGURATION MENU ==--" -b "Press A to validate your choice.")
 
-    [ "$Mychoice" = "$Option1" ] && Menu_Config_ScrapingSelection
-    [ "$Mychoice" = "$Option2" ] && Menu_Config_BackgroundScraping
-    [ "$Mychoice" = "$Option3" ] && Menu_Config_SSAccountSettings
-    [ "$Mychoice" = "$Option4" ] && Menu_Config_MediaType
-    [ "$Mychoice" = "$Option5" ] && Menu_Main
+    [ "$Mychoice" = "$Option1" ] && Menu_Config_MediaType
+    [ "$Mychoice" = "$Option2" ] && Menu_RegionSelection
+    [ "$Mychoice" = "$Option3" ] && Menu_Config_ScrapingSource
+    [ "$Mychoice" = "$Option4" ] && Menu_Config_SSAccountSettings
+    [ "$Mychoice" = "$Option5" ] && Menu_Config_BackgroundScraping
+	[ "$Mychoice" = "$Option6" ] && Menu_Main
+	
+	sync
 }
 
 Menu_Config_SSAccountSettings()
@@ -278,7 +282,7 @@ Menu_Config_MediaType()
     Option07="Screenscraper Mix V1       (available on SS)"
     Option08="Screenscraper Mix V2       (available on SS)"
 
-    Mychoice=$( echo -e "$Option01\n$Option02\n$Option03\n$Option04\n$Option05n$Option06\n$Option07\n$Option08\n" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t\ "Screenscraper scraping media type ? (currently) $ScreenscraperMediaType)" -b "Press A to validate your choice.")
+    Mychoice=$( echo -e "$Option01\n$Option02\n$Option03\n$Option04\n$Option05n$Option06\n$Option07\n$Option08\n" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t\ "Current media type : $ScreenscraperMediaType" -b "Press A to validate your choice.")
     
     [ "$Mychoice" = "$Option01" ]  && SSmediaType="box-2d"                 && LBmediaType="Box - Front"                      && RAmediaType="Named_Boxarts"  
     [ "$Mychoice" = "$Option02" ]  && SSmediaType="sstitle"                && LBmediaType="Screenshot - Game Title"          && RAmediaType="Named_Titles"  
@@ -311,6 +315,72 @@ Menu_Config_MediaType()
 
 
 
+Menu_RegionSelection()
+{
+    # Check if the configuration file exists
+    if [ ! -f "$ScraperConfigFile" ]; then
+      echo "Error: configuration file not found"
+      read -n 1 -s -r -p "Press A to continue"
+      exit 1
+    fi
+
+    # retrieve current media settings
+    config=$(cat "$ScraperConfigFile")
+    ScreenscraperRegion=$(echo "$config" | jq -r '.ScreenscraperRegion')
+
+
+    # Display Welcome
+    clear
+    echo -e 
+    echo -e "====================================================\n\n"
+    echo -e "Select your country.\n\n"
+    echo -e "If no media is found for your country code," 
+    echo -e "other countries will be searched as fallback.\n" 
+    echo -e "====================================================\n\n\n"
+    read -n 1 -s -r -p "Press A to continue"
+    clear
+
+
+Option01="Australia (au)"
+Option02="Brazil (br)"
+Option03="Canada (ca)"
+Option04="China (cn)"
+Option05="Finland (fi)"
+Option06="France (fr)"
+Option07="Germany (de)"
+Option08="Greece (gr)"
+Option09="Italy (it)"
+Option10="Japan (jp)"
+Option11="Korea (kr)"
+Option12="Netherlands (nl)"
+Option13="Norway (no)"
+Option14="Spain (sp)"
+Option15="Sweden (se)"
+Option16="United States (us)"
+Option17="United Kingdom (uk)"
+
+    Mychoice=$( echo -e "$Option01\n$Option02\n$Option03\n$Option04\n$Option05n$Option06\n$Option07\n$Option08\n$Option09\n$Option10\n$Option11\n$Option12\n$Option13\n$Option14\n$Option15\n$Option16\n$Option17\n" \
+	| /mnt/SDCARD/.tmp_update/script/shellect.sh -t\ "Current selected region: $ScreenscraperRegion" -b "Press A to validate your choice.") \
+    
+	SSregion=$(echo "$Mychoice" | sed -n 's/.*(\(.*\))/\1/p')
+	LBregion=$(echo "$Mychoice" | sed -n 's/\(.*\) (.*)/\1/p')
+
+	# exceptions :
+	case "$Mychoice" in
+	  "$Option12") LBregion="The Netherlands" ;;
+	esac
+ clear
+
+    config=$(cat $ScraperConfigFile)
+    config=$(echo "$config" | jq --arg LBregion "$LBregion" '.LaunchboxRegion = $LBregion')
+    config=$(echo "$config" | jq --arg SSregion "$SSregion" '.ScreenscraperRegion = $SSregion')        
+    echo "$config" > $ScraperConfigFile
+	
+    
+    Menu_Config
+
+}
+
 
 
 
@@ -319,7 +389,7 @@ Menu_Config_MediaType()
 
 ##########################################################################################
 
-Menu_Config_ScrapingSelection()
+Menu_Config_ScrapingSource()
 {
     clear
     echo "Loading..."
