@@ -108,10 +108,10 @@ search_on_screenscraper() {
     while true; do
 		# TODO : managing multithread for users who have it.
         api_result=$(curl -k -s "$url")
-		
+		IFS= read -r Head_api_result <<< "$api_result"
         
         # Don't check art if max threads for leechers is used
-        if echo "$api_result" | grep -q "The maximum threads"; then
+        if echo "$Head_api_result" | grep -q "The maximum threads"; then
             if [ "$retry_count" -ge "$max_retries" ]; then
                 echo "The Screenscraper API is too busy for non-users. Please try again later (or register)."
                 echo "Press any key to finish"
@@ -129,7 +129,7 @@ search_on_screenscraper() {
     done
 
     # Don't check art if screenscraper is closed
-    if echo "$api_result" | grep -q "API closed"; then
+    if echo "$Head_api_result" | grep -q "API closed"; then
         echo -e "${RED}The Screenscraper API is currently down, please try again later.{NONE}"
         let Scrap_Fail++
         read -n 1 -s -r -p "Press A to exit"
@@ -137,7 +137,7 @@ search_on_screenscraper() {
     fi
 
     # Don't check art after a failed curl request
-    if [ -z "$api_result" ]; then
+    if [ -z "$Head_api_result" ]; then
         echo -e "${RED}Request failed${NONE}"
         echo "Request failed for $romNameNoExtensionTrimmed" >> /mnt/SDCARD/.tmp_update/logs/scrap.log
         let Scrap_Fail++
@@ -145,7 +145,7 @@ search_on_screenscraper() {
     fi
     
     # Don't check art if screenscraper can't find a match
-    if echo "$api_result" | grep -q "^Erreur"; then
+    if echo "$Head_api_result" | grep -q "^Erreur"; then
         echo -e "${RED}No match found${NONE}"
         echo "Couldn't find a match for $romNameNoExtensionTrimmed" >> /mnt/SDCARD/.tmp_update/logs/scrap.log
         let Scrap_Fail++
