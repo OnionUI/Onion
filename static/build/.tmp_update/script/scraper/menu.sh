@@ -45,6 +45,70 @@ Menu_Config()
 	sync
 }
 
+
+
+
+Screenscraper_accountState()
+{
+
+	clear
+	if [ "$userSS" = "null" ] || [ "$passSS" = "null" ] || [ "$userSS" = "" ] || [ "$passSS" = "" ]; then
+		echo -e "Login or Password is empty!\nCheck user IDs!\n\n\n\n\n\n\n\n"
+		read -n 1 -s -r -p "Press A to continue"
+		return
+	fi
+	
+	echo "Retrieve account information..."
+	# Appel de l'API avec curl et stockage de la réponse JSON dans une variable
+	url="https://www.screenscraper.fr/api2/ssuserInfos.php?devid=xxx&devpassword=yyy&softname=zzz&output=json&ssid=$userSS&sspassword=$passSS"
+	api_result=$(curl -k -s "$url")
+
+
+	if echo "$api_result" | grep -q "^Erreur"; then
+		echo -e "Authentification failed.\nCheck user IDs!\n\n\n\n\n\n\n\n"
+		read -n 1 -s -r -p "Press A to continue"
+		return
+	fi
+
+	# Extraction des informations du JSON
+	id=$(echo "$api_result" | jq -r '.response.ssuser.id')
+	level=$(echo "$api_result" | jq -r '.response.ssuser.niveau')
+	contribution=$(echo "$api_result" | jq -r '.response.ssuser.contribution')
+	approvedParticipations=$(echo "$api_result" | jq -r '.response.ssuser.propositionok')
+	maxThreads=$(echo "$api_result" | jq -r '.response.ssuser.maxthreads')
+	maxDownloadSpeed=$(echo "$api_result" | jq -r '.response.ssuser.maxdownloadspeed')
+	requestsToday=$(echo "$api_result" | jq -r '.response.ssuser.requeststoday')
+	maxRequestsPerDay=$(echo "$api_result" | jq -r '.response.ssuser.maxrequestsperday')
+	maxRequestsPerMinute=$(echo "$api_result" | jq -r '.response.ssuser.maxrequestspermin')
+	lastScrape=$(echo "$api_result" | jq -r '.response.ssuser.datedernierevisite')
+
+	# Affichage des informations extraites
+	clear
+	echo -e "\n*****************************************************"
+	echo -e "*************** SCREENSCRAPER ACCOUNT ***************"
+	echo -e "*****************************************************\n\n"
+	echo -e "\n\n id: $id"
+	echo " Level: $level"
+	echo " Financial contribution: $contribution"
+	echo " Approved participations: $approvedParticipations"
+	echo " maxthreads: $maxThreads"
+	echo " max download speed: $maxDownloadSpeed"
+	echo " requests today: $requestsToday"
+	echo " max requests per day: $maxRequestsPerDay"
+	echo " max requests per minute: $maxRequestsPerMinute"
+	echo -e " Last scrape: $lastScrape\n\n\n\n\n\n\n\n\n\n\n\n"
+
+	read -n 1 -s -r -p "Press A to continue"
+
+
+}
+
+
+
+
+
+
+
 Menu_Config_SSAccountSettings()
 {
     
@@ -68,19 +132,24 @@ Menu_Config_SSAccountSettings()
             userStored=false
         else
             userStored=true
-            echo "username: $userSS"
-            echo "password: xxxx"
         fi
+		
+		echo "username: $userSS"
+		if ! [ -z "$passSS" ]; then
+			passwordState="Password: xxxx (hidden)"
+		else
+			passwordState="Password: (not set)"
+		fi
     fi
     
     
 
         while true; do
-        
-			Mychoice=$( echo -e "Username : $userSS\nPassword : xxxx\nScreenscraper information\nBack to configuration menu." | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "     --== SCREENSCRAPER ACCOUNT ==--" -b "Press A to validate your choice.")
+			clear
+			Mychoice=$( echo -e "Screenscraper information\nUsername : $userSS\n${passwordState}\nAccount state and stats\nBack to configuration menu." | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "     --== SCREENSCRAPER ACCOUNT ==--" -b "Press A to validate your choice.")
 			
 			case "$Mychoice" in
-				*Username\ :*)
+				*Username\ *)
 					clear
 					echo -ne "\e[?25h"  # display the cursor
 					echo -e "Press X to display the keyboard.\nPress A to enter a key.\nPress L1 for shift.\nPress R1 for backspace.\nPress Enter to validate.\n\n\n\nEnter your screenscraper username.\n\n"
@@ -88,10 +157,12 @@ Menu_Config_SSAccountSettings()
 					userSS=$(cat /tmp/readline.txt)
 					userSS="${userSS// /}"  # removing spaces
 					rm /tmp/readline.txt
-
-
+					config=$(cat $ScraperConfigFile)
+					config=$(echo "$config" | jq --arg user "$userSS" '.screenscraper_username = $user')
+					echo "$config" > $ScraperConfigFile
+					sync
 					;;
-				*Password\ :*)
+				*Password:\ *)
 					clear
 					echo -ne "\e[?25h"  # display the cursor
 					echo -e "Press X to display the keyboard.\nPress A to enter a key.\nPress L1 for shift.\nPress R1 for backspace.\nPress Enter to validate.\n\n\n\nEnter your screenscraper password.\n\n"
@@ -99,9 +170,16 @@ Menu_Config_SSAccountSettings()
 					passSS=$(cat /tmp/readline.txt)
 					passSS="${passSS// /}"  # removing spaces
 					rm /tmp/readline.txt
+					config=$(cat $ScraperConfigFile)
+					config=$(echo "$config" | jq --arg pass "$passSS" '.screenscraper_password = $pass')
+					echo "$config" > $ScraperConfigFile
+					sync
 					;;
 				*Screenscraper\ information*)
 					Screenscraper_information
+					;;
+				*Account\ state\ and\ stats*)
+					Screenscraper_accountState
 					;;
 				*Back\ to\ configuration\ menu.*)
 					Menu_Config; break;
@@ -113,9 +191,7 @@ Menu_Config_SSAccountSettings()
 
 			
 
-			config=$(cat $ScraperConfigFile)
-			config=$(echo "$config" | jq --arg user "$userSS" --arg pass "$passSS" '.screenscraper_username = $user | .screenscraper_password = $pass')
-			echo "$config" > $ScraperConfigFile
+
                
         done
 
@@ -523,7 +599,7 @@ Launch_Scraping ()
 
 
 Screenscraper_information () {
-clear 
+clear
 
 cat << 	EOF
 
