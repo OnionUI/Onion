@@ -120,6 +120,7 @@ search_on_screenscraper() {
             else
                 let retry_count++
                 echo "Retrying API call ($retry_count / $max_retries)..."
+				echo "Registering a Screenscraper account can help !"
                 sleep_duration=$((5 + retry_count))
                 sleep "$sleep_duration"
             fi
@@ -244,7 +245,7 @@ get_ssSystemID() {
     XONE)               ssSystemID="220";;   # Sharp X1
     ZXEIGHTYONE)        ssSystemID="77";;    # Sinclair ZX-81
     ZXS)                ssSystemID="76";;    # Sinclair ZX Spectrum
-    *)                  echo -n "unknown platform"
+    *)                  echo "Unknown platform"
   esac
 }
 
@@ -273,7 +274,10 @@ if [ -f "$ScraperConfigFile" ]; then
     ScrapeInBackground=$(echo "$config" | jq -r '.ScrapeInBackground')
 	MediaType=$(echo "$config" | jq -r '.ScreenscraperMediaType')
 	SelectedRegion=$(echo "$config" | jq -r '.ScreenscraperRegion')
-
+	
+	echo "Media Type: $MediaType"
+	echo "Current Region: $SelectedRegion"
+	
 	u=$(echo "U2FsdGVkX18PKpoEvELyE+5xionDX8iRxAIxJj4FN1U=" | openssl enc -aes-256-cbc -d -a -pbkdf2 -iter 10000 -salt -pass pass:"3x0tVD3jZvElZWRt3V67QQ==")
 	p=$(echo "U2FsdGVkX1/ydn2FWrwYcFVc5gVYgc5kVaJ5jDOeOKE=" |openssl enc -aes-256-cbc -d -a -pbkdf2 -iter 10000 -salt -pass pass:"RuA29ch3zVoodAItmvKKmZ+4Au+5owgvV/ztqRu4NjI=")
 
@@ -364,14 +368,9 @@ set -f
 if ! [ -z "$CurrentRom" ]; then
  #   CurrentRom_noapostrophe=${CurrentRom//\'/\\\'}    # replacing   '   by    \'
  #   romfilter="-name  '*$CurrentRom_noapostrophe*'"
- #   
- #   CurrentRom="Link's"
  #   romfilter="-name  '*$CurrentRom*'"
- #   
- #   romfilter="-name  '*Link's*'"
-    romfilter="-name \"*$CurrentRom*\""
     #romfilter="-name  '*$CurrentRom*'"
-    
+    romfilter="-name \"*$CurrentRom*\""
 fi
     
 
@@ -386,8 +385,8 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
     
     # Cleaning up names
     romName=$(basename "$file")
-    romNameNoExtension=${romName%.*}	
-    
+    romNameNoExtension=${romName%.*}
+	echo $romNameNoExtension	
     
     romNameTrimmed="${romNameNoExtension/".nkit"/}"
     romNameTrimmed="${romNameTrimmed//"!"/}"
@@ -400,7 +399,6 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
     romNameTrimmed="${romNameTrimmed//" "/"%20"}"
     
     
-    echo $romNameNoExtension
     #echo $romNameTrimmed # for debugging
 
 
@@ -419,8 +417,7 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 			MAX_FILE_SIZE_BYTES=52428800  #50MB
 			
 			if [ "$rom_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
-				echo "[coresize]: $rom_size : too big"
-				echo -e "${RED}Failed to get game ID${NONE}"
+				echo -e "${RED}Rom is too big to make a checksum.${NONE}"
 				let Scrap_Fail++;
 				continue;
 				
@@ -429,117 +426,64 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 				CRC=$(xcrc "$file")
 				url="https://www.screenscraper.fr/api2/jeuInfos.php?devid=${u#???}&devpassword=${p%??}&softname=onion&output=json&ssid=${userSS}&sspassword=${passSS}&&crc=${CRC}&systemeid=${ssSystemID}&romtype=rom&romnom=&romtaille=${rom_size}"  # most of other parameters than CRC are useless for the request but helps SS to fill their database
 				search_on_screenscraper
+				
 				if ! [ "$gameIDSS" -eq "$gameIDSS" ] 2> /dev/null; then	
 					echo -e "${RED}Failed to get game ID${NONE}"
 					let Scrap_Fail++;
 					continue;
 				fi
+				
 				RealgameName=$(echo "$api_result" | jq -r '.response.jeu.noms[0].text')
 				echo Real name found : "$RealgameName"
 			fi
-			
-			
-			
-			
 
         fi
 		
         echo "gameID = $gameIDSS"
-        # Here we choose the kind of media that we want :
-            # sstitle	        Screenshot of Title Screen	(recommended)
-            # ss	            Screenshot	(recommended)
-            # fanart	        Fan Art	
-            # screenmarquee	    Screen Marquee	
-            # steamgrid	        HD Logos	
-            # wheel	            Wheel	
-            # wheel-hd	        HD Logos	
-            # box-2D	        Box Art	(default) (recommended)
-            # box-2D-side   	Box: Side	
-            # box-2D-back   	Box: Back	
-            # box-texture   	Box: Texture	
-            # support-texture	Stand: Texture	
-            # box-3D            Box 3D Art
-			# mixrbv1			RecalBox Mix V1
-			# mixrbv2			RecalBox Mix V2
 
 
+        
+		api_result=$(echo $api_result | jq '.response.jeu.medias')   # we keep only media section for faster search : 0.01s instead of 0.25s after that
 
-        # TODO: the following list, calculated_regions, to be poulated by our new function final_fallback_region to be also defined and configurable
-        # by the user with a default value provided if if user confgifguration not provides  
+		regionsDB="/mnt/SDCARD/.tmp_update/script/scraper/screenscraper_database/regions.db"
+		RegionOrder=$(sqlite3 $regionsDB "SELECT ss_tree || ';' || ss_fallback FROM regions WHERE ss_nomcourt = '$SelectedRegion';")
+		# Old way:
+		# MediaURL=$(echo "$api_result" | jq --arg MediaType "$MediaType" --arg Region "$region" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == $region) | .url' | head -n 1)
+		# MediaURL=$(echo "$api_result" | jq --arg MediaType "$MediaType" --arg Region "$region" '.[] | select(.type == $MediaType) | select(.region == $region) | .url' | head -n 1)
 
-        # grab the regional configuration from the JSON file
-        regionsDB="/mnt/SDCARD/.tmp_update/script/scraper/screenscraper_database/regions.db"
-
-		# we keep only media section for faster search
-		api_result=$(echo $api_result | jq '.response.jeu.medias')   # 0.00s instead of 0.25s
-		
-
-    
-            # MediaURL=$(echo "$api_result" | jq --arg MediaType "$MediaType" --arg Region "$region" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == $region) | .url' | head -n 1)
-			echo searching in "$region"
-			# MediaURL=$(echo "$api_result" | jq --arg MediaType "$MediaType" --arg Region "$region" '.[] | select(.type == $MediaType) | select(.region == $region) | .url' | head -n 1)
-
-
-RegionOrder=$(sqlite3 $regionsDB "SELECT ss_tree || ';' || ss_fallback FROM regions WHERE ss_nomcourt = '$SelectedRegion';")
-
+# we split the RegionOrder in each region variable (do not indent)
 IFS=';' read -r Region1 Region2 Region3 Region4 Region5 Region6 Region7 Region8 <<EOF
 $RegionOrder
 EOF
-Region8="ttt"
-echo "Region1: $Region1"
-echo "Region2: $Region2"
-echo "Region3: $Region3"
-echo "Region4: $Region4"
-echo "Region5: $Region5"
-echo "Region6: $Region6"
-echo "Region7: $Region7"
-echo "Region8: $Region8"
-echo "$MediaType"
 
-stty sane
-echo $api_result > api_result.txt
-
-
-MediaURL=$(echo "$api_result" | jq --arg MediaType "$MediaType" \
-                        --arg Region1 "$region1" \
-                        --arg Region2 "$region2" \
-                        --arg Region3 "$region3" \
-                        --arg Region4 "$region4" \
-                        --arg Region5 "$region5" \
-                        --arg Region6 "$region6" \
-                        --arg Region7 "$region7" \
-                        --arg Region8 "$region8" \
-                        'map(select(.type == $MediaType)) |
-                          sort_by(if .region == $Region1 then 0
-                                elif .region == $Region2 then 1
-                                elif .region == $Region3 then 2
-                                elif .region == $Region4 then 3
-                                elif .region == $Region5 then 4
-                                elif .region == $Region6 then 5
-                                elif .region == $Region7 then 6
-                                elif .region == $Region8 then 7
-                                else 8 end) |
-                        .[0].url' | head -n 1)
-
-echo MediaURL is :$MediaURL
-
-
-
+# for debugging :
+# echo -e "Region1: $Region1\nRegion2: $Region2\nRegion3: $Region3\nRegion4: $Region4\nRegion5: $Region5\nRegion6: $Region6\nRegion7: $Region7\nRegion8: $Region8\n$MediaType"
 # MediaType="box-2D"
 # region1="eu"
 # echo "$api_result" | jq --arg MediaType "$MediaType"  --arg Region1 "$region1"  --arg Region2 "$region2" 'map(select(.type == $MediaType)) | sort_by(if .region == $Region1 then 0 elif .region == $Region2 then 1 else 8 end)'
 
 
-
-			
-            # if [ -n "$MediaURL" ]; then
-				# echo -e "${YELLOW}Game matches but no media found!${NONE}"
-				# let Scrap_Fail++
-                # break
-            # fi
-
-
-        # TODO : if default media not found search in other media types
+			# this jq query will search all the images of type "MediaType" and will display it by order defined in RegionOrder
+			MediaURL=$(echo "$api_result" | jq --arg MediaType "$MediaType" \
+									--arg Region1 "$region1" \
+									--arg Region2 "$region2" \
+									--arg Region3 "$region3" \
+									--arg Region4 "$region4" \
+									--arg Region5 "$region5" \
+									--arg Region6 "$region6" \
+									--arg Region7 "$region7" \
+									--arg Region8 "$region8" \
+									'map(select(.type == $MediaType)) |
+									  sort_by(if .region == $Region1 then 0
+											elif .region == $Region2 then 1
+											elif .region == $Region3 then 2
+											elif .region == $Region4 then 3
+											elif .region == $Region5 then 4
+											elif .region == $Region6 then 5
+											elif .region == $Region7 then 6
+											elif .region == $Region8 then 7
+											else 8 end) |
+									.[0].url' | head -n 1)
 
 
         if [ -z "$MediaURL" ]; then 
@@ -569,7 +513,6 @@ echo MediaURL is :$MediaURL
 		fi
         
         
-        # echo -e "\n\n ==$MediaURL== \n\n"
         #pngscale "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png" "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png"
     fi
    
@@ -601,8 +544,7 @@ echo MediaURL is :$MediaURL
 				
 #TODO : get manual	
 				
-				
-				
+
 
 done
 
