@@ -269,22 +269,20 @@ if [ -f "$ScraperConfigFile" ]; then
 
     config=$(cat $ScraperConfigFile)
 	
+	MediaType=$(echo "$config" | jq -r '.ScreenscraperMediaType')
+	SelectedRegion=$(echo "$config" | jq -r '.ScreenscraperRegion')
+	echo "Media Type: $MediaType"
+	echo "Current Region: $SelectedRegion"
     userSS=$(echo "$config" | jq -r '.screenscraper_username')
     passSS=$(echo "$config" | jq -r '.screenscraper_password')
     ScrapeInBackground=$(echo "$config" | jq -r '.ScrapeInBackground')
-	MediaType=$(echo "$config" | jq -r '.ScreenscraperMediaType')
-	SelectedRegion=$(echo "$config" | jq -r '.ScreenscraperRegion')
-	
-	echo "Media Type: $MediaType"
-	echo "Current Region: $SelectedRegion"
-	
 	u=$(echo "U2FsdGVkX18PKpoEvELyE+5xionDX8iRxAIxJj4FN1U=" | openssl enc -aes-256-cbc -d -a -pbkdf2 -iter 10000 -salt -pass pass:"3x0tVD3jZvElZWRt3V67QQ==")
 	p=$(echo "U2FsdGVkX1/ydn2FWrwYcFVc5gVYgc5kVaJ5jDOeOKE=" |openssl enc -aes-256-cbc -d -a -pbkdf2 -iter 10000 -salt -pass pass:"RuA29ch3zVoodAItmvKKmZ+4Au+5owgvV/ztqRu4NjI=")
 
     if [ "$userSS" = "null" ] || [ "$passSS" = "null" ] || [ "$userSS" = "" ] || [ "$passSS" = "" ]; then
-        userStored=false
+        userStored="false"
     else
-        userStored=true
+        userStored="true"
         echo "screenscraper username: $userSS"
         echo -e "screenscraper password: xxxx\n\n"
     fi
@@ -343,6 +341,16 @@ echo -e "*****************************************************\n\n"
 
 echo -e "Scraping $CurrentSystem...\n"
 
+echo "Media Type: $MediaType"
+echo "Current Region: $SelectedRegion"
+
+if [ "$userStored" = "true" ]; then
+	echo "screenscraper username: $userSS"
+	echo -e "screenscraper password: xxxx\n\n"
+else
+	echo "screenscraper account not configured."
+fi
+
 ####################################################################################################################################
  #ls /mnt/SDCARD/Roms/$CurrentSystem
  get_ssSystemID $CurrentSystem
@@ -397,7 +405,7 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
     romNameTrimmed="${romNameTrimmed//" - "/"%20"}"
     romNameTrimmed="${romNameTrimmed/"-"/"%20"}"
     romNameTrimmed="${romNameTrimmed//" "/"%20"}"
-    
+
     
     #echo $romNameTrimmed # for debugging
 
@@ -422,8 +430,9 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 				continue;
 				
 			else
-				echo CRC check...
+				echo -n "CRC check..."
 				CRC=$(xcrc "$file")
+				echo " $CRC"
 				url="https://www.screenscraper.fr/api2/jeuInfos.php?devid=${u#???}&devpassword=${p%??}&softname=onion&output=json&ssid=${userSS}&sspassword=${passSS}&&crc=${CRC}&systemeid=${ssSystemID}&romtype=rom&romnom=&romtaille=${rom_size}"  # most of other parameters than CRC are useless for the request but helps SS to fill their database
 				search_on_screenscraper
 				
