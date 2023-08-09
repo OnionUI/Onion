@@ -161,89 +161,89 @@ search_on_screenscraper() {
 
 
 
-get_ssID() {
+get_ssSystemID() {
   case $1 in
-    ADVMAME)            ssID="75";;    # Mame
-    AMIGA)              ssID="64";;    # Commodore Amiga
-    AMIGACD)            ssID="134";;   # Commodore Amiga CD
-    ARCADE)             ssID="75";;    # Mame
-    ARDUBOY)            ssID="263";;   # Arduboy
-    ATARI)              ssID="26";;    # Atari 2600
-    ATARIST)            ssID="42";;    # Atari ST
-    COLECO)             ssID="183";;   # Coleco
-    COMMODORE)          ssID="66";;    # Commodore 64
-    CPC)                ssID="65";;    # Amstrad CPC
-    CPS1)               ssID="6";;     # Capcom Play System
-    CPS2)               ssID="7";;     # Capcom Play System 2
-    CPS3)               ssID="8";;     # Capcom Play System 3
-    DAPHNE)             ssID="49";;    # Daphne
-    DOS)                ssID="135";;   # DOS
-    EASYRPG)            ssID="231";;   # EasyRPG
-    EBK)                ssID="93";;    # EBK
-    EIGHTHUNDRED)       ssID="43";;    # Atari 800
-    FAIRCHILD)          ssID="80";;    # Fairchild Channel F
-    FBA2012)            ssID="75";;    # FBA2012
-    FBALPHA)            ssID="75";;    # FBAlpha
-    FBNEO)              ssID="";;      # FBNeo (Empty)
-    FC)                 ssID="3";;     # NES (Famicom)
-    FDS)                ssID="106";;   # Famicom Disk System
-    FIFTYTWOHUNDRED)    ssID="40";;    # Atari 5200
-    GB)                 ssID="9";;     # Game Boy
-    GBA)                ssID="12";;    # Game Boy Advance
-    GBC)                ssID="10";;    # Game Boy Color
-    GG)                 ssID="21";;    # Sega Game Gear
-    GW)                 ssID="52";;    # Nintendo Game & Watch
-    INTELLIVISION)      ssID="115";;   # Intellivision
-    JAGUAR)             ssID="27";;    # Atari Jaguar
-    LUTRO)              ssID="206";;   # Lutro
-    LYNX)               ssID="28";;    # Atari Lynx
-    MAME2000)           ssID="75";;    # Mame 2000
-    MAME2003)           ssID="75";;    # Mame 2003
-    MBA)                ssID="75";;    # MBA
-    MD)                 ssID="1";;     # Sega Genesis (Mega Drive)
-    MDHACKS)            ssID="1";;     # Sega Genesis (Mega Drive) Hacks
-    MEGADUCK)           ssID="90";;    # Megaduck
-    MS)                 ssID="2";;     # Sega Master System
-    MSX)                ssID="113";;   # MSX
-    NEOCD)              ssID="70";;    # Neo Geo CD
-    NEOGEO)             ssID="142";;   # Neo Geo AES
-    NGP)                ssID="25";;    # Neo Geo Pocket
-    ODYSSEY)            ssID="104";;   # Videopac / Magnavox Odyssey 2
-    OPENBOR)            ssID="214";;   # OpenBOR
-    PALM)               ssID="219";;   # Palm
-    PANASONIC)          ssID="29";;    # 3DO
-    PCE)                ssID="31";;    # NEC TurboGrafx-16 / PC Engine
-    PCECD)              ssID="114";;   # NEC TurboGrafx-CD
-    PCEIGHTYEIGHT)      ssID="221";;   # NEC PC-8000 & PC-8800 series / NEC PC-8801
-    PCFX)               ssID="72";;    # NEC PC-FX
-    PCNINETYEIGHT)      ssID="208";;   # NEC PC-98 / NEC PC-9801
-    PICO)               ssID="234";;   # PICO
-    PORTS)              ssID="137";;   # PC Win9X
-    PS)                 ssID="57";;    # Sony Playstation
-    SATELLAVIEW)        ssID="107";;   # Satellaview
-    SCUMMVM)            ssID="123";;   # ScummVM
-    SEGACD)             ssID="20";;    # Sega CD
-    SEGASGONE)          ssID="109";;   # Sega SG-1000
-    SEVENTYEIGHTHUNDRED) ssID="41";;    # Atari 7800
-    SFC)                ssID="4";;     # Super Nintendo (SNES)
-    SGB)                ssID="127";;   # Super Game Boy
-    SGFX)               ssID="105";;   # NEC PC Engine SuperGrafx
-    SUFAMI)             ssID="108";;   # Sufami Turbo
-    SUPERVISION)        ssID="207";;   # Supervision
-    THIRTYTWOX)         ssID="19";;    # Sega 32X
-    THOMSON)            ssID="141";;   # Thomson
-    TIC)                ssID="222";;   # TIC-80
-    UZEBOX)             ssID="216";;   # Uzebox
-    VB)                 ssID="11";;    # Virtual Boy
-    VECTREX)            ssID="102";;   # Vectrex
-    VIC20)              ssID="73";;    # Commodore VIC-20
-    VIDEOPAC)           ssID="104";;   # Videopac
-    VMU)                ssID="23";;    # Dreamcast VMU (useless)
-    WS)                 ssID="45";;    # Bandai WonderSwan & Color
-    X68000)             ssID="79";;    # Sharp X68000
-    XONE)               ssID="220";;   # Sharp X1
-    ZXEIGHTYONE)        ssID="77";;    # Sinclair ZX-81
-    ZXS)                ssID="76";;    # Sinclair ZX Spectrum
+    ADVMAME)            ssSystemID="75";;    # Mame
+    AMIGA)              ssSystemID="64";;    # Commodore Amiga
+    AMIGACD)            ssSystemID="134";;   # Commodore Amiga CD
+    ARCADE)             ssSystemID="75";;    # Mame
+    ARDUBOY)            ssSystemID="263";;   # Arduboy
+    ATARI)              ssSystemID="26";;    # Atari 2600
+    ATARIST)            ssSystemID="42";;    # Atari ST
+    COLECO)             ssSystemID="183";;   # Coleco
+    COMMODORE)          ssSystemID="66";;    # Commodore 64
+    CPC)                ssSystemID="65";;    # Amstrad CPC
+    CPS1)               ssSystemID="6";;     # Capcom Play System
+    CPS2)               ssSystemID="7";;     # Capcom Play System 2
+    CPS3)               ssSystemID="8";;     # Capcom Play System 3
+    DAPHNE)             ssSystemID="49";;    # Daphne
+    DOS)                ssSystemID="135";;   # DOS
+    EASYRPG)            ssSystemID="231";;   # EasyRPG
+    EBK)                ssSystemID="93";;    # EBK
+    EIGHTHUNDRED)       ssSystemID="43";;    # Atari 800
+    FAIRCHILD)          ssSystemID="80";;    # Fairchild Channel F
+    FBA2012)            ssSystemID="75";;    # FBA2012
+    FBALPHA)            ssSystemID="75";;    # FBAlpha
+    FBNEO)              ssSystemID="";;      # FBNeo (Empty)
+    FC)                 ssSystemID="3";;     # NES (Famicom)
+    FDS)                ssSystemID="106";;   # Famicom Disk System
+    FIFTYTWOHUNDRED)    ssSystemID="40";;    # Atari 5200
+    GB)                 ssSystemID="9";;     # Game Boy
+    GBA)                ssSystemID="12";;    # Game Boy Advance
+    GBC)                ssSystemID="10";;    # Game Boy Color
+    GG)                 ssSystemID="21";;    # Sega Game Gear
+    GW)                 ssSystemID="52";;    # Nintendo Game & Watch
+    INTELLIVISION)      ssSystemID="115";;   # Intellivision
+    JAGUAR)             ssSystemID="27";;    # Atari Jaguar
+    LUTRO)              ssSystemID="206";;   # Lutro
+    LYNX)               ssSystemID="28";;    # Atari Lynx
+    MAME2000)           ssSystemID="75";;    # Mame 2000
+    MAME2003)           ssSystemID="75";;    # Mame 2003
+    MBA)                ssSystemID="75";;    # MBA
+    MD)                 ssSystemID="1";;     # Sega Genesis (Mega Drive)
+    MDHACKS)            ssSystemID="1";;     # Sega Genesis (Mega Drive) Hacks
+    MEGADUCK)           ssSystemID="90";;    # Megaduck
+    MS)                 ssSystemID="2";;     # Sega Master System
+    MSX)                ssSystemID="113";;   # MSX
+    NEOCD)              ssSystemID="70";;    # Neo Geo CD
+    NEOGEO)             ssSystemID="142";;   # Neo Geo AES
+    NGP)                ssSystemID="25";;    # Neo Geo Pocket
+    ODYSSEY)            ssSystemID="104";;   # Videopac / Magnavox Odyssey 2
+    OPENBOR)            ssSystemID="214";;   # OpenBOR
+    PALM)               ssSystemID="219";;   # Palm
+    PANASONIC)          ssSystemID="29";;    # 3DO
+    PCE)                ssSystemID="31";;    # NEC TurboGrafx-16 / PC Engine
+    PCECD)              ssSystemID="114";;   # NEC TurboGrafx-CD
+    PCEIGHTYEIGHT)      ssSystemID="221";;   # NEC PC-8000 & PC-8800 series / NEC PC-8801
+    PCFX)               ssSystemID="72";;    # NEC PC-FX
+    PCNINETYEIGHT)      ssSystemID="208";;   # NEC PC-98 / NEC PC-9801
+    PICO)               ssSystemID="234";;   # PICO
+    PORTS)              ssSystemID="137";;   # PC Win9X
+    PS)                 ssSystemID="57";;    # Sony Playstation
+    SATELLAVIEW)        ssSystemID="107";;   # Satellaview
+    SCUMMVM)            ssSystemID="123";;   # ScummVM
+    SEGACD)             ssSystemID="20";;    # Sega CD
+    SEGASGONE)          ssSystemID="109";;   # Sega SG-1000
+    SEVENTYEIGHTHUNDRED) ssSystemID="41";;    # Atari 7800
+    SFC)                ssSystemID="4";;     # Super Nintendo (SNES)
+    SGB)                ssSystemID="127";;   # Super Game Boy
+    SGFX)               ssSystemID="105";;   # NEC PC Engine SuperGrafx
+    SUFAMI)             ssSystemID="108";;   # Sufami Turbo
+    SUPERVISION)        ssSystemID="207";;   # Supervision
+    THIRTYTWOX)         ssSystemID="19";;    # Sega 32X
+    THOMSON)            ssSystemID="141";;   # Thomson
+    TIC)                ssSystemID="222";;   # TIC-80
+    UZEBOX)             ssSystemID="216";;   # Uzebox
+    VB)                 ssSystemID="11";;    # Virtual Boy
+    VECTREX)            ssSystemID="102";;   # Vectrex
+    VIC20)              ssSystemID="73";;    # Commodore VIC-20
+    VIDEOPAC)           ssSystemID="104";;   # Videopac
+    VMU)                ssSystemID="23";;    # Dreamcast VMU (useless)
+    WS)                 ssSystemID="45";;    # Bandai WonderSwan & Color
+    X68000)             ssSystemID="79";;    # Sharp X68000
+    XONE)               ssSystemID="220";;   # Sharp X1
+    ZXEIGHTYONE)        ssSystemID="77";;    # Sinclair ZX-81
+    ZXS)                ssSystemID="76";;    # Sinclair ZX Spectrum
     *)                  echo -n "unknown platform"
   esac
 }
@@ -341,7 +341,7 @@ echo -e "Scraping $CurrentSystem...\n"
 
 ####################################################################################################################################
  #ls /mnt/SDCARD/Roms/$CurrentSystem
- get_ssID $CurrentSystem
+ get_ssSystemID $CurrentSystem
 
  #ls /mnt/SDCARD/Roms/$CurrentSystem
  mkdir -p /mnt/SDCARD/Roms/$CurrentSystem/Imgs > /dev/null
@@ -409,24 +409,39 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 		let Scrap_notrequired++;
 	
 	else
-
-		url="https://www.screenscraper.fr/api2/jeuInfos.php?devid=${u#???}&devpassword=${p%??}&softname=onion&output=json&ssid=${userSS}&sspassword=${passSS}&crc=&systemeid=${ssID}&romtype=rom&romnom=${romNameTrimmed}.zip"
+		rom_size=$(stat -c%s "$file")
+		url="https://www.screenscraper.fr/api2/jeuInfos.php?devid=${u#???}&devpassword=${p%??}&softname=onion&output=json&ssid=${userSS}&sspassword=${passSS}&crc=&systemeid=${ssSystemID}&romtype=rom&romnom=${romNameTrimmed}.zip"
     	search_on_screenscraper
     	
     	# Don't check art if we didn't get screenscraper game ID
         if ! [ "$gameIDSS" -eq "$gameIDSS" ] 2> /dev/null; then
 			# Last chance : we search thanks to rom checksum
-			echo CRC check...
-			CRC=$(xcrc "$file")
-			url="https://www.screenscraper.fr/api2/jeuInfos.php?devid=${u#???}&devpassword=${p%??}&softname=onion&output=json&ssid=${userSS}&sspassword=${passSS}&&crc=${CRC}&systemeid=&romtype=rom&romnom=&romtaille=10"
-			search_on_screenscraper
-			if ! [ "$gameIDSS" -eq "$gameIDSS" ] 2> /dev/null; then	
+			MAX_FILE_SIZE_BYTES=52428800  #50MB
+			
+			if [ "$rom_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
+				echo "[coresize]: $rom_size : too big"
 				echo -e "${RED}Failed to get game ID${NONE}"
 				let Scrap_Fail++;
 				continue;
+				
+			else
+				echo CRC check...
+				CRC=$(xcrc "$file")
+				url="https://www.screenscraper.fr/api2/jeuInfos.php?devid=${u#???}&devpassword=${p%??}&softname=onion&output=json&ssid=${userSS}&sspassword=${passSS}&&crc=${CRC}&systemeid=&romtype=rom&romnom=${romNameTrimmed}.zip&romtaille=10"
+				search_on_screenscraper
+				if ! [ "$gameIDSS" -eq "$gameIDSS" ] 2> /dev/null; then	
+					echo -e "${RED}Failed to get game ID${NONE}"
+					let Scrap_Fail++;
+					continue;
+				fi
+				RealgameName=$(echo "$api_result" | jq -r '.response.jeu.noms[0].text')
+				echo Real name found : "$RealgameName"
 			fi
-			RealgameName=$(echo "$api_result" | jq -r '.response.jeu.noms[0].text')
-			echo Real name found : "$RealgameName"
+			
+			
+			
+			
+
         fi
 		
         echo "gameID = $gameIDSS"
