@@ -83,7 +83,7 @@ Menu_Config_SSAccountSettings()
 				*Username\ :*)
 					clear
 					echo -ne "\e[?25h"  # display the cursor
-					echo -e "Press X to display the keyboard and \nenter your screenscraper username\n\n"
+					echo -e "Press X to display the keyboard.\nPress A to enter a key.\nPress L1 for shift.\nPress R1 for backspace.\nPress Enter to validate.\n\n\n\nEnter your screenscraper username.\n\n"
 					readline -m "username: "
 					userSS=$(cat /tmp/readline.txt)
 					userSS="${userSS// /}"  # removing spaces
@@ -94,7 +94,7 @@ Menu_Config_SSAccountSettings()
 				*Password\ :*)
 					clear
 					echo -ne "\e[?25h"  # display the cursor
-					echo -e "Press X to display the keyboard and \nenter your screenscraper password\n\n"
+					echo -e "Press X to display the keyboard.\nPress A to enter a key.\nPress L1 for shift.\nPress R1 for backspace.\nPress Enter to validate.\n\n\n\nEnter your screenscraper password.\n\n"
 					readline -m "password: "
 					passSS=$(cat /tmp/readline.txt)
 					passSS="${passSS// /}"  # removing spaces
@@ -104,9 +104,7 @@ Menu_Config_SSAccountSettings()
 					Screenscraper_information
 					;;
 				*Back\ to\ configuration\ menu.*)
-					clear
-					Menu_Config
-					break
+					Menu_Config; break;
 					;;
 				*)
 					false
@@ -138,8 +136,8 @@ Menu_Config_BackgroundScraping()
     
     clear
     echo -e "====================================================\n\n"
-    echo -e "Background scraping allows you to use your\nMiyoo during scraping.\n\nYou may experience slowdowns,so choose \nnon-demanding emulators.\n\nHowever you will not see download in live if enabled.\n\n"
-    echo -e "====================================================\n\n\n"
+    echo -e "Background scraping allows you to use your\nMiyoo during scraping.\n\nYou may experience slowdowns,so choose \nnon-demanding emulators.\n\nHowever you will not see download in live if enabled.\n"
+    echo -e "====================================================\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
     read -n 1 -s -r -p "Press A to continue"
     clear
     
@@ -147,13 +145,15 @@ Menu_Config_BackgroundScraping()
     ScrapeInBackground=$(echo "$config" | jq -r '.ScrapeInBackground')
     
     
-    	Mychoice=$( echo -e "No\nYes" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "Background scraping ? (Currently: $ScrapeInBackground)" -b "Press A to validate your choice.")
+    	Mychoice=$( echo -e "No\nYes\nBack to Configuration Menu" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "Background scraping ? (Currently: $ScrapeInBackground)" -b "Press A to validate your choice.")
         # TODO : add a new option to display the tail of the log
 
         if [ "$Mychoice" = "Yes" ]; then
             ScrapeInBackground="true"
-        else
+        elif [ "$Mychoice" = "No" ]; then
             ScrapeInBackground="false"
+		elif [ "$Mychoice" = "Back to Configuration Menu" ]; then
+			Menu_Config; break;
         fi
 
         config=$(cat $ScraperConfigFile)
@@ -251,22 +251,24 @@ Menu_Config_MediaType()
       exit 1
     fi
 
-    # retrieve current media settings
-    config=$(cat "$ScraperConfigFile")
-    RetroarchMediaType=$(echo "$config" | jq -r '.RetroarchMediaType')
-    ScreenscraperMediaType=$(echo "$config" | jq -r '.ScreenscraperMediaType')
-    LaunchBoxMediaType=$(echo "$config" | jq -r '.LaunchboxMediaType')
 
     # Display Welcome
     clear
     echo -e 
     echo -e "====================================================\n\n"
-    echo -e "All the media types are not available on\neach scraper engine.\n\n"
+    echo -e " All the media types are not available on\n each scraper engine.\n\n"
     echo -e "	SS = Screenscraper" 
     echo -e "	LB = Launchbox" 
     echo -e "	RA = Retroarch\n\n"
   
-    echo -e "====================================================\n\n\n"
+    echo -e "====================================================\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+	
+    # retrieve current media settings
+    config=$(cat "$ScraperConfigFile")
+    RetroarchMediaType=$(echo "$config" | jq -r '.RetroarchMediaType')
+    ScreenscraperMediaType=$(echo "$config" | jq -r '.ScreenscraperMediaType')
+    LaunchBoxMediaType=$(echo "$config" | jq -r '.LaunchboxMediaType')
+	
     read -n 1 -s -r -p "Press A to continue"
     clear
 
@@ -281,10 +283,11 @@ Menu_Config_MediaType()
     Option06="Marquee                    (available on SS,LB)"
     Option07="Screenscraper Mix V1       (available on SS)"
     Option08="Screenscraper Mix V2       (available on SS)"
+	Option09="Back to Configuration Menu"
 
-    Mychoice=$( echo -e "$Option01\n$Option02\n$Option03\n$Option04\n$Option05n$Option06\n$Option07\n$Option08\n" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t\ "Current media type : $ScreenscraperMediaType" -b "Press A to validate your choice.")
+    Mychoice=$( echo -e "$Option01\n$Option02\n$Option03\n$Option04\n$Option05n$Option06\n$Option07\n$Option08\n$Option09\n" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t\ "Current media type : $ScreenscraperMediaType" -b "Press A to validate your choice.")
     
-    [ "$Mychoice" = "$Option01" ]  && SSmediaType="box-2d"                 && LBmediaType="Box - Front"                      && RAmediaType="Named_Boxarts"  
+    [ "$Mychoice" = "$Option01" ]  && SSmediaType="box-2D"                 && LBmediaType="Box - Front"                      && RAmediaType="Named_Boxarts"  
     [ "$Mychoice" = "$Option02" ]  && SSmediaType="sstitle"                && LBmediaType="Screenshot - Game Title"          && RAmediaType="Named_Titles"  
     [ "$Mychoice" = "$Option03" ]  && SSmediaType="ss"                     && LBmediaType="Screenshot - Gameplay"            && RAmediaType="Named_Snaps"  
     [ "$Mychoice" = "$Option04" ]  && SSmediaType="box-3D"                 && LBmediaType="Box - 3D"                         && RAmediaType=""  
@@ -292,6 +295,8 @@ Menu_Config_MediaType()
     [ "$Mychoice" = "$Option06" ]  && SSmediaType="screenmarqueesmall"     && LBmediaType="Banner"                           && RAmediaType=""  
     [ "$Mychoice" = "$Option07" ]  && SSmediaType="mixrbv1"                && LBmediaType=""                                 && RAmediaType=""  
     [ "$Mychoice" = "$Option08" ]  && SSmediaType="mixrbv2"                && LBmediaType=""                                 && RAmediaType=""  
+	[ "$Mychoice" = "$Option09" ]  && Menu_Config; break;
+					  
     clear
 
     # TODO: Create a dictionary so we can support display and system names throughout the utility
@@ -333,10 +338,10 @@ Menu_RegionSelection()
     clear
     echo -e 
     echo -e "====================================================\n\n"
-    echo -e "Select your country.\n\n"
-    echo -e "If no media is found for your country code," 
-    echo -e "other countries will be searched as fallback.\n" 
-    echo -e "====================================================\n\n\n"
+    echo -e " Select your country.\n\n"
+    echo -e " If no media is found for your country code," 
+    echo -e " other countries will be searched as fallback.\n" 
+    echo -e "====================================================\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
     read -n 1 -s -r -p "Press A to continue"
     clear
 
@@ -358,8 +363,9 @@ Option14="Spain (sp)"
 Option15="Sweden (se)"
 Option16="United States (us)"
 Option17="United Kingdom (uk)"
+Option18="Back to Configuration Menu"
 
-    Mychoice=$( echo -e "$Option01\n$Option02\n$Option03\n$Option04\n$Option05n$Option06\n$Option07\n$Option08\n$Option09\n$Option10\n$Option11\n$Option12\n$Option13\n$Option14\n$Option15\n$Option16\n$Option17\n" \
+    Mychoice=$( echo -e "$Option01\n$Option02\n$Option03\n$Option04\n$Option05n$Option06\n$Option07\n$Option08\n$Option09\n$Option10\n$Option11\n$Option12\n$Option13\n$Option14\n$Option15\n$Option16\n$Option17\n$Option18\n" \
 	| /mnt/SDCARD/.tmp_update/script/shellect.sh -t\ "Current selected region: $ScreenscraperRegion" -b "Press A to validate your choice.") \
     
 	SSregion=$(echo "$Mychoice" | sed -n 's/.*(\(.*\))/\1/p')
@@ -368,6 +374,7 @@ Option17="United Kingdom (uk)"
 	# exceptions :
 	case "$Mychoice" in
 	  "$Option12") LBregion="The Netherlands" ;;
+	  "$Option18") Menu_Config; break; ;;
 	esac
  clear
 
@@ -423,7 +430,7 @@ Menu_Config_ScrapingSource()
         [ "$Mychoice" = "[ ] Retroarch" ] && Retroarch="[x] Retroarch"
         [ "$Mychoice" = "[x] Retroarch" ] && Retroarch="[ ] Retroarch"
 
-        [ "$Mychoice" = "Back to Configuration Menu" ] && break
+        [ "$Mychoice" = "Back to Configuration Menu" ] && Menu_Config; break;
     
     done
     

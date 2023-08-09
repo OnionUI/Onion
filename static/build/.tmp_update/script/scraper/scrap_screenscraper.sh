@@ -260,7 +260,7 @@ echo -e "\n*****************************************************"
 echo -e "******************* SCREENSCRAPER *******************"
 echo -e "*****************************************************\n\n"
 
-echo -e "Scraping $CurrentSystem...\n"
+
 
 #We check for existing credentials
 
@@ -272,12 +272,20 @@ if [ -f "$ScraperConfigFile" ]; then
 	MediaType=$(echo "$config" | jq -r '.ScreenscraperMediaType')
 	SelectedRegion=$(echo "$config" | jq -r '.ScreenscraperRegion')
 	echo "Media Type: $MediaType"
-	echo "Current Region: $SelectedRegion"
+	echo -e "Current Region: $SelectedRegion\n\n"
+	echo -e "Scraping $CurrentSystem...\n"
     userSS=$(echo "$config" | jq -r '.screenscraper_username')
     passSS=$(echo "$config" | jq -r '.screenscraper_password')
     ScrapeInBackground=$(echo "$config" | jq -r '.ScrapeInBackground')
 	u=$(echo "U2FsdGVkX18PKpoEvELyE+5xionDX8iRxAIxJj4FN1U=" | openssl enc -aes-256-cbc -d -a -pbkdf2 -iter 10000 -salt -pass pass:"3x0tVD3jZvElZWRt3V67QQ==")
 	p=$(echo "U2FsdGVkX1/ydn2FWrwYcFVc5gVYgc5kVaJ5jDOeOKE=" |openssl enc -aes-256-cbc -d -a -pbkdf2 -iter 10000 -salt -pass pass:"RuA29ch3zVoodAItmvKKmZ+4Au+5owgvV/ztqRu4NjI=")
+	# Regions order management
+	regionsDB="/mnt/SDCARD/.tmp_update/script/scraper/screenscraper_database/regions.db"
+	RegionOrder=$(sqlite3 $regionsDB "SELECT ss_tree || ';' || ss_fallback FROM regions WHERE ss_nomcourt = '$SelectedRegion';")
+# we split the RegionOrder in each region variable (do not indent)
+IFS=';' read -r Region1 Region2 Region3 Region4 Region5 Region6 Region7 Region8 <<EOF
+$RegionOrder
+EOF
 
     if [ "$userSS" = "null" ] || [ "$passSS" = "null" ] || [ "$userSS" = "" ] || [ "$passSS" = "" ]; then
         userStored="false"
@@ -298,7 +306,7 @@ if [ "$userStored" = "false" ] && ! [ "$ScrapeInBackground" = "true" ]; then
         if [ "$Mychoice" = "Yes" ]; then
 			clear
 			echo -ne "\e[?25h"  # display the cursor
-			echo -e "Press X to display the keyboard and \nenter your screenscraper username\n\n"
+			echo -e "Press X to display the keyboard.\nPress A to enter a key.\nPress L1 for shift.\nPress R1 for backspace.\nPress Enter to validate.\n\n\n\nEnter your screenscraper username.\n\n"
 			readline -m "username: "
 			userSS=$(cat /tmp/readline.txt)
 			userSS="${userSS// /}"  # removing spaces
@@ -306,7 +314,7 @@ if [ "$userStored" = "false" ] && ! [ "$ScrapeInBackground" = "true" ]; then
 			# read -p "username : " userSS
 			clear
 			echo -ne "\e[?25h"  # display the cursor
-			echo -e "Press X to display the keyboard and \nenter your screenscraper password\n\n"
+			echo -e "Press X to display the keyboard.\nPress A to enter a key.\nPress L1 for shift.\nPress R1 for backspace.\nPress Enter to validate.\n\n\n\nEnter your screenscraper password.\n\n"
 			readline -m "password: "
 			passSS=$(cat /tmp/readline.txt)
 			passSS="${passSS// /}"  # removing spaces
@@ -454,22 +462,16 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
         
 		api_result=$(echo $api_result | jq '.response.jeu.medias')   # we keep only media section for faster search : 0.01s instead of 0.25s after that
 
-		regionsDB="/mnt/SDCARD/.tmp_update/script/scraper/screenscraper_database/regions.db"
-		RegionOrder=$(sqlite3 $regionsDB "SELECT ss_tree || ';' || ss_fallback FROM regions WHERE ss_nomcourt = '$SelectedRegion';")
-		# Old way:
-		# MediaURL=$(echo "$api_result" | jq --arg MediaType "$MediaType" --arg Region "$region" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == $region) | .url' | head -n 1)
-		# MediaURL=$(echo "$api_result" | jq --arg MediaType "$MediaType" --arg Region "$region" '.[] | select(.type == $MediaType) | select(.region == $region) | .url' | head -n 1)
 
-# we split the RegionOrder in each region variable (do not indent)
-IFS=';' read -r Region1 Region2 Region3 Region4 Region5 Region6 Region7 Region8 <<EOF
-$RegionOrder
-EOF
 
 # for debugging :
 # echo -e "Region1: $Region1\nRegion2: $Region2\nRegion3: $Region3\nRegion4: $Region4\nRegion5: $Region5\nRegion6: $Region6\nRegion7: $Region7\nRegion8: $Region8\n$MediaType"
 # MediaType="box-2D"
 # region1="eu"
 # echo "$api_result" | jq --arg MediaType "$MediaType"  --arg Region1 "$region1"  --arg Region2 "$region2" 'map(select(.type == $MediaType)) | sort_by(if .region == $Region1 then 0 elif .region == $Region2 then 1 else 8 end)'
+	# Old way:
+	# MediaURL=$(echo "$api_result" | jq --arg MediaType "$MediaType" --arg Region "$region" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == $region) | .url' | head -n 1)
+	# MediaURL=$(echo "$api_result" | jq --arg MediaType "$MediaType" --arg Region "$region" '.[] | select(.type == $MediaType) | select(.region == $region) | .url' | head -n 1)
 
 
 			# this jq query will search all the images of type "MediaType" and will display it by order defined in RegionOrder
@@ -523,6 +525,7 @@ EOF
         
         
         #pngscale "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png" "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png"
+		
     fi
    
 

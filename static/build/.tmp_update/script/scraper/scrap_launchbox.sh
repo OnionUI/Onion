@@ -208,13 +208,13 @@ ScraperConfigFile=/mnt/SDCARD/.tmp_update/config/scraper.json
 config=$(cat $ScraperConfigFile)
 MediaType=$(echo "$config" | jq -r '.LaunchboxMediaType')
 SelectedRegion=$(echo "$config" | jq -r '.LaunchboxRegion')
-echo "Media Type: $MediaType"
 if [ -z "$MediaType" ]; then
 	ssMediaType=$(echo "$config" | jq -r '.ScreenscraperMediaType')
-    echo -e " The currently selected media ($ssMediaType)\n is not compatible with Launchbox scraper.\n\n Exiting."
-	sleep 2
+    echo -e " The currently selected media ($ssMediaType)\n is not compatible with Launchbox scraper.\n\n\n\n\n\n\n\n\n\n\n\n Exiting."
+	sleep 5
 	exit
 fi
+echo "Media Type: $MediaType"
 echo -e "Current Region: $SelectedRegion\n\n"
 echo -e "Scraping $CurrentSystem...\n"
 
