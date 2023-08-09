@@ -410,7 +410,7 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 	
 	else
 		rom_size=$(stat -c%s "$file")
-		url="https://www.screenscraper.fr/api2/jeuInfos.php?devid=${u#???}&devpassword=${p%??}&softname=onion&output=json&ssid=${userSS}&sspassword=${passSS}&crc=&systemeid=${ssSystemID}&romtype=rom&romnom=${romNameTrimmed}.zip"
+		url="https://www.screenscraper.fr/api2/jeuInfos.php?devid=${u#???}&devpassword=${p%??}&softname=onion&output=json&ssid=${userSS}&sspassword=${passSS}&crc=&systemeid=${ssSystemID}&romtype=rom&romnom=${romNameTrimmed}.zip&romtaille=${rom_size}"
     	search_on_screenscraper
     	
     	# Don't check art if we didn't get screenscraper game ID
@@ -427,7 +427,7 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 			else
 				echo CRC check...
 				CRC=$(xcrc "$file")
-				url="https://www.screenscraper.fr/api2/jeuInfos.php?devid=${u#???}&devpassword=${p%??}&softname=onion&output=json&ssid=${userSS}&sspassword=${passSS}&&crc=${CRC}&systemeid=&romtype=rom&romnom=${romNameTrimmed}.zip&romtaille=10"
+				url="https://www.screenscraper.fr/api2/jeuInfos.php?devid=${u#???}&devpassword=${p%??}&softname=onion&output=json&ssid=${userSS}&sspassword=${passSS}&&crc=${CRC}&systemeid=${ssSystemID}&romtype=rom&romnom=&romtaille=${rom_size}"  # most of other parameters than CRC are useless for the request but helps SS to fill their database
 				search_on_screenscraper
 				if ! [ "$gameIDSS" -eq "$gameIDSS" ] 2> /dev/null; then	
 					echo -e "${RED}Failed to get game ID${NONE}"
