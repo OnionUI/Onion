@@ -11,35 +11,47 @@ execute_sql_query() {
 # Function to retrieve the URL of the media box
 get_url_media_box() {
   local romName="$1"
-	  
+  
+  
+  
+		# regionsDB="/mnt/SDCARD/.tmp_update/script/scraper/screenscraper_database/regions.db"
+		# RegionOrder=$(sqlite3 $regionsDB "SELECT lb_tree FROM regions WHERE lb_nom_en = '$SelectedRegion';")
+	  echo "MediaType : ${MediaType}"
 	if ! echo "$romName" | grep -q "and"; then
 	  local query="SELECT Images.FileName 
 				   FROM Games JOIN Images ON Games.DatabaseID = Images.DatabaseID 
 				   WHERE Games.Name LIKE '%$romName' 
-				   AND Images.Type = 'Box - Front' 
+				   AND Images.Type = '${MediaType}'
 				   ORDER BY CASE 
-							  WHEN Region = '' THEN 1
-							  WHEN Region = 'World' THEN 2
-							  WHEN Region = 'United States' THEN 3
-							  WHEN Region = 'North America' THEN 4
-							  WHEN Region = 'Europe' THEN 5
-							  ELSE 6 
+							  WHEN Region = '${Region1}' THEN 1
+							  WHEN Region = '${Region2}' THEN 2
+							  WHEN Region = '${Region3}' THEN 3
+							  WHEN Region = '${Region4}' THEN 4
+							  WHEN Region = '${Region5}' THEN 5
+							  WHEN Region = '${Region6}' THEN 6
+							  WHEN Region = '${Region7}' THEN 7
+							  WHEN Region = '${Region8}' THEN 8
+							  ELSE 9
 							END 
 				  ;"
+				  echo $query
 	else   # if the rom name contains "and" then we do a more complete search :
 	  romNameTrimmed_Ampersand=${romNameTrimmed//and/&}
 	  romNameTrimmed_WithoutAnd=${romNameTrimmed//and/%}
 	  local query="SELECT Images.FileName 
 				   FROM Games JOIN Images ON Games.DatabaseID = Images.DatabaseID 
 				   WHERE (Games.Name LIKE '%$romName' OR Games.Name LIKE '%$romNameTrimmed_Ampersand' OR Games.Name LIKE '%$romNameTrimmed_WithoutAnd')
-				   AND Images.Type = 'Box - Front' 
+				   AND Images.Type = '${MediaType}'
 				   ORDER BY CASE 
-							  WHEN Region = '' THEN 1
-							  WHEN Region = 'World' THEN 2
-							  WHEN Region = 'United States' THEN 3
-							  WHEN Region = 'North America' THEN 4
-							  WHEN Region = 'Europe' THEN 5
-							  ELSE 6 
+							  WHEN Region = '${Region1}' THEN 1
+							  WHEN Region = '${Region2}' THEN 2
+							  WHEN Region = '${Region3}' THEN 3
+							  WHEN Region = '${Region4}' THEN 4
+							  WHEN Region = '${Region5}' THEN 5
+							  WHEN Region = '${Region6}' THEN 6
+							  WHEN Region = '${Region7}' THEN 7
+							  WHEN Region = '${Region8}' THEN 8
+							  ELSE 9
 							END 
 				  ;"
 	fi
@@ -190,10 +202,31 @@ echo -e "\n*****************************************************"
 echo -e "*******************   LAUNCHBOX   *******************"
 echo -e "*****************************************************\n\n"
 
-echo "Scraping $CurrentSystem..."
+
+
+ScraperConfigFile=/mnt/SDCARD/.tmp_update/config/scraper.json
+config=$(cat $ScraperConfigFile)
+MediaType=$(echo "$config" | jq -r '.LaunchboxMediaType')
+SelectedRegion=$(echo "$config" | jq -r '.LaunchboxRegion')
+echo "Media Type: $MediaType"
+if [ -z "$MediaType" ]; then
+	ssMediaType=$(echo "$config" | jq -r '.ScreenscraperMediaType')
+    echo -e " The currently selected media ($ssMediaType)\n is not compatible with Launchbox scraper.\n\n Exiting."
+	sleep 2
+	exit
+fi
+echo -e "Current Region: $SelectedRegion\n\n"
+echo -e "Scraping $CurrentSystem...\n"
+
+
+regionsDB="/mnt/SDCARD/.tmp_update/script/scraper/screenscraper_database/regions.db"
+RegionOrder=$(sqlite3 $regionsDB "SELECT lb_tree FROM regions WHERE lb_nom_en = '$SelectedRegion';")
 mkdir -p /mnt/SDCARD/Roms/$CurrentSystem/Imgs > /dev/null
 get_launchbox_alias $CurrentSystem
-
+# we split the RegionOrder in each region variable (do not indent)
+IFS=';' read -r Region1 Region2 Region3 Region4 Region5 Region6 Region7 Region8 <<EOF
+$RegionOrder
+EOF
  
 # =================
 #this is a trick to manage spaces from find command, do not indent or modify
