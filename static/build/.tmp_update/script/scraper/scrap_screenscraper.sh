@@ -108,7 +108,7 @@ search_on_screenscraper() {
     while true; do
 		# TODO : managing multithread for users who have it.
         api_result=$(curl -k -s "$url")
-		IFS= read -r Head_api_result <<< "$api_result"
+		Head_api_result=$(echo "$api_result" | head -n 1)
         
         # Don't check art if max threads for leechers is used
         if echo "$Head_api_result" | grep -q "The maximum threads"; then
@@ -271,7 +271,8 @@ if [ -f "$ScraperConfigFile" ]; then
     userSS=$(echo "$config" | jq -r '.screenscraper_username')
     passSS=$(echo "$config" | jq -r '.screenscraper_password')
     ScrapeInBackground=$(echo "$config" | jq -r '.ScrapeInBackground')
-	MediaType=$(echo "$config" | jq -r '.MediaType')
+	MediaType=$(echo "$config" | jq -r '.ScreenscraperMediaType')
+	SelectedRegion=$(echo "$config" | jq -r '.ScreenscraperRegion')
 
 	u=$(echo "U2FsdGVkX18PKpoEvELyE+5xionDX8iRxAIxJj4FN1U=" | openssl enc -aes-256-cbc -d -a -pbkdf2 -iter 10000 -salt -pass pass:"3x0tVD3jZvElZWRt3V67QQ==")
 	p=$(echo "U2FsdGVkX1/ydn2FWrwYcFVc5gVYgc5kVaJ5jDOeOKE=" |openssl enc -aes-256-cbc -d -a -pbkdf2 -iter 10000 -salt -pass pass:"RuA29ch3zVoodAItmvKKmZ+4Au+5owgvV/ztqRu4NjI=")
@@ -452,33 +453,82 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
         # by the user with a default value provided if if user confgifguration not provides  
 
         # grab the regional configuration from the JSON file
-        regionsData="/mnt/SDCARD/.tmp_update/config/regions.json"
+        regionsDB="/mnt/SDCARD/.tmp_update/script/scraper/screenscraper_database/regions.db"
 
-        # retrieve the region information from various data sources
-        preferred_region="fr" # user configurable with default value
-        calculated_regions=$(./find_parent_regions.sh "$regionsData" "$preferred_region")
-        final_fallback_region="wo"  # user configurable with default value
-
-        # sequence final list of regions to execute the retrieval on
-        composite_reason_list="$preferred_region $calculated_regions $final_fallback_region"
-		
 		# we keep only media section for faster search
-		api_result=$(echo "$api_result" | jq '.response.jeu.medias')   # 0.00s instead of 0.25s
+		api_result=$(echo $api_result | jq '.response.jeu.medias')   # 0.00s instead of 0.25s
+		
+
+    
+            # MediaURL=$(echo "$api_result" | jq --arg MediaType "$MediaType" --arg Region "$region" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == $region) | .url' | head -n 1)
+			echo searching in "$region"
+			# MediaURL=$(echo "$api_result" | jq --arg MediaType "$MediaType" --arg Region "$region" '.[] | select(.type == $MediaType) | select(.region == $region) | .url' | head -n 1)
 
 
-        set -- $composite_reason_list
-        for region do
-            MediaURL=$(echo "$api_result" | jq --arg MediaType "$MediaType" --arg Region "$region" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == $region) | .url' | head -n 1)
-            if [ -n "$MediaURL" ]; then
-                break
-            fi
-        done
+RegionOrder=$(sqlite3 $regionsDB "SELECT ss_tree || ';' || ss_fallback FROM regions WHERE ss_nomcourt = '$SelectedRegion';")
+
+IFS=';' read -r Region1 Region2 Region3 Region4 Region5 Region6 Region7 Region8 <<EOF
+$RegionOrder
+EOF
+Region8="ttt"
+echo "Region1: $Region1"
+echo "Region2: $Region2"
+echo "Region3: $Region3"
+echo "Region4: $Region4"
+echo "Region5: $Region5"
+echo "Region6: $Region6"
+echo "Region7: $Region7"
+echo "Region8: $Region8"
+echo "$MediaType"
+
+stty sane
+echo $api_result > api_result.txt
+
+
+MediaURL=$(echo "$api_result" | jq --arg MediaType "$MediaType" \
+                        --arg Region1 "$region1" \
+                        --arg Region2 "$region2" \
+                        --arg Region3 "$region3" \
+                        --arg Region4 "$region4" \
+                        --arg Region5 "$region5" \
+                        --arg Region6 "$region6" \
+                        --arg Region7 "$region7" \
+                        --arg Region8 "$region8" \
+                        'map(select(.type == $MediaType)) |
+                          sort_by(if .region == $Region1 then 0
+                                elif .region == $Region2 then 1
+                                elif .region == $Region3 then 2
+                                elif .region == $Region4 then 3
+                                elif .region == $Region5 then 4
+                                elif .region == $Region6 then 5
+                                elif .region == $Region7 then 6
+                                elif .region == $Region8 then 7
+                                else 8 end) |
+                        .[0].url' | head -n 1)
+
+echo MediaURL is :$MediaURL
+
+
+
+# MediaType="box-2D"
+# region1="eu"
+# echo "$api_result" | jq --arg MediaType "$MediaType"  --arg Region1 "$region1"  --arg Region2 "$region2" 'map(select(.type == $MediaType)) | sort_by(if .region == $Region1 then 0 elif .region == $Region2 then 1 else 8 end)'
+
+
+
+			
+            # if [ -n "$MediaURL" ]; then
+				# echo -e "${YELLOW}Game matches but no media found!${NONE}"
+				# let Scrap_Fail++
+                # break
+            # fi
+
 
         # TODO : if default media not found search in other media types
 
 
         if [ -z "$MediaURL" ]; then 
-            echo -e "${YELLOW}Game match but no media found!${NONE}"
+            echo -e "${YELLOW}Game matches but no media found!${NONE}"
             let Scrap_Fail++
             continue
         fi
