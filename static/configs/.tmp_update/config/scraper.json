@@ -5,5 +5,9 @@
   "Screenscraper_enabled": "true",
   "Launchbox_enabled": "true",
   "ScrapeInBackground": "false",
-  "MediaType": "box-2D"
+  "RetroarchMediaType": "Named_Boxarts",
+  "ScreenscraperMediaType": "box-2D",
+  "LaunchboxMediaType": "Box - Front",
+  "LaunchboxRegion": "United States",
+  "ScreenscraperRegion": "us"
 }
