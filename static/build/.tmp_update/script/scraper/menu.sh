@@ -131,18 +131,17 @@ Menu_Config_SSAccountSettings()
         else
             userStored=true
         fi
-		
-		echo "username: $userSS"
-		if ! [ -z "$passSS" ]; then
-			passwordState="Password: xxxx (hidden)"
-		else
-			passwordState="Password: (not set)"
-		fi
     fi
     
     
 
         while true; do
+			echo "username: $userSS"
+			if ! [ -z "$passSS" ]; then
+				passwordState="Password: xxxx (hidden)"
+			else
+				passwordState="Password: (not set)"
+			fi
 			clear
 			Mychoice=$( echo -e "Screenscraper information\nUsername : $userSS\n${passwordState}\nAccount state and stats\nBack to configuration menu." | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "     --== SCREENSCRAPER ACCOUNT ==--" -b "Press A to validate your choice.")
 			

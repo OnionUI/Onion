@@ -149,7 +149,6 @@ search_on_screenscraper() {
     if echo "$Head_api_result" | grep -q "^Erreur"; then
         echo -e "${RED}No match found${NONE}"
         echo "Couldn't find a match for $romNameNoExtensionTrimmed" >> /mnt/SDCARD/.tmp_update/logs/scrap.log
-        let Scrap_Fail++
         return
     fi
 
