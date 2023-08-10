@@ -181,7 +181,7 @@ Menu_Config_SSAccountSettings()
 					;;
 				*Back\ to\ configuration\ menu.*)
 					Menu_Config 
-					return
+					break
 					;;
 				*)
 					false
@@ -447,10 +447,7 @@ Menu_Config_ScrapingSource()
     echo "Loading..."
     echo "==================================================="
     # The JSON file to modify
-    
-
-    [ ! -f "$ScraperConfigFile" ] && jq -n '{}' > "$ScraperConfigFile"     # If the file does not exist, create an empty JSON object
-        
+            
     # Read the content of the JSON file and convert it to a JSON string
     json=$(jq -c '.' "$ScraperConfigFile")
     
@@ -475,7 +472,7 @@ Menu_Config_ScrapingSource()
         [ "$Mychoice" = "[ ] Retroarch" ] && Retroarch="[x] Retroarch"
         [ "$Mychoice" = "[x] Retroarch" ] && Retroarch="[ ] Retroarch"
 
-        [ "$Mychoice" = "Back to Configuration Menu" ] && Menu_Config && return
+        [ "$Mychoice" = "Back to Configuration Menu" ] && break
     
     done
     

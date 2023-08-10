@@ -16,7 +16,6 @@ get_url_media_box() {
   
 		# regionsDB="/mnt/SDCARD/.tmp_update/script/scraper/screenscraper_database/regions.db"
 		# RegionOrder=$(sqlite3 $regionsDB "SELECT lb_tree FROM regions WHERE lb_nom_en = '$SelectedRegion';")
-	  echo "MediaType : ${MediaType}"
 	if ! echo "$romName" | grep -q "and"; then
 	  local query="SELECT Images.FileName 
 				   FROM Games JOIN Images ON Games.DatabaseID = Images.DatabaseID 
@@ -34,7 +33,6 @@ get_url_media_box() {
 							  ELSE 9
 							END 
 				  ;"
-				  echo $query
 	else   # if the rom name contains "and" then we do a more complete search :
 	  romNameTrimmed_Ampersand=${romNameTrimmed//and/&}
 	  romNameTrimmed_WithoutAnd=${romNameTrimmed//and/%}

@@ -271,9 +271,9 @@ if [ -f "$ScraperConfigFile" ]; then
 	
 	MediaType=$(echo "$config" | jq -r '.ScreenscraperMediaType')
 	SelectedRegion=$(echo "$config" | jq -r '.ScreenscraperRegion')
+	echo "Scraping $CurrentSystem..."
 	echo "Media Type: $MediaType"
-	echo -e "Current Region: $SelectedRegion\n\n"
-	echo -e "Scraping $CurrentSystem...\n"
+	echo "Current Region: $SelectedRegion"
     userSS=$(echo "$config" | jq -r '.screenscraper_username')
     passSS=$(echo "$config" | jq -r '.screenscraper_password')
     ScrapeInBackground=$(echo "$config" | jq -r '.ScrapeInBackground')
@@ -292,7 +292,7 @@ EOF
     else
         userStored="true"
         echo "screenscraper username: $userSS"
-        echo -e "screenscraper password: xxxx\n\n"
+        echo -e "screenscraper password: xxxx (hidden)\n\n"
     fi
 fi
 
@@ -349,16 +349,15 @@ echo -e "\n*****************************************************"
 echo -e "******************* SCREENSCRAPER *******************"
 echo -e "*****************************************************\n\n"
 
-echo -e "Scraping $CurrentSystem...\n"
-
+echo "Scraping $CurrentSystem..."
 echo "Media Type: $MediaType"
 echo "Current Region: $SelectedRegion"
 
 if [ "$userStored" = "true" ]; then
 	echo "screenscraper username: $userSS"
-	echo -e "screenscraper password: xxxx\n\n"
+	echo -e "screenscraper password: xxxx (hidden)\n\n"
 else
-	echo "screenscraper account not configured."
+	echo -e "screenscraper account not configured.\n\n"
 fi
 
 ####################################################################################################################################
