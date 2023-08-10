@@ -6,8 +6,8 @@
   "Launchbox_enabled": "true",
   "ScrapeInBackground": "false",
   "RetroarchMediaType": "Named_Boxarts",
-  "ScreenscraperMediaType": "box-2d",
+  "ScreenscraperMediaType": "box-2D",
   "LaunchboxMediaType": "Box - Front",
-  "PreferredRegion": "",
-  "FallbackRegion": "wor"
+  "LaunchboxRegion": "United States",
+  "ScreenscraperRegion": "us"
 }

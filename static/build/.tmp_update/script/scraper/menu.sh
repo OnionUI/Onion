@@ -182,7 +182,8 @@ Menu_Config_SSAccountSettings()
 					Screenscraper_accountState
 					;;
 				*Back\ to\ configuration\ menu.*)
-					Menu_Config; break;
+					Menu_Config 
+					return
 					;;
 				*)
 					false
@@ -229,13 +230,14 @@ Menu_Config_BackgroundScraping()
         elif [ "$Mychoice" = "No" ]; then
             ScrapeInBackground="false"
 		elif [ "$Mychoice" = "Back to Configuration Menu" ]; then
-			Menu_Config; break;
+			Menu_Config
+			return
         fi
 
         config=$(cat $ScraperConfigFile)
         config=$(echo "$config" | jq --arg ScrapeInBackground "$ScrapeInBackground" '.ScrapeInBackground = $ScrapeInBackground')
         echo "$config" > $ScraperConfigFile
-        
+        sync
         Menu_Config
 }
 
@@ -309,7 +311,7 @@ Screenscraper Mix V2       (available on SS)
         config=$(cat $ScraperConfigFile)
         config=$(echo "$config" | jq --arg MediaType "$MediaType" '.MediaType = $MediaType')
         echo "$config" > $ScraperConfigFile
-        
+        sync
         Menu_Config
 }
 
@@ -371,7 +373,7 @@ Menu_Config_MediaType()
     [ "$Mychoice" = "$Option06" ]  && SSmediaType="screenmarqueesmall"     && LBmediaType="Banner"                           && RAmediaType=""  
     [ "$Mychoice" = "$Option07" ]  && SSmediaType="mixrbv1"                && LBmediaType=""                                 && RAmediaType=""  
     [ "$Mychoice" = "$Option08" ]  && SSmediaType="mixrbv2"                && LBmediaType=""                                 && RAmediaType=""  
-	[ "$Mychoice" = "$Option09" ]  && Menu_Config; break;
+	[ "$Mychoice" = "$Option09" ]  && Menu_Config && return
 					  
     clear
 
@@ -384,7 +386,7 @@ Menu_Config_MediaType()
     config=$(echo "$config" | jq --arg LBmediaType "$LBmediaType" '.LaunchboxMediaType = $LBmediaType')
     config=$(echo "$config" | jq --arg SSmediaType "$SSmediaType" '.ScreenscraperMediaType = $SSmediaType')        
     echo "$config" > $ScraperConfigFile
-    
+    sync
     Menu_Config
 
 
@@ -450,7 +452,7 @@ Option18="Back to Configuration Menu"
 	# exceptions :
 	case "$Mychoice" in
 	  "$Option12") LBregion="The Netherlands" ;;
-	  "$Option18") Menu_Config; break; ;;
+	  "$Option18") Menu_Config; return; ;;
 	esac
  clear
 
@@ -458,8 +460,7 @@ Option18="Back to Configuration Menu"
     config=$(echo "$config" | jq --arg LBregion "$LBregion" '.LaunchboxRegion = $LBregion')
     config=$(echo "$config" | jq --arg SSregion "$SSregion" '.ScreenscraperRegion = $SSregion')        
     echo "$config" > $ScraperConfigFile
-	
-    
+	sync    
     Menu_Config
 
 }
@@ -506,7 +507,7 @@ Menu_Config_ScrapingSource()
         [ "$Mychoice" = "[ ] Retroarch" ] && Retroarch="[x] Retroarch"
         [ "$Mychoice" = "[x] Retroarch" ] && Retroarch="[ ] Retroarch"
 
-        [ "$Mychoice" = "Back to Configuration Menu" ] && Menu_Config; break;
+        [ "$Mychoice" = "Back to Configuration Menu" ] && Menu_Config && return
     
     done
     
@@ -521,6 +522,7 @@ Menu_Config_ScrapingSource()
     # Rewrite the modified JSON content to the file
     #echo "$json"    # for debugging
     echo "$json" > "$ScraperConfigFile"
+	sync
     #echo "$json" | jq '.' > "$ScraperConfigFile"
     
     Menu_Config
@@ -704,10 +706,4 @@ Mychoice=$( echo -e "$Option1\n$Option2\n$Option3\n$Option4\nExit" | /mnt/SDCARD
 
 
 Menu_Main
-
-
-
-
-
-
 
