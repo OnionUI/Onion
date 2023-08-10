@@ -1,5 +1,4 @@
 #!/bin/sh
-
 #echo $0 $*    # for debugging
 
 sysdir=/mnt/SDCARD/.tmp_update
@@ -24,6 +23,8 @@ ScraperConfigFile=/mnt/SDCARD/.tmp_update/config/scraper.json
 
 
 
+##########################################################################################
+
 Menu_Config()
 {
     Option1="Media preferences"
@@ -46,7 +47,7 @@ Menu_Config()
 }
 
 
-
+##########################################################################################
 
 Screenscraper_accountState()
 {
@@ -100,13 +101,10 @@ Screenscraper_accountState()
 
 	read -n 1 -s -r -p "Press A to continue"
 
-
 }
 
 
-
-
-
+##########################################################################################
 
 
 Menu_Config_SSAccountSettings()
@@ -190,15 +188,13 @@ Menu_Config_SSAccountSettings()
 					;;
 			esac
 
-			
-
-
-               
         done
 
     clear
 }
 
+
+##########################################################################################
 
 Menu_Config_BackgroundScraping()
 {
@@ -223,7 +219,7 @@ Menu_Config_BackgroundScraping()
     
     
     	Mychoice=$( echo -e "No\nYes\nBack to Configuration Menu" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "Background scraping ? (Currently: $ScrapeInBackground)" -b "Press A to validate your choice.")
-        # TODO : add a new option to display the tail of the log
+        # TODO : add a new option to display the tail of the log to show what happens in background
 
         if [ "$Mychoice" = "Yes" ]; then
             ScrapeInBackground="true"
@@ -240,6 +236,8 @@ Menu_Config_BackgroundScraping()
         sync
         Menu_Config
 }
+
+##########################################################################################
 
 Menu_Config_SSMediaPreferences()
 {
@@ -275,37 +273,19 @@ Marquee                    (available on SS,LB)
 Screenscraper Mix V1       (available on SS)
 Screenscraper Mix V2       (available on SS)
 " | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "Media $test Type ?     (currently: $MediaType)" -b "Press $test A to valid\r\nate your choice.")
-        # TODO : add a new option to display tail of the log
 
-        # TODO: Create a dictionary so we can support display and system names throughout the utility
+
+
         case "$Mychoice" in
-            "Box Art (default)")
-                MediaType="box-2D"
-                ;;
-            "Box Art - 3D")
-                MediaType="box-3D"
-                ;;
-            "Screenshot - Title Screen")
-                MediaType="sstitle"
-                ;;
-            "Screenshot - In Game")
-                MediaType="ss"
-                ;;
-            "Wheel")
-                MediaType="wheel"
-                ;;
-            "Marquee")
-                MediaType="screenmarqueesmall"
-                ;;
-            "Screenscraper Mix V1")
-                MediaType="mixrbv1"
-                ;;
-            "Screenscraper Mix V2")
-                MediaType="mixrbv2"
-                ;;
-            *)
-                false
-                ;;                
+            "Box Art (default)") MediaType="box-2D" ;;
+            "Box Art - 3D") MediaType="box-3D" ;;
+            "Screenshot - Title Screen") MediaType="sstitle" ;;
+            "Screenshot - In Game") MediaType="ss" ;;
+            "Wheel") MediaType="wheel" ;;
+            "Marquee") MediaType="screenmarqueesmall" ;;
+            "Screenscraper Mix V1") MediaType="mixrbv1" ;;
+            "Screenscraper Mix V2") MediaType="mixrbv2" ;;
+            *) false ;;                
         esac
 
         config=$(cat $ScraperConfigFile)
@@ -350,8 +330,6 @@ Menu_Config_MediaType()
     read -n 1 -s -r -p "Press A to continue"
     clear
 
-
-
     # Screenscreaper.fr
     Option01="Box Art                    (available on SS,LB,RA)"
     Option02="Screenshot - Title Screen  (available on SS,LB,RA)"
@@ -377,9 +355,6 @@ Menu_Config_MediaType()
 					  
     clear
 
-    # TODO: Create a dictionary so we can support display and system names throughout the utility
-    # Issues = Issues retrieving type, should define fallback regions for the type (see: https://github.com/zayamatias/EmulationStation/blob/52706db98a4affb2c1653e6ea3ae767d19f3ca78/es-app/src/scrapers/ScreenScraper.h#L23C11-L23C12)
-
 
     config=$(cat $ScraperConfigFile)
     config=$(echo "$config" | jq --arg RAmediaType "$RAmediaType" '.RetroarchMediaType = $RAmediaType')
@@ -389,13 +364,11 @@ Menu_Config_MediaType()
     sync
     Menu_Config
 
-
-
 }
 
 
 
-
+##########################################################################################
 
 
 Menu_RegionSelection()
@@ -466,11 +439,6 @@ Option18="Back to Configuration Menu"
 }
 
 
-
-
-
-
-
 ##########################################################################################
 
 Menu_Config_ScrapingSource()
@@ -527,11 +495,10 @@ Menu_Config_ScrapingSource()
     
     Menu_Config
 
-
 }
 
 
-
+##########################################################################################
 
 
 Launch_Scraping ()
@@ -598,7 +565,7 @@ Launch_Scraping ()
     exit
 }
 
-
+##########################################################################################
 
 Screenscraper_information () {
 clear
@@ -666,7 +633,7 @@ read -n 1 -s -r -p "Press A to continue"
 clear
 }
 
-
+##########################################################################################
 
 Delete_Rom_Cover ()
 {
@@ -679,19 +646,19 @@ Delete_Rom_Cover ()
 }
 
 
-
+##########################################################################################
 
 Menu_Main ()
 
 {
-
+clear
 Option1="Scrape all $(basename "$CurrentSystem") roms"
 [ -f "$romimage" ] && Option2="" || Option2="Scrape current rom: $romname"
 [ -f "$romimage" ] && Option3="Delete cover: $romNameNoExtension.png" || Option3=""
 Option4="Configuration"
 Option5="Exit"
 
-
+clear
 Mychoice=$( echo -e "$Option1\n$Option2\n$Option3\n$Option4\nExit" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "           --== MAIN MENU ==--" -b "                     Menu : Exit        A : Validate ")
 
 [ "$Mychoice" = "$Option1" ] && (onerom=0; Launch_Scraping;)
@@ -704,6 +671,6 @@ Mychoice=$( echo -e "$Option1\n$Option2\n$Option3\n$Option4\nExit" | /mnt/SDCARD
 }
 
 
-
+/mnt/SDCARD/.tmp_update/script/scraper/config_repair.sh &
 Menu_Main
 
