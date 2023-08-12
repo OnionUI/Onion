@@ -12,10 +12,15 @@ MODEL_MMP=354
 
 main() {
     # Set model ID
+    last_device_model="$sysdir/config/lastdeviceModel"
     axp 0 > /dev/null
     export DEVICE_ID=$([ $? -eq 0 ] && echo $MODEL_MMP || echo $MODEL_MM)
-    echo -n "$DEVICE_ID" > /tmp/deviceModel
-
+    # we check if the device model has changed
+    if [ "$(cat "$last_device_model")" != "$DEVICE_ID" ]; then
+        echo -n "$DEVICE_ID" > $last_device_model
+        is_device_model_changed=1
+    fi
+    
     touch /tmp/is_booting
     check_installer
     clear_logs
@@ -72,11 +77,10 @@ main() {
     if [ $menu_pressed -eq 0 ]; then
         rm -f "$sysdir/cmd_to_run.sh" 2> /dev/null
     fi
+	
+	
+	retroarch_selector
 
-    if [ $DEVICE_ID -eq $MODEL_MMP ] && [ -f /mnt/SDCARD/RetroArch/retroarch_miyoo354 ]; then
-        # Mount miyoo354 RA version
-        mount -o bind /mnt/SDCARD/RetroArch/retroarch_miyoo354 /mnt/SDCARD/RetroArch/retroarch
-    fi
 
     # Bind arcade name library to customer path
     mount -o bind $miyoodir/lib/libgamename.so /customer/lib/libgamename.so
@@ -177,8 +181,8 @@ launch_main_ui() {
     # Hide any new recents if applicable
     check_hide_recents
 
-    # Ensure we've mounted the correct MainUI binary
-    mount_main_ui
+    # Ensure we use the correct MainUI binary
+    mainui_selector
 
     # Wifi state before
     wifi_setting=$(/customer/app/jsonval wifi)
@@ -462,24 +466,21 @@ check_hide_recents() {
     sync
 }
 
-mainui_target=$miyoodir/app/MainUI
 
-mount_main_ui() {
+mainui_selector()
+{
+if [ $is_device_model_changed -eq 1 ]; then
     mainui_mode=$([ -f $sysdir/config/.showExpert ] && echo "expert" || echo "clean")
     mainui_srcname="MainUI-$DEVICE_ID-$mainui_mode"
-    mainui_mount=$(basename "$(cat /proc/self/mountinfo | grep $mainui_target | cut -d' ' -f4)")
+	cp "$sysdir/bin/$mainui_srcname" $miyoodir/app/MainUI
+fi
+}
 
-    if [ "$mainui_mount" != "$mainui_srcname" ]; then
-        if mount | grep -q "$mainui_target"; then
-            umount $mainui_target 2> /dev/null
-        fi
-
-        if [ ! -f $mainui_target ]; then
-            touch $mainui_target
-        fi
-
-        mount -o bind "$sysdir/bin/$mainui_srcname" $mainui_target
-    fi
+retroarch_selector()
+{
+if [ $is_device_model_changed -eq 1 ]; then
+	cp "$sysdir/bin/retroarch_$DEVICE_ID" /mnt/SDCARD/RetroArch/retroarch
+fi
 }
 
 init_system() {
