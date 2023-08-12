@@ -470,6 +470,7 @@ if [ $is_device_model_changed -eq 1 ]; then
     mainui_mode=$([ -f $sysdir/config/.showExpert ] && echo "expert" || echo "clean")
     mainui_srcname="MainUI-$DEVICE_ID-$mainui_mode"
 	cp "$sysdir/bin/$mainui_srcname" $miyoodir/app/MainUI
+	sync
 fi
 }
 
