@@ -82,9 +82,6 @@ main() {
 	retroarch_selector
 
 
-    # Bind arcade name library to customer path
-    mount -o bind $miyoodir/lib/libgamename.so /customer/lib/libgamename.so
-
     # Set filebrowser branding to "Onion" and apply custom theme
     if [ -f "$sysdir/config/filebrowser/first.run" ]; then
         $sysdir/bin/filebrowser config set --branding.name "Onion" -d $sysdir/config/filebrowser/filebrowser.db
