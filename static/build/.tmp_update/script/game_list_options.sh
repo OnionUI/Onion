@@ -254,12 +254,19 @@ add_script_files() {
 
             if [ "$scriptlabel" == "" ]; then
                 scriptlabel=$(basename "$entry" .sh)
+			elif [ "$scriptlabel" == "DynamicLabel" ]; then
+				# We run the script with "DynamicLabel" in third parameter to generate the name
+				"$entry" "$rompath" "$emupath" "DynamicLabel" "$emulabel" "$retroarch_core" "$romdirname" "$romext"
+				scriptlabel=$(cat /tmp/DynamicLabel.tmp)
+				rm /tmp/DynamicLabel.tmp
             fi
 
             scriptlabel=$(echo "$scriptlabel" | sed "s/%LIST%/$emulabel/g")
-
-            echo "adding romscript: $scriptlabel"
-            add_menu_option run_script "$scriptlabel" "$entry"
+			
+			if [ "$scriptlabel" != "none" ]; then
+				echo "adding romscript: $scriptlabel"
+				add_menu_option run_script "$scriptlabel" "$entry"
+			fi
         done
     fi
 }
