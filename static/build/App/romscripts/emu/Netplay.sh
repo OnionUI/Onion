@@ -30,6 +30,15 @@ if [ "$3" = "DynamicLabel" ]; then
     exit
 fi
 
+
 # Netplay mode main script:
 cd $sysdir
-"./script/netplay/netplay_server.sh" "$1" "$2"
+
+LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so prompt -t "Netplay" "Host" "Join"
+retcode=$?
+
+if [ $retcode -eq 0 ] ; then
+	"./script/netplay/standard_netplay.sh" "$1" "$2" "host"
+else
+	"./script/netplay/standard_netplay.sh" "$1" "$2" "join"
+fi
