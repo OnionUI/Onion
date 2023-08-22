@@ -39,10 +39,24 @@ cd $sysdir
 
 LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so prompt -t "Netplay" "Host" "Join"
 retcode=$?
-echo "retcode: $retcode"
-
 if [ $retcode -eq 0 ] ; then
-	"./script/netplay/standard_netplay.sh" "$1" "$2" "host"
+	LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so prompt -t "Netplay type" "Standard Netplay (Use current Wifi)" "Easy Netplay (play anywhere, local only)"
+	retcode=$?
+	if [ $retcode -eq 0 ] ; then
+		"./script/netplay/standard_netplay.sh" "$1" "$2" "host"
+	else
+		cd $sysdir
+		/bin/sh "$sysdir/script/easynetplay/netplay_server.sh"
+	fi
+
 else
-	"./script/netplay/standard_netplay.sh" "$1" "$2" "join"
+	LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so prompt -t "Netplay type" "Standard Netplay (Use current Wifi)" "Easy Netplay (play anywhere, local only)"
+	retcode=$?
+	if [ $retcode -eq 0 ] ; then
+		"./script/netplay/standard_netplay.sh" "$1" "$2" "join"
+	else
+		cd $sysdir
+		/bin/sh "$sysdir/script/easynetplay/netplay_client.sh"
+	fi
+	
 fi
