@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
                 continue;
             }
         }
-        if (pargc < MAX_ELEMENTS) {
+        if (pargc < MAX_ELEMENTS && strlen(argv[i]) > 0) {
             pargs[pargc] = malloc((STR_MAX + 1) * sizeof(char));
             strncpy(pargs[pargc], argv[i], STR_MAX);
             pargc++;
