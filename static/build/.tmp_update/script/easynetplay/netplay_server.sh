@@ -143,7 +143,7 @@ get_cookie_info() {
 start_retroarch() {
 	build_infoPanel_and_log "RetroArch" "Starting RetroArch..."
 	cd /mnt/SDCARD/RetroArch
-	HOME=/mnt/SDCARD/RetroArch ./retroarch -H -v -L "$host_core" "$host_rom"
+	HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/netplay_override.cfg -H -v -L "$host_core" "$host_rom"
 }
 
 cleanup() {

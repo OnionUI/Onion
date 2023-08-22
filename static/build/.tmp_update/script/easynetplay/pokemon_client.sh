@@ -283,7 +283,7 @@ start_retroarch() {
 	build_infoPanel_and_log "RetroArch" "Starting RetroArch..."
     log "Starting RetroArch loaded with $rom and $local_rom"
 	cd /mnt/SDCARD/RetroArch
-    HOME=/mnt/SDCARD/RetroArch ./retroarch -C $hostip -v -L .retroarch/cores/tgbdual_libretro.so --subsystem "gb_link_2p" "$rom" "$local_rom"
+    HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/netplay_override.cfg -C $hostip -v -L .retroarch/cores/tgbdual_libretro.so --subsystem "gb_link_2p" "$rom" "$local_rom"
 }
 
 # Go into a waiting state for the host to return the save

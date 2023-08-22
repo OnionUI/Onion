@@ -342,7 +342,7 @@ start_retroarch() {
 	build_infoPanel_and_log "RetroArch" "Starting RetroArch..."
     log "Starting RetroArch loaded with $host_rom and $client_rom_clone"
 	cd /mnt/SDCARD/RetroArch
-    HOME=/mnt/SDCARD/RetroArch ./retroarch -H -v -L .retroarch/cores/tgbdual_libretro.so --subsystem "gb_link_2p" "$host_rom" "$client_rom_clone"
+    HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/netplay_override.cfg -H -v -L .retroarch/cores/tgbdual_libretro.so --subsystem "gb_link_2p" "$host_rom" "$client_rom_clone"
 }
 
 # Go into a waiting state for the client to be ready to accept the save

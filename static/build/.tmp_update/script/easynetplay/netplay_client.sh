@@ -271,7 +271,7 @@ sync_file() {
 start_retroarch() {
 	build_infoPanel_and_log "Starting RA" "Starting RetroArch"
 	cd /mnt/SDCARD/RetroArch
-	HOME=/mnt/SDCARD/RetroArch ./retroarch -C $hostip -v -L "$core" "$rom"
+	HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/netplay_override.cfg -C $hostip -v -L "$core" "$rom"
 }
 
 ###########
