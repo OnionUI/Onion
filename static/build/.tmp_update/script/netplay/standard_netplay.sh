@@ -14,6 +14,7 @@ echo "cookie_core_path $cookie_core_path"
 CurrentSystem=$(echo "$1" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
 NetplayAction="$3"
 
+
 logfile=netplay
 . $sysdir/script/log.sh
 program=$(basename "$0" .sh)
@@ -49,42 +50,59 @@ check_wifi() {
 
 # Find the recommended core for the current system.
 Get_NetplayCore() {
-    platform="$1"
+	platform="$1"
+	echo "*****************************************1"
+	netplaycore_info=$(grep "^${platform};" "$sysdir/script/netplay/netplay_cores.cfg")
+	echo "***************************************2 $netplaycore_info"
+	if [ -n "$netplaycore_info" ]; then
+		netplaycore=$(echo "$netplaycore_info" | cut -d ';' -f 2)
+		core_config_folder=$(echo "$netplaycore_info" | cut -d ';' -f 3)
+		cpuspeed=$(echo "$netplaycore_info" | cut -d ';' -f 4)
 
-    core=$(grep "^$platform " "$sysdir/script/netplay/netplay_cores.cfg" | awk '{print $2}')
-
-    if [ -n "$core" ]; then
-        if [ "$core" = "none" ]; then
-			build_infoPanel_and_log "Netplay impossible" "$platform not compatible with Netplay"
-			sleep 3
-			return 1
-        fi
-    else
-        core="$cookie_core_path"
-    fi
-
-    echo "$core"
+		if [ -n "$netplaycore" ]; then
+			if [ "$netplaycore" = "none" ]; then
+				build_infoPanel_and_log "Netplay impossible" "$platform not compatible with Netplay"
+				sleep 3
+				return 1
+			fi
+		else
+			netplaycore="$cookie_core_path"
+		fi
+	fi
 	return 0
+
+
 }
 
 
 # We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
 start_retroarch() {
 
-	core=$(Get_NetplayCore "$CurrentSystem")
-		
-	if [ $? -eq 0 ]; then
-		echo "Core for platform $platform: $core"
-	else
-		exit
+	# We set core CPU speed for Netplay
+	if [ -n "$cpuspeed" ]; then
+		PreviousCPUspeed=$(cat "/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt")
+		echo -n $cpuspeed > "/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt"
 	fi
 
+	# Starting Retroarch
 	cd /mnt/SDCARD/RetroArch
-	if [ "$NetplayAction" = "host" ]; then
-		HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/netplay_override.cfg -H -L "$core" "$romfullpath"
-	else
-		HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/netplay_override.cfg -L "$core" "$romfullpath"
 
+
+	if [ "$NetplayAction" = "host" ]; then
+		HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/netplay_override.cfg -H -L "$netplaycore" "$romfullpath"
+	else
+		HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/netplay_override.cfg -L "$netplaycore" "$romfullpath"
+		
+		# cp "./.retroarch/retroarch.cfg" "./.retroarch/netplay_alternative.cfg"
+		# $sysdir/script/patch_ra_cfg.sh  "./.retroarch/netplay_override.cfg" "./.retroarch/netplay_alternative.cfg"
+		# HOME=/mnt/SDCARD/RetroArch ./retroarch --config=./.retroarch/netplay_alternative.cfg -L "$core" "$romfullpath"
+	fi
+
+	# We restore previous core CPU speed
+	if [ -n "$PreviousCPUspeed" ]; then
+		echo -n $PreviousCPUspeed > "/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt"
+	else
+		rm "/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt"
 	fi
 }
 
@@ -118,6 +136,18 @@ is_running() {
 
 lets_go() {
 	check_wifi
+	Get_NetplayCore "$CurrentSystem"
+	if [ $? -eq 0 ]; then
+		echo "*****************************************"
+		echo "romfullpath: $romfullpath"
+		echo "platform: ${platform}"
+		echo "netplaycore: $netplaycore"
+		echo "core_config_folder: $core_config_folder"
+		echo "cpuspeed: $cpuspeed"
+		echo "*****************************************"
+	else
+		exit
+	fi
 	start_retroarch
 }
 
