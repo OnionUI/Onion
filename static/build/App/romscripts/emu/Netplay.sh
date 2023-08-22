@@ -33,30 +33,55 @@ if [ "$3" = "DynamicLabel" ]; then
     exit
 fi
 
-
+romdirname=$(echo "$1" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
+if [ "$romdirname" == "GB" ]; then
+	EasyNetplayPokemon="Easy Netplay - Poekmon Trade/Battle"
+fi
 # Netplay mode main script:
 cd $sysdir
 
-LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so prompt -t "Netplay" "Host" "Join"
+LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so prompt -t "Netplay" \
+"Host" \
+"Join"
+
 retcode=$?
 if [ $retcode -eq 0 ] ; then
-	LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so prompt -t "Netplay type" "Standard Netplay (Use current Wifi)" "Easy Netplay (play anywhere, local only)"
+
+	LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so prompt -t "HOST - Netplay type" \
+	"Standard Netplay (Use current Wifi)" \
+	"Easy Netplay (play anywhere, local only)" \
+	"$EasyNetplayPokemon"
+
 	retcode=$?
-	if [ $retcode -eq 0 ] ; then
+	if [ $retcode -eq 0 ]; then
 		"./script/netplay/standard_netplay.sh" "$1" "$2" "host"
-	else
+	elif [ $retcode -eq 1 ]; then
 		cd $sysdir
 		/bin/sh "$sysdir/script/easynetplay/netplay_server.sh"
+	elif [ $retcode -eq 2 ]; then
+		/bin/sh "$sysdir/script/easynetplay/pokemon_server.sh"
+	elif [ $retcode -eq 255 ]; then
+		exit
 	fi
+elif [ $retcode -eq 1 ]; then
 
-else
-	LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so prompt -t "Netplay type" "Standard Netplay (Use current Wifi)" "Easy Netplay (play anywhere, local only)"
+	LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so prompt -t "JOIN - Netplay type" \
+	"Standard Netplay (Use current Wifi)" \
+	"Easy Netplay (play anywhere, local only)" \
+	"$EasyNetplayPokemon"
+	
 	retcode=$?
-	if [ $retcode -eq 0 ] ; then
+	if [ $retcode -eq 0 ]; then
 		"./script/netplay/standard_netplay.sh" "$1" "$2" "join"
-	else
+	elif [ $retcode -eq 1 ]; then
 		cd $sysdir
 		/bin/sh "$sysdir/script/easynetplay/netplay_client.sh"
+	elif [ $retcode -eq 2 ]; then
+		/bin/sh "$sysdir/script/easynetplay/pokemon_client.sh"
+	elif [ $retcode -eq 255 ]; then
+		exit
 	fi
-	
+
+elif [ $retcode -eq 255 ]; then
+	exit
 fi
