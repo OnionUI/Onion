@@ -342,7 +342,7 @@ start_retroarch() {
 	build_infoPanel_and_log "RetroArch" "Starting RetroArch..."
     log "Starting RetroArch loaded with $host_rom and $client_rom_clone"
 	cd /mnt/SDCARD/RetroArch
-    HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/netplay_override.cfg -H -v -L .retroarch/cores/tgbdual_libretro.so --subsystem "gb_link_2p" "$host_rom" "$client_rom_clone"
+    HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/easynetplay_override.cfg -H -v -L .retroarch/cores/tgbdual_libretro.so --subsystem "gb_link_2p" "$host_rom" "$client_rom_clone"
 }
 
 # Go into a waiting state for the client to be ready to accept the save
@@ -430,6 +430,35 @@ cleanup() {
 ###########
 #Utilities#
 ###########
+
+# URL encode helper
+url_encode(){
+  encoded_str=`echo "$*" | awk '
+    BEGIN {
+	split ("1 2 3 4 5 6 7 8 9 A B C D E F", hextab, " ")
+	hextab [0] = 0
+	for ( i=1; i<=255; ++i ) ord [ sprintf ("%c", i) "" ] = i + 0
+    }
+    {
+	encoded = ""
+	for ( i=1; i<=length ($0); ++i ) {
+	    c = substr ($0, i, 1)
+	    if ( c ~ /[a-zA-Z0-9.-]/ ) {
+		encoded = encoded c		# safe character
+	    } else if ( c == " " ) {
+		encoded = encoded "%20"	# special handling
+	    } else {
+		# unsafe character, encode it as a two-digit hex-number
+		lo = ord [c] % 16
+		hi = int (ord [c] / 16);
+		encoded = encoded "%" hextab [hi] hextab [lo]
+	    }
+	}
+	    print encoded
+    }
+' `
+echo "$encoded_str"
+}
 
 # Use the safe word
 notify_stop(){
@@ -620,10 +649,6 @@ unpack_rom() {
   else
     log "File '$file' not found - cannot continue"
   fi
-}
-    
-url_encode() {
-    echo "$1" | sed 's/ /%20/g'
 }
 
 build_infoPanel_and_log() {

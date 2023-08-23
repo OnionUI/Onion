@@ -283,7 +283,7 @@ start_retroarch() {
 	build_infoPanel_and_log "RetroArch" "Starting RetroArch..."
     log "Starting RetroArch loaded with $rom and $local_rom"
 	cd /mnt/SDCARD/RetroArch
-    HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/netplay_override.cfg -C $hostip -v -L .retroarch/cores/tgbdual_libretro.so --subsystem "gb_link_2p" "$rom" "$local_rom"
+    HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/easynetplay_override.cfg -C $hostip -v -L .retroarch/cores/tgbdual_libretro.so --subsystem "gb_link_2p" "$rom" "$local_rom"
 }
 
 # Go into a waiting state for the host to return the save
@@ -331,13 +331,13 @@ wait_for_save_return() {
 
 # If you don't call this you don't retransfer the saves - Users cannot under any circumstances miss this function.
 cleanup() {
-	build_infoPanel_and_log "Cleanup" "Cleaning up after Pokemon session\n Do not power off!"
+    build_infoPanel_and_log "Cleanup" "Cleaning up after Pokemon session\n Do not power off!"
 
-	pkill -9 pressMenu2Kill
+    pkill -9 pressMenu2Kill
 
-	if is_running infoPanel; then
-		killall -9 infoPanel
-	fi
+    if is_running infoPanel; then
+        killall -9 infoPanel
+    fi
     
     udhcpc_control
     sleep 1
@@ -356,14 +356,45 @@ cleanup() {
     rm "/tmp/MISSING.srm"
     rm "/tmp/stop_now"
     rm "/tmp/wpa_supplicant.conf_bk"
-		
-	log "Cleanup done"
-	exit
+    rm "/mnt/SDCARD/RetroArch/retroarch.cookie.client"
+    rm "/mnt/SDCARD/RetroArch/retroarch.cookie"
+
+    log "Cleanup done"
+    exit
 }
 
 ###########
 #Utilities#
 ###########
+
+# URL encode helper
+url_encode(){
+  encoded_str=`echo "$*" | awk '
+    BEGIN {
+	split ("1 2 3 4 5 6 7 8 9 A B C D E F", hextab, " ")
+	hextab [0] = 0
+	for ( i=1; i<=255; ++i ) ord [ sprintf ("%c", i) "" ] = i + 0
+    }
+    {
+	encoded = ""
+	for ( i=1; i<=length ($0); ++i ) {
+	    c = substr ($0, i, 1)
+	    if ( c ~ /[a-zA-Z0-9.-]/ ) {
+		encoded = encoded c		# safe character
+	    } else if ( c == " " ) {
+		encoded = encoded "%20"	# special handling
+	    } else {
+		# unsafe character, encode it as a two-digit hex-number
+		lo = ord [c] % 16
+		hi = int (ord [c] / 16);
+		encoded = encoded "%" hextab [hi] hextab [lo]
+	    }
+	}
+	    print encoded
+    }
+' `
+echo "$encoded_str"
+}
 
 # Use the safe word
 notify_stop(){
@@ -380,11 +411,6 @@ check_stop(){
             sleep 2
             cleanup
     fi
-}
-
-# URL encode helper
-url_encode() {
-    echo "$1" | sed 's/ /%20/g'
 }
 
 # Notify other MMP

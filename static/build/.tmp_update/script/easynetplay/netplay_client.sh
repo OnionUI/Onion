@@ -178,12 +178,16 @@ read_cookie() {
 			"[romchksum]: "*)
 				romcheck="${line##"[romchksum]: "}"
 				;;
+			"[cpuspeed]: "*)
+				cpuspeed="${line##"[cpuspeed]: "}"
+				;;
 		esac
 		log "$core $rom $coresize $corechksum $romsize $romchksum"
 	done < "/mnt/SDCARD/RetroArch/retroarch.cookie.client"
 
 	#url encode or curl complains
-	export core_url=$(echo "$core" | sed 's/ /%20/g')
+	export core_url=$(url_encode "$core")
+	export rom_url=$(url_encode "$rom")
 
 	log "Cookie file read"
 }
@@ -220,9 +224,25 @@ sync_file() {
                 cleanup
 			fi
 		else
-			build_infoPanel_and_log "Rom Missing" "The Rom doesn't exist on the client \n Cannot continue."
-            sleep 2
-            cleanup
+			if [ "$file_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
+				build_infoPanel_and_log "Syncing" "$file_type doesn't exist locallyand too big to be syncing with host."
+                sleep 2
+                cleanup
+			else
+				build_infoPanel_and_log "Syncing" "$file_type doesn't exist locally; syncing with host."
+				do_sync_file "$file_type" "$file_path" "$file_url"
+
+				if [ ! -e "$file_path" ]; then
+					build_infoPanel_and_log "Sync Failed" "Failed to download the $file_type file."
+					sleep 2
+					cleanup
+				else
+					# Refreshing roms list
+					romdirname=$(echo "$rom" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
+					rm "${rom%/*}/${romdirname}_cache6.db"
+					build_infoPanel_and_log "Syncing" "$file_type synced."
+				fi
+			fi
 		fi
 	else
 		if [ -e "$file_path" ]; then
@@ -270,13 +290,65 @@ sync_file() {
 # We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
 start_retroarch() {
 	build_infoPanel_and_log "Starting RA" "Starting RetroArch"
+	
+		log "RetroArch" "Starting RetroArch..."
+	echo "*****************************************"
+	echo "romfullpath: $rom"
+	echo "platform: ${platform}"
+	echo "netplaycore: $netplaycore"
+	echo "core_config_folder: $core_config_folder"
+	echo "cpuspeed: $cpuspeed"
+	echo "*****************************************"
+	
+	# We set core CPU speed for Netplay
+	if [ -n "$cpuspeed" ]; then
+		PreviousCPUspeed=$(cat "/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt")
+		echo -n $cpuspeed > "/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt"
+	fi
+	
 	cd /mnt/SDCARD/RetroArch
-	HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/netplay_override.cfg -C $hostip -v -L "$core" "$rom"
+	HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/easynetplay_override.cfg -C $hostip -L "$core" "$rom"
+	
+	# We restore previous core CPU speed
+	if [ -n "$PreviousCPUspeed" ]; then
+		echo -n $PreviousCPUspeed > "/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt"
+	else
+		rm -f "/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt"
+	fi
 }
 
 ###########
 #Utilities#
 ###########
+
+# URL encode helper
+url_encode(){
+  encoded_str=`echo "$*" | awk '
+    BEGIN {
+	split ("1 2 3 4 5 6 7 8 9 A B C D E F", hextab, " ")
+	hextab [0] = 0
+	for ( i=1; i<=255; ++i ) ord [ sprintf ("%c", i) "" ] = i + 0
+    }
+    {
+	encoded = ""
+	for ( i=1; i<=length ($0); ++i ) {
+	    c = substr ($0, i, 1)
+	    if ( c ~ /[a-zA-Z0-9.-]/ ) {
+		encoded = encoded c		# safe character
+	    } else if ( c == " " ) {
+		encoded = encoded "%20"	# special handling
+	    } else {
+		# unsafe character, encode it as a two-digit hex-number
+		lo = ord [c] % 16
+		hi = int (ord [c] / 16);
+		encoded = encoded "%" hextab [hi] hextab [lo]
+	    }
+	}
+	    print encoded
+    }
+' `
+echo "$encoded_str"
+}
 
 wifi_disabled() {
     [ $(/customer/app/jsonval wifi) -eq 0 ]

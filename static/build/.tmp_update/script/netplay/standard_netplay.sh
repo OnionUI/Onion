@@ -51,9 +51,7 @@ check_wifi() {
 # Find the recommended core for the current system.
 Get_NetplayCore() {
 	platform="$1"
-	echo "*****************************************1"
 	netplaycore_info=$(grep "^${platform};" "$sysdir/script/netplay/netplay_cores.cfg")
-	echo "***************************************2 $netplaycore_info"
 	if [ -n "$netplaycore_info" ]; then
 		netplaycore=$(echo "$netplaycore_info" | cut -d ';' -f 2)
 		core_config_folder=$(echo "$netplaycore_info" | cut -d ';' -f 3)
@@ -102,7 +100,7 @@ start_retroarch() {
 	if [ -n "$PreviousCPUspeed" ]; then
 		echo -n $PreviousCPUspeed > "/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt"
 	else
-		rm "/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt"
+		rm -f "/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt"
 	fi
 }
 

@@ -104,46 +104,98 @@ start_ftp() {
 	fi
 }
 
-# Pull the cookie info that the GLO script has generated (and use it to write the cksum to the cookie so the client has it)
-get_cookie_info() {
+
+# Find the recommended core for the current system.
+Get_NetplayCore() {
+
+	platform=$(echo "$cookie_rom_path" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
+	netplaycore_info=$(grep "^${platform};" "$sysdir/script/netplay/netplay_cores.cfg")
+	if [ -n "$netplaycore_info" ]; then
+		netplaycore=$(echo "$netplaycore_info" | cut -d ';' -f 2)
+		netplaycore="/mnt/SDCARD/RetroArch/.retroarch/cores/$netplaycore"
+		core_config_folder=$(echo "$netplaycore_info" | cut -d ';' -f 3)
+		cpuspeed=$(echo "$netplaycore_info" | cut -d ';' -f 4)
+
+		if [ -n "$netplaycore" ]; then
+			if [ "$netplaycore" = "none" ]; then
+				build_infoPanel_and_log "Netplay impossible" "$platform not compatible with Netplay"
+				sleep 3
+				return 1
+			fi
+		else
+			netplaycore="$cookie_core_path"
+		fi
+	fi
+	return 0
+
+
+}
+
+
+# Create a cookie with all the required info for the client. (client will use this cookie)
+create_cookie_info() {
 	COOKIE_FILE="/mnt/SDCARD/RetroArch/retroarch.cookie"
 	MAX_FILE_SIZE_BYTES=26214400
 
-	if [ -f "$COOKIE_FILE" ]; then
-		host_core=$(grep '\[core\]' "$COOKIE_FILE" | cut -d ':' -f 2 | xargs) && export host_core
-		host_rom=$(grep '\[rom\]' "$COOKIE_FILE" | cut -d ':' -f 2 | xargs) && export host_rom
+		echo "[core]: $netplaycore" > "$COOKIE_FILE"
+		echo "[rom]: $cookie_rom_path" >> "$COOKIE_FILE"
 
-		if [ -s "$host_core" ]; then
-			core_size=$(stat -c%s "$host_core")
+
+		if [ -s "$netplaycore" ]; then
+			core_size=$(stat -c%s "$netplaycore")
 			if [ "$core_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
 				echo "[coresize]: $core_size" >> "$COOKIE_FILE"
 				log "Writing core size"
 			else
-				echo "[corechksum]: $(cksum "$host_core" | cut -f 1 -d ' ')" >> "$COOKIE_FILE"
+				echo "[corechksum]: $(cksum "$netplaycore" | cut -f 1 -d ' ')" >> "$COOKIE_FILE"
 				log "Writing core checksum"
 			fi
 		fi
 
-		if [ -s "$host_rom" ]; then
-			rom_size=$(stat -c%s "$host_rom")
+		if [ -s "$cookie_rom_path" ]; then
+			rom_size=$(stat -c%s "$cookie_rom_path")
 			if [ "$rom_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
 				echo "[romsize]: $rom_size" >> "$COOKIE_FILE"
 				log "Writing rom size"
 			else
-				echo "[romchksum]: $(cksum "$host_rom" | cut -f 1 -d ' ')" >> "$COOKIE_FILE"
+				echo "[romchksum]: $(cksum "$cookie_rom_path" | cut -f 1 -d ' ')" >> "$COOKIE_FILE"
 				log "Writing rom checksum"
 			fi
 		fi
-	else
-		log "No cookie found!"
-	fi
+
+		if [ -s "$cpuspeed" ]; then
+				echo "[cpuspeed]: $cpuspeed" >> "$COOKIE_FILE"
+				log "Writing cpuspeed: $cpuspeed"
+		fi
+
 }
 
 # We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
 start_retroarch() {
-	build_infoPanel_and_log "RetroArch" "Starting RetroArch..."
+	log "RetroArch" "Starting RetroArch..."
+	echo "*****************************************"
+	echo "romfullpath: $cookie_rom_path"
+	echo "platform: ${platform}"
+	echo "netplaycore: $netplaycore"
+	echo "core_config_folder: $core_config_folder"
+	echo "cpuspeed: $cpuspeed"
+	echo "*****************************************"
+	
+	# We set core CPU speed for Netplay
+	if [ -n "$cpuspeed" ]; then
+		PreviousCPUspeed=$(cat "/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt")
+		echo -n $cpuspeed > "/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt"
+	fi
+	
 	cd /mnt/SDCARD/RetroArch
-	HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/netplay_override.cfg -H -v -L "$host_core" "$host_rom"
+	# sleep 5
+	HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/easynetplay_override.cfg -H -L "$netplaycore" "$cookie_rom_path"
+	# We restore previous core CPU speed
+	if [ -n "$PreviousCPUspeed" ]; then
+		echo -n $PreviousCPUspeed > "/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt"
+	else
+		rm -f "/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt"
+	fi
 }
 
 cleanup() {
@@ -169,6 +221,10 @@ cleanup() {
 
 	restore_ftp
 
+    # Remove some files we prepared and received
+	log "Removing stale files"
+	rm "/mnt/SDCARD/RetroArch/retroarch.cookie"
+	
 	log "Cleanup done"
 	exit
 
@@ -187,7 +243,7 @@ build_infoPanel_and_log() {
 	infoPanel --title "$title" --message "$message" --persistent &
 	touch /tmp/dismiss_info_panel
 	sync
-	sleep 0.5
+	sleep 0.3
 }
 
 restore_ftp() {
@@ -229,7 +285,8 @@ lets_go() {
 	check_wifi
 	start_hotspot
 	start_ftp
-	get_cookie_info
+	Get_NetplayCore
+	create_cookie_info
 	pkill -9 pressMenu2Kill
 	start_retroarch
 	cleanup

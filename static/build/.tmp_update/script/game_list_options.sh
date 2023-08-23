@@ -194,8 +194,6 @@ main() {
         add_script_files "$emupath/romscripts"
     fi
 
-    create_cookie
-
     # Show GLO menu
     runcmd="LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so prompt -t \"$UI_TITLE\" $(list_args "$menu_option_labels")"
     echo -e "\n\n=================================================================================================="
@@ -218,17 +216,6 @@ main() {
     exit 1
 }
 
-# This creates a cookie for the quick host script to pick up (host & client both use this cookie) (clears every cycle)
-create_cookie() {
-    cookiefile="/mnt/SDCARD/RetroArch/retroarch.cookie"
-
-    if [ -f "$cookiefile" ]; then
-        rm -f "$cookiefile"
-    fi
-
-    echo "[core]: $cookie_core_path" >> $cookiefile
-    echo "[rom]: $cookie_rom_path" >> $cookiefile
-}
 
 check_is_game() {
     echo "$1" | grep -q "retroarch" || echo "$1" | grep -q "/../../Roms/"
