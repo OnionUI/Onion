@@ -605,9 +605,3 @@ get_password() {
     # Get password from file for use with network services authentication
     PASS=$(cat "$sysdir/config/.password.txt")
 }
-
-if [ $LOGGING -eq 1 ]; then
-    main "$@"
-else
-    main "$@" 2>&1 > /dev/null
-fi
