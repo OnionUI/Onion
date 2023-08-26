@@ -14,7 +14,7 @@ if [ "$3" = "DynamicLabel" ]; then
 	if [ -z "$romdirname" ]  || [ "$romext" == "miyoocmd" ]; then
 		DynamicLabel = "none"
 	else
-		netplaycore_info=$(grep "^${romdirname};" "$sysdir/script/netplay/netplay_cores.cfg")
+		netplaycore_info=$(grep "^${romdirname};" "$sysdir/config/netplay_cores.conf")
 		if [ -n "$netplaycore_info" ]; then
 			netplaycore=$(echo "$netplaycore_info" | cut -d ';' -f 2)
 			if [ "$netplaycore" = "none" ]; then
@@ -33,6 +33,23 @@ if [ "$3" = "DynamicLabel" ]; then
     exit
 fi
 
+
+tgbdual_configurator() {
+tgb_dual_opts="/mnt/SDCARD/Saves/CurrentProfile/config/TGB Dual/TGB Dual.opt"
+tgb_dual_opts_bk="/mnt/SDCARD/Saves/CurrentProfile/config/TGB Dual/TGB Dual.opt.bak"
+tgb_dual_opts_tmp="/tmp/TGB Dual.patch"
+
+
+cp "$tgb_dual_opts" "$tgb_dual_opts_bk" 
+echo -e "tgbdual_single_screen_mp = \"player ${PlayerNum} only\"" > "$tgb_dual_opts_tmp"
+echo -e "tgbdual_audio_output = \"Game Boy #${PlayerNum}\"" >> "$tgb_dual_opts_tmp"
+$sysdir/script/patch_ra_cfg.sh  "$tgb_dual_opts_tmp" "$tgb_dual_opts"
+rm "$tgb_dual_opts_tmp"
+}
+
+
+
+
 romdirname=$(echo "$1" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
 if [ "$romdirname" == "GB" ]; then
 	EasyNetplayPokemon="Easy Netplay - Poekmon Trade/Battle"
@@ -46,13 +63,15 @@ LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so prompt -t "Netplay" \
 
 retcode=$?
 if [ $retcode -eq 0 ] ; then
-
+	
+	PlayerNum=1
 	LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so prompt -t "HOST - Netplay type" \
 	"Standard Netplay (Use current Wifi)" \
 	"Easy Netplay (play anywhere, local only)" \
 	"$EasyNetplayPokemon"
 
 	retcode=$?
+	[ "$romdirname" == "GB" ] && [ "$retcode" -ne 255 ] && tgbdual_configurator
 	if [ $retcode -eq 0 ]; then
 		"./script/netplay/standard_netplay.sh" "$1" "$2" "host"
 	elif [ $retcode -eq 1 ]; then
@@ -65,12 +84,14 @@ if [ $retcode -eq 0 ] ; then
 	fi
 elif [ $retcode -eq 1 ]; then
 
+	PlayerNum=2
 	LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so prompt -t "JOIN - Netplay type" \
 	"Standard Netplay (Use current Wifi)" \
 	"Easy Netplay (play anywhere, local only)" \
 	"$EasyNetplayPokemon"
 	
 	retcode=$?
+	[ "$romdirname" == "GB" ] && [ "$retcode" -ne 255 ] && tgbdual_configurator
 	if [ $retcode -eq 0 ]; then
 		"./script/netplay/standard_netplay.sh" "$1" "$2" "join"
 	elif [ $retcode -eq 1 ]; then
@@ -85,3 +106,7 @@ elif [ $retcode -eq 1 ]; then
 elif [ $retcode -eq 255 ]; then
 	exit
 fi
+
+
+[ "$romdirname" == "GB" ] && mv "$tgb_dual_opts_bk" "$tgb_dual_opts"
+

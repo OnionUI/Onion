@@ -192,40 +192,48 @@ read_cookie() {
 	log "Cookie file read"
 }
 
+
+
 sync_file() {
 	file_type="$1"
 	file_path="$2"
 	file_checksum="$3"
 	file_url="$4"
 	MAX_FILE_SIZE_BYTES=26214400
+	
+	CurrentSystem=$(echo "$rom" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
+	romName=$(basename "$rom")
+	romNameNoExtension=${romName%.*}
+	Img_path="/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png"
 
 	if [ -z "$file_path" ]; then
         build_infoPanel_and_log "Something went wrong" "We didn't receive a file path for the rom \n Cannot continue."
         sleep 2
         cleanup
 	fi
-
+	
+	
 	if [ "$file_type" == "Rom" ]; then
 		if [ -e "$file_path" ]; then
 			log "$file_path exists."
 
 			local file_size=$(stat -c%s "$file_path")
-			local file_chksum_actual
+			local local_file_checksum
 
 			if [ "$file_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
-				file_chksum_actual=$file_size
+				local_file_checksum=$file_size
 			else
-				file_chksum_actual=$(cksum "$file_path" | awk '{ print $1 }')
+				local_file_checksum=$(cksum "$file_path" | awk '{ print $1 }')
 			fi
 
-			if [ "$file_checksum" -ne "$file_chksum_actual" ]; then
+			if [ "$remote_file_checksum" -ne "$local_file_checksum" ]; then
 				build_infoPanel_and_log "Checksum Mismatch" "The Rom exists but the checksum doesn't match \n Cannot continue."
                 sleep 2
                 cleanup
 			fi
 		else
 			if [ "$file_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
-				build_infoPanel_and_log "Syncing" "$file_type doesn't exist locallyand too big to be syncing with host."
+				build_infoPanel_and_log "Syncing" "$file_type doesn't exist locally and too big to be syncing with host."
                 sleep 2
                 cleanup
 			else
@@ -237,8 +245,13 @@ sync_file() {
 					sleep 2
 					cleanup
 				else
+					file_url=$(url_encode "$Img_path")
+					do_sync_file "Img" "$Img_path" "$file_url"
+
 					# Refreshing roms list
 					romdirname=$(echo "$rom" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
+					echo "############################################################################################################################"
+					echo "${rom%/*}/${romdirname}_cache6.db"
 					rm "${rom%/*}/${romdirname}_cache6.db"
 					build_infoPanel_and_log "Syncing" "$file_type synced."
 				fi
@@ -249,15 +262,15 @@ sync_file() {
 			log "$file_path exists."
 
 			local file_size=$(stat -c%s "$file_path")
-			local file_chksum_actual
+			local local_file_checksum
 
 			if [ "$file_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
-				file_chksum_actual=$file_size
+				local_file_checksum=$file_size
 			else
-				file_chksum_actual=$(cksum "$file_path" | awk '{ print $1 }')
+				local_file_checksum=$(cksum "$file_path" | awk '{ print $1 }')
 			fi
 
-			if [ "$file_checksum" -ne "$file_chksum_actual" ]; then
+			if [ "$remote_file_checksum" -ne "$local_file_checksum" ]; then
 				build_infoPanel_and_log "Syncing" "$file_type checksums don't match, syncing"
 				sleep 0.5
 				do_sync_file "$file_type" "$file_path" "$file_url"
@@ -363,13 +376,18 @@ build_infoPanel_and_log() {
 	infoPanel --title "$title" --message "$message" --persistent &
 	touch /tmp/dismiss_info_panel
 	sync
-	sleep 0.5
+	sleep 0.3
 }
 
 confirm_join_panel() {
 	local title="$1"
 	local message="$2"
 
+
+	if [ -e "$Img_path" ]; then
+		pngScale "$Img_path" "/tmp/CurrentNetplay.png" 150 150
+		imgpop 2 2 "/tmp/CurrentNetplay.png" 245 270 > /dev/null 2>&1 &
+	fi
 	infoPanel -t "$title" -m "$message"
 	retcode=$?
 
@@ -427,32 +445,6 @@ restore_wifi_state() {
     $WPACLI reconfigure
 }
 
-do_sync_file() {
-	file_type="$1"
-	file_path="$2"
-	file_url="$3"
-
-	dir_path=$(dirname "$file_path")
-
-	if [ ! -d "$dir_path" ]; then
-		mkdir -p "$dir_path"
-	fi
-
-	if [ -e "$file_path" ]; then
-		mv "$file_path" "${file_path}_old"
-		log "Existing $file_type file moved to ${file_path}_old"
-	fi
-
-	log "Starting to download $file_type from $file_url"
-	curl -o "$file_path" "ftp://$hostip/$file_url" > /dev/null 2>&1
-
-	if [ $? -eq 0 ]; then
-		log "$file_type download completed"
-	else
-		log "$file_type download failed"
-	fi
-}
-
 udhcpc_control() {
 	if pgrep udhcpc > /dev/null; then
 		killall -9 udhcpc
@@ -506,8 +498,8 @@ lets_go() {
 	sync_file Rom "$rom" "$romcheck" "$rom_url"
 	sync_file Core "$core" "$corecheck" "$core_url"
 	stripped_game_name
-	confirm_join_panel "Join now?" "$game_name"
 	pkill -9 pressMenu2Kill
+	confirm_join_panel "Join now?" "$game_name"
 	start_retroarch
 	cleanup
 }

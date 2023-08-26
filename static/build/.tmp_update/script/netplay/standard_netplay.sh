@@ -51,7 +51,7 @@ check_wifi() {
 # Find the recommended core for the current system.
 Get_NetplayCore() {
 	platform="$1"
-	netplaycore_info=$(grep "^${platform};" "$sysdir/script/netplay/netplay_cores.cfg")
+	netplaycore_info=$(grep "^${platform};" "$sysdir/config/netplay_cores.conf")
 	if [ -n "$netplaycore_info" ]; then
 		netplaycore=$(echo "$netplaycore_info" | cut -d ';' -f 2)
 		core_config_folder=$(echo "$netplaycore_info" | cut -d ';' -f 3)
@@ -71,6 +71,7 @@ Get_NetplayCore() {
 
 
 }
+
 
 
 # We'll start Retroarch in host mode with -H with the core and rom paths loaded in.

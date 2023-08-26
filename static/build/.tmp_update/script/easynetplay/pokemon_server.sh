@@ -304,38 +304,6 @@ ready_up() {
     fi
 }
 
-# Set the screen and audio settings in TGB dual as these aren't default in Onion
-change_tgb_dual_opt() {
-    check_stop
-    current_value=$(grep 'tgbdual_single_screen_mp' "$tgb_dual_opts" | cut -d '"' -f 2)
-    current_audio_value=$(grep 'tgbdual_audio_output' "$tgb_dual_opts" | cut -d '"' -f 2)
-
-    if [ "$1" = "replace" ]; then
-        cp "$tgb_dual_opts" "$tgb_dual_opts_bk"
-        log "The current TGB Opt value is: $current_value"
-        log "Replacing TGB Opt value with 'player 1 only' and audio output to 'Game Boy #1'..."
-        
-        if [ -z "$current_value" ]; then
-            log "The key 'tgbdual_single_screen_mp' was not found in the file, adding"
-            echo -e "\ntgbdual_single_screen_mp = \"player 1 only\"" >> "$tgb_dual_opts"
-        else
-            sed -i 's|tgbdual_single_screen_mp = "'"$current_value"'"|tgbdual_single_screen_mp = "player 1 only"|' "$tgb_dual_opts"
-        fi
-
-        if [ -z "$current_audio_value" ]; then
-            log "The key 'tgbdual_audio_output' was not found in the file, adding"
-            echo 'tgbdual_audio_output = "Game Boy #1"' >> "$tgb_dual_opts"
-        else
-           sed -i 's|tgbdual_audio_output = "'"$current_audio_value"'"|tgbdual_audio_output = "Game Boy #1"|' "$tgb_dual_opts"
-        fi 
-    elif [ "$1" = "restore" ]; then
-        log "Restoring TGB opt original values..."
-        mv "$tgb_dual_opts_bk" "$tgb_dual_opts"
-    else
-        log "Invalid argument for TGB Opt. Please use 'replace' or 'restore'."
-    fi
-}
-
 # We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
 start_retroarch() {
     check_stop 
@@ -720,10 +688,8 @@ lets_go() {
     ready_up
     stripped_game_name
     confirm_join_panel "Join now?" "$game_name \n $game_name_client"
-    change_tgb_dual_opt replace
     pkill -9 pressMenu2Kill
     start_retroarch
-    change_tgb_dual_opt restore
     wait_for_save_return
     return_client_save
     cleanup

@@ -109,7 +109,7 @@ start_ftp() {
 Get_NetplayCore() {
 
 	platform=$(echo "$cookie_rom_path" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
-	netplaycore_info=$(grep "^${platform};" "$sysdir/script/netplay/netplay_cores.cfg")
+	netplaycore_info=$(grep "^${platform};" "$sysdir/config/netplay_cores.conf")
 	if [ -n "$netplaycore_info" ]; then
 		netplaycore=$(echo "$netplaycore_info" | cut -d ';' -f 2)
 		netplaycore="/mnt/SDCARD/RetroArch/.retroarch/cores/$netplaycore"
