@@ -334,6 +334,32 @@ start_retroarch() {
 #Utilities#
 ###########
 
+do_sync_file() {
+	file_type="$1"
+	file_path="$2"
+	file_url="$3"
+
+	dir_path=$(dirname "$file_path")
+
+	if [ ! -d "$dir_path" ]; then
+		mkdir -p "$dir_path"
+	fi
+
+	if [ -e "$file_path" ]; then
+		mv "$file_path" "${file_path}_old"
+		log "Existing $file_type file moved to ${file_path}_old"
+	fi
+
+	log "Starting to download $file_type from $file_url"
+	curl -o "$file_path" "ftp://$hostip/$file_url" > /dev/null 2>&1
+	echo "################################################ $file_path ftp://$hostip/$file_url"
+	if [ $? -eq 0 ]; then
+		log "$file_type download completed"
+	else
+		log "$file_type download failed"
+	fi
+}
+
 # URL encode helper
 url_encode(){
   encoded_str=`echo "$*" | awk '
