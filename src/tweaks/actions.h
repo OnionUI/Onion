@@ -56,6 +56,56 @@ void action_meterWidth(void *pt)
     osd_showBrightnessBar(settings.brightness);
 }
 
+static pthread_t last_thread;
+static pthread_mutex_t thread_mutex = PTHREAD_MUTEX_INITIALIZER;
+static int lastB = 128, lastG = 128, lastR = 128; 
+
+void* action_blueLight_thread(void *arg) {
+    ListItem *item = (ListItem *)arg;
+    int value = item->value;
+    int startB = lastB, startG = lastG, startR = lastR;
+    int endB, endG, endR;
+    char cmd[128];
+
+    switch (value) {
+        case 0: endB = 128; endG = 128; endR = 128; break;  // off
+        case 1: endB = 115; endG = 130; endR = 140; break;  // subtle
+        case 2: endB = 110;  endG = 125; endR = 140; break;  // moderate
+        case 3: endB = 100;  endG = 120; endR = 140; break;  // balanced
+        case 4: endB = 90;  endG = 115; endR = 140; break;  // strong
+        case 5: endB = 80;  endG = 110; endR = 140; break;  // intense
+        default: return NULL;
+    }
+
+    for (int i = 0; i <= 20; i++) {
+        snprintf(cmd, sizeof(cmd), "echo 'colortemp 0 0 0 0 %d %d %d' > /proc/mi_modules/mi_disp/mi_disp0",
+                 startB + (endB - startB) * i / 20,
+                 startG + (endG - startG) * i / 20,
+                 startR + (endR - startR) * i / 20);
+        system(cmd);
+        usleep(50000);
+        lastB = endB;
+        lastG = endG;
+        lastR = endR;
+    }
+
+    config_setNumber("display/blueLight", value);
+    return NULL;
+}
+
+void action_blueLight(void *pt) { 
+    pthread_mutex_lock(&thread_mutex);
+    if (last_thread) { // handle our threads so we don't have multiple starting at the same time through fast scrolling thorugh values (screen colour flickers)
+        pthread_cancel(last_thread); 
+        pthread_join(last_thread, NULL);
+    }
+
+    pthread_create(&last_thread, NULL, action_blueLight_thread, pt);
+    pthread_detach(last_thread);
+
+    pthread_mutex_unlock(&thread_mutex);
+}
+
 void action_setStartupAutoResume(void *pt)
 {
     settings.startup_auto_resume = ((ListItem *)pt)->value == 1;

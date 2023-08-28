@@ -60,6 +60,13 @@ int value_appShortcut(int button)
     return 0;
 }
 
+int value_blueLight(void)
+{
+    int blueLightLevel = 0;
+    config_get("display/blueLight", CONFIG_INT, &blueLightLevel);
+    return blueLightLevel;
+}
+
 int value_meterWidth(void)
 {
     int meterWidth = 4;

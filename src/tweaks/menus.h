@@ -472,7 +472,7 @@ void menu_themeOverrides(void *_)
 void menu_userInterface(void *_)
 {
     if (!_menu_user_interface._created) {
-        _menu_user_interface = list_createWithTitle(5, LIST_SMALL, "Appearance");
+        _menu_user_interface = list_createWithTitle(6, LIST_SMALL, "Appearance");
         list_addItemWithInfoNote(&_menu_user_interface,
                                  (ListItem){
                                      .label = "Show recents",
@@ -501,6 +501,16 @@ void menu_userInterface(void *_)
                                  "Set the width of the 'OSD bar' shown\n"
                                  "in the left side of the display when\n"
                                  "adjusting brightness, or volume (MMP).");
+        list_addItemWithInfoNote(&_menu_user_interface,
+                                 (ListItem){
+                                     .label = "Blue light filter",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 5,
+                                     .value_labels = BLUELIGHT_LABELS,
+                                     .value = value_blueLight(),
+                                     .action = action_blueLight},
+                                 "Enable and configure\n"
+                                 "the blue light filter\n");
         list_addItem(&_menu_user_interface,
                      (ListItem){
                          .label = "Theme overrides...",
