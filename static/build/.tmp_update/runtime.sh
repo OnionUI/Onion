@@ -64,6 +64,9 @@ main() {
     # Init
     rm /tmp/.offOrder 2> /dev/null
     HOME=/mnt/SDCARD/RetroArch/
+    
+    # Wipe bluelight filter setting (menu value in tweaks)
+    rm $sysdir/config/display/blueLight
 
     # Detect if MENU button is held
     detectKey 1
