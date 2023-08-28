@@ -24,11 +24,11 @@
     {                       \
         "-", "Off", "On"    \
     }
-    
-#define BLUELIGHT_LABELS                              \
-{                                                 \
-    "Off", "Subtle", "Moderate", "Balanced", "Strong", "Intense" \
-}
+
+#define BLUELIGHT_LABELS                                             \
+    {                                                                \
+        "Off", "Subtle", "Moderate", "Balanced", "Strong", "Intense" \
+    }
 
 void formatter_timezone(void *pt, char *out_label)
 {
