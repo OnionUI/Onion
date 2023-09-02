@@ -11,7 +11,7 @@ if [ "$3" = "DynamicLabel" ]; then
 	retroarch_core="$5"
 	romdirname="$6"
 	romext="$7"
-	if [ -z "$romdirname" ]  || [ "$romext" == "miyoocmd" ]; then
+	if [ -z "$romdirname" ] || [ "$romext" == "miyoocmd" ]; then
 		DynamicLabel = "none"
 	else
 		netplaycore_info=$(grep "^${romdirname};" "$sysdir/config/netplay_cores.conf")
@@ -21,7 +21,7 @@ if [ "$3" = "DynamicLabel" ]; then
 				DynamicLabel="No Netplay for $emulabel"
 			else
 				netplaycore_without_suffix=$(echo "$netplaycore" | awk -F "_libretro.so" '{print $1}')
-				DynamicLabel="Netplay (core supported: ${netplaycore_without_suffix})"				
+				DynamicLabel="Netplay (core supported: ${netplaycore_without_suffix})"
 			fi
 
 		else
@@ -29,49 +29,63 @@ if [ "$3" = "DynamicLabel" ]; then
 		fi
 	fi
 
-	echo -n "$DynamicLabel" > /tmp/DynamicLabel.tmp
-    exit
+	echo -n "$DynamicLabel" >/tmp/DynamicLabel.tmp
+	exit
 fi
 
+echo performance >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 
-tgbdual_configurator() {
-tgb_dual_opts="/mnt/SDCARD/Saves/CurrentProfile/config/TGB Dual/TGB Dual.opt"
-tgb_dual_opts_bk="/mnt/SDCARD/Saves/CurrentProfile/config/TGB Dual/TGB Dual.opt.bak"
-tgb_dual_opts_tmp="/tmp/TGB Dual.patch"
+cores_configurator() {
 
+	if [ "$romdirname" == "GB" ] || [ "$romdirname" == "GBC" ]; then
 
-cp "$tgb_dual_opts" "$tgb_dual_opts_bk" 
-echo -e "tgbdual_single_screen_mp = \"player ${PlayerNum} only\"" > "$tgb_dual_opts_tmp"
-echo -e "tgbdual_audio_output = \"Game Boy #${PlayerNum}\"" >> "$tgb_dual_opts_tmp"
-$sysdir/script/patch_ra_cfg.sh  "$tgb_dual_opts_tmp" "$tgb_dual_opts"
-rm "$tgb_dual_opts_tmp"
+		tgb_dual_opts="/mnt/SDCARD/Saves/CurrentProfile/config/TGB Dual/TGB Dual.opt"
+		tgb_dual_opts_bk="/mnt/SDCARD/Saves/CurrentProfile/config/TGB Dual/TGB Dual.opt.bak"
+		tgb_dual_opts_tmp="/tmp/TGB Dual.patch"
+
+		cp "$tgb_dual_opts" "$tgb_dual_opts_bk"
+		echo -e "tgbdual_single_screen_mp = \"player ${PlayerNum} only\"" >"$tgb_dual_opts_tmp"
+		echo -e "tgbdual_audio_output = \"Game Boy #${PlayerNum}\"" >>"$tgb_dual_opts_tmp"
+		$sysdir/script/patch_ra_cfg.sh "$tgb_dual_opts_tmp" "$tgb_dual_opts"
+		rm "$tgb_dual_opts_tmp"
+
+	fi
+
+	if [ "$romdirname" == "MD" ]; then
+		pico_opts_tmp="/tmp/MD.patch"
+		echo -e "picodrive_input1 = \"6 button pad\"" >"$pico_opts_tmp"
+		echo -e "picodrive_input2 = \"6 button pad\"" >>"$pico_opts_tmp"
+		$sysdir/script/patch_ra_cfg.sh "$pico_opts_tmp" "/mnt/SDCARD/Saves/CurrentProfile/config/PicoDrive/PicoDrive.opt"
+		rm "$pico_opts_tmp"
+	fi
 }
 
-
-
-
 romdirname=$(echo "$1" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
-if [ "$romdirname" == "GB" ]; then
+if [ "$romdirname" == "GB" ] || [ "$romdirname" == "GBC" ]; then
 	EasyNetplayPokemon="Easy Netplay - Poekmon Trade/Battle"
 fi
 # Netplay mode main script:
 cd $sysdir
-
+echo "###################################################################################################################"
+echo "#################################### Netplay.sh script start.######################################################"
+echo "###################################################################################################################"
 LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so prompt -t "Netplay" \
-"Host" \
-"Join"
+	"Host" \
+	"Join"
 
 retcode=$?
-if [ $retcode -eq 0 ] ; then
-	
+if [ $retcode -eq 0 ]; then
+
 	PlayerNum=1
 	LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so prompt -t "HOST - Netplay type" \
-	"Standard Netplay (Use current Wifi)" \
-	"Easy Netplay (play anywhere, local only)" \
-	"$EasyNetplayPokemon"
+		"Standard Netplay (Use current Wifi)" \
+		"Easy Netplay (play anywhere, local only)" \
+		"$EasyNetplayPokemon"
 
 	retcode=$?
-	[ "$romdirname" == "GB" ] && [ "$retcode" -ne 255 ] && tgbdual_configurator
+
+	[ "$retcode" -ne 255 ] && cores_configurator
+
 	if [ $retcode -eq 0 ]; then
 		"./script/netplay/standard_netplay.sh" "$1" "$2" "host"
 	elif [ $retcode -eq 1 ]; then
@@ -83,15 +97,14 @@ if [ $retcode -eq 0 ] ; then
 		exit
 	fi
 elif [ $retcode -eq 1 ]; then
-
 	PlayerNum=2
 	LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so prompt -t "JOIN - Netplay type" \
-	"Standard Netplay (Use current Wifi)" \
-	"Easy Netplay (play anywhere, local only)" \
-	"$EasyNetplayPokemon"
-	
+		"Standard Netplay (Use current Wifi)" \
+		"Easy Netplay (play anywhere, local only)" \
+		"$EasyNetplayPokemon"
+
 	retcode=$?
-	[ "$romdirname" == "GB" ] && [ "$retcode" -ne 255 ] && tgbdual_configurator
+	[ "$retcode" -ne 255 ] && cores_configurator
 	if [ $retcode -eq 0 ]; then
 		"./script/netplay/standard_netplay.sh" "$1" "$2" "join"
 	elif [ $retcode -eq 1 ]; then
@@ -107,6 +120,23 @@ elif [ $retcode -eq 255 ]; then
 	exit
 fi
 
+if [ "$romdirname" == "GB" ] || [ "$romdirname" == "GBC" ]; then
+	mv "$tgb_dual_opts_bk" "$tgb_dual_opts"
+fi
 
-[ "$romdirname" == "GB" ] && mv "$tgb_dual_opts_bk" "$tgb_dual_opts"
+echo "###################################################################################################################"
+echo "############################################# Netplay.sh script end. ##############################################"
+echo "###################################################################################################################"
+echo "###################################################################################################################"
+
+# restore wifi in case of sudden quit :
+if [ -f "/tmp/old_ipv4.txt" ]; then
+	"$sysdir/script/network/hotspot_cleanup.sh"
+fi
+
+
+
+
+
+
 

@@ -20,75 +20,6 @@ program=$(basename "$0" .sh)
 ##Setup.##
 ##########
 
-# We'll need wifi up for this. Lets try and start it..
-
-check_wifi() {
-	ifconfig wlan1 down
-	if ifconfig wlan0 &> /dev/null; then
-		build_infoPanel_and_log "WIFI" "Wifi up"
-	else
-		build_infoPanel_and_log "WIFI" "Wifi disabled, starting..."
-
-		/customer/app/axp_test wifion
-		sleep 2
-		ifconfig wlan0 up
-		sleep 1
-		$miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
-
-		if is_running wpa_supplicant && ifconfig wlan0 > /dev/null 2>&1; then
-			build_infoPanel_and_log "WIFI" "Wifi started."
-		else
-			build_infoPanel_and_log "WIFI" "Unable to start WiFi\n unable to continue."
-			sleep 1
-			cleanup
-		fi
-
-		sleep 2
-	fi
-}
-
-# We'll need hotspot to host the local connection
-start_hotspot() {
-	if is_running hostapd; then
-		killall -9 hostapd
-	fi
-
-	if is_running dnsmasq; then
-		killall -9 dnsmasq
-	fi
-
-	ifconfig wlan1 up
-	ifconfig wlan0 down # Put wlan0 down to suspend the current wifi connections
-
-	hotspot0addr=$(grep -E '^dhcp-range=' "$sysdir/config/dnsmasq.conf" | cut -d',' -f1 | cut -d'=' -f2)
-	hotspot0addr=$(echo $hotspot0addr | awk -F'.' -v OFS='.' '{$NF-=1; print}')
-	gateway0addr=$(grep -E '^dhcp-option=3' $sysdir/config/dnsmasq.conf | awk -F, '{print $2}')
-	subnetmask=$(grep -E '^dhcp-range=.*,[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+,' "$sysdir/config/dnsmasq.conf" | cut -d',' -f3)
-
-	ifconfig wlan1 $hotspot0addr netmask $subnetmask
-
-	build_infoPanel_and_log "Hotspot" "Starting hotspot..."
-
-	$sysdir/bin/hostapd -P /var/run/hostapd.pid -B -i wlan1 $sysdir/config/hostapd.conf &
-	$sysdir/bin/dnsmasq --conf-file=$sysdir/config/dnsmasq.conf -u root &
-	ip route add default via $gateway0addr
-
-	if is_running hostapd; then
-		log "Started with IP of: $hotspot0addr, subnet of: $subnetmask"
-	else
-		build_infoPanel_and_log "Hotspot" "Failed to start hotspot, exiting.."
-		sleep 2
-		cleanup
-	fi
-
-	if is_running wpa_supplicant; then # kill the sup, this means wifi will come back up after quitting RA.
-		killall -9 wpa_supplicant
-	fi
-
-	if is_running udhcpc; then
-		killall -9 udhcpc
-	fi
-}
 
 # We'll need FTP to host the cookie to the client - use the built in FTP, it allows us to curl (errors on bftpd re: path)
 start_ftp() {
@@ -142,24 +73,22 @@ create_cookie_info() {
 
 
 		if [ -s "$netplaycore" ]; then
+			log "Writing core size"
 			core_size=$(stat -c%s "$netplaycore")
 			if [ "$core_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
-				echo "[coresize]: $core_size" >> "$COOKIE_FILE"
-				log "Writing core size"
+				echo "[corechksum]: 0" >> "$COOKIE_FILE"
 			else
-				echo "[corechksum]: $(cksum "$netplaycore" | cut -f 1 -d ' ')" >> "$COOKIE_FILE"
-				log "Writing core checksum"
+				echo "[corechksum]: $(xcrc "$netplaycore")" >> "$COOKIE_FILE"
 			fi
 		fi
 
 		if [ -s "$cookie_rom_path" ]; then
+			log "Writing rom size"
 			rom_size=$(stat -c%s "$cookie_rom_path")
 			if [ "$rom_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
-				echo "[romsize]: $rom_size" >> "$COOKIE_FILE"
-				log "Writing rom size"
+				echo "[romchksum]: 0" >> "$COOKIE_FILE"
 			else
-				echo "[romchksum]: $(cksum "$cookie_rom_path" | cut -f 1 -d ' ')" >> "$COOKIE_FILE"
-				log "Writing rom checksum"
+				echo "[romchksum]: $(xcrc "$cookie_rom_path")" >> "$COOKIE_FILE"
 			fi
 		fi
 
@@ -203,21 +132,7 @@ cleanup() {
 
 	pkill -9 pressMenu2Kill
 
-	if is_running hostapd; then
-		killall -9 hostapd
-	fi
-
-	if is_running dnsmasq; then
-		killall -9 dnsmasq
-	fi
-
-	if is_running tcpsvd; then
-		killall -9 tcpsvd
-	fi
-
-	ifconfig wlan1 down
-
-	ifconfig wlan0 up
+	. "$sysdir/script/network/hotspot_cleanup.sh"
 
 	restore_ftp
 
@@ -282,8 +197,9 @@ is_running() {
 
 lets_go() {
 	pressMenu2Kill $(basename $0) &
-	check_wifi
-	start_hotspot
+	# check_wifi
+	# start_hotspot
+	. "$sysdir/script/network/hotspot_create.sh"
 	start_ftp
 	Get_NetplayCore
 	create_cookie_info
