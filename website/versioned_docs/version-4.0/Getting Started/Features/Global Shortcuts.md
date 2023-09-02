@@ -4,6 +4,7 @@ slug: /shortcuts
 
 ![menu_button_shortcuts](https://user-images.githubusercontent.com/44569252/189388343-3fa73c5d-31ca-4931-b310-4e7ba43c536d.png)
 
+
 <table align="center">
     <thead>
         <tr>
@@ -19,7 +20,7 @@ slug: /shortcuts
             <td><em>From MainUI</em></td>
         </tr>
         <tr>
-            <td><kbd>SELECT</kbd> or <kbd>MENU</kbd> <sup>hold</sup></td>
+            <td><kbd>MENU</kbd> <sup>hold</sup></td>
             <td>Open context menu <sub>[by default]</sub></td>
             <td><em>From MainUI</em></td>
         </tr>
@@ -167,3 +168,4 @@ slug: /shortcuts
     </tr>
     </tbody>
 </table>
+

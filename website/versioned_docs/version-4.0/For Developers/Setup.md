@@ -23,7 +23,7 @@ The following command lines will install the required Docker image to get the pr
 
 Open a Terminal and type : 
 
-`git clone https://github.com/OnionUI/Onion.git`
+`git clone --branch dev-latest https://github.com/OnionUI/Onion.git`
 
 `cd Onion/`
 
@@ -38,3 +38,4 @@ Done!
 ## Toolchain
 
 You can also use the command `make toolchain` to get access to the toolchain docker image, here to can run any commands, like `make dev`.
+

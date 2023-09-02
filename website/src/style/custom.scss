@@ -107,6 +107,12 @@ h6 {
   }
 }
 
+details.details_node_modules-\@docusaurus-theme-classic-lib-theme-Details-styles-module {
+  --docusaurus-details-decoration-color: rgba(255, 255, 255, .1);
+  border: 1px solid var(--docusaurus-details-decoration-color);
+  background-color: transparent;
+}
+
 
 // Agnolia Search
 

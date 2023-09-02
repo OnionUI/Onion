@@ -6,7 +6,7 @@ sidebar_position: 3
 ![FAQ](https://user-images.githubusercontent.com/98862735/178853267-a5d384f8-ad62-4ffa-a8e7-45abf38e742d.png)
 
 
-## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/189906668-cf6a57d5-075a-4894-8af0-906282bd8ae2.png" width="54"/></sup>Organizing games
+## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/189906668-cf6a57d5-075a-4894-8af0-906282bd8ae2.png" width="54" /></sup>Organizing games
 
 
 ### How can I <u>add box art</u> or screenshot images for my games?
@@ -30,7 +30,7 @@ You can scrape your box art or screenshots automatically by following the below 
 - Log in and select "Recalbox"   
 - Check "Include non-Recalbox rom folders"   
    > (Some systems aren't recognized because their folder-names are non-standard. To add those systems, press the `+` symbol on the bottom left, select the systems that are missing & hit "OK". Then click the added systems in the bar on the left, and correct the system's folders in the "Games/Roms folder" bar or by clicking the file-icon to the right of it.
-[You can find a list of all Rom folder names here](https://github.com/OnionUI/Onion/wiki/Emulators)   
+[You can find a list of all Rom folder names here](https://github.com/OnionUI/Onion/wiki/2.-Emulators-and-Ports)   
 - Go to the "media" tab -> Enable & set "Resize width to" to 250 and enable "Keep Image Ratio"    
 - Select the image type you don't want in the "Fetched Media List" and press the "minus" button, so there's only one picture.   
    > You can change how the image mix looks with the two buttons under "Media type",  I recommend changing "4 IMAGES MIX" to "Screenscraper's Recalbox Mix V2", but use whatever you prefer.
@@ -75,15 +75,7 @@ To create a miyoogamelist, review [the guide here](https://github.com/OnionUI/On
 <summary align="right"><i>Click to see answer</i></summary>
 <table><td>
 
-Any time you add rom files to your SD Card you will need to 'refresh your roms' to rebuild game list cache files:  
-* From the `Games` tab in the main menu, press the <kbd>SELECT</kbd> button. 
-* This will evoke the 'Refresh All Roms' menu option, press <kbd>A</kbd> to confirm.   
-
-> Please review our [Rom Files](https://github.com/OnionUI/Onion/wiki/Emulators#rom-files) section for some additional guidance and tips.   
-> If newly added games are still not appearing, ensure that you have placed them in the [correct rom folders](https://github.com/OnionUI/Onion/wiki/Emulators#rom-folders---quick-reference).  
-> Rom folder names for each system must be capitalized and may differ from those on the stock Miyoo SD Card.   
-> Also review the [Emulators Section](https://github.com/OnionUI/Onion/wiki/Emulators) to ensure you are using supported rom formats, as documented per system.   
-> _In the Stock Miyoo OS, rom refreshes are performed by pressing the <kbd>MENU</kbd> button._
+Any time you add more roms you will need to refresh your roms. From the `Games` tab, highlight the system and press the <kbd>SELECT</kbd> button to evoke the 'Refresh All Roms' option and press <kbd>A</kbd>. If your newly added games are still not appearing, ensure that you have placed your roms in the [correct rom folders](https://github.com/OnionUI/Onion/wiki/Emulators#rom-folders---quick-reference). Rom folders for each system must be named in capitals and they will differ from those on the stock Miyoo Mini SD Card. 
 
 <img src="https://user-images.githubusercontent.com/44569252/189995592-9d9e4702-e237-40a2-a0b7-b5e4578f0d7d.png" />
 </td></table>
@@ -147,7 +139,7 @@ You can store the files in whatever folder you want as long as the path to the c
 </details>
 
 
-### How can I <u>rename or rearrange consoles</u> or systems?
+### How can I <u>rename consoles</u> or systems?
 
 <details>
 <summary align="right"><i>Click to see answer</i></summary>
@@ -156,14 +148,8 @@ You can store the files in whatever folder you want as long as the path to the c
 The name of each console or system is defined in `Emu/[systemname]/config.json` 
 You can edit this file with a text editor on your PC and apply a new name by updating the 'label' field.
 
-To easily make bulk changes to your console or system names you can also use the excellent python scripts below by Andrea922.
+To easily make bulk changes to your console or system names you can use the excellent python scripts below by Andrea922.
 Visit the [onionos-console-renamer github](https://github.com/Andrea922/onionos-console-renamer) to download and follow the instructions detailed there.  
-
-> Notes:  
-> Systems in Onion OS are displayed in alphabetical order so the name will determine where in your list it sits.   
-> An alternative method to order the systems is by adding an equal number of spaces both sides of the label name.  
-> The number of spaces determines the position it is displayed on the Mini, with the most spaces being first.  
-> For example, _“   Arcade   “_ will appear before _“Arcade”_. 
 
 <img src="https://user-images.githubusercontent.com/44569252/189995592-9d9e4702-e237-40a2-a0b7-b5e4578f0d7d.png" />
 </td></table>
@@ -171,7 +157,6 @@ Visit the [onionos-console-renamer github](https://github.com/Andrea922/onionos-
 </details>
 
 
-<p>&nbsp;</p>
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/189905823-71a7f1bf-9eea-410f-b5e8-5b62d4dbc4fd.png" width="54" /></sup>Troubleshooting
 
@@ -189,30 +174,14 @@ There can be a few reasons why you may find a specific system does not launch ga
 * If none of the above points have resolved your issue, it is recommended to source and test with alternative roms (those that come with the Mini are of very poor quality). 
 
 > Notes:  
-> [Rom folders](https://github.com/OnionUI/Onion/wiki/Emulators#rom-folders---quick-reference) and [Bios](https://github.com/OnionUI/Onion/wiki/Emulators#bios-files) filenames are case sensitive.  
-> It is strongly advised not to use the Miyoo provided SD Card or USB Card Reader as both are very prone to data corruption and failure and will cause issues.  
+> Rom folder and Bios filenames are case sensitive.  
+> It is strongly recommended not to use the Miyoo provided SD Card or USB Card Reader as both are very prone to data corruption and failure and will cause issues.  
 
 <img src="https://user-images.githubusercontent.com/44569252/189995592-9d9e4702-e237-40a2-a0b7-b5e4578f0d7d.png" />
 </td></table>
 <p>&nbsp;</p>
 </details>
 
-### I have a red frame / rectangle displayed around the edge of the screen?
-
-<details>
-<summary align="right"><i>Click to see answer</i></summary>
-<table><td>
-
-This red frame indicate that your battery level is low. This warning avoids bad surprises on low battery during playing session. 
-
-Charge your device to make it disappear.
-> Notes:  
-> You can configure / disable this low battery warning in Tweaks app (section "User interface").
-
-<img src="https://user-images.githubusercontent.com/44569252/189995592-9d9e4702-e237-40a2-a0b7-b5e4578f0d7d.png" />
-</td></table>
-<p>&nbsp;</p>
-</details>
 
 ### I have upgraded to a newer version of Onion and some <u>games are running slower or too fast</u>? 
 
@@ -238,57 +207,9 @@ If you experience slower (or faster) gameplay than usual for some games followin
 
 If you launched a rom or a file that is incompatible with the core, it can cause a black screen. Onion's auto-resume feature can mean you returning to this same black screen on each boot. 
 
-You can hold down <kbd>POWER</kbd> for 10+ seconds (wait for 2nd rumble) to break out of this behaviour and return you to MainUI.
+You can hold down <kbd>POWER</kbd> for 10+ seconds to break out of this behaviour and return you to MainUI
 
 If this still does not work for you, you can disable the next auto-resume by inserting your SD card into your PC and deleting the file `cmd_to_run.sh` inside the `.tmp_update` folder
-
-<img src="https://user-images.githubusercontent.com/44569252/189995592-9d9e4702-e237-40a2-a0b7-b5e4578f0d7d.png" />
-</td></table>
-<p>&nbsp;</p>
-</details>
-
-### Why are my <u>favorites deleted</u> or missing thumbnails?
-
-<details>
-<summary align="right"><i>Click to see answer</i></summary>
-<table><td>
-
-There is a known bug in the Miyoo binaries which can cause the favorites list to become corrupted.  
-It appears to most commonly occur if duplicate game names (even roms from different consoles) are added to your favouites so care should be taken to avoid this.
-
-Since Miyoo have not shared their source code, the Onion team are unable to fix the cause.  
-Onion does include a Tweaks tool which can repair the corruption. This tool is located in:  
-`Apps` > `Tweaks` > `Tools` > `Favorites: Fix thumbnails and duplicates`.
-
-<img src="https://user-images.githubusercontent.com/44569252/189995592-9d9e4702-e237-40a2-a0b7-b5e4578f0d7d.png" />
-</td></table>
-<p>&nbsp;</p>
-</details>
-
-
-### My <u>play activity is lost</u> or corrupted, how can I recover it?
-
-<details>
-<summary align="right"><i>Click to see answer</i></summary>
-<table><td>
-
-If a RetroArch core fails abruptly or has memory leak issues, it can sometimes cause a game to freeze.  
-Exiting the game with the <kbd>MENU</kbd> button during this failure, may on rare occasions, corrupt the play activity database.
-
-FIX 1 (Mainly for 4.2 beta users)  
-If you have a `playActivityTMP.db` file in `/mnt/SDCARD/Saves/CurrentProfile/saves/`, just rename it to `playActivity.db`
-
-FIX 2  
-Onion keeps versioned backups of your play activity in case of such corruption:
-
-- Versioned backups are created and stored in `/mnt/SDCARD/Saves/CurrentProfile/saves/PlayActivityBackup/`.
-- Your current play times are stored in `/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db`.  
-
-> To restore from a backup:  
-> - Navigate to `/Saves/CurrentProfile/saves/PlayActivityBackup/` and find the database file that has a size of 0KB.  
-> - The the highest numbered version just before it will be the most recent good backup.  
-> - Make a copy and rename it (from `playActivity[nn].db`  to `playActivity.db`.  
-> - Copy it to `/Saves/CurrentProfile/saves/`, replacing the one located there.  
 
 <img src="https://user-images.githubusercontent.com/44569252/189995592-9d9e4702-e237-40a2-a0b7-b5e4578f0d7d.png" />
 </td></table>
@@ -304,7 +225,6 @@ Onion keeps versioned backups of your play activity in case of such corruption:
 
 **Charging Indicators**  
 The left most LED on the top of the Mini will turn blue when a full charge is reached.  
-Miyoo recommends 5V 1A and it must be USB-A to USB-C _(USB-C to USB-C charging is not supported)_.
 
 ![LED Indicators-500](https://user-images.githubusercontent.com/98862735/189775988-b6b4062d-f231-4351-9a79-6920498f1554.png)
 
@@ -317,7 +237,7 @@ Environment changes and power draw will affect the determined percentage which c
 > The Onion battery capacity estimation is constantly pooling in the background for more precise results over time. This is the best method that is possible on this device, improved over stock and the same method used by the RA build and in MiniUI. 
 
 **Reducing Battery Usage**  
-The display in the Mini is old tech and draws a lot of power. Lowering display brightness increases battery life.   
+The display in the Mini is old technology and draws a lot of power. Lowering display brightness will increase battery life.   
 The below testing output demonstrates GBA running at 50% display brightness for almost 8hrs of play time.  
 
 ![battery-600](https://user-images.githubusercontent.com/98862735/189774379-33b77793-bc36-4563-acbe-357713b4964e.png)
@@ -344,26 +264,6 @@ To cope with this, just rename the `launch.sh` file in your app folder to `launc
 </details>
 
 
-### How do I enable <u>logging in RetroArch</u>?
-
-<details>
-<summary align="right"><i>Click to see answer</i></summary>
-<table><td>
-
-In order to troubleshoot a particular game or emulator failure or issue, you may wish to enable RetroArch logging:
-
-* Go to `Apps` -> `RetroArch` -> `Settings` -> `Logging` and enable `Log to File`.  
-* Back out to the main RetroArch menu, and go to `Configuration File` and choose `Save Current Configuration`.  
-* Launch the game(s), or perform the action you are trying to troubleshoot.  
-* The output log file will be written to `.tmp_update/logs/retroarch.log`.  
-
-<img src="https://user-images.githubusercontent.com/44569252/189995592-9d9e4702-e237-40a2-a0b7-b5e4578f0d7d.png" />
-</td></table>
-<p>&nbsp;</p>
-</details>
-
-
-<p>&nbsp;</p>
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/189906120-248301c7-373e-482c-9c67-11f0faab9f39.png" width="54" /></sup>Saves
 
@@ -374,13 +274,13 @@ In order to troubleshoot a particular game or emulator failure or issue, you may
 <summary align="right"><i>Click to see answer</i></summary>
 <table><td>
 
-You can copy in-game save files from another device or emulator for use in OnionOS. 
+You can copy game save files from another device or emulator for use in OnionOS. 
 * In most cases, Save files should be in `.srm` format, named identically to the rom and are case sensitive. Note that `.sav` files can be renamed to `.srm`, other formats may require a conversion tool. 
 * To add your saves to OnionOS just copy your individual save files into the correct emulator folder in: `Saves/CurrentProfile/saves/[CORENAME]`
 * If you have already launched the game prior to adding your saves then you will also need to go to the `Saves/CurrentProfile/states/[CORENAME]` folder ...and delete any Save States here for the same game(s) in order for your newly added game saves to be recognised.
 
-> `[CORENAME]` = The folder with name of the RA core for the particular emulator or system the save file(s) relates to.     
-> If copying saves from your Miyoo stock SD Card, or an early version of Onion, you will find your saves in `RetroArch/.retroarch/saves/[CORENAME]`
+> `[CORENAME]` = the folder with name of the core for the particular emulator or system 'core', the save file(s) relates to   
+> If copying saves from your Miyoo stock SD Card, you will find them in `RetroArch/.retroarch/saves/[CORENAME]`
 
 <img src="https://user-images.githubusercontent.com/44569252/189995592-9d9e4702-e237-40a2-a0b7-b5e4578f0d7d.png" />
 </td></table>
@@ -449,25 +349,12 @@ To manage your current Save State slot:
    - <kbd>MENU</kbd>+<kbd>L2</kbd> to load from the slot you selected  
    - <kbd>MENU</kbd>+<kbd>R2</kbd> to save to (and overwrite) the slot you selected  
 
-> Save state slot `-1` is reserved for Onion's Auto-Save feature.   
-> Manual save states start counting from slot `0` upward. If your slot has reached a particularly high number and you would like to reduce it, you can manually change the slot in the RA Quick Menu menu. Switching back to slot '0' and making a manual save will mean it starts counting again incrementally from there.  
-
-> If you wish to forgo the advantages of incremental Save States mentioned above, you may disable them as follows:
-> - Launch a game and press <kbd>MENU</kbd>+<kbd>SELECT</kbd> to go into the RetroArch `Quick Menu`
-> - Press <kbd>B</kbd> once, to go to RA `Main Menu`
-> - Go to `Settings` > `Saving` > `Increment Save State Index Automatically` (and toggle this off)
-> - Press <kbd>B</kbd> twice and go to `Quick Menu` > `Overrides` to [save the RA settings](https://github.com/OnionUI/Onion/wiki/Frequently-Asked-Questions-%28FAQ%29#how-do-i-save-retroarch-settings)
-
-
-
-
 <img src="https://user-images.githubusercontent.com/44569252/189995592-9d9e4702-e237-40a2-a0b7-b5e4578f0d7d.png" />
 </td></table>
 <p>&nbsp;</p>
 </details>
 
 
-<p>&nbsp;</p>
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/189906362-b76f72fe-b6a9-4843-bc8a-9d024fb235f4.png" width="54" /></sup>Emulator settings
 
@@ -588,34 +475,8 @@ To do this, launch a game from the system to want to change.
       - `Save Content Remap File` - for everything in the same Rom folder.
 
 > Notes:  
-> Highlighting a mapped key and pressing <kbd>Y</kbd> will clear/disable it.  
-> `Content Remap File` saving is recommended over `Core Remap File` as some cores serve multiple systems.  
+> `Content Remap File` is recommended over `Core Remap File` since some cores serve multiple systems.  
 > For more information regarding RetroArch inputs and controls please review the [libretro documentation here](https://docs.libretro.com/guides/input-and-controls/).
-
-<img src="https://user-images.githubusercontent.com/44569252/189995592-9d9e4702-e237-40a2-a0b7-b5e4578f0d7d.png" />
-</td></table>
-<p>&nbsp;</p>
-</details>
-
-
-### How do I <u>set the in game time</u> or RTC, for games like Pokemon?
-
-<details>
-<summary align="right"><i>Click to see answer</i></summary>
-<table><td>
-
-Games such as the Pokemon and Zelda series, included a crystal oscillator in the cartridge to keep an accurate clock.  
-This ‘Real Time Clock’ allowed the game to track time of day and day of the week, to trigger certain in-game events.  
-
-The Miyoo Mini does not have a built-in clock and so cannot measure the progress of time when powered off.  
-Onion features two ways in which you can manage the emulated in-game time (or RTC).  
-
-- **Automatically**: By default, 4hrs will be added to the clock every time you boot your device.  
-    You can adjust this amount in `Apps` > `Tweaks` > `System` > `Startup`.  
-- **Manually**: You can specify the date and time in the Clock App, installed via `Apps` > `Package Manager`.    
-
-> Notes:  
-> In-game time will advance normally during gameplay and _only_ stops when the device is shutdown.  
 
 <img src="https://user-images.githubusercontent.com/44569252/189995592-9d9e4702-e237-40a2-a0b7-b5e4578f0d7d.png" />
 </td></table>

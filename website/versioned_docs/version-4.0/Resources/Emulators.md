@@ -1,5 +1,4 @@
 ---
-sidebar_position: 1
 slug: /emulators
 ---
 
@@ -40,14 +39,14 @@ These are found in the "Expert" section of Package Manager and will be installed
 
 ### Bios files
 
-* Bios files are essential for some systems, should be named exactly as stated below and placed in the root `/BIOS` folder, unless otherwise indicated in a specific systems notes further below. Bios file names and extensions are case sensitive!
+* Bios files are essential for some systems, should be named exactly as stated and placed in `/BIOS` unless otherwise stated in the systems notes. Bios file names and extensions are case sensitive!
 
 ### Rom files
 
 * The roms on the included Miyoo Mini SD Card are a mixed bag which can lead to incompatibility with some emulators. It is highly recommended to source your own roms to get the most out of the device.
 * Rom folder names are case sensitive and differ in Onion vs the Stock Miyoo SD Card, copy your roms from system to system if coming from stock (copying the ‘Roms’ folder wholesale from the Miyoo SD card will not work).
-* Subfolders can be used inside your rom folders but ONLY one level deep (i.e. `Roms/GB/Hacks`). 
-* Subfolders cannot have an apostrophe (`'`) in the name and browsing subfolders is not compatible with miyoogamelist.xml (all games will appear as one flat list). 
+* Subfolders can be used inside your rom folders but ONLY one level deep (i.e. `Roms/GB/Hacks`). Subfolders are not compatible with miyoogamelist.xml. 
+* Roms (and folders) with a dollar sign (`$`) or apostrophe (`'`) in the name are not supported, rename them.
 * If you add new roms to a system, highlight the system in the Games tab and press <kbd>SELECT</kbd> › `Refresh all roms`. 
 * To add a game to your Favorites list, highlight the game in the game list and press <kbd>SELECT</kbd> › `Add to favorites`.
 
@@ -62,14 +61,9 @@ Arcade emulation is a little more complex than your typical console emulation an
 
 While MAME supports many classic arcade games, for best compatibility and performance, it is recommended to use the CPS and Neo Geo systems (which use dedicated & customised emulators) for those particular games and MAME (or FB) for everything else.
 
-Both MAME and FB require your romsets to be matched exactly to the emulator version so you will need to source the recommended romsets. MAME romsets are not compatible with FB cores (and vice versa) and not every game in a full romset will be playable but the majority will be.  
+Both MAME and FB require your romsets to be matched exactly to the emulator version so you will need to source the recommended romsets. MAME romsets are not compatible with FB cores (and vice versa) and not every game in a full romset will be playable but the majority will be.
 
-Arcade roms in general do not play well with save states (some will work but the majority don’t), you can [disable auto-loading of save states](faq#how-do-i-disable-auto-load-save-states) in the Retroarch menu (and save content or core overrides).  
-
-MAME and FB both rely on internal databases to translate the rom file name into the displayed game name, some games may be missing from the db. You should never rename these roms, instead you can use the [miyoogamelist](faq#how-can-i-use-a-miyoogamelistxml-to-customise-game-names) functionality to give your arcade roms appropriate names.   
-
-For more detailed information and tips on Arcade emulation, checkout the awesome [Ultimate Miyoo Mini Arcade Guide for Onion](https://www.reddit.com/r/MiyooMini/comments/vfirs8/ultimate_miyoo_mini_arcade_guide_onion_os/) by lordelan.
-
+Arcade roms in general do not play well with save states (some will work but the majority don’t), you can disable 'auto-loading of save states' in the Retroarch menu (and save content or core overrides). For more detailed information and tips on Arcade emulation, checkout the awesome [Ultimate Miyoo Mini Arcade Guide for Onion](https://www.reddit.com/r/MiyooMini/comments/vfirs8/ultimate_miyoo_mini_arcade_guide_onion_os/) by lordelan.
 
 ### **Arcade** (Default) ✔
 
@@ -107,7 +101,7 @@ For more detailed information and tips on Arcade emulation, checkout the awesome
 - Rom Folder: `FBA2012`, `FBNEO`, `MAME2000`, `ARCADE` (mame2003-extreme) 
 - FBA2012 Required ROM Version: `"FBA Arcade Set v0.2.97.29 for FBA 2012 libretro core"` (use quotes when searching, to find an exact match)
 - FBNEO Required ROM Version: FinalBurn Neo is compatible with FinalBurn Neo latest ROM sets.
-- Extensions: `.zip` `.7z`
+- Extensions: `.zip` `.7z` `.bin/.cue`
 
 > **Notes**
 > 
@@ -265,14 +259,12 @@ For more detailed information and tips on Arcade emulation, checkout the awesome
 - Rom Folder: `SEVENTYEIGHTHUNDRED`
 - Extensions: `.a78` `.zip`
 - Bios: `7800 BIOS (U).rom`
-> **Notes**  
-> Roms must contain headers or they will not function. For an explanation of headers and why they are important, see this [comment](https://github.com/OpenEmu/OpenEmu/issues/4049#issuecomment-560232690)
 
 <img alt="verified" src="https://user-images.githubusercontent.com/44569252/189995592-9d9e4702-e237-40a2-a0b7-b5e4578f0d7d.png" />
 </td></table>
 
 
-### Atari Jaguar ⚠
+### **Atari Jaguar** ✔
 
 <table><td><br/>
 
@@ -296,8 +288,7 @@ For more detailed information and tips on Arcade emulation, checkout the awesome
 - Rom Folder: `ATARIST`
 - Extensions: `.st` `.msa` `.zip` `.stx` `.dim` `.ipf` (must be lowercase)
 - Bios: `tos.img`
-> _The plain ST mode only works with TOS 1.00, 1.02, 1.04, or 2.06. STE mode requires any of the TOS versions 1.xx or 2.xx. TOS 3.0x is for TT, and TOS 4.0x is for Falcon._  
-> For more information please review [the official core documentation](https://docs.libretro.com/library/hatari/)  
+> _The plain ST mode only works with TOS 1.00, 1.02, 1.04, or 2.06. STE mode requires any of the TOS versions 1.xx or 2.xx. TOS 3.0x is for TT, and TOS 4.0x is for Falcon._
 
 <img alt="experimental" src="https://user-images.githubusercontent.com/44569252/190520187-500c6659-b99b-497a-b2f3-817f1e6e2669.png" />
 </td></table>
@@ -325,7 +316,7 @@ For more detailed information and tips on Arcade emulation, checkout the awesome
 </td></table>
 
 
-### **Commodore 64/VIC-20/PET** ✔
+### Commodore 64/VIC-20/PET ⚠
 
 <table><td><br/>
 
@@ -355,8 +346,6 @@ For more detailed information and tips on Arcade emulation, checkout the awesome
 > - <kbd>SELECT</kbd> toggles the onscreen keyboard, <kbd>L</kbd> & <kbd>R</kbd> are mapped to the mouse buttons.
 > - This emulator will play Amiga CD32 games though some perform better than others.
 > - Setting CPU speed to -700 (negative 700) in the Retroarch menu may improve A1200/CD32 performance.
-> - Other Core Settings that might be useful for some games are frameskip set to 1, or setting off the blitter wait in Video options.
-> - Some games will have stuttering audio or behave very slowly regardless of the CPU speed, frameskip etc. Many of these games will work fine if you find another format for them. .hdf (hard disk files) are the most problematic. .adf or .lha games usually work better although you might have to open RA options to switch or add floppy disks when required. If you find a game that won't run correctly no matter the options you set for it, simply try to find another version in another format.
 
 <img alt="verified" src="https://user-images.githubusercontent.com/44569252/189995592-9d9e4702-e237-40a2-a0b7-b5e4578f0d7d.png" />
 </td></table>
@@ -416,7 +405,7 @@ For more detailed information and tips on Arcade emulation, checkout the awesome
 - Alias: *Philips Odyssey 2*, *Philips Videopac G7000*, *Philips Odyssey*, *Odyssey2*
 - Emulator: **lr-o2em**
 - Rom Folder: `ODYSSEY`
-- Extensions: `.bin` `.zip` `.7z`
+- Extensions: `.bin`
 - Bios: `o2rom.bin`
 
 <img alt="verified" src="https://user-images.githubusercontent.com/44569252/189995592-9d9e4702-e237-40a2-a0b7-b5e4578f0d7d.png" />
@@ -538,8 +527,6 @@ For more detailed information and tips on Arcade emulation, checkout the awesome
 - Rom Folder: `FC`
 - Extensions: `.nes` `.zip` `.7z`
 - Bios: None
-> **Notes**  
-> Roms must contain headers or they will not function. For an explanation of headers and why they are important, see this [comment](https://github.com/OpenEmu/OpenEmu/issues/4049#issuecomment-560232690)
 
 <img alt="verified" src="https://user-images.githubusercontent.com/44569252/189995592-9d9e4702-e237-40a2-a0b7-b5e4578f0d7d.png" />
 </td></table>
@@ -639,6 +626,21 @@ For more detailed information and tips on Arcade emulation, checkout the awesome
 - Bios: `bios_E.sms` (optional), `bios_U.sms` (optional), `bios_J.sms` (optional)
 
 <img alt="verified" src="https://user-images.githubusercontent.com/44569252/189995592-9d9e4702-e237-40a2-a0b7-b5e4578f0d7d.png" />
+</td></table>
+
+
+### Sega Saturn ⚠
+
+<table><td><br/>
+
+- Emulator: lr-mednafen-saturn
+- Rom Folder: `SATURN`
+- Extensions: `.img` `.bin/.cue` `.chd` `.iso` `.m3u`
+- Bios: `saturn_bios.bin` (Optional)
+> **Notes**  
+> This will never run full speed!
+
+<img alt="experimental" src="https://user-images.githubusercontent.com/44569252/190520187-500c6659-b99b-497a-b2f3-817f1e6e2669.png" />
 </td></table>
 
 
@@ -771,26 +773,14 @@ For more detailed information and tips on Arcade emulation, checkout the awesome
 - Alias: *PS*, *PS1*, *PSX*
 - Emulator: **lr-pcsx-rearmed**
 - Rom Folder: `PS`
-- Extensions: `.chd` `.pbp` `.bin/.cue` `.img` `.mdf` `.toc` `.cbn` `.m3u` `.ccd` (must be lowercase)
-- Bios: `PSXONPSP660.bin`, `scph101.bin`, `scph7001.bin`, `scph5501.bin`, `scph1001.bin`
-- Recommended Romset: `"files for CHD-PSX-USA"`
+- Extensions: `.bin` `.chd` `.img` `.mdf` `.pbp` `.toc` `.cbn` `.m3u` `.ccd` (must be lowercase)
+- Bios: `psxonpsp660.bin`, `scph101.bin`, `scph7001.bin`, `scph5501.bin`, `scph1001.bin`
 
-> **Important:**  
-> Roms in `.bin` format _must_ have accompanying `.cue` files or they will not be displayed.  
-> Onion can generate `.cue` files automatically (`Apps` > `Tweaks` > `Tools` > `Generate Cue Files for PSX Games`).  
-> Alternatively, you can create `.cue` files using a free online tool such as [cue-maker](https://www.duckstation.org/cue-maker/).  
-
-> All Bios files are 512kb in size and are case sensitive, they must be named _exactly_ as shown above.  
-> Using the `PSXONPSP660.bin` bios is recommended for best compatibility.  
-> If you experience issues loading games, you can use [md5 checker](http://getmd5checker.com/) to verify your bios files against the md5sum provided in the [official core documentation](https://docs.libretro.com/library/pcsx_rearmed/).
-
-> **Notes**  
-> Rewind and Fast Forward capability should be disabled while playing PSX as performance may suffer greatly. 
-> PAL/EUR games run at 50fps, NTSC/USA/JP games run at 60fps. This is by design and as per original hardware.   
-> Some titles (e.g. Looney Tunes Sheep Rider, Jedi Power Battles, and 2xtreme/espn extreme games) need to have `SMC Checks` disabled or games will eventually slow down and crash. Go to RetroArch Quick Menu (<kbd>MENU</kbd>+<kbd>SELECT</kbd> while in-game), select `Options` and toggle on `(Speed Hack) Disable SMC Checks`.  
->  
-> Check out the [PlayStation overview video](https://www.youtube.com/watch?v=5DdSP1KxzSE) by *RetroBreeze*.  
-
+> **Notes**
+> 
+> Rewind and Fast Forward capability should be disabled while playing PSX. Performance may suffer greatly otherwise. It's been reported best performance is achieved using the psxonpsp660.bin bios. Certain games (ex. Looney Tunes Sheep Rider, Jedi Power Battles and 2xtreme/espn extreme games) need to have SMC Checks disabled or games will eventually slow down and crash in the pcsx-rearmed core. Go to RetroArch Quick Menu (<kbd>MENU</kbd>+<kbd>SELECT</kbd> while in-game), select `Options` and toggle on `(Speed Hack) Disable SMC Checks`.  
+> 
+> Check out the [PlayStation overview video](https://www.youtube.com/watch?v=5DdSP1KxzSE) by *RetroBreeze*.
 
 <img alt="verified" src="https://user-images.githubusercontent.com/44569252/189995592-9d9e4702-e237-40a2-a0b7-b5e4578f0d7d.png" />
 </td></table>
@@ -823,8 +813,6 @@ For more detailed information and tips on Arcade emulation, checkout the awesome
 - Rom Folder: `LYNX`
 - Extensions: `.lnx` `.zip`
 - Bios: `lynxboot.img`
-> **Notes**  
-> Roms must contain headers or they will not function. For an explanation of headers and why they are important, see this [comment](https://github.com/OpenEmu/OpenEmu/issues/4049#issuecomment-560232690)
 
 <img alt="verified" src="https://user-images.githubusercontent.com/44569252/189995592-9d9e4702-e237-40a2-a0b7-b5e4578f0d7d.png" />
 </td></table>
@@ -1031,13 +1019,8 @@ For more detailed information and tips on Arcade emulation, checkout the awesome
 - Alias: *PC Engine CD*
 - Emulator: **lr-mednafen-pce-fast**
 - Rom Folder: `PCECD`
-- Extensions: `.pce` `.chd` `.ccd` `.iso` `.img` `.bin/.cue`
+- Extensions: `.pce` `.chd` `.zip` `.7z` `.ccd` `.iso` `.img` `.bin/.cue`
 - Bios: `syscard3.pce`
-
-> **Notes:**  
-> This core does not support compressed files (`.zip` or `.7z`), if you find your games are stuck   
-> at a `JUST A MOMENT...` loading screen, ensure that you roms (and bios files) are not zipped.   
-> For more information relating to this core please review the [official core documentation](https://docs.libretro.com/library/beetle_pce_fast/).   
 
 <img alt="verified" src="https://user-images.githubusercontent.com/44569252/189995592-9d9e4702-e237-40a2-a0b7-b5e4578f0d7d.png" />
 </td></table>
@@ -1054,8 +1037,6 @@ For more detailed information and tips on Arcade emulation, checkout the awesome
 - Rom Folder: `FDS`
 - Extensions: `.nes` `.unif` `.unf` `.fds` `.zip` `.7z`
 - Bios: `disksys.rom`
-> **Notes**  
-> Roms must contain headers or they will not function. For an explanation of headers and why they are important, see this [comment](https://github.com/OpenEmu/OpenEmu/issues/4049#issuecomment-560232690)
 
 <img alt="verified" src="https://user-images.githubusercontent.com/44569252/189995592-9d9e4702-e237-40a2-a0b7-b5e4578f0d7d.png" />
 </td></table>
@@ -1169,13 +1150,9 @@ For more detailed information and tips on Arcade emulation, checkout the awesome
 <table><td><br/>
 
 - Emulator: OpenBOR Standalone
-- Rom Folder: `OPENBOR`
+- Rom Folder: `RApp/OpenBOR/paks`
 - Extensions: `.pak`
 - Bios: None
-
-> **Notes:**  
-> Larger game paks (i.e. Marvel Infinity) may take 2-3 minutes to load, and up to a minute to close, be patient.   
-> Save states are not currently supported but in game saving and loading works well.  
 
 <img alt="experimental" src="https://user-images.githubusercontent.com/44569252/190520187-500c6659-b99b-497a-b2f3-817f1e6e2669.png" />
 </td></table>
@@ -1196,7 +1173,7 @@ For more detailed information and tips on Arcade emulation, checkout the awesome
 > - Many games will play fine, compatibility is not perfect but is improving.   
 > - This emulator does not currently support in-game saves or save states.  
 > - For multi-cart games (such as `POOM`), place all 'cart' game files in `Roms/PICO` (you may use subfolders, i.e. `Roms/PICO/POOM`) and launch the game from the first file (i.e. `poom_0.p8`).  
-> - To download games from the [Lexaloffle BBS](https://www.lexaloffle.com/bbs/?cat=7#sub=2&mode=carts&orderby=featured), right-click the <img src="https://user-images.githubusercontent.com/98862735/190835494-ec611ceb-5ec1-4b96-924d-7ec969fc83e1.png"  align="center"  width="52" /> 
+> - To download games from [lexofile.com](https://www.lexaloffle.com/bbs/?cat=7#sub=2&mode=carts&orderby=featured), right-click the <img src="https://user-images.githubusercontent.com/98862735/190835494-ec611ceb-5ec1-4b96-924d-7ec969fc83e1.png"  align="center"  width="52" /> 
 button in the bottom left corner of the play window and choose ‘save link as’.  
 > - Check out the [Pico-8 overview video](https://www.youtube.com/watch?v=ZGd5vmwnAPA) by *RetroBreeze*.
 
@@ -1215,11 +1192,11 @@ button in the bottom left corner of the play window and choose ‘save link as�
 - Extensions: `.scummvm`
 
 > **Notes**
-> For each ScummVM game folder you need to create a `scummvm` file with the same name (just add the `.scummvm` extension), and place it in the root of the rom folder (`Roms/SCUMMVM`). The file must contain the game's "short name" which can be found here: <https://www.scummvm.org/compatibility/2.7.0/>. (This requires Onion V4 and an updated ScummVM package - done via Package Manager).
+> For each ScummVM game folder you need to create a `scummvm` file with the same name (just add the `.scummvm` extension), and place it in the root of the rom folder (`Roms/SCUMMVM`). The file must contain the game's "short name" which can be found here: <https://www.scummvm.org/compatibility/2.1.1/>. (This requires Onion V4 and an updated ScummVM package - done via Package Manager).
 >
 > **Example**  
 > Game folder: `Roms/SCUMMVM/The Secret of Monkey Island/`  
-> ScummVM file: `Roms/SCUMMVM/The Secret of Monkey Island.scummvm`, contents: `scumm:monkey`
+> ScummVM file: `Roms/SCUMMVM/The Secret of Monkey Island.scummvm`, contents: `monkey`
 >
 > **Audio Troubleshooting**  
 > We recommend sourcing original `.sou` audio files for `Full Throttle`, `The Dig` and `The Curse of Monkey Island` to avoid audio issues (such as missing speech or dropping out).  

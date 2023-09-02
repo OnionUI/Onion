@@ -57,9 +57,9 @@ It also allows you to quickly change games and many other features:
 - Choose the systems and apps you need.
 - Optimized presets, homebrew apps, and more.
 - Packages are divided into three sections:
-  - **Verified:** Contains all verified systems (see [Emulators](emulators) for more information).
+  - **Verified:** Contains all verified systems (see [Emulators](https://github.com/OnionUI/Onion/wiki/Emulators) for more information).
   - **Apps:** Contains all the included Onion and third-party apps.
-  - **Expert:** Contains experimental/expert systems (see [Emulators](emulators) for more information).
+  - **Expert:** Contains experimental/expert systems (see [Emulators](https://github.com/OnionUI/Onion/wiki/Emulators) for more information).
 - To reinstall a package, first toggle it off and press <kbd>START</kbd> to apply, then open Package Manager, toggle it on and apply.
 
 
@@ -181,7 +181,7 @@ Simply copy this folder when you want to backup your data.
 - Box art size fix in the included themes  
   <sup>Credit: DiMo</sup>
 
-### Others
+## Other
 - Many additional systems supported
 - Experimental Arduboy support  
   <sup>Credit: JMARoeder</sup>

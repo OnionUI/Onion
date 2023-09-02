@@ -1,8 +1,3 @@
----
-sidebar_position: 4
-slug: /theme-design
----
-
 ![Themes3](https://user-images.githubusercontent.com/98862735/178886298-516ac53b-a7da-4568-a788-f97ece6b6c67.png)
 
 
@@ -44,6 +39,7 @@ It is no longer necessary to include the following fonts in your theme, just poi
 
 <details>
 <summary><i>See the list of included fonts</i></summary><br/>
+
 
 **BPreplay Bold**  
 `/mnt/SDCARD/miyoo/app/BPreplayBold.otf`
@@ -96,13 +92,6 @@ It is no longer necessary to include the following fonts in your theme, just poi
 </details>
 
 
-## Theme Overrides
-
-Since Onion v4 you can override some aspects of themes. This allows you to have elements which stay the same after updating and no matter which theme is applied.
-
-**Example:** To apply your own charging animation, just put the files `chargingState0.png` ... `chargingState23.png` in this folder: `Saves/CurrentProfile/theme/skin/extra`.
-
-
 ## Theme Development Tools
 
 ### Onion Theme Viewer
@@ -112,7 +101,6 @@ A theme viewer desktop application, available for both Mac and Windows.
 
 <p align="center"><a href="https://github.com/syphen/onion-theme-viewer/releases"><img title="Theme Viewer" width="280px" src="https://user-images.githubusercontent.com/98862735/179321252-235d31ba-579a-46dd-a266-8cca32b8f4fd.png?raw=true" /><br/>
 Get Onion Theme Viewer</a></p>
-
 
 ### HTML Preview page
 <sup>(Credit: Weston Campbell)</sup>

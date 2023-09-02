@@ -4,19 +4,18 @@
 
 ### Core team
 
-- **Aemiii91** - *Lead Developer - tremendous work reorganizing the github, automations and workflow. Actively working to improve the binaries, build structure and implement amazing new features such as Tweaks, Search/Filter and a simplified installation process.*
+- **Totofaki**/**Sichroteph** - *Previous Lead Developer - Responsible for the Onion binaries and the general Onion structure build up until V3. Because of a lack of free time, he had to step back from the project, with great peace in mind considering the amazing and talented people working on it.*
+- **Aemiii91** - *Lead Developer (since V4) - tremendous work reorganizing the github, automations and workflow. Actively working to improve the binaries, build structure and implement amazing new features such as Tweaks, Search/Filter and a simplified installation process.*
 - **Schmurtz** - *Technical Research & Development - Contributes greatly to Onion features like Ports, the Favorite Collection Manager, Easy Logotweak & new keymon features. He is also constantly finding ways to improve the RetroArch experience and enhance the available cores.*
 - **Olywa123** - *Documentation Management & Support - Amazing help to hundreds of Onion users, he made a lot of contributions like various documents/wiki/tutorials that eased the user experience tremendously.*
 - **DiMo** - *UI/UX Design - A lot of contributions, he made the default Onion theme and helped to improve theme capabilities, charging animations.*
-- **Totofaki**/**Sichroteph** - *Previous Lead Developer - Responsible for the Onion binaries and the general Onion structure build up until V3. Because of a lack of free time, he had to step back from the project, with great peace in mind considering the amazing and talented people working on it.*
 
 ### Contributors
 - **jimgray** - *the original creator of Onion, without him the Onion community wouldn't have existed!*
-- **eggs** - *His retroarch port and tools are incredible. We are so gifted to have him working on this handheld. He also made the background onion process (keymon) that we still use in a modified form.*
-- **[Shaun Inman](http://shauninman.com/)** - *Inspiration, miyoo mini and mainUI hacks, commander port*
+- **eggs** - *His retroarch port and tools are incredible. We are so gifted to have him working on this handheld*
+- **[Shaun Inman](http://shauninman.com/)** - *Inspiration and Commander port*
 - **[Introkun](https://github.com/introkun)** - *Improving apps (Clock, infoPanel/Screenshot Viewer), various optimisations, debugging & code reviews*
 - **[StupidHoroscope](https://github.com/StupidHoroscope)** - *For his excellent build of ScummVM and ports/engines such as NBlood, Rednukem & PCExhumed*
-- **[marchiore](https://github.com/marchiore)** - *Created the random game app for V4.1*
 - **DJM** - *For his awesome work and insights on the emulators settings and cores*
 - **[PixelShift](https://discord.com/users/725161245048832003)** - *Endless aesthetic and invaluable input (and wiki teamwork)*
 - **StubbornPixel** - *Lightbox photos and shoutouts: https://brbgaming.simplecast.com/*
