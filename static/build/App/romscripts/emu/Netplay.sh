@@ -87,12 +87,11 @@ if [ $retcode -eq 0 ]; then
 	[ "$retcode" -ne 255 ] && cores_configurator
 
 	if [ $retcode -eq 0 ]; then
-		"./script/netplay/standard_netplay.sh" "$1" "$2" "host"
+		/bin/sh "$sysdir/script/netplay/standard-netplay.sh" "$1" "$2" "host"
 	elif [ $retcode -eq 1 ]; then
-		cd $sysdir
-		/bin/sh "$sysdir/script/easynetplay/netplay_server.sh"
+		/bin/sh "$sysdir/script/netplay/easy-netplay_server.sh"
 	elif [ $retcode -eq 2 ]; then
-		/bin/sh "$sysdir/script/easynetplay/pokemon_server.sh"
+		/bin/sh "$sysdir/script/netplay/easy-netplay_server_pokemon.sh"
 	elif [ $retcode -eq 255 ]; then
 		exit
 	fi
@@ -106,12 +105,11 @@ elif [ $retcode -eq 1 ]; then
 	retcode=$?
 	[ "$retcode" -ne 255 ] && cores_configurator
 	if [ $retcode -eq 0 ]; then
-		"./script/netplay/standard_netplay.sh" "$1" "$2" "join"
+		/bin/sh "$sysdir/script/netplay/standard-netplay.sh" "$1" "$2" "join"
 	elif [ $retcode -eq 1 ]; then
-		cd $sysdir
-		/bin/sh "$sysdir/script/easynetplay/netplay_client.sh"
+		/bin/sh "$sysdir/script/netplay/easy-netplay_client.sh"
 	elif [ $retcode -eq 2 ]; then
-		/bin/sh "$sysdir/script/easynetplay/pokemon_client.sh"
+		/bin/sh "$sysdir/script/netplay/easy-netplay_client_pokemon.sh"
 	elif [ $retcode -eq 255 ]; then
 		exit
 	fi

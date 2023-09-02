@@ -12,7 +12,7 @@ romfullpath="$1"
 romname=$(basename "$1")
 echo "cookie_core_path $cookie_core_path"
 CurrentSystem=$(echo "$1" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
-NetplayAction="$3"
+NetplayAction="$3"    # host or join
 
 
 logfile=netplay
