@@ -326,8 +326,6 @@ ready_up() {
 
 # We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
 start_retroarch() {
-	build_infoPanel_and_log "Starting RA" "Starting RetroArch"
-
 
 	echo "*****************************************"
 	echo "romfullpath: $rom"

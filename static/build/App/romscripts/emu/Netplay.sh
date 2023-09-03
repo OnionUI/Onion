@@ -57,7 +57,7 @@ cores_configurator() {
 
 romdirname=$(echo "$1" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
 if [ "$romdirname" == "GB" ] || [ "$romdirname" == "GBC" ]; then
-	EasyNetplayPokemon="Easy Netplay - Poekmon Trade/Battle"
+	EasyNetplayPokemon="Easy Netplay - Pokemon Trade/Battle"
 fi
 # Netplay mode main script:
 cd $sysdir
