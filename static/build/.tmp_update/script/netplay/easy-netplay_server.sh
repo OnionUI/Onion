@@ -197,8 +197,6 @@ is_running() {
 
 lets_go() {
 	pressMenu2Kill $(basename $0) &
-	# check_wifi
-	# start_hotspot
 	. "$sysdir/script/network/hotspot_create.sh"
 	start_ftp
 	Get_NetplayCore

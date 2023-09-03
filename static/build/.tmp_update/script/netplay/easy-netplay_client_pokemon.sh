@@ -11,6 +11,8 @@ LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte
 WPACLI=/customer/app/wpa_cli
 hostip="192.168.100.100" # This should be the default unless the user has changed it..
 rm /tmp/stop_now
+local_rom="$cookie_rom_path"
+
 
 ## Source global utils
 logfile=pokemon_link
@@ -21,167 +23,45 @@ program=$(basename "$0" .sh)
 ##Setup.##
 ##########
 
-# We'll need wifi up for this. Lets try and start it..
-
-check_wifi() {
-    ifconfig wlan1 down
-    $WPACLI save_config
-    save_wifi_state
-    sync
-	if ifconfig wlan0 &>/dev/null; then
-		build_infoPanel_and_log "WIFI" "Wifi up"
-	else
-		build_infoPanel_and_log "WIFI" "Wifi disabled, starting..." 
-		
-		/customer/app/axp_test wifion
-		sleep 2
-		ifconfig wlan0 up
-		sleep 1
-		$miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
-		
-		if is_running wpa_supplicant && ifconfig wlan0 > /dev/null 2>&1; then
-			build_infoPanel_and_log "WIFI" "Wifi started."
-		else
-			build_infoPanel_and_log "WIFI" "Unable to start WiFi\n unable to continue."
-			notify_stop
-		fi
-		
-		sleep 2 
-	fi
-}
-
-
-# Create a new network id, set it up and enable it, start udhcpc against it.
-connect_to_host() {
-	build_infoPanel_and_log "Connecting..." "Trying to join the hotspot..."
-
-	export new_id=$($WPACLI -i wlan0 add_network)
-    
-	if [ -z "$new_id" ]; then
-		build_infoPanel_and_log "Failed"  "Failed to create network\n unable to continue." 
-		return 1
-	fi
-	
-	log "Added new network with id $new_id"
-
-	net_setup=$(
-		$WPACLI -i wlan0 <<- EOF
-			set_network $new_id ssid "MiyooMini+APOnionOS"
-			set_network $new_id psk "onionos+"
-			disable_network all
-			select_network $new_id
-			enable_network $new_id
-			save_config
-			reconfigure
-			quit
-		EOF
-	)
-	
-	if [ $? -ne 0 ]; then
-		build_infoPanel_and_log "Failed"  "Failed to configure the network\n unable to continue." 
-		notify_stop
-	fi
-    
-    ip addr flush dev wlan0
-    ip addr add 192.168.100.101/24 dev wlan0
-    ip route add default via 192.168.100.100
-    
-    killall -9 udhcpc
-    sleep 1
-	
-	log "Added new network and connected"
-}
-
-
-# We'd better wait for an ip address to be assigned before going any further.
-wait_for_connectivity() {
-    build_infoPanel_and_log "Connecting..."  "Trying to reach $hostip..."
-    counter=0
-
-    while ! ping -c 2 -W 2 $hostip > /dev/null 2>&1; do
-        counter=$((counter+1))
-
-        if [ $counter -ge 20 ]; then
-            build_infoPanel_and_log "Failed to connect!"  "Could not reach $hostip"
-            cleanup
-        fi
-    done
-
-    build_infoPanel_and_log "Joined hotspot!"  "Successfully reached the Hotspot! \n IP: $hostip" 
-    sleep 1
-}
-
-
-# Download the cookie from the host, check whether it downloaded and make sure it still exists on the client before we move on
-download_cookie() {
-    check_stop
-    local output_path="/mnt/SDCARD/RetroArch/retroarch.cookie.client"
-    curl -o "$output_path" ftp://$hostip/mnt/SDCARD/RetroArch/retroarch.cookie
-
-    if [ $? -ne 0 ]; then
-		build_infoPanel_and_log "Failed"  "Can't download the cookie, can't continue" 
-		notify_stop
-    fi
-
-    if [ ! -f $output_path ]; then
-		build_infoPanel_and_log "No cookie found"  "Cookie has been eaten, can't continue" 
-		notify_stop
-    fi
-	
-	build_infoPanel_and_log "Success!"  "Got the cookie" 
-}
-
 # Read the cookie and store the paths and checksums into a var.
 read_cookie() {
-    check_stop
-	while IFS= read -r line; do
-		case $line in
-			"[core]: "*)
-				core="${line##"[core]: "}"
-				;;
-			"[rom]: "*)
-				rom="${line##"[rom]: "}"
-				;;
-			"[coresize]: "*)
-				corecheck="${line##"[coresize]: "}"
-				;;
-			"[corechksum]: "*)
-				corecheck="${line##"[corechksum]: "}"
-				;;
-			"[romsize]: "*)
-				romcheck="${line##"[romsize]: "}"
-				;;
-			"[romchksum]: "*)
-				romcheck="${line##"[romchksum]: "}"
-				;;
-		esac
-	done <"/mnt/SDCARD/RetroArch/retroarch.cookie.client"
-    log "$core $rom"
-	
-	#url encode or curl complains
-	export core_url=$(echo "$core" | sed 's/ /%20/g')
-
-	log "Cookie file read"
-}
-
-# Pull the cookie local info that the GLO script has generated to build the host side rom path
-get_cookie_info() {
-    check_stop
-    COOKIE_FILE="/mnt/SDCARD/RetroArch/retroarch.cookie"
-
-    if [ -f "$COOKIE_FILE" ]; then
-        local_rom=$(grep '\[rom\]' "$COOKIE_FILE" | cut -d ':' -f 2 | xargs) 
-        local_rom_ext="${local_rom##*.}"
-    else
-        log "No cookie found!"
-    fi
-    
-    # Check the rom actually exists before we go any further
     sync
-    if [ ! -f "$local_rom" ]; then
-        build_infoPanel_and_log "No rom file found" "Youre trying to start a session for a game \n that doesn't exist! How? \n Can't continue.." 
-        notify_stop
-    fi
+    while IFS= read -r line; do
+        case $line in
+        "[core]: "*)
+            core="${line##"[core]: "}"
+            ;;
+        "[rom]: "*)
+            rom="${line##"[rom]: "}"
+            ;;
+        "[coresize]: "*)
+            corechecksum="${line##"[coresize]: "}"
+            ;;
+        "[corechksum]: "*)
+            corechecksum="${line##"[corechksum]: "}"
+            ;;
+        "[romsize]: "*)
+            romchecksum="${line##"[romsize]: "}"
+            ;;
+        "[romchksum]: "*)
+            romchecksum="${line##"[romchksum]: "}"
+            ;;
+        "[cpuspeed]: "*)
+            cpuspeed="${line##"[cpuspeed]: "}"
+            ;;
+        esac
+        log "$core $rom $coresize $corechksum $romsize $romchksum"
+    done <"/mnt/SDCARD/RetroArch/retroarch.cookie.client"
+
+    #url encode or curl complains
+    export core_url=$(url_encode "$core")
+    export rom_url=$(url_encode "$rom")
+
+    romdirname=$(echo "$rom" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
+    romName=$(basename "$rom")
+    romNameNoExtension=${romName%.*}
+    Img_path="/mnt/SDCARD/Roms/$romdirname/Imgs/$romNameNoExtension.png"
+    log "Cookie file read"
 }
 
 # Push our saves over to the host - The save will be found based on the rom we've started GLO on and it will look in the $save_dir path for it (see line13) - Backs up first
@@ -189,14 +69,20 @@ send_saves() {
     check_stop
     missing=""
     build_infoPanel_and_log "Syncing saves" "Syncing our save files with the host"
+
     save_file_filename_full=$(basename "$local_rom")
     save_file_filename="${save_file_filename_full%.*}"
     save_file_matched=$(find "$save_dir" -name "$save_file_filename.srm" -not -name "*.rtc" -not -path "*/.netplay/*")
 
     if [ ! -f "$save_file_matched" ]; then
-        touch "$save_dir/MISSING.srm"
-        save_file_matched="$save_dir/MISSING.srm"
-        missing=1
+        if [ -f "/mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$save_file_filename.srm" ]; then
+            cp "/mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$save_file_filename.srm"  "$save_dir$save_file_filename.srm"
+            save_file_matched=$(find "$save_dir" -name "$save_file_filename.srm" -not -name "*.rtc" -not -path "*/.netplay/*")
+        else
+            touch "$save_dir/MISSING.srm"
+            save_file_matched="$save_dir/MISSING.srm"
+            missing=1
+        fi
     fi
 
     save_file_stripped="${save_file_matched##*/}"
@@ -210,18 +96,17 @@ send_saves() {
     fi
 }
 
-
 # Backup local save file
 backup_save() {
     check_stop
-    log "Backing up save file to: ${save_file_matched}_bkup"
-    cp "$save_file_matched" "${save_file_matched}_bkup"
+    log "Backing up save file to: ${save_file_matched}_$(date +%Y%m%d_%H%M%S)"
+    cp "$save_file_matched" "${save_file_matched}_$(date +%Y%m%d_%H%M%S)"
     sync
 }
 
 # Wait for the host to tell us it's ready, this happens just before it starts its RA session and we look in /tmp for a file indicator (file removed in host script cleanup)
 wait_for_host() {
-    
+
     local counter=0
 
     build_infoPanel_and_log "Ready" "Waiting for host to ready up"
@@ -245,23 +130,45 @@ wait_for_host() {
     done
 }
 
-
 # We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
 start_retroarch() {
-    check_stop
-	build_infoPanel_and_log "RetroArch" "Starting RetroArch..."
+    build_infoPanel_and_log "Starting RA" "Starting RetroArch"
+
+    echo "*****************************************"
+    echo "romfullpath: $rom"
+    echo "platform: ${platform}"
+    echo "netplaycore: $netplaycore"
+    echo "core: $core"
+    echo "core_config_folder: $core_config_folder"
+    echo "cpuspeed: $cpuspeed"
+    echo "hostip: $hostip"
+    echo "*****************************************"
+
+    if [ -n "$cpuspeed" ]; then
+        log "We set core CPU speed for Netplay: $cpuspeed"
+        PreviousCPUspeed=$(cat "/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt")
+        echo -n $cpuspeed >"/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt"
+    fi
+
+    cd /mnt/SDCARD/RetroArch
     log "Starting RetroArch loaded with $rom and $local_rom"
-	cd /mnt/SDCARD/RetroArch
-    HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/easynetplay_override.cfg -C $hostip -v -L .retroarch/cores/tgbdual_libretro.so --subsystem "gb_link_2p" "$rom" "$local_rom"
+    HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/easynetplay_override.cfg -C $hostip -L "$core" --subsystem "gb_link_2p" "$rom" "$local_rom"
+
+    if [ -n "$PreviousCPUspeed" ]; then
+        log "We restore previous core CPU speed: $PreviousCPUspeed"
+        echo -n $PreviousCPUspeed >"/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt"
+    else
+        rm -f "/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt"
+    fi
 }
 
 # Go into a waiting state for the host to return the save
 wait_for_save_return() {
     build_infoPanel_and_log "Syncing" "Waiting for host to be ready for save sync"
     notify_peer "ready_to_receive"
-    
+
     sync
-    
+
     while true; do
         for file in /tmp/ready_to_send; do
             if [ -f "$file" ]; then
@@ -281,14 +188,14 @@ wait_for_save_return() {
             cleanup
         fi
     done
-    
+
     sleep 3
     sync
-    
+
     log "cp -f \"${save_file_matched}_rcvd\" \"$save_file_matched\""
     cp -f "${save_file_matched}_rcvd" "$save_file_matched"
     cp_exit_status=$?
-    
+
     if [ $cp_exit_status -eq 0 ]; then
         build_infoPanel_and_log "Syncing save" "Save merged successfully"
         sleep 1
@@ -307,13 +214,11 @@ cleanup() {
     if is_running infoPanel; then
         killall -9 infoPanel
     fi
-    
-    udhcpc_control
-    sleep 1
-    
-    restore_wifi_state	
+
+    # restore_wifi_state
+    . "$sysdir/script/network/hotspot_cleanup.sh"
     restore_ftp
-    
+
     # Remove some files we prepared and received
     log "Removing stale files"
     rm "/tmp/host_ready"
@@ -325,8 +230,8 @@ cleanup() {
     rm "/tmp/MISSING.srm"
     rm "/tmp/stop_now"
     rm "/tmp/wpa_supplicant.conf_bk"
-    rm "/mnt/SDCARD/RetroArch/retroarch.cookie.client"
-    rm "/mnt/SDCARD/RetroArch/retroarch.cookie"
+    # rm "/mnt/SDCARD/RetroArch/retroarch.cookie.client"
+    # rm "/mnt/SDCARD/RetroArch/retroarch.cookie"
 
     log "Cleanup done"
     exit
@@ -337,8 +242,8 @@ cleanup() {
 ###########
 
 # URL encode helper
-url_encode(){
-  encoded_str=`echo "$*" | awk '
+url_encode() {
+    encoded_str=$(echo "$*" | awk '
     BEGIN {
 	split ("1 2 3 4 5 6 7 8 9 A B C D E F", hextab, " ")
 	hextab [0] = 0
@@ -361,24 +266,24 @@ url_encode(){
 	}
 	    print encoded
     }
-' `
-echo "$encoded_str"
+')
+    echo "$encoded_str"
 }
 
 # Use the safe word
-notify_stop(){
+notify_stop() {
     notify_peer "stop_now"
-    sleep 2 
+    sleep 2
     cleanup
 }
 
 # Check stop, if the client tells us to stop we will.
-check_stop(){
+check_stop() {
     sync
     if [ -e "/tmp/stop_now" ]; then
-            build_infoPanel_and_log "Message from client" "The host has had a problem setting up the session"
-            sleep 2
-            cleanup
+        build_infoPanel_and_log "Message from client" "The host has had a problem setting up the session"
+        sleep 2
+        cleanup
     fi
 }
 
@@ -387,8 +292,8 @@ notify_peer() {
     local notify_file="/tmp/$1"
     touch "$notify_file"
     sync
-    curl -T "$notify_file" "ftp://$hostip/$notify_file" > /dev/null 2>&1
-    
+    curl -T "$notify_file" "ftp://$hostip/$notify_file" >/dev/null 2>&1
+
     if [ $? -eq 0 ]; then
         log "Successfully transferred $notify_file to ftp://$hostip/$notify_file"
     else
@@ -397,83 +302,283 @@ notify_peer() {
 }
 
 # Function to sync files
+
 sync_file() {
-	file_type="$1"
-	file_path="$2"
-	file_checksum="$3"
-	file_url="$4"
-	MAX_FILE_SIZE_BYTES=26214400
 
-	if [ -z "$file_path" ]; then
-        build_infoPanel_and_log "Something went wrong" "We didn't receive a file path for the rom \n Cannot continue."
+    MAX_FILE_CHKSUM_SIZE=26214400
+    MAX_FILE_DL_SIZE=104857600
+
+    file_type="$1"            # Used in displayed message and some custom actions
+    file_path="$2"            # Local file path
+    file_check_size="$3"      # 0 or 1 to indicate if we have to check the file size
+    remote_file_checksum="$4" # 0 to skip , real checksum value to check
+    sync_type="$5"            # -o overwrite if different (require file_size or/and checksum != 0) , (if file_size & checksum = 0 then the file is never overwritted, only copied if not present)
+    # -f overwrite all the time (whatever the value of file_size and checksum)  (if file_size & checksum = 0 then the file is overwritted, even if already present )
+    # -b if different, backup local file before copying remote file
+    # -c check only, allows to check the presence of a file, to check its CRC or size and to quit or not the script
+    file_mandatory="$6" # -m , exit the script on failed sync_success
+
+    #examples :
+    # sync_file archive /mnt/SDCARD/test.zip 1 5AFC442 -b -m 			# backup and replace if different file
+    # sync_file archive /mnt/SDCARD/test.zip 0 0 -f -m 					# the local file will be systematically replaced
+    # sync_file archive /mnt/SDCARD/test.zip 0 0 -o -m 					# the local file will be copied if not exist
+    # sync_file archive /mnt/SDCARD/test.zip 0 5AFC442 -c -m 			# exit if the file doesn't have the right checksum
+    # sync_file archive /mnt/SDCARD/test.zip 1 5AFC442 -o -m 			# the local file will be replaced if the size or the checksum is different
+
+    # some useful vars
+    dir_path=$(dirname "$file_path")
+    file_url="ftp://${hostip}/$(url_encode "${file_path#*/}")"
+
+    echo "############################ DEBUGGING #######################################"
+    echo file_type $file_type
+    echo file_path $file_path
+    echo file_check_size $file_check_size
+    echo remote_file_checksum $remote_file_checksum
+    echo sync_type $sync_type
+    echo file_mandatory $file_mandatory
+    echo
+    echo dir_path $dir_path
+    echo romdirname $romdirname
+    echo romName $romName
+    echo romNameNoExtension $romNameNoExtension
+    echo Img_path $Img_path
+    echo file_url $file_url
+    echo "##############################################################################"
+
+    # state vars
+    same_size=
+    same_chksum=
+    sync_success=
+    run_sync= # tell if the sync task must be done or not
+
+    RequestResult=$(curl -I "$file_url" 2>&1)
+
+    if [[ $RequestResult == *"The file does not exist"* ]]; then
+        log "The remote file does not exist."
+        msg="The remote file does not exist."
+        build_infoPanel_and_log "Syncing" "The remote file does not exist."
+        run_sync=0
+        sync_success=0
+        same_size=0
+    else
+        remote_file_size=$(echo "$RequestResult" | grep -i "Content-Length" | awk '{print $2}')
+        if ! echo "$remote_file_size" | grep -q "^[0-9][0-9]*$"; then # check if the remote file size is a numeric value
+            log "Impossible to get remote file size."
+            same_size=0
+            run_sync=0
+        else
+            log "remote_file_size: $remote_file_size"
+        fi
+
+    fi
+
+    if [ -e "$file_path" ]; then
+
+        ########################## File checksum check : same_chksum = 0 different, 1 identical , 2 unknown
+        checksum_func "$file_path" "$remote_file_checksum"
+
+        ########################## File size check   same_size = 0 different, 1 identical , 2 unknown
+        if [ "$file_check_size" -eq 1 ]; then # file_checksum=0 means skip the difference check = always replace
+            checksize_func "$file_path" "$remote_file_size"
+        else
+            log "Skipping file size check."
+            same_size=1 # fake same size for skipping
+        fi
+
+    else
+        log "The local file does not exist."
+        same_size=0
+        same_chksum=0
+    fi
+
+    ########################## exception : max file size check on the remote
+    if [ "$remote_file_size" -le "$MAX_FILE_DL_SIZE" ]; then
+        log "Remote file size ok: $remote_file_size bytes  (<= $MAX_FILE_DL_SIZE bytes)"
+    else
+        log "Remote file size too big: $remote_file_size bytes (> $MAX_FILE_DL_SIZE bytes)"
+        run_sync=0
+    fi
+
+    ##########################  We have all the required information, depending the choosen option we run the copy or not
+
+    if [ "$sync_type" == "-o" ]; then # we overwrite the file if different
+        log "option -o selected : we overwrite the file if different."
+        if [ "$same_size" -ne 1 ] || [ "$same_chksum" -ne 1 ]; then
+            [ -z "$run_sync" ] && run_sync=1
+        fi
+    fi
+
+    if [ "$sync_type" == "-b" ]; then # backup
+        log "option -b selected : we backup before overwrite."
+        if { [ "$remote_file_checksum" != "0" ] && [ "$same_chksum" -ne 1 ]; } || [ "$remote_file_checksum" == "0" ]; then # if (we don't skip CRC and CRC is not identical) or (if we skip CRC) then we sync -> in other words we only skip the copy when we have an identical CRC
+            [ -z "$run_sync" ] && run_sync=1
+        fi
+    fi
+
+    if [ "$sync_type" == "-f" ]; then # we overwrite the file if different
+        log "option -f selected : forced file syncing."
+        if { [ "$remote_file_checksum" != "0" ] && [ "$same_chksum" -ne 1 ]; } || [ "$remote_file_checksum" == "0" ]; then # if (we don't skip CRC and CRC is not identical) or (if we skip CRC) then we sync -> in other words we only skip the copy when we have an identical CRC
+            [ -z "$run_sync" ] && run_sync=1
+        fi
+
+    fi
+
+    if [ "$sync_type" == "-c" ]; then # we overwrite the file if different
+        log "option -c selected : no file copy, only check."
+        run_sync=0
+
+        if [ "$same_size" -ne 1 ]; then
+            msg="Files doesn't have the same size."
+            sync_success=0
+            [ $file_mandatory -eq 1 ] && cleanup
+
+        fi
+        if [ "$same_chksum" -ne 1 ]; then
+            msg="$msg\nFiles doesn't have the same checksum."
+            sync_success=0
+            [ $file_mandatory -eq 1 ] && cleanup
+
+        fi
+        if [ "$same_size" -eq 1 ] && [ "$same_chksum" -eq 1 ]; then
+            msg="Remote and local files are identical."
+            sync_success=1
+        fi
+        build_infoPanel_and_log "File check" "$msg"
+
+    fi
+
+    log "############################ DEBUGGING #######################################"
+    echo sync_type $sync_type
+    echo remote_file_checksum $remote_file_checksum
+    echo same_chksum $same_chksum
+    echo run_sync $run_sync
+    echo file_type $file_type
+    echo
+    echo
+    echo "##############################################################################"
+
+    ########################## COPY Operation ##########################
+
+    if [ "$run_sync" -eq 1 ]; then
+
+        if [ $file_type == "Cookie" ]; then # exception for cookies : we don't download with the same target name
+            file_path="${file_path}.client"
+        fi
+        # let's make a backup first whatever the case
+        if [ -e "$file_path" ]; then
+            if [ $file_type == "Rom" ]; then
+                # if rom already here and different file then we create a rom_neplay to avoid to override user games
+
+                # oldpath="$file_path"
+                # file_path_without_extension="${file_path%.*}"
+                # file_path="${file_path_without_extension}_netplay.${file_path##*.}"
+                # if [ -e "$Img_path" ]; then
+                # 	cp "$Img_path" "/mnt/SDCARD/Roms/$romdirname/Imgs/${romNameNoExtension}_netplay.png"
+                # 	Img_path="/mnt/SDCARD/Roms/$romdirname/Imgs/${romNameNoExtension}_netplay.png"
+                # fi
+
+                Netplay_Rom_Folder="$(dirname "$file_path")/.netplay"
+                mkdir -p "$Netplay_Rom_Folder"
+                file_path="$Netplay_Rom_Folder/$(basename "$file_path")"
+                rom=$file_path
+
+            elif [ $file_type == "Core" ]; then
+                # oldpath="$file_path"
+                # file_path_without_extension="${file_path%.*}"
+                # file_path="${file_path_without_extension}_netplay.${file_path##*.}"
+
+                Netplay_Core_Folder="$(dirname "$file_path")/.netplay"
+                mkdir -p "$Netplay_Core_Folder"
+                file_path="$Netplay_Core_Folder/$(basename "$file_path")"
+                core=$file_path
+            else
+                mv "$file_path" "${file_path}_old"
+                log "Existing $file_type file moved to ${file_path}_old"
+            fi
+        fi
+
+        if [ ! -d "$dir_path" ]; then
+            mkdir -p "$dir_path"
+        fi
+
+        log "Starting to download $file_type from $file_url"
+        curl -o "$file_path" "$file_url" >/dev/null 2>&1
+
+        if [ $? -eq 0 ]; then
+            log "$file_type download completed"
+        else
+            log "$file_type download failed"
+        fi
+
+    fi
+
+    ###################### FINAL CHECK RESULT #########################
+
+    if [ ! -e "$file_path" ]; then
+        build_infoPanel_and_log "Sync Failed" "Failed to download the $file_type file."
+
+        # copy has failed : restoring the original file
+        if [ $file_type != "Rom" ] && [ $file_type != "Core" ]; then
+            mv "${file_path}_old" "$file_path"
+            log "backup restored"
+        fi
         sleep 2
-        cleanup
-	fi
+        [ $file_mandatory -eq 1 ] && cleanup
 
-	if [ "$file_type" == "Rom" ]; then
-		if [ -e "$file_path" ]; then
-			log "$file_path exists."
+    else
 
-			local file_size=$(stat -c%s "$file_path")
-			local file_chksum_actual
+        checksum_func "$file_path" "$remote_file_checksum"
 
-			if [ "$file_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
-				file_chksum_actual=$file_size
-			else
-				file_chksum_actual=$(cksum "$file_path" | awk '{ print $1 }')
-			fi
+        if [ "$file_check_size" -eq 1 ]; then # file_checksum=0 means skip the difference check = always replace
+            checksize_func "$file_path" "$remote_file_size"
+        else
+            log "Skipping file size check."
+            same_size=1 # fake same size for skipping
+        fi
 
-			if [ "$file_checksum" -ne "$file_chksum_actual" ]; then
-				build_infoPanel_and_log "Checksum Mismatch" "The Rom exists but the checksum doesn't match \n Cannot continue."
-                notify_peer "stop_now"
-                sleep 2
-                cleanup
-			fi
-		else
-			build_infoPanel_and_log "Rom Missing" "A rom requested doesn't exist on the local client \n Cannot continue."
-            notify_peer "stop_now"
+        if [ "$same_size" -eq 1 ] && [ "$same_chksum" -eq 1 ]; then
+            build_infoPanel_and_log "Syncing" "$file_type synced."
+            if [ $file_type == "Rom" ]; then
+                log "Refreshing roms list ${rom%/*}/${romdirname}_cache6.db"
+                rm "${rom%/*}/${romdirname}_cache6.db"
+            fi
+
+        else
+            build_infoPanel_and_log "Sync Failed" "Failed to download the $file_type file."
+
+            # copy has failed : restoring the original file
+            if [ $file_type != "Rom" ] && [ $file_type != "Core" ]; then
+                mv "${file_path}_old" "$file_path"
+                log "backup restored"
+            fi
             sleep 2
-            cleanup
-		fi
-	else
-		if [ -e "$file_path" ]; then
-			log "$file_path exists."
-
-			local file_size=$(stat -c%s "$file_path")
-			local file_chksum_actual
-
-			if [ "$file_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
-				file_chksum_actual=$file_size
-			else
-				file_chksum_actual=$(cksum "$file_path" | awk '{ print $1 }')
-			fi
-
-			if [ "$file_checksum" -ne "$file_chksum_actual" ]; then
-				build_infoPanel_and_log "Syncing" "$file_type checksums don't match, syncing"
-				sleep 0.5
-				do_sync_file "$file_type" "$file_path" "$file_url"
-
-				if [ ! -e "$file_path" ]; then
-					build_infoPanel_and_log "Sync Failed" "Failed to download the $file_type file."
-                    notify_peer "stop_now"
-                    sleep 2
-					cleanup
-				else
-					build_infoPanel_and_log "Syncing" "$file_type synced."
-				fi
-			fi
-		else
-			build_infoPanel_and_log "Syncing" "$file_type doesn't exist locally; syncing with host."
-			do_sync_file "$file_type" "$file_path" "$file_url"
-
-			if [ ! -e "$file_path" ]; then
-				build_infoPanel_and_log "Sync Failed" "Failed to download the $file_type file."
+            if [ $file_mandatory -eq 1 ]; then
                 notify_peer "stop_now"
-                sleep 2
-				cleanup
-			fi
-		fi
-	fi
+                cleanup
+            fi
+        fi
+        #####"
+
+    fi
+    ###################### FINAL RESULT DISPLAY#########################
+
+    # if [ "$sync_success" -ne 1 ]; then
+    # 	build_infoPanel_and_log "Sync Failed" "Failed to download the $file_type file."
+    # 	sleep 2
+    # 	cleanup
+    # else
+    # 	build_infoPanel_and_log "Syncing" "$file_type synced."
+    # fi
+
+    # build_infoPanel_and_log "Syncing" "$file_type checksums don't match, syncing"
+    # build_infoPanel_and_log "Sync Failed" "Failed to download the $file_type file."
+    # build_infoPanel_and_log "Syncing" "$file_type synced."
+    # build_infoPanel_and_log "Syncing" "$file_type doesn't exist locally; syncing with host."
+    # build_infoPanel_and_log "Sync Failed" "Failed to download the $file_type file."
+    # build_infoPanel_and_log "Syncing" "$file_type synced."
+
+    ################### END ##########################
+
 }
 
 # We'll need FTP to transfer files
@@ -490,14 +595,51 @@ start_ftp() {
     fi
 }
 
+# Create a cookie with all the required info for the client. (client will use this cookie)
+create_cookie_info() {
+    echo -e "\n\n\n\n\n\n\n"
+    echo "we create =================================o=o=o=o=o=o==o"
+    COOKIE_FILE="/mnt/SDCARD/RetroArch/retroarch.cookie"
+    MAX_FILE_SIZE_BYTES=26214400
+
+    echo "[core]: $netplaycore" >"$COOKIE_FILE"
+    echo "[rom]: $cookie_rom_path" >>"$COOKIE_FILE"
+
+    if [ -s "$netplaycore" ]; then
+        log "Writing core size"
+        core_size=$(stat -c%s "$netplaycore")
+        if [ "$core_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
+            echo "[corechksum]: 0" >>"$COOKIE_FILE"
+        else
+            echo "[corechksum]: $(xcrc "$netplaycore")" >>"$COOKIE_FILE"
+        fi
+    fi
+
+    if [ -s "$cookie_rom_path" ]; then
+        log "Writing rom size"
+        rom_size=$(stat -c%s "$cookie_rom_path")
+        if [ "$rom_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
+            echo "[romchksum]: 0" >>"$COOKIE_FILE"
+        else
+            echo "[romchksum]: $(xcrc "$cookie_rom_path")" >>"$COOKIE_FILE"
+        fi
+    fi
+
+    if [ -s "$cpuspeed" ]; then
+        echo "[cpuspeed]: $cpuspeed" >>"$COOKIE_FILE"
+        log "Writing cpuspeed: $cpuspeed"
+    fi
+
+}
+
 # This will restore the users original ftp state
-restore_ftp(){
+restore_ftp() {
     log "Restoring original FTP server"
     killall -9 tcpsvd
     if flag_enabled ftpState; then
-        if flag_enabled authftpState; then 
+        if flag_enabled authftpState; then
             bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpdauth.conf &
-        else 
+        else
             bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpd.conf &
         fi
     fi
@@ -509,23 +651,34 @@ flag_enabled() {
 }
 
 build_infoPanel_and_log() {
-	local title="$1"
-	local message="$2"
+    local title="$1"
+    local message="$2"
 
-	log "Info Panel: \n\tStage: $title\n\tMessage: $message"
-	
-	infoPanel --title "$title" --message "$message" --persistent &
-	touch /tmp/dismiss_info_panel
-	sync
-	sleep 0.5
+    log "Info Panel: \n\tStage: $title\n\tMessage: $message"
+
+    infoPanel --title "$title" --message "$message" --persistent &
+    touch /tmp/dismiss_info_panel
+    sync
+    sleep 0.3
 }
 
 confirm_join_panel() {
     local title="$1"
     local message="$2"
-    
-    sync
-            
+
+	if [ -e "$Img_path" ]; then   # remote rom image
+		pngScale "$Img_path" "/tmp/CurrentNetplay.png" 100 100
+        sync
+		imgpop 3 2 "/tmp/CurrentNetplay.png" 530 300 >/dev/null 2>&1 &
+	fi
+
+	if [ -e "/mnt/SDCARD/Roms/$romdirname/Imgs/$save_file_filename.png" ]; then  # local rom image
+		pngScale "/mnt/SDCARD/Roms/$romdirname/Imgs/$save_file_filename.png" "/tmp/CurrentNetplay2.png" 100 100
+        sync
+		imgpop 2 1 "/tmp/CurrentNetplay2.png" 10 10 >/dev/null 2>&1 &
+	fi
+
+    # TO DO : allow to confirm only once the host has started
     infoPanel -t "$title" -m "$message"
     retcode=$?
 
@@ -540,95 +693,64 @@ confirm_join_panel() {
 
 stripped_game_name() {
     game_name="Host: \n$(basename "${rom%.*}")"
-    game_name_client="\n Client: \n$(basename "${local_rom%.*}")"
+    game_name="$(echo "$game_name" | sed -e 's/ ([^()]*)//g' -e 's/ [[A-z0-9!+]*]//g' -e 's/([^()]*)//g' -e 's/[[A-z0-9!+]*]//g')"
+
+    local_rom_trimmed="$(echo "$save_file_filename" | sed -e 's/ ([^()]*)//g' -e 's/ [[A-z0-9!+]*]//g' -e 's/([^()]*)//g' -e 's/[[A-z0-9!+]*]//g')"
+    game_name_client="\n Client (me): \n$local_rom_trimmed"
 }
 
-# If we're currently connected to wifi, save the network ID so we can reconnect after we're done with retroarch - save the IP address and subnet so we can restore these.
-save_wifi_state() {
-    IFACE=wlan0
-    cp /appconfigs/wpa_supplicant.conf /tmp/wpa_supplicant.conf_bk
-	old_ipv4=$(ip -4 addr show $IFACE | grep -o 'inet [^ ]*' | cut -d ' ' -f 2)
-	ip addr del $old_ipv4/$old_mask dev $IFACE
-}
+checksum_func() {
+    local_file_size=$(stat -c%s "$file_path")
+    local func_file_path="$1"
+    local CRC="$2"
 
-restore_wifi_state() {
-    cp /tmp/wpa_supplicant.conf_bk /appconfigs/wpa_supplicant.conf
-    sync
-	if [ -z "$old_ipv4" ]; then
-		log "Old IP address not found."
-	fi
+    ########################## File checksum check : same_chksum = 0 different, 1 identical , 2 unknown
 
-	ip_output=$(ip link set wlan0 down 2>&1)
-	if [ $? -ne 0 ]; then
-		log "Failed to bring down the interface."
-		log "Output from 'ip link set down' command: $ip_output"
-	fi
+    if [ "$CRC" != "0" ]; then # file_checksum=0 means skip the difference check = always replace
+        local_file_checksum=$(xcrc "$func_file_path")
 
-	ip -4 addr show wlan0 | awk '/inet/ {print $2}' | while IFS= read -r line; do
-		ip addr del "$line" dev wlan0
-	done
-
-	ip_output=$(ip addr add $old_ipv4 dev wlan0 2>&1)
-	if [ $? -ne 0 ]; then
-		log "Failed to assign the old IP address."
-		log "Output from 'ip addr add' command: $ip_output"
-	fi
-
-	ip_output=$(ip link set wlan0 up 2>&1)
-	if [ $? -ne 0 ]; then
-		log "Failed to bring up the interface."
-		log "Output from 'ip link set up' command: $ip_output"
-	fi
-    
-    $WPACLI reconfigure
-}
-
-do_sync_file() {
-    file_type="$1"
-    file_path="$2"
-    file_url="$3"
-
-    dir_path=$(dirname "$file_path")
-
-    if [ ! -d "$dir_path" ]; then
-        mkdir -p "$dir_path"
-    fi
-
-    if [ -e "$file_path" ]; then
-        mv "$file_path" "${file_path}_old"
-        log "Existing $file_type file moved to ${file_path}_old"
-    fi
-
-    log "Starting to download $file_type from $file_url"
-    curl -o "$file_path" "ftp://$hostip/$file_url" > /dev/null 2>&1
-
-    if [ $? -eq 0 ]; then
-        log "$file_type download completed"
+        if [ "$local_file_size" -gt "$MAX_FILE_CHKSUM_SIZE" ]; then
+            log "File size too big for checksum: it would be too long"
+            same_chksum=2
+        else
+            if [ "$CRC" == "$local_file_checksum" ]; then
+                same_chksum=1
+            else
+                same_chksum=0
+            fi
+        fi
     else
-        log "$file_type download failed"
+        log "Skipping checksum check."
+        same_chksum=1 # fake same size for skipping
     fi
 }
 
-udhcpc_control() {
-	if pgrep udhcpc > /dev/null; then
-		killall -9 udhcpc
-        log "Old DHCP proc killed."
-	fi
-	sleep 1
-	log "Trying to start DHCP"
-	udhcpc -i wlan0 -s /etc/init.d/udhcpc.script > /dev/null 2>&1 &
-	if is_running udhcpc; then
-		log "DHCP started"
-	else
-		build_infoPanel_and_log "DHCP" "Unable to start DHCP client\n unable to continue."
-	fi
+checksize_func() {
+
+    local func_file_path="$1"
+    local filesize_tocheck="$2"
+    local_file_size=$(stat -c%s "$func_file_path")
+
+    ########################## File size check   same_size = 0 different, 1 identical , 2 unknown
+
+    if echo "$filesize_tocheck" | grep -q "^[0-9][0-9]*$"; then # check if the remote file size is a numeric value
+        if [ "$filesize_tocheck" -eq "$local_file_size" ]; then
+            log "Same size as remote"
+            same_size=1
+        else
+            log "Files size are different"
+            same_size=0
+        fi
+    else
+        log "Impossible to get file size : wrong parameter."
+        same_size=2
+    fi
 }
 
 is_running() {
     process_name="$1"
-    pgrep "$process_name" > /dev/null
+    pgrep "$process_name" >/dev/null
 }
-
 
 #########
 ##Main.##
@@ -636,26 +758,25 @@ is_running() {
 
 lets_go() {
     pressMenu2Kill $(basename $0) &
-    check_wifi
-    connect_to_host
-    wait_for_connectivity
+    create_cookie_info
+    . "$sysdir/script/network/hotspot_join.sh"
     start_ftp
-    get_cookie_info
-    download_cookie
+    sync_file "Cookie" "/mnt/SDCARD/RetroArch/retroarch.cookie" 0 0 -f -m
     read_cookie
     send_saves
     backup_save
-    sync_file Rom "$local_rom" # Doesn't sync anything, just uses the sync function to confirm it exists locally
-    sync_file Rom "$rom" "$romcheck" "$rom_url"
-    sync_file Core "$core" "$corecheck" "$core_url"
+    # sync_file Rom "$local_rom" # Doesn't sync anything, just uses the sync function to confirm it exists locally
+    sync_file "Core" "$core" 1 "$corechecksum" -b -m
+    sync_file "Rom" "$rom" 1 "$romchecksum" -b -m
+    sync_file "Img" "$Img_path" 0 0 -o
     stripped_game_name
     wait_for_host
     confirm_join_panel "Join now?" "Start the game on the host first! \n $game_name \n $game_name_client"
     pkill -9 pressMenu2Kill
     start_retroarch
     wait_for_save_return
+    # TO DO : export save to Gambatte (with question)
     cleanup
 }
-
 
 lets_go

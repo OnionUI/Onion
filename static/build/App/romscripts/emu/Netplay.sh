@@ -38,17 +38,12 @@ echo performance >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 cores_configurator() {
 
 	if [ "$romdirname" == "GB" ] || [ "$romdirname" == "GBC" ]; then
-
 		tgb_dual_opts="/mnt/SDCARD/Saves/CurrentProfile/config/TGB Dual/TGB Dual.opt"
-		tgb_dual_opts_bk="/mnt/SDCARD/Saves/CurrentProfile/config/TGB Dual/TGB Dual.opt.bak"
 		tgb_dual_opts_tmp="/tmp/TGB Dual.patch"
-
-		cp "$tgb_dual_opts" "$tgb_dual_opts_bk"
 		echo -e "tgbdual_single_screen_mp = \"player ${PlayerNum} only\"" >"$tgb_dual_opts_tmp"
 		echo -e "tgbdual_audio_output = \"Game Boy #${PlayerNum}\"" >>"$tgb_dual_opts_tmp"
 		$sysdir/script/patch_ra_cfg.sh "$tgb_dual_opts_tmp" "$tgb_dual_opts"
 		rm "$tgb_dual_opts_tmp"
-
 	fi
 
 	if [ "$romdirname" == "MD" ]; then
@@ -119,12 +114,14 @@ elif [ $retcode -eq 255 ]; then
 fi
 
 if [ "$romdirname" == "GB" ] || [ "$romdirname" == "GBC" ]; then
-	mv "$tgb_dual_opts_bk" "$tgb_dual_opts"
+		echo -e "tgbdual_single_screen_mp = \"player 1 only\"" >"$tgb_dual_opts_tmp"
+		echo -e "tgbdual_audio_output = \"Game Boy #1\"" >>"$tgb_dual_opts_tmp"
+		$sysdir/script/patch_ra_cfg.sh "$tgb_dual_opts_tmp" "$tgb_dual_opts"
+		rm "$tgb_dual_opts_tmp"
 fi
 
 echo "###################################################################################################################"
 echo "############################################# Netplay.sh script end. ##############################################"
-echo "###################################################################################################################"
 echo "###################################################################################################################"
 
 # restore wifi in case of sudden quit :

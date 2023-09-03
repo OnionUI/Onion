@@ -52,12 +52,13 @@ Stop_hotspot_Client() {
 }
 
 Stop_hotspot_Server() {
-
+	$sysdir/bin/hostapd_cli all_sta flush
 	killall -9 hostapd
 	killall -9 dnsmasq
 	killall -9 tcpsvd
 	ifconfig wlan1 down
 	ifconfig wlan0 up
+	udhcpc_control
 	if ! pgrep "wpa_supplicant" >/dev/null; then
 		/mnt/SDCARD/miyoo/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
 	fi

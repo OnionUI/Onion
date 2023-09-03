@@ -49,11 +49,16 @@ read_cookie() {
 			;;
 		esac
 		log "$core $rom $coresize $corechksum $romsize $romchksum"
-	done <"/mnt/SDCARD/RetroArch/retroarch.cookie"
+	done <"/mnt/SDCARD/RetroArch/retroarch.cookie.client"
 
 	#url encode or curl complains
 	export core_url=$(url_encode "$core")
 	export rom_url=$(url_encode "$rom")
+
+	romdirname=$(echo "$rom" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
+	romName=$(basename "$rom")
+	romNameNoExtension=${romName%.*}
+	Img_path="/mnt/SDCARD/Roms/$romdirname/Imgs/$romNameNoExtension.png"
 
 	log "Cookie file read"
 }
@@ -216,11 +221,14 @@ sync_file() {
 
 	if [ "$run_sync" -eq 1 ]; then
 
+		if [ $file_type == "Cookie" ]; then # exception for cookies : we don't download with the same target name
+			file_path="${file_path}.client"
+		fi
 		# let's make a backup first whatever the case
 		if [ -e "$file_path" ]; then
 			if [ $file_type == "Rom" ]; then
 				# if rom already here and different file then we create a rom_neplay to avoid to override user games
-				
+
 				# oldpath="$file_path"
 				# file_path_without_extension="${file_path%.*}"
 				# file_path="${file_path_without_extension}_netplay.${file_path##*.}"
@@ -233,7 +241,6 @@ sync_file() {
 				mkdir -p "$Netplay_Rom_Folder"
 				file_path="$Netplay_Rom_Folder/$(basename "$file_path")"
 				rom=$file_path
-
 
 			elif [ $file_type == "Core" ]; then
 				# oldpath="$file_path"
@@ -249,7 +256,6 @@ sync_file() {
 				log "Existing $file_type file moved to ${file_path}_old"
 			fi
 		fi
-
 
 		if [ ! -d "$dir_path" ]; then
 			mkdir -p "$dir_path"
@@ -269,7 +275,7 @@ sync_file() {
 	###################### FINAL CHECK RESULT #########################
 
 	if [ ! -e "$file_path" ]; then
-		build_infoPanel_and_log "Sync Failed" "Failed to download the $file_type file.1111"
+		build_infoPanel_and_log "Sync Failed" "Failed to download the $file_type file."
 
 		# copy has failed : restoring the original file
 		if [ $file_type != "Rom" ] && [ $file_type != "Core" ]; then
@@ -290,8 +296,6 @@ sync_file() {
 			same_size=1 # fake same size for skipping
 		fi
 
-		echo "*-*--*-*-*-*-*-*-*-*-*-*-*-  same_size : $same_size  same_chksum : $same_chksum *-*--*-*-*-*-*-*-*-*-*-*-*- 2222"
-
 		if [ "$same_size" -eq 1 ] && [ "$same_chksum" -eq 1 ]; then
 			build_infoPanel_and_log "Syncing" "$file_type synced."
 			if [ $file_type == "Rom" ]; then
@@ -300,7 +304,7 @@ sync_file() {
 			fi
 
 		else
-			build_infoPanel_and_log "Sync Failed" "Failed to download the $file_type file.2222"
+			build_infoPanel_and_log "Sync Failed" "Failed to download the $file_type file."
 
 			# copy has failed : restoring the original file
 			if [ $file_type != "Rom" ] && [ $file_type != "Core" ]; then
@@ -467,6 +471,7 @@ confirm_join_panel() {
 
 	if [ -e "$Img_path" ]; then
 		pngScale "$Img_path" "/tmp/CurrentNetplay.png" 150 150
+		sync
 		imgpop 2 1 "/tmp/CurrentNetplay.png" 245 265 >/dev/null 2>&1 &
 	fi
 	infoPanel -t "$title" -m "$message"
@@ -482,7 +487,7 @@ confirm_join_panel() {
 }
 
 stripped_game_name() {
-	game_name=$(awk -F'/' '/\[rom\]:/ {print $NF}' /mnt/SDCARD/RetroArch/retroarch.cookie | sed 's/\(.*\)\..*/\1/')
+	game_name=$(awk -F'/' '/\[rom\]:/ {print $NF}' /mnt/SDCARD/RetroArch/retroarch.cookie.client | sed 's/\(.*\)\..*/\1/')
 }
 
 is_running() {
@@ -504,6 +509,8 @@ cleanup() {
 	# restore_wifi_state
 	. "$sysdir/script/network/hotspot_cleanup.sh"
 
+	rm "/mnt/SDCARD/RetroArch/retroarch.cookie.client"
+
 	log "Cleanup done"
 	exit
 }
@@ -513,17 +520,11 @@ cleanup() {
 #########
 
 lets_go() {
-	
+
 	pressMenu2Kill $(basename $0) &
 	. "$sysdir/script/network/hotspot_join.sh"
 	sync_file "Cookie" "/mnt/SDCARD/RetroArch/retroarch.cookie" 0 0 -f -m
 	read_cookie
-
-	romdirname=$(echo "$rom" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
-	romName=$(basename "$rom")
-	romNameNoExtension=${romName%.*}
-	Img_path="/mnt/SDCARD/Roms/$romdirname/Imgs/$romNameNoExtension.png"
-
 	sync_file "Core" "$core" 1 "$corechecksum" -b -m
 	sync_file "Rom" "$rom" 1 "$romchecksum" -b -m
 	sync_file "Img" "$Img_path" 0 0 -o
