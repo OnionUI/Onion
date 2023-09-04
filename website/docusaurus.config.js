@@ -60,8 +60,8 @@ const config = {
       // @ts-ignore
       ({
         hashed: true,
-        language: ["en", "zh"],
-        highlightSearchTermsOnTargetPage: true,
+        language: ["en"],
+        highlightSearchTermsOnTargetPage: false,
         explicitSearchResultPath: true,
       }),
     ],
