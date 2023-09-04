@@ -24,11 +24,11 @@ description: Overview of the most important features
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/189434056-b1148ff9-393b-43d1-b362-20d97b64b393.png" width="54" /></sup>Global Shortcuts
 
-<p align="center"><a href="https://github.com/OnionUI/Onion/wiki/Global-Shortcuts"><img src="https://user-images.githubusercontent.com/44569252/189388343-3fa73c5d-31ca-4931-b310-4e7ba43c536d.png" width="640" /></a></p>
+<p align="center"><a href="shortcuts"><img src="https://user-images.githubusercontent.com/44569252/189388343-3fa73c5d-31ca-4931-b310-4e7ba43c536d.png" width="640" /></a></p>
 
 <p align="center">
 
-[Click here](./Global%20Shortcuts.md) to see an overview of all global shortcuts.
+[Click here](shortcuts) to see an overview of all global shortcuts.
 
 </p>
 
