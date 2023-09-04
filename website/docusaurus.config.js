@@ -63,6 +63,7 @@ const config = {
         language: ["en"],
         highlightSearchTermsOnTargetPage: false,
         explicitSearchResultPath: true,
+        removeDefaultStopWordFilter: true
       }),
     ],
   ],
