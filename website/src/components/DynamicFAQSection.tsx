@@ -13,7 +13,7 @@ export default function DynamicFAQSection({ children }) {
 
             if (details && details instanceof HTMLDetailsElement) {
                 if (!details.open) {
-                    const offsetPosition = details.getBoundingClientRect().top + window.scrollY;
+                    const offsetPosition = details.getBoundingClientRect().top + window.scrollY - 75;
                     summary.click();
                     window.scrollTo({
                         top: offsetPosition,
