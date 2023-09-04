@@ -17,15 +17,13 @@ export default function ReleaseLink({ url, label, className, showDownloads }: Re
             .then(setData);
     }, []);
 
+    const renderedLabel = (data['name'] || "Loading...") + (label && ` (${label})` || "");
+
     return (
         <>
             {data &&
                 <div>
-                    <Link
-                        className={className}
-                        href={data['html_url']}>
-                        {data['name']}{label && <> ({label})</>}
-                    </Link>
+                    <Link className={className} href={data['html_url']}>{renderedLabel}</Link>
                     {showDownloads && data['assets'] &&
                         <div>
                             <small><i>{data['assets'][0]['download_count'].toLocaleString()} downloads</i></small>
