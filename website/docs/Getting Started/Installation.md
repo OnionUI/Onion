@@ -84,7 +84,7 @@ delete any non-working save states after upgrading.
 - When the installation is done, press the <kbd>A</kbd> button (or wait 10s) and the device will turn off.
 
 ### Step 3: Check that your files are in the correct folders
-- If they're not already in place, place your bios files in the `BIOS` folder and roms in their respective subfolder inside the `Roms` folder (see the *[Emulators](emulators)* page for more information, here you'll find the [Rom Folders](emulators#rom-folders---quick-reference) table).
+- If they're not already in place, place your bios files in the `BIOS` folder and roms in their respective subfolder inside the `Roms` folder (see the *[Emulators](emulators)* page for more information, here you'll find the [Rom Folders](emulators/folders) table).
 - Despite its name, the `.tmp_update` folder must stay on your SD card.
 - Insert your SD Card, boot up your Mini and press <kbd>SELECT</kbd> from the `Games` tab in the main menu to refresh roms.  
 - If you are a macOS user, run `Apps` > `Tweaks` > `Tools` > `Remove OSX files`, in Onion, to purge `._` index files from your SD Card (and game lists).

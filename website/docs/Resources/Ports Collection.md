@@ -164,7 +164,7 @@ To install these you just have to extract the contents of the archive to the roo
 ### Migrating ports from Onion versions prior to 4.1.0
 
 1. Rename your existing "Roms/PORTS" folder into something like Roms/PORTS_OLD  
-2. Update Onion to version 4.1.0 or later (the latest release is recommended) ([upgrading wiki](https://github.com/OnionUI/Onion/wiki/Installation#upgrading-from-stock-or-onion)).  
+2. Update Onion to version 4.1.0 or later (the latest release is recommended) (see [upgrade guide](installation#upgrading-from-stock-or-onion)).  
 3. Enable "Ports Collection" in `Apps` › `Package Manager` › `Verified`.  
 4. Download the "the full Ports-Collection" from [the official repository](https://github.com/OnionUI/Ports-Collection) (first link in the description).  
 5. Extract the archive to the root of your SD card.  

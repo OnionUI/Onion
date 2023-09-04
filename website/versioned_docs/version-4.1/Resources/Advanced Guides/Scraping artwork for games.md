@@ -24,7 +24,7 @@ The `Imgs` folder name is case sensitive (must have a capital `I`). Examples wou
 - Select "_Recalbox_"   
 - Tick "_Include non-Recalbox rom folders_"   
    > (Some systems aren't recognized because their folder-names are non-standard. To add those systems, press the `+` symbol on the bottom left, select the systems that are missing & hit "OK". Then, click the added systems in the bar on the left, and correct the system's folders via the "_GAMES & FRONT END_" tab -> "_Games/Roms folder:_" field -or- by clicking the folder-icon to the right of it.
-[You can find a list of all Rom folder names here](https://github.com/OnionUI/Onion/wiki/Emulators)
+[You can find a list of all Rom folder names here](emulators)
 
 ### Media Selection:
 **Use a (_Great!_) Custom Image Template Designed for OnionOS:**

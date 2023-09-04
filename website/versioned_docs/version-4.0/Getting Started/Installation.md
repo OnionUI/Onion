@@ -82,7 +82,7 @@ delete any non-working save states after upgrading.
 - When the installation is done, press any button and the device will turn off.
 
 ### Step 3: Check that your files are in the correct folders
-- If they're not already in place, make sure to put your bios files in the `BIOS` folder and roms in their respective subfolder inside the `Roms` folder (see the *[[Emulators]]* page for more information, here you'll find the [Rom Folders](https://github.com/OnionUI/Onion/wiki/Emulators#rom-folders---quick-reference) table).
+- If they're not already in place, make sure to put your bios files in the `BIOS` folder and roms in their respective subfolder inside the `Roms` folder (see the *[[Emulators]]* page for more information, here you'll find the [Rom Folders](emulators#rom-folders---quick-reference) table).
 - Despite its name, the `.tmp_update` folder must stay on your SD card.
 
 
