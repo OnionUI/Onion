@@ -92,8 +92,6 @@ https://www.screenscraper.fr/faq.php
 
 -----------------------------------
 
-
-
 EOF
 
 read -n 1 -s -r -p "Press A to continue"
@@ -101,183 +99,153 @@ clear
 }
 
 
-get_sc_id(){
-	#SS ID systems for screenscraper scraping
-	case $1 in
-		ADVMAME)
-			 ssID="75";;	#Mame
-		AMIGA)
-			 ssID="64";;	# ""Commodore : Amiga"
-		AMIGACD)
-			 ssID="134";;	# "Commodore : Amiga CD"
-		ARCADE)   #Mame
-			 ssID="75";;	# "Mame"
-		ARDUBOY)
-			 ssID="263";;	# "Arduboy"
-		ATARI)   #Atari 2600
-			 ssID="26";;	# "Atari : Atari 2600"
-		ATARIST)
-			 ssID="42";;	# "Atari : Atari ST"
-		# CHAI) # chailove
-			 # ssID="";;
-		COLECO)
-			 ssID="183";;	# "Coleco"
-		COMMODORE)     #  Commodore 64/VIC-20/PET
-			 ssID="66";;	# "Commodore : Commodore 64"
-		CPC)   #Amstrad CPC
-			 ssID="65";;	# "Amstrad : CPC"
-		CPS1)
-			 ssID="6";;	# "Capcom : Capcom Play System"
-		CPS2)
-			 ssID="7";;	# "Capcom : Capcom Play System 2"
-		CPS3)
-			 ssID="8";;	# "Capcom : Capcom Play System 3"
-		DAPHNE)
-			 ssID="49";;	# "Daphne"
-		DOS)
-			 ssID="135";;
-		EASYRPG)
-			 ssID="231";;
-		EBK)
-			 ssID="93";;
-		EIGHTHUNDRED)  # Atari 800 / Atari 8bit
-			 ssID="43";;
-		FAIRCHILD)  # Fairchild Channel F
-			 ssID="80";;
-		FBA2012)
-			 ssID="75";;
-		FBALPHA)
-			 ssID="75";;
-		FBNEO)
-			 ssID="";;
-		FC)  # NES
-			 ssID="3";;
-		FDS)   # Famicom Disk System
-			 ssID="106";;
-		FIFTYTWOHUNDRED)   # Atari 5200
-			 ssID="40";;
-		GB)
-			 ssID="9";;
-		GBA)
-			 ssID="12";;
-		GBC)
-			 ssID="10";;
-		GG)
-			 ssID="21";;  # "Sega - Game Gear"
-		GW)   #  Nintendo - Game & Watch
-			 ssID="52";;
-		INTELLIVISION)
-			 ssID="115";;
-		JAGUAR)
-			 ssID="27";;
-		LUTRO)
-			 ssID="206";;
-		LYNX)
-			 ssID="28";;
-		MAME2000)
-			 ssID="75";;
-		MAME2003)
-			 ssID="75";;
-		MBA)
-			 ssID="75";;
-		MD)   # "Sega - Mega Drive - Genesis"
-			 ssID="1";;
-		MDHACKS)
-			 ssID="1";;
-		MEGADUCK)
-			 ssID="90";;
-		# MICROW8)
-			 # ssID="";;
-		MS)
-			 ssID="2";;
-		MSX)
-			 ssID="113";;
-		NEOCD)
-			 ssID="70";;
-		NEOGEO)
-			 ssID="142";;
-		NGP)
-			 ssID="25";;
-		ODYSSEY)  # Videopac / Magnavox Odyssey 2
-			 ssID="104";;
-		OPENBOR)
-			 ssID="214";;
-		PALM)
-			 ssID="219";;
-		PANASONIC)   #3DO
-			 ssID="29";;
-		PCE)   # NEC TurboGrafx-16 / PC Engine
-			 ssID="31";;
-		PCECD)
-			 ssID="114";;
-		PCEIGHTYEIGHT)   # NEC - PC-8000 & PC-8800 series / NEC PC-8801
-			 ssID="221";;
-		PCFX)   # NEC - PC-FX 
-			 ssID="72";;
-		PCNINETYEIGHT)  # NEC - PC-98 / NEC PC-9801
-			 ssID="208";;
-		PICO)
-			 ssID="234";;
-		# POKE)
-			 # ssID="";;
-		PORTS)   # "Microsoft : PC Win9X"
-			 ssID="137";;
-		PS)
-			 ssID="57";;
-		SATELLAVIEW)
-			 ssID="107";;
-		SCUMMVM)
-			 ssID="123";;
-		SEGACD)
-			 ssID="20";;
-		SEGASGONE)   # Sega SG-1000
-			 ssID="109";;
-		SEVENTYEIGHTHUNDRED)  # Atari 7800
-			 ssID="41";;
-		SFC)
-			 ssID="4";;
-		SGB)
-			 ssID="127";;
-		SGFX)   #  NEC - PC Engine SuperGrafx
-			 ssID="105";;
-		SUFAMI)
-			 ssID="108";;
-		SUPERVISION)
-			 ssID="207";;
-		THIRTYTWOX)   # Sega - 32X 
-			 ssID="19";;
-		THOMSON)
-			 ssID="141";;
-		# TI83)
-			 # ssID="";;
-		TIC)   # TIC-80
-			 ssID="222";;
-		UZEBOX)
-			 ssID="216";;
-		VB)
-			 ssID="11";;
-		VECTREX)
-			 ssID="102";;
-		VIC20) # Commodore : Vic-20
-			 ssID="73";;
-		VIDEOPAC)
-			 ssID="104";;
-		VMU)   # dreamcast (useless)
-			 ssID="23";;
-		WS)  # Bandai WonderSwan & Color
-			 ssID="45";;
-		X68000)
-			 ssID="79";;
-		XONE)   # Sharp X1
-			 ssID="220";;
-		ZXEIGHTYONE) # Sinclair - ZX-81
-			 ssID="77";;
-		ZXS)  # Sinclair ZX Spectrum
-			 ssID="76";;
-		*)
-			 echo -n "unknown"
-		;;
-	esac
+
+# Function to search on screenscraper with retry logic
+search_on_screenscraper() {
+    local retry_count=0
+    local max_retries=5
+
+    while true; do
+		# TODO : managing multithread for users who have it.
+        api_result=$(curl -k -s "$url")
+		Head_api_result=$(echo "$api_result" | head -n 1)
+        
+        # Don't check art if max threads for leechers is used
+        if echo "$Head_api_result" | grep -q "The maximum threads"; then
+            if [ "$retry_count" -ge "$max_retries" ]; then
+                echo "The Screenscraper API is too busy for non-users. Please try again later (or register)."
+                echo "Press any key to finish"
+                read dummy
+                break
+            else
+                let retry_count++
+                echo "Retrying API call ($retry_count / $max_retries)..."
+				echo "Registering a Screenscraper account can help !"
+                sleep_duration=$((5 + retry_count))
+                sleep "$sleep_duration"
+            fi
+        else
+            break  # we have a result, we exit 
+        fi
+    done
+
+    # Don't check art if screenscraper is closed
+    if echo "$Head_api_result" | grep -q "API closed"; then
+        echo -e "${RED}The Screenscraper API is currently down, please try again later.{NONE}"
+        let Scrap_Fail++
+        read -n 1 -s -r -p "Press A to exit"
+        return
+    fi
+
+    # Don't check art after a failed curl request
+    if [ -z "$Head_api_result" ]; then
+        echo -e "${RED}Request failed${NONE}"
+        echo "Request failed for $romNameNoExtensionTrimmed" >> /mnt/SDCARD/.tmp_update/logs/scrap.log
+        let Scrap_Fail++
+        return
+    fi
+    
+    # Don't check art if screenscraper can't find a match
+    if echo "$Head_api_result" | grep -q "^Erreur"; then
+        echo -e "${RED}No match found${NONE}"
+        echo "Couldn't find a match for $romNameNoExtensionTrimmed" >> /mnt/SDCARD/.tmp_update/logs/scrap.log
+        return
+    fi
+
+    gameIDSS=$(echo "$api_result" | jq -r '.response.jeu.id')
+	if ! [ "$gameIDSS" -eq "$gameIDSS" ] 2> /dev/null; then
+		gameIDSS=$(echo "$api_result" | jq -r '.jeu.id')
+	fi
+}
+
+
+
+
+get_ssSystemID() {
+  case $1 in
+    ADVMAME)            ssSystemID="75";;    # Mame
+    AMIGA)              ssSystemID="64";;    # Commodore Amiga
+    AMIGACD)            ssSystemID="134";;   # Commodore Amiga CD
+    ARCADE)             ssSystemID="75";;    # Mame
+    ARDUBOY)            ssSystemID="263";;   # Arduboy
+    ATARI)              ssSystemID="26";;    # Atari 2600
+    ATARIST)            ssSystemID="42";;    # Atari ST
+    COLECO)             ssSystemID="183";;   # Coleco
+    COMMODORE)          ssSystemID="66";;    # Commodore 64
+    CPC)                ssSystemID="65";;    # Amstrad CPC
+    CPS1)               ssSystemID="6";;     # Capcom Play System
+    CPS2)               ssSystemID="7";;     # Capcom Play System 2
+    CPS3)               ssSystemID="8";;     # Capcom Play System 3
+    DAPHNE)             ssSystemID="49";;    # Daphne
+    DOS)                ssSystemID="135";;   # DOS
+    EASYRPG)            ssSystemID="231";;   # EasyRPG
+    EBK)                ssSystemID="93";;    # EBK
+    EIGHTHUNDRED)       ssSystemID="43";;    # Atari 800
+    FAIRCHILD)          ssSystemID="80";;    # Fairchild Channel F
+    FBA2012)            ssSystemID="75";;    # FBA2012
+    FBALPHA)            ssSystemID="75";;    # FBAlpha
+    FBNEO)              ssSystemID="";;      # FBNeo (Empty)
+    FC)                 ssSystemID="3";;     # NES (Famicom)
+    FDS)                ssSystemID="106";;   # Famicom Disk System
+    FIFTYTWOHUNDRED)    ssSystemID="40";;    # Atari 5200
+    GB)                 ssSystemID="9";;     # Game Boy
+    GBA)                ssSystemID="12";;    # Game Boy Advance
+    GBC)                ssSystemID="10";;    # Game Boy Color
+    GG)                 ssSystemID="21";;    # Sega Game Gear
+    GW)                 ssSystemID="52";;    # Nintendo Game & Watch
+    INTELLIVISION)      ssSystemID="115";;   # Intellivision
+    JAGUAR)             ssSystemID="27";;    # Atari Jaguar
+    LUTRO)              ssSystemID="206";;   # Lutro
+    LYNX)               ssSystemID="28";;    # Atari Lynx
+    MAME2000)           ssSystemID="75";;    # Mame 2000
+    MAME2003)           ssSystemID="75";;    # Mame 2003
+    MBA)                ssSystemID="75";;    # MBA
+    MD)                 ssSystemID="1";;     # Sega Genesis (Mega Drive)
+    MDHACKS)            ssSystemID="1";;     # Sega Genesis (Mega Drive) Hacks
+    MEGADUCK)           ssSystemID="90";;    # Megaduck
+    MS)                 ssSystemID="2";;     # Sega Master System
+    MSX)                ssSystemID="113";;   # MSX
+    NEOCD)              ssSystemID="70";;    # Neo Geo CD
+    NEOGEO)             ssSystemID="142";;   # Neo Geo AES
+    NGP)                ssSystemID="25";;    # Neo Geo Pocket
+    ODYSSEY)            ssSystemID="104";;   # Videopac / Magnavox Odyssey 2
+    OPENBOR)            ssSystemID="214";;   # OpenBOR
+    PALM)               ssSystemID="219";;   # Palm
+    PANASONIC)          ssSystemID="29";;    # 3DO
+    PCE)                ssSystemID="31";;    # NEC TurboGrafx-16 / PC Engine
+    PCECD)              ssSystemID="114";;   # NEC TurboGrafx-CD
+    PCEIGHTYEIGHT)      ssSystemID="221";;   # NEC PC-8000 & PC-8800 series / NEC PC-8801
+    PCFX)               ssSystemID="72";;    # NEC PC-FX
+    PCNINETYEIGHT)      ssSystemID="208";;   # NEC PC-98 / NEC PC-9801
+    PICO)               ssSystemID="234";;   # PICO
+    PORTS)              ssSystemID="137";;   # PC Win9X
+    PS)                 ssSystemID="57";;    # Sony Playstation
+    SATELLAVIEW)        ssSystemID="107";;   # Satellaview
+    SCUMMVM)            ssSystemID="123";;   # ScummVM
+    SEGACD)             ssSystemID="20";;    # Sega CD
+    SEGASGONE)          ssSystemID="109";;   # Sega SG-1000
+    SEVENTYEIGHTHUNDRED) ssSystemID="41";;    # Atari 7800
+    SFC)                ssSystemID="4";;     # Super Nintendo (SNES)
+    SGB)                ssSystemID="127";;   # Super Game Boy
+    SGFX)               ssSystemID="105";;   # NEC PC Engine SuperGrafx
+    SUFAMI)             ssSystemID="108";;   # Sufami Turbo
+    SUPERVISION)        ssSystemID="207";;   # Supervision
+    THIRTYTWOX)         ssSystemID="19";;    # Sega 32X
+    THOMSON)            ssSystemID="141";;   # Thomson
+    TIC)                ssSystemID="222";;   # TIC-80
+    UZEBOX)             ssSystemID="216";;   # Uzebox
+    VB)                 ssSystemID="11";;    # Virtual Boy
+    VECTREX)            ssSystemID="102";;   # Vectrex
+    VIC20)              ssSystemID="73";;    # Commodore VIC-20
+    VIDEOPAC)           ssSystemID="104";;   # Videopac
+    VMU)                ssSystemID="23";;    # Dreamcast VMU (useless)
+    WS)                 ssSystemID="45";;    # Bandai WonderSwan & Color
+    X68000)             ssSystemID="79";;    # Sharp X68000
+    XONE)               ssSystemID="220";;   # Sharp X1
+    ZXEIGHTYONE)        ssSystemID="77";;    # Sinclair ZX-81
+    ZXS)                ssSystemID="76";;    # Sinclair ZX Spectrum
+    *)                  echo "Unknown platform"
+  esac
 }
 
 
@@ -291,7 +259,7 @@ echo -e "\n*****************************************************"
 echo -e "******************* SCREENSCRAPER *******************"
 echo -e "*****************************************************\n\n"
 
-echo -e "Scraping $CurrentSystem...\n"
+
 
 #We check for existing credentials
 
@@ -300,18 +268,30 @@ if [ -f "$ScraperConfigFile" ]; then
 
     config=$(cat $ScraperConfigFile)
 	
+	MediaType=$(echo "$config" | jq -r '.ScreenscraperMediaType')
+	SelectedRegion=$(echo "$config" | jq -r '.ScreenscraperRegion')
+	echo "Scraping $CurrentSystem..."
+	echo "Media Type: $MediaType"
+	echo "Current Region: $SelectedRegion"
     userSS=$(echo "$config" | jq -r '.screenscraper_username')
     passSS=$(echo "$config" | jq -r '.screenscraper_password')
     ScrapeInBackground=$(echo "$config" | jq -r '.ScrapeInBackground')
 	u=$(echo "U2FsdGVkX18PKpoEvELyE+5xionDX8iRxAIxJj4FN1U=" | openssl enc -aes-256-cbc -d -a -pbkdf2 -iter 10000 -salt -pass pass:"3x0tVD3jZvElZWRt3V67QQ==")
 	p=$(echo "U2FsdGVkX1/ydn2FWrwYcFVc5gVYgc5kVaJ5jDOeOKE=" |openssl enc -aes-256-cbc -d -a -pbkdf2 -iter 10000 -salt -pass pass:"RuA29ch3zVoodAItmvKKmZ+4Au+5owgvV/ztqRu4NjI=")
+	# Regions order management
+	regionsDB="/mnt/SDCARD/.tmp_update/script/scraper/screenscraper_database/regions.db"
+	RegionOrder=$(sqlite3 $regionsDB "SELECT ss_tree || ';' || ss_fallback FROM regions WHERE ss_nomcourt = '$SelectedRegion';")
+# we split the RegionOrder in each region variable (do not indent)
+IFS=';' read -r Region1 Region2 Region3 Region4 Region5 Region6 Region7 Region8 <<EOF
+$RegionOrder
+EOF
 
     if [ "$userSS" = "null" ] || [ "$passSS" = "null" ] || [ "$userSS" = "" ] || [ "$passSS" = "" ]; then
-        userStored=false
+        userStored="false"
     else
-        userStored=true
+        userStored="true"
         echo "screenscraper username: $userSS"
-        echo -e "screenscraper password: xxxx\n\n"
+        echo -e "screenscraper password: xxxx (hidden)\n\n"
     fi
 fi
 
@@ -323,34 +303,65 @@ if [ "$userStored" = "false" ] && ! [ "$ScrapeInBackground" = "true" ]; then
 	    Mychoice=$( echo -e "No\nYes\nScreenscraper information" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "Add your screenscraper account ?" -b "Press A to validate your choice.")
         
         if [ "$Mychoice" = "Yes" ]; then
-            clear
-            echo -e "Press X to display the keyboard and \nenter your screenscraper username\n\n"
-            read -p "username : " userSS
-            clear
-            
-            echo -e "Press X to display the keyboard and \nenter your screenscraper password\n\n"
-            read -p "password : " passSS
-            clear
-            
-            ScraperConfigFile=/mnt/SDCARD/.tmp_update/config/scraper.json
-            config=$(cat $ScraperConfigFile)
-            config=$(echo "$config" | jq --arg user "$userSS" --arg pass "$passSS" '.screenscraper_username = $user | .screenscraper_password = $pass')
-            echo "$config" > $ScraperConfigFile
-            break
-            
+			clear
+			echo -ne "\e[?25h"  # display the cursor
+			echo -e "Press X to display the keyboard.\nPress A to enter a key.\nPress L1 for shift.\nPress R1 for backspace.\nPress Enter to validate.\n\n\n\nEnter your screenscraper username.\n\n"
+			readline -m "username: "
+			userSS=$(cat /tmp/readline.txt)
+			userSS="${userSS// /}"  # removing spaces
+			rm /tmp/readline.txt
+			config=$(cat $ScraperConfigFile)
+			config=$(echo "$config" | jq --arg user "$userSS" '.screenscraper_username = $user')
+			echo "$config" > $ScraperConfigFile
+			# read -p "username : " userSS
+			sync
+			clear
+			echo -ne "\e[?25h"  # display the cursor
+			echo -e "Press X to display the keyboard.\nPress A to enter a key.\nPress L1 for shift.\nPress R1 for backspace.\nPress Enter to validate.\n\n\n\nEnter your screenscraper password.\n\n"
+			readline -m "password: "
+			passSS=$(cat /tmp/readline.txt)
+			passSS="${passSS// /}"  # removing spaces
+			rm /tmp/readline.txt
+			config=$(cat $ScraperConfigFile)
+			config=$(echo "$config" | jq --arg pass "$passSS" '.screenscraper_password = $pass')
+			echo "$config" > $ScraperConfigFile
+			# read -p "password : " passSS
+			sync
+			clear
+			break
+
         elif [ "$Mychoice" = "Screenscraper information" ]; then
-            Screenscraper_information
+			clear
+			Screenscraper_information
         else
-            break
+			clear
+			break
         fi
+
     done
 fi
-		
 
+
+		
+clear
+echo -e "\n*****************************************************"
+echo -e "******************* SCREENSCRAPER *******************"
+echo -e "*****************************************************\n\n"
+
+echo "Scraping $CurrentSystem..."
+echo "Media Type: $MediaType"
+echo "Current Region: $SelectedRegion"
+
+if [ "$userStored" = "true" ]; then
+	echo "screenscraper username: $userSS"
+	echo -e "screenscraper password: xxxx (hidden)\n\n"
+else
+	echo -e "screenscraper account not configured.\n\n"
+fi
 
 ####################################################################################################################################
  #ls /mnt/SDCARD/Roms/$CurrentSystem
- get_sc_id $CurrentSystem
+ get_ssSystemID $CurrentSystem
 
  #ls /mnt/SDCARD/Roms/$CurrentSystem
  mkdir -p /mnt/SDCARD/Roms/$CurrentSystem/Imgs > /dev/null
@@ -373,14 +384,9 @@ set -f
 if ! [ -z "$CurrentRom" ]; then
  #   CurrentRom_noapostrophe=${CurrentRom//\'/\\\'}    # replacing   '   by    \'
  #   romfilter="-name  '*$CurrentRom_noapostrophe*'"
- #   
- #   CurrentRom="Link's"
  #   romfilter="-name  '*$CurrentRom*'"
- #   
- #   romfilter="-name  '*Link's*'"
-    romfilter="-name \"*$CurrentRom*\""
     #romfilter="-name  '*$CurrentRom*'"
-    
+    romfilter="-name \"*$CurrentRom*\""
 fi
     
 
@@ -389,12 +395,14 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 	! -path '*/Imgs/*' ! -path '*/.game_config/*' $romfilter"); do
 	
     echo "-------------------------------------------------"
+	gameIDSS=""
+	url=""
     let romcount++;
     
     # Cleaning up names
     romName=$(basename "$file")
-    romNameNoExtension=${romName%.*}	
-    
+    romNameNoExtension=${romName%.*}
+	echo $romNameNoExtension	
     
     romNameTrimmed="${romNameNoExtension/".nkit"/}"
     romNameTrimmed="${romNameTrimmed//"!"/}"
@@ -405,127 +413,119 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
     romNameTrimmed="${romNameTrimmed//" - "/"%20"}"
     romNameTrimmed="${romNameTrimmed/"-"/"%20"}"
     romNameTrimmed="${romNameTrimmed//" "/"%20"}"
+
     
-    
-    echo $romNameNoExtension
     #echo $romNameTrimmed # for debugging
 
 
 	if [ -f "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png" ]; then
 		echo -e "${YELLOW}already Scraped !${NONE}"
 		let Scrap_notrequired++;
+	
 	else
-
-        url="https://www.screenscraper.fr/api2/jeuInfos.php?devid=${u#???}&devpassword=${p%??}&softname=onion&output=json&ssid=${userSS}&sspassword=${passSS}&crc=&systemeid=${ssID}&romtype=rom&romnom=${romNameTrimmed}.zip"
-        # TODO : search by CRC/MD5/shal or gameid
-        # TODO : managing multithread for users who have it.
-        
-        #ID Game
-        
-        echo Searching on screenscraper ...
-        api_result=$(curl -k -s "$url") 
-
-    	
-    
-    	
-        # Don't check art if screenscraper is closed
-        if echo $api_result | grep -q "API closed"; then
-        	echo -e "The Screenscraper API is currently down, please try again later."
-        	echo -e "Press the ${RED}A button${NONE} to finish"
-        	let Scrap_Fail++;
-        	break;
-        fi
-        
-        # Don't check art after a failed curl request
-        if [[ "$api_result" == "" ]]; then
-            echo -e "${RED}Request failed${NONE}"
-        	# echo -e "Request failed to send for $romNameNoExtensionTrimmed, ${YELLOW}skipping${NONE}"    # for debugging
-        	echo "Request failed for $romNameNoExtensionTrimmed" >> /mnt/SDCARD/.tmp_update/logs/scrap.log
-        	let Scrap_Fail++;
-        	continue;
-        fi
-        
-        # Don't check art if screenscraper can't find a match
-        if echo $api_result | grep -q "^Erreur"; then
-        	#echo -e "Couldn't find a match for $romNameNoExtensionTrimmed, ${YELLOW}skipping${NONE}"   € for debugging
-        	echo -e "${RED}No match found${NONE}"
-        	echo "Couldn't find a match for $romNameNoExtensionTrimmed" >> /mnt/SDCARD/.tmp_update/logs/scrap.log
-        	let Scrap_Fail++;
-        	continue;
-        fi
-    	
-    
-        
-        gameIDSS=$(echo $api_result | jq -r '.response.jeu.id')
-    	echo "gameID = $gameIDSS"
+		rom_size=$(stat -c%s "$file")
+		url="https://www.screenscraper.fr/api2/jeuInfos.php?devid=${u#???}&devpassword=${p%??}&softname=onion&output=json&ssid=${userSS}&sspassword=${passSS}&crc=&systemeid=${ssSystemID}&romtype=rom&romnom=${romNameTrimmed}.zip&romtaille=${rom_size}"
+    	search_on_screenscraper
     	
     	# Don't check art if we didn't get screenscraper game ID
         if ! [ "$gameIDSS" -eq "$gameIDSS" ] 2> /dev/null; then
-            echo -e "${RED}Failed to get game ID${NONE}"
-            let Scrap_Fail++;
-            continue;
+			# Last chance : we search thanks to rom checksum
+			MAX_FILE_SIZE_BYTES=52428800  #50MB
+			
+			if [ "$rom_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
+				echo -e "${RED}Rom is too big to make a checksum.${NONE}"
+				let Scrap_Fail++;
+				continue;
+				
+			else
+				echo -n "CRC check..."
+				CRC=$(xcrc "$file")
+				echo " $CRC"
+				# !!! systemid must not be specified, it impacts the search by CRC but not romtaille (must be > 2 however) or romnom. Most of other parameters than CRC are useless for the request but helps to fill SS database
+				url="https://www.screenscraper.fr/api2/jeuInfos.php?devid=${u#???}&devpassword=${p%??}&softname=onion&output=json&ssid=${userSS}&sspassword=${passSS}&crc=${CRC}&systemeid=&romtype=rom&romnom=${romNameTrimmed}.zip&romtaille=${rom_size}"  
+				search_on_screenscraper
+				if ! [ "$gameIDSS" -eq "$gameIDSS" ] 2> /dev/null; then	
+					echo -e "${RED}Failed to get game ID${NONE}"
+					let Scrap_Fail++;
+					continue;
+				fi
+				
+				RealgameName=$(echo "$api_result" | jq -r '.response.jeu.noms[0].text')
+				echo Real name found : "$RealgameName"
+			fi
+
+        fi
+		
+        echo "gameID = $gameIDSS"
+
+
+        
+		api_result=$(echo $api_result | jq '.response.jeu.medias')   # we keep only media section for faster search : 0.01s instead of 0.25s after that
+
+
+
+# for debugging :
+# echo -e "Region1: $Region1\nRegion2: $Region2\nRegion3: $Region3\nRegion4: $Region4\nRegion5: $Region5\nRegion6: $Region6\nRegion7: $Region7\nRegion8: $Region8\n$MediaType"
+# MediaType="box-2D"
+# region1="eu"
+# echo "$api_result" | jq --arg MediaType "$MediaType"  --arg Region1 "$region1"  --arg Region2 "$region2" 'map(select(.type == $MediaType)) | sort_by(if .region == $Region1 then 0 elif .region == $Region2 then 1 else 8 end)'
+	# Old way:
+	# MediaURL=$(echo "$api_result" | jq --arg MediaType "$MediaType" --arg Region "$region" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == $region) | .url' | head -n 1)
+	# MediaURL=$(echo "$api_result" | jq --arg MediaType "$MediaType" --arg Region "$region" '.[] | select(.type == $MediaType) | select(.region == $region) | .url' | head -n 1)
+
+
+			# this jq query will search all the images of type "MediaType" and will display it by order defined in RegionOrder
+			MediaURL=$(echo "$api_result" | jq --arg MediaType "$MediaType" \
+									--arg Region1 "$region1" \
+									--arg Region2 "$region2" \
+									--arg Region3 "$region3" \
+									--arg Region4 "$region4" \
+									--arg Region5 "$region5" \
+									--arg Region6 "$region6" \
+									--arg Region7 "$region7" \
+									--arg Region8 "$region8" \
+									'map(select(.type == $MediaType)) |
+									  sort_by(if .region == $Region1 then 0
+											elif .region == $Region2 then 1
+											elif .region == $Region3 then 2
+											elif .region == $Region4 then 3
+											elif .region == $Region5 then 4
+											elif .region == $Region6 then 5
+											elif .region == $Region7 then 6
+											elif .region == $Region8 then 7
+											else 8 end) |
+									.[0].url' | head -n 1)
+
+
+        if [ -z "$MediaURL" ]; then 
+            echo -e "${YELLOW}Game matches but no media found!${NONE}"
+            let Scrap_Fail++
+            continue
         fi
         
-        # Here we choose the kind of media that we want :
-            # sstitle	        Screenshot Title	(recommended)
-            # ss	            Screenshot	(recommended)
-            # fanart	        Fan Art	
-            # screenmarquee	    Screen Marquee	
-            # steamgrid	        HD Logos	
-            # wheel	            Wheel	
-            # wheel-hd	        HD Logos	
-            # box-2D	        Case: Front	(default) (recommended)
-            # box-2D-side   	Box: Side	
-            # box-2D-back   	Box: Back	
-            # box-texture   	Box: Texture	
-            # support-texture	Stand: Texture	
-            
-         # TODO : let user choose his media type in options
-        
-        MediaType="box-2D"
-        # Get the URL of media in this order : world, us, usa, eu and then the first entry available
-        url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "wor") | .url' | head -n 1)
-        if [ -z "$url" ]; then
-          url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "us") | .url' | head -n 1)
-          if [ -z "$url" ]; then
-              url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "usa") | .url' | head -n 1)
-              if [ -z "$url" ]; then
-                  url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | select(.region == "eu") | .url' | head -n 1)
-                  if [ -z "$url" ]; then
-                    url=$(echo $api_result | jq --arg MediaType "$MediaType" '.response.jeu.medias[] | select(.type == $MediaType) | .url' | head -n 1)
-                  fi
-              fi
-          fi
-        fi
-        
-        
-        # TODO : if default media not found search in other media types
-    
-    
-        if [ -z "$url" ]; then
-            echo -e "${YELLOW}Game match but no media found!${NONE}"
-            let Scrap_Fail++;
-            continue;
-        fi
-        
-        # echo -e "Downloading Images for $romNameNoExtension \nScreenscraper ID : $gameIDSS \n url :$url\n\n"        # for debugging
-        
-        url=$(echo "$url" | sed 's/"$/\&maxwidth=250\&maxheight=360"/')
-        urlcmd=$(echo "wget -q --no-check-certificate "$url" -P \"/mnt/SDCARD/Roms/$CurrentSystem/Imgs\" -O \"$romNameNoExtension.png\"")
+        # echo -e "Downloading Images for $romNameNoExtension \nScreenscraper ID : $gameIDSS \n url :$MediaURL\n\n"        # for debugging
+
+        MediaURL=$(echo "$MediaURL" | sed 's/"$/\&maxwidth=250\&maxheight=360"/')
+        urlcmd=$(echo "wget -q --no-check-certificate "$MediaURL" -P \"/mnt/SDCARD/Roms/$CurrentSystem/Imgs\" -O \"$romNameNoExtension.png\"")
         
         # directl download trigger an error
-        #wget --no-check-certificate "$url" -P "/mnt/SDCARD/Roms/$CurrentSystem/Imgs" -O "$romNameNoExtension.png"
+        #wget --no-check-certificate "$MediaURL" -P "/mnt/SDCARD/Roms/$CurrentSystem/Imgs" -O "$romNameNoExtension.png"
         #wget $urlcmd
+
         echo $urlcmd>/tmp/rundl.sh
         sh /tmp/rundl.sh
-        echo -e "${GREEN}Scraped!${NONE}"
-        let Scrap_Success++;
-        
-        
-        # echo -e "\n\n ==$url== \n\n"
-        #pngscale "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png" "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png"
 
-          
+		if [ -f "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png" ]; then
+			echo -e "${GREEN}Scraped!${NONE}"
+			let Scrap_Success++;
+		else
+			echo -e "${RED}Download failed.${NONE}"
+			let Scrap_Fail++;
+		fi
+        
+        
+        #pngscale "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png" "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png"
+		
     fi
    
 
@@ -556,8 +556,7 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 				
 #TODO : get manual	
 				
-				
-				
+
 
 done
 
