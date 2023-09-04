@@ -84,7 +84,7 @@ h6 {
 .hero {
   .button--primary {
     background-color: #{$onion-green};
-    color: #000;
+    color: #000 !important;
 
     &:hover {
       background-color: #{lighten($onion-green, 10%)};
