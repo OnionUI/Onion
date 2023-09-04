@@ -20,7 +20,6 @@ program=$(basename "$0" .sh)
 ##Setup.##
 ##########
 
-
 # We'll need FTP to host the cookie to the client - use the built in FTP, it allows us to curl (errors on bftpd re: path)
 start_ftp() {
 	if is_running bftpd; then
@@ -35,7 +34,6 @@ start_ftp() {
 	fi
 }
 
-
 # Find the recommended core for the current system.
 Get_NetplayCore() {
 
@@ -46,56 +44,52 @@ Get_NetplayCore() {
 		netplaycore="/mnt/SDCARD/RetroArch/.retroarch/cores/$netplaycore"
 		core_config_folder=$(echo "$netplaycore_info" | cut -d ';' -f 3)
 		cpuspeed=$(echo "$netplaycore_info" | cut -d ';' -f 4)
-
-		if [ -n "$netplaycore" ]; then
-			if [ "$netplaycore" = "none" ]; then
-				build_infoPanel_and_log "Netplay impossible" "$platform not compatible with Netplay"
-				sleep 3
-				return 1
-			fi
-		else
-			netplaycore="$cookie_core_path"
+	fi
+	if [ -n "$netplaycore" ]; then
+		if [ "$netplaycore" = "none" ]; then
+			build_infoPanel_and_log "Netplay impossible" "$platform not compatible with Netplay"
+			sleep 3
+			return 1
 		fi
+	else
+		netplaycore="$cookie_core_path"
 	fi
 	return 0
 
-
 }
-
 
 # Create a cookie with all the required info for the client. (client will use this cookie)
 create_cookie_info() {
 	COOKIE_FILE="/mnt/SDCARD/RetroArch/retroarch.cookie"
 	MAX_FILE_SIZE_BYTES=26214400
 
-		echo "[core]: $netplaycore" > "$COOKIE_FILE"
-		echo "[rom]: $cookie_rom_path" >> "$COOKIE_FILE"
+	echo "[core]: $netplaycore" >"$COOKIE_FILE"
+	echo "[rom]: $cookie_rom_path" >>"$COOKIE_FILE"
 
-
-		if [ -s "$netplaycore" ]; then
-			log "Writing core size"
-			core_size=$(stat -c%s "$netplaycore")
-			if [ "$core_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
-				echo "[corechksum]: 0" >> "$COOKIE_FILE"
-			else
-				echo "[corechksum]: $(xcrc "$netplaycore")" >> "$COOKIE_FILE"
-			fi
+	if [ -s "$netplaycore" ]; then
+		log "Writing core size"
+		core_size=$(stat -c%s "$netplaycore")
+		if [ "$core_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
+			echo "[corechksum]: 0" >>"$COOKIE_FILE"
+		else
+			echo "[corechksum]: $(xcrc "$netplaycore")" >>"$COOKIE_FILE"
 		fi
+	fi
 
-		if [ -s "$cookie_rom_path" ]; then
-			log "Writing rom size"
-			rom_size=$(stat -c%s "$cookie_rom_path")
-			if [ "$rom_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
-				echo "[romchksum]: 0" >> "$COOKIE_FILE"
-			else
-				echo "[romchksum]: $(xcrc "$cookie_rom_path")" >> "$COOKIE_FILE"
-			fi
+	if [ -s "$cookie_rom_path" ]; then
+		log "Writing rom size"
+		rom_size=$(stat -c%s "$cookie_rom_path")
+		if [ "$rom_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
+			echo "[romchksum]: 0" >>"$COOKIE_FILE"
+		else
+			echo "[romchksum]: $(xcrc "$cookie_rom_path")" >>"$COOKIE_FILE"
 		fi
+	fi
 
-		if [ -s "$cpuspeed" ]; then
-				echo "[cpuspeed]: $cpuspeed" >> "$COOKIE_FILE"
-				log "Writing cpuspeed: $cpuspeed"
-		fi
+	if [ -s "$cpuspeed" ]; then
+		echo "[cpuspeed]: $cpuspeed" >>"$COOKIE_FILE"
+		log "Writing cpuspeed: $cpuspeed"
+	fi
 
 }
 
@@ -109,19 +103,19 @@ start_retroarch() {
 	echo "core_config_folder: $core_config_folder"
 	echo "cpuspeed: $cpuspeed"
 	echo "*****************************************"
-	
+
 	# We set core CPU speed for Netplay
 	if [ -n "$cpuspeed" ]; then
 		PreviousCPUspeed=$(cat "/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt")
-		echo -n $cpuspeed > "/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt"
+		echo -n $cpuspeed >"/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt"
 	fi
-	
+
 	cd /mnt/SDCARD/RetroArch
 	# sleep 5
 	HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/easynetplay_override.cfg -H -L "$netplaycore" "$cookie_rom_path"
 	# We restore previous core CPU speed
 	if [ -n "$PreviousCPUspeed" ]; then
-		echo -n $PreviousCPUspeed > "/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt"
+		echo -n $PreviousCPUspeed >"/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt"
 	else
 		rm -f "/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt"
 	fi
@@ -136,10 +130,10 @@ cleanup() {
 
 	restore_ftp
 
-    # Remove some files we prepared and received
+	# Remove some files we prepared and received
 	log "Removing stale files"
 	rm "/mnt/SDCARD/RetroArch/retroarch.cookie"
-	
+
 	log "Cleanup done"
 	exit
 
@@ -154,7 +148,7 @@ build_infoPanel_and_log() {
 	local message="$2"
 
 	log "Info Panel: \n\tStage: $title\n\tMessage: $message"
-	
+
 	infoPanel --title "$title" --message "$message" --persistent &
 	touch /tmp/dismiss_info_panel
 	sync
@@ -179,16 +173,16 @@ flag_enabled() {
 }
 
 udhcpc_control() {
-	if pgrep udhcpc > /dev/null; then
+	if pgrep udhcpc >/dev/null; then
 		killall -9 udhcpc
 	fi
 	sleep 1
-	udhcpc -i wlan0 -s /etc/init.d/udhcpc.script > /dev/null 2>&1 &
+	udhcpc -i wlan0 -s /etc/init.d/udhcpc.script >/dev/null 2>&1 &
 }
 
 is_running() {
 	process_name="$1"
-	pgrep "$process_name" > /dev/null
+	pgrep "$process_name" >/dev/null
 }
 
 #########
