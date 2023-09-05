@@ -44,8 +44,8 @@ These are found in the "Expert" section of Package Manager and will be installed
 
 ### Rom files
 
-* The roms on the included Miyoo Mini SD Card are a mixed bag which can lead to incompatibility with some emulators. It is highly recommended to source your own roms to get the most out of the device.
-* Rom folder names are case sensitive and differ in Onion vs the Stock Miyoo SD Card, copy your roms from system to system if coming from stock (copying the ‘Roms’ folder wholesale from the Miyoo SD card will not work).
+* The roms on the included Miyoo Mini SD card are a mixed bag which can lead to incompatibility with some emulators. It is highly recommended to source your own roms to get the most out of the device.
+* Rom folder names are case sensitive and differ in Onion vs the stock Miyoo SD card, copy your roms from system to system if coming from stock (copying the ‘Roms’ folder wholesale from the Miyoo SD card will not work).
 * Subfolders can be used inside your rom folders but ONLY one level deep (i.e. `Roms/GB/Hacks`). 
 * Subfolders cannot have an apostrophe (`'`) in the name and browsing subfolders is not compatible with miyoogamelist.xml (all games will appear as one flat list). 
 * If you add new roms to a system, highlight the system in the Games tab and press <kbd>SELECT</kbd> › `Refresh all roms`. 
@@ -1261,8 +1261,8 @@ button in the bottom left corner of the play window and choose ‘save link as�
 For convenience, a list of Rom folder names for all *fully supported* cores is detailed below. 
 
 **IMPORTANT**
-* If they do not already exist on your SD Card, Onion will create rom directories as required during first install. 
-* All names are case sensitive and may differ from the names on the stock Miyoo SD Card. 
+* If they do not already exist on your SD card, Onion will create rom directories as required during first install. 
+* All names are case sensitive and may differ from the names on the stock Miyoo SD card. 
 * This list does not include expert emulators. 
 
 | System                        | Rom Folder (Case Sensitive) |

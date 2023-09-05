@@ -47,6 +47,7 @@ html[data-theme='dark'] {
   --ifm-color-primary-light: #{lighten($onion-purple, 20%)};
   --ifm-color-primary-lighter: #{lighten($onion-purple, 25%)};
   --ifm-color-primary-lightest: #{lighten($onion-purple, 30%)};
+  --ifm-color-secondary-dark: rgba(var(--base-fg-rgb), 0.3);
   --docusaurus-highlighted-code-line-bg: rgba(var(--onion-purple-rgb), 0.3);
   --ifm-code-background: var(--docusaurus-highlighted-code-line-bg);
   --ifm-navbar-background-color: #242630;
@@ -165,6 +166,14 @@ details.alert.alert--info {
         color: rgba(var(--base-fg-rgb), 1);
       }
     }
+  }
+}
+
+@media (max-width: 576px) {
+  img[align=right] {
+    display: block;
+    margin: 16px auto;
+    float: none;
   }
 }
 

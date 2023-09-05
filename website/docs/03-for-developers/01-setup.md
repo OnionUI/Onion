@@ -1,9 +1,10 @@
 ---
 slug: /dev/setup
-sidebar_position: 1
 ---
 
-![development](https://user-images.githubusercontent.com/7110113/184558441-dc2783c1-0447-489d-9bde-b99d63b6d4b7.png)
+# Setup
+
+![](https://user-images.githubusercontent.com/7110113/184558441-dc2783c1-0447-489d-9bde-b99d63b6d4b7.png)
 
 
 ## Environment

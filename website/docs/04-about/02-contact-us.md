@@ -1,4 +1,6 @@
-![Credits](https://user-images.githubusercontent.com/98862735/179129117-5343b6d6-f4c7-4ae2-8ceb-a93aae65a90f.png)
+# Contact us
+
+![](https://user-images.githubusercontent.com/98862735/179129117-5343b6d6-f4c7-4ae2-8ceb-a93aae65a90f.png)
 
 
 ## Discord

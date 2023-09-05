@@ -47,7 +47,7 @@ like installing an older version of Onion or MiniUI.
 - When the installation is done, press any button and the device will turn off.
 
 ### Step 3: Copy over your bios and rom files
-- Copy your bios files into the `BIOS` folder (from `\RetroArch\.retroarch\system` on the Miyoo SD Card).  
+- Copy your bios files into the `BIOS` folder (from `\RetroArch\.retroarch\system` on the Miyoo SD card).  
 - Copy your roms into their respective folder in `Roms` (see the *[[Emulators]]* page for more information).  
 - Do NOT delete the `.tmp_update` folder, despite its name this must stay on your SD card.  
 

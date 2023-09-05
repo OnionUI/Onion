@@ -9,8 +9,8 @@ slug: /emulators/folders
 For convenience, a list of Rom folder names for all *fully supported* cores is detailed below. 
 
 **IMPORTANT**
-* If they do not already exist on your SD Card, Onion will create rom directories as required during first install. 
-* All names are case sensitive and may differ from the names on the stock Miyoo SD Card. 
+* If they do not already exist on your SD card, Onion will create rom directories as required during first install. 
+* All names are case sensitive and may differ from the names on the stock Miyoo SD card. 
 * This list does not include expert emulators. 
 
 | System                        | Rom Folder (Case Sensitive) |

@@ -1,9 +1,10 @@
 ---
 slug: /dev/install
-sidebar_position: 2
 ---
 
-![development](https://user-images.githubusercontent.com/7110113/184558441-dc2783c1-0447-489d-9bde-b99d63b6d4b7.png)
+# Installing a build
+
+![](https://user-images.githubusercontent.com/7110113/184558441-dc2783c1-0447-489d-9bde-b99d63b6d4b7.png)
 
 
 ## First install
