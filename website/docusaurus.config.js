@@ -40,7 +40,13 @@ const config = {
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
-          sidebarPath: require.resolve('./sidebars.js')
+          sidebarPath: require.resolve('./sidebars.js'),
+          lastVersion: 'current',
+          versions: {
+            current: {
+              label: '4.2'
+            },
+          },
         },
         blog: {
           showReadingTime: true
@@ -60,9 +66,10 @@ const config = {
       // @ts-ignore
       ({
         hashed: true,
-        language: ["en", "zh"],
-        highlightSearchTermsOnTargetPage: true,
+        language: ["en"],
+        highlightSearchTermsOnTargetPage: false,
         explicitSearchResultPath: true,
+        removeDefaultStopWordFilter: true
       }),
     ],
   ],
@@ -109,10 +116,10 @@ const config = {
             type: 'search',
             position: 'right',
           },
-          // {
-          //   type: 'docsVersionDropdown',
-          //   position: 'right',
-          // },
+          {
+            type: 'docsVersionDropdown',
+            position: 'right',
+          },
         ],
       },
       footer: {
