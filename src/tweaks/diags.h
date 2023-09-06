@@ -1,6 +1,8 @@
 #ifndef TWEAKS_DIAGS_H__
 #define TWEAKS_DIAGS_H__
 
+#include <sys/wait.h>
+
 #define DIAG_SCRIPT_PATH "/mnt/SDCARD/.tmp_update/script/diagnostics"
 #define DIAG_MAX_LABEL_LENGTH 64
 #define DIAG_MAX_FILENAME_LENGTH 64
@@ -145,7 +147,7 @@ void *diags_runScript(void *payload_ptr)
             list_updateStickyNote(item, "Script already running...");
         } else if (strcmp(currentStickyNote, "Script already running...") != 0) {
             list_updateStickyNote(item, "Another script is already running...");
-            diags_createResetThread(item);
+            diags_createStickyResetThread(item);
         }
         list_changed = true;
         return NULL;
