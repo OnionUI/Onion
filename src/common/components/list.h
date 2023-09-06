@@ -165,6 +165,11 @@ void list_updateStickyNote(ListItem *item, const char *message)
     strncpy(item->sticky_note, message, STR_MAX - 1);
 }
 
+const char* list_getStickyNote(ListItem *item) {
+    printf("Current sticky note: %s\n", item->sticky_note);
+    return item->sticky_note;
+}
+
 void _list_scroll(List *list, int pos)
 {
     pos = _list_modulo(pos, list->item_count);

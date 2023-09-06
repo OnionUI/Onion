@@ -23,109 +23,7 @@
 #include "./reset.h"
 #include "./tools.h"
 #include "./values.h"
-
-typedef struct {
-    char filename[DIAG_MAX_FILENAME_LENGTH]; // store the filename/path so we can call it later as the payload
-    char label[DIAG_MAX_LABEL_LENGTH];
-    char tooltip[STR_MAX];
-} diagScripts;
-
-static int diags_numScripts;
-static diagScripts *scripts = NULL;
-
-void diags_getEntries(void)
-{
-    DIR *dir;
-    struct dirent *ent;
-    diags_numScripts = 0;
-
-    if ((dir = opendir(DIAG_SCRIPT_PATH)) != NULL) {
-        while ((ent = readdir(dir)) != NULL) {
-            size_t path_size = strlen(DIAG_SCRIPT_PATH) + strlen(ent->d_name) + 2;
-            char *path = (char *)malloc(path_size);
-            if (path == NULL) {
-                printf("Memory allocation failed...\n");
-                return;
-            }
-
-            snprintf(path, path_size, "%s/%s", DIAG_SCRIPT_PATH, ent->d_name);
-
-            if (ent->d_type != DT_REG) {
-                free(path);
-                continue;
-            }
-
-            FILE *file = fopen(path, "r");
-            if (file != NULL) {
-                char line[STR_MAX];
-                diagScripts entry = {0};
-                strncpy(entry.filename, ent->d_name, sizeof(entry.filename) - 1);
-                entry.filename[DIAG_MAX_FILENAME_LENGTH - 1] = '\0';
-
-                while (fgets(line, sizeof(line), file)) {
-                    line[strcspn(line, "\n")] = 0;
-                    if (strcmp(line, "# IGNORE") == 0) {
-                        break;
-                    }
-                    if (sscanf(line, "menulabel=\"%64[^\"]\"", entry.label) == 1) {
-                        entry.label[DIAG_MAX_LABEL_LENGTH - 1] = '\0';
-                        continue;
-                    }
-                    if (sscanf(line, "tooltip=\"%256[^\"]\"", entry.tooltip) == 1) {
-                        entry.tooltip[STR_MAX - 1] = '\0';
-                        continue;
-                    }
-                }
-
-                fclose(file);
-
-                if (entry.label[0] && entry.tooltip[0]) {
-                    diags_numScripts++;
-                    scripts = realloc(scripts, diags_numScripts * sizeof(diagScripts));
-                    if (scripts == NULL) {
-                        printf("Memory allocation failed...\n");
-                        return;
-                    }
-                    scripts[diags_numScripts - 1] = entry;
-                }
-            }
-
-            free(path);
-        }
-        closedir(dir);
-    }
-    else {
-        printf("Could not open directory\n");
-    }
-}
-
-void diags_freeEntries(void)
-{
-    if (scripts != NULL) {
-        free(scripts);
-        scripts = NULL;
-    }
-}
-
-char *parse_newLines(const char *input)
-{ // helper function to parse /n in the scripts
-    char *output = malloc(strlen(input) + 1);
-    if (!output)
-        return NULL;
-
-    int j = 0;
-    for (int i = 0; input[i] != '\0'; i++) {
-        if (input[i] == '\\' && input[i + 1] == 'n') {
-            output[j++] = '\n';
-            i++;
-        }
-        else {
-            output[j++] = input[i];
-        }
-    }
-    output[j] = '\0';
-    return output;
-}
+#include "./diags.h"
 
 void menu_systemStartup(void *_)
 {
@@ -692,9 +590,9 @@ void menu_diagnostics(void *pt)
             }
 
             snprintf(diagItem.label, DIAG_MAX_LABEL_LENGTH - 1, "%s%.62s", prefix, scripts[i].label);
-            strncpy(diagItem.sticky_note, "Idle: Script not running", STR_MAX - 1);
+            strncpy(diagItem.sticky_note, "Idle: Selected script not running", STR_MAX - 1);
 
-            char *parsed_Tooltip = parse_newLines(scripts[i].tooltip);
+            char *parsed_Tooltip = diags_parseNewLines(scripts[i].tooltip);
             list_addItemWithInfoNote(&_menu_diagnostics, diagItem, parsed_Tooltip);
             free(parsed_Tooltip);
         }

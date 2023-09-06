@@ -15,11 +15,8 @@
 
 #include "./appstate.h"
 #include "./values.h"
+#include "./diags.h"
 
-#define DIAG_SCRIPT_PATH "/mnt/SDCARD/.tmp_update/script/diagnostics"
-#define DIAG_MAX_LABEL_LENGTH 64
-#define DIAG_MAX_FILENAME_LENGTH 64
-#define DIAG_MAX_PATH_LENGTH (strlen(DIAG_SCRIPT_PATH) + DIAG_MAX_FILENAME_LENGTH + 2)
 
 void action_setAppShortcut(void *pt)
 {
@@ -97,42 +94,6 @@ void action_setEnableLogging(void *pt)
     file_changeKeyValue(RETROARCH_CONFIG, "log_to_file =", new_value);
 }
 
-void *runScript(void *payload_ptr)
-{ // to background the running of the script so the UI isnt blocked
-    ListItem *item = (ListItem *)payload_ptr;
-    char *filename = (char *)item->payload_ptr;
-    char script_path[DIAG_MAX_PATH_LENGTH + 1];
-    snprintf(script_path, sizeof(script_path), "%s/%s", DIAG_SCRIPT_PATH, filename);
-
-    list_updateStickyNote(item, "Script running...");
-    list_changed = true;
-
-    pid_t pid = fork();
-    if (pid == 0) {
-        execl("/bin/sh", "sh", "-c", script_path, (char *)NULL);
-        exit(EXIT_FAILURE);
-    }
-    else if (pid > 0) {
-        int status;
-        waitpid(pid, &status, 0);
-
-        if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
-            list_updateStickyNote(item, "Script successfully completed."); // good run
-            list_changed = true;
-        }
-        else {
-            list_updateStickyNote(item, "Script failed!"); // displays if the script is bad (syntax, other errors, none-zero)
-            list_changed = true;
-        }
-    }
-    else {
-        list_updateStickyNote(item, "Failed to run script..."); // case when fork fails
-        list_changed = true;
-    }
-
-    return NULL;
-}
-
 void action_runDiagnosticScript(void *payload_ptr)
 { // run the script based on what the payload_ptr gives us
     ListItem *item = (ListItem *)payload_ptr;
@@ -141,7 +102,7 @@ void action_runDiagnosticScript(void *payload_ptr)
     snprintf(script_path, sizeof(script_path), "%s/%s", DIAG_SCRIPT_PATH, filename);
 
     pthread_t thread;
-    if (pthread_create(&thread, NULL, runScript, payload_ptr) != 0) {
+    if (pthread_create(&thread, NULL, diags_runScript, payload_ptr) != 0) {
         list_updateStickyNote(item, "Failed to run script..."); // threading issues
         list_changed = true;
     }
