@@ -6,7 +6,7 @@
 #define DIAG_MAX_FILENAME_LENGTH 64
 #define DIAG_MAX_PATH_LENGTH (strlen(DIAG_SCRIPT_PATH) + DIAG_MAX_FILENAME_LENGTH + 2)
 
-typedef struct { 
+typedef struct {
     char filename[DIAG_MAX_FILENAME_LENGTH]; // store the filename/path so we can call it later as the payload
     char label[DIAG_MAX_LABEL_LENGTH];
     char tooltip[STR_MAX];
@@ -109,7 +109,8 @@ char *diags_parseNewLines(const char *input)
     return output;
 }
 
-void *diags_resetStickyNote(void *payload_ptr) {
+void *diags_resetStickyNote(void *payload_ptr)
+{
     ListItem *item = (ListItem *)payload_ptr;
 
     sleep(5);
@@ -119,7 +120,8 @@ void *diags_resetStickyNote(void *payload_ptr) {
     return NULL;
 }
 
-void diags_createResetThread(ListItem *item) {
+void diags_createResetThread(ListItem *item)
+{
     pthread_t reset_thread;
     if (pthread_create(&reset_thread, NULL, diags_resetStickyNote, item) != 0) {
         perror("Failed to create reset_thread");
@@ -128,19 +130,21 @@ void diags_createResetThread(ListItem *item) {
 
 volatile int isScriptRunning = 0;
 
-void *diags_runScript(void *payload_ptr) {
+void *diags_runScript(void *payload_ptr)
+{
     ListItem *item = (ListItem *)payload_ptr;
     char *filename = (char *)item->payload_ptr;
-    
+
     char script_path[DIAG_MAX_PATH_LENGTH + 1];
     snprintf(script_path, sizeof(script_path), "%s/%s", DIAG_SCRIPT_PATH, filename);
 
-    const char *currentStickyNote = list_getStickyNote(item);  // Moved this line up
+    const char *currentStickyNote = list_getStickyNote(item); // Moved this line up
 
     if (__sync_lock_test_and_set(&isScriptRunning, 1)) {
         if (strcmp(currentStickyNote, "Script running...") == 0) {
             list_updateStickyNote(item, "Script already running...");
-        } else {
+        }
+        else {
             list_updateStickyNote(item, "Another script is already running...");
             diags_createResetThread(item);
         }
@@ -162,7 +166,8 @@ void *diags_runScript(void *payload_ptr) {
 
         if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
             list_updateStickyNote(item, "Script successfully completed.");
-        } else {
+        }
+        else {
             list_updateStickyNote(item, "Script failed!");
         }
 
