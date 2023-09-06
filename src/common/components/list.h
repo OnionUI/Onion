@@ -166,7 +166,6 @@ void list_updateStickyNote(ListItem *item, const char *message)
 }
 
 const char* list_getStickyNote(ListItem *item) {
-    printf("Current sticky note: %s\n", item->sticky_note);
     return item->sticky_note;
 }
 

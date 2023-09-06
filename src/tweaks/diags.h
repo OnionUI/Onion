@@ -119,7 +119,7 @@ void *diags_resetStickyNote(void *payload_ptr) {
     return NULL;
 }
 
-void diags_createResetThread(ListItem *item) {
+void diags_createStickyResetThread(ListItem *item) {
     pthread_t reset_thread;
     if (pthread_create(&reset_thread, NULL, diags_resetStickyNote, item) != 0) {
         perror("Failed to create reset_thread");
@@ -135,14 +135,14 @@ void *diags_runScript(void *payload_ptr) {
     char script_path[DIAG_MAX_PATH_LENGTH + 1];
     snprintf(script_path, sizeof(script_path), "%s/%s", DIAG_SCRIPT_PATH, filename);
 
-    const char *currentStickyNote = list_getStickyNote(item);  // Moved this line up
+    const char *currentStickyNote = list_getStickyNote(item); 
 
     if (__sync_lock_test_and_set(&isScriptRunning, 1)) {
         if (strcmp(currentStickyNote, "Script running...") == 0) {
             list_updateStickyNote(item, "Script already running...");
-        } else {
+        } else if (strcmp(currentStickyNote, "Script already running...") != 0) {
             list_updateStickyNote(item, "Another script is already running...");
-            diags_createResetThread(item);
+            diags_createStickyResetThread(item);
         }
         list_changed = true;
         return NULL;
@@ -166,14 +166,14 @@ void *diags_runScript(void *payload_ptr) {
             list_updateStickyNote(item, "Script failed!");
         }
 
-        diags_createResetThread(item);
+        diags_createStickyResetThread(item);
 
         __sync_lock_release(&isScriptRunning);
         list_changed = true;
     }
     else {
         list_updateStickyNote(item, "Failed to run script...");
-        diags_createResetThread(item);
+        diags_createStickyResetThread(item);
         list_changed = true;
     }
 
