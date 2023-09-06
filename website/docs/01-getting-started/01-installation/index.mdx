@@ -8,6 +8,7 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import DocCardList from '@theme/DocCardList';
 import ReleaseLink from '@site/src/components/ReleaseLink';
+import Link from '@docusaurus/Link';
 
 
 # Installation
@@ -19,13 +20,24 @@ import ReleaseLink from '@site/src/components/ReleaseLink';
 
 *The firmware is the backend part of the OS, which lives inside your device. Onion on the other hand is a frontend that will stay fresh on your SD card.*
 
-1. You can check your current version in `Settings` › `Device Info` › `Version`
-   - or if you already have Onion installed: `Settings` › `About device` › `Firmware version`
+:::caution Risk of bricking
+We can't take responsibility if your device is bricked in the process of upgrading the firmware.
+
+Take a look at the [*firmware upgrade guide*](https://user-images.githubusercontent.com/16885275/170205258-8add4be7-1a1e-4ae5-a8f2-cb13c6703e06.png) - beware, the guide contains an outdated link to lemiyoo.cn, we provide an alternative download link above.
+:::
+
+1. You can check your current version in `Settings` › `Device Info` › `Version`  
+   or if you already have Onion installed: `Settings` › `About device` › `Firmware version`
 2. Select your device in the tabs below, then check that you have the appropriate firmware version.
 
 <Tabs groupId="device" queryString>
 <TabItem value="mm" label="Miyoo Mini (MM)">
 
+
+:::info 'The Boya Incident'
+A bad firmware was found on devices bought in late December (version `20221216****` and `20221224****`).
+Please apply the community patch found below. [Read more](https://docs.google.com/document/d/e/2PACX-1vQCTMHDUz2jJBPx3XbvXGVukRJ0t96JKe1gchuV9i5eo3RqY1mIwFx8H1Ja-3sQtFXcHh3U72O8DNcY/pub)
+:::
 
 3. You need at least firmware version `20220419****` (for Onion v3.10 and above)  
    *Most devices produced after July 2022 will already have this firmware version.*
@@ -38,15 +50,12 @@ import ReleaseLink from '@site/src/components/ReleaseLink';
    - `2023 01 04 1337` ✔️ (community patch)
    - `2023 06 11 1426` ✔️
 
-:::caution 'The Boya Incident'
-A bad firmware was found on devices bought in late December (version `20221216****` and `20221224****`).
-Please apply the community patch found below. [Read more](https://docs.google.com/document/d/e/2PACX-1vQCTMHDUz2jJBPx3XbvXGVukRJ0t96JKe1gchuV9i5eo3RqY1mIwFx8H1Ja-3sQtFXcHh3U72O8DNcY/pub)
+:::note Firmware downloads (MM)
+
+- [Firmware 20220409](https://drive.google.com/drive/folders/1VtfcBCoIcpMIBY2FIyAtjV-Dg02JUvhG) (recommended version)
+- [Community patch](https://www.reddit.com/r/MiyooMini/comments/104qbak/community_firmware_patch_for_new_devices/) (use only on firmware 20221216/24)
+
 :::
-
-### Firmware downloads (MM)
-
-- [Firmware 20220409 (recommended)](https://drive.google.com/drive/folders/1VtfcBCoIcpMIBY2FIyAtjV-Dg02JUvhG)
-- [Community patch (use only on firmware 20221216/24)](https://www.reddit.com/r/MiyooMini/comments/104qbak/community_firmware_patch_for_new_devices/)
 
 </TabItem>
 <TabItem value="mmp" label="Miyoo Mini+ (MMP)">
@@ -63,19 +72,14 @@ Please apply the community patch found below. [Read more](https://docs.google.co
    - `2023 06 09 2122` ✔️ (recommended)
    - `2023 06 28 2128` ✔️
 
-### Firmware downloads (MMP)
+:::note Firmware downloads (MMP)
 
-- [Firmware 20230609 (recommended)](https://app.sugarsync.com/iris/wf/D4978471_09235444_029620)
+- [Firmware 20230609](https://app.sugarsync.com/iris/wf/D4978471_09235444_029620) (recommended version)
+
+:::
 
 </TabItem>
 </Tabs>
-
-
-:::danger Risk of bricking
-We can't take responsibility if your device is bricked in the process of upgrading the firmware.
-
-Take a look at the [*firmware upgrade guide*](https://user-images.githubusercontent.com/16885275/170205258-8add4be7-1a1e-4ae5-a8f2-cb13c6703e06.png) - beware, the guide contains an outdated link to lemiyoo.cn, we provide an alternative download link above.
-:::
 
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179302769-4169e57a-860f-4c0e-8792-007e7557ba48.png" width="54" /></sup> Download the installation files
@@ -86,14 +90,13 @@ You need to install **Onion V4.2** for MMP, as earlier versions doesn't support 
 
 Download the latest version of Onion:
 
-<div class="container text--center row">
-    <div class="margin-left--xl col">
-        <ReleaseLink label="Stable" showDownloads className="button button--primary button--lg" url="https://api.github.com/repos/OnionUI/Onion/releases/latest" />
-    </div>
-    <div class="margin-right--xl col">
-        <ReleaseLink label="Beta" showDownloads className="button button--secondary button--lg" url="https://api.github.com/repos/OnionUI/Onion/releases/tags/latest" />
-    </div>
+<div className="release-links">
+    <ReleaseLink label="Stable" showDownloads className="button button--primary button--lg" url="https://api.github.com/repos/OnionUI/Onion/releases/latest" />
+    <ReleaseLink label="Beta" showDownloads className="button button--secondary button--lg" url="https://api.github.com/repos/OnionUI/Onion/releases/tags/latest" />
 </div>
+
+The Onion installation zip is found under **Assets** at the bottom of the release notes.  
+Look for `Onion-v4.x.x.zip` or `Onion-v4.x.x-snapshot-[tag].zip`.
 
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179306127-e8a2c99c-a078-46b0-9561-47abf5c16208.png" width="54" /></sup> Install or upgrade
@@ -101,3 +104,12 @@ Download the latest version of Onion:
 Depending on your situation, choose an option below:
 
 <DocCardList/>
+
+:::tip
+If you experience any issues during the install, try copying over the installation
+files again and re-run the installation (you can skip copying the `BIOS`,
+`Icons`, and `Themes` folders).
+
+If you still have issues after trying a reinstall, you may need to reformat
+your SD card (remember to backup the `Roms` and `Saves` folders).
+:::

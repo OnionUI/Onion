@@ -103,14 +103,6 @@ h6 {
   }
 }
 
-code {
-  border-color: rgba(var(--onion-purple-rgb), .2);
-
-  html[data-theme='dark'] & {
-    border-color: rgba(var(--onion-purple-rgb), .5);
-  }
-}
-
 details.alert.alert--info {
   --docusaurus-details-decoration-color: rgba(var(--base-fg-rgb), .3);
   --ifm-code-background: inherit;
@@ -166,6 +158,35 @@ details.alert.alert--info {
         color: rgba(var(--base-fg-rgb), 1);
       }
     }
+  }
+}
+
+a.button,
+.alert a.button {
+  text-decoration: none;
+}
+
+.alert--secondary a {
+  color: #{$onion-purple};
+}
+
+.release-links {
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+h2 {
+  display: flex;
+  align-items: center;
+
+  img {
+    width: 48px;
+    margin-right: 8px;
   }
 }
 
