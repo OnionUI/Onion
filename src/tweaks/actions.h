@@ -12,10 +12,6 @@
 #include "utils/config.h"
 #include "utils/file.h"
 #include "utils/msleep.h"
-#include <pthread.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <unistd.h>
 
 #include "./appstate.h"
 #include "./values.h"
