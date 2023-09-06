@@ -120,7 +120,7 @@ void *diags_resetStickyNote(void *payload_ptr)
     return NULL;
 }
 
-void diags_createStickyResetThread(ListItem *item) 
+void diags_createStickyResetThread(ListItem *item)
 {
     pthread_t reset_thread;
     if (pthread_create(&reset_thread, NULL, diags_resetStickyNote, item) != 0) {
@@ -138,12 +138,13 @@ void *diags_runScript(void *payload_ptr)
     char script_path[DIAG_MAX_PATH_LENGTH + 1];
     snprintf(script_path, sizeof(script_path), "%s/%s", DIAG_SCRIPT_PATH, filename);
 
-    const char *currentStickyNote = list_getStickyNote(item); 
+    const char *currentStickyNote = list_getStickyNote(item);
 
     if (__sync_lock_test_and_set(&isScriptRunning, 1)) {
         if (strcmp(currentStickyNote, "Script running...") == 0) {
             list_updateStickyNote(item, "Script already running...");
-        } else if (strcmp(currentStickyNote, "Script already running...") != 0) {
+        }
+        else if (strcmp(currentStickyNote, "Script already running...") != 0) {
             list_updateStickyNote(item, "Another script is already running...");
             diags_createResetThread(item);
         }
