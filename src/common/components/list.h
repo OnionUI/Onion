@@ -165,7 +165,8 @@ void list_updateStickyNote(ListItem *item, const char *message)
     strncpy(item->sticky_note, message, STR_MAX - 1);
 }
 
-const char* list_getStickyNote(ListItem *item) {
+const char *list_getStickyNote(ListItem *item)
+{
     return item->sticky_note;
 }
 

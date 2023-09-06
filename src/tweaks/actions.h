@@ -14,9 +14,8 @@
 #include "utils/msleep.h"
 
 #include "./appstate.h"
-#include "./values.h"
 #include "./diags.h"
-
+#include "./values.h"
 
 void action_setAppShortcut(void *pt)
 {

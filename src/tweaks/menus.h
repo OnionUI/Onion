@@ -17,13 +17,13 @@
 
 #include "./actions.h"
 #include "./appstate.h"
+#include "./diags.h"
 #include "./formatters.h"
 #include "./icons.h"
 #include "./network.h"
 #include "./reset.h"
 #include "./tools.h"
 #include "./values.h"
-#include "./diags.h"
 
 void menu_systemStartup(void *_)
 {
