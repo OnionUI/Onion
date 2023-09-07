@@ -170,6 +170,11 @@ a.button,
   color: #{$onion-purple};
 }
 
+a>span.material-icons {
+  margin-right: 4px;
+  margin-bottom: -.25em;
+}
+
 .release-links {
   display: flex;
   gap: 32px;

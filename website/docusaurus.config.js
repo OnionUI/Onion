@@ -58,6 +58,10 @@ const config = {
     ],
   ],
 
+  stylesheets: [
+    "https://fonts.googleapis.com/icon?family=Material+Icons",
+  ],
+
   themes: [
     [
       // @ts-ignore
