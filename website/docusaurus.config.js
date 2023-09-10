@@ -48,9 +48,7 @@ const config = {
             },
           },
         },
-        blog: {
-          showReadingTime: true
-        },
+        blog: false,
         theme: {
           customCss: require.resolve('./src/style/custom.scss'),
         },
@@ -224,7 +222,15 @@ const config = {
     }),
 
   plugins: [
-    require.resolve('docusaurus-plugin-sass')
+    require.resolve('docusaurus-plugin-sass'),
+    [
+      "./src/plugins/blog-plugin",
+      {
+        id: "blog",
+        routeBasePath: "blog",
+        path: "./blog",
+      }
+    ]
   ],
 };
 

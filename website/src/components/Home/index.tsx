@@ -6,7 +6,8 @@ import Layout from '@theme/Layout';
 import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import ReleaseLink from '@site/src/components/ReleaseLink';
 
-import styles from './index.module.scss';
+import styles from './styles.module.scss';
+import { Content } from "@theme/BlogPostPage";
 
 function HomepageHeader() {
     const { siteConfig } = useDocusaurusContext();
@@ -39,8 +40,39 @@ function CenteredNote({ children }) {
     );
 }
 
-export default function Home(): JSX.Element {
+function RecentPosts({ recentPosts }: Props): JSX.Element {
+    return (<>
+        {recentPosts && (
+            <div className={clsx('container padding--lg', styles.recentPosts)}>
+                <h2>Recent blog posts</h2>
+                <div className="row">
+                    {recentPosts.map(({ content }) => (
+                        <div key={content.metadata.permalink} className="col col--4">
+                            <div className="card margin-vert--lg">
+                                <div className="card__header">
+                                    <h3><Link href={content.metadata.permalink}>{content.metadata.title}</Link></h3>
+                                </div>
+                                <div className="card__body">{content.metadata.description}</div>
+                                <div className={clsx('card__footer', styles.card__footer)}>
+                                    <small>{content.metadata.formattedDate}</small>
+                                    <button onClick={() => (location.href = content.metadata.permalink)} className="button button--link">Read more</button>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        )}
+    </>);
+}
+
+interface Props {
+    readonly recentPosts: readonly { readonly content: Content }[];
+}
+
+export default function Home({ recentPosts }: Props): JSX.Element {
     const { siteConfig } = useDocusaurusContext();
+    console.log(recentPosts);
     return (
         <Layout
             title={`Welcome`}
@@ -51,6 +83,7 @@ export default function Home(): JSX.Element {
                     <b>Windows user?</b> Try <Link href='https://github.com/schmurtzm/Onion-Desktop-Tools/blob/main/README.md'>Onion Desktop Tools</Link> for easy SD card preparation and installation.
                 </CenteredNote>
                 <HomepageFeatures />
+                <RecentPosts recentPosts={recentPosts} />
             </main>
         </Layout>
     );
