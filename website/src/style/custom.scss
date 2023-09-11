@@ -203,6 +203,11 @@ h2 {
   }
 }
 
+/* Fix giscus widget width */
+giscus-widget {
+  display: block;
+}
+
 
 // Agnolia Search
 
