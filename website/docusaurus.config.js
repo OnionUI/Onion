@@ -5,6 +5,15 @@ const lightCodeTheme = require('prism-react-renderer/themes/github');
 const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
 const remarkPing = require('remark-ping');
+const remarkPingOpts = {
+  pingUsername: (username) => true,
+  userURL: (username) => `https://github.com/${username}`
+}
+
+const oembed = require('remark-oembed');
+const oembedOpts = {
+  syncWidget: true
+}
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -49,6 +58,10 @@ const config = {
               label: '4.2'
             },
           },
+          remarkPlugins: [
+            [oembed, oembedOpts],
+            [remarkPing, remarkPingOpts],
+          ],
         },
         blog: false,
         theme: {
@@ -221,9 +234,20 @@ const config = {
         defaultMode: 'dark',
         respectPrefersColorScheme: true,
       },
+      zoom: {
+        selector: '.markdown :not(em):not(h2):not(sup):not(a) > img',
+        config: {
+          // options you can specify via https://github.com/francoischalifour/medium-zoom#usage
+          background: {
+            light: 'rgb(255, 255, 255)',
+            dark: 'rgb(50, 50, 50)'
+          }
+        }
+      },
     }),
 
   plugins: [
+    require.resolve('docusaurus-plugin-image-zoom'),
     require.resolve('docusaurus-plugin-sass'),
     [
       "./src/plugins/blog-plugin",
@@ -232,13 +256,11 @@ const config = {
         routeBasePath: "blog",
         path: "./blog",
         remarkPlugins: [
-          [remarkPing, {
-            pingUsername: (username) => true,
-            userURL: (username) => `https://github.com/${username}`
-          }]
+          [oembed, oembedOpts],
+          [remarkPing, remarkPingOpts],
         ],
       }
-    ]
+    ],
   ],
 };
 

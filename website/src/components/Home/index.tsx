@@ -45,6 +45,7 @@ function RecentPosts({ recentPosts }: Props): JSX.Element {
         {recentPosts && (
             <div className={clsx('container padding--lg', styles.recentPosts)}>
                 <h2>Recent blog posts</h2>
+                <Link href="/blog">See all blog posts</Link>
                 <div className="row">
                     {recentPosts.map(({ content }) => (
                         <div key={content.metadata.permalink} className="col col--4">
@@ -72,7 +73,7 @@ interface Props {
 
 export default function Home({ recentPosts }: Props): JSX.Element {
     const { siteConfig } = useDocusaurusContext();
-    console.log(recentPosts);
+
     return (
         <Layout
             title={`Welcome`}

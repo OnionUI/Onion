@@ -61,7 +61,11 @@ html[data-theme='dark'] {
 
 .footer {
   a {
-    color: inherit;
+    color: rgba(255, 255, 255, .65);
+
+    &:hover {
+      color: #fff;
+    }
   }
 }
 
@@ -128,7 +132,7 @@ details.alert.alert--info {
   }
 
   a {
-    text-decoration-color: #{$onion-purple};
+    text-decoration-color: var(--ifm-link-color);
   }
 
   summary {
@@ -166,8 +170,9 @@ a.button,
   text-decoration: none;
 }
 
-.alert--secondary a {
-  color: #{$onion-purple};
+.alert--secondary {
+  --ifm-link-color: inherit;
+  --ifm-link-hover-color: inherit;
 }
 
 a>span.material-icons {
@@ -222,6 +227,16 @@ h4 {
     top: -1em;
     margin-bottom: -1em;
     font-style: italic;
+  }
+}
+
+.remark-oembed-inline {
+  display: block;
+
+  iframe {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
   }
 }
 

@@ -6,7 +6,7 @@ slug: /third-party
 
 # Third-party apps
 
-![Apps](https://user-images.githubusercontent.com/98862735/178884500-8188e34c-b140-4c8e-83d1-44ec4c3b5112.png)
+*![](https://user-images.githubusercontent.com/98862735/178884500-8188e34c-b140-4c8e-83d1-44ec4c3b5112.png)*
 
 
 Here you will find a selection of third party applications and tools compatible with Onion.

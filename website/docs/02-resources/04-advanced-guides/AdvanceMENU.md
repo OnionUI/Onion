@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-slug: /advancemenu
+slug: /advanced/advancemenu
 ---
 
 *App shortcut, config files, and video files*

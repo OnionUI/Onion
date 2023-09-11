@@ -6,7 +6,7 @@ slug: /theme-design
 
 # Theme design
 
-![Themes3](https://user-images.githubusercontent.com/98862735/178886298-516ac53b-a7da-4568-a788-f97ece6b6c67.png)
+*![](https://user-images.githubusercontent.com/98862735/178886298-516ac53b-a7da-4568-a788-f97ece6b6c67.png)*
 
 
 ## Theme Repository

@@ -99,12 +99,12 @@ All the necessary files (except licensed game files) are now hosted on the:
 - **PDF Reader** (Green) - *ideal for looking up clues in game manuals  - credit: Steward-Fu*
 - **Ebook Reader** (Pixel Reader) - *well suited for reading walkthroughs on the go  - credit: [ealang](https://github.com/ealang/pixel-reader)*
 
-<p align="center">
+<p align="center"><em>
 <img title="Random Game" src="https://user-images.githubusercontent.com/44569252/226454336-c2425e57-e507-4b32-aa30-8e1b3884f4ef.png"/>
 <img title="Video Player" src="https://user-images.githubusercontent.com/44569252/226454472-7e4e6769-a86c-469f-b735-e85473094b0e.png"/>
 <img title="PDF Reader" src="https://user-images.githubusercontent.com/44569252/226454495-bd086c74-61fe-4709-9e97-bebb3febbe75.png"/>
 <img title="Ebook Reader" src="https://user-images.githubusercontent.com/44569252/226454509-1815c543-8001-4b7d-b7d9-2d3be5795140.png"/>
-</p>
+</em></p>
 
 
 ### Other exciting features
