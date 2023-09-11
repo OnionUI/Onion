@@ -17,4 +17,4 @@ slug: /emulators/neogeo
 - Because Neo Geo roms can come in different formats (split or non-merged), it's recommended to keep the 'neogeo.zip' bios in both the `/BIOS` folder and the `/Roms/NEOGEO` folder to ensure best compatibility.
 - For best game compatibility, seek out the recommended romset above. Alternative romsets for Final Burn cores may be largely compatible (i.e. v0.2.97.24, v0.2.97.39, v0.2.97.40, v0.2.97.44).
 
-Check out the [NeoGeo overview video](https://www.youtube.com/watch?v=CGKX6yPG2nE) by *RetroBreeze*.
+https://www.youtube.com/watch?v=CGKX6yPG2nE

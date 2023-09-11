@@ -18,4 +18,4 @@ For multi-cart games (such as `POOM`), place all 'cart' game files in `Roms/PICO
 To download games from the [Lexaloffle BBS](https://www.lexaloffle.com/bbs/?cat=7#sub=2&mode=carts&orderby=featured), right-click the <img src="https://user-images.githubusercontent.com/98862735/190835494-ec611ceb-5ec1-4b96-924d-7ec969fc83e1.png"  align="center"  width="52" /> 
 button in the bottom left corner of the play window and choose ‘save link as’.  
 
-Check out the [Pico-8 overview video](https://www.youtube.com/watch?v=ZGd5vmwnAPA) by *RetroBreeze*.
+https://www.youtube.com/watch?v=ZGd5vmwnAPA

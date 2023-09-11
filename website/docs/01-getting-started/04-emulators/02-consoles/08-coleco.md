@@ -14,4 +14,4 @@ slug: /emulators/coleco
 
 The blueMSX core requires the `Databases` and `Machines` folders from a full installation of blueMSX ([more info here](https://docs.libretro.com/library/bluemsx/#bios)) to be placed inside the `BIOS` folder.
 
-Check out the [ColecoVision overview video](https://www.youtube.com/watch?v=tDtrmM-hLno) by *RetroBreeze*.
+https://www.youtube.com/watch?v=tDtrmM-hLno
