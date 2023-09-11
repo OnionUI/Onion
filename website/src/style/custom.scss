@@ -203,9 +203,26 @@ h2 {
   }
 }
 
-/* Fix giscus widget width */
-giscus-widget {
-  display: block;
+
+.ping {
+  color: rgba(var(--base-fg-rgb), .4);
+
+  .ping-username {
+    font-weight: bold;
+    color: var(--ifm-link-color);
+  }
+}
+
+h1,
+h2,
+h3,
+h4 {
+  &+sup {
+    position: relative;
+    top: -1em;
+    margin-bottom: -1em;
+    font-style: italic;
+  }
 }
 
 

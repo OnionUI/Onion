@@ -4,6 +4,8 @@
 const lightCodeTheme = require('prism-react-renderer/themes/github');
 const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
+const remarkPing = require('remark-ping');
+
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'Onion',
@@ -229,6 +231,12 @@ const config = {
         id: "blog",
         routeBasePath: "blog",
         path: "./blog",
+        remarkPlugins: [
+          [remarkPing, {
+            pingUsername: (username) => true,
+            userURL: (username) => `https://github.com/${username}`
+          }]
+        ],
       }
     ]
   ],
