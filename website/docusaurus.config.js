@@ -255,6 +255,7 @@ const config = {
         id: "blog",
         routeBasePath: "blog",
         path: "./blog",
+        showReadingTime: false,
         remarkPlugins: [
           [oembed, oembedOpts],
           [remarkPing, remarkPingOpts],
