@@ -12,6 +12,7 @@
 #include <sys/file.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <sqlite3/sqlite3.h>
 
 #ifdef PLATFORM_MIYOOMINI
 #include "shmvar/shmvar.h"
@@ -24,13 +25,20 @@
 #include "utils/file.h"
 #include "utils/flags.h"
 #include "utils/log.h"
+#include "batmonDB.h"
 
 #define CHECK_BATTERY_TIMEOUT_S 15 // s - check battery percentage every 15s
+
+// Battery logs
+#define BATTERY_LOG_THRESHOLD 2 // Define when a new battery entry is logged
+#define FILO_MIN_SIZE 1000
+#define MAX_DURATION_BEFORE_UPDATE 600
 
 // for reading battery
 #define SARADC_IOC_MAGIC 'a'
 #define IOCTL_SAR_INIT _IO(SARADC_IOC_MAGIC, 0)
 #define IOCTL_SAR_SET_CHANNEL_READ_VALUE _IO(SARADC_IOC_MAGIC, 1)
+
 typedef struct {
     int channel_value;
     int adc_value;
@@ -44,6 +52,11 @@ static bool is_suspended = false;
 
 static void sigHandler(int sig);
 void cleanup(void);
+
+void update_current_duration(void);
+void log_new_percentage(int new_bat_value, int is_charging);
+int get_current_session_time(void);
+int set_best_session_time(int best_session);
 void saveFakeAxpResult(int current_percentage);
 bool isCharging(void);
 int updateADCValue(int);
