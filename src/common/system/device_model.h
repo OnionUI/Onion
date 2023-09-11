@@ -9,7 +9,7 @@
 
 static int DEVICE_ID;
 static char DEVICE_SN[12];
- 
+
 /**
  * @brief Get device model
  * MM = Miyoo mini

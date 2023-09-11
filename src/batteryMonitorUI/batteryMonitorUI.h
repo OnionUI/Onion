@@ -1,6 +1,5 @@
 #ifndef BATTERY_MONITOR_UI_H
 #define BATTERY_MONITOR_UI_H
-#include <sqlite3/sqlite3.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
@@ -8,6 +7,7 @@
 #include <linux/input.h>
 #include <math.h>
 #include <signal.h>
+#include <sqlite3/sqlite3.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -15,9 +15,9 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "system/display.h"
 #include "system/keymap_sw.h"
 #include "system/system.h"
-#include "system/display.h"
 #include "utils/file.h"
 #include "utils/keystate.h"
 #include "utils/log.h"
@@ -49,7 +49,7 @@
 #define LABEL3_X 407
 #define LABEL4_X 538
 
-#define SUB_TITLE_X 255 
+#define SUB_TITLE_X 255
 #define SUB_TITLE_Y 32
 
 #define LABEL_SESSION_X 100
@@ -63,7 +63,6 @@
 
 #define LABEL_SIZE_X 65
 #define LABEL_SIZE_Y 15
-
 
 #define RIGHT_ARROW_X 591
 #define RIGHT_ARROW_Y 13

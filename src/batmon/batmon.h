@@ -4,6 +4,7 @@
 #include <fcntl.h>
 #include <pthread.h>
 #include <signal.h>
+#include <sqlite3/sqlite3.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -12,12 +13,12 @@
 #include <sys/file.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
-#include <sqlite3/sqlite3.h>
 
 #ifdef PLATFORM_MIYOOMINI
 #include "shmvar/shmvar.h"
 #endif
 
+#include "batmonDB.h"
 #include "system/battery.h"
 #include "system/display.h"
 #include "system/system.h"
@@ -25,7 +26,6 @@
 #include "utils/file.h"
 #include "utils/flags.h"
 #include "utils/log.h"
-#include "batmonDB.h"
 
 #define CHECK_BATTERY_TIMEOUT_S 15 // s - check battery percentage every 15s
 
