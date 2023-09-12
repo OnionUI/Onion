@@ -208,30 +208,6 @@ h2 {
   }
 }
 
-
-giscus-widget {
-  display: block;
-  position: relative;
-
-  &::after {
-    content: "";
-    border: 1px solid var(--ifm-toc-border-color);
-    position: absolute;
-    left: 0px;
-    right: -1px;
-    top: 138px;
-    bottom: 6.5px;
-    border-radius: 4px;
-
-    @media (max-width: 360px) {
-      & {
-        display: none;
-      }
-    }
-  }
-}
-
-
 .ping {
   color: rgba(var(--base-fg-rgb), .4);
 
