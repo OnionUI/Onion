@@ -239,6 +239,21 @@ h4 {
   }
 }
 
+table[align=center] {
+  display: table;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+tr.table-separator:nth-child(1n) {
+  background-color: transparent;
+
+  td {
+    border-left: 0;
+    border-right: 0;
+  }
+}
+
 
 // Agnolia Search
 

@@ -4,6 +4,7 @@ sidebar_position: 3
 ---
 
 import DynamicFAQSection from '@site/src/components/DynamicFAQSection';
+import IconLink from '@site/src/components/IconLink';
 
 
 # FAQ
@@ -22,31 +23,13 @@ import DynamicFAQSection from '@site/src/components/DynamicFAQSection';
 
 </summary>
 
-<sup>(Credit: Julian)</sup>
+Onion has a built-in scraper (MMP only):
 
-The file format is PNG with a max size of 250×360. The images need to be placed into the `Roms/<gamesystem>/Imgs` folder. 
+1. When inside a game list, press <kbd>Y</kbd> to access GLO
+2. Scroll down and find the "Scraper" option
 
-The `Imgs` folder name is case sensitive (must have a capital `I`). Examples would be like the following:    
-`Roms/FC/Imgs`  
-`Roms/SFC/Imgs`  
-`Roms/GB/Imgs`  
-
-You can scrape your box art or screenshots automatically by following the below process:
-
-- Use https://www.skraper.net/   
-- Log in and select "Recalbox"   
-- Check "Include non-Recalbox rom folders"   
-   > (Some systems aren't recognized because their folder-names are non-standard. To add those systems, press the `+` symbol on the bottom left, select the systems that are missing & hit "OK". Then click the added systems in the bar on the left, and correct the system's folders in the "Games/Roms folder" bar or by clicking the file-icon to the right of it.
-[You can find a list of all Rom folder names here](emulators)   
-- Go to the "media" tab › Enable & set "Resize width to" to 250 and enable "Keep Image Ratio"    
-- Select the image type you don't want in the "Fetched Media List" and press the "minus" button, so there's only one picture.   
-   > You can change how the image mix looks with the two buttons under "Media type",  I recommend changing "4 IMAGES MIX" to "Screenscraper's Recalbox Mix V2", but use whatever you prefer.
-   > If you choose a picture that's taller than it's wide, like the boxart, set "Resize height to" to 360 and disable "Keep Image Ratio"
-- Change "Output folder" to `%ROMROOTFOLDER%\Imgs`, with a capital `I`.
-- Under 'Gamelist Link' ensure that "Link from node '&lt;thumbnail&gt;'" is ticked as well as 'Optimize media storage' (these are important if you wish to use the generated gamelist.xml to create a miyoogamelist.xml for use in Onion (more info on this below on this page).    
-- Now click the system you want to scrape for on the left side, or "all system", and press the play button in the bottom right corner.    
-
-This will automatically scrape images to the correct folders for Miyoo Mini. 
+If you have a regular Mini, or just want to scrape images off-device, follow this guide:
+- [Scraping artwork for games](advanced/scraping)
 
 </details>
 
@@ -106,7 +89,7 @@ This guide will teach you how to add cheats for your RetroArch emulators.
 
 Your first task is to find cheat files for your games (usually provided in `.cht` format). You can find them fairly easily online, but the recommended source is [LibRetro database](https://github.com/libretro/libretro-database), which has up-to-date cheats for most LibRetro supported emulators.
 
-1. Download the [whole repository as a ZIP file](https://github.com/libretro/libretro-database/archive/refs/heads/master.zip) (Code › Download ZIP),
+1. Download the <IconLink href="https://github.com/libretro/libretro-database/archive/refs/heads/master.zip" icon="folder_zip">database repository as a ZIP file</IconLink>,
 2. Extract it and go into the `cht` directory (you will see cheats sorted by console),
 3. Copy directories for consoles you want to your Miyoo Mini's SD card, into the `RetroArch/.retroarch/cheats` directory (you might have to enable showing hidden directories if you can't see the `.retroarch` directory),
 4. Inside the `.retroarch` directory there will be a `retroarch.cfg` file, which you need to open in a text editor. Find the line with the option `quick_menu_show_cheats` and set it to `"true"` (so the whole line should be `quick_menu_show_cheats = "true"`),
@@ -264,8 +247,11 @@ Onion keeps versioned backups of your play activity in case of such corruption:
 </summary>
 
 **Charging Indicators**  
-The left most LED on the top of the Mini will turn blue when a full charge is reached.  
-Miyoo recommends 5V 1A and it must be USB-A to USB-C _(USB-C to USB-C charging is not supported)_.
+The left most LED on the top of the Mini will turn blue when a full charge is reached.
+The blue LED on the MMP is unfortunately non-functional, the red LED will turn off when fully charged.
+
+**MM:** Miyoo recommends 5V 1A and it must be USB-A to USB-C _(USB-C to USB-C charging is not supported)_.  
+**MMP:** Supports USB-C to USB-C charging (the support is limited, and some chargers will not be accepted / start charging)
 
 ![LED Indicators-500](https://user-images.githubusercontent.com/98862735/189775988-b6b4062d-f231-4351-9a79-6920498f1554.png)
 
@@ -278,9 +264,13 @@ Environment changes and power draw will affect the determined percentage which c
 >  
 > The Onion battery capacity estimation is constantly pooling in the background for more precise results over time. This is the best method that is possible on this device, improved over stock and the same method used by the RA build and in MiniUI. 
 
-**Reducing Battery Usage**  
-The display in the Mini is old tech and draws a lot of power. Lowering display brightness increases battery life.   
-The below testing output demonstrates GBA running at 50% display brightness for almost 8hrs of play time.  
+:::tip Reducing Battery Usage
+1. Lowering display brightness (preferably below 70%)
+2. Use headphones - the speaker is the most battery-hungry component!
+3. Disable Wi-Fi when not in use (the Wi-Fi chip is a major power draw as well)
+:::
+
+The below testing output demonstrates GBA running at 50% display brightness for almost 8hrs of play time.
 
 ![battery-600](https://user-images.githubusercontent.com/98862735/189774379-33b77793-bc36-4563-acbe-357713b4964e.png)
 
@@ -294,8 +284,7 @@ The below testing output demonstrates GBA running at 50% display brightness for 
 </summary>
 
 It is likely due to a lack of compatibility with the Miyoo audio server.
-To cope with this, just rename the `launch.sh` file in your app folder to `launch2.sh`, then extract this file to the app folder: 
-[launch.zip](https://github.com/OnionUI/Onion/files/9041212/launch.zip)
+To cope with this, just rename the `launch.sh` file in your app folder to `launch2.sh`, then extract this file to the app folder: <IconLink icon="folder_zip" href="https://github.com/OnionUI/Onion/files/9041212/launch.zip">launch.zip</IconLink>
 
 </details>
 
@@ -325,9 +314,9 @@ There's currently an issue in MainUI that prevents WiFi from associating when it
 
 Currently, there's no fix due to MainUI being closed source however there are various workarounds:
 
-- Edit your `wpa_supplicant.conf` file (found in `/appconfigs/wpa_supplicant.conf`)
-- Use third-party apps such as: [this one](https://github.com/XK9274/better-wifi-miyoo), which supports most special characters
-- Use Onions built in WPS function (if your router supports pinless WPS). You can find this in **Tweaks** › **Network** › **WPS**.
+- Edit your `wpa_supplicant.conf` file via the File Explorer (file found in `/appconfigs/wpa_supplicant.conf`)
+- Use third-party apps such as: <IconLink icon="open_in_new" href="https://github.com/XK9274/better-wifi-miyoo">XK9274/better-wifi-miyoo</IconLink>, which supports most special characters
+- Use Onion's built in WPS function (if your router supports pinless WPS). You can find this in **Tweaks** › **Network** › **WPS**.
 
 </details>
 
