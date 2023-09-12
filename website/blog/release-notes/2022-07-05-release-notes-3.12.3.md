@@ -8,8 +8,6 @@ tags: [release-notes, stable]
 
 *Official release notes for Onion V3.12.3*
 
-(No longer available)
-
 <!-- truncate -->
 
 

@@ -8,7 +8,7 @@ tags: [release-notes, stable]
 
 *Official release notes for Onion V4.0.0*
 
-(No longer available)
+This release introduces a new app, *Tweaks*, containing everything you need to *make Onion your own!* Built-in global search. Improved theme support.
 
 <!-- truncate -->
 
