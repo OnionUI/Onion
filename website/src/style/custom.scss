@@ -254,6 +254,14 @@ tr.table-separator:nth-child(1n) {
   }
 }
 
+.markdown {
+
+  &>img {
+    display: block;
+    margin: 16px auto;
+  }
+}
+
 
 // Agnolia Search
 

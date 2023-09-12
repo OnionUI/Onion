@@ -3,9 +3,11 @@ sidebar_position: 2
 slug: /advanced/scraping
 ---
 
-<sup>(Credit: f8less & Julian)</sup>
+# Scraping artwork for games
 
-## File Type and Placement
+<sup>Credit: f8less & Julian</sup>
+
+## File type and placement
 
 The image file format for scraped artwork is _.PNG_, with a max size of 250px (H) X 360px (W). The images need to be placed into the `Roms/<gamesystem>/Imgs` folder. 
 
@@ -14,19 +16,26 @@ The `Imgs` folder name is case sensitive (must have a capital `I`). Examples wou
 `Roms/SFC/Imgs`  
 `Roms/GB/Imgs`  
 
-## Box Art/Screenshot Scraping Process
 
-### Software Install:
+## Box art/screenshot scraping process
+
+
+### Install
+
 - Download & Extract _Skraper_ from: https://www.skraper.net/   
 - Log in to Skraper
 
-### Initial Setup
+
+### Initial setup
+
 - Select "_Recalbox_"   
 - Tick "_Include non-Recalbox rom folders_"   
    > (Some systems aren't recognized because their folder-names are non-standard. To add those systems, press the `+` symbol on the bottom left, select the systems that are missing & hit "OK". Then, click the added systems in the bar on the left, and correct the system's folders via the "_GAMES & FRONT END_" tab -> "_Games/Roms folder:_" field -or- by clicking the folder-icon to the right of it.
 [You can find a list of all Rom folder names here](../emulators)
 
-### Media Selection
+
+### Media selection
+
 **Use a (_Great!_) Custom Image Template Designed for OnionOS:**
 
 **_Examples:_**<br/>
@@ -54,7 +63,9 @@ The `Imgs` folder name is case sensitive (must have a capital `I`). Examples wou
    > You can change how the image mix looks with the two buttons under "_Media type_",  I recommend changing "_4 IMAGES MIX_" to "_Screenscraper's Recalbox Mix V2_", but use whatever you prefer.
    > If you choose a picture that's taller than it's wide, like the boxart, set "_Resize height to_" to 360 and disable "_Keep Image Ratio_"
 
-### Output Settings
+
+### Output settings
+
 - Change "_Output folder_" to `%ROMROOTFOLDER%\Imgs`, with a capital `I`.
 - Under 'Gamelist Link' ensure that "_Link from node '&lt;thumbnail&gt;'_" is ticked as well as '_Optimize media storage_' (these are important if you wish to use the generated gamelist.xml to create a miyoogamelist.xml for use in Onion (more info on this below on this page).    
 - Now click the system you want to scrape for on the left side, or "all system", and press the play button in the bottom right corner.    
@@ -62,7 +73,7 @@ The `Imgs` folder name is case sensitive (must have a capital `I`). Examples wou
 This will automatically scrape images to the correct folders for Miyoo Mini.
 
 
-### YouTube Tutorials
+### YouTube tutorials
 
 #### Add Stunning Boxart To Your Miyoo Mini In Two Easy Ways _by RetroBreeze_
 
