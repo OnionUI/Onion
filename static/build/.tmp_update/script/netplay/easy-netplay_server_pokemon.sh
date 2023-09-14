@@ -14,8 +14,10 @@ logfile=pokemon_link
 program=$(basename "$0" .sh)
 
 rm /tmp/stop_now
- host_rom="$cookie_rom_path"
+host_rom="$cookie_rom_path"
 netplaycore="/mnt/SDCARD/RetroArch/.retroarch/cores/tgbdual_libretro.so"
+SaveFromGambatte=0
+CurDate=$(date +%Y%m%d_%H%M%S)
 
 ##########
 ##Setup.##
@@ -27,54 +29,53 @@ check_wifi() {
 	if ifconfig wlan0 &>/dev/null; then
 		build_infoPanel_and_log "WIFI" "Wifi up"
 	else
-		build_infoPanel_and_log "WIFI" "Wifi disabled, starting..." 
-		
+		build_infoPanel_and_log "WIFI" "Wifi disabled, starting..."
+
 		/customer/app/axp_test wifion
 		sleep 2
 		ifconfig wlan0 up
 		sleep 1
 		$miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
-        udhcpc_control
-		
-		if is_running wpa_supplicant && ifconfig wlan0 > /dev/null 2>&1; then
+		udhcpc_control
+
+		if is_running wpa_supplicant && ifconfig wlan0 >/dev/null 2>&1; then
 			build_infoPanel_and_log "WIFI" "Wifi started."
 		else
 			build_infoPanel_and_log "WIFI" "Unable to start WiFi\n unable to continue."
 			notify_stop
 		fi
-		
-		sleep 2 
+
+		sleep 2
 	fi
 }
 
 # We'll need hotspot to host the local connection
-start_hotspot() { 
-    build_infoPanel_and_log "Hotspot" "Starting hotspot..." 
-    if is_running hostapd; then
+start_hotspot() {
+	build_infoPanel_and_log "Hotspot" "Starting hotspot..."
+	if is_running hostapd; then
 		killall -9 hostapd
 	fi
-    if is_running dnsmasq; then
+	if is_running dnsmasq; then
 		killall -9 dnsmasq
 	fi
-	
-    enable_flag hotspotState
-    $sysdir/script/network/update_networking.sh hotspot toggle
-}
 
+	enable_flag hotspotState
+	$sysdir/script/network/update_networking.sh hotspot toggle
+}
 
 # We'll need FTP to host the cookie to the client - use the built in FTP, it allows us to curl (errors on bftpd re: path)
 start_ftp() {
-    check_stop
-    if is_running bftpd; then
-        log "FTP already running, killing to rebind"
-        bftpd_p=$(ps | grep bftpd | grep -v grep | awk '{for(i=4;i<=NF;++i) printf $i" "}')
-        killall -9 bftpd
-        killall -9 tcpsvd
-        tcpsvd -E 0.0.0.0 21 ftpd -w / &
-    else
-        tcpsvd -E 0.0.0.0 21 ftpd -w / &
-        log "Starting FTP server"
-    fi
+	check_stop
+	if is_running bftpd; then
+		log "FTP already running, killing to rebind"
+		bftpd_p=$(ps | grep bftpd | grep -v grep | awk '{for(i=4;i<=NF;++i) printf $i" "}')
+		killall -9 bftpd
+		killall -9 tcpsvd
+		tcpsvd -E 0.0.0.0 21 ftpd -w / &
+	else
+		tcpsvd -E 0.0.0.0 21 ftpd -w / &
+		log "Starting FTP server"
+	fi
 }
 
 # Create a cookie with all the required info for the client. (client will use this cookie)
@@ -82,179 +83,181 @@ create_cookie_info() {
 	COOKIE_FILE="/mnt/SDCARD/RetroArch/retroarch.cookie"
 	MAX_FILE_SIZE_BYTES=26214400
 
-		echo "[core]: $netplaycore" > "$COOKIE_FILE"
-		echo "[rom]: $cookie_rom_path" >> "$COOKIE_FILE"
+	echo "[core]: $netplaycore" >"$COOKIE_FILE"
+	echo "[rom]: $cookie_rom_path" >>"$COOKIE_FILE"
 
-
-		if [ -s "$netplaycore" ]; then
-			log "Writing core size"
-			core_size=$(stat -c%s "$netplaycore")
-			if [ "$core_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
-				echo "[corechksum]: 0" >> "$COOKIE_FILE"
-			else
-				echo "[corechksum]: $(xcrc "$netplaycore")" >> "$COOKIE_FILE"
-			fi
+	if [ -s "$netplaycore" ]; then
+		log "Writing core size"
+		core_size=$(stat -c%s "$netplaycore")
+		if [ "$core_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
+			echo "[corechksum]: 0" >>"$COOKIE_FILE"
+		else
+			echo "[corechksum]: $(xcrc "$netplaycore")" >>"$COOKIE_FILE"
 		fi
+	fi
 
-		if [ -s "$cookie_rom_path" ]; then
-			log "Writing rom size"
-			rom_size=$(stat -c%s "$cookie_rom_path")
-			if [ "$rom_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
-				echo "[romchksum]: 0" >> "$COOKIE_FILE"
-			else
-				echo "[romchksum]: $(xcrc "$cookie_rom_path")" >> "$COOKIE_FILE"
-			fi
+	if [ -s "$cookie_rom_path" ]; then
+		log "Writing rom size"
+		rom_size=$(stat -c%s "$cookie_rom_path")
+		if [ "$rom_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
+			echo "[romchksum]: 0" >>"$COOKIE_FILE"
+		else
+			echo "[romchksum]: $(xcrc "$cookie_rom_path")" >>"$COOKIE_FILE"
 		fi
+	fi
 
-		if [ -s "$cpuspeed" ]; then
-				echo "[cpuspeed]: $cpuspeed" >> "$COOKIE_FILE"
-				log "Writing cpuspeed: $cpuspeed"
-		fi
+	if [ -s "$cpuspeed" ]; then
+		echo "[cpuspeed]: $cpuspeed" >>"$COOKIE_FILE"
+		log "Writing cpuspeed: $cpuspeed"
+	fi
 
 }
 
 # Wait for a hit on the sta list for someone joining the hotspot
 wait_for_client() {
-    check_stop
-    build_infoPanel_and_log "Hotspot" "Waiting for a client to connect..."
+	check_stop
+	build_infoPanel_and_log "Hotspot" "Waiting for a client to connect..."
 
-    client_ip=""
-    client_mac=""
-    counter=0
-    
-    killall -9 wpa_supplicant
-    killall -9 udhcpc
-    
-    sleep 1
-    
-    while true; do    
-        sta_list=$($sysdir/bin/hostapd_cli all_sta 2>/dev/null)
-        $sysdir/bin/hostapd_cli all_sta flush
-        
-        if [ $? -ne 0 ]; then
-            build_infoPanel_and_log "Hotspot" "Hostapd hook failing, retrying."
-            counter=$((counter + 1))
-        fi
-                
-        if [ ! -z "$sta_list" ]; then
-            client_mac=$(echo "$sta_list" | awk 'NR==2{print $1; exit}')
-            client_ip=$(arp -an | awk '/'"$client_mac"'/ {gsub(/[\(\)]/,""); print $2}')
+	client_ip=""
+	client_mac=""
+	counter=0
 
-            if [ ! -z "$client_ip" ]; then
-                case "$client_ip" in
-                    192.168.100.*)
-                        log "$sta_list"
-                        log "A client has connected. IP: $client_ip"
-                        build_infoPanel_and_log "Hotspot" "A client has connected! \n IP: $client_ip"
-                        break
-                        ;;
-                esac
-            fi
-        fi
+	killall -9 wpa_supplicant
+	killall -9 udhcpc
 
-        sleep 1
-        counter=$((counter + 1))
+	sleep 1
 
-        if [ $counter -ge 30 ]; then
-            log "No client has connected"
-            build_infoPanel_and_log "Hotspot error" "No client has connected. Exiting..."
-            cleanup
-        fi
-    done
-    
-    sleep 1
-    log "$client_ip has joined the hotspot"    
+	while true; do
+		sta_list=$($sysdir/bin/hostapd_cli all_sta 2>/dev/null)
+		$sysdir/bin/hostapd_cli all_sta flush
+
+		if [ $? -ne 0 ]; then
+			build_infoPanel_and_log "Hotspot" "Hostapd hook failing, retrying."
+			counter=$((counter + 1))
+		fi
+
+		if [ ! -z "$sta_list" ]; then
+			client_mac=$(echo "$sta_list" | awk 'NR==2{print $1; exit}')
+			client_ip=$(arp -an | awk '/'"$client_mac"'/ {gsub(/[\(\)]/,""); print $2}')
+
+			if [ ! -z "$client_ip" ]; then
+				case "$client_ip" in
+				192.168.100.*)
+					log "$sta_list"
+					log "A client has connected. IP: $client_ip"
+					build_infoPanel_and_log "Hotspot" "A client has connected! \n IP: $client_ip"
+					break
+					;;
+				esac
+			fi
+		fi
+
+		sleep 1
+		counter=$((counter + 1))
+
+		if [ $counter -ge 30 ]; then
+			log "No client has connected"
+			build_infoPanel_and_log "Hotspot error" "No client has connected. Exiting..."
+			cleanup
+		fi
+	done
+
+	sleep 1
+	log "$client_ip has joined the hotspot"
 }
 
 # Backup the save we're going to use before we do anythign else
 backup_save() {
-    check_stop
-    save_file_filename_full=$(basename "$host_rom")
-    save_file_filename="${save_file_filename_full%.*}"
-    save_file_matched=$(find "$save_dir" -name "$save_file_filename.srm" -not -name "*.rtc" -not -path "*/.netplay/*")
-    if [ ! -f "$save_file_matched" ]; then
-        if [ -f "/mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$save_file_filename.srm" ]; then
-            cp "/mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$save_file_filename.srm"  "$save_dir$save_file_filename.srm"
-            save_file_matched=$(find "$save_dir" -name "$save_file_filename.srm" -not -name "*.rtc" -not -path "*/.netplay/*")
-        fi
-    fi
-    log "Backing up save file to: $(basename "${save_file_matched}")_$(date +%Y%m%d_%H%M%S)"
-    sleep 1
-    cp "$save_file_matched" "${save_file_matched}_$(date +%Y%m%d_%H%M%S)"
-    sync
+	check_stop
+	save_file_filename_full=$(basename "$host_rom")
+	save_file_filename="${save_file_filename_full%.*}"
+	save_file_matched=$(find "$save_dir" -name "$save_file_filename.srm" -not -name "*.rtc" -not -path "*/.netplay/*")
+	if [ ! -f "$save_file_matched" ]; then
+		if [ -f "/mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$save_file_filename.srm" ]; then
+			cp "/mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$save_file_filename.srm" "$save_dir$save_file_filename.srm"
+			save_file_matched=$(find "$save_dir" -name "$save_file_filename.srm" -not -name "*.rtc" -not -path "*/.netplay/*")
+			SaveFromGambatte=1
+		fi
+	fi
+	log "Backing up save file to: $(basename "${save_file_matched}")_$Curdate"
+	sleep 1
+	if [ $SaveFromGambatte -eq 1 ]; then
+		cp -f "$save_file_matched" "/mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$save_file_filename.srm_$CurDate"
+	else
+		cp "$save_file_matched" "${save_file_matched}_$CurDate"
+	fi
+	sync
 }
 
-# The client will send us a save file, we'll pull the name from this, find it on the host and call duplicate_rename_rom - send to tmp 
+# The client will send us a save file, we'll pull the name from this, find it on the host and call duplicate_rename_rom - send to tmp
 wait_for_save_file() {
-    check_stop
-    build_infoPanel_and_log "Setting up" "Setting up session \n Waiting for save files."
-    
-    client_save_file=""
-    counter=0
-    
-    while true; do
-        sync
-        for file in /tmp/*.srm; do
-            if [ -f "$file" ]; then
-                if [ "$(basename "$file")" = "MISSING.srm" ]; then
-                    build_infoPanel_and_log "Sync error" "Client advises they don't have a save file. \n Cannot continue."
-                    notify_stop
-                else
-                    client_save_file=$file
-                fi
-                build_infoPanel_and_log "Synced!" "Received save from client"
-                break 2
-            fi
-        done
+	check_stop
+	build_infoPanel_and_log "Setting up" "Setting up session \n Waiting for save files."
 
-        sleep 1
-        counter=$((counter + 1))
+	client_save_file=""
+	counter=0
 
-        if [ $counter -ge 25 ]; then
-            build_infoPanel_and_log "Sync error" "No save file was received. Exiting..."
-            notify_stop
-        fi
-    done
+	while true; do
+		sync
+		for file in /tmp/*.srm; do
+			if [ -f "$file" ]; then
+				if [ "$(basename "$file")" = "MISSING.srm" ]; then
+					build_infoPanel_and_log "Sync error" "Client advises they don't have a save file. \n Cannot continue."
+					notify_stop
+				else
+					client_save_file=$file
+				fi
+				build_infoPanel_and_log "Synced!" "Received save from client"
+				break 2
+			fi
+		done
+
+		sleep 1
+		counter=$((counter + 1))
+
+		if [ $counter -ge 25 ]; then
+			build_infoPanel_and_log "Sync error" "No save file was received. Exiting..."
+			notify_stop
+		fi
+	done
 }
 
 # Prep the clients save file
 rename_client_save() {
-    check_stop
-    if [ ! -z "$client_save_file" ]; then
-        save_base_name=$(basename "$client_save_file" .srm)
-        save_new_name="${save_base_name}_client.srm"
-        save_new_path="/mnt/SDCARD/Saves/CurrentProfile/saves/TGB Dual/$save_new_name"
-        mv "$client_save_file" "$save_new_path"
-        log "Save file found and processed - old save path:$client_save_file, new save path:$save_new_path "
-        sync
-    else
-        build_infoPanel_and_log "Syncing" "Save file not found, cannot continue"
-        cleanup
-    fi
+	check_stop
+	if [ ! -z "$client_save_file" ]; then
+		save_base_name=$(basename "$client_save_file" .srm)
+		save_new_name="${save_base_name}_client.srm"
+		save_new_path="/mnt/SDCARD/Saves/CurrentProfile/saves/TGB Dual/$save_new_name"
+		mv "$client_save_file" "$save_new_path"
+		log "Save file found and processed - old save path:$client_save_file, new save path:$save_new_path "
+		sync
+	else
+		build_infoPanel_and_log "Syncing" "Save file not found, cannot continue"
+		cleanup
+	fi
 }
 
 # Download the cookie from the client so we know which second game to preload as GB2
 download_cookie() {
-    check_stop
-	build_infoPanel_and_log "Downloading cookie"  "Retrieving info from client..." 
-    log "Trying to pull the clients game info"
-    local output_path="/mnt/SDCARD/RetroArch/retroarch.cookie.client"
-    curl -o "$output_path" ftp://$client_ip/mnt/SDCARD/RetroArch/retroarch.cookie
+	check_stop
+	build_infoPanel_and_log "Downloading cookie" "Retrieving info from client..."
+	log "Trying to pull the clients game info"
+	local output_path="/mnt/SDCARD/RetroArch/retroarch.cookie.client"
+	curl -o "$output_path" ftp://$client_ip/mnt/SDCARD/RetroArch/retroarch.cookie
 
-    if [ $? -ne 0 ]; then
-		build_infoPanel_and_log "Failed"  "Can't download the cookie, can't continue" 
+	if [ $? -ne 0 ]; then
+		build_infoPanel_and_log "Failed" "Can't download the cookie, can't continue"
 		notify_stop
-    fi
+	fi
 
-    if [ ! -f $output_path ]; then
-		build_infoPanel_and_log "No cookie found"  "Cookie has been eaten, can't continue" 
+	if [ ! -f $output_path ]; then
+		build_infoPanel_and_log "No cookie found" "Cookie has been eaten, can't continue"
 		notify_stop
-    fi
-	
-	build_infoPanel_and_log "Success!"  "Got the cookie" 
+	fi
+
+	build_infoPanel_and_log "Success!" "Got the cookie"
 }
-
-
 
 # Read the cookie and store the paths and checksums into a var.
 read_cookie() {
@@ -297,41 +300,39 @@ read_cookie() {
 	log "Cookie file read"
 }
 
-
 # Duplicate the rom to spoof the save loaded in on the host
 handle_roms() {
-    check_stop
-    
-    rom_extension="${client_rom##*.}"
-    client_rom_clone="${client_rom%.*}_client.$rom_extension"
-    cp "$client_rom" "$client_rom_clone"
-    if [ $? -eq 0 ]; then
-        log "Successfully copied $client_rom to $client_rom_clone"
-    else
-        log "Failed to copy $client_rom to $client_rom_clone"
-    fi
+	check_stop
+
+	rom_extension="${client_rom##*.}"
+	client_rom_clone="${client_rom%.*}_client.$rom_extension"
+	cp "$client_rom" "$client_rom_clone"
+	if [ $? -eq 0 ]; then
+		log "Successfully copied $client_rom to $client_rom_clone"
+	else
+		log "Failed to copy $client_rom to $client_rom_clone"
+	fi
 }
 
 # Tell the client we're ready to accept connections
 ready_up() {
-    check_stop
-    ping -c 5 192.168.100.100 > /dev/null 2>&1
-    if [ $? -eq 0 ]; then
-        notify_peer "host_ready"
-    else
-        build_infoPanel_and_log "Error" "No connectivity to 192.168.100.100, \n is the client still connected?"
-        notify_stop
-    fi
+	check_stop
+	ping -c 5 192.168.100.100 >/dev/null 2>&1
+	if [ $? -eq 0 ]; then
+		notify_peer "host_ready"
+	else
+		build_infoPanel_and_log "Error" "No connectivity to 192.168.100.100, \n is the client still connected?"
+		notify_stop
+	fi
 }
 
 # We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
 start_retroarch() {
 
 	echo "*****************************************"
-	echo "romfullpath: $rom"
-	echo "platform: ${platform}"
+	echo "host_rom: $host_rom"
+	echo "client_rom_clone: ${client_rom_clone}"
 	echo "netplaycore: $netplaycore"
-	echo "core_config_folder: $core_config_folder"
 	echo "cpuspeed: $cpuspeed"
 	echo "*****************************************"
 
@@ -342,7 +343,8 @@ start_retroarch() {
 	fi
 
 	cd /mnt/SDCARD/RetroArch
-    log "Starting RetroArch loaded with $host_rom and $client_rom_clone"
+	log "Starting RetroArch loaded with $host_rom and $client_rom_clone"
+	(sleep 2 && notify_peer "host_ready" &) &
 	HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/easynetplay_override.cfg -H -v -L .retroarch/cores/tgbdual_libretro.so --subsystem "gb_link_2p" "$host_rom" "$client_rom_clone"
 
 	if [ -n "$PreviousCPUspeed" ]; then
@@ -353,78 +355,83 @@ start_retroarch() {
 	fi
 }
 
+# Restore gambatte save from TGB Dual
+gambatte_host_save() {
+	if [ $SaveFromGambatte -eq 1 ]; then
+		mv -f "$save_file_matched" "/mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$save_file_filename.srm"
+	fi
+}
 
 # Go into a waiting state for the client to be ready to accept the save
 wait_for_save_return() {
-    check_stop
-    local counter=0
+	check_stop
+	local counter=0
 
-    build_infoPanel_and_log "Syncing" "Waiting for client to be ready for save sync"
-    notify_peer "ready_to_send"
-    sync
-    
-    while true; do
-        for file in /tmp/ready_to_receive; do
-            if [ -f "$file" ]; then
-                build_infoPanel_and_log "Message from client" "Client is ready for the save"
-                break 2
-            fi
-        done
+	build_infoPanel_and_log "Syncing" "Waiting for client to be ready for save sync"
+	notify_peer "ready_to_send"
+	sync
 
-        sleep 1
-        counter=$((counter + 1))
+	while true; do
+		for file in /tmp/ready_to_receive; do
+			if [ -f "$file" ]; then
+				build_infoPanel_and_log "Message from client" "Client is ready for the save"
+				break 2
+			fi
+		done
 
-        if [ $counter -ge 30 ]; then
-            build_infoPanel_and_log "Error" "The client didn't ready up, cannot continue..."
-            sleep 1
-            cleanup
-            break
-        fi
-    done
+		sleep 1
+		counter=$((counter + 1))
+
+		if [ $counter -ge 30 ]; then
+			build_infoPanel_and_log "Error" "The client didn't ready up, cannot continue..."
+			sleep 1
+			cleanup
+			break
+		fi
+	done
 }
 
 # Push the clients save file back
 return_client_save() {
-    check_stop
-    build_infoPanel_and_log "Syncing" "Returning client save..."
-    encoded_path=$(url_encode "${save_new_path/_client/}")
-    log "Returning client save: $save_new_path to ftp://$client_ip/${encoded_path}_rcvd"
-    curl --connect-timeout 20 -T "$save_new_path" "ftp://$client_ip/${encoded_path}_rcvd"
+	check_stop
+	build_infoPanel_and_log "Syncing" "Returning client save..."
+	encoded_path=$(url_encode "${save_new_path/_client/}")
+	log "Returning client save: $save_new_path to ftp://$client_ip/${encoded_path}_rcvd"
+	curl --connect-timeout 20 -T "$save_new_path" "ftp://$client_ip/${encoded_path}_rcvd"
 
-    curl_exit_status=$?
+	curl_exit_status=$?
 
-    if [ $curl_exit_status -eq 0 ]; then
-        build_infoPanel_and_log "Syncing" "Client save returned!"
-    else
-        build_infoPanel_and_log "Syncing" "Failed to return the client save \n Progress has likely been lost \n Curl exit code: $curl_exit_status"
-    fi
+	if [ $curl_exit_status -eq 0 ]; then
+		build_infoPanel_and_log "Syncing" "Client save returned!"
+	else
+		build_infoPanel_and_log "Syncing" "Failed to return the client save \n Progress has likely been lost \n Curl exit code: $curl_exit_status"
+	fi
 }
-
 
 # Cleanup. If you don't call this you don't retransfer the saves - Users cannot under any circumstances miss this function.
 cleanup() {
 	build_infoPanel_and_log "Cleanup" "Cleaning up after Pokemon session\n Do not power off!"
-   
+
 	pkill -9 pressMenu2Kill
 
 	. "$sysdir/script/network/hotspot_cleanup.sh"
-	
+
 	restore_ftp
-    
-    # Remove some files we prepared and received
-    rm "/tmp/host_ready"
-    rm "$save_new_path"
-    rm "$client_rom_clone"
-    rm "/tmp/ready_to_send"
-    rm "/tmp/ready_to_receive"
-    rm "$tgb_dual_opts.bak"
-    rm "$save_dir/MISSING.srm"
-    rm "/tmp/MISSING.srm"
-    rm "/tmp/stop_now"
-    disable_flag hotspotState
-	
+
+	# Remove some files we prepared and received
+	rm "/tmp/host_ready"
+	rm "$save_new_path"
+	rm "$client_rom_clone"
+	rm "/tmp/ready_to_send"
+	rm "/tmp/ready_to_receive"
+	rm "$tgb_dual_opts.bak"
+	rm "$save_dir/MISSING.srm"
+	rm "/tmp/MISSING.srm"
+	rm "/tmp/stop_now"
+	disable_flag hotspotState
+
 	log "Cleanup done"
- 	exit
+	exit
 }
 
 ###########
@@ -432,8 +439,8 @@ cleanup() {
 ###########
 
 # URL encode helper
-url_encode(){
-  encoded_str=`echo "$*" | awk '
+url_encode() {
+	encoded_str=$(echo "$*" | awk '
     BEGIN {
 	split ("1 2 3 4 5 6 7 8 9 A B C D E F", hextab, " ")
 	hextab [0] = 0
@@ -456,96 +463,94 @@ url_encode(){
 	}
 	    print encoded
     }
-' `
-echo "$encoded_str"
+')
+	echo "$encoded_str"
 }
 
 # Use the safe word
-notify_stop(){
-    notify_peer "stop_now"
-    sleep 2 
-    cleanup
+notify_stop() {
+	notify_peer "stop_now"
+	sleep 2
+	cleanup
 }
 
 # Check stop, if the client tells us to stop we will.
-check_stop(){
-    sync
-    if [ -e "/tmp/stop_now" ]; then
-            build_infoPanel_and_log "Message from client" "The client has had a problem joining the session."
-            sleep 2
-            cleanup
-    fi
+check_stop() {
+	sync
+	if [ -e "/tmp/stop_now" ]; then
+		build_infoPanel_and_log "Message from client" "The client has had a problem joining the session."
+		sleep 2
+		cleanup
+	fi
 }
 
 notify_peer() {
-    local notify_file="/tmp/$1"
-    touch "$notify_file"
-    sync
-    curl -T "$notify_file" "ftp://$client_ip/$notify_file" > /dev/null 2>&1
-    
-    if [ $? -eq 0 ]; then
-        log "Successfully transferred $notify_file to ftp://$client_ip/$notify_file"
-    else
-        log "Failed to transfer $notify_file to ftp://$client_ip/$notify_file"
-    fi
+	local notify_file="/tmp/$1"
+	touch "$notify_file"
+	sync
+	curl -T "$notify_file" "ftp://$client_ip/$notify_file" >/dev/null 2>&1
+
+	if [ $? -eq 0 ]; then
+		log "Successfully transferred $notify_file to ftp://$client_ip/$notify_file"
+	else
+		log "Failed to transfer $notify_file to ftp://$client_ip/$notify_file"
+	fi
 }
 
 # Rename the new save back to the original one ready to be re-transferred
 remove_client_save_suffix() {
-    if [ ! -z "$save_new_path" ]; then
-        save_base_name=$(basename "$save_new_path" _client.srm)
-        original_name="${save_base_name}.srm"
-        original_path="/tmp/$original_name"
-        mv "$save_new_path" "$original_path"
-    fi
+	if [ ! -z "$save_new_path" ]; then
+		save_base_name=$(basename "$save_new_path" _client.srm)
+		original_name="${save_base_name}.srm"
+		original_path="/tmp/$original_name"
+		mv "$save_new_path" "$original_path"
+	fi
 }
 
 confirm_join_panel() {
-    local title="$1"
-    local message="$2"
-    
-    sync
-    
-    if [ -e "/tmp/stop_now" ]; then
-        build_infoPanel_and_log "Message from client" "The client advises they don't have this rom \n Can't continue."
-        sleep 2
-        cleanup
-    fi
+	local title="$1"
+	local message="$2"
 
-	if [ -e "$Img_path" ]; then   # local rom image
+	sync
+
+	if [ -e "/tmp/stop_now" ]; then
+		build_infoPanel_and_log "Message from client" "The client advises they don't have this rom \n Can't continue."
+		sleep 2
+		cleanup
+	fi
+
+	if [ -e "$Img_path" ]; then # local rom image
 		pngScale "$Img_path" "/tmp/CurrentNetplay.png" 100 100
-        sync
+		sync
 		imgpop 3 2 "/tmp/CurrentNetplay.png" 10 10 >/dev/null 2>&1 &
 	fi
 
-	if [ -e "/mnt/SDCARD/Roms/$romdirname/Imgs/$save_file_filename.png" ]; then  # remote rom image
+	if [ -e "/mnt/SDCARD/Roms/$romdirname/Imgs/$save_file_filename.png" ]; then # remote rom image
 		pngScale "/mnt/SDCARD/Roms/$romdirname/Imgs/$save_file_filename.png" "/tmp/CurrentNetplay2.png" 100 100
-        sync
+		sync
 		imgpop 2 1 "/tmp/CurrentNetplay2.png" 530 300 >/dev/null 2>&1 &
 	fi
-    
-    infoPanel -t "$title" -m "$message"
-    retcode=$?
 
-    echo "retcode: $retcode"
+	infoPanel -t "$title" -m "$message"
+	retcode=$?
 
-    if [ $retcode -ne 0 ]; then
-        build_infoPanel_and_log "Cancelled" "User cancelled, exiting."
-        cleanup
-        exit 1
-    fi
+	echo "retcode: $retcode"
+
+	if [ $retcode -ne 0 ]; then
+		build_infoPanel_and_log "Cancelled" "User cancelled, exiting."
+		cleanup
+		exit 1
+	fi
 }
 
 stripped_game_name() {
-    game_name="$(basename "${host_rom%.*}")"
-    game_name="$(echo "$game_name" | sed -e 's/ ([^()]*)//g' -e 's/ [[A-z0-9!+]*]//g' -e 's/([^()]*)//g' -e 's/[[A-z0-9!+]*]//g')"
-    game_name="Host (me): \n$game_name"
+	game_name="$(basename "${host_rom%.*}")"
+	game_name="$(echo "$game_name" | sed -e 's/ ([^()]*)//g' -e 's/ [[A-z0-9!+]*]//g' -e 's/([^()]*)//g' -e 's/[[A-z0-9!+]*]//g')"
+	game_name="Host (me): \n$game_name"
 
-    local_rom_trimmed="$(basename "${client_rom%.*}" | sed -e 's/ ([^()]*)//g' -e 's/ [[A-z0-9!+]*]//g' -e 's/([^()]*)//g' -e 's/[[A-z0-9!+]*]//g')"
-    game_name_client="\n Client: \n$local_rom_trimmed"
+	local_rom_trimmed="$(basename "${client_rom%.*}" | sed -e 's/ ([^()]*)//g' -e 's/ [[A-z0-9!+]*]//g' -e 's/([^()]*)//g' -e 's/[[A-z0-9!+]*]//g')"
+	game_name_client="\n Client: \n$local_rom_trimmed"
 }
-
-
 
 # Function to sync files
 
@@ -711,7 +716,7 @@ sync_file() {
 		if [ -e "$file_path" ]; then
 			if [ $file_type == "Rom" ]; then
 				# if rom already here and different file then we create a rom_neplay to avoid to override user games
-				
+
 				# oldpath="$file_path"
 				# file_path_without_extension="${file_path%.*}"
 				# file_path="${file_path_without_extension}_netplay.${file_path##*.}"
@@ -724,7 +729,6 @@ sync_file() {
 				mkdir -p "$Netplay_Rom_Folder"
 				file_path="$Netplay_Rom_Folder/$(basename "$file_path")"
 				rom=$file_path
-
 
 			elif [ $file_type == "Core" ]; then
 				# oldpath="$file_path"
@@ -740,7 +744,7 @@ sync_file() {
 				log "Existing $file_type file moved to ${file_path}_old"
 			fi
 		fi
-		if [ $file_type == "Cookie" ]; then  # exception for cookies : we don't download with the same target name
+		if [ $file_type == "Cookie" ]; then # exception for cookies : we don't download with the same target name
 			file_path="${file_path}.client"
 		fi
 
@@ -800,9 +804,9 @@ sync_file() {
 			fi
 			sleep 2
 			if [ $file_mandatory -eq 1 ]; then
-                notify_peer "stop_now"
-                cleanup
-            fi
+				notify_peer "stop_now"
+				cleanup
+			fi
 		fi
 		#####"
 
@@ -828,65 +832,64 @@ sync_file() {
 
 }
 
-
 checksum_func() {
-    local_file_size=$(stat -c%s "$file_path")
-    local func_file_path="$1"
-    local CRC="$2"
+	local_file_size=$(stat -c%s "$file_path")
+	local func_file_path="$1"
+	local CRC="$2"
 
-    ########################## File checksum check : same_chksum = 0 different, 1 identical , 2 unknown
+	########################## File checksum check : same_chksum = 0 different, 1 identical , 2 unknown
 
-    if [ "$CRC" != "0" ]; then # file_checksum=0 means skip the difference check = always replace
-        local_file_checksum=$(xcrc "$func_file_path")
+	if [ "$CRC" != "0" ]; then # file_checksum=0 means skip the difference check = always replace
+		local_file_checksum=$(xcrc "$func_file_path")
 
-        if [ "$local_file_size" -gt "$MAX_FILE_CHKSUM_SIZE" ]; then
-            log "File size too big for checksum: it would be too long"
-            same_chksum=2
-        else
-            if [ "$CRC" == "$local_file_checksum" ]; then
-                same_chksum=1
-            else
-                same_chksum=0
-            fi
-        fi
-    else
-        log "Skipping checksum check."
-        same_chksum=1 # fake same size for skipping
-    fi
+		if [ "$local_file_size" -gt "$MAX_FILE_CHKSUM_SIZE" ]; then
+			log "File size too big for checksum: it would be too long"
+			same_chksum=2
+		else
+			if [ "$CRC" == "$local_file_checksum" ]; then
+				same_chksum=1
+			else
+				same_chksum=0
+			fi
+		fi
+	else
+		log "Skipping checksum check."
+		same_chksum=1 # fake same size for skipping
+	fi
 }
 
 checksize_func() {
 
-    local func_file_path="$1"
-    local filesize_tocheck="$2"
-    local_file_size=$(stat -c%s "$func_file_path")
+	local func_file_path="$1"
+	local filesize_tocheck="$2"
+	local_file_size=$(stat -c%s "$func_file_path")
 
-    ########################## File size check   same_size = 0 different, 1 identical , 2 unknown
+	########################## File size check   same_size = 0 different, 1 identical , 2 unknown
 
-    if echo "$filesize_tocheck" | grep -q "^[0-9][0-9]*$"; then # check if the remote file size is a numeric value
-        if [ "$filesize_tocheck" -eq "$local_file_size" ]; then
-            log "Same size as remote"
-            same_size=1
-        else
-            log "Files size are different"
-            same_size=0
-        fi
-    else
-        log "Impossible to get file size : wrong parameter."
-        same_size=2
-    fi
+	if echo "$filesize_tocheck" | grep -q "^[0-9][0-9]*$"; then # check if the remote file size is a numeric value
+		if [ "$filesize_tocheck" -eq "$local_file_size" ]; then
+			log "Same size as remote"
+			same_size=1
+		else
+			log "Files size are different"
+			same_size=0
+		fi
+	else
+		log "Impossible to get file size : wrong parameter."
+		same_size=2
+	fi
 }
 
 unpack_rom() {
-  file="$1"
-  folder=$(dirname "$file")
-  extension="${file##*.}"
+	file="$1"
+	folder=$(dirname "$file")
+	extension="${file##*.}"
 
-  if [ -f "$file" ]; then
-    7z x "$file" -o"$folder" > /dev/null 2>&1
-  else
-    log "File '$file' not found - cannot continue"
-  fi
+	if [ -f "$file" ]; then
+		7z x "$file" -o"$folder" >/dev/null 2>&1
+	else
+		log "File '$file' not found - cannot continue"
+	fi
 }
 
 build_infoPanel_and_log() {
@@ -894,47 +897,46 @@ build_infoPanel_and_log() {
 	local message="$2"
 
 	log "Info Panel: \n\tStage: $title\n\tMessage: $message"
-	
+
 	infoPanel --title "$title" --message "$message" --persistent &
 	touch /tmp/dismiss_info_panel
 	sync
 	sleep 0.5
 }
 
-restore_ftp(){
-    log "Restoring original FTP server"
-    killall -9 tcpsvd
-    if flag_enabled ftpState; then
-        if flag_enabled authftpState; then 
-            bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpdauth.conf &
-        else 
-            bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpd.conf &
-        fi
-    fi
+restore_ftp() {
+	log "Restoring original FTP server"
+	killall -9 tcpsvd
+	if flag_enabled ftpState; then
+		if flag_enabled authftpState; then
+			bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpdauth.conf &
+		else
+			bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpd.conf &
+		fi
+	fi
 }
 
 flag_enabled() {
-    flag="$1"
-    [ -f "$sysdir/config/.$flag" ]
+	flag="$1"
+	[ -f "$sysdir/config/.$flag" ]
 }
 
 udhcpc_control() {
-	if pgrep udhcpc > /dev/null; then
+	if pgrep udhcpc >/dev/null; then
 		killall -9 udhcpc
 	fi
 	sleep 1
-	udhcpc -i wlan0 -s /etc/init.d/udhcpc.script > /dev/null 2>&1 &	
+	udhcpc -i wlan0 -s /etc/init.d/udhcpc.script >/dev/null 2>&1 &
 }
 
 is_running() {
-    process_name="$1"
-    pgrep "$process_name" > /dev/null
+	process_name="$1"
+	pgrep "$process_name" >/dev/null
 }
 
-
 enable_flag() {
-    flag="$1"
-    touch "$sysdir/config/.$flag"
+	flag="$1"
+	touch "$sysdir/config/.$flag"
 }
 
 #########
@@ -942,28 +944,29 @@ enable_flag() {
 #########
 
 lets_go() {
-    pressMenu2Kill $(basename $0) &
-    create_cookie_info
-    . "$sysdir/script/network/hotspot_create.sh"
-    start_ftp
-    wait_for_client
-    backup_save
-    wait_for_save_file
-    rename_client_save
-    sync_file "Cookie" "/mnt/SDCARD/RetroArch/retroarch.cookie" 0 0 -f -m
-    read_cookie
-    echo -e "\n\n\n\n\n\n\n\n\n\n\n"
+	pressMenu2Kill $(basename $0) &
+	create_cookie_info
+	. "$sysdir/script/network/hotspot_create.sh"
+	start_ftp
+	wait_for_client
+	backup_save
+	wait_for_save_file
+	rename_client_save
+	sync_file "Cookie" "/mnt/SDCARD/RetroArch/retroarch.cookie" 0 0 -f -m
+	read_cookie
+	echo -e "\n\n\n\n\n\n\n\n\n\n\n"
 	sync_file "Rom" "$client_rom" 1 "$romchecksum" -b -m
 	sync_file "Img" "$Img_path" 0 0 -o
-    handle_roms
-    ready_up
-    stripped_game_name
-    confirm_join_panel "Host now?" "$game_name \n $game_name_client"
-    pkill -9 pressMenu2Kill
-    start_retroarch
-    wait_for_save_return
-    return_client_save
-    cleanup
+	handle_roms
+	ready_up
+	stripped_game_name
+	confirm_join_panel "Host now?" "$game_name \n $game_name_client"
+	pkill -9 pressMenu2Kill
+	start_retroarch
+	gambatte_host_save
+	wait_for_save_return
+	return_client_save
+	cleanup
 }
 
 lets_go

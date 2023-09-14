@@ -12,7 +12,8 @@ WPACLI=/customer/app/wpa_cli
 hostip="192.168.100.100" # This should be the default unless the user has changed it..
 rm /tmp/stop_now
 local_rom="$cookie_rom_path"
-
+SaveFromGambatte=0
+CurDate=$(date +%Y%m%d_%H%M%S)
 
 ## Source global utils
 logfile=pokemon_link
@@ -76,8 +77,9 @@ send_saves() {
 
     if [ ! -f "$save_file_matched" ]; then
         if [ -f "/mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$save_file_filename.srm" ]; then
-            cp "/mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$save_file_filename.srm"  "$save_dir$save_file_filename.srm"
+            cp "/mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$save_file_filename.srm" "$save_dir$save_file_filename.srm"
             save_file_matched=$(find "$save_dir" -name "$save_file_filename.srm" -not -name "*.rtc" -not -path "*/.netplay/*")
+            SaveFromGambatte=1
         else
             touch "$save_dir/MISSING.srm"
             save_file_matched="$save_dir/MISSING.srm"
@@ -99,8 +101,15 @@ send_saves() {
 # Backup local save file
 backup_save() {
     check_stop
-    log "Backing up save file to: ${save_file_matched}_$(date +%Y%m%d_%H%M%S)"
-    cp "$save_file_matched" "${save_file_matched}_$(date +%Y%m%d_%H%M%S)"
+
+    if [ $SaveFromGambatte -eq 1 ]; then
+        log "Backing up save file to: /mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$save_file_filename.srm_$CurDate"
+        cp -f "$save_file_matched" "/mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$save_file_filename.srm_$CurDate"
+    else
+        log "Backing up save file to: ${save_file_matched}_$CurDate"
+        cp "$save_file_matched" "${save_file_matched}_$CurDate"
+    fi
+
     sync
 }
 
@@ -116,6 +125,7 @@ wait_for_host() {
         for file in /tmp/host_ready; do
             if [ -f "$file" ]; then
                 build_infoPanel_and_log "Message from host" "Setup complete"
+                rm /tmp/host_ready # be ready for the second use of host_ready flag
                 break 2
             fi
         done
@@ -150,6 +160,7 @@ start_retroarch() {
         echo -n $cpuspeed >"/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt"
     fi
 
+    wait_for_host # we wait a second flag triggered from the host once RA is running
     cd /mnt/SDCARD/RetroArch
     log "Starting RetroArch loaded with $rom and $local_rom"
     HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/easynetplay_override.cfg -C $hostip -L "$core" --subsystem "gb_link_2p" "$rom" "$local_rom"
@@ -197,6 +208,11 @@ wait_for_save_return() {
     cp_exit_status=$?
 
     if [ $cp_exit_status -eq 0 ]; then
+        if [ $SaveFromGambatte -eq 1 ]; then
+            log "Restoring the modified save to gambatte"
+            echo "$save_file_matched /mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$save_file_filename.srm"
+            mv -f "$save_file_matched" "/mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$save_file_filename.srm"
+        fi
         build_infoPanel_and_log "Syncing save" "Save merged successfully"
         sleep 1
     else
@@ -666,17 +682,17 @@ confirm_join_panel() {
     local title="$1"
     local message="$2"
 
-	if [ -e "$Img_path" ]; then   # remote rom image
-		pngScale "$Img_path" "/tmp/CurrentNetplay.png" 100 100
+    if [ -e "$Img_path" ]; then # remote rom image
+        pngScale "$Img_path" "/tmp/CurrentNetplay.png" 100 100
         sync
-		imgpop 3 2 "/tmp/CurrentNetplay.png" 530 300 >/dev/null 2>&1 &
-	fi
+        imgpop 3 2 "/tmp/CurrentNetplay.png" 530 300 >/dev/null 2>&1 &
+    fi
 
-	if [ -e "/mnt/SDCARD/Roms/$romdirname/Imgs/$save_file_filename.png" ]; then  # local rom image
-		pngScale "/mnt/SDCARD/Roms/$romdirname/Imgs/$save_file_filename.png" "/tmp/CurrentNetplay2.png" 100 100
+    if [ -e "/mnt/SDCARD/Roms/$romdirname/Imgs/$save_file_filename.png" ]; then # local rom image
+        pngScale "/mnt/SDCARD/Roms/$romdirname/Imgs/$save_file_filename.png" "/tmp/CurrentNetplay2.png" 100 100
         sync
-		imgpop 2 1 "/tmp/CurrentNetplay2.png" 10 10 >/dev/null 2>&1 &
-	fi
+        imgpop 2 1 "/tmp/CurrentNetplay2.png" 10 10 >/dev/null 2>&1 &
+    fi
 
     # TO DO : allow to confirm only once the host has started
     infoPanel -t "$title" -m "$message"
