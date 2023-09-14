@@ -17,6 +17,8 @@ fi
 # try and reset the IP and supp conf
 Stop_hotspot_Client() {
 	# mv /tmp/wpa_supplicant.conf_bk /appconfigs/wpa_supplicant.conf
+	ip link set wlan1 down
+	ip addr flush dev wlan1
 	pkill -9 -f wpa_supplicant
 	/mnt/SDCARD/miyoo/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
 	# sync
@@ -33,8 +35,9 @@ Stop_hotspot_Client() {
 
 	if [ -z "$old_ipv4" ]; then
 		$log_func "Old IP address not found."
-		udhcpc_control
+		
 	else
+		$log_func "Old IP address found : $old_ipv4"
 		ip_output=$(ip addr add $old_ipv4 dev wlan0 2>&1)
 		if [ $? -ne 0 ]; then
 			$log_func "Failed to assign the old IP address."
@@ -47,8 +50,7 @@ Stop_hotspot_Client() {
 		$log_func "Failed to bring up the interface."
 		$log_func "Output from 'ip link set up' command: $ip_output"
 	fi
-
-	$WPACLI reconfigure
+	udhcpc_control
 }
 
 Stop_hotspot_Server() {
@@ -56,13 +58,14 @@ Stop_hotspot_Server() {
 	killall -9 hostapd
 	killall -9 dnsmasq
 	killall -9 tcpsvd
-	ifconfig wlan1 down
+	ip link set wlan1 down
+	ip addr flush dev wlan1
 	ifconfig wlan0 up
 	udhcpc_control
 	if ! pgrep "wpa_supplicant" >/dev/null; then
 		/mnt/SDCARD/miyoo/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
 	fi
-
+	$WPACLI reconfigure
 }
 
 udhcpc_control() {
