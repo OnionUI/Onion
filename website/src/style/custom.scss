@@ -262,6 +262,19 @@ tr.table-separator:nth-child(1n) {
   }
 }
 
+a.card {
+  color: inherit;
+  text-decoration: none;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  box-shadow: 0 1.5px 3px 0 #00000026;
+  transition: all var(--ifm-transition-fast) ease;
+  transition-property: border, box-shadow;
+
+  &:hover {
+    border-color: var(--ifm-color-primary);
+  }
+}
+
 
 // Agnolia Search
 

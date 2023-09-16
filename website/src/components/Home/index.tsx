@@ -41,28 +41,33 @@ function CenteredNote({ children }) {
 }
 
 function RecentPosts({ recentPosts }: Props): JSX.Element {
+    console.log({ recentPosts })
     return (<>
         {recentPosts && (
-            <div className={clsx('container padding--lg', styles.recentPosts)}>
+            <section className={clsx('container padding--lg', styles.recentPosts)}>
                 <h2>Recent blog posts</h2>
                 <Link href="/blog">See all blog posts</Link>
                 <div className="row">
                     {recentPosts.map(({ content }) => (
-                        <div key={content.metadata.permalink} className="col col--4">
-                            <div className="card margin-vert--lg">
+                        <article key={content.metadata.permalink} className="col col--4">
+                            <a className="card margin-vert--lg" href={content.metadata.permalink}>
+                                {content.assets.image && (
+                                    <div className="card__image">
+                                        <img src={content.assets.image} />
+                                    </div>
+                                )}
                                 <div className="card__header">
-                                    <h3><Link href={content.metadata.permalink}>{content.metadata.title}</Link></h3>
+                                    <h3>{content.metadata.title}</h3>
                                 </div>
                                 <div className="card__body">{content.metadata.description}</div>
                                 <div className={clsx('card__footer', styles.card__footer)}>
                                     <small>{content.metadata.formattedDate}</small>
-                                    <button onClick={() => (location.href = content.metadata.permalink)} className="button button--link">Read More</button>
                                 </div>
-                            </div>
-                        </div>
+                            </a>
+                        </article>
                     ))}
                 </div>
-            </div>
+            </section>
         )}
     </>);
 }
