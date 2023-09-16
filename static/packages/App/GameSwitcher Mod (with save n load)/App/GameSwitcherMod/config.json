@@ -1,0 +1,6 @@
+{
+	"label":	"GameSwitcher Mod",
+	"icon":	"/mnt/SDCARD/Icons/Default/app/gameswitcher.png",
+	"launch":	"launch.sh",
+	"description":	"Quickly switch games with save & load"
+}

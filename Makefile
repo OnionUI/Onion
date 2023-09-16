@@ -151,6 +151,10 @@ core: $(CACHE)/.setup
 
 apps: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
+	@cd $(SRC_DIR)/gameSwitcherMod && BUILD_DIR="$(PACKAGES_APP_DEST)/GameSwitcher Mod (with save n load)/App/GameSwitcherMod" make
+	@find $(SRC_DIR)/gameSwitcherMod -depth -type d -name res -exec cp -r {}/. "$(PACKAGES_APP_DEST)/GameSwitcher Mod (with save n load)/App/GameSwitcherMod/res/" \;
+	@cd $(SRC_DIR)/gameSwitcherModInstaller && BUILD_DIR="$(PACKAGES_APP_DEST)/GameSwitcher Mod (with save n load)/App/GameSwitcherMod" make
+	@find $(SRC_DIR)/gameSwitcherModInstaller -depth -type d -name res -exec cp -r {}/. "$(PACKAGES_APP_DEST)/GameSwitcher Mod (with save n load)/App/GameSwitcherMod/res/" \;
 	@cd $(SRC_DIR)/playActivityUI && BUILD_DIR="$(PACKAGES_APP_DEST)/Activity Tracker/App/PlayActivity" make
 	@find $(SRC_DIR)/playActivityUI -depth -type d -name res -exec cp -r {}/. "$(PACKAGES_APP_DEST)/Activity Tracker/App/PlayActivity/res/" \;
 	@find $(SRC_DIR)/packageManager -depth -type d -name res -exec cp -r {}/. $(BUILD_DIR)/App/PackageManager/res/ \;
