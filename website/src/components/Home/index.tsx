@@ -56,7 +56,7 @@ function RecentPosts({ recentPosts }: Props): JSX.Element {
                                 <div className="card__body">{content.metadata.description}</div>
                                 <div className={clsx('card__footer', styles.card__footer)}>
                                     <small>{content.metadata.formattedDate}</small>
-                                    <button onClick={() => (location.href = content.metadata.permalink)} className="button button--link">Read more</button>
+                                    <button onClick={() => (location.href = content.metadata.permalink)} className="button button--link">Read More</button>
                                 </div>
                             </div>
                         </div>
