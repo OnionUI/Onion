@@ -2,11 +2,14 @@
 slug: /welcome
 authors: [aemiii91]
 tags: [misc, announcements]
+image: ./assets/banner-website-intro.png
 ---
 
 # Introducing the new Onion website!
 
 We've finally moved away from using GitHub Wikis, and we're happy to introduce our shiny new website!
+
+![](./assets/website-intro.png)
 
 <!-- truncate -->
 
@@ -23,3 +26,4 @@ The new website introduces:
 5. **SEO** - this wiki should get picked up by Google (finally)! 😅
 
 We hope you'll find this new site a joy to use, and maybe even more impressive than our old wiki.
+
