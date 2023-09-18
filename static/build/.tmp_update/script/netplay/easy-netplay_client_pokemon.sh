@@ -5,20 +5,23 @@
 sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo
 save_dir="/mnt/SDCARD/Saves/CurrentProfile/saves/TGB Dual/"
-tgb_dual_opts="/mnt/SDCARD/Saves/CurrentProfile/config/TGB Dual/TGB Dual.opt"
-tgb_dual_opts_bk="/mnt/SDCARD/Saves/CurrentProfile/config/TGB Dual/TGB Dual.opt.bak"
 LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 WPACLI=/customer/app/wpa_cli
 hostip="192.168.100.100" # This should be the default unless the user has changed it..
 rm /tmp/stop_now
-local_rom="$cookie_rom_path"
+client_rom="$cookie_rom_path"
+client_rom_filename=$(basename "$client_rom")
+client_rom_filename_NoExt="${client_rom_filename%.*}"
+
 SaveFromGambatte=0
-CurDate=$(date +%Y%m%d_%H%M%S)
 
 ## Source global utils
 logfile=pokemon_link
 . $sysdir/script/log.sh
 program=$(basename "$0" .sh)
+
+export CurDate=$(date +%Y%m%d_%H%M%S)
+log "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* Easy Netplay Pokemon Client -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*\ndate : $CurDate"
 
 ##########
 ##Setup.##
@@ -62,33 +65,49 @@ read_cookie() {
     romName=$(basename "$rom")
     romNameNoExtension=${romName%.*}
     Img_path="/mnt/SDCARD/Roms/$romdirname/Imgs/$romNameNoExtension.png"
-    log "Cookie file read"
+    log "Cookie file read :"
+    log "romdirname $romdirname"
+    log "romName $romName"
+    log "romNameNoExtension $romNameNoExtension"
+    log "Img_path $Img_path"
+
 }
 
-# Push our saves over to the host - The save will be found based on the rom we've started GLO on and it will look in the $save_dir path for it (see line13) - Backs up first
-send_saves() {
+# Push our save over to the host - The save will be found based on the rom we've started GLO on and it will look in the $save_dir path for it (see line13) - Backs up first
+backup_and_send_save() {
     check_stop
     missing=""
     build_infoPanel_and_log "Syncing saves" "Syncing our save files with the host"
 
-    save_file_filename_full=$(basename "$local_rom")
-    save_file_filename="${save_file_filename_full%.*}"
-    save_file_matched=$(find "$save_dir" -name "$save_file_filename.srm" -not -name "*.rtc" -not -path "*/.netplay/*")
+    save_gambatte="/mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$client_rom_filename_NoExt.srm"
+    save_tgbdual="/mnt/SDCARD/Saves/CurrentProfile/saves/TGB Dual/$client_rom_filename_NoExt.srm"
 
-    if [ ! -f "$save_file_matched" ]; then
-        if [ -f "/mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$save_file_filename.srm" ]; then
-            cp "/mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$save_file_filename.srm" "$save_dir$save_file_filename.srm"
-            save_file_matched=$(find "$save_dir" -name "$save_file_filename.srm" -not -name "*.rtc" -not -path "*/.netplay/*")
-            SaveFromGambatte=1
-        else
-            touch "$save_dir/MISSING.srm"
-            save_file_matched="$save_dir/MISSING.srm"
-            missing=1
+    if [ -f "$save_gambatte" ]; then
+        SaveFromGambatte=1
+        log "Gambatte save file detected."
+        log "Backing up Gambatte save file to: $client_rom_filename_NoExt.srm_$Curdate"
+        cp -f "$save_gambatte" "${save_gambatte}_$CurDate"
+        if [ -f "$save_tgbdual" ]; then
+            confirm_join_panel "Continue ?" "There is a local save for\n$client_rom_filename_NoExt\nfor TGB Dual and for Gambatte.\n Gambatte save will be used by default."
+            log "Existing TGB Dual save file detected. Continue with Gambatte save."
+            # cp -f "$save_tgbdual" "${save_tgbdual}_$CurDate"
         fi
+        # copy save from Gambatte to TGB Dual
+        cp -f "$save_gambatte" "$save_tgbdual"
+        save_file_matched="$save_gambatte"
+    elif [ -f "$save_tgbdual" ]; then
+        log "No Gambatte save file detected, using TGB Dual save file instead."
+        log "Backing up current TGB Dual save file to: $client_rom_filename_NoExt.srm_$Curdate"
+        cp -f "$save_tgbdual" "${save_tgbdual}_$CurDate"
+        save_file_matched="$save_tgbdual"
+    else
+        touch "/tmp/MISSING.srm"
+        save_file_matched="/tmp/MISSING.srm"
     fi
 
     save_file_stripped="${save_file_matched##*/}"
     encoded_save_file=$(url_encode "$save_file_stripped")
+    log "encoded_save_file: $encoded_save_file"
 
     curl -T "$save_file_matched" "ftp://$hostip/tmp/$encoded_save_file"
 
@@ -96,22 +115,23 @@ send_saves() {
         build_infoPanel_and_log "Save not found" "You don't have a save for this game, \n or we failed to find it. Cannot continue \n Notified host."
         notify_stop
     fi
+
 }
 
-# Backup local save file
-backup_save() {
-    check_stop
+# # Backup local save file
+# backup_save() {
+#     check_stop
 
-    if [ $SaveFromGambatte -eq 1 ]; then
-        log "Backing up save file to: /mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$save_file_filename.srm_$CurDate"
-        cp -f "$save_file_matched" "/mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$save_file_filename.srm_$CurDate"
-    else
-        log "Backing up save file to: ${save_file_matched}_$CurDate"
-        cp "$save_file_matched" "${save_file_matched}_$CurDate"
-    fi
+#     if [ $SaveFromGambatte -eq 1 ]; then
+#         log "Backing up save file to: /mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$client_rom_filename_NoExt.srm_$CurDate"
+#         cp -f "$save_file_matched" "/mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$client_rom_filename_NoExt.srm_$CurDate"
+#     else
+#         log "Backing up save file to: ${save_file_matched}_$CurDate"
+#         cp "$save_file_matched" "${save_file_matched}_$CurDate"
+#     fi
 
-    sync
-}
+#     sync
+# }
 
 # Wait for the host to tell us it's ready, this happens just before it starts its RA session and we look in /tmp for a file indicator (file removed in host script cleanup)
 wait_for_host() {
@@ -144,15 +164,14 @@ wait_for_host() {
 start_retroarch() {
     build_infoPanel_and_log "Starting RA" "Starting RetroArch"
 
-    echo "*****************************************"
-    echo "romfullpath: $rom"
-    echo "platform: ${platform}"
-    echo "netplaycore: $netplaycore"
-    echo "core: $core"
-    echo "core_config_folder: $core_config_folder"
-    echo "cpuspeed: $cpuspeed"
-    echo "hostip: $hostip"
-    echo "*****************************************"
+    log "\n############################ RETROARCH DEBUGGING ############################"
+	log "host_rom: $rom"
+	log "client_rom_clone (here): ${client_rom}"
+    log "core: $core"
+    log "core_config_folder: $core_config_folder"
+    log "cpuspeed: $cpuspeed"
+    log "hostip: $hostip"
+    log "###############################################################################"
 
     if [ -n "$cpuspeed" ]; then
         log "We set core CPU speed for Netplay: $cpuspeed"
@@ -162,8 +181,8 @@ start_retroarch() {
 
     wait_for_host # we wait a second flag triggered from the host once RA is running
     cd /mnt/SDCARD/RetroArch
-    log "Starting RetroArch loaded with $rom and $local_rom"
-    HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/easynetplay_override.cfg -C $hostip -L "$core" --subsystem "gb_link_2p" "$rom" "$local_rom"
+    log "Starting RetroArch loaded with $rom and $client_rom"
+    HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/easynetplay_override.cfg -C $hostip -L "$core" --subsystem "gb_link_2p" "$rom" "$client_rom"
 
     if [ -n "$PreviousCPUspeed" ]; then
         log "We restore previous core CPU speed: $PreviousCPUspeed"
@@ -203,16 +222,13 @@ wait_for_save_return() {
     sleep 3
     sync
 
-    log "cp -f \"${save_file_matched}_rcvd\" \"$save_file_matched\""
-    cp -f "${save_file_matched}_rcvd" "$save_file_matched"
+    received_save="/tmp/$(basename "$save_file_matched")_rcvd"
+
+    log "cp -f \"$received_save\" \"$save_file_matched\""
+    cp -f "${received_save}" "$save_file_matched"
     cp_exit_status=$?
 
     if [ $cp_exit_status -eq 0 ]; then
-        if [ $SaveFromGambatte -eq 1 ]; then
-            log "Restoring the modified save to gambatte"
-            echo "$save_file_matched /mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$save_file_filename.srm"
-            mv -f "$save_file_matched" "/mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$save_file_filename.srm"
-        fi
         build_infoPanel_and_log "Syncing save" "Save merged successfully"
         sleep 1
     else
@@ -241,13 +257,11 @@ cleanup() {
     rm "/tmp/ready_to_send"
     rm "/tmp/ready_to_receive"
     rm "${save_file_matched}_rcvd"
-    rm "$tgb_dual_opts.bak"
-    rm "$save_dir/MISSING.srm"
     rm "/tmp/MISSING.srm"
     rm "/tmp/stop_now"
     rm "/tmp/wpa_supplicant.conf_bk"
-    # rm "/mnt/SDCARD/RetroArch/retroarch.cookie.client"
-    # rm "/mnt/SDCARD/RetroArch/retroarch.cookie"
+    rm "/mnt/SDCARD/RetroArch/retroarch.cookie.client"
+    rm "/mnt/SDCARD/RetroArch/retroarch.cookie"
 
     log "Cleanup done"
     exit
@@ -308,12 +322,12 @@ notify_peer() {
     local notify_file="/tmp/$1"
     touch "$notify_file"
     sync
-    curl -T "$notify_file" "ftp://$hostip/$notify_file" >/dev/null 2>&1
+    curl -T "$notify_file" "ftp://${hostip}/${notify_file}" >/dev/null 2>&1 # the first / after the IP must be not encoded
 
     if [ $? -eq 0 ]; then
-        log "Successfully transferred $notify_file to ftp://$hostip/$notify_file"
+        log "Successfully transferred $notify_file to ftp://${hostip}/${notify_file}"
     else
-        log "Failed to transfer $notify_file to ftp://$hostip/$notify_file"
+        log "Failed to transfer $notify_file to ftp://${hostip}/${notify_file}"
     fi
 }
 
@@ -345,21 +359,16 @@ sync_file() {
     dir_path=$(dirname "$file_path")
     file_url="ftp://${hostip}/$(url_encode "${file_path#*/}")"
 
-    echo "############################ DEBUGGING #######################################"
-    echo file_type $file_type
-    echo file_path $file_path
-    echo file_check_size $file_check_size
-    echo remote_file_checksum $remote_file_checksum
-    echo sync_type $sync_type
-    echo file_mandatory $file_mandatory
-    echo
-    echo dir_path $dir_path
-    echo romdirname $romdirname
-    echo romName $romName
-    echo romNameNoExtension $romNameNoExtension
-    echo Img_path $Img_path
-    echo file_url $file_url
-    echo "##############################################################################"
+    log -e "\n############################ SYNC_FILE DEBUGGING ############################"
+    log file_type $file_type
+    log file_path $file_path
+    log file_check_size $file_check_size
+    log remote_file_checksum $remote_file_checksum
+    log sync_type $sync_type
+    log file_mandatory $file_mandatory
+    log file_url $file_url
+    log dir_path $dir_path
+    log "#############################################################################"
 
     # state vars
     same_size=
@@ -463,15 +472,14 @@ sync_file() {
 
     fi
 
-    log "############################ DEBUGGING #######################################"
-    echo sync_type $sync_type
-    echo remote_file_checksum $remote_file_checksum
-    echo same_chksum $same_chksum
-    echo run_sync $run_sync
-    echo file_type $file_type
-    echo
-    echo
-    echo "##############################################################################"
+    # log "############################ DEBUGGING #######################################"
+    # log sync_type $sync_type
+    # log remote_file_checksum $remote_file_checksum
+    # log same_chksum $same_chksum
+    # log run_sync $run_sync
+    # log file_type $file_type
+    # log -e "\n\n"
+    # log "##############################################################################"
 
     ########################## COPY Operation ##########################
 
@@ -613,8 +621,6 @@ start_ftp() {
 
 # Create a cookie with all the required info for the client. (client will use this cookie)
 create_cookie_info() {
-    echo -e "\n\n\n\n\n\n\n"
-    echo "we create =================================o=o=o=o=o=o==o"
     COOKIE_FILE="/mnt/SDCARD/RetroArch/retroarch.cookie"
     MAX_FILE_SIZE_BYTES=26214400
 
@@ -682,23 +688,23 @@ confirm_join_panel() {
     local title="$1"
     local message="$2"
 
-    if [ -e "$Img_path" ]; then # remote rom image
-        pngScale "$Img_path" "/tmp/CurrentNetplay.png" 100 100
-        sync
-        imgpop 3 2 "/tmp/CurrentNetplay.png" 530 300 >/dev/null 2>&1 &
-    fi
+    if [ "$title" = "Join now?" ]; then
+        if [ -e "$Img_path" ]; then # remote rom image
+            pngScale "$Img_path" "/tmp/CurrentNetplay.png" 100 100
+            sync
+            imgpop 3 2 "/tmp/CurrentNetplay.png" 530 300 >/dev/null 2>&1 &
+        fi
 
-    if [ -e "/mnt/SDCARD/Roms/$romdirname/Imgs/$save_file_filename.png" ]; then # local rom image
-        pngScale "/mnt/SDCARD/Roms/$romdirname/Imgs/$save_file_filename.png" "/tmp/CurrentNetplay2.png" 100 100
-        sync
-        imgpop 2 1 "/tmp/CurrentNetplay2.png" 10 10 >/dev/null 2>&1 &
+        if [ -e "/mnt/SDCARD/Roms/$romdirname/Imgs/$client_rom_filename_NoExt.png" ]; then # local rom image
+            pngScale "/mnt/SDCARD/Roms/$romdirname/Imgs/$client_rom_filename_NoExt.png" "/tmp/CurrentNetplay2.png" 100 100
+            sync
+            imgpop 2 1 "/tmp/CurrentNetplay2.png" 10 10 >/dev/null 2>&1 &
+        fi
     fi
 
     # TO DO : allow to confirm only once the host has started
     infoPanel -t "$title" -m "$message"
     retcode=$?
-
-    echo "retcode: $retcode"
 
     if [ $retcode -ne 0 ]; then
         build_infoPanel_and_log "Cancelled" "User cancelled, exiting."
@@ -707,12 +713,12 @@ confirm_join_panel() {
     fi
 }
 
-stripped_game_name() {
+stripped_game_names() {
     game_name="Host: \n$(basename "${rom%.*}")"
     game_name="$(echo "$game_name" | sed -e 's/ ([^()]*)//g' -e 's/ [[A-z0-9!+]*]//g' -e 's/([^()]*)//g' -e 's/[[A-z0-9!+]*]//g')"
 
-    local_rom_trimmed="$(echo "$save_file_filename" | sed -e 's/ ([^()]*)//g' -e 's/ [[A-z0-9!+]*]//g' -e 's/([^()]*)//g' -e 's/[[A-z0-9!+]*]//g')"
-    game_name_client="\n Client (me): \n$local_rom_trimmed"
+    client_rom_trimmed="$(echo "$client_rom_filename_NoExt" | sed -e 's/ ([^()]*)//g' -e 's/ [[A-z0-9!+]*]//g' -e 's/([^()]*)//g' -e 's/[[A-z0-9!+]*]//g')"
+    game_name_client="\n Client (me): \n$client_rom_trimmed"
 }
 
 checksum_func() {
@@ -779,13 +785,13 @@ lets_go() {
     start_ftp
     sync_file "Cookie" "/mnt/SDCARD/RetroArch/retroarch.cookie" 0 0 -f -m
     read_cookie
-    send_saves
-    backup_save
-    # sync_file Rom "$local_rom" # Doesn't sync anything, just uses the sync function to confirm it exists locally
+    backup_and_send_save
+    # backup_save
+    # sync_file Rom "$client_rom" # Doesn't sync anything, just uses the sync function to confirm it exists locally
     sync_file "Core" "$core" 1 "$corechecksum" -b -m
     sync_file "Rom" "$rom" 1 "$romchecksum" -b -m
     sync_file "Img" "$Img_path" 0 0 -o
-    stripped_game_name
+    stripped_game_names
     wait_for_host
     confirm_join_panel "Join now?" "Start the game on the host first! \n $game_name \n $game_name_client"
     pkill -9 pressMenu2Kill

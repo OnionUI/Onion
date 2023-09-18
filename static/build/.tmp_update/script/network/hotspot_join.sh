@@ -91,16 +91,16 @@ connect_to_host() {
 	# fi
 	##########################################################################################
 	udhcpc_control
-
-	sleep 0.5
+	sleep 2
 }
 
 # We'd better wait for an ip address to be assigned before going any further.
 wait_for_ip() {
-	ip addr flush dev wlan0
+	
 	IP=""
 	$display_func "Connecting..." "Waiting for an IP..."
 	local counter=0
+	ip addr flush dev wlan0
 
 	while [ -z "$IP" ]; do
 		IP=$(ip route get 1 2>/dev/null | awk '{print $NF;exit}')

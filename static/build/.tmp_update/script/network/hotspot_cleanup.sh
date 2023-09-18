@@ -35,7 +35,7 @@ Stop_hotspot_Client() {
 
 	if [ -z "$old_ipv4" ]; then
 		$log_func "Old IP address not found."
-		
+
 	else
 		$log_func "Old IP address found : $old_ipv4"
 		ip_output=$(ip addr add $old_ipv4 dev wlan0 2>&1)
@@ -61,10 +61,10 @@ Stop_hotspot_Server() {
 	ip link set wlan1 down
 	ip addr flush dev wlan1
 	ifconfig wlan0 up
-	udhcpc_control
 	if ! pgrep "wpa_supplicant" >/dev/null; then
 		/mnt/SDCARD/miyoo/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
 	fi
+	udhcpc_control
 	$WPACLI reconfigure
 }
 
