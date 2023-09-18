@@ -119,6 +119,7 @@ const config = {
             label: 'Themes',
             position: 'left',
           },
+          { to: '/about', label: 'About', position: 'left' },
           {
             type: 'search',
             position: 'right',

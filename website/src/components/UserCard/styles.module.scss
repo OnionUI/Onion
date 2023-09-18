@@ -1,0 +1,72 @@
+.userCard {
+    --image-size: 132px;
+
+    :global(.card) {
+        display: grid;
+        grid-template-columns: calc(var(--image-size) + 24px) 1fr;
+        grid-template-rows: auto;
+        grid-template-areas:
+            "image header"
+            "image main";
+        margin-bottom: 16px;
+
+        @media (max-width: 576px) {
+            & {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "image"
+                    "header"
+                    "main";
+            }
+        }
+
+        :global(.card__header) {
+            grid-area: header;
+            display: flex;
+            white-space: nowrap;
+            align-items: center;
+
+            h3 {
+                display: inline-block;
+                margin-bottom: 0;
+                margin-right: 16px;
+            }
+
+            i {
+                display: inline-block;
+                opacity: .6;
+            }
+
+            @media (max-width: 576px) {
+                & {
+                    padding-top: 0;
+                    flex-direction: column;
+
+                    h3 {
+                        margin-right: 0;
+                    }
+                }
+            }
+        }
+
+        :global(.card__image) {
+            grid-area: image;
+            text-align: center;
+
+            img {
+                border-radius: calc(var(--image-size) / 2);
+                overflow: hidden;
+                max-width: var(--image-size);
+                aspect-ratio: 1;
+                margin: 16px;
+                box-sizing: border-box;
+            }
+        }
+
+        :global(.card__body) {
+            grid-area: main;
+            font-size: .95em;
+            font-style: italic;
+        }
+    }
+}
