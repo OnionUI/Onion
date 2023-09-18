@@ -110,16 +110,6 @@ const config = {
           },
           { to: '/blog', label: 'Blog', position: 'left' },
           {
-            href: 'https://github.com/OnionUI/Onion',
-            label: 'GitHub',
-            position: 'left',
-          },
-          {
-            href: 'https://www.youtube.com/@OnionUIOfficial',
-            label: 'YouTube',
-            position: 'left',
-          },
-          {
             href: 'https://github.com/OnionUI/Ports-Collection/blob/main/README.md',
             label: 'Ports',
             position: 'left',
@@ -135,6 +125,11 @@ const config = {
           },
           {
             type: 'docsVersionDropdown',
+            position: 'right',
+          },
+          {
+            href: 'https://github.com/OnionUI/Onion',
+            label: 'GitHub',
             position: 'right',
           },
         ],
@@ -196,10 +191,6 @@ const config = {
           {
             title: 'More',
             items: [
-              {
-                label: 'Blog',
-                to: '/blog',
-              },
               {
                 label: 'GitHub',
                 href: 'https://github.com/OnionUI/Onion',
