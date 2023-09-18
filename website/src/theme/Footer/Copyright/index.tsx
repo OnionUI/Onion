@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import BrowserOnly from '@docusaurus/BrowserOnly';
 import Copyright from '@theme-original/Footer/Copyright';
 import type CopyrightType from '@theme/Footer/Copyright';
 import type { WrapperProps } from '@docusaurus/types';
@@ -6,6 +7,10 @@ import type { WrapperProps } from '@docusaurus/types';
 type Props = WrapperProps<typeof CopyrightType>;
 
 function PageCount(): JSX.Element {
+  if (window == undefined) {
+    return (<></>)
+  }
+
   let pageUrl = `onionui.github.io${location.pathname}`
   let imagePath = `https://api.visitorbadge.io/api/combined?path=${encodeURIComponent(pageUrl)}&label=PAGE%20HITS&labelColor=%237147c2&countColor=%23242630`
   const [imageSvg, setImageSvg] = useState(sessionStorage.getItem(imagePath))
@@ -39,7 +44,7 @@ export default function CopyrightWrapper(props: Props): JSX.Element {
   return (
     <>
       <Copyright {...props} />
-      <PageCount />
+      <BrowserOnly>{PageCount}</BrowserOnly>
     </>
   );
 }

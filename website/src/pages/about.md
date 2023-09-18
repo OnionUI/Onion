@@ -36,3 +36,19 @@
 - **Razole** - *for his awesome work managing themes*
 - *Our incredible theme creators!*
 - *All our amazing testers: Andrez, cardsaysmoops, Deletable_Man, diimdeep, jeltron, kalamer, TadMSTER, TheDewd, HYJINX187, Jutleys, jmaroeder, JDewitz, Tshroom, Sezuko, therecanonlybeoneandrew, NexLevel and so many more!*
+
+
+### Contact us
+
+#### Discord
+
+The best way to get in touch is via the *Retro Game Handhelds* discord server.
+
+1. [Click here](https://discord.gg/Jd2azKX) to join the server.
+2. Then, come find us in the thread:
+   - [*Takes a village to grow an onion*](https://discord.com/channels/529983248114122762/931367023588569180)
+
+
+#### Reddit
+
+You'll probably also be able to find us in the comments on [r/MiyooMini](https://www.reddit.com/r/MiyooMini).

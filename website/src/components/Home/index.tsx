@@ -41,7 +41,6 @@ function CenteredNote({ children }) {
 }
 
 function RecentPosts({ recentPosts }: Props): JSX.Element {
-    console.log({ recentPosts })
     return (<>
         {recentPosts && (
             <section className={clsx('container padding--lg', styles.recentPosts)}>
