@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from '@docusaurus/router';
 
 interface Props {
     path: string
@@ -17,6 +18,7 @@ export default function PageCount({
     const imagePath = new URL("https://api.visitorbadge.io/api/combined")
     imagePath.search = new URLSearchParams(opts).toString()
 
+    const location = useLocation();
     const [imageSvg, setImageSvg] = useState(null)
 
     useEffect(() => {
@@ -26,7 +28,7 @@ export default function PageCount({
                 const imageData = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`
                 setImageSvg(imageData)
             })
-    }, [])
+    }, [location.pathname])
 
     return (
         <>

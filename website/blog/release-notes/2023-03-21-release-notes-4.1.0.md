@@ -2,6 +2,7 @@
 slug: release-notes/4.1.0
 authors: [aemiii91, schmurtz]
 tags: [release-notes, stable]
+image: ./assets/banner-release-4.1.png
 ---
 
 # Release notes: Onion V4.1
