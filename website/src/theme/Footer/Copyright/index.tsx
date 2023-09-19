@@ -7,12 +7,8 @@ import type { WrapperProps } from '@docusaurus/types';
 type Props = WrapperProps<typeof CopyrightType>;
 
 function PageCount(): JSX.Element {
-  if (window == undefined) {
-    return (<></>)
-  }
-
-  let pageUrl = `onionui.github.io${location.pathname}`
-  let imagePath = `https://api.visitorbadge.io/api/combined?path=${encodeURIComponent(pageUrl)}&label=PAGE%20HITS&labelColor=%237147c2&countColor=%23242630`
+  let pageUrl = "onionui.github.io"
+  let imagePath = `https://api.visitorbadge.io/api/combined?path=${encodeURIComponent(pageUrl)}&labelColor=%237147c2&countColor=%23242630`
   const [imageSvg, setImageSvg] = useState(sessionStorage.getItem(imagePath))
 
   useEffect(() => {
