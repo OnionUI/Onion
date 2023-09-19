@@ -9,16 +9,17 @@ type Props = WrapperProps<typeof CopyrightType>;
 function PageCount(): JSX.Element {
   let pageUrl = "onionui.github.io"
   let imagePath = `https://api.visitorbadge.io/api/combined?path=${encodeURIComponent(pageUrl)}&labelColor=%237147c2&countColor=%23242630`
-  const [imageSvg, setImageSvg] = useState()
+  const [imageSvg, setImageSvg] = useState(null)
 
   useEffect(() => {
     fetch(imagePath)
       .then(response => response.text())
       .then(svg => {
         const imageData = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`
+        console.log(imageData)
         setImageSvg(imageData)
       })
-  })
+  }, [])
 
   return (
     <>
