@@ -4,7 +4,7 @@
 # Env setup
 sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo
-save_dir="/mnt/SDCARD/Saves/CurrentProfile/saves/TGB Dual/"
+# save_dir="/mnt/SDCARD/Saves/CurrentProfile/saves/TGB Dual/"
 LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 WPACLI=/customer/app/wpa_cli
 hostip="192.168.100.100" # This should be the default unless the user has changed it..
@@ -79,6 +79,7 @@ backup_and_send_save() {
     missing=""
     build_infoPanel_and_log "Syncing saves" "Syncing our save files with the host"
 
+    mkdir -p "/mnt/SDCARD/Saves/CurrentProfile/saves/TGB Dual"
     save_gambatte="/mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$client_rom_filename_NoExt.srm"
     save_tgbdual="/mnt/SDCARD/Saves/CurrentProfile/saves/TGB Dual/$client_rom_filename_NoExt.srm"
 
@@ -118,21 +119,6 @@ backup_and_send_save() {
 
 }
 
-# # Backup local save file
-# backup_save() {
-#     check_stop
-
-#     if [ $SaveFromGambatte -eq 1 ]; then
-#         log "Backing up save file to: /mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$client_rom_filename_NoExt.srm_$CurDate"
-#         cp -f "$save_file_matched" "/mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$client_rom_filename_NoExt.srm_$CurDate"
-#     else
-#         log "Backing up save file to: ${save_file_matched}_$CurDate"
-#         cp "$save_file_matched" "${save_file_matched}_$CurDate"
-#     fi
-
-#     sync
-# }
-
 # Wait for the host to tell us it's ready, this happens just before it starts its RA session and we look in /tmp for a file indicator (file removed in host script cleanup)
 wait_for_host() {
 
@@ -165,8 +151,8 @@ start_retroarch() {
     build_infoPanel_and_log "Starting RA" "Starting RetroArch"
 
     log "\n############################ RETROARCH DEBUGGING ############################"
-	log "host_rom: $rom"
-	log "client_rom_clone (here): ${client_rom}"
+    log "host_rom: $rom"
+    log "client_rom_clone (here): ${client_rom}"
     log "core: $core"
     log "core_config_folder: $core_config_folder"
     log "cpuspeed: $cpuspeed"
@@ -229,6 +215,11 @@ wait_for_save_return() {
     cp_exit_status=$?
 
     if [ $cp_exit_status -eq 0 ]; then
+        if [ $SaveFromGambatte -eq 1 ]; then
+            mv -f "/mnt/SDCARD/Saves/CurrentProfile/states/Gambatte/$client_rom_filename_NoExt.state.auto" "/mnt/SDCARD/Saves/CurrentProfile/states/Gambatte/$client_rom_filename_NoExt.state.auto_$CurDate"
+        else
+            mv -f "/mnt/SDCARD/Saves/CurrentProfile/states/TGB Dual/$client_rom_filename_NoExt.state.auto" "/mnt/SDCARD/Saves/CurrentProfile/states/TGB Dual/$client_rom_filename_NoExt.state.auto_$CurDate"
+        fi
         build_infoPanel_and_log "Syncing save" "Save merged successfully"
         sleep 1
     else

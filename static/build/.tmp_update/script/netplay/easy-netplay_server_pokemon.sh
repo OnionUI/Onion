@@ -168,27 +168,9 @@ wait_for_client() {
 
 # Backup the save we're going to use before we do anythign else
 host_save_backup() {
-	# check_stop
-	# save_dir="/mnt/SDCARD/Saves/CurrentProfile/saves/TGB Dual/"
-	# host_rom_filename=$(basename "$host_rom")
-	# host_rom_filename_NoExt="${host_rom_filename%.*}"
-	# host_save_file=$(find "$save_dir" -name "$host_rom_filename_NoExt.srm" -not -name "*.rtc" -not -path "*/.netplay/*")
-	# if [ ! -f "$host_save_file" ]; then
-	# 	if [ -f "/mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$host_rom_filename_NoExt.srm" ]; then
-	# 		cp "/mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$host_rom_filename_NoExt.srm" "$save_dir$host_rom_filename_NoExt.srm"
-	# 		host_save_file=$(find "$save_dir" -name "$host_rom_filename_NoExt.srm" -not -name "*.rtc" -not -path "*/.netplay/*")
-	# 		SaveFromGambatte=1
-	# 	fi
-	# fi
-	# log "Backing up save file to: $(basename "${host_save_file}")_$Curdate"
-	# sleep 1
-	# if [ $SaveFromGambatte -eq 1 ]; then
-	# 	cp -f "$host_save_file" "/mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$host_rom_filename_NoExt.srm_$CurDate"
-	# else
-	# 	cp "$host_save_file" "${host_save_file}_$CurDate"
-	# fi
 
 	check_stop
+	mkdir -p "/mnt/SDCARD/Saves/CurrentProfile/saves/TGB Dual"
 	save_gambatte="/mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$host_rom_filename_NoExt.srm"
 	save_tgbdual="/mnt/SDCARD/Saves/CurrentProfile/saves/TGB Dual/$host_rom_filename_NoExt.srm"
 
@@ -300,11 +282,11 @@ client_read_cookie() {
 	romName=$(basename "$client_rom")
 	romNameNoExtension=${romName%.*}
 	client_Img_path="/mnt/SDCARD/Roms/$romdirname/Imgs/$romNameNoExtension.png"
-    log "Cookie file read :"
-    log "client romdirname $romdirname"
-    log "client romName $romName"
-    log "client romNameNoExtension $romNameNoExtension"
-    log "client Img_path $Img_path"
+	log "Cookie file read :"
+	log "client romdirname $romdirname"
+	log "client romName $romName"
+	log "client romNameNoExtension $romNameNoExtension"
+	log "client Img_path $Img_path"
 }
 
 # Duplicate the rom to spoof the save loaded in on the host
@@ -336,12 +318,12 @@ ready_up() {
 # We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
 start_retroarch() {
 
-    log "\n############################ RETROARCH DEBUGGING ############################"
+	log "\n############################ RETROARCH DEBUGGING ############################"
 	log "host_rom: $host_rom"
 	log "client_rom_clone: ${client_rom_clone}"
 	log "netplaycore: $netplaycore"
 	log "cpuspeed: $cpuspeed"
-    log "###############################################################################"
+	log "###############################################################################"
 
 	if [ -n "$cpuspeed" ]; then
 		log "We set core CPU speed for Netplay: $cpuspeed"
@@ -366,10 +348,12 @@ start_retroarch() {
 host_save_overwrite() {
 	if [ $SaveFromGambatte -eq 1 ]; then
 		mv -f "$save_tgbdual" "$save_gambatte"
+		mv -f "/mnt/SDCARD/Saves/CurrentProfile/states/Gambatte/$host_rom_filename_NoExt.state.auto" "/mnt/SDCARD/Saves/CurrentProfile/states/Gambatte/$host_rom_filename_NoExt.state.auto_$CurDate"
 		if [ -f "${save_tgbdual}_$CurDate" ]; then # We restore the previous tgbdual save to keep it intact.
 			mv -f "${save_tgbdual}_$CurDate" "$save_tgbdual"
 		fi
-
+	else
+		mv -f "/mnt/SDCARD/Saves/CurrentProfile/states/TGB Dual/$host_rom_filename_NoExt.state.auto" "/mnt/SDCARD/Saves/CurrentProfile/states/TGB Dual/$host_rom_filename_NoExt.state.auto_$CurDate"
 	fi
 }
 
@@ -590,16 +574,16 @@ sync_file() {
 	dir_path=$(dirname "$file_path")
 	file_url="ftp://${client_ip}/$(url_encode "${file_path#*/}")"
 
-    log "\n############################ SYNC_FILE DEBUGGING ############################"
-    log file_type $file_type
-    log file_path $file_path
-    log file_check_size $file_check_size
-    log remote_file_checksum $remote_file_checksum
-    log sync_type $sync_type
-    log file_mandatory $file_mandatory
-    log file_url $file_url
-    log dir_path $dir_path
-    log "#############################################################################"
+	log "\n############################ SYNC_FILE DEBUGGING ############################"
+	log file_type $file_type
+	log file_path $file_path
+	log file_check_size $file_check_size
+	log remote_file_checksum $remote_file_checksum
+	log sync_type $sync_type
+	log file_mandatory $file_mandatory
+	log file_url $file_url
+	log dir_path $dir_path
+	log "#############################################################################"
 
 	# state vars
 	same_size=
