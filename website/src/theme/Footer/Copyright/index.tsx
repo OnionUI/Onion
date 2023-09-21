@@ -1,5 +1,4 @@
 import React from 'react';
-import BrowserOnly from '@docusaurus/BrowserOnly';
 import Copyright from '@theme-original/Footer/Copyright';
 import type CopyrightType from '@theme/Footer/Copyright';
 import type { WrapperProps } from '@docusaurus/types';
@@ -11,11 +10,7 @@ export default function CopyrightWrapper(props: Props): JSX.Element {
   return (
     <>
       <Copyright {...props} />
-      <BrowserOnly>
-        {() => (
-          <PageCount path="OnionUI/onionui.github.io" />
-        )}
-      </BrowserOnly>
+      <PageCount user="OnionUI" repo="onionui.github.com" />
     </>
   );
 }
