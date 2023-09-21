@@ -55,13 +55,25 @@ Once you've activated your SSH server in Tweaks you'll now be able to connect us
 If you connect using the integrated ssh client in Windows or Linux, you might get this error:
 
 ```
-Unable to negotiate with 10.0.0.32 port 22: no matching key exchange method found.
+Unable to negotiate with x.x.x.x port 22: no matching key exchange method found.
 ```
 
 To fix this, you need to specify the **key exchange** and **host key algorithm** by adding the correct arguments:
 
 ```sh
 ssh onion@IPADDRESS -oKexAlgorithms=+diffie-hellman-group1-sha1 -oHostKeyAlgorithms=+ssh-rsa
+```
+
+If you connect from Fedora, some versions of SSH will fail to connect with the error:
+
+```sh
+Unable to negotiate with x.x.x.x port 22: no matching host key type found. Their offer: ssh-rsa,ssh-dss
+```
+
+To fix this, try specifying the accepted key types with:
+
+```sh
+ssh onion@IPADDRESS -oKexAlgorithms=+diffie-hellman-group1-sha1 -oHostKeyAlgorithms=+ssh-rsa -oPubkeyAcceptedKeyTypes=+ssh-rsa
 ```
 
 Replace `IPADDRESS` accordingly.
