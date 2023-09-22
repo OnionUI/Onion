@@ -10,7 +10,7 @@ export default function CopyrightWrapper(props: Props): JSX.Element {
   return (
     <>
       <Copyright {...props} />
-      <PageCount user="OnionUI" repo="onionui.github.com" />
+      <PageCount user="OnionUI" repo="onionui.github.io" />
     </>
   );
 }
