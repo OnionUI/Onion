@@ -52,6 +52,7 @@ const config = {
       ({
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
+          editUrl: 'https://github.com/OnionUI/Onion/edit/main/website',
           lastVersion: 'current',
           versions: {
             current: {
