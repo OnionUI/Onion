@@ -190,13 +190,13 @@ sync_file() {
 		if [ "$same_size" -ne 1 ]; then
 			msg="Files doesn't have the same size."
 			sync_success=0
-			[ $file_mandatory -eq 1 ] && cleanup
+			[ "$file_mandatory" = "-m" ] && cleanup
 
 		fi
 		if [ "$same_chksum" -ne 1 ]; then
 			msg="$msg\nFiles doesn't have the same checksum."
 			sync_success=0
-			[ $file_mandatory -eq 1 ] && cleanup
+			[ "$file_mandatory" = "-m" ] && cleanup
 
 		fi
 		if [ "$same_size" -eq 1 ] && [ "$same_chksum" -eq 1 ]; then
@@ -283,7 +283,7 @@ sync_file() {
 			log "backup restored"
 		fi
 		sleep 2
-		[ $file_mandatory -eq 1 ] && cleanup
+		[ "$file_mandatory" = "-m" ] && cleanup
 
 	else
 
@@ -312,7 +312,7 @@ sync_file() {
 				log "backup restored"
 			fi
 			sleep 2
-			[ $file_mandatory -eq 1 ] && cleanup
+			[ "$file_mandatory" = "-m" ] && cleanup
 		fi
 		#####"
 
