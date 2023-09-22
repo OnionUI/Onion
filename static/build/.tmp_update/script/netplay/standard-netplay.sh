@@ -106,12 +106,19 @@ Check_PlayerName() {
 
 	config_file="/mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg"
 	netplay_nickname=$(grep "^netplay_nickname" "$config_file" | awk -F '"' '{print $2}')
-	if [ "${netplay_nickname#0nion - }" = "$netplay_nickname" ]; then
-		new_nickname="0nion - $netplay_nickname"
+
+	if [ "$netplay_nickname" = "--0 Miyoo Mini+ - Onion 0--" ]; then
+		new_nickname="0nion"
 		sed -i "s/^netplay_nickname = .*/netplay_nickname = \"$new_nickname\"/" "$config_file"
-		log "netplay_nickname prefix added: \"$netplay_nickname\" is now \"$new_nickname\""
+		log "The new netplay_nickname value is: \"$new_nickname\""
 	else
-		log "netplay_nickname prefix already OK: \"$netplay_nickname\""
+		if [ "${netplay_nickname#0nion}" = "$netplay_nickname" ]; then
+			new_nickname="0nion - $netplay_nickname"
+			sed -i "s/^netplay_nickname = .*/netplay_nickname = \"$new_nickname\"/" "$config_file"
+			log "netplay_nickname prefix added: \"$netplay_nickname\" is now \"$new_nickname\""
+		else
+			log "netplay_nickname prefix already OK: \"$netplay_nickname\""
+		fi
 	fi
 
 }
