@@ -146,9 +146,10 @@ clear_logs() {
         ./gameSwitcher.log \
         ./keymon.log \
         ./game_list_options.log \
-        ./network.log \
         ./dnsmasq.log \
         ./ftp.log \
+        ./runtime.log \
+        ./update_networking.log \
         ./easy_netplay.log \
         2> /dev/null
 }
