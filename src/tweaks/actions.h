@@ -14,6 +14,7 @@
 #include "utils/msleep.h"
 
 #include "./appstate.h"
+#include "./diags.h"
 #include "./values.h"
 
 void action_setAppShortcut(void *pt)
@@ -90,6 +91,22 @@ void action_setEnableLogging(void *pt)
     char new_value[22];
     sprintf(new_value, "log_to_file = %s", settings.enable_logging ? "\"true\"" : "\"false\"");
     file_changeKeyValue(RETROARCH_CONFIG, "log_to_file =", new_value);
+}
+
+void action_runDiagnosticScript(void *payload_ptr)
+{ // run the script based on what the payload_ptr gives us
+    ListItem *item = (ListItem *)payload_ptr;
+    char *filename = (char *)item->payload_ptr;
+    char script_path[DIAG_MAX_PATH_LENGTH + 1];
+    snprintf(script_path, sizeof(script_path), "%s/%s", DIAG_SCRIPT_PATH, filename);
+
+    pthread_t thread;
+    if (pthread_create(&thread, NULL, diags_runScript, payload_ptr) != 0) {
+        list_updateStickyNote(item, "Failed to run script..."); // threading issues
+        list_changed = true;
+    }
+
+    pthread_detach(thread);
 }
 
 void action_setMenuButtonHaptics(void *pt)
