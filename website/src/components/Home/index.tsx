@@ -21,7 +21,7 @@ function HomepageHeader() {
                 <p className="hero__subtitle">{siteConfig.tagline}</p>
                 <div className={styles.buttons}>
                     <ReleaseLink label="Stable" showDownloads className="button button--primary button--lg" url="https://api.github.com/repos/OnionUI/Onion/releases/latest" />
-                    <ReleaseLink label="Beta" showDownloads className="button button--secondary button--lg" url="https://api.github.com/repos/OnionUI/Onion/releases/tags/latest" />
+                    <ReleaseLink label="Beta" showDownloads className="button button--secondary button--lg" url="https://api.github.com/repos/OnionUI/Onion/releases/tags/v4.2.0-rc" />
                 </div>
             </div>
         </header>
