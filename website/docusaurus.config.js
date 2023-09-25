@@ -4,6 +4,17 @@
 const lightCodeTheme = require('prism-react-renderer/themes/github');
 const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
+const remarkPing = require('remark-ping');
+const remarkPingOpts = {
+  pingUsername: (username) => true,
+  userURL: (username) => `https://github.com/${username}`
+}
+
+const oembed = require('remark-oembed');
+const oembedOpts = {
+  syncWidget: true
+}
+
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'Onion',
@@ -40,16 +51,29 @@ const config = {
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
-          sidebarPath: require.resolve('./sidebars.js')
+          sidebarPath: require.resolve('./sidebars.js'),
+          editUrl: 'https://github.com/OnionUI/Onion/edit/main/website',
+          lastVersion: 'current',
+          versions: {
+            current: {
+              label: '4.2'
+            },
+          },
+          remarkPlugins: [
+            [oembed, oembedOpts],
+            [remarkPing, remarkPingOpts],
+          ],
         },
-        blog: {
-          showReadingTime: true
-        },
+        blog: false,
         theme: {
           customCss: require.resolve('./src/style/custom.scss'),
         },
       }),
     ],
+  ],
+
+  stylesheets: [
+    "https://fonts.googleapis.com/icon?family=Material+Icons",
   ],
 
   themes: [
@@ -60,9 +84,10 @@ const config = {
       // @ts-ignore
       ({
         hashed: true,
-        language: ["en", "zh"],
-        highlightSearchTermsOnTargetPage: true,
+        language: ["en"],
+        highlightSearchTermsOnTargetPage: false,
         explicitSearchResultPath: true,
+        removeDefaultStopWordFilter: true
       }),
     ],
   ],
@@ -86,16 +111,6 @@ const config = {
           },
           { to: '/blog', label: 'Blog', position: 'left' },
           {
-            href: 'https://github.com/OnionUI/Onion',
-            label: 'GitHub',
-            position: 'left',
-          },
-          {
-            href: 'https://www.youtube.com/@OnionUIOfficial',
-            label: 'YouTube',
-            position: 'left',
-          },
-          {
             href: 'https://github.com/OnionUI/Ports-Collection/blob/main/README.md',
             label: 'Ports',
             position: 'left',
@@ -105,14 +120,20 @@ const config = {
             label: 'Themes',
             position: 'left',
           },
+          { to: '/about', label: 'About', position: 'left' },
           {
             type: 'search',
             position: 'right',
           },
-          // {
-          //   type: 'docsVersionDropdown',
-          //   position: 'right',
-          // },
+          {
+            type: 'docsVersionDropdown',
+            position: 'right',
+          },
+          {
+            href: 'https://github.com/OnionUI/Onion',
+            label: 'GitHub',
+            position: 'right',
+          },
         ],
       },
       footer: {
@@ -173,10 +194,6 @@ const config = {
             title: 'More',
             items: [
               {
-                label: 'Blog',
-                to: '/blog',
-              },
-              {
                 label: 'GitHub',
                 href: 'https://github.com/OnionUI/Onion',
               },
@@ -210,10 +227,34 @@ const config = {
         defaultMode: 'dark',
         respectPrefersColorScheme: true,
       },
+      zoom: {
+        selector: '.markdown :not(em):not(h2):not(sup):not(a) > img, .markdown > img',
+        config: {
+          // options you can specify via https://github.com/francoischalifour/medium-zoom#usage
+          background: {
+            light: 'rgb(255, 255, 255)',
+            dark: 'rgb(50, 50, 50)'
+          }
+        }
+      },
     }),
 
   plugins: [
-    require.resolve('docusaurus-plugin-sass')
+    require.resolve('docusaurus-plugin-image-zoom'),
+    require.resolve('docusaurus-plugin-sass'),
+    [
+      "./src/plugins/blog-plugin",
+      {
+        id: "blog",
+        routeBasePath: "blog",
+        path: "./blog",
+        showReadingTime: false,
+        remarkPlugins: [
+          [oembed, oembedOpts],
+          [remarkPing, remarkPingOpts],
+        ],
+      }
+    ],
   ],
 };
 

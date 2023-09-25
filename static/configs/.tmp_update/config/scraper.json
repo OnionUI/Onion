@@ -4,5 +4,10 @@
   "Retroarch_enabled": "true",
   "Screenscraper_enabled": "true",
   "Launchbox_enabled": "true",
-  "ScrapeInBackground": "false"
+  "ScrapeInBackground": "false",
+  "RetroarchMediaType": "Named_Boxarts",
+  "ScreenscraperMediaType": "box-2D",
+  "LaunchboxMediaType": "Box - Front",
+  "LaunchboxRegion": "United States",
+  "ScreenscraperRegion": "us"
 }
