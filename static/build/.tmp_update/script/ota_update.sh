@@ -113,9 +113,15 @@ get_release_info() {
 
 	# Github source api url
 	if [ "$channel" = "beta" ]; then
-		Release_assets_info=$(curl -k -s https://api.github.com/repos/$GITHUB_REPOSITORY/releases | jq -r 'map(select(.prerelease)) | first')
+		Release_assets_info=$(curl -k -s https://api.github.com/repos/$GITHUB_REPOSITORY/releases/tags/latest)
 	else
 		Release_assets_info=$(curl -k -s https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest)
+	fi
+
+	if echo "$Release_assets_info" | grep -q '"message": "Not Found"'; then
+		echo -e "${GREEN}DONE${NC}\n\n" \
+			"No update available for $channel channel\n"
+		return 1
 	fi
 
 	Release_asset=$(echo "$Release_assets_info" | jq '.assets[]? | select(.name | contains("Onion-v"))')
@@ -146,7 +152,7 @@ get_release_info() {
 	v1=$(get_version $Current_Version)
 	v2=$(get_version $Release_Version)
 
-	if [ $v1 -gt $v2 ] || ([ $v1 -eq $v2 ] && [ "$Current_FullVersion" == "$Release_FullVersion" ]); then
+	if [ $v1 -gt $v2 ] || ([ $v1 -eq $v2 ] && [ "$Current_FullVersion" = "$Release_FullVersion" ]); then
 		echo -e "Version is up to date\n"
 		return 1
 	fi
