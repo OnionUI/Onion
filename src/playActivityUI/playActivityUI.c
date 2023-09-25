@@ -21,7 +21,7 @@ static SDL_Surface *background;
 
 static TTF_Font *font40;
 static TTF_Font *font30;
-static TTF_Font *fontRomName25;
+static TTF_Font *fontCJKRomName25;
 static TTF_Font *font18;
 
 static PlayActivities *play_activities;
@@ -50,7 +50,7 @@ void init(void)
 
     font40 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 40);
     font30 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 30);
-    fontRomName25 = TTF_OpenFont("/customer/app/wqy-microhei.ttc", 25);
+    fontCJKRomName25 = TTF_OpenFont("/customer/app/wqy-microhei.ttc", 25);
     font18 = TTF_OpenFont("/customer/app/wqy-microhei.ttc", 18);
 }
 
@@ -58,7 +58,7 @@ void free_resources(void)
 {
     TTF_CloseFont(font40);
     TTF_CloseFont(font30);
-    TTF_CloseFont(fontRomName25);
+    TTF_CloseFont(fontCJKRomName25);
     TTF_CloseFont(font18);
 
     TTF_Quit();
@@ -152,7 +152,7 @@ void renderPage(int current_page)
             strncpy(rom_name, rom->name, STR_MAX - 1);
         else
             file_cleanName(rom_name, rom->name);
-        renderText(rom_name, font30, color_white, &(SDL_Rect){num_width + 100, 75 + 90 * row, 400, 40});
+        renderText(rom_name, includeCJK(rom_name) ? fontCJKRomName25 : font30, color_white, &(SDL_Rect){num_width + 100, 75 + 90 * row, 400, 40});
 
         str_serializeTime(total, entry->play_time_total);
         str_serializeTime(average, entry->play_time_average);
