@@ -202,3 +202,16 @@ int str_count_char(const char *str, char ch)
     }
     return count;
 }
+
+bool includeCJK(char *str)
+{
+    while (*str) {
+        unsigned char c = *str;
+        // normal cjk range
+        if (c >= 0x80 && c <= 0x9FFF) {
+            return true;
+        }
+        str++;
+    }
+    return false;
+}

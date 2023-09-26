@@ -52,6 +52,7 @@ const config = {
       ({
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
+          editUrl: 'https://github.com/OnionUI/Onion/edit/main/website',
           lastVersion: 'current',
           versions: {
             current: {
@@ -119,6 +120,7 @@ const config = {
             label: 'Themes',
             position: 'left',
           },
+          { to: '/about', label: 'About', position: 'left' },
           {
             type: 'search',
             position: 'right',
