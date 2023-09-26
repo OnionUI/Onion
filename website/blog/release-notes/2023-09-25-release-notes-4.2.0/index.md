@@ -17,14 +17,28 @@ image: ./assets/banner-release-4.2.png
 
 ## Features
 
-### ScummVM standalone
+### New emulators
+
+#### ScummVM standalone
+<sup>
+
+by @schmurtzm
+
+</sup>
 
 A new and improved standalone version of ScummVM has been added.
 
 [Read More](/docs/emulators/scummvm)
 
 
-### Logging framework/diagnostics
+### Utilities
+
+#### Logging framework/diagnostics
+<sup>
+
+by @XK9274
+
+</sup>
 
 ...
 
@@ -34,34 +48,74 @@ A new and improved standalone version of ScummVM has been added.
 ### Network services
 
 #### FTP
+<sup>
+
+by @XK9274
+
+</sup>
 
 ...
 
 #### SSH
+<sup>
+
+by @XK9274
+
+</sup>
 
 ...
 
 #### Telnet
+<sup>
+
+by @XK9274
+
+</sup>
 
 ...
 
 #### Samba
+<sup>
+
+by @XK9274
+
+</sup>
 
 ...
 
 #### HTTP Fileserver
+<sup>
+
+by @sa3eedDev
+
+</sup>
 
 ...
 
 #### NTP
+<sup>
+
+by @tGecko
+
+</sup>
 
 ...
 
 #### WPS
+<sup>
+
+by @XK9274
+
+</sup>
 
 ...
 
-#### WiFi hotspot
+#### Wi-Fi hotspot
+<sup>
+
+by @XK9274
+
+</sup>
 
 ...
 
@@ -69,10 +123,20 @@ A new and improved standalone version of ScummVM has been added.
 ### Netplay support
 
 #### Easy Netplay - Hotspot/Local
+<sup>
+
+by @XK9274
+
+</sup>
 
 ...
 
 #### Easy Netplay - Hotspot link cable support GB/GBC
+<sup>
+
+by @XK9274
+
+</sup>
 
 Adds support for Pokémon trading on 1st gen Pokémon games
 
