@@ -171,4 +171,15 @@ void action_resetAll(void *pt)
     _notifyResetDone(title_str);
 }
 
+void action_resetGameSwitcher(void *pt)
+{
+    const char title_str[] = "Reset GameSwitcher";
+    if (!_disable_confirm && !_confirmReset(title_str, "Are you sure you want to\nreset GameSwitcher config?"))
+        return;
+    system("rm -rf /mnt/SDCARD/.tmp_update/config/gameSwitcher && mkdir -p /mnt/SDCARD/.tmp_update/config/gameSwitcher");
+    reset_menus = true;
+    if (!_disable_confirm)
+        _notifyResetDone(title_str);
+}
+
 #endif // TWEAKS_RESET_H__

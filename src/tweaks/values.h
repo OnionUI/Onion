@@ -278,4 +278,12 @@ void value_setLcdVoltage(void)
     file_put(fp, LCD_VOLT_CONFIG, "%x", value);
 }
 
+int value_getGameSwitcherMaxSaveStates(void)
+{
+    int maxSaveStates = 1;
+    config_get("gameSwitcher/maxSaveStates", CONFIG_INT, &maxSaveStates);
+    maxSaveStates = (maxSaveStates - 5) / 5;
+    return maxSaveStates;
+}
+
 #endif // TWEAKS_VALUES_H__

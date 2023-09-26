@@ -330,4 +330,15 @@ void action_advancedSetLcdVoltage(void *pt)
     file_put(fp, LCD_VOLT_CONFIG, "%x", 0x0e);
 }
 
+void action_advancedSetGameSwitcherSaveLoad(void *pt)
+{
+    config_flag_set("gameSwitcher/enableSaveLoad", ((ListItem *)pt)->value);
+}
+
+void action_advancedSetGameSwitcherMaxSaveStates(void *pt)
+{
+    int maxSaveStatesValue = ((ListItem *)pt)->value * 5 + 5;
+    config_setNumber("gameSwitcher/maxSaveStates", maxSaveStatesValue);
+}
+
 #endif // TWEAKS_ACTIONS_H__

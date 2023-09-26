@@ -602,10 +602,43 @@ void menu_diagnostics(void *pt)
     header_changed = true;
 }
 
+void menu_gameswitcher(void *_)
+{
+    if (!_menu_gameswitcher._created) {
+        _menu_gameswitcher = list_createWithTitle(3, LIST_SMALL, "GameSwitcher");
+        list_addItemWithInfoNote(&_menu_gameswitcher,
+                                 (ListItem){
+                                     .label = "Enable save/load feature",
+                                     .item_type = TOGGLE,
+                                     .value = config_flag_get("gameSwitcher/enableSaveLoad"),
+                                     .action = action_advancedSetGameSwitcherSaveLoad},
+                                 "Enables functions to save\n"
+                                 "and load game states.\n"
+                                 "Replaces the backlight brightness\n"
+                                 "adjustment function.\n");
+        list_addItemWithInfoNote(&_menu_gameswitcher,
+                                 (ListItem){
+                                     .label = "Max save states",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 4,
+                                     .value_labels = {"5", "10", "15", "20", "25"},
+                                     .value = value_getGameSwitcherMaxSaveStates(),
+                                     .action = action_advancedSetGameSwitcherMaxSaveStates},
+                                 "Set the maximum save states.");
+        list_addItemWithInfoNote(&_menu_gameswitcher,
+                                 (ListItem){
+                                     .label = "Reset config",
+                                     .action = action_resetGameSwitcher},
+                                 "Reset all GameSwitcher config.");
+    }
+    menu_stack[++menu_level] = &_menu_gameswitcher;
+    header_changed = true;
+}
+
 void menu_advanced(void *_)
 {
     if (!_menu_advanced._created) {
-        _menu_advanced = list_createWithTitle(6, LIST_SMALL, "Advanced");
+        _menu_advanced = list_createWithTitle(7, LIST_SMALL, "Advanced");
         list_addItemWithInfoNote(&_menu_advanced,
                                  (ListItem){
                                      .label = "Swap triggers (L<>L2, R<>R2)",
@@ -647,6 +680,10 @@ void menu_advanced(void *_)
                                      "Use this option if you're seeing\n"
                                      "small artifacts on the display.");
         }
+        list_addItem(&_menu_advanced,
+                     (ListItem){
+                         .label = "GameSwitcher...",
+                         .action = menu_gameswitcher});
         if (exists(RESET_CONFIGS_PAK)) {
             list_addItem(&_menu_advanced,
                          (ListItem){

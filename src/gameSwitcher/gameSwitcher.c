@@ -1,6 +1,8 @@
+#include "SDL/SDL_rotozoom.h"
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
+#include <dirent.h>
 #include <fcntl.h>
 #include <libgen.h>
 #include <linux/fb.h>
@@ -42,10 +44,14 @@
 #define MAXHISTORY 100
 #define MAXHROMNAMESIZE 250
 #define MAXHROMPATHSIZE 150
+#define MAXSTATES 10
+#define MAXSTATESORTFAILS 5
 
+#define RA_SAVESTATES_DIR "/mnt/SDCARD/Saves/CurrentProfile/states"
 #define ROM_SCREENS_DIR "/mnt/SDCARD/Saves/CurrentProfile/romScreens"
 #define HISTORY_PATH \
     "/mnt/SDCARD/Saves/CurrentProfile/lists/content_history.lpl"
+#define CACHE_PATH CONFIG_PATH "gameSwitcher/gameSwitcher.json"
 
 #define MAXFILENAMESIZE 250
 #define MAXSYSPATHSIZE 80
@@ -87,10 +93,16 @@ static char sTotalTimePlayed[50] = "";
 typedef struct {
     uint32_t hash;
     char name[MAXHROMNAMESIZE];
+    char rom_name[MAXHROMNAMESIZE];
     char shortname[STR_MAX];
     char core[STR_MAX];
+    char core_name[STR_MAX];
     char RACommand[STR_MAX * 2 + 80];
     char totalTime[100];
+    char savingStatesPath[STR_MAX];
+    bool currentAutoStateSaved;
+    bool savingStatesSorted;
+    int savingStatesNum;
     int jsonIndex;
     int is_duplicate;
     SDL_Surface *romScreen;
@@ -101,6 +113,8 @@ static Game_s game_list[MAXHISTORY];
 
 static int game_list_len = 0;
 static int current_game = 0;
+static int current_state = 0; // 0 - auto, 1 ... MAXSTATES - manual saved states
+static int max_save_states = MAXSTATES;
 
 static SDL_Surface *surfaceGameName = NULL;
 static int gameNameScrollX = 0;
@@ -110,18 +124,257 @@ static int gameNameScrollEnd = 20;
 
 static cJSON *json_root = NULL;
 static cJSON *json_items = NULL;
+static cJSON *jsonCache_root = NULL;
 
 static bool __initial_romscreens_loaded = false;
+static bool gameSaveLoadEnabled = false;
+
+void readGameSwitcherSettings()
+{
+    // Read save/load enabled setting value
+    gameSaveLoadEnabled = config_flag_get("gameSwitcher/enableSaveLoad");
+
+    // Read max save states value
+    config_get("gameSwitcher/maxSaveStates", CONFIG_INT, &max_save_states);
+    if (max_save_states <= 0)
+        max_save_states = MAXSTATES;
+}
+
+const bool __getSavingStatesPathCached(const char *core_name, char *saving_states_path)
+{
+    if (jsonCache_root == NULL) {
+        jsonCache_root = json_load(CACHE_PATH);
+    }
+
+    return json_getString(jsonCache_root, core_name, saving_states_path);
+}
+
+const bool __cacheSavingStatesPath(const char *core_name, const char *states_path)
+{
+    if (!exists(CACHE_PATH)) {
+        FILE *fp;
+
+        if ((fp = fopen(CACHE_PATH, "w+")) == NULL)
+            return false;
+
+        fprintf(fp, "{\n");
+        fprintf(fp, "}");
+
+        fflush(fp);
+        fsync(fileno(fp));
+        fclose(fp);
+    }
+
+    if (jsonCache_root == NULL) {
+        jsonCache_root = json_load(CACHE_PATH);
+    }
+
+    const bool saveResult = json_forceSetString(jsonCache_root, core_name, states_path);
+
+    if (saveResult)
+        json_save(jsonCache_root, CACHE_PATH);
+
+    return saveResult;
+}
+
+// Find the folder name for saving states for the selected emulator
+const char *getSavingStatesPath(const char *core_name)
+{
+    char savingStatesPath[STR_MAX * 3];
+
+    if (__getSavingStatesPathCached(core_name, savingStatesPath))
+        return strdup(savingStatesPath);
+
+    char command[STR_MAX * 5];
+    char emuMasked[STR_MAX];
+
+    FILE *find;
+
+    // Extract the emulator name from the brackets, remove starting 'Beetle' word for Supafaust, replace ' ' and '-' chars by mask symbol
+    sprintf(command, "echo \"%s\" | awk -F '[()]' '{print $2}' | sed -e 's/^.*Beetle //' | sed -r 's/[- ]+/*/g'", core_name);
+    find = popen(command, "r");
+    if (find == NULL) {
+        perror("Error executing awk, sed command");
+        exit(EXIT_FAILURE);
+    }
+
+    // Read the output of the previous commands and extract masked emulator name
+    while (fgets(emuMasked, sizeof(emuMasked), find) != NULL) {
+        emuMasked[strcspn(emuMasked, "\n")] = '\0'; // Remove trailing newline character
+    }
+
+    pclose(find);
+
+    // Use the 'find' command to search for emulator subdirectories of the RA_SAVESTATES_DIR path
+    sprintf(command, "find \"%s\" -iname \"%s\" -and -type d -prune", RA_SAVESTATES_DIR, emuMasked);
+    find = popen(command, "r");
+    if (find == NULL) {
+        perror("Error executing find command");
+        exit(EXIT_FAILURE);
+    }
+
+    // Read the output of the find command and extract matching folder names
+    while (fgets(savingStatesPath, sizeof(savingStatesPath), find) != NULL) {
+        savingStatesPath[strcspn(savingStatesPath, "\n")] = '\0'; // Remove trailing newline character
+    }
+
+    pclose(find);
+
+    __cacheSavingStatesPath(core_name, savingStatesPath);
+
+    return strdup(savingStatesPath);
+}
+
+// Perform auto sort of saving states for selected game
+void sortSavingStates()
+{
+    if ((current_game < 0) && (current_game >= game_list_len))
+        return;
+
+    Game_s *game = &game_list[current_game];
+
+    if (game->savingStatesSorted)
+        return;
+
+    char statePath[STR_MAX * 3];
+    char stateScrPath[STR_MAX * 3 + 4];
+    int currentStateNum = 0, currentStep = 0;
+    int sortingFails = 0;
+
+    while (sortingFails < MAXSTATESORTFAILS) {
+        currentStep++;
+
+        // Construct new path for state number i
+        sprintf(statePath, "%s/%s.state%i", game->savingStatesPath, game->rom_name, currentStep);
+        sprintf(stateScrPath, "%s.png", statePath);
+
+        if (exists(statePath)) {
+            currentStateNum++;
+
+            // state files renaming required
+            if (currentStateNum != currentStep) {
+                char newStatePath[STR_MAX * 3];
+                char newStateScrPath[STR_MAX * 3 + 4];
+
+                sprintf(newStatePath, "%s/%s.state%i", game->savingStatesPath, game->rom_name, currentStateNum);
+                rename(statePath, newStatePath);
+
+                if (exists(stateScrPath)) {
+                    sprintf(newStateScrPath, "%s.png", newStatePath);
+                    rename(stateScrPath, newStateScrPath);
+                }
+            }
+        }
+        else {
+            sortingFails++;
+        }
+    }
+
+    game->savingStatesNum = currentStateNum;
+}
+
+// Duplicate current auto state as last saving state
+void saveCurrentAutoState()
+{
+    Game_s *game = &game_list[current_game];
+
+    if (game->currentAutoStateSaved ||
+        (current_state != 0) ||
+        (game->savingStatesNum < 0) ||
+        (game->savingStatesNum >= max_save_states))
+        return;
+
+    char statePath[STR_MAX * 3];
+    char stateScrPath[STR_MAX * 3 + 4];
+
+    sprintf(statePath, "%s/%s.state.auto", game->savingStatesPath, game->rom_name);
+    sprintf(stateScrPath, "%s.png", statePath);
+
+    if (!exists(statePath))
+        return;
+
+    char newStatePath[STR_MAX * 3];
+    char newStateScrPath[STR_MAX * 3 + 4];
+
+    game->savingStatesNum++;
+    game->currentAutoStateSaved = true;
+
+    sprintf(newStatePath, "%s/%s.state%i", game->savingStatesPath, game->rom_name, game->savingStatesNum);
+    sprintf(newStateScrPath, "%s.png", newStatePath);
+
+    file_copy(statePath, newStatePath);
+    file_copy(stateScrPath, newStateScrPath);
+
+    current_state = game->savingStatesNum;
+}
+
+// Copy selected saving state to the auto state
+void playCurrentState()
+{
+    if (current_state <= 0)
+        return;
+
+    Game_s *game = &game_list[current_game];
+
+    char statePath[STR_MAX * 3];
+    char stateScrPath[STR_MAX * 3 + 4];
+    char selStatePath[STR_MAX * 3];
+    char selStateScrPath[STR_MAX * 3 + 4];
+
+    sprintf(statePath, "%s/%s.state.auto", game->savingStatesPath, game->rom_name);
+    sprintf(stateScrPath, "%s.png", statePath);
+
+    sprintf(selStatePath, "%s/%s.state%i", game->savingStatesPath, game->rom_name, current_state);
+    sprintf(selStateScrPath, "%s.png", selStatePath);
+
+    if (!exists(statePath) ||
+        !exists(stateScrPath) ||
+        !exists(selStatePath) ||
+        !exists(selStateScrPath))
+        return;
+
+    file_copy(selStatePath, statePath);
+    file_copy(selStateScrPath, stateScrPath);
+}
+
+// Delete selected saving state
+void removeCurrentState()
+{
+    if (current_state <= 0)
+        return;
+
+    Game_s *game = &game_list[current_game];
+
+    char selStatePath[STR_MAX * 3];
+    char selStateScrPath[STR_MAX * 3 + 4];
+
+    sprintf(selStatePath, "%s/%s.state%i", game->savingStatesPath, game->rom_name, current_state);
+    sprintf(selStateScrPath, "%s.png", selStatePath);
+
+    if (exists(selStatePath) && exists(selStateScrPath)) {
+        remove(selStatePath);
+        remove(selStateScrPath);
+        game->savingStatesSorted = false;
+    }
+}
 
 void unloadRomScreen(int index)
 {
     if (index < 0 || index >= game_list_len)
         return;
+
     Game_s *game = &game_list[index];
 
     if (game->romScreen != NULL) {
         SDL_FreeSurface(game->romScreen);
         game->romScreen = NULL;
+    }
+}
+
+void freeRomScreens()
+{
+    for (int i = 0; i < game_list_len; i++) {
+        unloadRomScreen(i);
     }
 }
 
@@ -131,6 +384,23 @@ SDL_Surface *loadRomScreen(int index)
         return NULL;
 
     Game_s *game = &game_list[index];
+
+    if (gameSaveLoadEnabled) {
+        char stateScrPath[STR_MAX * 3 + 4];
+
+        unloadRomScreen(index);
+
+        if (current_state > 0) {
+            sprintf(stateScrPath, "%s/%s.state%i.png", game->savingStatesPath, game->rom_name, current_state);
+        }
+        else {
+            sprintf(stateScrPath, "%s/%s.state.auto.png", game->savingStatesPath, game->rom_name);
+        }
+
+        if (exists(stateScrPath)) {
+            game->romScreen = IMG_Load(stateScrPath);
+        }
+    }
 
     if (game->romScreen == NULL) {
         char currPicture[STR_MAX * 2];
@@ -159,18 +429,6 @@ SDL_Surface *loadRomScreen(int index)
     }
 
     return game->romScreen;
-}
-
-void freeRomScreens()
-{
-    for (int i = 0; i < game_list_len; i++) {
-        Game_s *game = &game_list[i];
-
-        if (game->romScreen != NULL) {
-            SDL_FreeSurface(game->romScreen);
-            game->romScreen = NULL;
-        }
-    }
 }
 
 static void *_loadRomScreensThread(void *_)
@@ -206,13 +464,14 @@ void getGameName(char *name_out, const char *rom_path)
 void readHistory()
 {
     game_list_len = 0;
+    current_state = 0;
 
     if (!exists(HISTORY_PATH)) {
         print_debug("History file missing");
         return;
     }
 
-    char rom_path[STR_MAX], core_path[STR_MAX];
+    char rom_path[STR_MAX], core_path[STR_MAX], core_name[STR_MAX];
 
     if (json_items == NULL) {
         json_root = json_load(HISTORY_PATH);
@@ -226,7 +485,8 @@ void readHistory()
             break;
 
         if (!json_getString(subitem, "path", rom_path) ||
-            !json_getString(subitem, "core_path", core_path))
+            !json_getString(subitem, "core_path", core_path) ||
+            !json_getString(subitem, "core_name", core_name))
             continue;
 
         if (strncmp("/mnt/SDCARD/App", rom_path, 15) == 0)
@@ -241,12 +501,18 @@ void readHistory()
         game->romScreen = NULL;
         game->is_duplicate = 0;
         game->totalTime[0] = '\0';
+        game->savingStatesNum = 0;
+        game->currentAutoStateSaved = false;
+        game->savingStatesSorted = false;
         sprintf(game->RACommand, "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v -L \"%s\" \"%s\"", core_path, rom_path);
         getGameName(game->name, rom_path);
         strcpy(game->path, rom_path);
         strcpy(game->core, basename(core_path));
         str_split(game->core, "_libretro");
         file_cleanName(game->shortname, game->name);
+        strcpy(game->core_name, core_name);
+        strcpy(game->savingStatesPath, getSavingStatesPath(core_name));
+        strcpy(game->rom_name, file_removeExtension(basename(strdup(rom_path))));
 
         printf_debug("Game loaded:\n"
                      "\tname: '%s' (%s)\n"
@@ -271,7 +537,8 @@ void readHistory()
         game_list_len++;
     }
 
-    pthread_create(&thread_pt, NULL, _loadRomScreensThread, NULL);
+    if (!gameSaveLoadEnabled)
+        pthread_create(&thread_pt, NULL, _loadRomScreensThread, NULL);
 }
 
 void removeCurrentItem()
@@ -280,10 +547,7 @@ void removeCurrentItem()
 
     printf_debug("removing: %s\n", game->name);
 
-    if (game->romScreen != NULL) {
-        SDL_FreeSurface(game->romScreen);
-        game->romScreen = NULL;
-    }
+    unloadRomScreen(current_game);
 
     if (game->is_duplicate > 0) {
         // Check for duplicates
@@ -335,6 +599,10 @@ int main(void)
     SDL_BlitSurface(screen, NULL, video, NULL);
     SDL_Flip(video);
 
+    mkdirs("/mnt/SDCARD/.tmp_update/config/gameSwitcher");
+
+    readGameSwitcherSettings();
+
     readHistory();
 
     settings_load();
@@ -363,8 +631,6 @@ int main(void)
     bool select_pressed = false;
     bool select_combo_key = false;
 
-    mkdirs("/mnt/SDCARD/.tmp_update/config/gameSwitcher");
-
     bool view_min = config_flag_get("gameSwitcher/minimal");
     bool show_time = config_flag_get("gameSwitcher/showTime");
     bool show_total = !config_flag_get("gameSwitcher/hideTotal");
@@ -383,10 +649,10 @@ int main(void)
     uint32_t brightness_timeout = 2000;
 
     char header_path[STR_MAX], footer_path[STR_MAX];
-    bool use_custom_header = theme_getImagePath(theme()->path, "extra/gs-top-bar", header_path);
-    bool use_custom_footer = theme_getImagePath(theme()->path, "extra/gs-bottom-bar", footer_path);
+    bool use_custom_header = theme_getImagePath(theme()->path, gameSaveLoadEnabled ? "extra/gs-top-bar-v2" : "extra/gs-top-bar", header_path);
+    bool use_custom_footer = theme_getImagePath(theme()->path, gameSaveLoadEnabled ? "extra/gs-bottom-bar-v2" : "extra/gs-bottom-bar", footer_path);
     SDL_Surface *custom_header = use_custom_header ? IMG_Load(header_path) : NULL;
-    SDL_Surface *custom_footer = use_custom_footer ? IMG_Load(footer_path) : NULL;
+    SDL_Surface *custom_footer = use_custom_footer ? IMG_Load(footer_path) : IMG_Load(SYSTEM_RESOURCES "gs-legend-v2.png");
 
     int header_height = use_custom_header ? custom_header->h : 60;
     if (header_height == 1)
@@ -436,6 +702,7 @@ int main(void)
             if (keystate[SW_BTN_RIGHT] >= PRESSED) {
                 if (current_game < game_list_len - 1) {
                     current_game++;
+                    current_state = 0;
                     current_game_changed = true;
                     changed = true;
                 }
@@ -444,6 +711,7 @@ int main(void)
             if (keystate[SW_BTN_LEFT] >= PRESSED) {
                 if (current_game > 0) {
                     current_game--;
+                    current_state = 0;
                     current_game_changed = true;
                     changed = true;
                 }
@@ -454,13 +722,54 @@ int main(void)
                 break;
             }
 
-            if (keystate[SW_BTN_A] == PRESSED)
+            if (keystate[SW_BTN_A] == PRESSED) {
+                if (gameSaveLoadEnabled) {
+                    playCurrentState();
+                }
+
                 break;
+            }
 
             if (keystate[SW_BTN_B] == PRESSED) {
-                exit_to_menu = true;
-                quit = true;
-                break;
+                if (gameSaveLoadEnabled) {
+                    if (current_state == 0) {
+                        saveCurrentAutoState();
+                        current_game_changed = true;
+                        changed = true;
+                    }
+                    else {
+                        theme_renderDialog(
+                            screen, "Delete save",
+                            "Are you sure you want to\ndelete selected save?",
+                            true);
+
+                        SDL_BlitSurface(screen, NULL, video, NULL);
+                        SDL_Flip(video);
+                        sound_change();
+
+                        while (!quit) {
+                            if (updateKeystate(keystate, &quit, true, NULL)) {
+                                if (keystate[SW_BTN_A] == PRESSED) {
+                                    removeCurrentState();
+                                    sortSavingStates();
+                                    current_state--;
+                                    current_game_changed = true;
+                                    changed = true;
+                                    break;
+                                }
+                                if (keystate[SW_BTN_B] == PRESSED) {
+                                    changed = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                else {
+                    exit_to_menu = true;
+                    quit = true;
+                    break;
+                }
             }
 
             if (keystate[changed_key] == PRESSED && changed_key != SW_BTN_UP &&
@@ -468,22 +777,48 @@ int main(void)
                 brightness_changed = false;
 
             if (keystate[SW_BTN_UP] >= PRESSED) {
-                // Change brightness
-                if (settings.brightness < 10) {
-                    settings_setBrightness(settings.brightness + 1, true, true);
+                if (gameSaveLoadEnabled) {
+                    // Change game state
+                    Game_s *game = &game_list[current_game];
+                    if (current_state > 0) {
+                        current_state--;
+                    }
+                    else if (current_state == 0) {
+                        current_state = game->savingStatesNum;
+                    }
+                    current_game_changed = true;
                 }
-                brightness_changed = true;
-                brightness_start = last_ticks;
+                else {
+                    // Change brightness
+                    if (settings.brightness < 10) {
+                        settings_setBrightness(settings.brightness + 1, true, true);
+                    }
+                    brightness_changed = true;
+                    brightness_start = last_ticks;
+                }
                 changed = true;
             }
 
             if (keystate[SW_BTN_DOWN] >= PRESSED) {
-                // Change brightness
-                if (settings.brightness > 0) {
-                    settings_setBrightness(settings.brightness - 1, true, true);
+                if (gameSaveLoadEnabled) {
+                    // Change game state
+                    Game_s *game = &game_list[current_game];
+                    if (current_state < game->savingStatesNum) {
+                        current_state++;
+                    }
+                    else if (current_state == game->savingStatesNum) {
+                        current_state = 0;
+                    }
+                    current_game_changed = true;
                 }
-                brightness_changed = true;
-                brightness_start = last_ticks;
+                else {
+                    // Change brightness
+                    if (settings.brightness > 0) {
+                        settings_setBrightness(settings.brightness - 1, true, true);
+                    }
+                    brightness_changed = true;
+                    brightness_start = last_ticks;
+                }
                 changed = true;
             }
 
@@ -599,10 +934,20 @@ int main(void)
                     current_bg = loadRomScreen(current_game);
 
                     if (current_bg != NULL) {
-                        if (view_mode == VIEW_NORMAL)
-                            SDL_BlitSurface(current_bg, &frame, screen, &frame);
-                        else
-                            SDL_BlitSurface(current_bg, NULL, screen, NULL);
+                        if (gameSaveLoadEnabled) {
+                            if (current_bg->w < 640) {
+                                const double zoomFactor = 640 / (double)current_bg->w;
+                                current_bg = rotozoomSurface(current_bg, 0.0, zoomFactor, 0);
+                            }
+                            SDL_Rect current_bg_rect = {320 - current_bg->w / 2, 240 - current_bg->h / 2};
+                            SDL_BlitSurface(current_bg, NULL, screen, &current_bg_rect);
+                        }
+                        else {
+                            if (view_mode == VIEW_NORMAL)
+                                SDL_BlitSurface(current_bg, &frame, screen, &frame);
+                            else
+                                SDL_BlitSurface(current_bg, NULL, screen, NULL);
+                        }
                     }
                 }
             }
@@ -610,7 +955,7 @@ int main(void)
             Game_s *game = &game_list[current_game];
 
             if (view_mode != VIEW_FULLSCREEN && game_list_len > 0) {
-                SDL_Rect game_name_bg_size = {0, 0, 640, 60};
+                SDL_Rect game_name_bg_size = {0, 0, 640, gameSaveLoadEnabled ? 120 : 60};
                 SDL_Rect game_name_bg_pos = {0, 360};
 
                 if (view_mode == VIEW_NORMAL) {
@@ -621,16 +966,18 @@ int main(void)
                 }
 
                 game_name_bg_size.y = game_name_bg_pos.y =
-                    view_mode == VIEW_NORMAL ? (480 - footer_height - 60) : 420;
+                    view_mode == VIEW_NORMAL ? (480 - footer_height - (gameSaveLoadEnabled ? 30 : 60)) : (gameSaveLoadEnabled ? 440 : 420);
 
-                SDL_BlitSurface(current_bg, &game_name_bg_size, screen,
-                                &game_name_bg_pos);
+                if (!gameSaveLoadEnabled)
+                    SDL_BlitSurface(current_bg, &game_name_bg_size, screen,
+                                    &game_name_bg_pos);
+
                 SDL_BlitSurface(transparent_bg, &game_name_bg_size, screen,
                                 &game_name_bg_pos);
 
                 if (current_game > 0) {
                     SDL_Rect arrow_left_rect = {theme()->frame.border_left + 10,
-                                                game_name_bg_pos.y + 30 -
+                                                game_name_bg_pos.y + (gameSaveLoadEnabled ? 20 : 30) -
                                                     arrow_left->h / 2};
                     SDL_BlitSurface(arrow_left, NULL, screen, &arrow_left_rect);
                 }
@@ -638,7 +985,7 @@ int main(void)
                 if (current_game < game_list_len - 1) {
                     SDL_Rect arrow_right_rect = {
                         630 - theme()->frame.border_right - arrow_right->w,
-                        game_name_bg_pos.y + 30 - arrow_right->h / 2};
+                        game_name_bg_pos.y + (gameSaveLoadEnabled ? 20 : 30) - arrow_right->h / 2};
                     SDL_BlitSurface(arrow_right, NULL, screen,
                                     &arrow_right_rect);
                 }
@@ -651,6 +998,9 @@ int main(void)
                 else
                     strcpy(game_name_str, game->shortname);
 
+                if (gameSaveLoadEnabled && (current_state > 0))
+                    snprintf(game_name_str, STR_MAX * 2 + 3, "%s (Save %i)", strdup(game_name_str), current_state);
+
                 if (current_game_changed) {
                     if (surfaceGameName != NULL)
                         SDL_FreeSurface(surfaceGameName);
@@ -662,10 +1012,13 @@ int main(void)
                     game_name_size.h = surfaceGameName->h;
                     gameNameScrollX =
                         -gameNameScrollStart * gameNameScrollSpeed;
+
+                    if (gameSaveLoadEnabled)
+                        sortSavingStates();
                 }
 
                 SDL_Rect game_name_rect = {320 - surfaceGameName->w / 2,
-                                           game_name_bg_pos.y + 30 -
+                                           game_name_bg_pos.y + (gameSaveLoadEnabled ? 20 : 30) -
                                                surfaceGameName->h / 2};
                 if (game_name_rect.x < game_name_padding)
                     game_name_rect.x = game_name_padding;
@@ -696,7 +1049,7 @@ int main(void)
             }
 
             if (view_mode == VIEW_NORMAL) {
-                if (custom_footer) {
+                if (use_custom_footer && custom_footer) {
                     if (footer_height > 0) {
                         SDL_Rect footer_rect = {0, 480 - custom_footer->h};
                         SDL_BlitSurface(custom_footer, NULL, screen,
@@ -704,13 +1057,33 @@ int main(void)
                     }
                 }
                 else {
-                    theme_renderFooter(screen);
-                    theme_renderStandardHint(
-                        screen, lang_get(LANG_RESUME, LANG_FALLBACK_RESUME),
-                        lang_get(LANG_BACK, LANG_FALLBACK_BACK));
-                    theme_renderFooterStatus(
-                        screen, game_list_len > 0 ? current_game + 1 : 0,
-                        game_list_len);
+                    if (gameSaveLoadEnabled) {
+                        if (current_state == 0) {
+                            if (!game->currentAutoStateSaved) {
+                                theme_renderStandardHint(screen, "RESUME", "SAVE");
+                            }
+                            else {
+                                theme_renderStandardHint(screen, "RESUME", NULL);
+                            }
+                        }
+                        else {
+                            theme_renderStandardHint(screen, "RESUME", "DELETE");
+                        }
+
+                        if (footer_height > 0) {
+                            SDL_Rect footer_rect = {640 - custom_footer->w, 480 - custom_footer->h - 9};
+                            SDL_BlitSurface(custom_footer, NULL, screen, &footer_rect);
+                        }
+                    }
+                    else {
+                        theme_renderFooter(screen);
+                        theme_renderStandardHint(
+                            screen, lang_get(LANG_RESUME, LANG_FALLBACK_RESUME),
+                            lang_get(LANG_BACK, LANG_FALLBACK_BACK));
+                        theme_renderFooterStatus(
+                            screen, game_list_len > 0 ? current_game + 1 : 0,
+                            game_list_len);
+                    }
                 }
             }
 
@@ -730,7 +1103,7 @@ int main(void)
                     }
                 }
 
-                if (custom_header) {
+                if (use_custom_header && custom_header) {
                     if (header_height > 0) {
                         SDL_BlitSurface(custom_header, NULL, screen, NULL);
                         SDL_Surface *title = TTF_RenderUTF8_Blended(
@@ -748,8 +1121,25 @@ int main(void)
                     }
                 }
                 else {
-                    theme_renderHeader(screen, title_str, false);
-                    theme_renderHeaderBattery(screen, battery_percentage);
+                    if (gameSaveLoadEnabled) {
+                        SDL_Rect header_bg_size = {0, 0, 640, 40};
+
+                        SDL_BlitSurface(transparent_bg, &header_bg_size, screen, NULL);
+
+                        SDL_Surface *title = TTF_RenderUTF8_Blended(
+                            resource_getFont(TITLE), title_str,
+                            theme()->title.color);
+                        if (title) {
+                            SDL_Rect title_rect = {320 - title->w / 2, (header_bg_size.h - title->h) / 2};
+                            SDL_BlitSurface(title, NULL, screen, &title_rect);
+                            SDL_FreeSurface(title);
+                        }
+                        theme_renderHeaderBatteryCustom(screen, battery_percentage, header_bg_size.h);
+                    }
+                    else {
+                        theme_renderHeader(screen, title_str, false);
+                        theme_renderHeaderBattery(screen, battery_percentage);
+                    }
                 }
             }
 
@@ -785,7 +1175,8 @@ int main(void)
         }
     }
 
-    screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
+    // Seamless loading of the game
+    //screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
 
     remove("/mnt/SDCARD/.tmp_update/.runGameSwitcher");
     remove("/mnt/SDCARD/.tmp_update/cmd_to_run.sh");
@@ -806,8 +1197,12 @@ int main(void)
     if (json_root != NULL)
         cJSON_free(json_root);
 
-    SDL_BlitSurface(screen, NULL, video, NULL);
-    SDL_Flip(video);
+    if (jsonCache_root != NULL)
+        cJSON_free(jsonCache_root);
+
+    // Seamless loading of the game
+    //SDL_BlitSurface(screen, NULL, video, NULL);
+    //SDL_Flip(video);
 
     if (custom_header != NULL)
         SDL_FreeSurface(custom_header);
