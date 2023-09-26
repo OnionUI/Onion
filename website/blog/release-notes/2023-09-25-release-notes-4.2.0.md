@@ -15,12 +15,24 @@ image: ./assets/banner-release-4.2.png
 
 ## Features
 
-- ...
-- ...
+- MMP Network features support in Tweaks:
+  - FTP
+  - SSH
+  - Telnet
+  - Samba
+  - HTTP Fileserver
+  - NTP
+  - WPS
+  - WiFi hotspot
+- MMP Netplay support:
+  - Easy Netplay - Hotspot/Local
+  - Easy Netplay - Hotspot link cable support GB/GBC (Adds support for Pokémon trading on 1st gen Pokémon games)
+- MM/MMP Logging framework/diagnostics
+- MM/MMP ScummVM Standalone
 - ...
 
 ## Fixes
-
+- 
 - ...
 - ...
 - ...
