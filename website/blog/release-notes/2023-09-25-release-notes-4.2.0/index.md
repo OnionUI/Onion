@@ -8,6 +8,8 @@ image: ./assets/banner-release-4.2.png
 
 # Release notes: Onion V4.2
 
+<img src={assets.image} />
+
 *Official release notes for Onion V4.2.0*
 
 ...

@@ -7,11 +7,11 @@ image: ./assets/banner-website-intro.png
 
 # Introducing the new Onion website!
 
+<img src={assets.image} />
+
 *You're finally here.. good to see you traveler!*
 
 We've moved away from the limited GitHub Wikis and over to GitHub Pages, and are happy to introduce our shiny new website!
-
-![](./assets/website-intro.png)
 
 <Truncate />
 
