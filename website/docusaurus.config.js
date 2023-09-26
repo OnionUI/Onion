@@ -248,6 +248,7 @@ const config = {
         id: "blog",
         routeBasePath: "blog",
         path: "./blog",
+        truncateMarker: new RegExp("<Truncate />"),
         showReadingTime: false,
         remarkPlugins: [
           [oembed, oembedOpts],

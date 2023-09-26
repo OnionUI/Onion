@@ -11,7 +11,7 @@ image: ./assets/banner-release-4.0.png
 
 This release introduces a new app, *Tweaks*, containing everything you need to *make Onion your own!* Built-in global search. Improved theme support.
 
-<!-- truncate -->
+<Truncate />
 
 ## Changelog
 

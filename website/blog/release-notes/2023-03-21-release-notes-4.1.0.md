@@ -11,7 +11,7 @@ image: ./assets/banner-release-4.1.png
 
 This release features a new menu, *GLO*, with game and list specific options (for example, you can now change core per game and load without save state); automatic icon switching and customization, a whole new ports collection, random game app, on-screen overlays, AdvanceMENU (an alternative frontend), and so much more!
 
-<!-- truncate -->
+<Truncate />
 
 ## Features
 

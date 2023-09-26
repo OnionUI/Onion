@@ -13,7 +13,7 @@ We've moved away from the limited GitHub Wikis and over to GitHub Pages, and are
 
 ![](./assets/website-intro.png)
 
-<!-- truncate -->
+<Truncate />
 
 ## New features
 
