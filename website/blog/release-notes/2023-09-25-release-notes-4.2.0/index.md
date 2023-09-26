@@ -50,7 +50,7 @@ by @XK9274
 #### FTP
 <sup>
 
-by @XK9274
+by @schmurtzm and @XK9274
 
 </sup>
 
