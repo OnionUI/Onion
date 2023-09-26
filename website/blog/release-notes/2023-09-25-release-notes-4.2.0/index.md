@@ -29,7 +29,7 @@ A new and improved standalone version of ScummVM has been added.
 ...
 
 
-## MMP-only features
+## Network features (MMP-only)
 
 ### Network services
 
