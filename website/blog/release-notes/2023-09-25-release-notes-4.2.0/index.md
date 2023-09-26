@@ -95,7 +95,7 @@ by @sa3eedDev
 #### NTP
 <sup>
 
-by @tGecko
+by @tGecko, @Aemiii91, and @XK9274
 
 </sup>
 
