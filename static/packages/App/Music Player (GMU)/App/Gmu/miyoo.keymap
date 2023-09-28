@@ -4,46 +4,49 @@
 # PlaylistPlayItem, PlaylistClear,
 # FileBrowserAddFileToPlaylistOrChDir
 Modifier=Menu
+
 # Global mappings:
 #Left=Left
 #Right=Right
 Up=Up
 Down=Down
-ShutdownTimer=Mod+Down
+Stop=Mod+B
+Pause=Start
 IncreaseVolume=R2
 DecreaseVolume=L2
+ShutdownTimer=Mod+Down
 ToggleTime=Mod+Left
-Pause=X
-Stop=Mod+X
-ToggleView=Start
-PreviousTrack=Left
-NextTrack=Right
-SeekForward=Mod+R1
-SeekBackward=Mod+L1
+ToggleView=Select
+PreviousTrack=L1
+NextTrack=R1
+SeekForward=Right
+SeekBackward=Left
 #Lock=Lock
 #Unlock=Unlock
-Exit=Mod+Start
-Help=Mod+Up
+Exit=Mod+Select
+Help=Mod+Start
 
 # Program info mappings:
-ProgramInfo=Mod+A
+ProgramInfo=Mod+L2
 ProgramInfoOkay=A
+
 # File browser mappings:
 #FileBrowserDirUp=Left
 #FileBrowserChDir=Right
 
-FileBrowserPlayFile=B
-FileBrowserAddFileToPlaylistOrChDir=A
-FileBrowserAddDirToPlaylist=Y
+FileBrowserPlayFile=A
+FileBrowserAddFileToPlaylistOrChDir=Y
+FileBrowserAddDirToPlaylist=X
 FileBrowserInsertFileIntoPlaylist=Mod+A
 FileBrowserNewPlFromDir=Mod+Y
 #FileBrowserDeleteFile=Mod+X
 # Playlist mappings:
 PlaylistPlayItem=A
-PlaylistToggleRandomMode=B
-PlaylistRemoveItem=Y
-PlaylistClear=Mod+Y
-PlaylistSave=Mod+B
+PlaylistToggleRandomMode=X
+PlaylistRemoveItem=B
+PlaylistClear=Mod+B
+PlaylistSave=Mod+A
+
 # Playlist save dialog:
 PlaylistSaveSelect=A
 PlaylistSaveCancel=B
@@ -51,12 +54,15 @@ PlaylistSaveLoadList=Y
 PlaylistSaveAppendList=Mod+Y
 #PlaylistDeleteFile=Mod+X
 PlaylistQueue=Mod+Right
+
 # Track info mappings:
 TrackInfoToggleCover=A
 TrackInfoToggleText=B
+
 # Question dialog mappings: 
 QuestionYes=A
 QuestionNo=B
+
 # Setup mappings:
 SetupSelect=A
 SetupSaveAndExit=X
