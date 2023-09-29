@@ -1,0 +1,25 @@
+---
+slug: /emulators/arcade
+---
+
+import DocCardList from '@theme/DocCardList';
+
+
+# Arcade systems
+
+*![](https://user-images.githubusercontent.com/98862735/177056379-3680d239-5ee7-4db7-b15d-ea484dcbf93e.png)*
+
+Arcade emulation is a little more complex than your typical console emulation and includes MAME (*Multiple Arcade Machine Emulator*) along with CPS1/2/3 (*Capcom Play System*), SNK Neo Geo (released both as an Arcade cabinet and Home Console), FB (*Final Burn*) and Daphne.
+
+While MAME supports many classic arcade games, for best compatibility and performance, it is recommended to use the CPS and Neo Geo systems (which use dedicated & customised emulators) for those particular games and MAME (or FB) for everything else.
+
+Both MAME and FB require your romsets to be matched exactly to the emulator version so you will need to source the recommended romsets. MAME romsets are not compatible with FB cores (and vice versa) and not every game in a full romset will be playable but the majority will be.  
+
+Arcade roms in general do not play well with save states (some will work but the majority don’t), you can [disable auto-loading of save states](../faq#how-do-i-disable-auto-load-save-states) in the Retroarch menu (and save content or core overrides).  
+
+MAME and FB both rely on internal databases to translate the rom file name into the displayed game name, some games may be missing from the db. You should never rename these roms, instead you can use the [miyoogamelist](../faq#how-can-i-use-a-miyoogamelistxml-to-customize-game-names) functionality to give your arcade roms appropriate names.   
+
+For more detailed information and tips on Arcade emulation, checkout the awesome [Ultimate Miyoo Mini Arcade Guide for Onion](https://www.reddit.com/r/MiyooMini/comments/vfirs8/ultimate_miyoo_mini_arcade_guide_onion_os/) by lordelan.
+
+
+<DocCardList />
