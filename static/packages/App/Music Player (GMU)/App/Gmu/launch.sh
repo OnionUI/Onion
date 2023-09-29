@@ -3,7 +3,7 @@ my_dir=`dirname $0`
 cd $my_dir
 
 echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-/mnt/SDCARD/.tmp_update/script/stop_audioserver.sh
+. /mnt/SDCARD/.tmp_update/script/stop_audioserver.sh
 
 HOME=/mnt/SDCARD/App/Gmu
 LD_LIBRARY_PATH=/mnt/SDCARD/.tmp_update/lib/parasyte:./lib:$LD_LIBRARY_PATH
