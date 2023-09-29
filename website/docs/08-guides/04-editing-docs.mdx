@@ -1,0 +1,98 @@
+---
+slug: /dev/docs
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+
+# Editing docs
+
+## Prerequisites
+
+To clone and build the website all you need is *git*, and [npm](https://nodejs.org/en/download/package-manager) or [yarn](https://yarnpkg.com/getting-started/install).
+
+Start by cloning [a fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) of the Onion repository:
+
+```sh
+git clone https://github.com/YOUR-USERNAME/Onion.git
+```
+
+Go to the `website` directory:
+
+```sh
+cd Onion/website
+```
+
+Use your preferred package manager to install the dependencies:
+
+<Tabs groupId="pm" queryString>
+<TabItem value="npm">
+
+
+```sh
+npm install
+```
+
+
+</TabItem>
+<TabItem value="yarn">
+
+
+```sh
+yarn install
+```
+
+
+</TabItem>
+</Tabs>
+
+
+## Serving the website locally
+
+To instantly preview your changes on save, you can serve the website locally using this command:
+
+<Tabs groupId="pm" queryString>
+<TabItem value="npm">
+
+
+```sh
+npm start
+```
+
+
+</TabItem>
+<TabItem value="yarn">
+
+
+```sh
+yarn start
+```
+
+
+</TabItem>
+</Tabs>
+
+
+## Editing content
+
+Now you're ready to start editing the docs! Open the `website/docs` directory (or any of the markdown files inside) in your favorite text editor, for example **Visual Studio Code**:
+
+```sh
+code docs/
+```
+
+### Notes on the file structure
+
+The markdown files inside the `docs` directory each represent a page on the website. These are divided into categories and subcategories. The number prefixes on the categories and pages decides the order in which they are shown in the sidebar.
+
+Some of the markdown files are using the `.mdx` extension, these have simply been supercharged with support for [MDX (Markdown + React)](https://www.docusaurus.io/docs/markdown-features/react) syntax.
+
+Some of the subcategories contain an `index.md` or `index.mdx` file, these represent the main landing page for each subcategory.
+
+
+## Propose changes via a Pull Request (PR)
+
+Push your changes to a fork of the Onion repo and create a PR to the main repo.
+
+Read more about [collaborating with pull requests here](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests).
