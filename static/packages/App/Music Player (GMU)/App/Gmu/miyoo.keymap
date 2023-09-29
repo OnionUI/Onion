@@ -34,7 +34,8 @@ ProgramInfoOkay=A
 #FileBrowserDirUp=Left
 #FileBrowserChDir=Right
 
-FileBrowserPlayFile=A
+#FileBrowserPlayFile=A
+FileBrowserPlayFileOrChDir=A
 FileBrowserAddFileToPlaylistOrChDir=Y
 FileBrowserAddDirToPlaylist=X
 FileBrowserInsertFileIntoPlaylist=Mod+A
