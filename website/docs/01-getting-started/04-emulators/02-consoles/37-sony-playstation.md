@@ -21,7 +21,8 @@ All Bios files are 512kb in size and are case sensitive, they must be named _exa
 Using the `PSXONPSP660.bin` bios is recommended for best compatibility.  
 If you experience issues loading games, you can use [md5 checker](http://getmd5checker.com/) to verify your bios files against the md5sum provided in the [official core documentation](https://docs.libretro.com/library/pcsx_rearmed/).
 
-Check out the [PlayStation overview video](https://www.youtube.com/watch?v=5DdSP1KxzSE) by *RetroBreeze*.  
+
+https://www.youtube.com/watch?v=5DdSP1KxzSE
 
 
 ## Notes on performance

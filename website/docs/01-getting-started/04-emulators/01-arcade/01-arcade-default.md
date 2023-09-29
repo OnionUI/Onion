@@ -21,4 +21,4 @@ An onscreen message saying ‘This Game Will Not Work’ is MAME letting you kno
 
 Current/modern versions of MAME are not compatible with the Miyoo Minis limited hardware specification which is why MAME 2003Plus has been chosen as the default.  
 
-Check out the [MAME overview video](https://www.youtube.com/watch?v=-0riylHkJis) by *RetroBreeze*.
+https://www.youtube.com/watch?v=-0riylHkJis

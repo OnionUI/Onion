@@ -61,7 +61,11 @@ html[data-theme='dark'] {
 
 .footer {
   a {
-    color: inherit;
+    color: rgba(255, 255, 255, .65);
+
+    &:hover {
+      color: #fff;
+    }
   }
 }
 
@@ -103,14 +107,6 @@ h6 {
   }
 }
 
-code {
-  border-color: rgba(var(--onion-purple-rgb), .2);
-
-  html[data-theme='dark'] & {
-    border-color: rgba(var(--onion-purple-rgb), .5);
-  }
-}
-
 details.alert.alert--info {
   --docusaurus-details-decoration-color: rgba(var(--base-fg-rgb), .3);
   --ifm-code-background: inherit;
@@ -136,7 +132,7 @@ details.alert.alert--info {
   }
 
   a {
-    text-decoration-color: #{$onion-purple};
+    text-decoration-color: var(--ifm-link-color);
   }
 
   summary {
@@ -169,11 +165,113 @@ details.alert.alert--info {
   }
 }
 
+a.button,
+.alert a.button {
+  text-decoration: none;
+}
+
+.alert--secondary {
+  --ifm-link-color: inherit;
+  --ifm-link-hover-color: inherit;
+}
+
+a>span.material-icons {
+  margin-right: 4px;
+  margin-bottom: -.25em;
+}
+
+.release-links {
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+h2 {
+  display: flex;
+  align-items: center;
+
+  img {
+    width: 48px;
+    margin-right: 8px;
+  }
+}
+
 @media (max-width: 576px) {
   img[align=right] {
     display: block;
     margin: 16px auto;
     float: none;
+  }
+}
+
+.ping {
+  color: rgba(var(--base-fg-rgb), .4);
+
+  .ping-username {
+    font-weight: bold;
+    color: var(--ifm-link-color);
+  }
+}
+
+h1,
+h2,
+h3,
+h4 {
+  &+sup {
+    position: relative;
+    top: -1em;
+    margin-bottom: -1em;
+    font-style: italic;
+  }
+}
+
+.remark-oembed-inline {
+  display: block;
+
+  iframe {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+}
+
+table[align=center] {
+  display: table;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+tr.table-separator:nth-child(1n) {
+  background-color: transparent;
+
+  td {
+    border-left: 0;
+    border-right: 0;
+  }
+}
+
+.markdown {
+
+  &>img {
+    display: block;
+    margin: 16px auto;
+  }
+}
+
+a.card {
+  color: inherit;
+  text-decoration: none;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  box-shadow: 0 1.5px 3px 0 #00000026;
+  transition: all var(--ifm-transition-fast) ease;
+  transition-property: border, box-shadow;
+
+  &:hover {
+    border-color: var(--ifm-color-primary);
   }
 }
 

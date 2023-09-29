@@ -416,6 +416,7 @@ check_hotspotstate() {
 # It does set TZ on the tty that Main is running in so this is ok
 
 check_ntpstate() {
+    ret_val=0
     if flag_enabled ntpState && wifi_enabled && [ ! -f "$sysdir/config/.hotspotState" ]; then
         set_tzid
         [ -f /tmp/ntp_synced ] && return 0
@@ -606,8 +607,9 @@ get_password() {
     PASS=$(cat "$sysdir/config/.password.txt")
 }
 
-if [ $LOGGING -eq 1 ]; then
+if [ -f $sysdir/config/.logging ]; then
     main "$@"
 else
     main "$@" 2>&1 > /dev/null
 fi
+

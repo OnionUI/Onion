@@ -2,6 +2,7 @@
 #define TWEAKS_MENUS_H__
 
 #include <SDL/SDL_image.h>
+#include <dirent.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -16,6 +17,7 @@
 
 #include "./actions.h"
 #include "./appstate.h"
+#include "./diags.h"
 #include "./formatters.h"
 #include "./icons.h"
 #include "./network.h"
@@ -565,21 +567,47 @@ void menu_resetSettings(void *_)
     header_changed = true;
 }
 
-void menu_diagnostics(void *_)
+void menu_diagnostics(void *pt)
 {
     if (!_menu_diagnostics._created) {
-        _menu_diagnostics = list_createWithTitle(1, LIST_SMALL, "Diagnostics");
+        diags_getEntries();
+
+        _menu_diagnostics = list_createWithSticky(1 + diags_numScripts, "Diagnostics");
         list_addItemWithInfoNote(&_menu_diagnostics,
                                  (ListItem){
                                      .label = "Enable logging",
+                                     .sticky_note = "Enable global logging",
                                      .item_type = TOGGLE,
                                      .value = (int)settings.enable_logging,
                                      .action = action_setEnableLogging},
-                                 "Enables logging to files for most of\n"
-                                 "the Onion system.\n"
-                                 " \n"
-                                 "Find the logs at 'SD:/.tmp_update/logs'.");
+                                 "Enable global logging, \n"
+                                 "for system & networking. \n \n"
+                                 "Logs will be generated in, \n"
+                                 "SD: /.tmp_update/logs.");
+        for (int i = 0; i < diags_numScripts; i++) {
+            ListItem diagItem = {
+                .label = "",
+                .payload_ptr = &scripts[i].filename,
+                .action = action_runDiagnosticScript,
+            };
+
+            const char *prefix = "";
+            if (strncmp(scripts[i].filename, "util", 4) == 0) {
+                prefix = "Util: ";
+            }
+            else if (strncmp(scripts[i].filename, "fix", 3) == 0) {
+                prefix = "Fix: ";
+            }
+
+            snprintf(diagItem.label, DIAG_MAX_LABEL_LENGTH - 1, "%s%.62s", prefix, scripts[i].label);
+            strncpy(diagItem.sticky_note, "Idle: Selected script not running", STR_MAX - 1);
+
+            char *parsed_Tooltip = diags_parseNewLines(scripts[i].tooltip);
+            list_addItemWithInfoNote(&_menu_diagnostics, diagItem, parsed_Tooltip);
+            free(parsed_Tooltip);
+        }
     }
+
     menu_stack[++menu_level] = &_menu_diagnostics;
     header_changed = true;
 }

@@ -1,0 +1,17 @@
+.socialLink {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    border-radius: 8px;
+
+    &:hover {
+        background-color: var(--docusaurus-highlighted-code-line-bg);
+    }
+
+    svg {
+        min-width: 24px;
+        width: 1.2em;
+        height: auto;
+        aspect-ratio: 1;
+    }
+}

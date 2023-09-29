@@ -12,5 +12,6 @@ slug: /emulators/segacd
 - Extensions: `.chd` `.bin/.cue` `.iso`
 - Bios: `bios_CD_U.bin`, `bios_CD_E.bin`, `bios_CD_J.bin`
 
-You can find a video tutorial by RetroBreeze [here](https://www.youtube.com/watch?v=mSuJHu43LB0).
 Review the [official core documentation](https://docs.libretro.com/library/picodrive/) for more information about this emulator.  
+
+https://www.youtube.com/watch?v=mSuJHu43LB0

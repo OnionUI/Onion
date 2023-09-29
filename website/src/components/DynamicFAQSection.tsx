@@ -6,7 +6,6 @@ export default function DynamicFAQSection({ children }) {
         const target = location.hash && document.querySelector(location.hash) || null;
         const summary = target?.parentElement;
         const details = summary?.parentElement as HTMLDetailsElement;
-        console.log({ details });
 
         if (target != null) {
             document.title = `${target.textContent} | FAQ | Onion`;
