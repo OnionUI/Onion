@@ -1,5 +1,5 @@
 ---
-slug: /apps/included-in-onion/advancemenu
+slug: /advancemenu
 ---
 
 
