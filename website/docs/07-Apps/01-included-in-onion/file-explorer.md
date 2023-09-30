@@ -1,6 +1,6 @@
 ---
 slug: /Apps/included-in-onion/file-explorer
-description: A flie explorer
+description: Organize your Onion with DinguxCommander
 ---
 
 # File Explorer

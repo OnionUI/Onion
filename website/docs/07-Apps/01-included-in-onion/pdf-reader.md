@@ -1,6 +1,6 @@
 ---
 slug: /Apps/included-in-onion/pdf-reader
-description: A PDF reader
+description: Green PDF reader by Steward-Fu
 ---
 
 # PDF reader

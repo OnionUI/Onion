@@ -1,6 +1,6 @@
 ---
 slug: /Apps/included-in-onion/clock
-description: A Clock app for Onion
+description: Set your Onions time
 ---
 
 # Clock
