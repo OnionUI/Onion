@@ -1,7 +1,10 @@
 ---
 slug: /apps/included-in-onion/quick-guide
-description: Getting started with Onion
 ---
 
 # Quick Guide
 
+
+*Getting started with Onion*
+
+Shows the quick guide that is shown after installing Onion

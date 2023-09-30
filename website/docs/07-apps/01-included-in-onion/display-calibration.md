@@ -1,7 +1,11 @@
 ---
 slug: /apps/included-in-onion/display-calibration
-description: 240pTestSuite by ArtemioUrbina
 ---
 
 # Display Calibration
 
+*240pTestSuite by ArtemioUrbina*
+
+A nifty collection of test tools for your device.
+
+Includes test patterns, video and audio test and controller test.

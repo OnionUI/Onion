@@ -1,7 +1,10 @@
 ---
 slug: /apps/included-in-onion/terminal
-description: simple terminal
 ---
 
 # Terminal
 
+
+*simple terminal*
+
+A simple terminal emulator with a complete on-screen keyboard for your Onion!
