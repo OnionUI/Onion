@@ -1,3 +1,11 @@
+---
+slug: /Apps/included-in-onion/file-explorer
+description: A flie explorer
+---
+
+# File Explorer
+
+
 A dual-pane file explorer that allows you to manage files directly on your device.
 
 Shortcuts:

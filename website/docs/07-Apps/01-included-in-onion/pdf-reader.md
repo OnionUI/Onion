@@ -1,10 +1,18 @@
+---
+slug: /Apps/included-in-onion/pdf-reader
+description: A PDF reader
+---
+
+# PDF reader
+
+
 Allows you to read PDF files, right on your device.
 
 Shortcuts:
 
 | Button | Function |
 |---|---|
-|Dpad|Navigate|
+|D-pad|Navigate|
 |A|Fit to width|
 |B|Rotate|
 |X|Zoom in|
