@@ -1,6 +1,6 @@
 ---
 slug: /Apps/included-in-onion/ota-update
-description: An OTA updater
+description: Update your Onion using WiFi
 ---
 
 # Onion OTA update

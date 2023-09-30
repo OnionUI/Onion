@@ -1,6 +1,6 @@
 ---
 slug: /Apps/included-in-onion/gallery
-description: A Screenshot viewer
+description: View your screenshots
 ---
 
 # Gallery
