@@ -1,7 +1,8 @@
 ---
 slug: /apps/included-in-onion/activity-tracker
+description: Track your play activity
 ---
 
 # Activity Tracker
 
-*Track your play activity*
+<i>{frontMatter.description}</i>
