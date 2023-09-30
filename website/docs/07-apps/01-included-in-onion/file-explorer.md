@@ -19,4 +19,4 @@ Shortcuts:
 |Y/Menu button|Open general submenu (Select all/New Directory etc)|
 |L1/R1|Scroll page|
 
-![](./res/file-explorer.png)
+![](./assets/file-explorer.png)

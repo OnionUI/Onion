@@ -20,4 +20,4 @@ Shortcuts:
 |Select|Show Chapters|
 |Menu|Exit|
 
-![](./res/ebook-reader.png)
+![](./assets/ebook-reader.png)
