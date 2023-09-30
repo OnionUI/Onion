@@ -6,6 +6,7 @@ image: ./assets/banner-release-4.2.png
 ---
 
 import TOCInline from '@theme/TOCInline';
+import Card from '@site/src/components/Card';
 
 
 # Release notes: Onion V4.2
@@ -28,6 +29,8 @@ import TOCInline from '@theme/TOCInline';
 
 ### Core Onion apps
 
+<Card>
+
 #### Activity Tracker
 <sup>
 
@@ -39,7 +42,11 @@ The Activity Tracker has undergone a complete overhaul.
 
 Through a huge collaborative effort, we've implemented a new backend, many bugfixes and added new features such as average playtime and play count tracking. 
 
+</Card>
+
 ### New emulators
+
+<Card readMore="/docs/emulators/scummvm">
 
 #### ScummVM standalone
 <sup>
@@ -52,9 +59,11 @@ A new and improved standalone version of ScummVM has been added.
 
 The standalone version features an extensive engine list & performance increases to audio in certain engines.
 
-[Read More](/docs/emulators/scummvm)
+</Card>
 
 ### Utilities
+
+<Card>
 
 #### Logging framework/diagnostics
 <sup>
@@ -67,11 +76,15 @@ A diagnostics framework that allows users to receive scripts from a developer an
 
 Releases with a snapshot feature to create an exported archive of logs you can quickly send to a dev or attach on our Github.
 
+</Card>
+
 ## Network features (MMP-only)
 
 ### Network services
 
 The Onion network services you know and love have moved! They now live in Tweaks!
+
+<Card>
 
 #### FTP
 <sup>
@@ -81,6 +94,9 @@ by @schmurtzm and @XK9274
 </sup>
 
 A compilation of bftpd to provide a great FTP experience to transfer content to and from your MMP.
+
+</Card>
+<Card>
 
 #### SSH
 <sup>
@@ -92,6 +108,9 @@ by @XK9274, @tGecko
 Adds dropbear SSH support to the MMP, utilisating new authentication methods.  
 Enabling SSH will also enable SFTP functionality.
 
+</Card>
+<Card>
+
 #### Telnet
 <sup>
 
@@ -100,6 +119,9 @@ by @XK9274
 </sup>
 
 Telnet re-worked to auto-disable on startup which provides a more secure experience. Telnet is by default disabled in Onion.
+
+</Card>
+<Card>
 
 #### Samba
 <sup>
@@ -113,6 +135,9 @@ Adds Samba support with authentication.
 Samba makes it easy to access and manage your stored content on your MMP across various types of devices and operating systems.
 For Windows and iOS users, built-in Samba apps are available, while Android users can download them from the Play Store.
 
+</Card>
+<Card>
+
 #### HTTP Fileserver
 <sup>
 
@@ -121,7 +146,10 @@ by @sa3eedDev, @XK9274
 </sup>
 
 Adds a graphically (and feature) rich way to transfer files, run shell commands and manage content.  
-The HTTP fileserver has been incredibly popular in Onion. 
+The HTTP fileserver has been incredibly popular in Onion.
+
+</Card>
+<Card>
 
 #### Automatic time sync
 <sup>
@@ -130,9 +158,12 @@ by @schmurtzm, @tGecko, @Aemiii91, and @XK9274
 
 </sup>
 
-Need your time to be accurate for in-game time based events? We've got you covered!  
-Sync your device's time with the internet effortlessly! Updates your clock automatically using Wi-Fi.  
+Need your time to be accurate for in-game time based events? We've got you covered!
+Sync your device's time with the internet effortlessly! Updates your clock automatically using Wi-Fi.
 Your time zone is set automatically but can also be changed. Optionally wait for a time sync on boot.
+
+</Card>
+<Card>
 
 #### WPS
 <sup>
@@ -142,6 +173,9 @@ by @XK9274
 </sup>
 
 Basic (pinless) WPS functionality to connect to your WiFi router!
+
+</Card>
+<Card>
 
 #### Wi-Fi hotspot
 <sup>
@@ -153,7 +187,11 @@ by @XK9274
 You can use all of Onions network features on the integrated hotspot, available through Tweaks.
 It's also compatible with Netplay!
 
+</Card>
+
 ### Netplay support
+
+<Card>
 
 #### Easy Netplay - GLO Menu
 <sup>
@@ -165,6 +203,9 @@ by @schmurtzm
 Netplay is now directly accessible through GLO.  
 
 The GLO Netplay menu brings together Netplay options like Host/Join and Easy Netplay into one location for a more user-friendly experience.
+
+</Card>
+<Card>
 
 #### Easy Netplay - Hotspot/Local
 <sup>
@@ -178,6 +219,9 @@ Out on the road without a router? No worries, Onion has you covered.
 You can play games with friends and family using the built-in hotspot feature. 
 Available in GLO, Easy Netplay will seamlessly setup a session and get you connected!
 
+</Card>
+<Card>
+
 #### Easy Netplay - Hotspot link cable support GB/GBC
 <sup>
 
@@ -187,6 +231,8 @@ by @XK9274
 
 Using the Easy Netplay framework, we've also added support for Cable link netplay on GBC.  
 This GLO feature allows for Pokémon trading on 1st gen Pokémon games (Red/Blue/Yellow, Gold/Silver) through TGBDual.
+
+</Card>
 
 ## Fixes and minor improvements
 
