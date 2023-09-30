@@ -1,5 +1,5 @@
 ---
-slug: /third-party/video-player
+slug: /community-apps/video-player
 description: A fully featured video player for Onion.
 ---
 

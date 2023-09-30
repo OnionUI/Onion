@@ -1,5 +1,5 @@
 ---
-slug: /third-party/logotweak
+slug: /community-apps/logotweak
 description: An app for easily updating the Miyoo Mini boot logo.
 ---
 

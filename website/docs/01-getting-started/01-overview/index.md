@@ -1,10 +1,10 @@
 ---
-slug: /overview
+slug: /features
 description: Overview of the most important features
 ---
 
 
-# Overview
+# Features
 
 <p align="center">
 <a href="#global-shortcuts"><img title="Global Shortcuts" src="https://user-images.githubusercontent.com/44569252/189434056-b1148ff9-393b-43d1-b362-20d97b64b393.png" width="48" /></a>
@@ -143,6 +143,58 @@ Some examples of video filters made for this RetroArch port (click to view full 
 
 **LCD filters, click to magnify (Integer scaling):**  
 ![](https://user-images.githubusercontent.com/16885275/173250366-dbaed067-640e-485d-8244-c62b9a7bd722.png)
+
+## Game List Options (GLO)
+<sup>
+
+
+</sup>
+
+*Press Y in a game list to get specific options for the selected game and the entire list*
+
+<table><thead>
+<th colspan="3"><b>Game List Options</b></th>
+</thead><tr>
+<td width="33%" align="center" valign="top"><img src="https://user-images.githubusercontent.com/44569252/226447277-a9452ecc-92ad-407f-a629-307491a652b4.png"/></td>
+<td width="33%" align="center" valign="top"><img src="https://user-images.githubusercontent.com/44569252/226447388-8c9c95f1-536a-4946-8b0f-f4b8ead0e97e.png"/></td>
+<td width="33%" align="center" valign="top"><img src="https://user-images.githubusercontent.com/44569252/226447466-71d4f5c1-7675-4355-9b60-20dbd1a03eae.png"/></td>
+</tr><tr>
+<td align="center" valign="top"><p><i>When in a game list, press <kbd>Y</kbd> to open GLO (this action can be reassigned in Tweaks)</i></p></td>
+<td align="center" valign="top"><p><i>GLO - specific options for the selected game or the entire list</i></p></td>
+<td align="center" valign="top"><p><i>Use the "Game core" option to change core per game</i></p></td>
+</tr></table>
+
+- **Reset game** - *load game without save state*
+- **Game core** - *set custom core per game*
+- **Filter list** - *use a keyword to filter the list*
+- **Refresh roms** - *refresh the list’s game cache*
+- *Custom scripts:*
+  - **Random game** - *added by Random Game app - launches a random game from the list*
+  - **Set time** - *added by Clock app - quick access to setting date and time*
+
+
+## Icon switching
+<sup>
+
+
+</sup>
+
+- ThemeSwitcher now supports themes with icon packs - *remember to visit our [themes repository](https://github.com/OnionUI/Themes/blob/main/README.md) for additional themes and icon packs!*
+- Change icon pack and edit individual icons in Tweaks
+
+<table align="center"><thead>
+<th colspan="2">Icon Switching</th>
+</thead><tr>
+<td width="65%" align="center" rowspan="2"><img src="https://user-images.githubusercontent.com/44569252/226450380-2d6ec505-c65d-4b67-bbc5-7104e39cd7ee.gif"/></td>
+<td><img src="https://user-images.githubusercontent.com/44569252/226451178-3d11e9f4-0c7f-4213-af24-ad1209b36350.png"/></td>
+</tr><tr>
+<td><img src="https://user-images.githubusercontent.com/44569252/226451190-2529bb42-f5b3-4a9e-acfd-6cf65e2d4d33.png"/></td>
+</tr><tr>
+<td align="center"><p><i>Showcase: Applying themes with icon packs</i></p></td>
+<td align="center"><p><i>Use Tweaks to change icon pack or edit individual icons</i></p></td>
+</tr></table>
+
+
 
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179304290-8c7e5140-5fb4-4ae1-bd90-faa416f9a37c.png" width="54" /></sup>Guest Mode
