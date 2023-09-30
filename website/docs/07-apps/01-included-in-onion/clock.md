@@ -1,5 +1,5 @@
 ---
-slug: /Apps/included-in-onion/clock
+slug: /apps/included-in-onion/clock
 description: Set your Onions time
 ---
 

@@ -1,5 +1,5 @@
 ---
-slug: /Apps/included-in-onion/music-player
+slug: /apps/included-in-onion/music-player
 description: Gmu Music Player
 ---
 

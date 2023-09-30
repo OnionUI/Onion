@@ -1,5 +1,5 @@
 ---
-slug: /included apps/package manager
+slug: /apps/included-in-onion/package manager
 description: Choose your apps and emulators to create your own Onion.
 ---
 

@@ -1,5 +1,5 @@
 ---
-slug: /Apps/included-in-onion/ebook-reader
+slug: /apps/included-in-onion/ebook-reader
 description: Pixel Reader by ealang
 ---
 

@@ -1,5 +1,5 @@
 ---
-slug: /Apps/included-in-onion/quick-guide
+slug: /apps/included-in-onion/quick-guide
 description: Getting started with Onion
 ---
 

@@ -1,5 +1,5 @@
 ---
-slug: /Apps/included-in-onion/search
+slug: /apps/included-in-onion/search
 description: Search your game library
 ---
 

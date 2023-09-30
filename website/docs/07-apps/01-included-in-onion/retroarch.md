@@ -1,5 +1,5 @@
 ---
-slug: /Apps/included-in-onion/retroarch
+slug: /apps/included-in-onion/retroarch
 description: Advanced emulator settings
 ---
 

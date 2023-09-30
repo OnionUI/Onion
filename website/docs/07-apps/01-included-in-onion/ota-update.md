@@ -1,5 +1,5 @@
 ---
-slug: /Apps/included-in-onion/ota-update
+slug: /apps/included-in-onion/ota-update
 description: Update your Onion using WiFi
 ---
 

@@ -1,5 +1,5 @@
 ---
-slug: /Apps/included-in-onion/advance-menu
+slug: /apps/included-in-onion/advance-menu
 description: Advanced emulator frontend
 ---
 

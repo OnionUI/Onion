@@ -1,5 +1,5 @@
 ---
-slug: /Apps/included-in-onion/terminal
+slug: /apps/included-in-onion/terminal
 description: simple terminal
 ---
 

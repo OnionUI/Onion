@@ -1,5 +1,5 @@
 ---
-slug: /Apps/included-in-onion/gallery
+slug: /apps/included-in-onion/gallery
 description: View your screenshots
 ---
 

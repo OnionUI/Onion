@@ -1,5 +1,5 @@
 ---
-slug: /Apps/included-in-onion/file-explorer
+slug: /apps/included-in-onion/file-explorer
 description: Organize your Onion with DinguxCommander
 ---
 

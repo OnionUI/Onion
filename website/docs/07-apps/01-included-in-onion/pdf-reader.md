@@ -1,5 +1,5 @@
 ---
-slug: /Apps/included-in-onion/pdf-reader
+slug: /apps/included-in-onion/pdf-reader
 description: Green PDF reader by Steward-Fu
 ---
 

@@ -1,5 +1,5 @@
 ---
-slug: /Apps/included-in-onion/activity-tracker
+slug: /apps/included-in-onion/activity-tracker
 ---
 
 # Activity Tracker
