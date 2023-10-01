@@ -6,7 +6,7 @@ interface Props {
     children: any
 }
 
-export default function UserCard({ readMore, children }: Props): JSX.Element {
+export default function Card({ readMore, children }: Props): JSX.Element {
     return (
         <article>
             <div className="card margin-bottom--md">
