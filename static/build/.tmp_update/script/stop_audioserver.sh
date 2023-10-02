@@ -12,7 +12,7 @@ set_snd_level() {
             echo "set_ao_volume 0 ${curvol}dB" > /proc/mi_modules/mi_ao/mi_ao0
             echo "set_ao_volume 1 ${curvol}dB" > /proc/mi_modules/mi_ao/mi_ao0
             echo "Volume set to ${curvol}dB"
-			break
+            break
         fi
         sleep 0.1
     done
