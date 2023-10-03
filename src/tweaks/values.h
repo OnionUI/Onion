@@ -243,6 +243,13 @@ void value_setSwapTriggers(void)
                  r_btn, l2_btn, r2_btn);
 }
 
+int value_getPWMFrequency(void)
+{
+    int pwmfrequency = 0;
+    config_get(".pwmfrequency", CONFIG_INT, &pwmfrequency);
+    return pwmfrequency;
+}
+
 int value_getLcdVoltage(void)
 {
     int value = 0x0;

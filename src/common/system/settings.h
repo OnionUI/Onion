@@ -50,6 +50,7 @@ typedef struct settings_s {
     int ingame_long_press;
     int ingame_double_press;
     bool disable_standby;
+    int pwmfrequency;
     bool enable_logging;
 
     char mainui_button_x[JSON_STRING_LEN];
@@ -96,6 +97,7 @@ static settings_s __default_settings = (settings_s){
     .ingame_double_press = 3,
     .disable_standby = false,
     .enable_logging = false,
+    .pwmfrequency = 7,
     .mainui_button_x = "",
     .mainui_button_y = ""};
 
@@ -190,6 +192,7 @@ void settings_load(void)
     config_get("startup/addHours", CONFIG_INT, &settings.time_skip);
     config_get("vibration", CONFIG_INT, &settings.vibration);
     config_get("startup/tab", CONFIG_INT, &settings.startup_tab);
+    config_get("pwmfrequency", CONFIG_INT, &settings.pwmfrequency);
 
     if (config_flag_get(".menuInverted")) { // flag is deprecated, but keep compatibility
         settings.ingame_single_press = 2;
@@ -310,7 +313,7 @@ void settings_save(void)
     config_setNumber("startup/addHours", settings.time_skip);
     config_setNumber("vibration", settings.vibration);
     config_setNumber("startup/tab", settings.startup_tab);
-
+    config_setNumber("pwmfrequency", settings.pwmfrequency);
     // remove deprecated flags
     remove(CONFIG_PATH ".noLowBatteryAutoSave");
     remove(CONFIG_PATH ".noBatteryWarning");

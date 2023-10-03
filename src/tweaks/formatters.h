@@ -25,6 +25,11 @@
         "-", "Off", "On"    \
     }
 
+#define PWM_FREQUENCIES                                                       \
+    {                                                                         \
+        "100", "200", "300", "400", "500", "600", "700", "800", "900", "1000" \
+    }   
+
 void formatter_timezone(void *pt, char *out_label)
 {
     ListItem *item = (ListItem *)pt;
