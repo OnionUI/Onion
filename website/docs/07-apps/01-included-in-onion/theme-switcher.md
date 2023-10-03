@@ -1,5 +1,5 @@
 ---
-slug: /apps/included-in-onion/theme-switcher
+slug: /apps/theme-switcher
 ---
 
 # Themes

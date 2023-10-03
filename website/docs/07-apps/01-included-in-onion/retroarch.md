@@ -1,5 +1,5 @@
 ---
-slug: /apps/included-in-onion/retroarch
+slug: /apps/retroarch
 ---
 
 # RetroArch

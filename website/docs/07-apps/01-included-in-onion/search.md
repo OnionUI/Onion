@@ -1,5 +1,5 @@
 ---
-slug: /apps/included-in-onion/search
+slug: /apps/search
 ---
 
 # Search

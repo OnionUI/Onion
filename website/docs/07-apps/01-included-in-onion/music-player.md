@@ -1,5 +1,5 @@
 ---
-slug: /music-player
+slug: /apps/music-player
 description: Gmu Music Player
 ---
 
@@ -30,26 +30,26 @@ Gmu supports MPEG audio, Ogg Vorbis and Ogg Opus for internet audio
 
 ### Global Controls:
 
-| Function | Button |
-|---|---|
-|play|A  (in playlist and in filebrowser)|
-|pause|start|
-|seek in track|Left/Right|
-|prev/next track|L1/R1|
-|ToggleView|Select|
-|exit|Menu + Select (similar to RA menu)|
-|help|Menu + Start|
+| Function        | Button                              |
+| --------------- | ----------------------------------- |
+| play            | A  (in playlist and in filebrowser) |
+| pause           | start                               |
+| seek in track   | Left/Right                          |
+| prev/next track | L1/R1                               |
+| ToggleView      | Select                              |
+| exit            | Menu + Select (similar to RA menu)  |
+| help            | Menu + Start                        |
 
 
 ### Playlist Controls:
 
-| Function | Button |
-|---|---|
-|PlayItem|A|
-|ToggleRandomMode|X|
-|RemoveItem|B|
-|Clear|Menu + B|
-|Save|Menu + A|
+| Function         | Button   |
+| ---------------- | -------- |
+| PlayItem         | A        |
+| ToggleRandomMode | X        |
+| RemoveItem       | B        |
+| Clear            | Menu + B |
+| Save             | Menu + A |
 
 <br /><br /><br />
 

@@ -1,5 +1,5 @@
 ---
-slug: /community-apps/screen-capture-toolkit
+slug: /apps/screen-capture-toolkit
 description: A Screencapturing toolkit for the Miyoo Mini + (Twitch/VNC/RTMP/Outputfile)
 ---
 

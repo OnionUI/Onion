@@ -1,5 +1,5 @@
 ---
-slug: /community-apps/spotify-client
+slug: /apps/spotify-client
 description: Builds ncspot for the Miyoo Mini + (contains appfolder).
 ---
 

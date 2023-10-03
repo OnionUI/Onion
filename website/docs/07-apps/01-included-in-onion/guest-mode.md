@@ -1,5 +1,5 @@
 ---
-slug: /apps/included-in-onion/guest-mode
+slug: /apps/guest-mode
 ---
 
 # Guest Mode

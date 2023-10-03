@@ -1,5 +1,5 @@
 ---
-slug: /advancemenu
+slug: /apps/advancemenu
 ---
 
 

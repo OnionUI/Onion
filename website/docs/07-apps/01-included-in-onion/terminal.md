@@ -1,5 +1,5 @@
 ---
-slug: /apps/included-in-onion/terminal
+slug: /apps/terminal
 ---
 
 # Terminal

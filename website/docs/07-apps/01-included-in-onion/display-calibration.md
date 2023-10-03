@@ -1,5 +1,5 @@
 ---
-slug: /apps/included-in-onion/display-calibration
+slug: /apps/display-calibration
 ---
 
 # Display Calibration

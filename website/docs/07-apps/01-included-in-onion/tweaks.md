@@ -1,5 +1,5 @@
 ---
-slug: /apps/included-in-onion/tweaks
+slug: /apps/tweaks
 ---
 
 # Tweaks

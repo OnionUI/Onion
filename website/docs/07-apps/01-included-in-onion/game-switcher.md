@@ -1,5 +1,5 @@
 ---
-slug: /apps/included-in-onion/game-switcher
+slug: /apps/game-switcher
 ---
 
 # GameSwitcher

@@ -1,5 +1,5 @@
 ---
-slug: /community-apps/speed-test
+slug: /apps/speed-test
 description: An app to allow testing internet speed on the miyoo mini plus.
 ---
 

@@ -1,5 +1,5 @@
 ---
-slug: /apps/included-in-onion/quick-guide
+slug: /apps/quick-guide
 ---
 
 # Quick Guide

@@ -1,5 +1,5 @@
 ---
-slug: /apps/included-in-onion/random-game
+slug: /apps/random-game
 ---
 
 # Random Game

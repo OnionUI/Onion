@@ -1,5 +1,5 @@
 ---
-slug: /apps/included-in-onion/gallery
+slug: /apps/gallery
 description: View your screenshots
 ---
 
@@ -10,9 +10,9 @@ A viewer for your screenshots.
 
 Shortcuts:
 
-| Button | Function |
-|---|---|
-|D-pad right or A|Next image|
-|D-pad left or B|Previous image|
-|Y|Toggle visibility of top and bottom bars|
-|Menu|Exit|
+| Button           | Function                                 |
+| ---------------- | ---------------------------------------- |
+| D-pad right or A | Next image                               |
+| D-pad left or B  | Previous image                           |
+| Y                | Toggle visibility of top and bottom bars |
+| Menu             | Exit                                     |

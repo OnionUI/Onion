@@ -1,5 +1,5 @@
 ---
-slug: /community-apps/time-quick-fix
+slug: /apps/time-quick-fix
 description: Using NTP and CloudFlare, fix your system time.
 ---
 

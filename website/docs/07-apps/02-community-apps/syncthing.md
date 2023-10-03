@@ -1,5 +1,5 @@
 ---
-slug: /community-apps/syncthing
+slug: /apps/syncthing
 description: Sets up Syncthing and injects into Onion 4.2.0 beta runtime.sh
 ---
 

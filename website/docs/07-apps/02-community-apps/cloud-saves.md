@@ -1,5 +1,5 @@
 ---
-slug: /community-apps/cloud-saves
+slug: /apps/cloud-saves
 description: Utilizing rclone, upload and download saves to and from your Miyoo Mini Plus..
 ---
 
