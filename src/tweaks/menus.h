@@ -636,16 +636,16 @@ void menu_advanced(void *_)
                                      .action = action_advancedSetFrameThrottle},
                                  "Set the maximum fast forward rate.");
         list_addItemWithInfoNote(&_menu_advanced,
-                                    (ListItem){
-                                        .label = "PWM frequency",
-                                        .item_type = MULTIVALUE,
-                                        .value_max = 9,
-                                        .value_labels = PWM_FREQUENCIES,
-                                        .value = value_getPWMFrequency(),
-                                        .action = action_advancedSetPWMFreqency},
-                                    "Change the PWM frequency\n"
-                                    "Lower values for less buzzing\n"
-                                    "Experimental feature");                  
+                                 (ListItem){
+                                     .label = "PWM frequency",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 9,
+                                     .value_labels = PWM_FREQUENCIES,
+                                     .value = value_getPWMFrequency(),
+                                     .action = action_advancedSetPWMFreqency},
+                                 "Change the PWM frequency\n"
+                                 "Lower values for less buzzing\n"
+                                 "Experimental feature");
         if (DEVICE_ID == MIYOO354) {
             list_addItemWithInfoNote(&_menu_advanced,
                                      (ListItem){
