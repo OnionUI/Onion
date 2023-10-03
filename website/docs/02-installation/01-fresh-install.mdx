@@ -24,7 +24,6 @@ Stick to using SD cards from reputable brands (e.g. SanDisk or Samsung).
 <Tabs groupId="os" queryString>
 <TabItem value="win" label="Windows">
 
-
 If your SD card is larger than 32 GB, you need to use a third-party tool like [Rufus](https://rufus.ie/):
 
 1. In Rufus, select the device that corresponds with the SD card you want to format
@@ -38,10 +37,8 @@ If your SD card is larger than 32 GB, you need to use a third-party tool like [R
 We do not recommend using *GUIFormat / fat32format*, since many users are reporting file system errors on cards above 128 GB
 :::
 
-
 </TabItem>
 <TabItem value="mac" label="Mac">
-
 
 On Mac, you can format your SD card with the built-in **Disk Utilities**:
 
@@ -52,15 +49,17 @@ On Mac, you can format your SD card with the built-in **Disk Utilities**:
 5. Set **Scheme** (if it exists) › `Master Boot Record`
 6. Click **Erase** and wait for the process to finish
 
-
 </TabItem>
 <TabItem value="linux" label="Linux">
-
 
 There are lots of ways to format an SD card on Linux. 3 methods are presented in [this blog post](https://www.golinuxcloud.com/steps-to-format-sd-card-in-linux/).
 
 Make sure you choose: `For use with all systems and devices (FAT)`
 
+</TabItem>
+<TabItem value="chromeos" label="Chrome OS">
+
+Chrome already has a tool to format an SD card. Insert the card into your Chromebook, right-click it and click **Format Device**, make sure `FAT32` is selected under **Format** and click or tap **Erase & Format**. 
 
 </TabItem>
 </Tabs>
@@ -68,18 +67,14 @@ Make sure you choose: `For use with all systems and devices (FAT)`
 
 ## Step 2: Copy the installation files and boot up your device to begin the installation
 
-
 <Tabs groupId="os" queryString>
 <TabItem value="win" label="Windows">
-
 
 1. Right click the `Onion-v4.x.x.zip` file and select **Extract all** › **Extract**
 2. Select and copy the 7 folders to the root of your SD card
 
-
 </TabItem>
 <TabItem value="mac" label="Mac">
-
 
 1. Unzip (expand) the `Onion-v4.x.x.zip` file: Double-click the `.zip` file.  
    The unzipped item will appear in the same folder as the `.zip` file.  
@@ -87,10 +82,8 @@ Make sure you choose: `For use with all systems and devices (FAT)`
 2. Select and copy the 7 folders to the root of your SD card  
    Make sure hidden files are shown (press <kbd>Command</kbd>+<kbd>Shift</kbd>+<kbd>.</kbd> in Finder)
 
-
 </TabItem>
 <TabItem value="linux" label="Linux">
-
 
 1. Unzip the `Onion-v4.x.x.zip` file using the following command (replace `Onion-v4.2.0` with the filename of the zip you downloaded):
 
@@ -104,6 +97,11 @@ Make sure you choose: `For use with all systems and devices (FAT)`
    cp -r Onion-v4.2.0/* /run/media/mmcblk0p1
    ```
 
+</TabItem>
+<TabItem value="chromeos" label="Chrome OS">
+
+1. Double-click the `Onion-v4.x.x.zip` file and make sure hidden files are visible by clicking or tapping the top-right corner 3-dots icon and making sure `Show Hidden Files` is toggled on.
+2. Copy the 7 folders to your SD card, dragging them into your SD card drive icon on the left panel.
 
 </TabItem>
 </Tabs>
