@@ -643,7 +643,9 @@ void menu_advanced(void *_)
                                         .value_labels = PWM_FREQUENCIES,
                                         .value = value_getPWMFrequency(),
                                         .action = action_advancedSetPWMFreqency},
-                                    "Change the PWM frequency");                  
+                                    "Change the PWM frequency\n"
+                                    "Lower values for less buzzing\n"
+                                    "Experimental feature");                  
         if (DEVICE_ID == MIYOO354) {
             list_addItemWithInfoNote(&_menu_advanced,
                                      (ListItem){
