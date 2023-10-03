@@ -1,0 +1,11 @@
+changelog:
+  categories:
+    - title: Features
+      labels:
+        - enhancement
+    - title: Fixes
+      labels:
+        - bug in onion
+    - title: Localization
+      labels:
+        - localization
