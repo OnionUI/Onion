@@ -1,5 +1,5 @@
 ---
-slug: /network/netplay
+slug: /multiplayer/easynetplay
 ---
 
 

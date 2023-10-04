@@ -1,9 +1,9 @@
 ---
-slug: /network/netplay/link
+slug: /multiplayer/easynetplay-pokemon
 ---
 
 
-# Pokémon trade/battle (GB/GBC)
+# Easy Netplay - Pokémon trade/battle (GB/GBC)
 
 Trade and battle with your friends, the easy way. With Onion and RetroArch Netplay, you can effortlessly setup a session to trade those hard to acquire Pokémon without save editing. This feature simplifies the process by eliminating the need for complex setups or additional hardware, allowing players to connect and trade seamlessly with friends.
 
