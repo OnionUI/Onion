@@ -230,6 +230,14 @@ h4 {
   }
 }
 
+.theme-doc-sidebar-menu {
+  ul.menu__list {
+    border-left: 1px solid var(--ifm-toc-border-color);
+    margin-left: 14px;
+    padding-left: 6px;
+  }
+}
+
 .remark-oembed-inline {
   display: block;
 

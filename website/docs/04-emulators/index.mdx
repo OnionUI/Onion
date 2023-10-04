@@ -1,0 +1,50 @@
+---
+slug: /emulators
+---
+
+import DocCardList from '@theme/DocCardList';
+
+
+# Emulators
+
+*![](https://user-images.githubusercontent.com/98862735/177056342-dbdd3c7f-30de-4669-945a-d5e5d330b7ab.png)*
+
+
+*This category contains information on all supported emulators and rom formats for each system.*
+
+
+## Important information
+
+
+### Verified vs. experimental systems
+
+- **Verified systems** are marked with ✔
+
+  These are found in the "Verified" section of Package Manager, and will be installed in the `Games` tab.
+
+- **Experimental systems** are marked with ⚠
+
+  These are found in the "Expert" section of Package Manager and will be installed in the `Expert` tab (hidden by default). The `Expert` tab can be accessed by installing the `Expert` shortcut or by enabling it via `Apps` › `Tweaks` › `User interface` › `Show expert mode`.
+
+  > **Note:** These may require additional learning, files and configuration by the user to get working. Some may have performance or compatibility issues, please research and refer to the libretro core documentation.
+
+
+### Bios files
+
+Bios files are essential for some systems, should be named exactly as stated below and placed in the root `/BIOS` folder, unless otherwise indicated in a specific systems notes further below. Bios file names and extensions are case sensitive!
+
+
+### Rom files
+
+* The roms on the included Miyoo Mini SD card are a mixed bag which can lead to incompatibility with some emulators. It is highly recommended to source your own roms to get the most out of the device.
+* Rom folder names are case sensitive and differ in Onion vs the stock Miyoo SD card, copy your roms from system to system if coming from stock (copying the ‘Roms’ folder wholesale from the Miyoo SD card will not work).
+* Subfolders can be used inside your rom folders but ONLY one level deep (i.e. `Roms/GB/Hacks`). 
+* Subfolders cannot have an apostrophe (`'`) in the name and browsing subfolders is not compatible with miyoogamelist.xml (all games will appear as one flat list). 
+* If you add new roms to a system, highlight the system in the Games tab and press <kbd>SELECT</kbd> › `Refresh all roms`. 
+* To add a game to your Favorites list, highlight the game in the game list and press <kbd>SELECT</kbd> › `Add to favorites`.
+
+---
+
+*The details provided in the pages below are for guidance and not every emulator included in Onion has been documented.*
+
+<DocCardList/>
