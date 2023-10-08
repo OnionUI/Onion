@@ -2,7 +2,6 @@
 slug: /multiplayer/standardnetplay
 ---
 
-
 # Standard Netplay
 
 
@@ -10,7 +9,9 @@ slug: /multiplayer/standardnetplay
 
 *Fight against your friends remotely!*
 
-**Standard Netplay:** a feature to create and join Retroarch multiplayer sessions easily. Each game you'll create will be available over internet and making it easy for your friends to join in your game.
+**Standard Netplay:** a feature to create and join Retroarch multiplayer sessions easily.
+
+Each game you'll create will be available over internet and your local network, making it easy for your friends to join in your game.
 
 
 
@@ -25,14 +26,10 @@ slug: /multiplayer/standardnetplay
 - CPU performance boots when it's needed
 
 
-## Enabling Easy Netplay
-
-You'll currently find the quick join feature in GLO. GLO can be opened by browsing to the rom you want to play and pressing Y. 
+## Using Standard Netplay
 
 
 ### As the host
-
-To host a rom you'll first need to make sure you're using a core that can support netplay. Cores can be verified using [this sheet](https://docs.google.com/spreadsheets/d/1y1esG3HcNagPG8cy-ulZK_mhhUb93pqG5_XEtRRgKQ4/edit#gid=0)
 
 1. Find the rom in the Games submenu
 
@@ -44,8 +41,6 @@ Your Onion netplay session is now ready to be joined from your local home networ
 
 
 ### As the client
-
-To join a host, it's a little easier. Currently you'll start the hotspot client connection using the same process as the host. 
 
 1. Select the same game as the host
 
@@ -59,15 +54,29 @@ To join a host, it's a little easier. Currently you'll start the hotspot client 
 	
 5. Select your target server in the list.
  
+---
 
 ## Example
 
 ### Host: 
 
-![](https://github.com/OnionUI/Onion/assets/47260768/e319297d-d65d-4060-9fa0-174d9c3b4516)
+
+
+
+import NetStdHost from './assets/Netplay - standard - host.mp4';
+
+<video controls>
+  <source src={NetStdHost}/>
+</video>
+
+
 
 ### Client:
 
-![](https://github.com/OnionUI/Onion/assets/47260768/4d6bb983-e986-47b6-8810-17cd9e15f553)
+import NetStdJoin from './assets/Netplay - standard - join.mp4';
+
+<video controls>
+  <source src={NetStdJoin}/>
+</video>
 
 
