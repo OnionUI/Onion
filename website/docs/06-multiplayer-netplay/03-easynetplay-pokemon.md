@@ -9,7 +9,6 @@ Trade and battle with your friends, the easy way. With Onion and RetroArch Netpl
 
 https://www.youtube.com/watch?v=8-GnEP1zC6g
 
-
 ## Features
 
 - 1-click automated host setup
@@ -20,7 +19,7 @@ https://www.youtube.com/watch?v=8-GnEP1zC6g
 
 - Backup process to avoid any data loss
 
-:::info No GBA support (yet!)
+:::info No GBA support
 This feature only supports **GB** and **GBC** games (**Red**, **Blue**, **Yellow** / **Gold**, **Silver**, **Crystal**)  
 :::
 
@@ -35,18 +34,14 @@ Trades tested and working:
 
 For the process goes as smooth as possible, make sure you:
 
-1. Have your own save files within the TGB Dual save directory: `/mnt/SDCARD/Saves/CurrentProfile/saves/TGB Dual`  
-   *Onion will handle bringing the host and client save together so you don't have to.*
 
 1. Have matching Roms within their respective platform locations: `GB` or `GBC` on each Miyoo
 
-2. Use **TGB Dual** as your default core for solo play (select this through GLO)
+2. Have save files who's name matches the rom's name perfectly
 
-3. Have save files who's name matches the rom's name perfectly
+3. Have a stable connection throughout the trade until completion - don't wander too far away from each other!
 
-4. Have a stable connection throughout the trade until completion - don't wander too far away from each other!
-
-5. Exit RetroArch gracefully - the process isn't complete until after you exit RetroArch via the menu:  
+4. Exit RetroArch gracefully - the process isn't complete until after you exit RetroArch via the menu:  
    <kbd>MENU</kbd>+<kbd>SELECT</kbd> › <kbd>B</kbd> › <b>Quit RetroArch</b>
 
 If you've followed the above, you've likely just completed your first trade evolution with a friend! Nice!
@@ -56,7 +51,7 @@ If you've followed the above, you've likely just completed your first trade evol
 
 ### As the host
 
-<img src="https://github.com/OnionUI/Onion/assets/47260768/46a1fea4-2ffe-4f41-a035-4a0cbc8591f9" width="320" />
+![](./assets/Netplay-pokemon-host.png)
 
 Setting up the host is as easy as:
 
@@ -64,14 +59,14 @@ Setting up the host is as easy as:
 
 2. Press <kbd>Y</kbd> to open GLO
 
-3. Choose **Pokémon Trade/Battle: Host Hotspot**
+3. Choose `Netplay` -> `Host` -> `Easy Netplay - Pokemon Trade/Battle`
  
 Onion will now take over and setup a session on the built in personal hotspot.
 
 
 ### As the client
 
-<img src="https://github.com/OnionUI/Onion/assets/47260768/81963fe6-663c-4b87-a99b-83566cc3af30" width="320" />
+![](./assets/Netplay-pokemon-join.png)
 
 As with the host, getting connected as a client is just as simple:
 
@@ -79,7 +74,7 @@ As with the host, getting connected as a client is just as simple:
 
 2. Press <kbd>Y</kbd> to open GLO
 
-3. Choose **Pokémon Trade/Battle: Join Hotspot**
+3. Choose `Netplay` -> `Join` -> `Easy Netplay - Pokemon Trade/Battle`
  
 Onion will now take over and join the hotspot, pull the information from the host and connect! 
 
