@@ -281,7 +281,7 @@ Menu_Config_MediaType()
     Option08="Screenscraper Mix V2       (available on SS)"
 	Option09="Back to Configuration Menu"
 
-    Mychoice=$( echo -e "$Option01\n$Option02\n$Option03\n$Option04\n$Option05n$Option06\n$Option07\n$Option08\n$Option09\n" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t\ "Current media type : $ScreenscraperMediaType" -b "Press A to validate your choice.")
+    Mychoice=$( echo -e "$Option01\n$Option02\n$Option03\n$Option04\n$Option05\n$Option06\n$Option07\n$Option08\n$Option09\n" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t\ "Current media type : $ScreenscraperMediaType" -b "Press A to validate your choice.")
     
     [ "$Mychoice" = "$Option01" ]  && SSmediaType="box-2D"                 && LBmediaType="Box - Front"                      && RAmediaType="Named_Boxarts"  
     [ "$Mychoice" = "$Option02" ]  && SSmediaType="sstitle"                && LBmediaType="Screenshot - Game Title"          && RAmediaType="Named_Titles"  
