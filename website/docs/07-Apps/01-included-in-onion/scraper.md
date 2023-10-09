@@ -32,16 +32,20 @@ Using WiFi (so Miyoo Mini Plus only), this app allows you to download game cover
 ### Media Preference: 
 Choose the desired kind of media.
 
-| Function        | Button                              |
-| --------------- | ----------------------------------- |
-| Box Art |![](./assets/scraper_2dbox.png) |    |
-| Screenshot - Title Screen |![](./assets/scraper_screentitle.png)|
-| Screenshot - In Game |![](./assets/scraper_screenshot.png) |
-| Box Art - 3D |![](./assets/scraper_3dbox.png)      |
-| Wheel |![](./assets/scraper_wheel.png)    |
-| Marquee |![](./assets/scraper_marquee.png)    |
-| Screenscraper Mix V1  |![](./assets/scraper_mix1.png)       |
-| Screenscraper Mix V2  |![](./assets/scraper_mix2.png)       |
+
+| name        | preview example                                   |   available on   |
+| ------------------------- | ----------------------------------- | ---------------- |
+| Box Art                   |![](./assets/scraper_2dbox.png)      | SS,LB,RA         |
+| Screenshot - Title Screen |![](./assets/scraper_screentitle.png)| SS,LB,RA         |
+| Screenshot - In Game      |![](./assets/scraper_screenshot.png) | SS,LB,RA         |
+| Box Art - 3D              |![](./assets/scraper_3dbox.png)      | SS,LB            |
+| Wheel                     |![](./assets/scraper_wheel.png)      | SS,LB            |
+| Marquee                   |![](./assets/scraper_marquee.png)    | SS,LB            |
+| Screenscraper Mix V1      |![](./assets/scraper_mix1.png)       | SS               |
+| Screenscraper Mix V2      |![](./assets/scraper_mix2.png)       | SS               |
+
+*SS = Screenscraper, LB = Launchbox, RA = Retroarch*
+
 
 ### Region selection:
 Choose your prefered region. If no media is found for your country code, other countries will be searched as fallback.
