@@ -5,11 +5,10 @@ description: Download your box arts using WiFi
 
 # Scraper
 
-https://www.youtube.com/watch?v=lOMP0ozb0I0
-
 A missing illustration in your game list ? Onion Scraper can solve that !
-
 Using WiFi (so Miyoo Mini Plus only), this app allows you to download game covers without even touching your SD card or a computer.  
+
+https://www.youtube.com/watch?v=lOMP0ozb0I0
 
 ## Features
 
@@ -22,14 +21,22 @@ Using WiFi (so Miyoo Mini Plus only), this app allows you to download game cover
 - Find game match even if your rom is not well named thanks to ScreenScraper CRC search
 
 
-![](./assets/scraper.png)
+![](./assets/scraper.png)<br /> *Summary screen at end of the scraping*
 
-*summary screen at end of the scraping*
+## Usage
+
+1. Select a rom in the Games submenu
+
+2. Press <kbd>Y</kbd> to open GLO
+
+3. Choose Scraper
+
+
 
 ## Configuration
 
 
-### Media Preference: 
+### Media Preference
 Choose the desired kind of media.
 
 
@@ -44,15 +51,15 @@ Choose the desired kind of media.
 | Screenscraper Mix V1      |![](./assets/scraper_mix1.png)       | SS               |
 | Screenscraper Mix V2      |![](./assets/scraper_mix2.png)       | SS               |
 
-*SS = Screenscraper, LB = Launchbox, RA = Retroarch*
+<sup>SS = Screenscraper, LB = Launchbox, RA = Retroarch</sup>
 
 
-### Region selection:
+### Region selection
 Choose your prefered region. If no media is found for your country code, other countries will be searched as fallback.
 
 
 
-### Scraping source:
+### Scraping source
 Select where the covers will be searched.
 - ScreenScraper is probably the best supplied, it supports all the media types proposed in Scraper and it also allows to search by CRC which provide a lot of additional matches.
 - Launchbox offers a fast alternative to ScreenScraper.
@@ -70,12 +77,6 @@ Allows to download covers in background, which means that you can use your Miyoo
 
 
 
-## Usage
 
-1. Select a rom in the Games submenu
-
-2. Press <kbd>Y</kbd> to open GLO
-
-3. Choose Scraper
 
 

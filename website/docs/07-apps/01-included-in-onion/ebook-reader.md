@@ -6,10 +6,17 @@ slug: /apps/ebook-reader
 
 *Pixel Reader by ealang*
 
+## Presentation
+
 An ebook reader app for the Miyoo Mini. Supports epub and txt formats.
 
+![](./assets/ebook-reader.png)
 
-Shortcuts:
+## Usage
+
+Ebook Reader is available in [Package Manager](package-manager).
+
+### Controls
 
 | Button | Function        |
 | ------ | --------------- |
@@ -20,4 +27,7 @@ Shortcuts:
 | Select | Show Chapters   |
 | Menu   | Exit            |
 
-![](./assets/ebook-reader.png)
+
+## Advanced
+
+[Pixel Reader source code](https://github.com/ealang/pixel-reader).
