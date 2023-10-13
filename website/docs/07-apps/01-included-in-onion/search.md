@@ -9,6 +9,8 @@ slug: /apps/search
 
 ## Presentation
 
+The Search application is the perfect companion for large game collections. It lets you find all the games containing the keyword you've entered.
+Search also allows to filter a game list to include only games containing a specific keyword.
 
 <table><thead>
 <th colspan="2"><b>Search screenshots</b></th>
@@ -21,10 +23,8 @@ slug: /apps/search
 </tr></table>
 
 
-<p align="center">    </p>
 
-The Search application is the perfect companion for large game collections. It lets you find all the games containing the keyword you've entered.
-Search also allows to filter a game list to include only games containing a specific keyword.
+
 
 ## usage
 

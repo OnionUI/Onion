@@ -74,7 +74,7 @@ Tweaks is the backbone of onion's configuration and personalization! With Tweaks
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/189498482-2590f31f-cca2-46e9-a316-3af98828446a.png" width="54" /></sup>Search
 
-<p align="center"><img src="https://user-images.githubusercontent.com/44569252/189498639-8e2a43a6-4020-4492-b4b1-6e3f0c0d5fd6.png" width="320" />&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://user-images.githubusercontent.com/44569252/189498645-f615dd73-ed0c-4505-a439-5fb5b611237d.png" width="320" /></p>
+<p align="center"><img src="https://user-images.githubusercontent.com/44569252/189498639-8e2a43a6-4020-4492-b4b1-6e3f0c0d5fd6.png" width="320" /></p>
 
 
 :::note <a href="apps/search">Search overview</a>
