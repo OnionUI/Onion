@@ -186,11 +186,15 @@ launch_main_ui() {
 
     start_audioserver
 
+    # restart filewatcher so it picks up the new icon if it has changed
+	pkill filewatcher
+	filewatcher &
+
     # MainUI launch
     cd $miyoodir/app
     PATH="$miyoodir/app:$PATH" \
         LD_LIBRARY_PATH="$miyoodir/lib:/config/lib:/lib" \
-        LD_PRELOAD="$miyoodir/lib/libpadsp.so" \
+        LD_PRELOAD="$sysdir/lib/libmainuihooks.so:$miyoodir/lib/libpadsp.so" \
         ./MainUI 2>&1 > /dev/null
 
     # Check if wifi setting changed
