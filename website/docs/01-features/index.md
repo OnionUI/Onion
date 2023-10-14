@@ -17,6 +17,10 @@ description: Overview of the most important features
 <a href="#retroarch"><img title="RetroArch" src="https://user-images.githubusercontent.com/44569252/179318731-7e262588-cb92-4ea3-9001-2991c4f8ccbe.png" width="48" /></a>
 <a href="#game-list-options-glo-menu"><img src={require('./assets/icon-glo-menu.png').default} style={{width: 48}} /></a>
 <a href="#guest-mode"><img title="Guest Mode" src="https://user-images.githubusercontent.com/44569252/179304290-8c7e5140-5fb4-4ae1-bd90-faa416f9a37c.png" width="48" /></a>
+<a href="#random-game-picker"><img title="Random Game Picker" src={require('./assets/random-game-picker.png').default} style={{width: 48}} /></a>
+<a href="#advancemenu"><img title="AdvanceMENU" src={require('./assets/advancemenu.png').default} style={{width: 48}} /></a>
+<a href="#ports-collection"><img title="Ports Collection" src={require('./assets/ports.png').default} style={{width: 48}} /></a>
+<a href="#included-apps"><img title="Included apps" src={require('./assets/apps.png').default} style={{width: 48}} /></a>
 <a href="#personal-files-gathered-in-one-place"><img title="Personal files gathered in one place" src="https://user-images.githubusercontent.com/44569252/179305837-59922e34-e18f-45d1-b5fb-89593ee08152.png" width="48" /></a>
 <a href="#mainui-improvements"><img title="MainUI improvements" src="https://user-images.githubusercontent.com/44569252/179305495-2ae1f522-6918-469f-a2eb-63dd30262e17.png" width="48" /></a>
 </p>
@@ -123,10 +127,7 @@ Dedicated customations are also included : all the core are configured with atte
 
 ## <sup><img src={require('./assets/icon-glo-menu.png').default} style={{width: 54}} /></sup>Game List Options (GLO Menu)
 
-
-
 <img src="https://user-images.githubusercontent.com/44569252/226447388-8c9c95f1-536a-4946-8b0f-f4b8ead0e97e.png" width="320" />
-
 
 :::note <a href="apps/game-list-options">Game List Options overview</a>
 *Game List Options (GLO Menu) is a tool to make actions for the selected game or the entire list. Press <kbd>Y</kbd> in a game list then from this menu you can choose the Retroarch core, download the image cover of your game (wifi/MMP required), launch a Netplay session, reset your game (to skip the last save state), filter the list of games with a keyword,...<br />Thanks to GLO menu flexibility, you can even add your own scripts here !*
@@ -140,6 +141,45 @@ Dedicated customations are also included : all the core are configured with atte
 Guest mode is a separate profile so you can safely lend your device to your kid or your friend.
 :::
 
+## <sup><img align="left" title="Random Game Picker" src={require('./assets/random-game-picker.png').default} style={{width: 48}} /></sup>Random Game Picker
+
+:::note <a href="apps/random-game">Random Game Picker overview</a>
+Random Game will allow you to discover new games in your collection !
+:::
+
+## <sup><img align="left" title="AdvanceMENU" src={require('./assets/advancemenu.png').default} style={{width: 48}} /></sup>AdvanceMENU
+
+<img src="https://user-images.githubusercontent.com/34470397/228361197-86608c11-fc89-4b49-b029-5d536b3d75df.png" width="320" />
+
+:::note <a href="apps/advancemenu">AdvanceMENU</a>
+An alternative user interface with animated game previews!
+:::
+
+
+## <sup><img align="left" title="Ports Collection" src={require('./assets/ports.png').default} style={{width: 48}} /></sup>Ports Collection
+
+<img src="https://user-images.githubusercontent.com/44569252/227540219-bf2734a3-9686-45d9-a32e-6ad20aa56d07.png" width="320" />
+
+:::note <a href="ports">Ports Collection</a>
+More than 60 game ports pre-configured !
+:::
+
+## <sup><img align="left" title="Included apps" src={require('./assets/apps.png').default} style={{width: 48}} /></sup>Included apps
+
+<img title="Included apps" src={require('./assets/apps.gif').default} style={{width: 320}} />
+
+:::note <a href="included-apps">Included apps</a>
+Onion also contains many additional apps like :<br />
+- [a video player](apps/ebook-reader)
+- [a music player](apps/ebook-reader)
+- [a file explorer](apps/ebook-reader)
+- [a terminal](apps/ebook-reader)
+- [ebook & pdf readers](apps/ebook-reader)
+- ...
+Check the <a href="included-apps">included apps</a> documentation for more information.
+:::
+
+
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179305837-59922e34-e18f-45d1-b5fb-89593ee08152.png" width="54" /></sup>Personal files gathered in one place
 
 :::note Personal files 
@@ -147,7 +187,6 @@ Your saves and most of your preferences are now in `/Saves` (Example: `D:/Saves/
 This also includes your secondary profile, your config files, RetroArch lists and play activity database.
 Simply copy this folder when you want to backup your data.
 :::
-
 
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179305495-2ae1f522-6918-469f-a2eb-63dd30262e17.png" width="54" /></sup>MainUI improvements
@@ -171,10 +210,8 @@ MainUI is the main interface of Onion provided by Miyoo and modified by Onion Te
 
 
 
-### Others
+## Others
 - Many additional systems supported
-- Ports
-  <sup>Credit: Schmurtz</sup>
 - Experimental Arduboy support 
   <sup>Credit: JMARoeder</sup>
 - Boxart moved to `/Roms/[SYSTEM]/Imgs` for easier scraping
