@@ -21,6 +21,7 @@ description: Overview of the most important features
 <a href="#advancemenu"><img title="AdvanceMENU" src={require('./assets/advancemenu.png').default} style={{width: 48}} /></a>
 <a href="#ports-collection"><img title="Ports Collection" src={require('./assets/ports.png').default} style={{width: 48}} /></a>
 <a href="#included-apps"><img title="Included apps" src={require('./assets/apps.png').default} style={{width: 48}} /></a>
+<a href="#connected-features"><img title="Connected Features" src={require('./assets/wifi.png').default} style={{width: 48}} /></a>
 <a href="#personal-files-gathered-in-one-place"><img title="Personal files gathered in one place" src="https://user-images.githubusercontent.com/44569252/179305837-59922e34-e18f-45d1-b5fb-89593ee08152.png" width="48" /></a>
 <a href="#mainui-improvements"><img title="MainUI improvements" src="https://user-images.githubusercontent.com/44569252/179305495-2ae1f522-6918-469f-a2eb-63dd30262e17.png" width="48" /></a>
 </p>
@@ -178,6 +179,24 @@ Onion also contains many additional apps like :<br />
 - ...
 Check the <a href="included-apps">included apps</a> documentation for more information.
 :::
+
+
+## <sup><img title="Connected Features" src={require('./assets/wifi.png').default} style={{width: 48}} /></sup>Connected Features
+
+<img title="Included apps" src={require('./assets/network-features.gif').default} style={{width: 320}} />
+
+:::note <a href="network-features">Network Features</a>
+For the Miyoo Mini Plus (equiped with wifi) Onion offers many additional possibilites :<br />
+- [Multiplayer / Netplay](multiplayer) : play in multiplayer over internet or on you lcoal network to your favorite retro games:
+- [Easy Netplay](multiplayer/easynetplay): play multiplayer games anywhere (compatible with GBC/GBC Pokemon trading !)
+- [OTA (Over The Air) updates](apps/ota-update) : update Onion directly from your MMP
+- [Automatic date/time synchronisation](http://localhost:3000/docs/apps/tweaks#set-automatically-via-the-internet) (NTP, via Tweaks app)
+- [Retroachivements](https://www.retroarch.com/?page=achievements)
+- [Scraper](scraper) : import game covers directly from your MMP
+- [Network Services](network-features) : [Samba/SMB share](network/samba), [http server](network/http), [SSH](network/ssh), [FTP](network/ftp), [Telnet](network/telnet), [Hotspot](network/hotspot)...
+:::
+
+
 
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179305837-59922e34-e18f-45d1-b5fb-89593ee08152.png" width="54" /></sup>Personal files gathered in one place
