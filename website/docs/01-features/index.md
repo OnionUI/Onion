@@ -15,6 +15,7 @@ description: Overview of the most important features
 <a href="#themes"><img title="Themes" src="https://user-images.githubusercontent.com/44569252/179304061-647e63ff-5113-4a8a-aaa9-4dfda248d54e.png" width="48" /></a>
 <a href="#activity-tracker"><img title="Activity Tracker" src="https://user-images.githubusercontent.com/44569252/179302722-7fa82e4d-d72d-4b1e-bb4d-96a2a52aaa62.png" width="48" /></a>
 <a href="#retroarch"><img title="RetroArch" src="https://user-images.githubusercontent.com/44569252/179318731-7e262588-cb92-4ea3-9001-2991c4f8ccbe.png" width="48" /></a>
+<a href="#optimized-emulators"><img title="Optimized Emulators" src={require('./assets/optimized.png').default} style={{width: 48}} /></a>
 <a href="#game-list-options-glo-menu"><img src={require('./assets/icon-glo-menu.png').default} style={{width: 48}} /></a>
 <a href="#guest-mode"><img title="Guest Mode" src="https://user-images.githubusercontent.com/44569252/179304290-8c7e5140-5fb4-4ae1-bd90-faa416f9a37c.png" width="48" /></a>
 <a href="#random-game-picker"><img title="Random Game Picker" src={require('./assets/random-game-picker.png').default} style={{width: 48}} /></a>
@@ -123,6 +124,20 @@ Thanks to `Activity Tracker` app you can :
 :::note <a href="apps/retroarch">Retroarch overview</a>
 A full Retroarch in a such tiny device ! Retroarch is regularly updated from the offcial repository. Onion benefits to dedicated drivers created by [Eggs](https://discordapp.com/users/778867980096241715) for precision and performance.
 Dedicated customations are also included : all the core are configured with attention to detail, [custom overlays and custom filters](http://localhost:3000/docs/apps/retroarch#some-examples-of-video-filters-made-for-this-retroarch-port-click-to-view-full-resolution) made specially for the Miyoo Mini screen. 
+:::
+
+## <sup><img src={require('./assets/optimized.png').default} style={{width: 54}} /></sup>Optimized emulators
+
+<img src="https://user-images.githubusercontent.com/44569252/189438841-f419f936-6376-436e-89b5-78ce1f88494f.png" width="320" />
+
+
+:::note <a href="apps/retroarch">Retroarch overview</a>
+Onion has its own emulators, many optimizations on the Retroarch cores but also some dedicated emulators like :
+- PCSX Standalone (with awesome performances)
+- ScummVM standalone (awesome performances too)
+- Gambatte core (GB/GBC) with an [unique organization of color palettes](https://github.com/schmurtzm/gambatte-libretro/tree/advanced-color-organisation)
+
+...
 :::
 
 
