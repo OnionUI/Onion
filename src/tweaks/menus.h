@@ -736,7 +736,7 @@ void menu_about(void *_)
                          .value_formatter = formatter_FirmwareVersion});
         list_addItem(&_menu_about,
                      (ListItem){
-                         .label = "Used/total Storage",
+                         .label = "Used/total storage",
                          .item_type = INFO,
                          .value_formatter = formatter_Storage});
         list_addItem(&_menu_about,
