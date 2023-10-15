@@ -25,6 +25,11 @@
         "-", "Off", "On"    \
     }
 
+#define SLEEP_TIMER_LABELS                 \
+    {                                      \
+        "Off", "5 min", "15 min", "30 min" \
+    }
+
 void formatter_timezone(void *pt, char *out_label)
 {
     ListItem *item = (ListItem *)pt;

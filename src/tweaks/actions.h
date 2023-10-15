@@ -268,6 +268,18 @@ void action_setLowBatteryWarnAt(void *pt)
     config_setNumber("battery/warnAt", settings.low_battery_warn_at);
 }
 
+void action_setSleepTimer(void *pt)
+{
+    if (((ListItem *)pt)->value == 0)
+        settings.sleep_timer = 0;
+    else if (((ListItem *)pt)->value == 1)
+        settings.sleep_timer = 5;
+    else if (((ListItem *)pt)->value == 2)
+        settings.sleep_timer = 15;
+    else if (((ListItem *)pt)->value == 3)
+        settings.sleep_timer = 30;
+}
+
 void action_setStartupTab(void *pt)
 {
     settings.startup_tab = ((ListItem *)pt)->value;

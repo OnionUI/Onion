@@ -293,4 +293,15 @@ int value_getDeviceModel()
     }
 }
 
+int value_getSleepTimer()
+{
+    if (settings.sleep_timer == 0)
+        return 0;
+    else if (settings.sleep_timer == 15)
+        return 2;
+    else if (settings.sleep_timer == 30)
+        return 3;
+    else
+        return 1;
+}
 #endif // TWEAKS_VALUES_H__

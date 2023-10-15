@@ -171,7 +171,7 @@ void menu_datetime(void *_)
 void menu_system(void *_)
 {
     if (!_menu_system._created) {
-        _menu_system = list_createWithTitle(6, LIST_SMALL, "System");
+        _menu_system = list_createWithTitle(7, LIST_SMALL, "System");
         list_addItem(&_menu_system,
                      (ListItem){
                          .label = "Startup...",
@@ -184,6 +184,16 @@ void menu_system(void *_)
                      (ListItem){
                          .label = "Date and time...",
                          .action = menu_datetime});
+        list_addItemWithInfoNote(&_menu_system,
+                                 (ListItem){
+                                     .label = "Sleep timer",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 3,
+                                     .value_labels = SLEEP_TIMER_LABELS,
+                                     .value = value_getSleepTimer(),
+                                     .action = action_setSleepTimer},
+                                 "Set the time after which the system\n"
+                                 "should go into standby mode.");
         list_addItemWithInfoNote(&_menu_system,
                                  (ListItem){
                                      .label = "Low battery warning",
