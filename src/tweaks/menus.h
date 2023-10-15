@@ -196,6 +196,15 @@ void menu_system(void *_)
                                  "should go into standby mode.");
         list_addItemWithInfoNote(&_menu_system,
                                  (ListItem){
+                                     .label = "MainUI Volume",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 20,
+                                     .value = settings.bgm_volume,
+                                     .action = action_setBgmVolume},
+                                 "Set the volume of the MainUI.\n"
+                                 "Affects Background music and click sounds.");
+        list_addItemWithInfoNote(&_menu_system,
+                                 (ListItem){
                                      .label = "Low battery warning",
                                      .item_type = MULTIVALUE,
                                      .value_max = 5,
