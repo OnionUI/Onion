@@ -2,7 +2,7 @@
 #define TWEAKS_FORMATTERS_H__
 
 #include <stdio.h>
-
+#include <sys/statvfs.h>
 #include "components/list.h"
 #include "utils/apps.h"
 #include "utils/str.h"
@@ -180,4 +180,83 @@ void formatter_timeSkip(void *pt, char *out_label)
         sprintf(out_label, "+ %dh", item->value);
 }
 
+void formatter_Serial(void *pt, char *out_label)
+{
+    char buffer[32];
+    process_start_read_return("serial", buffer);
+    strcpy(out_label, buffer);
+}
+
+void formatter_OnionVersion(void *pt, char *out_label)
+{
+    FILE *fp;
+    char buffer[32] = "";
+    file_get(fp, "/mnt/SDCARD/.tmp_update/onionVersion/version.txt", "%s", buffer);
+    if (strlen(buffer) > 0)
+        strcpy(out_label, buffer);
+    else
+        strcpy(out_label, "0.0.0");
+}
+
+void formatter_FirmwareVersion(void *pt, char *out_label)
+{
+    char buffer[13] = "";
+    process_start_read_return("/etc/fw_printenv miyoo_version | sed 's/[^0-9]//g'", buffer);
+    printf("FirmwareVersion: [%s]", buffer);
+    if (strlen(buffer) > 0)
+        sprintf(out_label, "%s", buffer);
+    else
+        strcpy(out_label, "XXXXXXXXXXXX");
+}
+
+void formatter_CPUFrequency(void *pt, char *out_label)
+{
+    char buffer[32] = "";
+    process_start_read_return("cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq", buffer);
+    if (strlen(buffer) > 0)
+        sprintf(out_label, "%.4s MHz", buffer);
+    else
+        strcpy(out_label, "0 MHz");
+}
+
+void formatter_Memory(void *pt, char *out_label)
+{
+    char buffer[8] = "";
+    process_start_read_return("cat /proc/meminfo | awk '/MemTotal/ {print $2}'", buffer);
+    int mem = atoi(buffer);
+
+    // this is how MainUI calculates it so don't @ me
+    mem += 1023; // round up
+    mem >>= 10;  // convert to MB (divide by 1024)
+    mem += 32;   // add 32 MB because 128 looks better than 96
+    mem >>= 5;   // divide by 32
+    mem <<= 5;   // multiply by 32 - this rounds to the nearest 32 MB
+
+    if (strlen(buffer) > 0)
+        sprintf(out_label, "%d MB", mem);
+    else
+        strcpy(out_label, "0 MB");
+}
+
+void formatter_Storage(void *pt, char *out_label)
+{
+    struct statvfs stat;
+    if(statvfs("/mnt/SDCARD", &stat) == 0) {
+        unsigned long long block_size = stat.f_frsize;
+        unsigned long long total_blocks = stat.f_blocks;
+        unsigned long long free_blocks = stat.f_bfree;
+
+        unsigned long long total_space = block_size * total_blocks;
+        unsigned long long free_space = block_size * free_blocks;
+        unsigned long long used_space = total_space - free_space;
+
+        double total_gb = (double)total_space / (1 << 30);
+        double used_gb = (double)used_space / (1 << 30);
+
+        sprintf(out_label, "%.2lf/%.2lf GB", used_gb, total_gb);
+
+    } else{
+        strcpy(out_label, "failed");
+    }
+}
 #endif // TWEAKS_FORMATTERS_H__

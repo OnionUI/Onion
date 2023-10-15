@@ -145,6 +145,20 @@ void theme_renderList(SDL_Surface *screen, List *list)
                 item_center_y - value_size.h / 2};
             SDL_BlitSurface(value_label, &value_size, screen, &value_pos);
         }
+        else if (item->item_type == INFO) {
+            char value_str[STR_MAX];
+            list_getItemValueLabel(item, value_str);
+            SDL_Surface *value_label = TTF_RenderUTF8_Blended(list_font, value_str, theme()->list.color);
+            if (show_disabled) {
+                surfaceSetAlpha(value_label, HIDDEN_ITEM_ALPHA);
+            }
+            SDL_Rect value_size = {0, 0, multivalue_width, value_label->h};
+            int label_width = value_label->w > value_size.w ? value_size.w : value_label->w;
+            SDL_Rect value_pos = {
+                640 - 20 - label_width,
+                item_center_y - value_size.h / 2};
+            SDL_BlitSurface(value_label, &value_size, screen, &value_pos);
+        }
 
         theme_renderListLabel(screen, item->label, theme()->list.color,
                               offset_x, item_bg_rect.y + label_y,

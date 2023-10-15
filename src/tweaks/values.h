@@ -278,4 +278,19 @@ void value_setLcdVoltage(void)
     file_put(fp, LCD_VOLT_CONFIG, "%x", value);
 }
 
+int value_getDeviceModel()
+{
+    switch (DEVICE_ID) {
+    case MIYOO283:
+        return 0;
+        break;
+    case MIYOO354:
+        return 1;
+        break;
+    default:
+        return -1;
+        break;
+    }
+}
+
 #endif // TWEAKS_VALUES_H__

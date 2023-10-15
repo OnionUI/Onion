@@ -697,6 +697,53 @@ void menu_tools(void *_)
     header_changed = true;
 }
 
+void menu_about(void *_)
+{
+    if (!_menu_about._created) {
+        _menu_about = list_create(7, LIST_SMALL);
+        strcpy(_menu_about.title, "About");
+        list_addItem(&_menu_about,
+                     (ListItem){
+                         .label = "Model number",
+                         .item_type = INFO,
+                         .value_labels = {"MY283", "MY354"},
+                         .value = value_getDeviceModel()});
+
+        list_addItem(&_menu_about,
+                     (ListItem){
+                         .label = "Serial number",
+                         .item_type = INFO,
+                         .value_formatter = formatter_Serial});
+        list_addItem(&_menu_about,
+                     (ListItem){
+                         .label = "Onion version",
+                         .item_type = INFO,
+                         .value_formatter = formatter_OnionVersion});
+        list_addItem(&_menu_about,
+                     (ListItem){
+                         .label = "Firmware version",
+                         .item_type = INFO,
+                         .value_formatter = formatter_FirmwareVersion});
+        list_addItem(&_menu_about,
+                     (ListItem){
+                         .label = "Used/total Storage",
+                         .item_type = INFO,
+                         .value_formatter = formatter_Storage});
+        list_addItem(&_menu_about,
+                     (ListItem){
+                         .label = "CPU frequency",
+                         .item_type = INFO,
+                         .value_formatter = formatter_CPUFrequency});
+        list_addItem(&_menu_about,
+                     (ListItem){
+                         .label = "Memory size",
+                         .item_type = INFO,
+                         .value_formatter = formatter_Memory});
+    }
+    menu_stack[++menu_level] = &_menu_about;
+    header_changed = true;
+}
+
 void *_get_menu_icon(const char *name)
 {
     char path[STR_MAX * 2] = {0};
@@ -719,7 +766,7 @@ void *_get_menu_icon(const char *name)
 void menu_main(void)
 {
     if (!_menu_main._created) {
-        _menu_main = list_createWithTitle(6, LIST_LARGE, "Tweaks");
+        _menu_main = list_createWithTitle(7, LIST_LARGE, "Tweaks");
         list_addItem(&_menu_main,
                      (ListItem){
                          .label = "System",
@@ -758,6 +805,12 @@ void menu_main(void)
                          .description = "Favorites, clean files",
                          .action = menu_tools,
                          .icon_ptr = _get_menu_icon("tweaks_tools")});
+        list_addItem(&_menu_main,
+                     (ListItem){
+                         .label = "About",
+                         .description = "Information about your device",
+                         .action = menu_about,
+                         .icon_ptr = _get_menu_icon("tweaks_about")});
     }
     menu_level = 0;
     menu_stack[0] = &_menu_main;

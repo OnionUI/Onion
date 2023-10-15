@@ -92,4 +92,27 @@ bool process_start(const char *pname, const char *args, const char *home,
     return true;
 }
 
+bool process_start_read_return(const char *cmdline, char *out_str)
+{
+    char buffer[255] = "";
+    char *result = NULL;
+
+    FILE *pipe = popen(cmdline, "r");
+    if (pipe == NULL) {
+        fprintf(stderr, "Error executing command: %s\n", cmdline);
+        return -1;
+    }
+
+    while (fgets(buffer, sizeof(buffer), pipe) != NULL) {
+        result = strdup(buffer);
+    }
+
+    pclose(pipe);
+    if (result != NULL) {
+        result[strlen(buffer) - 1] = '\0';
+        strcpy(out_str, result);
+        free(result);
+    }
+    return 0;
+}
 #endif // PROCESS_H__
