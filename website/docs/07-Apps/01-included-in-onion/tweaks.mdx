@@ -3,7 +3,7 @@ slug: /apps/tweaks
 ---
 
 
-import DynamicFAQSection from '@site/src/components/DynamicFAQSection';
+import DynamicTweaksSection from '@site/src/components/DynamicTweaksSection';
 import IconLink from '@site/src/components/IconLink';
 
 
@@ -41,7 +41,7 @@ Tweaks is the backbone of onion's configuration and personalization! With Tweaks
 
 ## Features descriptions
 
-<DynamicFAQSection>
+<DynamicTweaksSection>
 
 
 <details><summary>
@@ -55,19 +55,22 @@ Tweaks is the backbone of onion's configuration and personalization! With Tweaks
 </summary>
 <details><summary>
 
-### Auto-resume last game 
+#### Auto-resume last game 
 </summary>
-<div>Auto-resume happens when you shutdown the device while a game is running. At startup, the system will resume where you left off last time.</div>
+<div>Auto-resume happens when you shutdown the device while a game is running. At startup, the system will resume where you left off last time. If disabled the main interface will be displayed after boot, your last game played will not resume.</div>
 </details>
 <details><summary>
 
-### Start application
+#### Start application
 </summary>
-<div>With this option you can choose which frontend you want to launch into on startup.</div>
+<div>With this option you can choose which frontend you want to launch into on startup.
+
+It can be MainUI, [GameSwitcher](apps/game-switcher), [Retroarch](apps/retroarch) or [AdvanceMenu](apps/advancemenu).
+</div>
 </details>
 <details><summary>
 
-### MainUI: Start tab
+#### MainUI: Start tab
 </summary>
 <div>Here you can set which tab you want MainUI to launch into.</div>
 </details>
@@ -92,7 +95,7 @@ Tweaks is the backbone of onion's configuration and personalization! With Tweaks
 
 ### Wait for sync on startup
 </summary>
-<div>Wait for date and time synchronization "on system startup. Ensures that time is synced before a game is launched.</div>
+<div>Wait for date and time synchronization "on system startup. Ensures that time is synced before a game is launched. Useful for games like Pokemon which requires a synced time.</div>
 </details>
 <details><summary>
 
@@ -216,7 +219,11 @@ Tweaks is the backbone of onion's configuration and personalization! With Tweaks
 
 #### Single press
 </summary>
-<div>Set the action for single pressing the menu button while in MainUI.</div>
+<div>
+Set the action for single pressing the menu button while in MainUI.
+
+(Off, Exit to menu, Quick Switch, Game Switcher) 
+</div>
 </details>
 <details><summary>
 
@@ -476,4 +483,4 @@ Tweaks is the backbone of onion's configuration and personalization! With Tweaks
 
 
 
-</DynamicFAQSection>
+</DynamicTweaksSection>

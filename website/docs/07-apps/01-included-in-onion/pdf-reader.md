@@ -9,6 +9,8 @@ description: Green PDF reader by Steward-Fu
 
 Allows you to read PDF files, right on your device.
 
+![](./assets/pdf-reader.png)
+
 ## Usage
 
 ### Controls
