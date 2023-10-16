@@ -28,7 +28,7 @@ int printf(const char *format, ...)
 
         if (arg == 7) { // 7 = settings menu
             FILE *fp;
-            file_put_sync(fp, "/mnt/SDCARD/.tmp_update/cmd_to_run.sh", "%s", "/mnt/SDCARD/App/Tweaks/launch.sh");
+            file_put_sync(fp, "/mnt/SDCARD/.tmp_update/cmd_to_run.sh", "%s", "LD_PRELOAD=/customer/lib/libpadsp.so /mnt/SDCARD/App/Tweaks/launch.sh");
             kill(getpid(), SIGTERM);
             rip_mainui = true;
         }

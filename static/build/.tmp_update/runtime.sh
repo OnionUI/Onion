@@ -186,9 +186,6 @@ launch_main_ui() {
 
     start_audioserver
 
-    # restart filewatcher so it picks up the new icon if it has changed
-	pkill filewatcher
-	filewatcher &
 
     # MainUI launch
     cd $miyoodir/app
