@@ -63,6 +63,7 @@ static List _menu_button_action;
 static List _menu_button_action_mainui_menu;
 static List _menu_button_action_ingame_menu;
 static List _menu_user_interface;
+static List _menu_appearance_display;
 static List _menu_theme_overrides;
 static List _menu_battery_percentage;
 static List _menu_advanced;
@@ -83,6 +84,7 @@ void menu_free_all(void)
     list_free(&_menu_button_action_mainui_menu);
     list_free(&_menu_button_action_ingame_menu);
     list_free(&_menu_user_interface);
+    list_free(&_menu_appearance_display);
     list_free(&_menu_theme_overrides);
     list_free(&_menu_battery_percentage);
     list_free(&_menu_advanced);

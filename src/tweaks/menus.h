@@ -73,7 +73,7 @@ void menu_systemLanguage(void *_)
         lang_getAllLanguages();
 
         _menu_system_language = list_createWithTitle(num_languages + 1, LIST_SMALL, "Language");
-        
+
         for (int i = 0; i < num_languages; i++) {
             ListItem languageItem = {
                 .label = "",
@@ -471,6 +471,43 @@ void menu_batteryPercentage(void *_)
     header_changed = true;
 }
 
+void menu_display(void *_)
+{
+    if (!_menu_appearance_display._created) {
+        _menu_appearance_display = list_createWithTitle(4, LIST_SMALL, "Display");
+        list_addItem(&_menu_appearance_display,
+                     (ListItem){
+                         .label = "Luminance",
+                         .item_type = MULTIVALUE,
+                         .value_max = 20,
+                         .value = settings.lumination,
+                         .action = action_setLuminance});
+        list_addItem(&_menu_appearance_display,
+                     (ListItem){
+                         .label = "Hue",
+                         .item_type = MULTIVALUE,
+                         .value_max = 20,
+                         .value = settings.hue,
+                         .action = action_setHue});
+        list_addItem(&_menu_appearance_display,
+                     (ListItem){
+                         .label = "Saturation",
+                         .item_type = MULTIVALUE,
+                         .value_max = 20,
+                         .value = settings.saturation,
+                         .action = action_setSaturation});
+        list_addItem(&_menu_appearance_display,
+                     (ListItem){
+                         .label = "Contrast",
+                         .item_type = MULTIVALUE,
+                         .value_max = 20,
+                         .value = settings.contrast,
+                         .action = action_setContrast});
+    }
+    menu_stack[++menu_level] = &_menu_appearance_display;
+    header_changed = true;
+}
+
 void menu_themeOverrides(void *_)
 {
     if (!_menu_theme_overrides._created) {
@@ -518,7 +555,7 @@ void menu_themeOverrides(void *_)
 void menu_userInterface(void *_)
 {
     if (!_menu_user_interface._created) {
-        _menu_user_interface = list_createWithTitle(5, LIST_SMALL, "Appearance");
+        _menu_user_interface = list_createWithTitle(6, LIST_SMALL, "Appearance");
         list_addItemWithInfoNote(&_menu_user_interface,
                                  (ListItem){
                                      .label = "Show recents",
@@ -547,6 +584,10 @@ void menu_userInterface(void *_)
                                  "Set the width of the 'OSD bar' shown\n"
                                  "in the left side of the display when\n"
                                  "adjusting brightness, or volume (MMP).");
+        list_addItem(&_menu_user_interface,
+                     (ListItem){
+                         .label = "Display...",
+                         .action = menu_display});
         list_addItem(&_menu_user_interface,
                      (ListItem){
                          .label = "Theme overrides...",

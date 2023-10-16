@@ -354,4 +354,44 @@ void action_advancedSetLcdVoltage(void *pt)
     file_put(fp, LCD_VOLT_CONFIG, "%x", 0x0e);
 }
 
+void set_LCDParams(void)
+{
+    int device_id = 0;
+    int csc_matrix = 3;
+
+    // magic numbers by miyoo
+    // actual ranges for these are 0-100, default 50
+    int contrast = (settings.contrast + 15) * 2;
+    int luminance = settings.lumination + 35;
+    int saturation = settings.saturation * 5;
+    int hue = settings.hue * 5;
+
+    char cmd[256];
+    snprintf(cmd, sizeof(cmd), "echo csc %d %d %d %d %d %d 0 0 > /proc/mi_modules/mi_disp/mi_disp0",
+             device_id, csc_matrix, contrast, hue, luminance, saturation);
+    printf("cmd: %s\n", cmd);
+    system(cmd);
+}
+
+void action_setLuminance(void *pt)
+{
+    settings.lumination = ((ListItem *)pt)->value;
+    set_LCDParams();
+}
+void action_setHue(void *pt)
+{
+    settings.hue = ((ListItem *)pt)->value;
+    set_LCDParams();
+}
+void action_setSaturation(void *pt)
+{
+    settings.saturation = ((ListItem *)pt)->value;
+    set_LCDParams();
+}
+void action_setContrast(void *pt)
+{
+    settings.contrast = ((ListItem *)pt)->value;
+    set_LCDParams();
+}
+
 #endif // TWEAKS_ACTIONS_H__
