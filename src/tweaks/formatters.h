@@ -187,9 +187,11 @@ void formatter_timeSkip(void *pt, char *out_label)
 
 void formatter_Serial(void *pt, char *out_label)
 {
-    char buffer[32];
-    process_start_read_return("serial", buffer);
-    strcpy(out_label, buffer);
+
+    static char serial[32];
+    if (strlen(serial) == 0)
+        process_start_read_return("serial", serial);
+    strcpy(out_label, serial);
 }
 
 void formatter_Language(void *pt, char *out_label)
@@ -201,40 +203,45 @@ void formatter_Language(void *pt, char *out_label)
 void formatter_OnionVersion(void *pt, char *out_label)
 {
     FILE *fp;
-    char buffer[32] = "";
-    file_get(fp, "/mnt/SDCARD/.tmp_update/onionVersion/version.txt", "%s", buffer);
-    if (strlen(buffer) > 0)
-        strcpy(out_label, buffer);
+    static char onion_version[32] = "";
+    if (strlen(onion_version) == 0)
+        file_get(fp, "/mnt/SDCARD/.tmp_update/onionVersion/version.txt", "%s", onion_version);
+    if (strlen(onion_version) > 0)
+        strcpy(out_label, onion_version);
     else
         strcpy(out_label, "0.0.0");
 }
 
 void formatter_FirmwareVersion(void *pt, char *out_label)
 {
-    char buffer[13] = "";
-    process_start_read_return("/etc/fw_printenv miyoo_version | sed 's/[^0-9]//g'", buffer);
-    printf("FirmwareVersion: [%s]", buffer);
-    if (strlen(buffer) > 0)
-        sprintf(out_label, "%s", buffer);
+    static char firmware_version[16] = "";
+    if (strlen(firmware_version) == 0)
+        process_start_read_return("/etc/fw_printenv miyoo_version | sed 's/[^0-9]//g'", firmware_version);
+    if (strlen(firmware_version) > 0)
+        sprintf(out_label, "%s", firmware_version);
     else
         strcpy(out_label, "XXXXXXXXXXXX");
 }
 
 void formatter_CPUFrequency(void *pt, char *out_label)
 {
-    char buffer[32] = "";
-    process_start_read_return("cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq", buffer);
-    if (strlen(buffer) > 0)
-        sprintf(out_label, "%.4s MHz", buffer);
+    static char cpu_frequency[32] = "";
+    if (strlen(cpu_frequency) == 0)
+        process_start_read_return("cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq", cpu_frequency);
+
+    if (strlen(cpu_frequency) > 0)
+        sprintf(out_label, "%.4s MHz", cpu_frequency);
     else
         strcpy(out_label, "0 MHz");
 }
 
 void formatter_Memory(void *pt, char *out_label)
 {
-    char buffer[8] = "";
-    process_start_read_return("cat /proc/meminfo | awk '/MemTotal/ {print $2}'", buffer);
-    int mem = atoi(buffer);
+    static char memory[8] = "";
+    if (strlen(memory) == 0)
+        process_start_read_return("cat /proc/meminfo | awk '/MemTotal/ {print $2}'", memory);
+
+    int mem = atoi(memory);
 
     // this is how MainUI calculates it so don't @ me
     mem += 1023; // round up
@@ -243,7 +250,7 @@ void formatter_Memory(void *pt, char *out_label)
     mem >>= 5;   // divide by 32
     mem <<= 5;   // multiply by 32 - this rounds to the nearest 32 MB
 
-    if (strlen(buffer) > 0)
+    if (strlen(memory) > 0)
         sprintf(out_label, "%d MB", mem);
     else
         strcpy(out_label, "0 MB");
@@ -252,22 +259,26 @@ void formatter_Memory(void *pt, char *out_label)
 void formatter_Storage(void *pt, char *out_label)
 {
     struct statvfs stat;
-    if(statvfs("/mnt/SDCARD", &stat) == 0) {
-        unsigned long long block_size = stat.f_frsize;
-        unsigned long long total_blocks = stat.f_blocks;
-        unsigned long long free_blocks = stat.f_bfree;
+    static char storage[32] = "";
+    if (strlen(storage) == 0) {
+        if (statvfs("/mnt/SDCARD", &stat) == 0) {
+            unsigned long long block_size = stat.f_frsize;
+            unsigned long long total_blocks = stat.f_blocks;
+            unsigned long long free_blocks = stat.f_bfree;
 
-        unsigned long long total_space = block_size * total_blocks;
-        unsigned long long free_space = block_size * free_blocks;
-        unsigned long long used_space = total_space - free_space;
+            unsigned long long total_space = block_size * total_blocks;
+            unsigned long long free_space = block_size * free_blocks;
+            unsigned long long used_space = total_space - free_space;
 
-        double total_gb = (double)total_space / (1 << 30);
-        double used_gb = (double)used_space / (1 << 30);
+            double total_gb = (double)total_space / (1 << 30);
+            double used_gb = (double)used_space / (1 << 30);
 
-        sprintf(out_label, "%.2lf/%.2lf GB", used_gb, total_gb);
-
-    } else{
-        strcpy(out_label, "failed");
+            sprintf(storage, "%.2lf/%.2lf GB", used_gb, total_gb);
+        }
+        else {
+            strcpy(storage, "failed");
+        }
     }
+    strcpy(out_label, storage);
 }
 #endif // TWEAKS_FORMATTERS_H__
