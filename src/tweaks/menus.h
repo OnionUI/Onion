@@ -13,6 +13,7 @@
 #include "components/list.h"
 #include "system/device_model.h"
 #include "system/display.h"
+#include "system/lang.h"
 #include "utils/apps.h"
 
 #include "./actions.h"
@@ -63,6 +64,26 @@ void menu_systemStartup(void *_)
                                  "MainUI to launch into.");
     }
     menu_stack[++menu_level] = &_menu_system_startup;
+    header_changed = true;
+}
+
+void menu_systemLanguage(void *_)
+{
+    if (!_menu_system_language._created) {
+        lang_getAllLanguages();
+
+        _menu_system_language = list_createWithTitle(num_languages + 1, LIST_SMALL, "Language");
+        
+        for (int i = 0; i < num_languages; i++) {
+            ListItem languageItem = {
+                .label = "",
+                .value = i,
+                .action = action_setLanguage};
+            strcpy(languageItem.label, all_language_names[i]);
+            list_addItem(&_menu_system_language, languageItem);
+        }
+    }
+    menu_stack[++menu_level] = &_menu_system_language;
     header_changed = true;
 }
 
@@ -171,7 +192,7 @@ void menu_datetime(void *_)
 void menu_system(void *_)
 {
     if (!_menu_system._created) {
-        _menu_system = list_createWithTitle(7, LIST_SMALL, "System");
+        _menu_system = list_createWithTitle(8, LIST_SMALL, "System");
         list_addItem(&_menu_system,
                      (ListItem){
                          .label = "Startup...",
@@ -184,6 +205,10 @@ void menu_system(void *_)
                      (ListItem){
                          .label = "Date and time...",
                          .action = menu_datetime});
+        list_addItem(&_menu_system,
+                     (ListItem){
+                         .label = "Language...",
+                         .action = menu_systemLanguage});
         list_addItemWithInfoNote(&_menu_system,
                                  (ListItem){
                                      .label = "Sleep timer",

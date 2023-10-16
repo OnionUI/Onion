@@ -192,6 +192,12 @@ void formatter_Serial(void *pt, char *out_label)
     strcpy(out_label, buffer);
 }
 
+void formatter_Language(void *pt, char *out_label)
+{
+    ListItem *item = (ListItem *)pt;
+    strcpy(out_label, all_language_names[item->value]);
+}
+
 void formatter_OnionVersion(void *pt, char *out_label)
 {
     FILE *fp;

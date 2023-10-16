@@ -268,6 +268,13 @@ void action_setLowBatteryWarnAt(void *pt)
     config_setNumber("battery/warnAt", settings.low_battery_warn_at);
 }
 
+void action_setLanguage(void *pt)
+{
+    strcpy(settings.language, all_languages[((ListItem *)pt)->value]);
+    // TODO: maybe set language instantly without exiting?
+    kill(getpid(), SIGTERM);
+}
+
 void action_setSleepTimer(void *pt)
 {
     if (((ListItem *)pt)->value == 0)
@@ -279,10 +286,12 @@ void action_setSleepTimer(void *pt)
     else if (((ListItem *)pt)->value == 3)
         settings.sleep_timer = 30;
 }
+
 void action_setBgmVolume(void *pt)
 {
     settings.bgm_volume = ((ListItem *)pt)->value;
 }
+
 void action_setStartupTab(void *pt)
 {
     settings.startup_tab = ((ListItem *)pt)->value;

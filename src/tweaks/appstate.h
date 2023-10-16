@@ -58,6 +58,7 @@ static List _menu_system;
 static List _menu_date_time;
 static List _menu_system_display;
 static List _menu_system_startup;
+static List _menu_system_language;
 static List _menu_button_action;
 static List _menu_button_action_mainui_menu;
 static List _menu_button_action_ingame_menu;
@@ -77,6 +78,7 @@ void menu_free_all(void)
     list_free(&_menu_date_time);
     list_free(&_menu_system_display);
     list_free(&_menu_system_startup);
+    list_free(&_menu_system_language);
     list_free(&_menu_button_action);
     list_free(&_menu_button_action_mainui_menu);
     list_free(&_menu_button_action_ingame_menu);

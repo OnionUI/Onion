@@ -29,6 +29,38 @@
 #define LANG_FALLBACK_EXPERT_TAB "Expert"
 #define LANG_FALLBACK_APPS_TAB "Apps"
 
+static char *all_languages[100];
+static char *all_language_names[100];
+static int num_languages = 0;
+
+void lang_getAllLanguages()
+{
+    DIR *dp;
+    struct dirent *ep;
+    if ((dp = opendir(LANG_DIR)) == NULL) {
+        printf("opendir failed\n");
+        return;
+    }
+    while ((ep = readdir(dp))) {
+        if (ep->d_type == DT_REG && strcmp("lang", file_getExtension(ep->d_name)) == 0) {
+            all_languages[num_languages] = (char *)malloc(STR_MAX * sizeof(char));
+            // save language file name
+            strcpy(all_languages[num_languages], ep->d_name);
+            
+            // save language name from "lang" field in json
+            char file_path[STR_MAX * 2];
+            snprintf(file_path, STR_MAX * 2 - 1, "%s/%s", LANG_DIR, ep->d_name);
+            const char *json_data = file_read(file_path);
+            cJSON *root = cJSON_Parse(json_data);
+            char lang_name[STR_MAX];
+            json_getString(root, "lang", lang_name);
+            all_language_names[num_languages] = (char *)malloc(STR_MAX * sizeof(char));
+            strcpy(all_language_names[num_languages], lang_name);
+            num_languages++;
+        }
+    }
+}
+
 void lang_removeIconLabels(bool remove_icon_labels, bool remove_hints)
 {
     DIR *dp;
