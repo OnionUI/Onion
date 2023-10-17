@@ -222,6 +222,7 @@ h2,
 h3,
 h4 {
   &+sup {
+    display: inline-block;
     position: relative;
     top: -1em;
     margin-bottom: -1em;
