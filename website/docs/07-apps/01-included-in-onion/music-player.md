@@ -11,7 +11,7 @@ Gmu is a music player application.
 Gmu is built in a modular way and supports various frontends and decoders for supports of different user interfaces and file formats respectively.
 Gmu supports MPEG audio, Ogg Vorbis and Ogg Opus for internet audio
 
-![](./assets/gmu.png)
+![](./assets/gmu.webp)
 
 
 ### Supported file formats

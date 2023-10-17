@@ -38,12 +38,6 @@ description: Overview of the most important features
 The Onion shortcuts are very powerful it allows you quick actions like rewind, fast forward, screenshots, volume boost... 
 :::
 
-<p align="center">
-
-[Click here](shortcuts) to see an overview of all shortcuts.
-
-</p>
-
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179301923-635b60fa-22de-4cf3-894a-2f3c34702d64.png" width="54" /></sup>GameSwitcher
 
@@ -123,7 +117,7 @@ Thanks to `Activity Tracker` app you can :
 
 :::note <a href="apps/retroarch">Retroarch overview</a>
 A full Retroarch in a such tiny device ! Retroarch is regularly updated from the offcial repository. Onion benefits to dedicated drivers created by [Eggs](https://discordapp.com/users/778867980096241715) for precision and performance.
-Dedicated customations are also included : all the core are configured with attention to detail, [custom overlays and custom filters](http://localhost:3000/docs/apps/retroarch#some-examples-of-video-filters-made-for-this-retroarch-port-click-to-view-full-resolution) made specially for the Miyoo Mini screen. 
+Dedicated customations are also included : all the core are configured with attention to detail, [custom overlays and custom filters](apps/retroarch#customized-overlays-and-filters) made specially for the Miyoo Mini screen. 
 :::
 
 ## <sup><img src={require('./assets/optimized.png').default} style={{width: 54}} /></sup>Optimized emulators
@@ -131,7 +125,7 @@ Dedicated customations are also included : all the core are configured with atte
 <img src="https://user-images.githubusercontent.com/44569252/189438841-f419f936-6376-436e-89b5-78ce1f88494f.png" width="320" />
 
 
-:::note <a href="apps/retroarch">Retroarch overview</a>
+:::note <a href="emulators">Optimized emulators</a>
 Onion has its own emulators, many optimizations on the Retroarch cores but also some dedicated emulators like :
 - PCSX Standalone (with awesome performances)
 - ScummVM standalone (awesome performances too)
@@ -174,7 +168,7 @@ An alternative user interface with animated game previews!
 
 ## <sup><img align="left" title="Ports Collection" src={require('./assets/ports.png').default} style={{width: 48}} /></sup>Ports Collection
 
-<img src="https://user-images.githubusercontent.com/44569252/227540219-bf2734a3-9686-45d9-a32e-6ad20aa56d07.png" width="320" />
+<img title="Included apps" src={require('./assets/ports.webp').default} style={{width: 320}} />
 
 :::note <a href="ports">Ports Collection</a>
 More than 60 game ports pre-configured !
@@ -205,7 +199,7 @@ For the Miyoo Mini Plus (equiped with wifi) Onion offers many additional possibi
 - [Multiplayer / Netplay](multiplayer) : play in multiplayer over internet or on you lcoal network to your favorite retro games:
 - [Easy Netplay](multiplayer/easynetplay): play multiplayer games anywhere (compatible with GBC/GBC Pokemon trading !)
 - [OTA (Over The Air) updates](apps/ota-update) : update Onion directly from your MMP
-- [Automatic date/time synchronisation](http://localhost:3000/docs/apps/tweaks#set-automatically-via-the-internet) (NTP, via Tweaks app)
+- [Automatic date/time synchronisation](apps/tweaks#set-automatically-via-the-internet) (NTP, via Tweaks app)
 - [Retroachivements](https://www.retroarch.com/?page=achievements)
 - [Scraper](scraper) : import game covers directly from your MMP
 - [Network Services](network-features) : [Samba/SMB share](network/samba), [http server](network/http), [SSH](network/ssh), [FTP](network/ftp), [Telnet](network/telnet), [Hotspot](network/hotspot)...

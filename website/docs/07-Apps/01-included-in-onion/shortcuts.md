@@ -73,6 +73,11 @@ Shortcuts in Onion are managed by an app called `keymon`. This app has no graphi
             <td><em>In-game</em></td>
         </tr>
         <tr>
+            <td><kbd>MENU</kbd> + <kbd>START</kbd></td>
+            <td>Change aspect ratio</td>
+            <td><em>In-game</em></td>
+        </tr>
+        <tr>
             <td><kbd>MENU</kbd> + <kbd>L</kbd></td>
             <td>Toggle rewind (if available)</td>
             <td><em>In-game</em></td>

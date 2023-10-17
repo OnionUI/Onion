@@ -32,7 +32,7 @@ Removing an emulator or an app will not remove the associated roms and data.
 :::
 
 :::info
-If you install an item from the `Expert` section, you'll need to display the expert section in `Tweaks app` -> `Appearance` -> `Show expert mode`
+If you install an item from the `Expert` section, you'll need to display the expert section in [Tweaks app](tweaks#show-recent) -> `Appearance` -> `Show expert mode`
 :::
 
 ### controls

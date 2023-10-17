@@ -54,7 +54,7 @@ When installing a theme you can choose if you want to install the icons as well,
 
 ## Advanced
 
-Learn how to make your own theme by consulting [our guide](theme-design).
+Learn how to make your own theme by consulting [our guide](../theme-design).
 
 If you have a big amount of themes on your SD card, you can unzip each theme, Theme Switcher app will be faster to launch.
 
