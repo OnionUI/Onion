@@ -20,9 +20,9 @@ Package Manager is a native application of Onion, it is installed by default.
 
 - run Package Manager from Apps section.
 - Packages are divided into three sections:
-  - **Verified:** Contains all verified systems which are fully compatible with Onion and the Game Switcher (see [Emulators](emulators) for more information).
+  - **Verified:** Contains all verified systems which are fully compatible with Onion and the Game Switcher (see [Emulators](../emulators) for more information).
   - **Apps:** Contains all the included Onion and third-party apps.
-  - **Expert:** Contains experimental/expert systems. Some are just alternative, some are standalone emulators (not compatible with Game Switcher) and some are just not fully tested. (see [Emulators](emulators) for more information). 
+  - **Expert:** Contains experimental/expert systems. Some are just alternative, some are standalone emulators (not compatible with Game Switcher) and some are just not fully tested. (see [Emulators](../emulators) for more information). 
 - Choose the systems and apps you need and press <kbd>start</kbd>.
 - at the top right of the screen you'll see the number of current modifications <sub><sup>(on the screenshot above we see that 1 item will be insntalled)</sup></sub>
 - Package Manager will display a summary of the modifications, press <kbd>start</kbd> again to confirm and apply the modifications.

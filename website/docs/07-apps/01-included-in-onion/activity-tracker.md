@@ -7,7 +7,6 @@ description: Track your play activity
 <p><i>{frontMatter.description}</i></p>
 
 
-
 ## Presentation
 
 Activity Tracker tracks your game time for all the games you play! Also shows your overall play time in the top bar.

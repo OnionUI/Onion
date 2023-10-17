@@ -16,7 +16,7 @@ description: Overview of the most important features
 <a href="#activity-tracker"><img title="Activity Tracker" src="https://user-images.githubusercontent.com/44569252/179302722-7fa82e4d-d72d-4b1e-bb4d-96a2a52aaa62.png" width="48" /></a>
 <a href="#retroarch"><img title="RetroArch" src="https://user-images.githubusercontent.com/44569252/179318731-7e262588-cb92-4ea3-9001-2991c4f8ccbe.png" width="48" /></a>
 <a href="#optimized-emulators"><img title="Optimized Emulators" src={require('./assets/optimized.png').default} style={{width: 48}} /></a>
-<a href="#game-list-options-glo-menu"><img src={require('./assets/icon-glo-menu.png').default} style={{width: 48}} /></a>
+<a href="#game-list-options-glo-menu"><img title="GLO Menu" src={require('./assets/icon-glo-menu.png').default} style={{width: 48}} /></a>
 <a href="#guest-mode"><img title="Guest Mode" src="https://user-images.githubusercontent.com/44569252/179304290-8c7e5140-5fb4-4ae1-bd90-faa416f9a37c.png" width="48" /></a>
 <a href="#random-game-picker"><img title="Random Game Picker" src={require('./assets/random-game-picker.png').default} style={{width: 48}} /></a>
 <a href="#advancemenu"><img title="AdvanceMENU" src={require('./assets/advancemenu.png').default} style={{width: 48}} /></a>
@@ -201,7 +201,7 @@ For the Miyoo Mini Plus (equiped with wifi) Onion offers many additional possibi
 - [OTA (Over The Air) updates](apps/ota-update) : update Onion directly from your MMP
 - [Automatic date/time synchronisation](apps/tweaks#set-automatically-via-the-internet) (NTP, via Tweaks app)
 - [Retroachivements](https://www.retroarch.com/?page=achievements)
-- [Scraper](scraper) : import game covers directly from your MMP
+- [Scraper](/docs/apps/scraper) : import game covers directly from your MMP
 - [Network Services](network-features) : [Samba/SMB share](network/samba), [http server](network/http), [SSH](network/ssh), [FTP](network/ftp), [Telnet](network/telnet), [Hotspot](network/hotspot)...
 :::
 
