@@ -4,7 +4,6 @@
 # 	Create a cookie file containing details for the client,
 # 	Start FTP to be able to host this file,
 # 	Start RA as a netplay host with -H, the core path and the rom path.
-# 	Leave WPS commented out until it's further tested, it works but leads to an unstable connection. Possible issue with the new hostapd binary.
 # Used within GLO as an addon script.
 
 # Env setup

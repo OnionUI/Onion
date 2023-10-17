@@ -10,7 +10,7 @@ echo "Running game : \"$rompath\""
 echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 
 # disable audioserver to gain some MB of ram
-/mnt/SDCARD/.tmp_update/script/stop_audioserver.sh
+. /mnt/SDCARD/.tmp_update/script/stop_audioserver.sh
 
 # Running retroarch (ScummVM will be launched with the argument contained in the .target file).
 cd /mnt/SDCARD/RetroArch/
