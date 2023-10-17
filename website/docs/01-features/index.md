@@ -32,7 +32,7 @@ description: Overview of the most important features
 
 
 
-<p align="center"><a href="./apps/shortcuts"><img src={require('../07-Apps/01-included-in-onion/assets/shortcuts.webp').default} style={{width: 320}} /></a></p>
+<p align="center"><a href="./apps/shortcuts"><img src={require('../07-apps/01-included-in-onion/assets/shortcuts.webp').default} style={{width: 320}} /></a></p>
 
 :::note <a href="./apps/shortcuts">Shortcuts overview</a>
 The Onion shortcuts are very powerful it allows you quick actions like rewind, fast forward, screenshots, volume boost... 
