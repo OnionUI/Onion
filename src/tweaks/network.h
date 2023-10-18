@@ -407,7 +407,6 @@ void network_toggleVNC(void *pt)
             int result = system(command_stop);
             if (result == 0) {
                 fprintf(stderr, "VNC disabled\n");
-                
             }
         }
     }
@@ -419,7 +418,7 @@ void network_setVNCFPS(void *pt)
 {
     network_settings.vncfps = ((ListItem *)pt)->value;
     config_setNumber(".vncfps", network_settings.vncfps);
-    
+
     if (network_state.vncserv) {
         network_toggleVNC(pt);
         network_state.vncserv = false;
