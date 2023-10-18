@@ -24,7 +24,6 @@ log "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* Easy Netplay Pokemon Host -*-*-*-*
 ##########
 
 # We'll need wifi up for this. Lets try and start it..
-
 check_wifi() {
 	if ifconfig wlan0 &>/dev/null; then
 		build_infoPanel_and_log "WIFI" "Wifi up"
@@ -306,11 +305,11 @@ client_rom_rename() {
 # Tell the client we're ready to accept connections
 ready_up() {
 	check_stop
-	ping -c 5 192.168.100.100 >/dev/null 2>&1
+	ping -c 5 $client_ip >/dev/null 2>&1
 	if [ $? -eq 0 ]; then
 		notify_peer "host_ready"
 	else
-		build_infoPanel_and_log "Error" "No connectivity to 192.168.100.100, \n is the client still connected?"
+		build_infoPanel_and_log "Error" "No connectivity to $client_ip, \n is the client still connected?"
 		notify_stop
 	fi
 }
