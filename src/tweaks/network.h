@@ -41,13 +41,26 @@ static struct network_s {
     bool manual_tz;
     bool check_updates;
     bool keep_alive;
+    bool vncserv;
     bool loaded;
 } network_state;
+
+typedef struct network_set {
+    int vncfps;
+    int vncrot;
+    bool loaded;
+} network_set;
+
+static network_set network_settings = {
+    .vncfps = 20,
+    .vncrot = 0,
+};
 
 void network_loadState(void)
 {
     if (network_state.loaded)
         return;
+    
     network_state.smbd = config_flag_get(".smbdState");
     network_state.http = config_flag_get(".httpState");
     network_state.ssh = config_flag_get(".sshState");
@@ -62,7 +75,16 @@ void network_loadState(void)
     network_state.manual_tz = config_flag_get(".manual_tz");
     network_state.check_updates = config_flag_get(".checkUpdates");
     network_state.keep_alive = config_flag_get(".keepServicesAlive");
+    network_state.vncserv = config_flag_get(".vncServer");
     network_state.loaded = true;
+    
+    // netset
+    if (network_settings.loaded)
+        return;
+    
+
+    config_get(".vncfps", CONFIG_INT, &network_settings.vncfps);
+    network_settings.loaded = true;
 }
 
 typedef struct {
@@ -188,6 +210,12 @@ void network_toggleSmbAvailable(void *item)
     fflush(file);
 
     fclose(file);
+}
+
+void network_setVNCFPS(void *pt)
+{
+    network_settings.vncfps = ((ListItem *)pt)->value;
+    config_setNumber(".vncfps", network_settings.vncfps);
 }
 
 void network_setState(bool *state_ptr, const char *flag_name, bool value)
@@ -317,6 +345,37 @@ void network_setSshAuthState(void *pt)
 void network_wpsConnect(void *pt)
 {
     system("sh " NET_SCRIPT_PATH "/wpsclient.sh");
+}
+
+void network_toggleVNC(void *pt)
+{
+    char command_start[STR_MAX];
+    char command_stop[STR_MAX];
+
+    int new_fps = (int)network_settings.vncfps;
+
+    sprintf(command_start, "/mnt/SDCARD/.tmp_update/bin/vncserver -k /dev/input/event0 -F %d -r 180 &", new_fps);
+    sprintf(command_stop, "killall -9 vncserver");
+
+    if (!network_state.vncserv) {
+        if (!process_isRunning("vncserver")) {
+            int result = system(command_start);
+            if (result == 0) {
+                fprintf(stderr, "VNC enabled\n");
+            } else {
+                fprintf(stderr, "VNC failed to start\n");
+            }
+        }
+    } else {
+        if (process_isRunning("vncserver")) {
+            int result = system(command_stop);
+            if (result == 0) {
+                fprintf(stderr, "VNC disabled\n");
+            } 
+        } 
+    }
+
+    network_setState(&network_state.vncserv, ".vncServer", ((ListItem *)pt)->value);
 }
 
 void network_setTzManualState(void *pt)
@@ -544,10 +603,44 @@ void menu_wifi(void *_)
     header_changed = true;
 }
 
+void menu_vnc(void *pt)
+{
+    ListItem *item = (ListItem *)pt;
+    item->value = (int)network_state.vncserv;
+    if (!_menu_vnc._created) {
+        _menu_vnc = list_create(3, LIST_SMALL);
+        strcpy(_menu_vnc.title, "vnc");
+        list_addItem(&_menu_vnc,
+                     (ListItem){
+                         .label = "IP address: N/A",
+                         .disabled = true,
+                         .action = NULL});
+                    list_addItem(&_menu_vnc,
+                                 (ListItem){
+                                     .label = "Enable",
+                                     .item_type = TOGGLE,
+                                     .value = (int)network_state.vncserv,
+                                     .action = network_toggleVNC});
+        list_addItemWithInfoNote(&_menu_vnc,
+                                 (ListItem){
+                                     .label = "Framerate",
+                                     .item_type = MULTIVALUE,
+                                     .value = (int)network_settings.vncfps,
+                                     .value_max = 31,
+                                     .value_formatter = formatter_vncFps,
+                                     .action = network_setVNCFPS},
+                                 "Start a VNC server to view your\n"
+                                 "MMP screen remotely\n");
+    }
+    strcpy(_menu_vnc.items[0].label, ip_address_label);
+    menu_stack[++menu_level] = &_menu_vnc;
+    header_changed = true;
+}
+
 void menu_network(void *_)
 {
-    if (!_menu_network._created) {
-        _menu_network = list_create(8, LIST_SMALL);
+    if (!_menu_network._created) {       
+        _menu_network = list_create(9, LIST_SMALL);
         strcpy(_menu_network.title, "Network");
 
         network_loadState();
@@ -626,6 +719,17 @@ void menu_network(void *_)
                                      .action = network_setTelnetState},
                                  "Telnet provides unencrypted remote shell\n"
                                  "access to your device.");
+        list_addItemWithInfoNote(&_menu_network,
+                                 (ListItem){
+                                     .label = "VNC: Screen share",
+                                     .item_type = TOGGLE,
+                                     .disabled = !settings.wifi_on,
+                                     .alternative_arrow_action = true,
+                                     .arrow_action = network_toggleVNC,
+                                     .value = (int)network_state.vncserv,
+                                     .action = menu_vnc},
+                                 "Connect to your MMP from another device\n"
+                                 "to view the screen");
         list_addItemWithInfoNote(&_menu_network,
                                  (ListItem){
                                      .label = "Disable services in game",
