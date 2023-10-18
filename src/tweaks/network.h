@@ -80,6 +80,17 @@ void network_freeWifiNetworks()
         free(_wifi_networks);
 }
 
+void network_connectWifi(void *pt)
+{
+    WifiNetwork *wifi_network = (WifiNetwork *)(((ListItem *)pt)->payload_ptr);
+    if (wifi_network->encrypted) {
+        printf("Connecting to %s...\n", wifi_network->ssid);
+    }
+    else {
+        printf("Connecting to unencrypted %s...\n", wifi_network->ssid);
+    }
+}
+
 void network_getWifiNetworks()
 {
 
@@ -135,7 +146,8 @@ void network_getWifiNetworks()
     for (int i = 0; i < network_numWifiNetworks; i++) {
         ListItem wifi_network = {
             .item_type = WIFINETWORK,
-            .payload_ptr = _wifi_networks + i};
+            .payload_ptr = _wifi_networks + i,
+            .action = network_connectWifi};
         snprintf(wifi_network.label, STR_MAX - 1, "%s", _wifi_networks[i].ssid);
         list_addItem(&_menu_wifi, wifi_network);
         list_changed = true;
