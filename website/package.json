@@ -15,8 +15,8 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@docusaurus/core": "2.4.1",
-    "@docusaurus/preset-classic": "2.4.1",
+    "@docusaurus/core": "^2.4.3",
+    "@docusaurus/preset-classic": "^2.4.3",
     "@easyops-cn/docusaurus-search-local": "^0.35.0",
     "@giscus/react": "^2.3.0",
     "@material-ui/core": "^4.12.4",
@@ -37,7 +37,7 @@
     "trim": "^0.0.3"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "2.4.1",
+    "@docusaurus/module-type-aliases": "^2.4.3",
     "@tsconfig/docusaurus": "^1.0.5",
     "typescript": "^4.7.4"
   },

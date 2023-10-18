@@ -146,7 +146,7 @@ wait_for_host() {
     done
 }
 
-# We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
+# Start retroarch with -C in client mode if everything's gone to plan
 start_retroarch() {
     build_infoPanel_and_log "Starting RA" "Starting RetroArch"
 
@@ -178,7 +178,7 @@ start_retroarch() {
     fi
 }
 
-# Go into a waiting state for the host to return the save
+# Go into a waiting state for the host to return the save (If you don't call this you don't retransfer the saves - Users cannot under any circumstances miss this function)
 wait_for_save_return() {
     build_infoPanel_and_log "Syncing" "Waiting for host to be ready for save sync"
     notify_peer "ready_to_receive"
@@ -228,7 +228,6 @@ wait_for_save_return() {
     fi
 }
 
-# If you don't call this you don't retransfer the saves - Users cannot under any circumstances miss this function.
 cleanup() {
     build_infoPanel_and_log "Cleanup" "Cleaning up after Pokemon session\n Do not power off!"
 

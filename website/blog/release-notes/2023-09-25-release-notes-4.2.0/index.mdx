@@ -1,0 +1,288 @@
+---
+slug: release-notes/4.2.0
+authors: [aemiii91, schmurtz, totofaki, xk, tgecko]
+tags: [release-notes, stable]
+image: ./assets/banner-release-4.2.png
+---
+
+import TOCInline from '@theme/TOCInline';
+import Card from '@site/src/components/Card';
+import ThemeCollection, { ThemeCard } from '@site/src/components/ThemeCollection';
+
+
+# Release notes: Onion V4.2
+
+<img src={assets.image} />
+
+*Official release notes for Onion V4.2.0*
+
+This release features updated core Onion apps, like the Activity Tracker which has been completely reworked,
+an overhauled and simplified multiplayer experience, upgraded network services for the Miyoo Mini Plus and even more new features, bug fixes and improvements.
+
+
+<Truncate />
+
+
+<h2 id="overview">Overview</h2>
+
+<TOCInline toc={toc} maxHeadingLevel={4} />
+
+
+## Features
+
+### Core Onion apps
+
+<Card readMore="/docs/apps/activity-tracker">
+
+#### Activity Tracker
+<sup>
+
+by @Aemiii91, @Sichroteph, @schmurtzm, @nil0bject
+
+</sup>
+
+The Activity Tracker has undergone a complete overhaul.  
+
+Through a huge collaborative effort, we've implemented a new backend, many bugfixes and added new features such as average playtime and play count tracking. 
+
+</Card>
+
+### New emulators
+
+<Card readMore="/docs/emulators/scummvm">
+
+#### ScummVM standalone
+<sup>
+
+by @schmurtzm and @XK9274
+
+</sup>
+
+A new and improved standalone version of ScummVM has been added.  
+
+The standalone version features an extensive engine list & performance increases to audio in certain engines.
+
+</Card>
+
+### Utilities
+
+<Card>
+
+#### Logging framework/diagnostics
+<sup>
+
+by @XK9274
+
+</sup>
+
+A diagnostics framework that allows users to receive scripts from a developer and execute it tweaks, no commandline needed!  
+
+Releases with a snapshot feature to create an exported archive of logs you can quickly send to a dev or attach on our Github.
+
+</Card>
+
+## Network features (MMP-only)
+
+### Network services
+
+The Onion network services you know and love have moved! They now live in Tweaks!
+
+<Card readMore="/docs/network/ftp">
+
+#### FTP
+<sup>
+
+by @schmurtzm and @XK9274
+
+</sup>
+
+A compilation of bftpd to provide a great FTP experience to transfer content to and from your MMP.
+
+</Card>
+<Card readMore="/docs/network/ssh">
+
+#### SSH
+<sup>
+
+by @XK9274, @tGecko
+
+</sup>
+
+Adds dropbear SSH support to the MMP, utilisating new authentication methods.  
+Enabling SSH will also enable SFTP functionality.
+
+</Card>
+<Card readMore="/docs/network/telnet">
+
+#### Telnet
+<sup>
+
+by @XK9274
+
+</sup>
+
+Telnet re-worked to auto-disable on startup which provides a more secure experience. Telnet is by default disabled in Onion.
+
+</Card>
+<Card readMore="/docs/network/samba">
+
+#### Samba
+<sup>
+
+by @XK9274, @tGecko, @Aemiii91
+
+</sup>
+
+Adds Samba support with authentication.  
+
+Samba makes it easy to access and manage your stored content on your MMP across various types of devices and operating systems.
+For Windows and iOS users, built-in Samba apps are available, while Android users can download them from the Play Store.
+
+</Card>
+<Card readMore="/docs/network/http">
+
+#### HTTP Fileserver
+<sup>
+
+by @sa3eedDev, @XK9274 
+
+</sup>
+
+Adds a graphically (and feature) rich way to transfer files, run shell commands and manage content.  
+The HTTP fileserver has been incredibly popular in Onion.
+
+</Card>
+<Card>
+
+#### Automatic time sync
+<sup>
+
+by @schmurtzm, @tGecko, @Aemiii91, and @XK9274
+
+</sup>
+
+Need your time to be accurate for in-game time based events? We've got you covered!
+Sync your device's time with the internet effortlessly! Updates your clock automatically using Wi-Fi.
+Your time zone is set automatically but can also be changed. Optionally wait for a time sync on boot.
+
+</Card>
+<Card>
+
+#### WPS
+<sup>
+
+by @XK9274
+
+</sup>
+
+Basic (pinless) WPS functionality to connect to your WiFi router!
+
+</Card>
+<Card readMore="/docs/network/hotspot">
+
+#### Wi-Fi hotspot
+<sup>
+
+by @XK9274
+
+</sup>
+
+You can use all of Onions network features on the integrated hotspot, available through Tweaks.
+It's also compatible with Netplay!
+
+</Card>
+
+### Netplay support
+
+<Card>
+
+#### Easy Netplay - GLO Menu
+<sup>
+
+by @schmurtzm
+
+</sup>
+
+Netplay is now directly accessible through GLO.  
+
+The GLO Netplay menu brings together Netplay options like Host/Join and Easy Netplay into one location for a more user-friendly experience.
+
+</Card>
+<Card readMore="/docs/network/netplay">
+
+#### Easy Netplay - Hotspot/Local
+<sup>
+
+by @XK9274
+
+</sup>
+
+Out on the road without a router? No worries, Onion has you covered. 
+
+You can play games with friends and family using the built-in hotspot feature. 
+Available in GLO, Easy Netplay will seamlessly setup a session and get you connected!
+
+</Card>
+<Card readMore="/docs/network/netplay/link">
+
+#### Easy Netplay - Hotspot link cable support GB/GBC
+<sup>
+
+by @XK9274
+
+</sup>
+
+Using the Easy Netplay framework, we've also added support for Cable link netplay on GBC.  
+This GLO feature allows for Pokémon trading on 1st gen Pokémon games (Red/Blue/Yellow, Gold/Silver) through TGBDual.
+
+</Card>
+
+## Fixes and minor improvements
+
+* Removed the Wi-Fi icons background - allows more customization for theme authors - *by @tGecko*
+* Fixed a memory leak in installUI that crashed the app when changing slides often - *by @tGecko*
+* Fixed the "About Device" screen displaying the wrong model number on the MM - *by @tGecko*
+* Swapped start and select buttons in the game list for consistency with other screens - *by @tGecko*
+* Fixed a bug in MainUI where sound would play on pressing L1/R1 instead of L2/R2 - *by @tGecko*
+* Added the option to shutdown the device instantly instead of going to standby - *by @tGecko*
+* Fixed a bug where multiple languages would not display properly in RetroArch - *by @tGecko*
+
+## RetroArch overlays
+
+* Multiple overlays & improvements to overlay structure - *by @Jeltr0n*
+* GBA Real. - *by @sinedied*
+* Perfect CRT - *by [u/1playerinsertcoin](https://www.reddit.com/user/1playerinsertcoin/)*
+* 4:3 AR Overlays for Game Gear - *by @retroNUC*
+
+
+## Updated/added languages
+
+### Added
+
+* **Català** (Catalan) - *credit: @sandrasgg*
+* **Čeština** (Czech) - *credit: @spenaat*
+* **Ελληνικά** (Greek) - *credit: @Tortugasss*
+* **Bahasa Indonesia** (Indonesian) - *credit: @jiprastyo*
+* **Polski** (Polish) - *credit: @Assassins78pl*
+* **沖縄口** (Uchinaguchi/Okinawan) - *credit: @kuragehimekurara1*
+
+### Updated
+
+* **Português brasileiro** (Brazilian Portuguese) - *credit: @bruhensant*
+* **简体中文** (Simplified Chinese) - *credit: @codeudan*
+* **繁體中文** (Traditional Chinese) - *credit: @Erebus20*
+* **Français** (French) - *credit: @gaslec*
+* **Deutsch** (German) - *credit: @tGecko*
+* **Italiano** (Italian) - *credit: @Amiga500 and @Vitty85*
+* **日本語** (Japanese) - *credit: @kuragehimekurara1*
+* **Русский язык** (Russian) - *credit: @RandomKartopfel*
+* **Español** (Spanish) - *credit: @sandrasgg*
+* **Українська мова** (Ukrainian) *credit: @RandomKartopfel*
+* **Tiếng Việt** (Vietnamese) - *credit: @Grayjks*
+
+---
+
+<p align="center">
+<a href="https://github.com/OnionUI/Onion/releases/tag/v4.2.0" class="button button--primary button--lg">Download Onion V4.2.0</a><br/>
+<small><i>you'll find the download at the bottom of the page</i></small>
+</p>
