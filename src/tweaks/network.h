@@ -211,7 +211,6 @@ void network_toggleSmbAvailable(void *item)
     fclose(file);
 }
 
-
 void network_setState(bool *state_ptr, const char *flag_name, bool value)
 {
     *state_ptr = value;

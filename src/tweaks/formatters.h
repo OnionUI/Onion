@@ -44,7 +44,7 @@ void formatter_vncFps(void *pt, char *out_label)
     ListItem *item = (ListItem *)pt;
     int value = item->value;
 
-    if (value > 30) 
+    if (value > 30)
         value = 0;
     else if (value < 0)
         value = 30;
