@@ -10,7 +10,7 @@
 #include "utils/json.h"
 
 #define MAX_BRIGHTNESS 10
-#define MAIN_UI_SETTINGS "/appconfigs/system.json"
+#define MAIN_UI_SETTINGS "/mnt/SDCARD/system.json"
 #define CMD_TO_RUN_PATH "/mnt/SDCARD/.tmp_update/cmd_to_run.sh"
 #define RETROARCH_CONFIG "/mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg"
 #define HISTORY_PATH \

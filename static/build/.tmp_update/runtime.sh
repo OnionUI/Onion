@@ -496,6 +496,26 @@ init_system() {
 
     start_audioserver
 
+    device_settings="/mnt/SDCARD/.tmp_update/config/system/$(read_uuid).json"
+    if [ -f "$device_settings" ]; then
+        cp -f "$device_settings" /mnt/SDCARD/system.json
+    fi
+
+    # make sure MainUI settings exist
+    if [ ! -f /mnt/SDCARD/system.json ]; then
+        if [ -f /appconfigs/system.json ]; then
+            cp -f /appconfigs/system.json /mnt/SDCARD/system.json
+        else
+            cp -f $sysdir/res/miyoo${DEVICE_ID}_system.json /mnt/SDCARD/system.json
+        fi
+    fi
+
+    # link /appconfigs/system.json to SD card
+    if [ -L /appconfigs/system.json ] && [ "$(readlink /appconfigs/system.json)" == "/mnt/SDCARD/system.json" ]; then
+        rm /appconfigs/system.json
+    fi
+    ln -s /mnt/SDCARD/system.json /appconfigs/system.json
+
     if [ $DEVICE_ID -eq $MODEL_MM ]; then
         # init charger detection
         if [ ! -f /sys/devices/gpiochip0/gpio/gpio59/direction ]; then
@@ -505,11 +525,11 @@ init_system() {
 
         if [ $(/customer/app/jsonval vol) -ne 20 ] || [ $(/customer/app/jsonval mute) -ne 0 ]; then
             # Force volume and mute settings
-            cat /appconfigs/system.json |
+            cat /mnt/SDCARD/system.json |
                 sed 's/^\s*"vol":\s*[0-9][0-9]*/\t"vol":\t20/g' |
                 sed 's/^\s*"mute":\s*[0-9][0-9]*/\t"mute":\t0/g' \
                     > temp
-            mv -f temp /appconfigs/system.json
+            mv -f temp /mnt/SDCARD/system.json
         fi
     fi
 
