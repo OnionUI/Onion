@@ -608,7 +608,7 @@ void menu_vnc(void *_)
 {
     if (!_menu_vnc._created) {
         _menu_vnc = list_create(3, LIST_SMALL);
-        strcpy(_menu_vnc.title, "vnc");
+        strcpy(_menu_vnc.title, "VNC");
         list_addItem(&_menu_vnc,
                      (ListItem){
                          .label = "IP address: N/A",
@@ -729,7 +729,7 @@ void menu_network(void *_)
                                      .value = (int)network_state.vncserv,
                                      .action = menu_vnc},
                                  "Connect to your MMP from another device\n"
-                                 "to view the screen");
+                                 "to view the screen and interact with it.");
         list_addItemWithInfoNote(&_menu_network,
                                  (ListItem){
                                      .label = "Disable services in game",
