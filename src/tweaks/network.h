@@ -60,7 +60,7 @@ void network_loadState(void)
 {
     if (network_state.loaded)
         return;
-    
+
     network_state.smbd = config_flag_get(".smbdState");
     network_state.http = config_flag_get(".httpState");
     network_state.ssh = config_flag_get(".sshState");
@@ -77,11 +77,10 @@ void network_loadState(void)
     network_state.keep_alive = config_flag_get(".keepServicesAlive");
     network_state.vncserv = config_flag_get(".vncServer");
     network_state.loaded = true;
-    
+
     // netset
     if (network_settings.loaded)
         return;
-    
 
     config_get(".vncfps", CONFIG_INT, &network_settings.vncfps);
     network_settings.loaded = true;
@@ -362,17 +361,19 @@ void network_toggleVNC(void *pt)
             int result = system(command_start);
             if (result == 0) {
                 fprintf(stderr, "VNC enabled\n");
-            } else {
+            }
+            else {
                 fprintf(stderr, "VNC failed to start\n");
             }
         }
-    } else {
+    }
+    else {
         if (process_isRunning("vncserver")) {
             int result = system(command_stop);
             if (result == 0) {
                 fprintf(stderr, "VNC disabled\n");
-            } 
-        } 
+            }
+        }
     }
 
     network_setState(&network_state.vncserv, ".vncServer", ((ListItem *)pt)->value);
@@ -615,12 +616,12 @@ void menu_vnc(void *pt)
                          .label = "IP address: N/A",
                          .disabled = true,
                          .action = NULL});
-                    list_addItem(&_menu_vnc,
-                                 (ListItem){
-                                     .label = "Enable",
-                                     .item_type = TOGGLE,
-                                     .value = (int)network_state.vncserv,
-                                     .action = network_toggleVNC});
+        list_addItem(&_menu_vnc,
+                     (ListItem){
+                         .label = "Enable",
+                         .item_type = TOGGLE,
+                         .value = (int)network_state.vncserv,
+                         .action = network_toggleVNC});
         list_addItemWithInfoNote(&_menu_vnc,
                                  (ListItem){
                                      .label = "Framerate",
@@ -639,7 +640,7 @@ void menu_vnc(void *pt)
 
 void menu_network(void *_)
 {
-    if (!_menu_network._created) {       
+    if (!_menu_network._created) {
         _menu_network = list_create(9, LIST_SMALL);
         strcpy(_menu_network.title, "Network");
 
