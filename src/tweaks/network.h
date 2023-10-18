@@ -211,11 +211,6 @@ void network_toggleSmbAvailable(void *item)
     fclose(file);
 }
 
-void network_setVNCFPS(void *pt)
-{
-    network_settings.vncfps = ((ListItem *)pt)->value;
-    config_setNumber(".vncfps", network_settings.vncfps);
-}
 
 void network_setState(bool *state_ptr, const char *flag_name, bool value)
 {
@@ -346,39 +341,6 @@ void network_wpsConnect(void *pt)
     system("sh " NET_SCRIPT_PATH "/wpsclient.sh");
 }
 
-void network_toggleVNC(void *pt)
-{
-    char command_start[STR_MAX];
-    char command_stop[STR_MAX];
-
-    int new_fps = (int)network_settings.vncfps;
-
-    sprintf(command_start, "/mnt/SDCARD/.tmp_update/bin/vncserver -k /dev/input/event0 -F %d -r 180 &", new_fps);
-    sprintf(command_stop, "killall -9 vncserver");
-
-    if (!network_state.vncserv) {
-        if (!process_isRunning("vncserver")) {
-            int result = system(command_start);
-            if (result == 0) {
-                fprintf(stderr, "VNC enabled\n");
-            }
-            else {
-                fprintf(stderr, "VNC failed to start\n");
-            }
-        }
-    }
-    else {
-        if (process_isRunning("vncserver")) {
-            int result = system(command_stop);
-            if (result == 0) {
-                fprintf(stderr, "VNC disabled\n");
-            }
-        }
-    }
-
-    network_setState(&network_state.vncserv, ".vncServer", ((ListItem *)pt)->value);
-}
-
 void network_setTzManualState(void *pt)
 {
     bool enabled = ((ListItem *)pt)->value;
@@ -418,6 +380,45 @@ void network_setTzSelectState(void *pt)
     setenv("TZ", utc_str, 1);
     tzset();
     config_setString(".tz", utc_str);
+}
+
+void network_toggleVNC(void *pt)
+{
+    char command_start[STR_MAX];
+    char command_stop[STR_MAX];
+
+    int new_fps = (int)network_settings.vncfps;
+
+    sprintf(command_start, "/mnt/SDCARD/.tmp_update/bin/vncserver -k /dev/input/event0 -F %d -r 180 &", new_fps);
+    sprintf(command_stop, "killall -9 vncserver");
+
+    if (!network_state.vncserv) {
+        if (!process_isRunning("vncserver")) {
+            int result = system(command_start);
+            if (result == 0) {
+                fprintf(stderr, "VNC enabled\n");
+            }
+            else {
+                fprintf(stderr, "VNC failed to start\n");
+            }
+        }
+    }
+    else {
+        if (process_isRunning("vncserver")) {
+            int result = system(command_stop);
+            if (result == 0) {
+                fprintf(stderr, "VNC disabled\n");
+            }
+        }
+    }
+
+    network_setState(&network_state.vncserv, ".vncServer", ((ListItem *)pt)->value);
+}
+
+void network_setVNCFPS(void *pt)
+{
+    network_settings.vncfps = ((ListItem *)pt)->value;
+    config_setNumber(".vncfps", network_settings.vncfps);
 }
 
 void menu_smbd(void *pt)
