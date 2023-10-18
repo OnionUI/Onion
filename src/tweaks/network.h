@@ -604,10 +604,8 @@ void menu_wifi(void *_)
     header_changed = true;
 }
 
-void menu_vnc(void *pt)
+void menu_vnc(void *_)
 {
-    ListItem *item = (ListItem *)pt;
-    item->value = (int)network_state.vncserv;
     if (!_menu_vnc._created) {
         _menu_vnc = list_create(3, LIST_SMALL);
         strcpy(_menu_vnc.title, "vnc");
@@ -630,8 +628,9 @@ void menu_vnc(void *pt)
                                      .value_max = 31,
                                      .value_formatter = formatter_vncFps,
                                      .action = network_setVNCFPS},
-                                 "Start a VNC server to view your\n"
-                                 "MMP screen remotely\n");
+                                 "Set the framerate of the VNC server\n"
+                                 "between 1 and 30. The higher the \n"
+                                 "framerate the more CPU it will use \n");
     }
     strcpy(_menu_vnc.items[0].label, ip_address_label);
     menu_stack[++menu_level] = &_menu_vnc;
