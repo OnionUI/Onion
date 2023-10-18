@@ -12,6 +12,7 @@
 #include <unistd.h>
 
 #include "components/list.h"
+#include "components/types.h"
 #include "system/keymap_sw.h"
 #include "theme/render/dialog.h"
 #include "theme/sound.h"
@@ -67,23 +68,6 @@ void network_loadState(void)
     network_state.loaded = true;
 }
 
-typedef struct {
-    char name[STR_MAX - 11];
-    char path[STR_MAX];
-    int available;     // 1 if available = yes, 0 otherwise
-    long availablePos; // in file position for the available property
-} Share;
-
-typedef struct {
-    char bssid[18];
-    int frequency;
-    int signal_level;
-    char flags[256];
-    char ssid[33];
-    bool connected;
-    bool encrypted;
-} WifiNetwork;
-
 static Share *_network_shares = NULL;
 static int network_numShares;
 
@@ -109,10 +93,12 @@ void network_getWifiNetworks()
         perror("Failed to open the wifi list");
         return;
     }
-
+    char current_ssid[32] = "";
+    system("wpa_cli status | awk -F= '/^ssid=/{print $2}' > /tmp/ssid");
+    FILE *fp = fopen("/tmp/ssid", "r");
+    file_get(fp, "/tmp/ssid", "%s", current_ssid);
     char line[256];
     _wifi_networks = (WifiNetwork *)calloc(1, sizeof(WifiNetwork));
-    system("cat /tmp/wifi.list\n\n"); // TODO: remove
     network_numWifiNetworks = 0;
 
     while (fgets(line, sizeof(line), file) != NULL) {
@@ -129,12 +115,15 @@ void network_getWifiNetworks()
                    _wifi_networks[network_numWifiNetworks].flags,
                    _wifi_networks[network_numWifiNetworks].ssid) == 5) {
             if (strstr(_wifi_networks[network_numWifiNetworks].flags, "WPA") != NULL ||
-                strstr(_wifi_networks[network_numWifiNetworks].flags, "WEP") != NULL) {
+                strstr(_wifi_networks[network_numWifiNetworks].flags, "WEP") != NULL)
                 _wifi_networks[network_numWifiNetworks].encrypted = true;
-            }
-            else {
+
+            else
                 _wifi_networks[network_numWifiNetworks].encrypted = false;
-            }
+            if (strcmp(current_ssid, _wifi_networks[network_numWifiNetworks].ssid) == 0)
+                _wifi_networks[network_numWifiNetworks].connected = true;
+            else
+                _wifi_networks[network_numWifiNetworks].connected = false;
             network_numWifiNetworks++;
         }
         else {
@@ -142,15 +131,14 @@ void network_getWifiNetworks()
         }
     }
     fclose(file);
-    for (int i = 0; i < network_numWifiNetworks; i++) {
 
+    for (int i = 0; i < network_numWifiNetworks; i++) {
         ListItem wifi_network = {
-            .item_type = ACTION};
-        snprintf(wifi_network.label, STR_MAX - 1, "SSID: %s  encrypted: %d  SIG:%d",
-                 _wifi_networks[i].ssid, _wifi_networks[i].encrypted, _wifi_networks[i].signal_level);
+            .item_type = WIFINETWORK,
+            .payload_ptr = _wifi_networks + i};
+        snprintf(wifi_network.label, STR_MAX - 1, "%s", _wifi_networks[i].ssid);
         list_addItem(&_menu_wifi, wifi_network);
-        all_changed = true;
-        // printf("SSID: %s\tSignal Strength: %d\tKey Type: %s\n", _wifi_networks[i].ssid, _wifi_networks[i].signal_strength, _wifi_networks[i].key_type);
+        list_changed = true;
     }
 }
 

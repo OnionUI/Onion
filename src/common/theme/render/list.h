@@ -2,10 +2,10 @@
 #define RENDER_MENU_H__
 
 #include "components/list.h"
+#include "components/types.h"
 #include "theme/background.h"
 #include "theme/config.h"
 #include "theme/resources.h"
-
 #define HIDDEN_ITEM_ALPHA 60
 
 static SDL_Color color_black = {0, 0, 0};
@@ -158,6 +158,49 @@ void theme_renderList(SDL_Surface *screen, List *list)
                 640 - 20 - label_width,
                 item_center_y - value_size.h / 2};
             SDL_BlitSurface(value_label, &value_size, screen, &value_pos);
+        }
+        else if (item->item_type == WIFINETWORK) {
+            char value_str[STR_MAX];
+            list_getItemValueLabel(item, value_str);
+            SDL_Surface *value_label = TTF_RenderUTF8_Blended(list_font, value_str, theme()->list.color);
+            SDL_Rect value_size = {0, 0, multivalue_width, value_label->h};
+            int label_width = value_label->w > value_size.w ? value_size.w : value_label->w;
+            WifiNetwork *wifi = (WifiNetwork *)item->payload_ptr;
+            if (wifi->encrypted) {
+                SDL_Surface *wifi_encrypted = resource_getSurface(WIFI_LOCKED);
+                SDL_Rect wifi_encrypted_pos = {
+                    640 - 50 - label_width - wifi_encrypted->w,
+                    item_center_y - wifi_encrypted->h / 2};
+                SDL_BlitSurface(wifi_encrypted, NULL, screen, &wifi_encrypted_pos);
+            }
+            SDL_Surface *wifi_strength = NULL;
+            if (wifi->signal_level >= -50) {
+                wifi_strength = resource_getSurface(WIFI_SIGNAL_4);
+            }
+            else if (wifi->signal_level < -50 && wifi->signal_level >= -70) {
+                wifi_strength = resource_getSurface(WIFI_SIGNAL_3);
+            }
+            else if (wifi->signal_level < -70 && wifi->signal_level >= -90) {
+                wifi_strength = resource_getSurface(WIFI_SIGNAL_2);
+            }
+            else {
+                wifi_strength = resource_getSurface(WIFI_SIGNAL_1);
+            }
+            SDL_Rect wifi_strength_pos = {
+                640 - label_width - wifi_strength->w,
+                item_center_y - wifi_strength->h / 2};
+            SDL_BlitSurface(wifi_strength, NULL, screen, &wifi_strength_pos);
+ 
+            if(wifi->connected) {
+                SDL_Surface *wifi_connected = resource_getSurface(WIFI_CONNECTED);
+                int offset_x = label_width + wifi_connected->w + wifi_strength->w;
+                if(wifi->encrypted)
+                    offset_x += 50;
+                SDL_Rect wifi_connected_pos = {
+                    640 - offset_x,
+                    item_center_y - wifi_connected->h / 2};
+                SDL_BlitSurface(wifi_connected, NULL, screen, &wifi_connected_pos);
+            }
         }
 
         theme_renderListLabel(screen, item->label, theme()->list.color,

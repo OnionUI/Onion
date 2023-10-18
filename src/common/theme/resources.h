@@ -50,6 +50,12 @@ typedef enum theme_images {
     BRIGHTNESS_9,
     BRIGHTNESS_10,
     LEGEND_GAMESWITCHER,
+    WIFI_LOCKED,
+    WIFI_CONNECTED,
+    WIFI_SIGNAL_1,
+    WIFI_SIGNAL_2,
+    WIFI_SIGNAL_3,
+    WIFI_SIGNAL_4,
     images_count
 } ThemeImages;
 
@@ -175,6 +181,18 @@ SDL_Surface *_loadImage(ThemeImages request)
         return theme_loadImage(t->path, "extra/lum10");
     case LEGEND_GAMESWITCHER:
         return theme_loadImage(t->path, "extra/gs-legend");
+    case WIFI_LOCKED:
+        return theme_loadImage(t->path, "icon-wifi-locked");
+    case WIFI_CONNECTED:
+        return theme_loadImage(t->path, "icon-wifi-connected");
+    case WIFI_SIGNAL_1:
+        return theme_loadImage(t->path, "icon-wifi-signal-01");
+    case WIFI_SIGNAL_2:
+        return theme_loadImage(t->path, "icon-wifi-signal-02");
+    case WIFI_SIGNAL_3:
+        return theme_loadImage(t->path, "icon-wifi-signal-03");
+    case WIFI_SIGNAL_4:
+        return theme_loadImage(t->path, "icon-wifi-signal-04");
     default:
         break;
     }
