@@ -55,6 +55,6 @@ int main()
     }
     serial[j] = '\0';
 
-    printf("%s", serial);
+    printf("%s\n", serial);
     return 0;
 }

@@ -290,6 +290,7 @@ void action_setSleepTimer(void *pt)
 void action_setBgmVolume(void *pt)
 {
     settings.bgm_volume = ((ListItem *)pt)->value;
+    system("touch /tmp/volume_changed");
 }
 
 void action_setStartupTab(void *pt)
@@ -369,7 +370,6 @@ void set_LCDParams(void)
     char cmd[256];
     snprintf(cmd, sizeof(cmd), "echo csc %d %d %d %d %d %d 0 0 > /proc/mi_modules/mi_disp/mi_disp0",
              device_id, csc_matrix, contrast, hue, luminance, saturation);
-    printf("cmd: %s\n", cmd);
     system(cmd);
 }
 
