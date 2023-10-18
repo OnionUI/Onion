@@ -50,33 +50,16 @@ In the submenu you'll get 2 options:
 *We're using a new auth system, user defined passwords will come in a future update.*
 :::
 
-Once you've activated your SSH server in Tweaks you'll now be able to connect using software such as PuTTY, SolarPuTTY, Hyperterm. You'll also be able to use an SFTP client to transfer files securely
+Once you've activated your SSH server in Tweaks you'll now be able to connect using the integrated terminal emulator in Windows, Mac or Linux or with separate software such as PuTTY, SolarPuTTY or Hyperterm. You'll also be able to use an SFTP client such as FileZilla to transfer files securely.
 
-If you connect using the integrated ssh client in Windows or Linux, you might get this error:
+As an example, in most terminal emulators you can connect with the following:
 
 ```
-Unable to negotiate with x.x.x.x port 22: no matching key exchange method found.
+ssh onion@ipaddress
 ```
+You'll be prompted to enter the password, `onion`, and then you'll be greeted with a shell prompt:
 
-To fix this, you need to specify the **key exchange** and **host key algorithm** by adding the correct arguments:
-
-```sh
-ssh onion@IPADDRESS -oKexAlgorithms=+diffie-hellman-group1-sha1 -oHostKeyAlgorithms=+ssh-rsa
-```
-
-If you connect from Fedora, some versions of SSH will fail to connect with the error:
-
-```sh
-Unable to negotiate with x.x.x.x port 22: no matching host key type found. Their offer: ssh-rsa,ssh-dss
-```
-
-To fix this, try specifying the accepted key types with:
-
-```sh
-ssh onion@IPADDRESS -oKexAlgorithms=+diffie-hellman-group1-sha1 -oHostKeyAlgorithms=+ssh-rsa -oPubkeyAcceptedKeyTypes=+ssh-rsa
-```
-
-Replace `IPADDRESS` accordingly.
+![](./assets/terminal-ssh.png)
 
 You'll need the IP of the device, found below (**Tweaks** › **Network**).
 
@@ -91,7 +74,7 @@ Head over to **Tweaks** › **Network** › **SSH** and toggle:
 
 ![](https://github.com/OnionUI/Onion/assets/47260768/4ccc836b-08d6-44cb-8e5d-9f795be0c85f)
 
-
+Now you can connect with the username `root` and no password.
 ## Security
 
 :::caution Network security
