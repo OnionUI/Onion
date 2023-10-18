@@ -256,6 +256,7 @@ launch_game() {
     retroarch_core=""
 
     start_audioserver
+    save_settings
 
     # TIMER BEGIN
     if check_is_game "$cmd"; then
@@ -496,7 +497,23 @@ init_system() {
 
     start_audioserver
 
-    device_settings="/mnt/SDCARD/.tmp_update/config/system/$(read_uuid).json"
+    load_settings
+
+    brightness=$(/customer/app/jsonval brightness)
+    brightness_raw=$(awk "BEGIN { print int(3 * exp(0.350656 * $brightness) + 0.5) }")
+    log "brightness: $brightness -> $brightness_raw"
+
+    # init backlight
+    echo 0 > /sys/class/pwm/pwmchip0/export
+    echo 800 > /sys/class/pwm/pwmchip0/pwm0/period
+    echo $brightness_raw > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
+    echo 1 > /sys/class/pwm/pwmchip0/pwm0/enable
+}
+
+device_uuid=$(read_uuid)
+device_settings="/mnt/SDCARD/.tmp_update/config/system/$device_uuid.json"
+
+load_settings() {
     if [ -f "$device_settings" ]; then
         cp -f "$device_settings" /mnt/SDCARD/system.json
     fi
@@ -532,16 +549,12 @@ init_system() {
             mv -f temp /mnt/SDCARD/system.json
         fi
     fi
+}
 
-    brightness=$(/customer/app/jsonval brightness)
-    brightness_raw=$(awk "BEGIN { print int(3 * exp(0.350656 * $brightness) + 0.5) }")
-    log "brightness: $brightness -> $brightness_raw"
-
-    # init backlight
-    echo 0 > /sys/class/pwm/pwmchip0/export
-    echo 800 > /sys/class/pwm/pwmchip0/pwm0/period
-    echo $brightness_raw > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
-    echo 1 > /sys/class/pwm/pwmchip0/pwm0/enable
+save_settings() {
+    if [ -f /mnt/SDCARD/system.json ]; then
+        cp -f /mnt/SDCARD/system.json "$device_settings"
+    fi
 }
 
 update_time() {
