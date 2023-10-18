@@ -54,7 +54,7 @@ Through a huge collaborative effort, we've implemented a new backend, many bugfi
 #### ScummVM standalone
 <sup>
 
-by @schmurtzm and @XK9274
+by @XK9274 and @schmurtzm
 
 </sup>
 
@@ -63,6 +63,51 @@ A new and improved standalone version of ScummVM has been added.
 The standalone version features an extensive engine list & performance increases to audio in certain engines.
 
 </Card>
+
+
+<Card readMore="/docs/emulators/gba">
+
+#### gpSP core improvements
+<sup>
+
+by @schmurtzm
+
+</sup>
+
+New version of gpSP with major improvements on compatibility and graphical effects.
+
+</Card>
+<Card readMore="/docs/emulators/gb">
+
+#### New TGB Dual core (GB)
+<sup>
+
+by @schmurtzm
+
+</sup>
+
+TGB Dual is a new GB core in Onion 4.2.0 which allows Netplay and Pokemon Trading thanks to cable link emulation.
+
+</Card>
+<Card>
+
+#### New cores added
+
+<sup>
+
+by @schmurtzm
+
+</sup>
+
+- Caprice32: Amstrad - CPC
+- Frodo: Commodore - C64
+- [gong](https://github.com/libretro/gong): opened rewrite of Pong
+- [LowRes NX](https://lowresnx.inutilis.com/): game engine in PASCAL 
+- Beetle PCE: NEC - PC Engine / SuperGrafx / CD (Beetle PCE)
+
+</Card>
+
+
 
 ### Utilities
 
@@ -78,6 +123,32 @@ by @XK9274
 A diagnostics framework that allows users to receive scripts from a developer and execute it tweaks, no commandline needed!  
 
 Releases with a snapshot feature to create an exported archive of logs you can quickly send to a dev or attach on our Github.
+
+</Card>
+
+<Card>
+
+#### Command line utilities
+<sup>
+
+by @XK9274, @schmurtzm
+
+</sup>
+
+Many new command line utilites for advanced users / devs : jq, sqlite, wget, curl, rsync, pressMenu2Kill, jpg2png, pngScale...
+
+</Card>
+
+<Card readMore="/docs/apps/tweaks">
+
+#### Tweaks app : many new settings
+<sup>
+
+by @XK9274, @tGecko, @Aemiii91
+
+</sup>
+
+Many new settings in Tweaks for the MMP : time sync settings, network settings, LCD voltage...
 
 </Card>
 
@@ -144,7 +215,7 @@ For Windows and iOS users, built-in Samba apps are available, while Android user
 #### HTTP Fileserver
 <sup>
 
-by @sa3eedDev, @XK9274 
+by @sa3eedDev, @XK9274, @schmurtzm
 
 </sup>
 
@@ -157,7 +228,7 @@ The HTTP fileserver has been incredibly popular in Onion.
 #### Automatic time sync
 <sup>
 
-by @schmurtzm, @tGecko, @Aemiii91, and @XK9274
+by @XK9274, @tGecko, @Aemiii91, and @schmurtzm
 
 </sup>
 
@@ -192,14 +263,47 @@ It's also compatible with Netplay!
 
 </Card>
 
-### Netplay support
+<Card readMore="/docs/apps/scraper">
 
-<Card>
+#### Scraper
 
-#### Easy Netplay - GLO Menu
 <sup>
 
-by @schmurtzm
+by @schmurtzm - ([PR](https://github.com/OnionUI/Onion/pull/1110))
+
+</sup>
+
+Scraper allows you to download game covers. A powerful mix of 3 scraping sources to easily find missing covers. 
+Scraper has been totally refactored since the beta with media selection, region selection, Screenscraper crc scan, faster and more accurate Launchbox scraping ...
+
+
+</Card>
+
+
+<Card readMore="/docs/apps/ota-update">
+
+#### OTA update
+
+<sup>
+
+by @schmurtzm - ([PR](https://github.com/OnionUI/Onion/commit/34db31debdd4d6e9471f2283983f7634362e6003))
+
+</sup>
+
+OTA update allows you to update your Onion without even touching your SD card or a computer.
+
+</Card>
+
+
+### Netplay support
+
+<Card readMore="/docs/multiplayer/standardnetplay">
+
+#### Easy Netplay - GLO Menu
+
+<sup>
+
+by @schmurtzm - ([PR](https://github.com/OnionUI/Onion/pull/1140))
 
 </sup>
 
@@ -208,12 +312,13 @@ Netplay is now directly accessible through GLO.
 The GLO Netplay menu brings together Netplay options like Host/Join and Easy Netplay into one location for a more user-friendly experience.
 
 </Card>
-<Card readMore="/docs/network/netplay">
+<Card readMore="/docs/multiplayer/easynetplay">
 
 #### Easy Netplay - Hotspot/Local
+
 <sup>
 
-by @XK9274
+by @XK9274, @schmurtzm
 
 </sup>
 
@@ -223,12 +328,12 @@ You can play games with friends and family using the built-in hotspot feature.
 Available in GLO, Easy Netplay will seamlessly setup a session and get you connected!
 
 </Card>
-<Card readMore="/docs/network/netplay/link">
+<Card readMore="/docs/multiplayer/easynetplay-pokemon">
 
 #### Easy Netplay - Hotspot link cable support GB/GBC
 <sup>
 
-by @XK9274
+by @XK9274, @schmurtzm
 
 </sup>
 
@@ -237,15 +342,35 @@ This GLO feature allows for Pokémon trading on 1st gen Pokémon games (Red/Blue
 
 </Card>
 
+### Retroachievements
+
+<Card readMore="https://www.retroarch.com/?page=achievements">
+
+#### Retroachievements
+
+With Retroachievements unlock achievements on your favorite classic games. A new way to discover your classical games again !
+
+</Card>
+
+
+
 ## Fixes and minor improvements
 
 * Removed the Wi-Fi icons background - allows more customization for theme authors - *by @tGecko*
 * Fixed a memory leak in installUI that crashed the app when changing slides often - *by @tGecko*
+* Replacing unzip with 7z in install.sh - *by @schmurtzm*
 * Fixed the "About Device" screen displaying the wrong model number on the MM - *by @tGecko*
 * Swapped start and select buttons in the game list for consistency with other screens - *by @tGecko*
 * Fixed a bug in MainUI where sound would play on pressing L1/R1 instead of L2/R2 - *by @tGecko*
 * Added the option to shutdown the device instantly instead of going to standby - *by @tGecko*
 * Fixed a bug where multiple languages would not display properly in RetroArch - *by @tGecko*
+* New shutdown script for proper power-off (less SD card corruption) ([PR](https://github.com/OnionUI/Onion/pull/958)) - *by @schmurtzm*
+* Update of [GMU music player](/docs/apps/music-player) ([PR](https://github.com/OnionUI/Onion/pull/1177)) - *by @schmurtzm*
+* New Main UI (Favorite bug fixed, "." mac files are not showed anymore) - *by @schmurtzm*
+* the red rectangle on low battery has been replaced by a battery logo - *by @schmurtzm*
+* fix numerous Netplay problems - *by @schmurtzm*
+
+
 
 ## RetroArch overlays
 
