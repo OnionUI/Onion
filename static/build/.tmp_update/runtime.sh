@@ -256,6 +256,7 @@ launch_game() {
     retroarch_core=""
 
     start_audioserver
+    save_settings
 
     # TIMER BEGIN
     if check_is_game "$cmd"; then
@@ -496,22 +497,7 @@ init_system() {
 
     start_audioserver
 
-    if [ $DEVICE_ID -eq $MODEL_MM ]; then
-        # init charger detection
-        if [ ! -f /sys/devices/gpiochip0/gpio/gpio59/direction ]; then
-            echo 59 > /sys/class/gpio/export
-            echo in > /sys/devices/gpiochip0/gpio/gpio59/direction
-        fi
-
-        if [ $(/customer/app/jsonval vol) -ne 20 ] || [ $(/customer/app/jsonval mute) -ne 0 ]; then
-            # Force volume and mute settings
-            cat /appconfigs/system.json |
-                sed 's/^\s*"vol":\s*[0-9][0-9]*/\t"vol":\t20/g' |
-                sed 's/^\s*"mute":\s*[0-9][0-9]*/\t"mute":\t0/g' \
-                    > temp
-            mv -f temp /appconfigs/system.json
-        fi
-    fi
+    load_settings
 
     brightness=$(/customer/app/jsonval brightness)
     brightness_raw=$(awk "BEGIN { print int(3 * exp(0.350656 * $brightness) + 0.5) }")
@@ -522,6 +508,53 @@ init_system() {
     echo 800 > /sys/class/pwm/pwmchip0/pwm0/period
     echo $brightness_raw > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
     echo 1 > /sys/class/pwm/pwmchip0/pwm0/enable
+}
+
+device_uuid=$(read_uuid)
+device_settings="/mnt/SDCARD/.tmp_update/config/system/$device_uuid.json"
+
+load_settings() {
+    if [ -f "$device_settings" ]; then
+        cp -f "$device_settings" /mnt/SDCARD/system.json
+    fi
+
+    # make sure MainUI settings exist
+    if [ ! -f /mnt/SDCARD/system.json ]; then
+        if [ -f /appconfigs/system.json ]; then
+            cp -f /appconfigs/system.json /mnt/SDCARD/system.json
+        else
+            cp -f $sysdir/res/miyoo${DEVICE_ID}_system.json /mnt/SDCARD/system.json
+        fi
+    fi
+
+    # link /appconfigs/system.json to SD card
+    if [ -L /appconfigs/system.json ] && [ "$(readlink /appconfigs/system.json)" == "/mnt/SDCARD/system.json" ]; then
+        rm /appconfigs/system.json
+    fi
+    ln -s /mnt/SDCARD/system.json /appconfigs/system.json
+
+    if [ $DEVICE_ID -eq $MODEL_MM ]; then
+        # init charger detection
+        if [ ! -f /sys/devices/gpiochip0/gpio/gpio59/direction ]; then
+            echo 59 > /sys/class/gpio/export
+            echo in > /sys/devices/gpiochip0/gpio/gpio59/direction
+        fi
+
+        if [ $(/customer/app/jsonval vol) -ne 20 ] || [ $(/customer/app/jsonval mute) -ne 0 ]; then
+            # Force volume and mute settings
+            cat /mnt/SDCARD/system.json |
+                sed 's/^\s*"vol":\s*[0-9][0-9]*/\t"vol":\t20/g' |
+                sed 's/^\s*"mute":\s*[0-9][0-9]*/\t"mute":\t0/g' \
+                    > temp
+            mv -f temp /mnt/SDCARD/system.json
+        fi
+    fi
+}
+
+save_settings() {
+    if [ -f /mnt/SDCARD/system.json ]; then
+        cp -f /mnt/SDCARD/system.json "$device_settings"
+    fi
 }
 
 update_time() {

@@ -28,13 +28,23 @@ if [ "$0" = "/tmp/_shutdown" ]; then
 	killall -9 main # mandatory to avoid the suppression of .tmp_update !
 	killall -9 updater
 	killall -9 runtime.sh
-   	killall -9 smbd
-	
+	killall -9 smbd
+
 	kill_hooked_tasks
 	sleep 0.1
 	kill_hooked_tasks -9
-	
+
 	sync
+
+	if [ -f /mnt/SDCARD/system.json ]; then
+		mkdir -p /mnt/SDCARD/.tmp_update/config/system
+		mv -f /mnt/SDCARD/system.json "/mnt/SDCARD/.tmp_update/config/system/$(read_uuid).json"
+		sync
+	fi
+
+	rm -f /appconfigs/system.json 2> /dev/null
+	rm -f /mnt/SDCARD/update.log 2> /dev/null
+
 	umount /etc/passwd /etc/group /etc/profile
 	umount /mnt/SDCARD/miyoo/app/MainUI
 	umount /mnt/SDCARD/RetroArch/retroarch
@@ -42,23 +52,23 @@ if [ "$0" = "/tmp/_shutdown" ]; then
 	swapoff /mnt/SDCARD/cachefile
 	umount -r /mnt/SDCARD
 	umount /mnt/SDCARD
-	
+
 	############# DEBUG #############
 	# fuser -m /mnt/SDCARD > /appconfigs/shutdown.log
 	# lsof /mnt/SDCARD >> /appconfigs/shutdown.log
 	# mount >> /appconfigs/shutdown.log
 	#################################
-	
+
 	if [ "$1" = "-r" ]; then
 		/sbin/reboot
 	else
 		if [ "$(cat /tmp/deviceModel)" = "283" ]; then
-			/sbin/reboot     # no poweroff command on Miyoo Mini
+			/sbin/reboot # no poweroff command on Miyoo Mini
 		else
 			/sbin/poweroff
 		fi
 	fi
-	
+
 fi
 
 if [ ! -f /tmp/_shutdown ]; then
@@ -66,7 +76,10 @@ if [ ! -f /tmp/_shutdown ]; then
 fi
 
 # run the script totally detached from current shell
-pgrep -f /tmp/_shutdown || (set -m; su root -c "/usr/bin/nohup /tmp/_shutdown $1 </dev/null >/dev/null 2>&1 &")
+pgrep -f /tmp/_shutdown || (
+	set -m
+	su root -c "/usr/bin/nohup /tmp/_shutdown $1 </dev/null >/dev/null 2>&1 &"
+)
 while true; do
 	sleep 10
 done
