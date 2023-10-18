@@ -1,5 +1,5 @@
 ---
-slug: /network/netplay
+slug: /multiplayer/easynetplay
 ---
 
 
@@ -10,7 +10,9 @@ slug: /network/netplay
 
 *Fight against your friends or fight alongside them, the easy way!*
 
-**Easy Netplay:** a feature for convenience that streamlines multiplayer gaming. This tool effortlessly sets up a hotspot, launches RetroArch and enables Netplay on the host side. On the client side, it joins the hotspot, checks the core and ROM checksums and connects to the RetroArch session, ensuring a seamless and enjoyable multiplayer experience.
+**Easy Netplay:** a feature for convenience that streamlines multiplayer gaming: play from anywhere with all nearby Miyoo Mini Plus without any wifi or Retroarch configuration.
+
+This tool effortlessly sets up a hotspot, launches RetroArch and enables Netplay on the host side. On the client side, it joins the hotspot, checks the core and ROM checksums and connects to the RetroArch session, ensuring a seamless and enjoyable multiplayer experience.
 
 When you've finished playing, provided you exit RetroArch through the menu (and don't power down!) the script will continue to work, re-connecting you to the original Wi-Fi network. 
 
@@ -24,20 +26,18 @@ When you've finished playing, provided you exit RetroArch through the menu (and 
 - Rom/core checksum verification for higher compatibility
 
 
-## Enabling Easy Netplay
+## Using Easy Netplay
 
-You'll currently find the quick join feature in GLO. GLO can be opened by browsing to the rom you want to play and pressing Y. 
+You'll currently find the quick join feature in GLO. GLO can be opened by browsing to the rom you want to play and pressing <kbd>Y</kbd>. 
 
 
 ### As the host
-
-To host a rom you'll first need to make sure you're using a core that can support netplay. Cores can be verified using [this sheet](https://docs.google.com/spreadsheets/d/1y1esG3HcNagPG8cy-ulZK_mhhUb93pqG5_XEtRRgKQ4/edit#gid=0)
 
 1. Find the rom in the Games submenu
 
 2. Press <kbd>Y</kbd> to open GLO
 
-3. Choose **Easy Netplay: Host a game**
+3. Choose `Netplay` -> `Host` -> `Easy Netplay (Play anywhere, local only)`
  
 Onion should now take over and setup a session on the built in personal hotspot.
 
@@ -50,7 +50,7 @@ To join a host, it's a little easier. Currently you'll start the hotspot client 
 
 2. Press <kbd>Y</kbd> to open GLO
 
-3. Choose **Easy Netplay: Join a game**
+3. Choose  `Netplay` -> `Join` -> `Easy Netplay (Play anywhere, local only)`
  
 Onion will now take over and join the hotspot, pull the information from the host and connect! 
 

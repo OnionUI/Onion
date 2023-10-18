@@ -5,7 +5,7 @@ slug: /network/hotspot
 # Hotspot
 
 Your Miyoo Mini Plus just got a lot more portable. SSH/Telnet, HTTP file server, FTP on the go, no extra devices needed. Stay connected with ease, anytime, anywhere. 
-Compatible with Netplay (best paired with [Easy Netplay](netplay))
+Compatible with Netplay (best paired with [Easy Netplay](../multiplayer/easynetplay)
 
 There are reports of issues with hotspot on firmware levels below `2023 05 05``.
 
