@@ -408,6 +408,7 @@ void network_toggleVNC(void *pt)
             int result = system(command_stop);
             if (result == 0) {
                 fprintf(stderr, "VNC disabled\n");
+                
             }
         }
     }
@@ -419,6 +420,14 @@ void network_setVNCFPS(void *pt)
 {
     network_settings.vncfps = ((ListItem *)pt)->value;
     config_setNumber(".vncfps", network_settings.vncfps);
+    
+    if (network_state.vncserv) {
+        network_toggleVNC(pt);
+        network_state.vncserv = false;
+        network_setState(&network_state.vncserv, ".vncServer", false);
+        reset_menus = true;
+        all_changed = true;
+    }
 }
 
 void menu_smbd(void *pt)
@@ -605,8 +614,10 @@ void menu_wifi(void *_)
     header_changed = true;
 }
 
-void menu_vnc(void *_)
+void menu_vnc(void *pt)
 {
+    ListItem *item = (ListItem *)pt;
+    item->value = (int)network_state.vncserv;
     if (!_menu_vnc._created) {
         _menu_vnc = list_create(3, LIST_SMALL);
         strcpy(_menu_vnc.title, "VNC");
