@@ -24,7 +24,9 @@
 
 #define NET_SCRIPT_PATH "/mnt/SDCARD/.tmp_update/script/network"
 #define SMBD_CONFIG_PATH "/mnt/SDCARD/.tmp_update/config/smb.conf"
-
+#define MAX_NUM_WIFI_NETWORKS 32 /*  Can't really find a way around this right now  */
+                                 /*  but it really shouldn't be an issue            */
+                                 /*  since the list is sorted by signal stength     */
 static struct network_s {
     bool smbd;
     bool http;
@@ -72,8 +74,85 @@ typedef struct {
     long availablePos; // in file position for the available property
 } Share;
 
+typedef struct {
+    char bssid[18];
+    int frequency;
+    int signal_level;
+    char flags[256];
+    char ssid[33];
+    bool connected;
+    bool encrypted;
+} WifiNetwork;
+
 static Share *_network_shares = NULL;
 static int network_numShares;
+
+WifiNetwork *_wifi_networks = NULL;
+static int network_numWifiNetworks;
+
+void network_freeWifiNetworks()
+{
+    if (_wifi_networks != NULL)
+        free(_wifi_networks);
+}
+
+void network_getWifiNetworks()
+{
+
+    system("rm -f /tmp/wifi.list && wpa_cli scan > /dev/null");
+    sleep(5);
+    system("wpa_cli scan_result | tail -n +3 > /tmp/wifi.list");
+    system("sync");
+
+    FILE *file = fopen("/tmp/wifi.list", "r");
+    if (file == NULL) {
+        perror("Failed to open the wifi list");
+        return;
+    }
+
+    char line[256];
+    _wifi_networks = (WifiNetwork *)calloc(1, sizeof(WifiNetwork));
+    system("cat /tmp/wifi.list\n\n"); // TODO: remove
+    network_numWifiNetworks = 0;
+
+    while (fgets(line, sizeof(line), file) != NULL) {
+        if (network_numWifiNetworks == MAX_NUM_WIFI_NETWORKS)
+            break;
+
+        if (network_numWifiNetworks > 0)
+            _wifi_networks = (WifiNetwork *)realloc(_wifi_networks,
+                                                    (network_numWifiNetworks + 1) * sizeof(WifiNetwork));
+        if (sscanf(line, "%18s\t%d\t%d\t%255s\t%32[^\n]",
+                   _wifi_networks[network_numWifiNetworks].bssid,
+                   &_wifi_networks[network_numWifiNetworks].frequency,
+                   &_wifi_networks[network_numWifiNetworks].signal_level,
+                   _wifi_networks[network_numWifiNetworks].flags,
+                   _wifi_networks[network_numWifiNetworks].ssid) == 5) {
+            if (strstr(_wifi_networks[network_numWifiNetworks].flags, "WPA") != NULL ||
+                strstr(_wifi_networks[network_numWifiNetworks].flags, "WEP") != NULL) {
+                _wifi_networks[network_numWifiNetworks].encrypted = true;
+            }
+            else {
+                _wifi_networks[network_numWifiNetworks].encrypted = false;
+            }
+            network_numWifiNetworks++;
+        }
+        else {
+            printf("Failed to parse the line: %s", line); // it fails on hidden wifis.. which is kinda the point?
+        }
+    }
+    fclose(file);
+    for (int i = 0; i < network_numWifiNetworks; i++) {
+
+        ListItem wifi_network = {
+            .item_type = ACTION};
+        snprintf(wifi_network.label, STR_MAX - 1, "SSID: %s  encrypted: %d  SIG:%d",
+                 _wifi_networks[i].ssid, _wifi_networks[i].encrypted, _wifi_networks[i].signal_level);
+        list_addItem(&_menu_wifi, wifi_network);
+        all_changed = true;
+        // printf("SSID: %s\tSignal Strength: %d\tKey Type: %s\n", _wifi_networks[i].ssid, _wifi_networks[i].signal_strength, _wifi_networks[i].key_type);
+    }
+}
 
 void network_freeSmbShares()
 {
@@ -360,6 +439,25 @@ void network_setTzSelectState(void *pt)
     config_setString(".tz", utc_str);
 }
 
+void network_toggleWifi(void *pt)
+{
+    bool wifion = ((ListItem *)pt)->value;
+    settings.wifi_on = wifion;
+    char cmd[256];
+    // sprintf(cmd, "%s/wifi.sh %d &", NET_SCRIPT_PATH, wifion);
+    system(cmd);
+
+    if (menu_stack[menu_level] == &_menu_wifi) {
+        if (wifion) {
+            //showInfoDialogGeneric("WiFi networks", "Scanning for networks...\n", false);
+            //network_getWifiNetworks();
+        }
+    }
+    reset_menus = true;
+    all_changed = true;
+    list_changed = true;
+}
+
 void menu_smbd(void *pt)
 {
     ListItem *item = (ListItem *)pt;
@@ -459,20 +557,6 @@ void menu_ftp(void *pt)
     header_changed = true;
 }
 
-void menu_wps(void *_)
-{
-    if (!_menu_wps._created) {
-        _menu_wps = list_create(1, LIST_SMALL);
-        strcpy(_menu_wps.title, "WPS");
-        list_addItem(&_menu_wps,
-                     (ListItem){
-                         .label = "WPS connect",
-                         .action = network_wpsConnect});
-    }
-    menu_stack[++menu_level] = &_menu_wps;
-    header_changed = true;
-}
-
 void menu_ssh(void *pt)
 {
     ListItem *item = (ListItem *)pt;
@@ -504,42 +588,30 @@ void menu_ssh(void *pt)
     header_changed = true;
 }
 
-void menu_wifi(void *_)
+void menu_wifi(void *pt)
 {
-    if (!_menu_wifi._created) {
-        _menu_wifi = list_create(3, LIST_SMALL);
-        strcpy(_menu_wifi.title, "WiFi");
-        list_addItem(&_menu_wifi,
-                     (ListItem){
-                         .label = "IP address: N/A",
-                         .disabled = true,
-                         .action = NULL});
-        list_addItemWithInfoNote(&_menu_wifi,
-                                 (ListItem){
-                                     .label = "WiFi Hotspot",
-                                     .item_type = TOGGLE,
-                                     .value = (int)network_state.hotspot,
-                                     .action = network_setHotspotState},
-                                 "Use hotspot to host all the network\n"
-                                 "services on the go, no router needed.\n"
-                                 "Stay connected at anytime, anywhere.\n"
-                                 "Compatible with Easy Netplay and\n"
-                                 "regular netplay.");
-        list_addItemWithInfoNote(&_menu_wifi,
-                                 (ListItem){
-                                     .label = "WPS connect",
-                                     .action = network_wpsConnect},
-                                 "Use your WiFi router's WPS function\n"
-                                 "to connect your device with a single press.\n"
-                                 " \n"
-                                 "First press the WPS button on your router,\n"
-                                 "then click this option to connect.");
-        // list_addItem(&_menu_wifi,
-        //              (ListItem){
-        //                  .label = "WPS...",
-        //                  .action = menu_wps});
+    ListItem *item = (ListItem *)pt;
+    item->value = (int)settings.wifi_on;
+
+    if (_menu_wifi._created)
+        list_free(&_menu_wifi);
+
+    _menu_wifi = list_createWithTitle(2 + MAX_NUM_WIFI_NETWORKS, LIST_SMALL, "WiFi networks");
+    list_addItem(&_menu_wifi,
+                 (ListItem){
+                     .label = "Enabled",
+                     .item_type = TOGGLE,
+                     .value = (int)settings.wifi_on,
+                     .action = network_toggleWifi});
+    list_addItem(&_menu_wifi,
+                 (ListItem){
+                     .label = "WPS connect",
+                     .disabled = !settings.wifi_on,
+                     .action = network_wpsConnect});
+    if (settings.wifi_on) {
+        showInfoDialogGeneric("WiFi networks", "Scanning for networks...\n", false);
+        network_getWifiNetworks();
     }
-    strcpy(_menu_wifi.items[0].label, ip_address_label);
     menu_stack[++menu_level] = &_menu_wifi;
     header_changed = true;
 }
@@ -547,7 +619,7 @@ void menu_wifi(void *_)
 void menu_network(void *_)
 {
     if (!_menu_network._created) {
-        _menu_network = list_create(8, LIST_SMALL);
+        _menu_network = list_create(9, LIST_SMALL);
         strcpy(_menu_network.title, "Network");
 
         network_loadState();
@@ -557,10 +629,29 @@ void menu_network(void *_)
                          .label = "IP address: N/A",
                          .disabled = true,
                          .action = NULL});
-        list_addItem(&_menu_network,
-                     (ListItem){
-                         .label = "WiFi: Hotspot/WPS...",
-                         .action = menu_wifi});
+        list_addItemWithInfoNote(&_menu_network,
+                                 (ListItem){
+                                     .label = "WiFi...",
+                                     .item_type = TOGGLE,
+                                     .alternative_arrow_action = true,
+                                     .arrow_action = network_toggleWifi,
+                                     .value = (int)settings.wifi_on,
+                                     .action = menu_wifi},
+                                 "Enable or disable WiFi.\n"
+                                 "Connect to a network using\n"
+                                 "a password or WPS.\n");
+        list_addItemWithInfoNote(&_menu_network,
+                                 (ListItem){
+                                     .label = "WiFi Hotspot",
+                                     .item_type = TOGGLE,
+                                     .disabled = !settings.wifi_on,
+                                     .value = (int)network_state.hotspot,
+                                     .action = network_setHotspotState},
+                                 "Use hotspot to host all the network\n"
+                                 "services on the go, no router needed.\n"
+                                 "Stay connected at anytime, anywhere.\n"
+                                 "Compatible with Easy Netplay and\n"
+                                 "regular netplay.");
         list_addItemWithInfoNote(&_menu_network,
                                  (ListItem){
                                      .label = "Samba: Network file share...",

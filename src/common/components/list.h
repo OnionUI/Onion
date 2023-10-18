@@ -16,7 +16,7 @@ typedef enum list_type { LIST_SMALL,
 typedef enum item_type { ACTION,
                          TOGGLE,
                          MULTIVALUE,
-                         INFO } ListItemType;
+                         INFO} ListItemType;
 
 typedef struct ListItem {
     int _id;

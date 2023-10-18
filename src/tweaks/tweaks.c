@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
             else if (keystate[SW_BTN_SELECT] == PRESSED) {
                 if (list_hasInfoNote(menu_stack[menu_level])) {
                     sound_change();
-                    showInfoDialog(menu_stack[menu_level]);
+                    showInfoDialog(menu_stack[menu_level], true);
                 }
             }
             else if (keystate[SW_BTN_A] == PRESSED) {
@@ -191,7 +191,7 @@ int main(int argc, char *argv[])
                              "Press SELECT to view a tooltip\n"
                              "describing the selected option."
                              " \n"
-                             "Press any button to close");
+                             "Press any button to close", true);
         }
 
         if (battery_hasChanged(ticks, &battery_percentage))
@@ -203,13 +203,13 @@ int main(int argc, char *argv[])
                     list_changed = true;
                 }
             }
-            if (isMenu(&_menu_network) || isMenu(&_menu_wifi)) {
+            if (isMenu(&_menu_network) || isMenu(&_menu_hotspot)) {
                 network_loadState();
                 if (netinfo_getIpAddress(ip_address_label, network_state.hotspot ? "wlan1" : "wlan0")) {
                     if (_menu_network._created)
                         strcpy(_menu_network.items[0].label, ip_address_label);
-                    if (_menu_wifi._created)
-                        strcpy(_menu_wifi.items[0].label, ip_address_label);
+                    if (_menu_hotspot._created)
+                        strcpy(_menu_hotspot.items[0].label, ip_address_label);
                     list_changed = true;
                 }
             }
@@ -262,6 +262,7 @@ int main(int argc, char *argv[])
     Mix_CloseAudio();
 
     network_freeSmbShares();
+    network_freeWifiNetworks();
     diags_freeEntries();
 
     display_free();

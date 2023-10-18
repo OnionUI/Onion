@@ -7,7 +7,7 @@
 
 #include "./appstate.h"
 
-void __showInfoDialog(const char *title, const char *message)
+void __showInfoDialog(const char *title, const char *message, bool waitinput)
 {
     bool confirm_quit = false;
     SDLKey changed_key = SDLK_UNKNOWN;
@@ -20,24 +20,29 @@ void __showInfoDialog(const char *title, const char *message)
     theme_renderDialog(screen, title, message, false);
     SDL_BlitSurface(screen, NULL, video, NULL);
     SDL_Flip(video);
-
-    while (!confirm_quit) {
-        if (updateKeystate(keystate, &confirm_quit, true, &changed_key)) {
-            if ((changed_key == SW_BTN_A || changed_key == SW_BTN_B || changed_key == SW_BTN_SELECT) && keystate[changed_key] == PRESSED) {
-                confirm_quit = true;
-                sound_change();
+    if (waitinput) {
+        while (!confirm_quit) {
+            if (updateKeystate(keystate, &confirm_quit, true, &changed_key)) {
+                if ((changed_key == SW_BTN_A || changed_key == SW_BTN_B || changed_key == SW_BTN_SELECT) && keystate[changed_key] == PRESSED) {
+                    confirm_quit = true;
+                    sound_change();
+                }
             }
         }
     }
-
     keys_enabled = true;
     all_changed = true;
 }
 
-void showInfoDialog(List *list)
+void showInfoDialogGeneric(const char *title, const char *message, bool waitinput)
+{
+    __showInfoDialog(title, message, waitinput);
+}
+
+void showInfoDialog(List *list, bool waitinput)
 {
     ListItem *item = list_currentItem(list);
-    __showInfoDialog(item->label, item->info_note);
+    __showInfoDialog(item->label, item->info_note, waitinput);
 }
 
 #endif // TWEAKS_INFO_DIALOG_H__
