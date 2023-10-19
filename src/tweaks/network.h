@@ -721,7 +721,7 @@ void menu_network(void *_)
                                  "access to your device.");
         list_addItemWithInfoNote(&_menu_network,
                                  (ListItem){
-                                     .label = "VNC: Screen share",
+                                     .label = "VNC: Screen share...",
                                      .item_type = TOGGLE,
                                      .disabled = !settings.wifi_on,
                                      .alternative_arrow_action = true,
