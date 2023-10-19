@@ -566,11 +566,10 @@ void menu_ssh(void *pt)
     header_changed = true;
 }
 
-
 void menu_vnc(void *pt)
 {
     ListItem *item = (ListItem *)pt;
-    item->value = (int)network_state.vncserv;    
+    item->value = (int)network_state.vncserv;
     if (!_menu_vnc._created) {
         _menu_vnc = list_create(2, LIST_SMALL);
         strcpy(_menu_vnc.title, "VNC");
@@ -636,7 +635,6 @@ void menu_wifi(void *_)
     header_changed = true;
 }
 
-
 void menu_network(void *_)
 {
     if (!_menu_network._created) {
@@ -644,7 +642,7 @@ void menu_network(void *_)
         strcpy(_menu_network.title, "Network");
 
         network_loadState();
-        
+
         list_addItem(&_menu_network,
                      (ListItem){
                          .label = "IP address: N/A",
