@@ -5,10 +5,16 @@ description: View your screenshots
 
 # Gallery
 
+## Presentation
 
 A viewer for your screenshots.
 
-Shortcuts:
+![](./assets/gallery.webp)
+
+
+## Usage
+
+### Controls:
 
 | Button           | Function                                 |
 | ---------------- | ---------------------------------------- |
@@ -16,3 +22,7 @@ Shortcuts:
 | D-pad left or B  | Previous image                           |
 | Y                | Toggle visibility of top and bottom bars |
 | Menu             | Exit                                     |
+
+## Advanced
+
+[File Explorer / DinguxCommander source code](https://github.com/OnionUI/app-DinguxCommander/).

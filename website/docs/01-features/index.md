@@ -7,7 +7,7 @@ description: Overview of the most important features
 # Features
 
 <p align="center">
-<a href="#global-shortcuts"><img title="Global Shortcuts" src="https://user-images.githubusercontent.com/44569252/189434056-b1148ff9-393b-43d1-b362-20d97b64b393.png" width="48" /></a>
+<a href="#shortcuts"><img title="Shortcuts" src="https://user-images.githubusercontent.com/44569252/189434056-b1148ff9-393b-43d1-b362-20d97b64b393.png" width="48" /></a>
 <a href="#gameswitcher"><img title="GameSwitcher" src="https://user-images.githubusercontent.com/44569252/179301923-635b60fa-22de-4cf3-894a-2f3c34702d64.png" width="48" /></a>
 <a href="#package-manager"><img title="Package Manager" src="https://user-images.githubusercontent.com/44569252/179315622-e29e0971-87c8-4855-85e6-fc8de4ccd940.png" width="48" /></a>
 <a href="#tweaks"><img title="Tweaks" src="https://user-images.githubusercontent.com/44569252/189439761-e03a9684-ade4-4dcc-8fdd-c006a1663c05.png" width="48" /></a>
@@ -15,213 +15,212 @@ description: Overview of the most important features
 <a href="#themes"><img title="Themes" src="https://user-images.githubusercontent.com/44569252/179304061-647e63ff-5113-4a8a-aaa9-4dfda248d54e.png" width="48" /></a>
 <a href="#activity-tracker"><img title="Activity Tracker" src="https://user-images.githubusercontent.com/44569252/179302722-7fa82e4d-d72d-4b1e-bb4d-96a2a52aaa62.png" width="48" /></a>
 <a href="#retroarch"><img title="RetroArch" src="https://user-images.githubusercontent.com/44569252/179318731-7e262588-cb92-4ea3-9001-2991c4f8ccbe.png" width="48" /></a>
+<a href="#optimized-emulators"><img title="Optimized Emulators" src={require('./assets/optimized.png').default} style={{width: 48}} /></a>
+<a href="#game-list-options-glo-menu"><img title="GLO Menu" src={require('./assets/icon-glo-menu.png').default} style={{width: 48}} /></a>
 <a href="#guest-mode"><img title="Guest Mode" src="https://user-images.githubusercontent.com/44569252/179304290-8c7e5140-5fb4-4ae1-bd90-faa416f9a37c.png" width="48" /></a>
+<a href="#random-game-picker"><img title="Random Game Picker" src={require('./assets/random-game-picker.png').default} style={{width: 48}} /></a>
+<a href="#advancemenu"><img title="AdvanceMENU" src={require('./assets/advancemenu.png').default} style={{width: 48}} /></a>
+<a href="#ports-collection"><img title="Ports Collection" src={require('./assets/ports.png').default} style={{width: 48}} /></a>
+<a href="#included-apps"><img title="Included apps" src={require('./assets/apps.png').default} style={{width: 48}} /></a>
+<a href="#connected-features"><img title="Connected Features" src={require('./assets/wifi.png').default} style={{width: 48}} /></a>
 <a href="#personal-files-gathered-in-one-place"><img title="Personal files gathered in one place" src="https://user-images.githubusercontent.com/44569252/179305837-59922e34-e18f-45d1-b5fb-89593ee08152.png" width="48" /></a>
 <a href="#mainui-improvements"><img title="MainUI improvements" src="https://user-images.githubusercontent.com/44569252/179305495-2ae1f522-6918-469f-a2eb-63dd30262e17.png" width="48" /></a>
 </p>
 
 
-## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/189434056-b1148ff9-393b-43d1-b362-20d97b64b393.png" width="54" /></sup>Global Shortcuts
+## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/189434056-b1148ff9-393b-43d1-b362-20d97b64b393.png" width="54" /></sup>Shortcuts
 
-<p align="center"><a href="shortcuts"><img src="https://user-images.githubusercontent.com/44569252/189388343-3fa73c5d-31ca-4931-b310-4e7ba43c536d.png" width="640" /></a></p>
 
-<p align="center">
 
-[Click here](shortcuts) to see an overview of all global shortcuts.
+<p align="center"><a href="./apps/shortcuts"><img src={require('../07-apps/01-included-in-onion/assets/shortcuts.webp').default} style={{width: 320}} /></a></p>
 
-</p>
+:::note <a href="./apps/shortcuts">Shortcuts overview</a>
+The Onion shortcuts are very powerful it allows you quick actions like rewind, fast forward, screenshots, volume boost... 
+:::
 
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179301923-635b60fa-22de-4cf3-894a-2f3c34702d64.png" width="54" /></sup>GameSwitcher
 
-<p align="center"><img src="https://user-images.githubusercontent.com/44569252/189434217-72ef0daf-c630-4ec9-b96a-30fd76cb709f.png" width="320" /> <img src="https://user-images.githubusercontent.com/44569252/189434224-aeba7b8f-c881-4784-ba2f-65c60d41d20c.png" width="320" /></p>
+<p align="center"><img src="https://user-images.githubusercontent.com/44569252/189434217-72ef0daf-c630-4ec9-b96a-30fd76cb709f.png" width="320" /></p>
 
-The GameSwitcher is designed to be the central user interface of Onion.
-Launch the GameSwitcher by pressing the <kbd>MENU</kbd> button.
-The last game played will be resumed in a few seconds, and with the simple press of a button, save your progress and turn off the console.  
-It also allows you to quickly change games and many other features:
 
-- Quick boot your last played game.
-- Quickly switch games from your history.
-  - Remove a game by pressing <kbd>X</kbd>.
-- Full overlay with accurate brightness, battery readings and playtimes.
-  - Press <kbd>SELECT</kbd> to toggle playtime display.
-- **Minimal view mode:** Press <kbd>Y</kbd> to toggle.
-- Improved *Sleep Mode* with full game suspension (press <kbd>POWER</kbd>).
-- Low battery indicator: Red frame when <15% (can be adjusted in Tweaks).
-- When the battery goes below 4%, the device will automatically save and exit to prevent losing progress.
-
+:::note <a href="apps/game-switcher">Game Switcher overview</a>
+The GameSwitcher is designed to be the central user interface of Onion. It allows browse and resume the last games played in few seconds.
+Launch the GameSwitcher by pressing the <kbd>MENU</kbd> button, then you'll see a screenshot of where you were in your game ! Use Left and right to browse the last games played like this.
+It also allows you to quickly change games and many other features.
+:::
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179315622-e29e0971-87c8-4855-85e6-fc8de4ccd940.png" width="54" /></sup>Package Manager
 
-<p align="center"><img src="https://user-images.githubusercontent.com/44569252/189438069-2926cf7b-1e72-476f-8b41-79132146d7c9.png" width="320" /></p>
+<p align="center"><img src={require('./assets/packagemanager.webp').default} style={{width: 320}} /></p>
 
-- Choose the systems and apps you need.
-- Optimized presets, homebrew apps, and more.
-- Packages are divided into three sections:
-  - **Verified:** Contains all verified systems (see [Emulators](emulators) for more information).
-  - **Apps:** Contains all the included Onion and third-party apps.
-  - **Expert:** Contains experimental/expert systems (see [Emulators](emulators) for more information).
-- To reinstall a package, first toggle it off and press <kbd>START</kbd> to apply, then open Package Manager, toggle it on and apply.
+
+:::note <a href="apps/package-manager">Package Manager overview</a>
+The "Package Manager" app is a powerful tool that allows users to easily install or uninstall emulators and apps.
+:::
+ 
 
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/189439761-e03a9684-ade4-4dcc-8fdd-c006a1663c05.png" width="54" /></sup>Tweaks
 
-*Make Onion your own!*
+<p align="center"><img src={require('./assets/tweaks.webp').default} style={{width: 320}} /></p>
 
-<p align="center"><img src="https://user-images.githubusercontent.com/44569252/189440370-23849320-e130-4cdf-a1d6-ca97d2696e3a.png" width="320" /></p>
 
-- **System settings:** Startup behavior, auto-save and exit, vibration
-- **Custom shortcuts:** Single/long/double press <kbd>MENU</kbd>, and launch apps or tools via <kbd>X</kbd> or <kbd>Y</kbd> in MainUI
-  - *Known limitation:* Some apps can't be launched this way (for now only Music Player / GMU is known not to support this)
-- **User interface:** Show/hide recents/expert tabs, theme overrides
-- **Advanced:** Quick access to advanced emulator settings, plus a submenu to reset different settings
-- **Tools:** Sort favorites, fix thumbnails, remove OSX system files
+:::note <a href="apps/tweaks">Tweaks overview</a>
+Tweaks is the backbone of onion's configuration and personalization! With Tweaks you can adjust System settings, enable network services, configure your button shortcuts and more!
+:::
 
-<p align="center"><img src="https://user-images.githubusercontent.com/44569252/189440460-0afffde0-2e5e-41a4-b85e-0484b23c461a.png" /></p>
 
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/189498482-2590f31f-cca2-46e9-a316-3af98828446a.png" width="54" /></sup>Search
 
-<p align="center"><img src="https://user-images.githubusercontent.com/44569252/189498639-8e2a43a6-4020-4492-b4b1-6e3f0c0d5fd6.png" width="320" /> <img src="https://user-images.githubusercontent.com/44569252/189498645-f615dd73-ed0c-4505-a439-5fb5b611237d.png" width="320" /></p>
+<p align="center"><img src="https://user-images.githubusercontent.com/44569252/189498639-8e2a43a6-4020-4492-b4b1-6e3f0c0d5fd6.png" width="320" /></p>
 
-- The *Search* app lets you search all your games.
-  - *Note: For now only verified systems are supported (the ones that are in the `Games` tab).*
-- You'll find Search under `Apps` - and it's a popular choice for mapping to <kbd>X</kbd> or <kbd>Y</kbd> (via Tweaks).
-- When a search is active, the results will be shown under `Games` › `Search`, you can remove the search again by choosing "Clear search".
-- "Missing caches" lists all systems which haven't been cached yet, and thereby haven't been included in the search.
-  - *Reason:* All game caches are cleared everytime you "Refresh all roms".
-  - *Solution:* Go into each system you want included in the search.
 
-**Filter**
-- *Filter* is available via `Package Manager` › `Apps`, installing it will add the following shortcuts at the bottom of each game list:
-  - **Filter:** Will prompt you to enter a keyword for filtering the selected game list.
-  - **Refresh roms:** Will refresh roms only for the selected game list.
-- *Note: If you're using a `miyoogamelist.xml` you will need to add an entry for `~Filter.miyoocmd` and `~Refresh roms.miyoocmd`.*
+:::note <a href="apps/search">Search overview</a>
+The Search application is the perfect companion for large game collections. It lets you find all the games containing the keyword you've entered.
+Search also allows to filter a game list to include only games containing a specific keyword.
+:::
 
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179304061-647e63ff-5113-4a8a-aaa9-4dfda248d54e.png" width="54" /></sup>Themes
 
-<p align="center"><a href="https://github.com/OnionUI/Themes/blob/main/README.md"><img src="https://user-images.githubusercontent.com/44569252/189352231-03ae9688-a859-41c2-a8e3-4eba8ef360c8.png" /></a></p>
+<img src="https://user-images.githubusercontent.com/44569252/226450380-2d6ec505-c65d-4b67-bbc5-7104e39cd7ee.gif" width="320" />
 
-- Preview and change themes.
-- [Get more themes](https://github.com/OnionUI/Themes/blob/main/README.md) from our <sup><sub>❤️</sub></sup> community
+
+:::note <a href="apps/theme-switcher">Theme-switcher overview</a>
+Onion loves themes. In Onion themes allow to customize the background, the entry categories, console icons, music bacground, fonts... And best of all, the chosen theme impacts all Onion's internal applications!<br />
+Themes in Onion are two things : <br /> 
+- [A fabulous theme repository](https://github.com/OnionUI/Themes/blob/main/README.md) with a very active participation from Onion community <sup><sub>❤️</sub></sup>
+- An application called <a href="apps/theme-switcher">Theme-switcher</a> included in Onion which allows to preview and change themes.
+:::
 
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179302722-7fa82e4d-d72d-4b1e-bb4d-96a2a52aaa62.png" width="54" /></sup>Activity Tracker
 
-<p align="center"><img src="https://user-images.githubusercontent.com/44569252/189435280-9de4f088-b013-4c71-a44b-71f953b128a8.png" width="320" /></p>
+<p align="center"><img src={require('./assets/activity-tracker.webp').default} style={{width: 320}} /></p>
 
-- Track your game playtimes (format `h:m`).
-- View your total playtime in the top bar (format `h:m`).
-- Share your playtimes by taking a screenshot (press <kbd>MENU</kbd>+<kbd>POWER</kbd> - screenshot is saved in `Screenshots`).
+:::note <a href="apps/activity-tracker">Activity Tracker overview</a>
+Thanks to `Activity Tracker` app you can : 
+- Track your game playtimes.
+- View your total playtime in the top bar.
+- Share your playtimes by taking a screenshot (press <kbd>MENU</kbd>+<kbd>POWER</kbd> - screenshot is saved in `Screenshots` folder).
+:::
+
+
 
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179318731-7e262588-cb92-4ea3-9001-2991c4f8ccbe.png" width="54" /></sup>RetroArch
 
-*Rebuilt for Miyoo Mini - synched with [RA main](https://github.com/libretro/RetroArch)*
-
-<p align="center"><img src="https://user-images.githubusercontent.com/44569252/189438841-f419f936-6376-436e-89b5-78ce1f88494f.png" width="320" /></p>
-
-- Save State Thumbnails enabled
-- Compiled and partially rebuilt by [Eggs](https://discordapp.com/users/778867980096241715) for precision and performance  
-  > Custom audio driver, custom scalers, new display driver, and a new input driver
-- Minimal input and audio lag
-- Customs cores
-- Fine-tuned with optimal best settings for the Miyoo Mini in mind
-- Crisp 640×480 resolution
-- Can also work as a game launcher  
-  > Cores embedded, playlists and favorites unlocked
-- Rotation support for arcade games
-- Custom video filters  
-  > You can now modify, or create your own
-
-Some examples of video filters made for this RetroArch port (click to view full resolution):
-
-**Normal_3X:**  
-<img src="https://user-images.githubusercontent.com/16885275/166151805-fa2315c6-f783-4c7d-ba59-fd1996352fef.png" width="240" /> 
-
-**LCD filters, click to magnify (Integer scaling):**  
-![](https://user-images.githubusercontent.com/16885275/173250366-dbaed067-640e-485d-8244-c62b9a7bd722.png)
-
-## Game List Options (GLO)
-<sup>
+<img src="https://user-images.githubusercontent.com/44569252/189438841-f419f936-6376-436e-89b5-78ce1f88494f.png" width="320" />
 
 
-</sup>
+:::note <a href="apps/retroarch">Retroarch overview</a>
+A full Retroarch in a such tiny device ! Retroarch is regularly updated from the offcial repository. Onion benefits to dedicated drivers created by [Eggs](https://discordapp.com/users/778867980096241715) for precision and performance.
+Dedicated customations are also included : all the core are configured with attention to detail, [custom overlays and custom filters](apps/retroarch#customized-overlays-and-filters) made specially for the Miyoo Mini screen. 
+:::
 
-*Press Y in a game list to get specific options for the selected game and the entire list*
+## <sup><img src={require('./assets/optimized.png').default} style={{width: 54}} /></sup>Optimized emulators
 
-<table><thead>
-<th colspan="3"><b>Game List Options</b></th>
-</thead><tr>
-<td width="33%" align="center" valign="top"><img src="https://user-images.githubusercontent.com/44569252/226447277-a9452ecc-92ad-407f-a629-307491a652b4.png"/></td>
-<td width="33%" align="center" valign="top"><img src="https://user-images.githubusercontent.com/44569252/226447388-8c9c95f1-536a-4946-8b0f-f4b8ead0e97e.png"/></td>
-<td width="33%" align="center" valign="top"><img src="https://user-images.githubusercontent.com/44569252/226447466-71d4f5c1-7675-4355-9b60-20dbd1a03eae.png"/></td>
-</tr><tr>
-<td align="center" valign="top"><p><i>When in a game list, press <kbd>Y</kbd> to open GLO (this action can be reassigned in Tweaks)</i></p></td>
-<td align="center" valign="top"><p><i>GLO - specific options for the selected game or the entire list</i></p></td>
-<td align="center" valign="top"><p><i>Use the "Game core" option to change core per game</i></p></td>
-</tr></table>
-
-- **Reset game** - *load game without save state*
-- **Game core** - *set custom core per game*
-- **Filter list** - *use a keyword to filter the list*
-- **Refresh roms** - *refresh the list’s game cache*
-- *Custom scripts:*
-  - **Random game** - *added by Random Game app - launches a random game from the list*
-  - **Set time** - *added by Clock app - quick access to setting date and time*
+<img src="https://user-images.githubusercontent.com/44569252/189438841-f419f936-6376-436e-89b5-78ce1f88494f.png" width="320" />
 
 
-## Icon switching
-<sup>
+:::note <a href="emulators">Optimized emulators</a>
+Onion has its own emulators, many optimizations on the Retroarch cores but also some dedicated emulators like :
+- PCSX Standalone (with awesome performances)
+- ScummVM standalone (awesome performances too)
+- Gambatte core (GB/GBC) with an [unique organization of color palettes](https://github.com/schmurtzm/gambatte-libretro/tree/advanced-color-organisation)
+
+...
+:::
 
 
-</sup>
+## <sup><img src={require('./assets/icon-glo-menu.png').default} style={{width: 54}} /></sup>Game List Options (GLO Menu)
 
-- ThemeSwitcher now supports themes with icon packs - *remember to visit our [themes repository](https://github.com/OnionUI/Themes/blob/main/README.md) for additional themes and icon packs!*
-- Change icon pack and edit individual icons in Tweaks
+<img src="https://user-images.githubusercontent.com/44569252/226447388-8c9c95f1-536a-4946-8b0f-f4b8ead0e97e.png" width="320" />
 
-<table align="center"><thead>
-<th colspan="2">Icon Switching</th>
-</thead><tr>
-<td width="65%" align="center" rowspan="2"><img src="https://user-images.githubusercontent.com/44569252/226450380-2d6ec505-c65d-4b67-bbc5-7104e39cd7ee.gif"/></td>
-<td><img src="https://user-images.githubusercontent.com/44569252/226451178-3d11e9f4-0c7f-4213-af24-ad1209b36350.png"/></td>
-</tr><tr>
-<td><img src="https://user-images.githubusercontent.com/44569252/226451190-2529bb42-f5b3-4a9e-acfd-6cf65e2d4d33.png"/></td>
-</tr><tr>
-<td align="center"><p><i>Showcase: Applying themes with icon packs</i></p></td>
-<td align="center"><p><i>Use Tweaks to change icon pack or edit individual icons</i></p></td>
-</tr></table>
-
+:::note <a href="apps/game-list-options">Game List Options overview</a>
+*Game List Options (GLO Menu) is a tool to make actions for the selected game or the entire list. Press <kbd>Y</kbd> in a game list then from this menu you can choose the Retroarch core, download the image cover of your game (wifi/MMP required), launch a Netplay session, reset your game (to skip the last save state), filter the list of games with a keyword,...<br />Thanks to GLO menu flexibility, you can even add your own scripts here !*
+:::
 
 
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179304290-8c7e5140-5fb4-4ae1-bd90-faa416f9a37c.png" width="54" /></sup>Guest Mode
 
-Guest mode is a separate profile so you can safely lend your device to your kid or your friend. The profile contains the following properties:
-- Saves
-- States
-- Video filter and scaling options
-- Core options
-- Custom button remapping layouts
-- RetroArch history  
-  > The Game Switcher list will be different to reflect this
-- RetroArch playlists and favorites
-- Timers for your games  
-  <sup>Play Activity app</sup>
-- RGUI config  
-  <sup>RetroArch Graphic User Interface</sup>
+:::note <a href="apps/guest-mode">Guest mode overview</a>
+Guest mode is a separate profile so you can safely lend your device to your kid or your friend.
+:::
+
+## <sup><img align="left" title="Random Game Picker" src={require('./assets/random-game-picker.png').default} style={{width: 48}} /></sup>Random Game Picker
+
+:::note <a href="apps/random-game">Random Game Picker overview</a>
+Random Game will allow you to discover new games in your collection !
+:::
+
+## <sup><img align="left" title="AdvanceMENU" src={require('./assets/advancemenu.png').default} style={{width: 48}} /></sup>AdvanceMENU
+
+<img src="https://user-images.githubusercontent.com/34470397/228361197-86608c11-fc89-4b49-b029-5d536b3d75df.png" width="320" />
+
+:::note <a href="apps/advancemenu">AdvanceMENU</a>
+An alternative user interface with animated game previews!
+:::
+
+
+## <sup><img align="left" title="Ports Collection" src={require('./assets/ports.png').default} style={{width: 48}} /></sup>Ports Collection
+
+<img title="Included apps" src={require('./assets/ports.webp').default} style={{width: 320}} />
+
+:::note <a href="ports">Ports Collection</a>
+More than 60 game ports pre-configured !
+:::
+
+## <sup><img align="left" title="Included apps" src={require('./assets/apps.png').default} style={{width: 48}} /></sup>Included apps
+
+<img title="Included apps" src={require('./assets/apps.gif').default} style={{width: 320}} />
+
+:::note <a href="included-apps">Included apps</a>
+Onion also contains many additional apps like :<br />
+- [a video player](apps/ebook-reader)
+- [a music player](apps/ebook-reader)
+- [a file explorer](apps/ebook-reader)
+- [a terminal](apps/ebook-reader)
+- [ebook & pdf readers](apps/ebook-reader)
+- ...
+Check the <a href="included-apps">included apps</a> documentation for more information.
+:::
+
+
+## <sup><img title="Connected Features" src={require('./assets/wifi.png').default} style={{width: 48}} /></sup>Connected Features
+
+<img title="Included apps" src={require('./assets/network-features.gif').default} style={{width: 320}} />
+
+:::note <a href="network-features">Network Features</a>
+For the Miyoo Mini Plus (equiped with wifi) Onion offers many additional possibilites :<br />
+- [Multiplayer / Netplay](multiplayer) : play in multiplayer over internet or on you lcoal network to your favorite retro games:
+- [Easy Netplay](multiplayer/easynetplay): play multiplayer games anywhere (compatible with GBC/GBC Pokemon trading !)
+- [OTA (Over The Air) updates](apps/ota-update) : update Onion directly from your MMP
+- [Automatic date/time synchronisation](apps/tweaks#set-automatically-via-the-internet) (NTP, via Tweaks app)
+- [Retroachivements](https://www.retroarch.com/?page=achievements)
+- [Scraper](/docs/apps/scraper) : import game covers directly from your MMP
+- [Network Services](network-features) : [Samba/SMB share](network/samba), [http server](network/http), [SSH](network/ssh), [FTP](network/ftp), [Telnet](network/telnet), [Hotspot](network/hotspot)...
+:::
+
+
 
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179305837-59922e34-e18f-45d1-b5fb-89593ee08152.png" width="54" /></sup>Personal files gathered in one place
 
+:::note Personal files 
 Your saves and most of your preferences are now in `/Saves` (Example: `D:/Saves/`).
 This also includes your secondary profile, your config files, RetroArch lists and play activity database.
 Simply copy this folder when you want to backup your data.
+:::
 
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179305495-2ae1f522-6918-469f-a2eb-63dd30262e17.png" width="54" /></sup>MainUI improvements
+
+:::note MainUI improvements
+MainUI is the main interface of Onion provided by Miyoo and modified by Onion Team with these improvements :
 
 - Battery percentage is shown in the top bar  
   > You can configure the battery percentage visibility and color in the theme configuration file. It is also possible to make a theme that only shows the percentage text.
@@ -235,13 +234,13 @@ Simply copy this folder when you want to backup your data.
 - Box art size fix in the included themes  
   <sup>Credit: DiMo</sup>
 
-### Others
+:::
+
+
+
+## Others
 - Many additional systems supported
-- Experimental Arduboy support  
+- Experimental Arduboy support 
   <sup>Credit: JMARoeder</sup>
-- Updated PICO emulator to Fake08 standalone  
-  <sup>Credit: Supergrom</sup>
-- Support for game system icon packs   
-  > Drag and drop custom icons into the `Icons` folder at the root of your SD
 - Boxart moved to `/Roms/[SYSTEM]/Imgs` for easier scraping
 - Various bug fixes and optimizations

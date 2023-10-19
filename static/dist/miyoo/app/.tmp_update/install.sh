@@ -294,7 +294,7 @@ run_installation() {
 
     if [ $system_only -ne 1 ]; then
         if [ $reset_configs -eq 1 ]; then
-            cp -f $sysdir/res/miyoo${DEVICE_ID}_system.json /appconfigs/system.json
+            cp -f $sysdir/res/miyoo${DEVICE_ID}_system.json /mnt/SDCARD/system.json
         fi
 
         # Start the battery monitor

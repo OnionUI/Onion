@@ -6,7 +6,23 @@ slug: /apps/guest-mode
 
 *A separate profile for your Onion*
 
-Guest mode is a separate profile so you can safely lend your device to your kid or your friend. The profile contains the following properties:
+## Presentation
+
+Guest mode is a separate profile so you can safely lend your device to your kid or your friend.
+The Guest profile will have its own save and save states. Guest mode makes the Onion experience perfect when 2 persons are using the same Miyoo Mini.
+
+## Usage
+
+Go in Apps section and run "Guest mode", the icon will change to show the current state :
+
+| ![](./assets/guest-mode-off.webp)               | ![](./assets/guest-mode-on.webp)               |
+| ---------------                                 | ---------------                                |
+| <center><sup>Guest mode disabled</sup></center> | <center><sup>Guest mode enabled</sup></center> |
+
+
+## Advanced
+
+The profile contains the following properties:
 - Saves
 - States
 - Video filter and scaling options

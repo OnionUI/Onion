@@ -8,7 +8,7 @@ tags: [release-notes, stable]
 
 *Official release notes for Onion V3.12.3*
 
-<!-- truncate -->
+<Truncate />
 
 
 ### Eggs keymon integration

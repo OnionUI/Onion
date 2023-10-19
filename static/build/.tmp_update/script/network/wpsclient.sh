@@ -7,9 +7,9 @@ export IMGPOP=$sysdir/bin/imgpop
 # Syntax: ./imgpop duration delay image_path x_position y_position.
 
 main() {
-    if ifconfig wlan0 &>/dev/null; then
+    if ifconfig wlan0 &> /dev/null; then
         if is_running wpa_supplicant && is_running udhcpc; then
-        wifiup
+            wifiup
         fi
         sleep 1
         log "WPS: Wi-Fi is up"
@@ -25,19 +25,19 @@ main() {
         wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
         sleep 2
         killall -9 imgpop
-        sed -i 's/"wifi":\s*0/"wifi": 1/' /appconfigs/system.json # tell mainui that wifi needs to be kept up once started
-        
+        sed -i 's/"wifi":\s*0/"wifi": 1/' /mnt/SDCARD/system.json # tell mainui that wifi needs to be kept up once started
+
         if is_running wpa_supplicant; then
             wifiup
             sleep 1
         fi
-        
+
         touch /tmp/dont_restart_wifi
         sync
     fi
 
     start_udhcpc
-    $WPACLI disable_network all > /dev/null 2>&1 &# disconnect any existing networks
+    $WPACLI disable_network all > /dev/null 2>&1 & # disconnect any existing networks
     log "WPS: Disconnecting from current network"
     $WPACLI wps_pbc # start wps
     log "WPS: Trying to connect to WPS host"
@@ -45,7 +45,7 @@ main() {
     start_time=$(date +%s)
 
     while true; do
-        IP=$(ip route get 1 2>/dev/null | awk '{print $NF;exit}')
+        IP=$(ip route get 1 2> /dev/null | awk '{print $NF;exit}')
 
         if [ -z "$IP" ]; then
             wpsflicker
@@ -60,9 +60,9 @@ main() {
                     log "WPS: Failed to connect.."
                     sleep 5
                     exit
-                else 
+                else
                     wpsconnected
-                fi            
+                fi
             fi
         else
             break
@@ -77,8 +77,8 @@ main() {
     exit
 }
 
-start_udhcpc(){
-    udhcpc -i wlan0 -s /etc/init.d/udhcpc.script > /dev/null 2>&1 &    
+start_udhcpc() {
+    udhcpc -i wlan0 -s /etc/init.d/udhcpc.script > /dev/null 2>&1 &
 }
 
 kill_udhcpc() {
@@ -89,7 +89,7 @@ kill_udhcpc() {
 
 conn_cleanup() {
     kill_udhcpc
-    start_udhcpc 
+    start_udhcpc
 }
 
 is_running() {
@@ -97,11 +97,11 @@ is_running() {
     pgrep "$process_name" > /dev/null
 }
 
-wifiquery(){
+wifiquery() {
     $IMGPOP 5 0 "$icondir/wifiquery.png" 84 428 > /dev/null 2>&1 &
 }
 
-wifiup(){
+wifiup() {
     $IMGPOP 5 0 "$icondir/wifiup.png" 84 428 > /dev/null 2>&1 &
 }
 

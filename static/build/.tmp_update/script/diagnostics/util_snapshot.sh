@@ -37,10 +37,10 @@ program=$(basename "$0" .sh)
 ##################
 
 main() {
-     log "Generating system snapshot, please wait"
-     snapshot
-     log "Starting exporter"
-     $diagsdir/util_exporter.sh
+    log "Generating system snapshot, please wait"
+    snapshot
+    log "Starting exporter"
+    $diagsdir/util_exporter.sh
 }
 
 ##################
@@ -102,18 +102,18 @@ get_lcd_voltage() { # Check LCD voltage incase it's been changed by user
     echo "$((voltage_tenths / 10)).$((voltage_tenths % 10)) volts."
 }
 
-actual_uptime() { 
+actual_uptime() {
     uptime=$(cut -d. -f1 /proc/uptime)
-    
+
     uptime_days=$((uptime / 60 / 60 / 24))
     uptime_hours=$((uptime / 60 / 60 % 24))
     uptime_minutes=$((uptime / 60 % 60))
     uptime_seconds=$((uptime % 60))
-    
+
     echo "Uptime: $uptime_days days, $uptime_hours hours, $uptime_minutes minutes, $uptime_seconds seconds"
 }
 
-system_healthcheck () {
+system_healthcheck() {
     log "Generating system healthcheck"
     write_info "Onion version:" "cat $sysdir/onionVersion/version.txt" $sysinfo_file
     write_info "Firmware version:" "/etc/fw_printenv miyoo_version" $sysinfo_file
@@ -130,9 +130,9 @@ system_healthcheck () {
     write_info "LCD Voltage:" "get_lcd_voltage" $sysinfo_file
     write_info "Framebuffer info:" "cat /proc/mi_modules/fb/mi_fb0" $sysinfo_file
     write_info "More framebuffer info:" "fbset" $sysinfo_file
-    write_info "System.json state:" "cat /appconfigs/system.json" $sysinfo_file
-    write_info "Keymap state:" "cat $sysdir/config/keymap.json" $sysinfo_file    
-    write_info "Config folder dump" "ls -alhR $sysdir/config/" $sysinfo_file 
+    write_info "System.json state:" "cat /mnt/SDCARD/system.json" $sysinfo_file
+    write_info "Keymap state:" "cat $sysdir/config/keymap.json" $sysinfo_file
+    write_info "Config folder dump" "ls -alhR $sysdir/config/" $sysinfo_file
     dmesg > "$workingdir/sysinfo/dmesg.log"
     log "Finished generating healthcheck"
 }
@@ -173,11 +173,11 @@ wpa_supplicant_health_check() {
     fi
 }
 
-wpa_supplicant_contains_networks() {  
+wpa_supplicant_contains_networks() {
     if [[ -f "$wpa_conf_path" ]]; then
         num_ssids=$(grep -c "ssid=" "$wpa_conf_path")
         num_disabled=$(grep -c "disabled=" "$wpa_conf_path")
-        
+
         echo "$num_ssids SSIDs configured, $num_disabled SSIDs disabled"
     else
         echo "Wpa_supplicant.conf is not present"
@@ -185,11 +185,11 @@ wpa_supplicant_contains_networks() {
 }
 
 get_wpa_supplicant() { # print the file aswell but remove the users ssid/psk - worth doing a full formatting check on the file incase syntax is broken by someone manually editing.
-  if [ ! -f "$wpa_conf_path" ]; then
-    echo "File not found: $wpa_conf_path"
-  fi
+    if [ ! -f "$wpa_conf_path" ]; then
+        echo "File not found: $wpa_conf_path"
+    fi
 
-  sed 's/ssid="[^"]*"/ssid="redacted"/g; s/psk="[^"]*"/psk="redacted"/g' "$wpa_conf_path"
+    sed 's/ssid="[^"]*"/ssid="redacted"/g; s/psk="[^"]*"/psk="redacted"/g' "$wpa_conf_path"
 }
 
 check_hostapd_conf() {
@@ -221,7 +221,7 @@ wifi_healthcheck() {
     write_info "Network service:" "get_netserv_status" $networkinfo_file
     write_info "Checking size of hostapd.conf:" "check_hostapd_conf" $networkinfo_file
     write_info "Checking size of dnsmasq.conf" "check_dnsmasq_conf" $networkinfo_file
-    write_info "Wpa_supplicant.conf health:" "wpa_supplicant_health_check" $networkinfo_file 
+    write_info "Wpa_supplicant.conf health:" "wpa_supplicant_health_check" $networkinfo_file
     write_info "Wpa_supplicant.conf ssid count:" "wpa_supplicant_contains_networks" $networkinfo_file
     write_info "Wpa_supplicant.conf sanitised dump:" "get_wpa_supplicant" $networkinfo_file
     write_info "WiFi Status:" "ifconfig" $networkinfo_file
@@ -265,7 +265,7 @@ create_dir_logs() { # Currently creates a list of roms which can take a while de
         fi
     done
 }
-  
+
 ##################
 ## CALL MAIN FUNCTION ##
 ##################
