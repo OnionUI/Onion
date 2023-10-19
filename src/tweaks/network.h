@@ -388,31 +388,25 @@ void network_toggleVNC(void *pt)
 
     int new_fps = (int)network_settings.vncfps;
 
-    sprintf(command_start, "/mnt/SDCARD/.tmp_update/bin/vncserver -k /dev/input/event0 -F %d -r 180 &", new_fps);
+    sprintf(command_start, "/mnt/SDCARD/.tmp_update/bin/vncserver -k /dev/input/event0 -F %d -r 180 > /dev/null 2>&1 &", new_fps);
     sprintf(command_stop, "killall -9 vncserver");
 
     if (!network_state.vncserv) {
+        network_state.vncserv = true;
+        network_setState(&network_state.vncserv, ".vncServer", true);
+        reset_menus = true;
         if (!process_isRunning("vncserver")) {
-            int result = system(command_start);
-            if (result == 0) {
-                fprintf(stderr, "VNC enabled\n");
-            }
-            else {
-                fprintf(stderr, "VNC failed to start\n");
-            }
+            system(command_start);
         }
     }
     else {
+        network_state.vncserv = false;
+        network_setState(&network_state.vncserv, ".vncServer", false);
+        reset_menus = true;
         if (process_isRunning("vncserver")) {
-            int result = system(command_stop);
-            if (result == 0) {
-                fprintf(stderr, "VNC disabled\n");
-                
-            }
+            system(command_stop);
         }
     }
-
-    network_setState(&network_state.vncserv, ".vncServer", ((ListItem *)pt)->value);
 }
 
 void network_setVNCFPS(void *pt)
@@ -425,7 +419,6 @@ void network_setVNCFPS(void *pt)
         network_state.vncserv = false;
         network_setState(&network_state.vncserv, ".vncServer", false);
         reset_menus = true;
-        all_changed = true;
     }
 }
 
@@ -573,6 +566,36 @@ void menu_ssh(void *pt)
     header_changed = true;
 }
 
+
+void menu_vnc(void *pt)
+{
+    ListItem *item = (ListItem *)pt;
+    item->value = (int)network_state.vncserv;    
+    if (!_menu_vnc._created) {
+        _menu_vnc = list_create(2, LIST_SMALL);
+        strcpy(_menu_vnc.title, "VNC");
+        list_addItem(&_menu_vnc,
+                     (ListItem){
+                         .label = "Enable",
+                         .item_type = TOGGLE,
+                         .value = (int)network_state.vncserv,
+                         .action = network_toggleVNC});
+        list_addItemWithInfoNote(&_menu_vnc,
+                                 (ListItem){
+                                     .label = "Framerate",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 31,
+                                     .value_formatter = formatter_vncFps,
+                                     .value = (int)network_settings.vncfps,
+                                     .action = network_setVNCFPS},
+                                 "Set the framerate of the VNC server\n"
+                                 "between 1 and 30. The higher the \n"
+                                 "framerate the more CPU it will use \n");
+    }
+    menu_stack[++menu_level] = &_menu_vnc;
+    header_changed = true;
+}
+
 void menu_wifi(void *_)
 {
     if (!_menu_wifi._created) {
@@ -613,40 +636,6 @@ void menu_wifi(void *_)
     header_changed = true;
 }
 
-void menu_vnc(void *pt)
-{
-    ListItem *item = (ListItem *)pt;
-    item->value = (int)network_state.vncserv;
-    if (!_menu_vnc._created) {
-        _menu_vnc = list_create(3, LIST_SMALL);
-        strcpy(_menu_vnc.title, "VNC");
-        list_addItem(&_menu_vnc,
-                     (ListItem){
-                         .label = "IP address: N/A",
-                         .disabled = true,
-                         .action = NULL});
-        list_addItem(&_menu_vnc,
-                     (ListItem){
-                         .label = "Enable",
-                         .item_type = TOGGLE,
-                         .value = (int)network_state.vncserv,
-                         .action = network_toggleVNC});
-        list_addItemWithInfoNote(&_menu_vnc,
-                                 (ListItem){
-                                     .label = "Framerate",
-                                     .item_type = MULTIVALUE,
-                                     .value = (int)network_settings.vncfps,
-                                     .value_max = 31,
-                                     .value_formatter = formatter_vncFps,
-                                     .action = network_setVNCFPS},
-                                 "Set the framerate of the VNC server\n"
-                                 "between 1 and 30. The higher the \n"
-                                 "framerate the more CPU it will use \n");
-    }
-    strcpy(_menu_vnc.items[0].label, ip_address_label);
-    menu_stack[++menu_level] = &_menu_vnc;
-    header_changed = true;
-}
 
 void menu_network(void *_)
 {
@@ -655,7 +644,7 @@ void menu_network(void *_)
         strcpy(_menu_network.title, "Network");
 
         network_loadState();
-
+        
         list_addItem(&_menu_network,
                      (ListItem){
                          .label = "IP address: N/A",
