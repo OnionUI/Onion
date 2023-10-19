@@ -1,67 +1,79 @@
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <sys/mman.h>
+#include <unistd.h>
+#include <stdint.h>
 
-#define MAX_LINE_LENGTH 255
+#define BIT8 0x100
+#define BANK_TO_ADDR32(b) (b << 9)
 
-void remove_0x_and_newline(char *str)
+#define REG_ADDR(riu_base, bank, reg_offset) ((riu_base) + BANK_TO_ADDR32(bank) + (reg_offset * 4))
+
+typedef struct
 {
-    char *src = str;
-    char *dest = str;
-    while (*src) {
-        if (src[0] == '0' && src[1] == 'x') {
-            src += 2;
-        }
-        else if (src[0] == '\n') {
-            src++;
-        }
-        else {
-            *dest = *src;
-            dest++;
-            src++;
-        }
+    unsigned char *virt_addr;
+    unsigned char *mmap_base;
+    unsigned int mmap_length;
+} MmapHandle;
+
+static unsigned int const page_size_mask = 0xFFF;
+
+MmapHandle *devMemMMap(unsigned int phys_addr, unsigned int length)
+{
+    int fd;
+    unsigned int phys_offset;
+    fd = open("/dev/mem", O_RDWR | O_SYNC);
+    if (fd == -1)
+    {
+        printf("open /dev/mem fail\n");
+        return NULL;
     }
-    *dest = '\0';
+    MmapHandle *handle = malloc(sizeof(MmapHandle));
+    phys_offset = (phys_addr & (page_size_mask));
+    phys_addr &= ~(page_size_mask);
+    handle->mmap_length = length + phys_offset;
+    handle->mmap_base = mmap(NULL, handle->mmap_length,
+                             PROT_READ | PROT_WRITE, MAP_SHARED, fd, phys_addr);
+    handle->virt_addr = handle->mmap_base + phys_offset;
+    if (handle->mmap_base == MAP_FAILED)
+    {
+        printf("mmap fail\n");
+        close(fd);
+        free(handle);
+        return NULL;
+    }
+    close(fd);
+    return handle;
 }
 
-char *execute_command(const char *command)
+int devMemUmap(MmapHandle *handle)
 {
-    char buffer[MAX_LINE_LENGTH];
-    char *result = NULL;
-
-    FILE *pipe = popen(command, "r");
-    if (pipe == NULL) {
-        fprintf(stderr, "Error executing command: %s\n", command);
-        exit(1);
+    int ret = 0;
+    ret = munmap(handle->mmap_base, handle->mmap_length);
+    if (ret != 0)
+    {
+        printf("munmap fail\n");
+        return ret;
     }
 
-    while (fgets(buffer, sizeof(buffer), pipe) != NULL) {
-        result = strdup(buffer);
-    }
-
-    pclose(pipe);
-    return result;
+    free(handle);
+    return ret;
 }
 
 int main()
 {
-    char serial[22] = "";
-    const char *commands[] = {
-        "/config/riu_r 20 18 | awk 'NR==2'",
-        "/config/riu_r 20 17 | awk 'NR==2'",
-        "/config/riu_r 20 16 | awk 'NR==2'"};
+    uint16_t word[3];
+    MmapHandle *riu_base = devMemMMap(0x1F000000, 0x2B0000);
 
-    for (int i = 0; i < 3; i++) {
-        char *output = execute_command(commands[i]);
-        if (output != NULL) {
-            strcat(serial, output);
-        }
-        else {
-            fprintf(stderr, "Error executing command: %s\n", commands[i]);
-            exit(1);
-        }
-    }
-    remove_0x_and_newline(serial);
-    printf("%s\n", serial);
+    *(unsigned short *)REG_ADDR(riu_base->virt_addr, 0x20, 0x03) &= ~BIT8;
+
+    word[0] = *(unsigned short *)REG_ADDR(riu_base->virt_addr, 0x20, 0x16);
+    word[1] = *(unsigned short *)REG_ADDR(riu_base->virt_addr, 0x20, 0x17);
+    word[2] = *(unsigned short *)REG_ADDR(riu_base->virt_addr, 0x20, 0x18);
+    
+    devMemUmap(riu_base);
+
+    printf("%04X%04X%04X\n", word[2], word[1], word[0]);
     return 0;
 }
