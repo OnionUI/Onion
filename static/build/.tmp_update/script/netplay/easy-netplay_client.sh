@@ -386,7 +386,7 @@ checksize_func() {
 	fi
 }
 
-# We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
+# Start retroarch with -C in client mode if everything's gone to plan
 start_retroarch() {
 	build_infoPanel_and_log "Starting RA" "Starting RetroArch"
 

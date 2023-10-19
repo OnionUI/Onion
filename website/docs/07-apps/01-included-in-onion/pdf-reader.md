@@ -5,10 +5,15 @@ description: Green PDF reader by Steward-Fu
 
 # PDF reader
 
+## Presentation
 
 Allows you to read PDF files, right on your device.
 
-Shortcuts:
+![](./assets/pdf-reader.png)
+
+## Usage
+
+### Controls
 
 | Button | Function            |
 | ------ | ------------------- |
@@ -22,3 +27,7 @@ Shortcuts:
 | Select | Mirror vertically   |
 | Start  | Mirror horizontally |
 | Menu   | Close file          |
+
+## Advanced
+
+Based on [Green](https://github.com/schandinat/green), compiled by Steward Fu.
