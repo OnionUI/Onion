@@ -190,7 +190,7 @@ void formatter_Serial(void *pt, char *out_label)
 
     static char serial[32];
     if (strlen(serial) == 0)
-        process_start_read_return("serial", serial);
+        process_start_read_return("read_uuid", serial);
     strcpy(out_label, serial);
 }
 
