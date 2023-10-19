@@ -2,5 +2,5 @@
 "label":"Ebook Reader",
 "icon":"../../Icons/Default/app/ereader.png",
 "launch":"launch.sh",
-"description":"PixelReader v0.4"
+"description":"PixelReader v0.6"
 }
