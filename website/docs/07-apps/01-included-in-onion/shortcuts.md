@@ -1,11 +1,18 @@
 ---
-slug: /shortcuts
+slug: /apps/shortcuts
 ---
 
+# Shortcuts
 
-# Global shortcuts
+## Presentation
 
-![](./global-shortcuts.png)
+![](./assets/shortcuts.webp)
+
+Shortcuts in Onion are managed by an app called `keymon`. This app has no graphical interface, it is an background daemon which will manage the shortcuts during gameplay or not.
+
+## Usage
+
+
 
 <table align="center">
     <thead>
@@ -63,6 +70,11 @@ slug: /shortcuts
         <tr>
             <td><kbd>MENU</kbd> + <kbd>SELECT</kbd></td>
             <td>RetroArch quick menu</td>
+            <td><em>In-game</em></td>
+        </tr>
+        <tr>
+            <td><kbd>MENU</kbd> + <kbd>START</kbd></td>
+            <td>Change aspect ratio</td>
             <td><em>In-game</em></td>
         </tr>
         <tr>
@@ -176,3 +188,7 @@ slug: /shortcuts
         </tr>
     </tbody>
 </table>
+
+## Advanced
+
+- [Keymon source code](https://github.com/OnionUI/Onion/blob/main/src/keymon/keymon.c).

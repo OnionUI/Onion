@@ -198,7 +198,7 @@ const config = {
                 href: 'https://github.com/OnionUI/Onion',
               },
               {
-                href: 'https://www.youtube.com/@OnionUIOfficial',
+                href: 'https://www.youtube.com/@OnionUI',
                 label: 'YouTube',
               },
               {
