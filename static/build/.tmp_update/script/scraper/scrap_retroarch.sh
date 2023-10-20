@@ -49,10 +49,10 @@ case $1 in
 	GB)                  remoteSystem="Nintendo - Game Boy" ;;
 	GBA)                 remoteSystem="Nintendo - Game Boy Advance" ;;
 	# gbc)               remoteSystem="Nintendo - Game Boy Color" ;;
-	GBC)                 remoteSystem="Nintendo - GameCube" ;;
+	GBC)                 remoteSystem="Nintendo - Game Boy Color" ;;
 	# 3ds)               remoteSystem="Nintendo - Nintendo 3DS" ;;
 	# n64)               remoteSystem="Nintendo - Nintendo 64" ;;
-	# nds)               remoteSystem="Nintendo - Nintendo DS" ;;
+	NDS)                 remoteSystem="Nintendo - Nintendo DS" ;;
 	FC)                  remoteSystem="Nintendo - Nintendo Entertainment System" ;;
 	POKE)                remoteSystem="Nintendo - Pokemon Mini" ;;
 	SFC)                 remoteSystem="Nintendo - Super Nintendo Entertainment System" ;;
