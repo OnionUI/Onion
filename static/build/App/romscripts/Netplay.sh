@@ -29,27 +29,27 @@ if [ "$3" = "DynamicLabel" ]; then
 		fi
 	fi
 
-	echo -n "$DynamicLabel" >/tmp/DynamicLabel.tmp
+	echo -n "$DynamicLabel" > /tmp/DynamicLabel.tmp
 	exit
 fi
 
-echo performance >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 
 cores_configurator() {
 
 	if [ "$romdirname" == "GB" ] || [ "$romdirname" == "GBC" ]; then
 		tgb_dual_opts="/mnt/SDCARD/Saves/CurrentProfile/config/TGB Dual/TGB Dual.opt"
 		tgb_dual_opts_tmp="/tmp/TGB Dual.patch"
-		echo -e "tgbdual_single_screen_mp = \"player ${PlayerNum} only\"" >"$tgb_dual_opts_tmp"
-		echo -e "tgbdual_audio_output = \"Game Boy #${PlayerNum}\"" >>"$tgb_dual_opts_tmp"
+		echo -e "tgbdual_single_screen_mp = \"player ${PlayerNum} only\"" > "$tgb_dual_opts_tmp"
+		echo -e "tgbdual_audio_output = \"Game Boy #${PlayerNum}\"" >> "$tgb_dual_opts_tmp"
 		$sysdir/script/patch_ra_cfg.sh "$tgb_dual_opts_tmp" "$tgb_dual_opts"
 		rm "$tgb_dual_opts_tmp"
 	fi
 
 	if [ "$romdirname" == "MD" ]; then
 		pico_opts_tmp="/tmp/MD.patch"
-		echo -e "picodrive_input1 = \"6 button pad\"" >"$pico_opts_tmp"
-		echo -e "picodrive_input2 = \"6 button pad\"" >>"$pico_opts_tmp"
+		echo -e "picodrive_input1 = \"6 button pad\"" > "$pico_opts_tmp"
+		echo -e "picodrive_input2 = \"6 button pad\"" >> "$pico_opts_tmp"
 		$sysdir/script/patch_ra_cfg.sh "$pico_opts_tmp" "/mnt/SDCARD/Saves/CurrentProfile/config/PicoDrive/PicoDrive.opt"
 		rm "$pico_opts_tmp"
 	fi
@@ -65,8 +65,8 @@ echo "##########################################################################
 echo "#################################### Netplay.sh script start.######################################################"
 echo "###################################################################################################################"
 LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so prompt -t "Netplay" \
-	"Host" \
-	"Join"
+	"Host a session..." \
+	"Join a session..."
 
 retcode=$?
 if [ $retcode -eq 0 ]; then
@@ -114,10 +114,10 @@ elif [ $retcode -eq 255 ]; then
 fi
 
 if [ "$romdirname" == "GB" ] || [ "$romdirname" == "GBC" ]; then
-		echo -e "tgbdual_single_screen_mp = \"player 1 only\"" >"$tgb_dual_opts_tmp"
-		echo -e "tgbdual_audio_output = \"Game Boy #1\"" >>"$tgb_dual_opts_tmp"
-		$sysdir/script/patch_ra_cfg.sh "$tgb_dual_opts_tmp" "$tgb_dual_opts"
-		rm "$tgb_dual_opts_tmp"
+	echo -e "tgbdual_single_screen_mp = \"player 1 only\"" > "$tgb_dual_opts_tmp"
+	echo -e "tgbdual_audio_output = \"Game Boy #1\"" >> "$tgb_dual_opts_tmp"
+	$sysdir/script/patch_ra_cfg.sh "$tgb_dual_opts_tmp" "$tgb_dual_opts"
+	rm "$tgb_dual_opts_tmp"
 fi
 
 echo "###################################################################################################################"
@@ -128,10 +128,3 @@ echo "##########################################################################
 if [ -f "/tmp/old_ipv4.txt" ]; then
 	"$sysdir/script/network/hotspot_cleanup.sh"
 fi
-
-
-
-
-
-
-
