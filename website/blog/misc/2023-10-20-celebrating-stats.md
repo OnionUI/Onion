@@ -9,7 +9,7 @@ image: ./assets/banner_amazing_stats.png
 
 <img src={assets.image} />
 
-I recently noticed a lot of our stats we're looking pretty neat, so I decided to put them in a graphic, as I thought it was about time that we celebrated this amazing project.
+I recently noticed a lot of our stats were looking pretty neat, so I decided to put them in a graphic, as I thought it was about time that we celebrated this amazing project.
 
 The community engagement has been, and continues to be, amazing!
 
