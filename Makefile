@@ -137,7 +137,6 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/pngScale && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/libgamename && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/gameNameList && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/serial && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/libmainuihooks && BUILD_DIR=$(LIB_DIR) make
 
 # Build dependencies for installer
