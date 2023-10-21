@@ -89,6 +89,30 @@ bool getConfigPath(char *config_path, const char *data_path, const char *base_di
     return true;
 }
 
+bool hasExtension(const char *file_name, const char *extlist)
+{
+    const char *file_ext = file_getExtension(file_name);
+
+    if (extlist == NULL || strlen(extlist) == 0)
+        return true;
+
+    if (strcasecmp(file_ext, "miyoocmd") == 0)
+        return false;
+
+    char extlist_dup[STR_MAX];
+    strcpy(extlist_dup, extlist);
+
+    char *token = strtok(extlist_dup, "|");
+
+    while (token != NULL) {
+        if (strcasecmp(file_ext, token) == 0)
+            return true;
+        token = strtok(NULL, "|");
+    }
+
+    return false;
+}
+
 bool checkRomDir(const char *rom_dir, const char *extlist, int level)
 {
     struct dirent *dp;
@@ -114,16 +138,8 @@ bool checkRomDir(const char *rom_dir, const char *extlist, int level)
         }
 
         if (dp->d_type == DT_REG) {
-            const char *ext = file_getExtension(dp->d_name);
-
-            char *ext_pt;
-            if (strcmp(ext, "miyoocmd") == 0 || (ext_pt = strstr(extlist, ext)) == NULL) {
+            if (!hasExtension(dp->d_name, extlist))
                 continue;
-            }
-            ext_pt += strlen(ext);
-            if (*ext_pt != '|' && *ext_pt != '\0') {
-                continue;
-            }
 
             return true;
         }
