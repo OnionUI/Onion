@@ -35,5 +35,8 @@ fi
 
 ./drastic "$1"
 
-echo $sv > /proc/sys/vm/swappiness
 sync
+sync
+sync
+
+echo $sv > /proc/sys/vm/swappiness

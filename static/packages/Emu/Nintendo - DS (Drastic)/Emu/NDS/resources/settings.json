@@ -1,1 +1,23 @@
-{"pen":2,"theme":1,"mode":8,"xv":10000,"yv":12000,"alpha":0,"position":0,"border":1,"maxcpu":1600,"touchpad":0,"overlay":2,"mincpu":500,"alt":2,"swap_l1l2":0,"swap_r1r2":0}
+{
+  "pen":3,
+  "theme":4,
+  "mode":8,
+  "xv":10000,
+  "yv":12000,
+  "alpha":3,
+  "position":0,
+  "border":1,
+  "maxcpu":1600,
+  "touchpad":0,
+  "overlay":1,
+  "mincpu":500,
+  "alt":3,
+  "swap_l1l2":0,
+  "swap_r1r2":0,
+  "cust_menu":1,
+  "lang":"en",
+  "dpad_90d":0,
+  "menu_c0":"0xffffff",
+  "menu_c1":"0x000000",
+  "menu_c2":"0x289a35"
+}
