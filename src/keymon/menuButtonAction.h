@@ -99,12 +99,12 @@ bool terminate_retroarch(void)
 
         // send signal
         kill(pid, SIGCONT);
-        usleep(100000);
+        usleep(100000); 
         kill(pid, SIGTERM);
         // wait for terminate
         sprintf(fname, "/proc/%d", pid);
 
-        uint32_t count = 20; // 4s
+        uint32_t count = 40; // 8s
         while (--count && exists(fname))
             usleep(200000); // 0.2s
         return true;
