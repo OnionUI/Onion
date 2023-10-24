@@ -90,6 +90,50 @@ bool terminate_retroarch(void)
         uint32_t count = 20; // 4s
         while (--count && exists(fname))
             usleep(200000); // 0.2s
+        return true;
+    }
+
+    pid = process_searchpid("drastic");
+    if (pid) {
+        screenshot_system();
+
+        // send signal
+        kill(pid, SIGCONT);
+        usleep(100000);
+        kill(pid, SIGTERM);
+        // wait for terminate
+        sprintf(fname, "/proc/%d", pid);
+
+        uint32_t count = 20; // 4s
+        while (--count && exists(fname))
+            usleep(200000); // 0.2s
+        return true;
+    }
+
+    return false;
+}
+
+//
+//    Terminate drastic before kill/shotdown processes to save progress
+//
+bool terminate_drastic(void)
+{
+    char fname[16];
+    pid_t pid = process_searchpid("drastic");
+
+    if (pid) {
+        screenshot_system();
+
+        // send signal
+        kill(pid, SIGCONT);
+        usleep(100000);
+        kill(pid, SIGTERM);
+        // wait for terminate
+        sprintf(fname, "/proc/%d", pid);
+
+        uint32_t count = 20; // 4s
+        while (--count && exists(fname))
+            usleep(200000); // 0.2s
 
         return true;
     }

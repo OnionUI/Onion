@@ -173,6 +173,7 @@ void shutdown(void)
 {
     system_shutdown();
     terminate_retroarch();
+
     system_clock_get();
     system_clock_save();
     sync();
@@ -293,7 +294,7 @@ void deepsleep(void)
     }
     else if (system_state == MODE_APPS) {
         short_pulse();
-        remove(CMD_TO_RUN_PATH);
+        //   remove(CMD_TO_RUN_PATH);
         system_shutdown();
         suspend(1);
     }
