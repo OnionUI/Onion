@@ -92,7 +92,7 @@ bool terminate_retroarch(void)
             usleep(200000); // 0.2s
         return true;
     }
-    
+
     pid = process_searchpid("drastic");
     if (pid) {
         screenshot_system();
@@ -109,10 +109,9 @@ bool terminate_retroarch(void)
             usleep(200000); // 0.2s
         return true;
     }
-    
+
     return false;
 }
-
 
 //
 //    Terminate drastic before kill/shotdown processes to save progress
@@ -141,7 +140,6 @@ bool terminate_drastic(void)
 
     return false;
 }
-
 
 void quietMainUI(void)
 {

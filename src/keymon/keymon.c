@@ -285,7 +285,6 @@ void deepsleep(void)
             short_pulse();
             system_shutdown();
             terminate_retroarch();
-            
         }
     }
     else if (system_state == MODE_ADVMENU) {
@@ -295,7 +294,7 @@ void deepsleep(void)
     }
     else if (system_state == MODE_APPS) {
         short_pulse();
-     //   remove(CMD_TO_RUN_PATH);
+        //   remove(CMD_TO_RUN_PATH);
         system_shutdown();
         suspend(1);
     }
