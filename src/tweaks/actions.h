@@ -239,6 +239,11 @@ void action_hideLabelsIcons(void *pt)
     theme_changeOverride("hideLabels", "icons", NULL, value_types[item_value]);
 }
 
+void action_toggleBackgroundMusic(void *pt) 
+{
+    settings.mute_bgm = ((ListItem *)pt)->value == 1;
+};
+
 void action_hideLabelsHints(void *pt)
 {
     static bool applied_values[] = {false, false, true};

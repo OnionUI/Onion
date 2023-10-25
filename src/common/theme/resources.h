@@ -257,6 +257,10 @@ Mix_Chunk *resource_getSoundChange(void)
 
 Mix_Music *resource_getBGM(void)
 {
+    if (config_flag_get(".muteBgm")) {
+        resources.bgm = NULL;
+        return NULL;
+    };
     if (resources.bgm == NULL) {
         char sound_path[STR_MAX * 2];
         snprintf(sound_path, STR_MAX * 2 - 1, "%ssound/bgm.mp3", theme()->path);

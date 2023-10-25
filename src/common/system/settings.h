@@ -21,6 +21,7 @@ typedef struct settings_s {
     int volume;
     char keymap[JSON_STRING_LEN];
     int mute;
+    bool mute_bgm;
     int bgm_volume;
     int brightness;
     char language[JSON_STRING_LEN];
@@ -64,6 +65,7 @@ static settings_s __default_settings = (settings_s){
     .volume = 20,
     .keymap = "L2,L,R2,R,X,A,B,Y",
     .mute = 0,
+    .mute_bgm = false,
     .bgm_volume = 20,
     .brightness = 7,
     .language = "en.lang",
@@ -170,6 +172,7 @@ void settings_load(void)
     settings.startup_auto_resume = !config_flag_get(".noAutoStart");
     settings.menu_button_haptics = !config_flag_get(".noMenuHaptics");
     settings.show_recents = config_flag_get(".showRecents");
+    settings.mute_bgm = config_flag_get(".muteBgm");
     settings.show_expert = config_flag_get(".showExpert");
     settings.mute = config_flag_get(".muteVolume");
     settings.disable_standby = config_flag_get(".disableStandby");
@@ -302,6 +305,7 @@ void settings_save(void)
     config_flag_set(".showRecents", settings.show_recents);
     config_flag_set(".showExpert", settings.show_expert);
     config_flag_set(".muteVolume", settings.mute);
+    config_flag_set(".muteBgm", settings.mute_bgm);
     config_flag_set(".disableStandby", settings.disable_standby);
     config_flag_set(".logging", settings.enable_logging);
     config_setNumber("battery/warnAt", settings.low_battery_warn_at);
