@@ -26,15 +26,14 @@ int main(int argc, char *argv[])
     }
 
     int input_fd;
-
+    input_fd = open("/dev/input/event0", O_WRONLY);
+    
     for (int j = 0; j < num_events; j++) {
         printf_debug("sendkeys: code = %d, value = %d\n", events[j].code,
-                     events[j].value);
-        input_fd = open("/dev/input/event0", O_WRONLY);
+                     events[j].value);   
         write(input_fd, &events[j], sizeof(events[j]));
-        close(input_fd);
-        sync();
     }
-
+    close(input_fd);
+    sync();
     return 0;
 }

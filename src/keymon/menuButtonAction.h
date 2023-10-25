@@ -72,10 +72,10 @@ void applyExtraButtonShortcut(int button)
 //
 bool terminate_retroarch(void)
 {
-    char fname[16];
+    char fname[20];
     pid_t pid = process_searchpid("retroarch");
     if (!pid)
-        pid = process_searchpid("ra32");
+    pid = process_searchpid("ra32");
 
     if (pid) {
         screenshot_system();
@@ -89,7 +89,7 @@ bool terminate_retroarch(void)
 
         uint32_t count = 20; // 4s
         while (--count && exists(fname))
-            usleep(200000); // 0.2s
+        usleep(200000); // 0.2s 
         return true;
     }
 
@@ -98,48 +98,29 @@ bool terminate_retroarch(void)
         screenshot_system();
 
         // send signal
-        kill(pid, SIGCONT);
-        usleep(100000); 
-        kill(pid, SIGTERM);
+        //  kill(pid, SIGCONT);
+        // usleep(100000); 
+        //kill(pid, SIGTERM);
+        //  sprintf(fname, "pkill drastic");
+        //  system(fname);
         // wait for terminate
-        sprintf(fname, "/proc/%d", pid);
+        sprintf(fname, "sendkeys 97 1, 18 1");
+        system(fname);
+        usleep(200000); // 0.2s
+        sprintf(fname, "sendkeys 97 0, 18 0");
 
+        sprintf(fname, "/proc/%d", pid);
         uint32_t count = 40; // 8s
         while (--count && exists(fname))
-            usleep(200000); // 0.2s
+        usleep(200000); // 0.2s
+        
+        
         return true;
     }
 
     return false;
 }
 
-//
-//    Terminate drastic before kill/shotdown processes to save progress
-//
-bool terminate_drastic(void)
-{
-    char fname[16];
-    pid_t pid = process_searchpid("drastic");
-
-    if (pid) {
-        screenshot_system();
-
-        // send signal
-        kill(pid, SIGCONT);
-        usleep(100000);
-        kill(pid, SIGTERM);
-        // wait for terminate
-        sprintf(fname, "/proc/%d", pid);
-
-        uint32_t count = 20; // 4s
-        while (--count && exists(fname))
-            usleep(200000); // 0.2s
-
-        return true;
-    }
-
-    return false;
-}
 
 void quietMainUI(void)
 {
