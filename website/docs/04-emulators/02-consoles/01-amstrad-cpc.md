@@ -11,3 +11,10 @@ slug: /emulators/cpc
 - Rom Folder: `CPC`
 - Extensions: `.sna` `.dsk` `.kcr`
 - Bios: None
+
+Alternative Emulator:
+  
+- Emulator: Caprice32
+- Rom Folder: `CPC`
+- Extensions: `.dsk` `.sna` `.zip` `.tap` `.cdt` `.voc` `.cpr` `.m3u`
+- Bios: None
