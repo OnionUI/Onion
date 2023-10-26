@@ -56,6 +56,10 @@ please **make sure to create in-game saves** before upgrading.
    ```sh
    cp -rf Onion-v4.2.0/* /run/media/mmcblk0p1
    ```
+NOTE: Optionally, instead of the command above, if you wish to backup the files that should be overwritten by the updated ones you can run this command instead (repleace the palceolder paths with the actual paths):
+   ```sh
+   rsync -av --remove-source-files --backup --backup-dir=onion-backup Onion-v4.2.0/ /run/media/mmcblk0p1
+   ```
 
 </TabItem>
 <TabItem value="chromeos" label="Chrome OS">
