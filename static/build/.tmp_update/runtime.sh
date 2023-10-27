@@ -488,6 +488,8 @@ mount_main_ui() {
 init_system() {
     log "\n:: Init system"
 
+    load_settings
+
     # init_lcd
     cat /proc/ls
     sleep 0.25
@@ -497,8 +499,6 @@ init_system() {
     fi
 
     start_audioserver
-
-    load_settings
 
     brightness=$(/customer/app/jsonval brightness)
     brightness_raw=$(awk "BEGIN { print int(3 * exp(0.350656 * $brightness) + 0.5) }")
