@@ -70,8 +70,6 @@
 static bool quit = false;
 static bool exit_to_menu = false;
 
-//static pthread_t thread_pt;
-
 static void sigHandler(int sig)
 {
     switch (sig) {
@@ -121,8 +119,6 @@ static int gameNameScrollEnd = 20;
 static cJSON *json_root = NULL;
 static cJSON *json_items = NULL;
 static cJSON *jsonCache_root = NULL;
-
-//static bool __initial_romscreens_loaded = false;
 
 const bool __setCoreSavePathToCache(const char *core_name, const char *save_path)
 {
@@ -229,6 +225,61 @@ void addGameSaveState(const int index, const int state_id)
     game->saveStatesNum++;
 }
 
+void __arraySwap(int *xp, int *yp)
+{
+    int temp = *xp;
+    *xp = *yp;
+    *yp = temp;
+}
+
+void __cocktailSortDescend(int *array, const int array_size)
+{
+    bool swapped = true;
+    int start = 0;
+    int end = array_size - 1;
+
+    while (swapped) {
+        // reset the swapped flag on entering
+        // the loop, because it might be true from
+        // a previous iteration.
+        swapped = false;
+
+        // loop from left to right same as the bubble sort
+        for (int i = start; i < end; ++i) {
+            if (array[i] < array[i + 1]) {
+                __arraySwap(&array[i], &array[i + 1]);
+                swapped = true;
+            }
+        }
+
+        // if nothing moved, then array is sorted.
+        if (!swapped)
+            break;
+
+        // otherwise, reset the swapped flag so that it
+        // can be used in the next stage
+        swapped = false;
+
+        // move the end point back by one, because
+        // item at the end is in its rightful spot
+        --end;
+
+        // from right to left, doing the
+        // same comparison as in the previous stage
+        for (int i = end - 1; i >= start; --i) {
+            if (array[i] < array[i + 1]) {
+                __arraySwap(&array[i], &array[i + 1]);
+                swapped = true;
+            }
+        }
+
+        // increase the starting point, because
+        // the last stage would have moved the next
+        // smallest number to its rightful spot.
+        ++start;
+    }
+}
+
 void getRomSaves(const int index)
 {
     if (index < 0 || index >= game_list_len)
@@ -266,6 +317,10 @@ void getRomSaves(const int index)
         }
 
         closedir(save_dir);
+
+        // Because readdir does not guarantee the output of an
+        // alphabetically sorted result, it is necessary to sort manually
+        __cocktailSortDescend(game->saveStates, game->saveStatesNum);
     }
     else {
         perror("Error reading save directory");
@@ -326,9 +381,10 @@ void loadRomScreen(int index)
     if (game->saveStateSelected >= 0) {
         sprintf(stateScrPath, "%s/%s.state%i.png", getCoreSavePath(game->core_name), game->rom_name, game->saveStates[game->saveStateSelected]);
     }
-    else if (game->saveStateSelected == -1) {
+    // Commented out - use romscreen instead of autostate screenshot
+    /*else if (game->saveStateSelected == -1) {
         sprintf(stateScrPath, "%s/%s.state.auto.png", getCoreSavePath(game->core_name), game->rom_name);
-    }
+    }*/
 
     if (exists(stateScrPath)) {
         current_bg = IMG_Load(stateScrPath);
@@ -353,20 +409,6 @@ void loadRomScreen(int index)
         }
     }
 }
-
-/*static void *_loadRomScreensThread(void *_)
-{
-    for (int i = 0; i < 10 && i < game_list_len; i++) {
-        Game_s *game = &game_list[i];
-
-        if (game->romScreen == NULL)
-            loadRomScreen(i);
-    }
-
-    __initial_romscreens_loaded = true;
-
-    return NULL;
-}*/
 
 void getGameName(char *name_out, const char *rom_path)
 {
@@ -455,8 +497,6 @@ void readHistory()
 
         game_list_len++;
     }
-
-    //pthread_create(&thread_pt, NULL, _loadRomScreensThread, NULL);
 }
 
 void removeCurrentItem()
@@ -465,8 +505,8 @@ void removeCurrentItem()
 
     printf_debug("removing: %s\n", game->name);
 
+    // Check for duplicates
     if (game->is_duplicate > 0) {
-        // Check for duplicates
         for (int i = 0; i < game_list_len; i++) {
             Game_s *other = &game_list[i];
             if (other->hash == game->hash)
@@ -1009,13 +1049,15 @@ int main(void)
         }
     }
 
-    //screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
-
     remove("/mnt/SDCARD/.tmp_update/.runGameSwitcher");
     remove("/mnt/SDCARD/.tmp_update/cmd_to_run.sh");
 
-    if (exit_to_menu)
+    if (exit_to_menu) {
         print_debug("Exiting to menu");
+        screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
+        SDL_BlitSurface(screen, NULL, video, NULL);
+        SDL_Flip(video);
+    }
     else {
         print_debug("Resuming game");
         FILE *file = fopen("/mnt/SDCARD/.tmp_update/cmd_to_run.sh", "w");
@@ -1032,9 +1074,6 @@ int main(void)
 
     if (jsonCache_root != NULL)
         cJSON_free(jsonCache_root);
-
-    //SDL_BlitSurface(screen, NULL, video, NULL);
-    //SDL_Flip(video);
 
     if (custom_header != NULL)
         SDL_FreeSurface(custom_header);
