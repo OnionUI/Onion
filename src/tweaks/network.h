@@ -74,74 +74,87 @@ static int network_numShares;
 WifiNetwork *_wifi_networks = NULL;
 static int network_numWifiNetworks;
 
+bool reset_wifi = false;
+
 void network_freeWifiNetworks()
 {
     if (_wifi_networks != NULL)
         free(_wifi_networks);
 }
 
+void network_getWifiNetworks();
+
 void network_connectWifi(void *pt)
 {
     WifiNetwork *wifi_network = (WifiNetwork *)(((ListItem *)pt)->payload_ptr);
     if (wifi_network->encrypted) {
-        printf("Connecting to %s...\n", wifi_network->ssid);
+        printf("##### Connecting to %s...\n", wifi_network->ssid);
     }
     else {
-        printf("Connecting to unencrypted %s...\n", wifi_network->ssid);
+        printf("##### Connecting to unencrypted %s...\n", wifi_network->ssid);
+        char cmd[256];
+        snprintf(cmd, 256, "%s/wifi.sh connect %s &", NET_SCRIPT_PATH, wifi_network->ssid);
+        system(cmd);
+        char message[256];
+        sprintf(message, "Connecting to WiFi network\n%s", wifi_network->ssid);
+        showInfoDialogGeneric("WiFi networks", message, false, 5000);
+        network_getWifiNetworks();
     }
+    reset_menus = true;
 }
 
 void network_getWifiNetworks()
 {
+    char current_ssid[33] = "";
+    process_start_read_return("wpa_cli status | grep '^ssid=' | cut -d'=' -f2", current_ssid);
 
     system("rm -f /tmp/wifi.list && wpa_cli scan > /dev/null");
     sleep(5);
     system("wpa_cli scan_result | tail -n +3 > /tmp/wifi.list");
     system("sync");
 
-    FILE *file = fopen("/tmp/wifi.list", "r");
-    if (file == NULL) {
+    FILE *fp = fopen("/tmp/wifi.list", "r");
+    if (fp == NULL) {
         perror("Failed to open the wifi list");
         return;
     }
-    char current_ssid[32] = "";
-    system("wpa_cli status | awk -F= '/^ssid=/{print $2}' > /tmp/ssid");
-    FILE *fp = fopen("/tmp/ssid", "r");
-    file_get(fp, "/tmp/ssid", "%s", current_ssid);
+
     char line[256];
     _wifi_networks = (WifiNetwork *)calloc(1, sizeof(WifiNetwork));
     network_numWifiNetworks = 0;
-
-    while (fgets(line, sizeof(line), file) != NULL) {
+    printf("##### initializing wifi list\n");
+    while (fgets(line, sizeof(line), fp) != NULL) {
         if (network_numWifiNetworks == MAX_NUM_WIFI_NETWORKS)
             break;
-
         if (network_numWifiNetworks > 0)
             _wifi_networks = (WifiNetwork *)realloc(_wifi_networks,
                                                     (network_numWifiNetworks + 1) * sizeof(WifiNetwork));
+
         if (sscanf(line, "%18s\t%d\t%d\t%255s\t%32[^\n]",
                    _wifi_networks[network_numWifiNetworks].bssid,
                    &_wifi_networks[network_numWifiNetworks].frequency,
                    &_wifi_networks[network_numWifiNetworks].signal_level,
                    _wifi_networks[network_numWifiNetworks].flags,
                    _wifi_networks[network_numWifiNetworks].ssid) == 5) {
+
             if (strstr(_wifi_networks[network_numWifiNetworks].flags, "WPA") != NULL ||
                 strstr(_wifi_networks[network_numWifiNetworks].flags, "WEP") != NULL)
                 _wifi_networks[network_numWifiNetworks].encrypted = true;
-
             else
                 _wifi_networks[network_numWifiNetworks].encrypted = false;
+
             if (strcmp(current_ssid, _wifi_networks[network_numWifiNetworks].ssid) == 0)
                 _wifi_networks[network_numWifiNetworks].connected = true;
             else
                 _wifi_networks[network_numWifiNetworks].connected = false;
+
             network_numWifiNetworks++;
         }
         else {
             printf("Failed to parse the line: %s", line); // it fails on hidden wifis.. which is kinda the point?
         }
     }
-    fclose(file);
+    fclose(fp);
 
     for (int i = 0; i < network_numWifiNetworks; i++) {
         ListItem wifi_network = {
@@ -150,7 +163,9 @@ void network_getWifiNetworks()
             .action = network_connectWifi};
         snprintf(wifi_network.label, STR_MAX - 1, "%s", _wifi_networks[i].ssid);
         list_addItem(&_menu_wifi, wifi_network);
-        list_changed = true;
+        reset_wifi = true;
+        // reset_menus = true;
+        all_changed = true;
     }
 }
 
@@ -444,18 +459,12 @@ void network_toggleWifi(void *pt)
     bool wifion = ((ListItem *)pt)->value;
     settings.wifi_on = wifion;
     char cmd[256];
-    // sprintf(cmd, "%s/wifi.sh %d &", NET_SCRIPT_PATH, wifion);
+    sprintf(cmd, "%s/wifi.sh %s &", NET_SCRIPT_PATH, wifion ? "on" : "off");
     system(cmd);
 
-    if (menu_stack[menu_level] == &_menu_wifi) {
-        if (wifion) {
-            //showInfoDialogGeneric("WiFi networks", "Scanning for networks...\n", false);
-            //network_getWifiNetworks();
-        }
-    }
+    reset_wifi = true;
     reset_menus = true;
     all_changed = true;
-    list_changed = true;
 }
 
 void menu_smbd(void *pt)
@@ -562,6 +571,7 @@ void menu_ssh(void *pt)
     ListItem *item = (ListItem *)pt;
     item->value = (int)network_state.ssh;
     if (!_menu_ssh._created) {
+        printf("##### Creating ssh menu\n");
         _menu_ssh = list_create(2, LIST_SMALL);
         strcpy(_menu_ssh.title, "SSH");
         list_addItemWithInfoNote(&_menu_ssh,
@@ -593,24 +603,30 @@ void menu_wifi(void *pt)
     ListItem *item = (ListItem *)pt;
     item->value = (int)settings.wifi_on;
 
-    if (_menu_wifi._created)
+    if (reset_wifi) {
+        printf("##### Freeing wifi menu\n");
         list_free(&_menu_wifi);
+    }
 
-    _menu_wifi = list_createWithTitle(2 + MAX_NUM_WIFI_NETWORKS, LIST_SMALL, "WiFi networks");
-    list_addItem(&_menu_wifi,
-                 (ListItem){
-                     .label = "Enabled",
-                     .item_type = TOGGLE,
-                     .value = (int)settings.wifi_on,
-                     .action = network_toggleWifi});
-    list_addItem(&_menu_wifi,
-                 (ListItem){
-                     .label = "WPS connect",
-                     .disabled = !settings.wifi_on,
-                     .action = network_wpsConnect});
-    if (settings.wifi_on) {
-        showInfoDialogGeneric("WiFi networks", "Scanning for networks...\n", false);
-        network_getWifiNetworks();
+    if (!_menu_wifi._created) {
+        printf("##### Creating wifi menu\n");
+        _menu_wifi = list_createWithTitle(2 + MAX_NUM_WIFI_NETWORKS, LIST_SMALL, "WiFi networks");
+        list_addItem(&_menu_wifi,
+                     (ListItem){
+                         .label = "Enabled",
+                         .item_type = TOGGLE,
+                         .value = (int)settings.wifi_on,
+                         .action = network_toggleWifi});
+        list_addItem(&_menu_wifi,
+                     (ListItem){
+                         .label = "WPS connect",
+                         .disabled = !settings.wifi_on,
+                         .action = network_wpsConnect});
+        if (settings.wifi_on) {
+            showInfoDialogGeneric("WiFi networks", "Scanning for networks...\n", false, 0);
+            network_getWifiNetworks();
+        }
+        reset_wifi = false;
     }
     menu_stack[++menu_level] = &_menu_wifi;
     header_changed = true;

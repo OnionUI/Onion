@@ -1,21 +1,148 @@
 #!/bin/sh
 
-if [ "$1" = "0" ]; then
-    ifconfig wlan0 down
-    killall -15 wpa_supplicant
-    killall -15 udhcpc
-    sleep 0.5
-    /customer/app/axp_test wifioff
-elif [ "$1" = "1" ]; then
+sysdir=/mnt/SDCARD/.tmp_update
+miyoodir=/mnt/SDCARD/miyoo
+WPA="wpa_cli -i wlan0"
+
+logfile=wifi
+. $sysdir/script/log.sh
+
+wifi_enabled() {
+     if ifconfig wlan0 &> /dev/null; then
+        echo 1
+    else
+        echo 0
+    fi
+}
+
+enable_wifi() {
     /customer/app/axp_test wifion
     sleep 2
-    ifconfig wlan0 down
-    killall -15 wpa_supplicant
-    killall -15 udhcpc
     ifconfig wlan0 up
-    wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
+    sleep 1
+	$miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
     udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
-else
-    echo "Usage: $0 [0|1]"
+}
+
+disable_wifi() {
+    pkill -9 wpa_supplicant
+    pkill -9 udhcpc
+    /customer/app/axp_test wifioff
+}
+
+is_known() {
+    list_known_wifi | grep -e $'\t'"$1"$'\t' | cut -f1
+}
+
+connect_wifi() {
+    id=$(is_known "$1")
+    if  [ -z "$id" ]; then
+        log "Adding new Wi-Fi network: $1"
+        network_id=$($WPA add_network | tail -n 1)
+        pkill -9 udhcpc
+        $WPA set_network "$network_id" ssid "\"$1\""
+        if [ -n "$2" ]; then
+            $WPA set_network "$network_id" psk "\"$2\""
+        else
+            $WPA set_network "$network_id" key_mgmt NONE
+        fi
+        $WPA enable_network "$network_id"
+        $WPA select_network "$network_id"
+        $WPA reassociate
+        $WPA save_config
+    else
+        log "Connecting to known Wi-Fi network: $1 (ID:$id)"
+        pkill -9 udhcpc
+        $WPA select_network "$id"
+        $WPA reassociate
+        $WPA save_config
+    fi
+    
+    pkill -9 wpa_supplicant
+    $miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf >/dev/null 2>&1 &
+    sleep 1
+    udhcpc -i wlan0 -s /etc/init.d/udhcpc.script > /dev/null 2>&1 &
+}
+
+get_connected_wifi() {
+    $WPA status | grep '^ssid=' | cut -d'=' -f2
+}
+
+list_known_wifi() {
+    $WPA list_networks | tail -n+2
+}
+
+delete_known_wifi() {
+    if [ -n "$1" ]; then
+
+
+        $WPA remove_network "$1"
+        $WPA save_config
+    else
+        echo "Usage: $0 delete <ID>"
+        exit 1
+    fi
+}
+
+delete_all_known_wifi() {
+    $WPA remove_network all
+    $WPA save_config
+}
+
+scan() {
+    $WPA scan
+    sleep 5
+    $WPA scan_results
+}
+
+case "$1" in
+"on")
+    enable_wifi
+    ;;
+"off")
+    disable_wifi
+    ;;
+"enabled")
+    wifi_enabled
+    ;;
+"known")
+    is_known "$2"
+    ;;
+"connect")
+    connect_wifi "$2" "$3"
+    ;;
+"connected")
+    get_connected_wifi
+    ;;
+"list")
+    list_known_wifi
+    ;;
+"delete")
+    delete_known_wifi "$2"
+    ;;
+"delete_all")
+    delete_all_known_wifi
+    ;;
+"scan")
+    scan "$2"
+    ;;
+*)
+    echo "Usage: $0 {on|off|enabled|connect <SSID> [PSK]|connected|list|delete <ID>|delete_all|scan}"
+    echo ""
+    echo "Options:"
+    echo "  on          Enable Wi-Fi"
+    echo "  off         Disable Wi-Fi"
+    echo "  enabled     Check if Wi-Fi is enabled"
+    echo "  connect     Connect to a Wi-Fi network"
+    echo "              Usage: $0 connect <SSID> [PSK]"
+    echo "  connected   Get the name of the connected Wi-Fi network"
+    echo "  list        List known Wi-Fi networks"
+    echo "  delete      Delete a known Wi-Fi network by its ID"
+    echo "              Usage: $0 delete <ID>"
+    echo "  delete_all  Delete all known Wi-Fi networks"
+    echo "  scan        Scan for available Wi-Fi networks"
     exit 1
-fi
+    ;;
+esac
+
+exit 0

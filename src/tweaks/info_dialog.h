@@ -7,7 +7,7 @@
 
 #include "./appstate.h"
 
-void __showInfoDialog(const char *title, const char *message, bool waitinput)
+void __showInfoDialog(const char *title, const char *message, bool waitinput, int timeout)
 {
     bool confirm_quit = false;
     SDLKey changed_key = SDLK_UNKNOWN;
@@ -30,19 +30,22 @@ void __showInfoDialog(const char *title, const char *message, bool waitinput)
             }
         }
     }
+    if (timeout > 0) {
+        SDL_Delay(timeout);
+    }
     keys_enabled = true;
     all_changed = true;
 }
 
-void showInfoDialogGeneric(const char *title, const char *message, bool waitinput)
+void showInfoDialogGeneric(const char *title, const char *message, bool waitinput, int timeout)
 {
-    __showInfoDialog(title, message, waitinput);
+    __showInfoDialog(title, message, waitinput, timeout);
 }
 
-void showInfoDialog(List *list, bool waitinput)
+void showInfoDialog(List *list, bool waitinput, int timeout)
 {
     ListItem *item = list_currentItem(list);
-    __showInfoDialog(item->label, item->info_note, waitinput);
+    __showInfoDialog(item->label, item->info_note, waitinput, timeout);
 }
 
 #endif // TWEAKS_INFO_DIALOG_H__

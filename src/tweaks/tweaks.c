@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
             else if (keystate[SW_BTN_SELECT] == PRESSED) {
                 if (list_hasInfoNote(menu_stack[menu_level])) {
                     sound_change();
-                    showInfoDialog(menu_stack[menu_level], true);
+                    showInfoDialog(menu_stack[menu_level], true, 0);
                 }
             }
             else if (keystate[SW_BTN_A] == PRESSED) {
@@ -191,7 +191,7 @@ int main(int argc, char *argv[])
                              "Press SELECT to view a tooltip\n"
                              "describing the selected option."
                              " \n"
-                             "Press any button to close", true);
+                             "Press any button to close", true, 0);
         }
 
         if (battery_hasChanged(ticks, &battery_percentage))
