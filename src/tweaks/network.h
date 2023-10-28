@@ -298,10 +298,13 @@ void network_scanWifiNetworks(void *pt)
     wifi_scan_running = true;
     pthread_t network_updateScanningLabel_thread;
     pthread_create(&network_updateScanningLabel_thread, NULL, network_updateScanningLabel, NULL);
+    pthread_detach(network_updateScanningLabel_thread);
 
     pthread_t wifi_thread;
     pthread_create(&wifi_thread, NULL, network_getWifiNetworks, NULL);
+    pthread_detach(wifi_thread);
 }
+
 
 void network_freeSmbShares()
 {
