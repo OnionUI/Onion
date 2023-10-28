@@ -3,11 +3,14 @@
 
 #include <SDL/SDL_image.h>
 #include <ctype.h>
+#include <pthread.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/syscall.h>
+#include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -74,7 +77,9 @@ static int network_numShares;
 WifiNetwork *_wifi_networks = NULL;
 static int network_numWifiNetworks;
 
-bool reset_wifi = false;
+static bool reset_wifi = false;
+pthread_mutex_t wifi_scan_mutex = PTHREAD_MUTEX_INITIALIZER;
+bool wifi_scan_running = false;
 
 void network_freeWifiNetworks()
 {
@@ -82,29 +87,40 @@ void network_freeWifiNetworks()
         free(_wifi_networks);
 }
 
-void network_getWifiNetworks();
+void network_scanWifiNetworks();
 
 void network_connectWifi(void *pt)
 {
     WifiNetwork *wifi_network = (WifiNetwork *)(((ListItem *)pt)->payload_ptr);
     if (wifi_network->encrypted) {
-        printf("##### Connecting to %s...\n", wifi_network->ssid);
+        printf("[WiFi] Connecting to %s...\n", wifi_network->ssid);
     }
     else {
-        printf("##### Connecting to unencrypted %s...\n", wifi_network->ssid);
+        printf("[WiFi] Connecting to unencrypted %s...\n", wifi_network->ssid);
         char cmd[256];
         snprintf(cmd, 256, "%s/wifi.sh connect %s &", NET_SCRIPT_PATH, wifi_network->ssid);
         system(cmd);
         char message[256];
         sprintf(message, "Connecting to WiFi network\n%s", wifi_network->ssid);
         showInfoDialogGeneric("WiFi networks", message, false, 5000);
-        network_getWifiNetworks();
+        network_scanWifiNetworks();
     }
     reset_menus = true;
 }
 
-void network_getWifiNetworks()
+void *network_getWifiNetworks()
 {
+    if (pthread_mutex_trylock(&wifi_scan_mutex) != 0)
+        return NULL;
+    wifi_scan_running = true;
+    printf("[WiFi] scan thread START %ld\n", syscall(__NR_gettid));
+
+    network_numWifiNetworks = 0;
+    _wifi_networks = NULL;
+    strcpy(_menu_wifi.items[2].label, "Scanning...");
+    list_changed = true;
+    reset_menus = true;
+    reset_wifi = true;
     char current_ssid[33] = "";
     process_start_read_return("wpa_cli status | grep '^ssid=' | cut -d'=' -f2", current_ssid);
 
@@ -116,13 +132,13 @@ void network_getWifiNetworks()
     FILE *fp = fopen("/tmp/wifi.list", "r");
     if (fp == NULL) {
         perror("Failed to open the wifi list");
-        return;
+        pthread_mutex_unlock(&wifi_scan_mutex);
+        return NULL;
     }
 
     char line[256];
     _wifi_networks = (WifiNetwork *)calloc(1, sizeof(WifiNetwork));
     network_numWifiNetworks = 0;
-    printf("##### initializing wifi list\n");
     while (fgets(line, sizeof(line), fp) != NULL) {
         if (network_numWifiNetworks == MAX_NUM_WIFI_NETWORKS)
             break;
@@ -156,17 +172,50 @@ void network_getWifiNetworks()
     }
     fclose(fp);
 
-    for (int i = 0; i < network_numWifiNetworks; i++) {
-        ListItem wifi_network = {
-            .item_type = WIFINETWORK,
-            .payload_ptr = _wifi_networks + i,
-            .action = network_connectWifi};
-        snprintf(wifi_network.label, STR_MAX - 1, "%s", _wifi_networks[i].ssid);
-        list_addItem(&_menu_wifi, wifi_network);
-        reset_wifi = true;
-        // reset_menus = true;
+    sprintf(_menu_wifi.items[2].label, "Scan for networks");
+    list_changed = true;
+    reset_menus = true;
+    all_changed = true;
+    reset_wifi = true;
+    printf("[WiFi] scan thread END %ld\n", syscall(__NR_gettid));
+    wifi_scan_running = false;
+    pthread_mutex_unlock(&wifi_scan_mutex);
+    return NULL;
+}
+
+void *wifi_scanning_text()
+{
+    printf("wifi_scanning_text_thread starting\n");
+    while (wifi_scan_running) {
+        if (strcmp(_menu_wifi.items[2].label, "Scanning...") == 0)
+            strcpy(_menu_wifi.items[2].label, "Scanning");
+        else if (strcmp(_menu_wifi.items[2].label, "Scanning") == 0)
+            strcpy(_menu_wifi.items[2].label, "Scanning.");
+        else if (strcmp(_menu_wifi.items[2].label, "Scanning.") == 0)
+            strcpy(_menu_wifi.items[2].label, "Scanning..");
+        else if (strcmp(_menu_wifi.items[2].label, "Scanning..") == 0)
+            strcpy(_menu_wifi.items[2].label, "Scanning...");
+        else
+            strcpy(_menu_wifi.items[2].label, "Scanning");
+        list_changed = true;
         all_changed = true;
+        usleep(500000);
+        printf("wifi_scanning_text_thread changing text\n");
     }
+    printf("wifi_scanning_text_thread exiting\n");
+    return NULL;
+}
+
+void network_scanWifiNetworks(void *pt)
+{
+    network_numWifiNetworks = 0;
+    _wifi_networks = NULL;
+    wifi_scan_running = true;
+    pthread_t wifi_scanning_text_thread;
+    pthread_create(&wifi_scanning_text_thread, NULL, wifi_scanning_text, NULL);
+
+    pthread_t wifi_thread;
+    pthread_create(&wifi_thread, NULL, network_getWifiNetworks, NULL);
 }
 
 void network_freeSmbShares()
@@ -604,13 +653,13 @@ void menu_wifi(void *pt)
     item->value = (int)settings.wifi_on;
 
     if (reset_wifi) {
-        printf("##### Freeing wifi menu\n");
+        printf("Freeing wifi menu\n");
         list_free(&_menu_wifi);
     }
 
     if (!_menu_wifi._created) {
-        printf("##### Creating wifi menu\n");
-        _menu_wifi = list_createWithTitle(2 + MAX_NUM_WIFI_NETWORKS, LIST_SMALL, "WiFi networks");
+        printf("Creating wifi menu\n");
+        _menu_wifi = list_createWithTitle(3 + MAX_NUM_WIFI_NETWORKS, LIST_SMALL, "WiFi networks");
         list_addItem(&_menu_wifi,
                      (ListItem){
                          .label = "Enabled",
@@ -622,9 +671,19 @@ void menu_wifi(void *pt)
                          .label = "WPS connect",
                          .disabled = !settings.wifi_on,
                          .action = network_wpsConnect});
-        if (settings.wifi_on) {
-            showInfoDialogGeneric("WiFi networks", "Scanning for networks...\n", false, 0);
-            network_getWifiNetworks();
+        list_addItem(&_menu_wifi,
+                     (ListItem){
+                         .label = "Scan for networks",
+                         .disabled = !settings.wifi_on,
+                         .action = network_scanWifiNetworks});
+
+        for (int i = 0; i < network_numWifiNetworks; i++) {
+            ListItem wifi_network = {
+                .item_type = WIFINETWORK,
+                .payload_ptr = _wifi_networks + i,
+                .action = network_connectWifi};
+            snprintf(wifi_network.label, STR_MAX - 1, "%s", _wifi_networks[i].ssid);
+            list_addItem(&_menu_wifi, wifi_network);
         }
         reset_wifi = false;
     }
