@@ -78,6 +78,7 @@ int main(int argc, char *argv[])
         SDL_InitDefault(true);
 
     settings_load();
+    settings.mute_bgm = !BGMFileExists();
     lang_load();
 
     // Apply tool via command line

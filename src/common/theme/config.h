@@ -8,7 +8,6 @@
 
 #include "./color.h"
 #include "./load.h"
-#include "system/lang.h"
 #include "utils/file.h"
 #include "utils/json.h"
 #include "utils/str.h"

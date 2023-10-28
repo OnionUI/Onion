@@ -242,6 +242,7 @@ void action_hideLabelsIcons(void *pt)
 void action_toggleBackgroundMusic(void *pt) 
 {
     settings.mute_bgm = ((ListItem *)pt)->value == 1;
+    settings.mute_bgm ? muteBGM() : unmuteBGM();
 };
 
 void action_hideLabelsHints(void *pt)
