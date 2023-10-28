@@ -123,10 +123,10 @@ void network_connectWifi(void *pt)
     }
     else {
         printf("[WiFi] Connecting to unencrypted %s...\n", wifi_network->ssid);
-        char cmd[256];
-        snprintf(cmd, 256, "%s/wifi.sh connect %s &", NET_SCRIPT_PATH, wifi_network->ssid);
+        char cmd[STR_MAX];
+        snprintf(cmd, STR_MAX, "%s/wifi.sh connect %s &", NET_SCRIPT_PATH, wifi_network->ssid);
         system(cmd);
-        char message[256];
+        char message[STR_MAX];
         sprintf(message, "Connecting to WiFi network\n%s", wifi_network->ssid);
         showInfoDialogGeneric("WiFi networks", message, false, 5000);
     }
@@ -172,7 +172,7 @@ void network_handleParsedNetwork(WifiNetwork *network, const char *current_ssid)
 // called by network_scanAndPop.
 void network_parseAndPopulate(FILE *fp, const char *current_ssid)
 {
-    char line[256];
+    char line[STR_MAX];
     int capacity = INITIAL_CAPACITY;
     globalNetworkList.networks = (WifiNetwork *)calloc(capacity, sizeof(WifiNetwork));
     if (globalNetworkList.networks == NULL) {
@@ -429,7 +429,7 @@ void network_setState(bool *state_ptr, const char *flag_name, bool value)
 
 void network_execServiceState(const char *service_name, bool background)
 {
-    char state[256];
+    char state[STR_MAX];
     char command[512];
 
     sync();
@@ -445,7 +445,7 @@ void network_execServiceState(const char *service_name, bool background)
 
 void network_execServiceAuth(const char *service_name)
 {
-    char authed[256];
+    char authed[STR_MAX];
     char command[512];
 
     sync();
@@ -595,7 +595,7 @@ void network_toggleWifi(void *pt)
 {
     bool wifion = ((ListItem *)pt)->value;
     settings.wifi_on = wifion;
-    char cmd[256];
+    char cmd[STR_MAX];
     sprintf(cmd, "%s/wifi.sh %s &", NET_SCRIPT_PATH, wifion ? "on" : "off");
     system(cmd);
 
