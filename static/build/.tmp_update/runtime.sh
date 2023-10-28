@@ -186,6 +186,8 @@ launch_main_ui() {
 
     start_audioserver
 
+    mute_theme_bgm
+
     # MainUI launch
     cd $miyoodir/app
     PATH="$miyoodir/app:$PATH" \
@@ -481,6 +483,23 @@ mount_main_ui() {
         fi
 
         mount -o bind "$sysdir/bin/$mainui_srcname" $mainui_target
+    fi
+}
+
+mute_theme_bgm() {
+    bgm_muted=$(/customer/app/jsonval bgmmute)
+    system_theme="$(/customer/app/jsonval theme)"
+    bgm_file="${system_theme}sound/bgm.mp3"
+    muted_bgm_file="${system_theme}sound/bgm_muted.mp3"
+
+    if [ $bgm_muted -eq 1 ]; then
+        if [[ -f "$bgm_file" ]]; then
+            mv -f "$bgm_file" "$muted_bgm_file"
+        fi
+    else
+        if [[ -f "$muted_bgm_file" ]]; then
+            mv -f "$muted_bgm_file" "$bgm_file"
+        fi
     fi
 }
 

@@ -80,10 +80,6 @@ const char *file_read(const char *path);
 
 bool file_write(const char *path, const char *str, uint32_t len);
 
-bool file_touch(const char *path);
-
-bool file_rename(const char *existing_path, const char *new_path);
-
 void file_copy(const char *src_path, const char *dest_path);
 
 char *file_removeExtension(char *myStr);

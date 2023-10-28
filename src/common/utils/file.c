@@ -132,22 +132,6 @@ bool file_write(const char *path, const char *str, uint32_t len)
     return true;
 }
 
-bool file_touch(const char *path)
-{
-    uint32_t fd;
-    bool is_success;
-    is_success = (fd = open(path, O_CREAT)) == 0;
-    if (is_success)
-        close(fd);
-    return is_success;
-}
-
-
-bool file_rename(const char *existing_path, const char *new_path)
-{
-    return rename(existing_path, new_path) == 0;
-};
-
 void file_copy(const char *src_path, const char *dest_path)
 {
     char system_cmd[512];

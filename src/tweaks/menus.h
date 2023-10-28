@@ -440,7 +440,7 @@ void menu_themeOverrides(void *_)
                                  (ListItem){
                                      .label = "Mute background music",
                                      .item_type = TOGGLE,
-                                     .value = settings.mute_bgm,
+                                     .value = settings.bgm_mute,
                                      .action = action_toggleBackgroundMusic},
                                  "Mute background music for themes");
         list_addItemWithInfoNote(&_menu_theme_overrides,

@@ -255,39 +255,8 @@ Mix_Chunk *resource_getSoundChange(void)
     return resources.sound_change;
 }
 
-bool BGMFileExists(void) 
-{
-    char sound_path[STR_MAX * 2];
-    snprintf(sound_path, STR_MAX * 2 - 1, "%ssound/bgm.mp3", theme()->path);
-    return exists(sound_path);    
-};
-
-bool muteBGM() 
-{
-    char bgm[STR_MAX * 2];
-    char mutedBGM[STR_MAX * 2];
-    snprintf(bgm, STR_MAX * 2 - 1, "%ssound/bgm.mp3", theme()->path);
-    snprintf(mutedBGM, STR_MAX * 2 - 1, "%ssound/bgm_muted.mp3", theme()->path);
-    file_touch(bgm);
-    return file_rename(bgm, mutedBGM) == 0;
-}
-
-bool unmuteBGM()
-{
-    char bgm[STR_MAX * 2];
-    char mutedBGM[STR_MAX * 2];
-    snprintf(bgm, STR_MAX * 2 - 1, "%ssound/bgm.mp3", theme()->path);
-    snprintf(mutedBGM, STR_MAX * 2 - 1, "%ssound/bgm_muted.mp3", theme()->path);
-    file_touch(mutedBGM);
-    return file_rename(mutedBGM, bgm) == 0;
-}
-
 Mix_Music *resource_getBGM(void)
 {
-    if (config_flag_get(".muteBgm")) {
-        resources.bgm = NULL;
-        return NULL;
-    };
     if (resources.bgm == NULL) {
         char sound_path[STR_MAX * 2];
         snprintf(sound_path, STR_MAX * 2 - 1, "%ssound/bgm.mp3", theme()->path);
