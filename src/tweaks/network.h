@@ -91,7 +91,6 @@ bool wifi_scan_running = false;
 
 // forward decs
 void network_scanWifiNetworks();
-void menu_wifi();
 
 void network_freeWifiNetworks()
 {
