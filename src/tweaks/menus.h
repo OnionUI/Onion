@@ -11,6 +11,7 @@
 #include <unistd.h>
 
 #include "components/list.h"
+#include "components/kbinput_wrapper.h"
 #include "system/device_model.h"
 #include "system/display.h"
 #include "utils/apps.h"
