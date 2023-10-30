@@ -139,6 +139,7 @@ int main(int argc, char *argv[])
                 if (list_currentItem(menu_stack[menu_level])->action != NULL) {
                     sound_change();
                     skip_next_change = true;
+                    keystate[SW_BTN_A] = RELEASED;
                 }
                 key_changed = list_activateItem(menu_stack[menu_level]) || header_changed;
             }
