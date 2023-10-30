@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 
-const char* launch_keyboard(const char *initial_value, const char *title);
+const char *launch_keyboard(const char *initial_value, const char *title);
 
 #ifdef __cplusplus
 }
