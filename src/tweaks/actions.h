@@ -297,7 +297,6 @@ void action_setAltBrightness(void *pt)
     config_flag_set(".altBrightness", ((ListItem *)pt)->value);
 }
 
-
 void action_advancedSetLcdVoltage(void *pt)
 {
     int value = 0x0e - ((ListItem *)pt)->value;
@@ -331,8 +330,9 @@ void action_advancedSetLcdVoltage(void *pt)
     file_put(fp, LCD_VOLT_CONFIG, "%x", 0x0e);
 }
 
-const char* action_LaunchKeyboardWrapper(const char *initial_value, const char *title) {
-    const char* result = launch_keyboard(initial_value, title);
+const char *action_LaunchKeyboardWrapper(const char *initial_value, const char *title)
+{
+    const char *result = launch_keyboard(initial_value, title);
     all_changed = true;
     return result;
 }
