@@ -19,5 +19,7 @@
   "dpad_90d":0,
   "menu_c0":"0xffffff",
   "menu_c1":"0x000000",
-  "menu_c2":"0x289a35"
+  "menu_c2":"0x289a35",
+  "auto_state":1,
+  "auto_slot":0
 }
