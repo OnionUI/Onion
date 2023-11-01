@@ -14,6 +14,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "components/kbinput_wrapper.h"
 #include "components/list.h"
 #include "components/types.h"
 #include "system/keymap_sw.h"
@@ -30,7 +31,8 @@
 #define SMBD_CONFIG_PATH "/mnt/SDCARD/.tmp_update/config/smb.conf"
 
 #define INITIAL_CAPACITY 10 // preallocate for 10 network slots
-#define GROWTH_FACTOR 2 // gets doubled if we hit 10
+#define GROWTH_FACTOR 2     // gets doubled if we hit 10
+#define WIFI_CONNECT_WAIT 7000
 
 typedef struct { // create a struct to store the wifi networks, we can use access them afterwards if we need to for anything
     WifiNetwork *networks;
@@ -91,7 +93,6 @@ bool wifi_scan_running = false;
 
 // forward decs
 void network_scanWifiNetworks();
-
 void network_freeWifiNetworks()
 {
     if (globalNetworkList.networks != NULL) {
@@ -118,21 +119,48 @@ bool network_ssidContainsNull(char *str, int len)
 void network_connectWifi(void *pt)
 {
     WifiNetwork *wifi_network = (WifiNetwork *)(((ListItem *)pt)->payload_ptr);
-    if (wifi_network->encrypted) {
-        printf("[WiFi] Connecting to %s...\n", wifi_network->ssid);
-    }
-    else {
-        printf("[WiFi] Connecting to unencrypted %s...\n", wifi_network->ssid);
+    if (wifi_network->known) {
+        printf("[WiFi] Connecting to known network %s...\n", wifi_network->ssid);
         char cmd[STR_MAX];
-        snprintf(cmd, STR_MAX, "%s/wifi.sh connect %s &", NET_SCRIPT_PATH, wifi_network->ssid);
+        snprintf(cmd, STR_MAX, "%s/wifi.sh connect \"%s\" &", NET_SCRIPT_PATH, wifi_network->ssid);
         system(cmd);
         char message[STR_MAX];
         sprintf(message, "Connecting to WiFi network\n%s", wifi_network->ssid);
-        showInfoDialogGeneric("WiFi networks", message, false, 5000);
+        showInfoDialogGeneric("WiFi networks", message, false, WIFI_CONNECT_WAIT);
     }
+    else {
+        printf("[WiFi] Connecting to unknown network %s...\n", wifi_network->ssid);
+        if (wifi_network->encrypted) {
+            printf("[WiFi] Connecting to %s...\n", wifi_network->ssid);
+            const char *psk = launch_keyboard("", "Enter your WiFi password");
+            if (strlen(psk) < 8) {
+                showInfoDialogGeneric("WiFi networks", "Password too short.\nPress any button to continue", true, 0);
+                return;
+            }
+            else {
+                char cmd[STR_MAX];
+                snprintf(cmd, STR_MAX, "%s/wifi.sh connect \"%s\" %s &", NET_SCRIPT_PATH, wifi_network->ssid, psk);
+                system(cmd);
+                char message[STR_MAX];
+                sprintf(message, "Connecting to WiFi network\n%s", wifi_network->ssid);
+                showInfoDialogGeneric("WiFi networks", message, false, WIFI_CONNECT_WAIT);
+            }
+        }
+        else {
+            printf("[WiFi] Connecting to unencrypted %s...\n", wifi_network->ssid);
+            char cmd[STR_MAX];
+            snprintf(cmd, STR_MAX, "%s/wifi.sh connect \"%s\" &", NET_SCRIPT_PATH, wifi_network->ssid);
+            system(cmd);
+            char message[STR_MAX];
+            sprintf(message, "Connecting to WiFi network\n%s", wifi_network->ssid);
+            showInfoDialogGeneric("WiFi networks", message, false, WIFI_CONNECT_WAIT);
+        }
+    }
+
     // list would need rebuilding here with fresh data to change connected icon to new netwk, or change the value of the lisitems "connected" state to true/1 then reload the list
-    all_changed= true;
+    all_changed = true;
     reset_menus = true;
+    network_scanWifiNetworks();
 }
 
 // parses a line to extract network data from `scan_results`
@@ -152,7 +180,7 @@ bool network_parseLine(const char *line, WifiNetwork *network)
 // called by network_parseAndPopulate.
 void network_handleParsedNetwork(WifiNetwork *network, const char *current_ssid)
 {
-    if (! network_ssidContainsNull(network->ssid, 32)) { 
+    if (!network_ssidContainsNull(network->ssid, 32)) {
         strcpy(network->ssid, "Bad name");
     }
 
@@ -166,6 +194,23 @@ void network_handleParsedNetwork(WifiNetwork *network, const char *current_ssid)
         network->connected = true;
     else
         network->connected = false;
+
+    char cmd[STR_MAX];
+    sprintf(cmd, "%s/wifi.sh known \"%s\" &", NET_SCRIPT_PATH, network->ssid);
+    printf("cmd: %s\n", cmd);
+    char output[STR_MAX];
+    process_start_read_return(cmd, output);
+    printf("known output: %s\n", output);
+    if (strlen(output) > 0) {
+        network->known = true;
+        network->id = atoi(output);
+    }
+    else {
+        network->known = false;
+        network->id = -1;
+    }
+
+    printf("network id: %d\t%s\nknown: %d\n", network->id, network->ssid, network->known);
 }
 
 // parses and populates global network list / struct from file pointer.
@@ -198,7 +243,8 @@ void network_parseAndPopulate(FILE *fp, const char *current_ssid)
         if (network_parseLine(line, current_network)) {
             network_handleParsedNetwork(current_network, current_ssid);
             globalNetworkList.count++;
-        } else {
+        }
+        else {
             strcpy(current_network->ssid, "Hidden");
             printf("HIDDEN NETWORK %s", line);
             globalNetworkList.count++;
@@ -216,7 +262,7 @@ void network_scanAndPop()
     process_start_read_return("wpa_cli status | grep '^ssid=' | cut -d'=' -f2", current_ssid);
 
     system("wpa_cli scan > /dev/null");
-    sleep(5);
+    sleep(3);
 
     FILE *fp = popen("wpa_cli scan_result | tail -n +3", "r");
     if (fp == NULL) {
@@ -227,8 +273,8 @@ void network_scanAndPop()
     network_parseAndPopulate(fp, current_ssid);
 
     pclose(fp);
-    
-    printf("Network List Count: %d\n", globalNetworkList.count); 
+
+    printf("Network List Count: %d\n", globalNetworkList.count);
     for (int i = 0; i < globalNetworkList.count; i++) { // some debugging, you can remove this
         printf("Network %d:\n", i);
         printf("\tBSSID: %s\n", globalNetworkList.networks[i].bssid);
@@ -238,7 +284,21 @@ void network_scanAndPop()
         printf("\tSSID: %s\n", globalNetworkList.networks[i].ssid);
         printf("\tEncrypted: %s\n", globalNetworkList.networks[i].encrypted ? "Yes" : "No");
         printf("\tConnected: %s\n", globalNetworkList.networks[i].connected ? "Yes" : "No");
+        printf("\tKnown: %s\n", globalNetworkList.networks[i].known ? "Yes" : "No");
+        printf("\tID: %d\n", globalNetworkList.networks[i].id);
     }
+}
+
+int compareSignalLevel(const void *a, const void *b)
+{
+    WifiNetwork *wifiA = (WifiNetwork *)a;
+    WifiNetwork *wifiB = (WifiNetwork *)b;
+    if (wifiA->signal_level < wifiB->signal_level)
+        return 1;
+    else if (wifiA->signal_level > wifiB->signal_level)
+        return -1;
+    else
+        return 0;
 }
 
 void *network_getWifiNetworks()
@@ -247,17 +307,23 @@ void *network_getWifiNetworks()
         return NULL;
     wifi_scan_running = true;
     printf("[WiFi] scan thread START %ld\n", syscall(__NR_gettid));
-    
+
     WifiNetworkList networkList = {0};
     network_scanAndPop(&networkList);
-    
+
     _wifi_networks = networkList.networks;
     network_numWifiNetworks = networkList.count;
-    
+
+    for (int i = 0; i < networkList.count; i++) {
+        printf("Network %d:\n", i);
+        printf("\tSignal Level: %d\n", _wifi_networks[i].signal_level);
+        printf("\tSSID: %s\n", _wifi_networks[i].ssid);
+    }
     list_changed = true;
     reset_menus = true;
     all_changed = true;
     reset_wifi = true;
+
     printf("[WiFi] scan thread END %ld\n", syscall(__NR_gettid));
     wifi_scan_running = false;
     pthread_mutex_unlock(&wifi_scan_mutex);
@@ -268,7 +334,6 @@ void *network_getWifiNetworks()
 // called by network_scanWifiNetworks.
 void *network_updateScanningLabel()
 {
-    printf("network_updateScanningLabel_thread starting\n");
     while (wifi_scan_running) {
         if (strcmp(_menu_wifi.items[2].label, "Scanning...") == 0)
             strcpy(_menu_wifi.items[2].label, "Scanning");
@@ -283,9 +348,7 @@ void *network_updateScanningLabel()
         list_changed = true;
         all_changed = true;
         usleep(500000);
-        printf("network_updateScanningLabel_thread changing text\n");
     }
-    printf("network_updateScanningLabel_thread exiting\n");
     return NULL;
 }
 
@@ -304,7 +367,6 @@ void network_scanWifiNetworks(void *pt)
     pthread_create(&wifi_thread, NULL, network_getWifiNetworks, NULL);
     pthread_detach(wifi_thread);
 }
-
 
 void network_freeSmbShares()
 {
@@ -747,7 +809,7 @@ void menu_wifi(void *pt)
 
     if (!_menu_wifi._created) {
         printf("Creating wifi menu\n");
-        _menu_wifi = list_createWithTitle(3 + globalNetworkList.count, LIST_SMALL, "WiFi networks");  // use networkList->count instead of MAX_NUM_WIFI_NETWORKS so we're not limited to 35
+        _menu_wifi = list_createWithTitle(3 + globalNetworkList.count, LIST_SMALL, "WiFi networks"); // use networkList->count instead of MAX_NUM_WIFI_NETWORKS so we're not limited to 35
         list_addItem(&_menu_wifi,
                      (ListItem){
                          .label = "Enabled",
@@ -764,13 +826,17 @@ void menu_wifi(void *pt)
                          .label = "Scan for networks",
                          .disabled = !settings.wifi_on,
                          .action = network_scanWifiNetworks});
-        for (int i = 0; i < globalNetworkList.count; i++) { 
+
+        // sort before displaying
+        qsort(globalNetworkList.networks, globalNetworkList.count, sizeof(WifiNetwork), compareSignalLevel);
+
+        for (int i = 0; i < globalNetworkList.count; i++) {
             ListItem wifi_network = {
                 .item_type = WIFINETWORK,
                 .payload_ptr = globalNetworkList.networks + i,
                 .action = network_connectWifi};
             snprintf(wifi_network.label, STR_MAX - 1, "%s", globalNetworkList.networks[i].ssid);
-            printf("Added %s \n", globalNetworkList.networks[i].ssid);  // debug adding items to list
+            printf("Added %s \n", globalNetworkList.networks[i].ssid); // debug adding items to list
             list_addItem(&_menu_wifi, wifi_network);
         }
         list_changed = true;

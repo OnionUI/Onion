@@ -112,6 +112,8 @@ bool process_start_read_return(const char *cmdline, char *out_str)
         result[strlen(buffer) - 1] = '\0';
         strcpy(out_str, result);
         free(result);
+    } else{
+        strcpy(out_str, "");
     }
     return 0;
 }

@@ -17,6 +17,8 @@ typedef struct {
     char ssid[33];
     bool connected;
     bool encrypted;
+    bool known;
+    int id;
 } WifiNetwork;
 
 #endif // TYPES_H__

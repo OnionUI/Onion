@@ -175,28 +175,44 @@ void theme_renderList(SDL_Surface *screen, List *list)
                 label_end -= wifi_encrypted->w;
             }
             SDL_Surface *wifi_strength = NULL;
+
             // not too sure about the values..
-            if (wifi->signal_level >= -50) {
+            switch (wifi->signal_level) {
+            case -50 ... 0:
                 wifi_strength = resource_getSurface(WIFI_SIGNAL_4);
-            }
-            else if (wifi->signal_level < -50 && wifi->signal_level >= -70) {
+                break;
+            case -70 ... -51:
                 wifi_strength = resource_getSurface(WIFI_SIGNAL_3);
-            }
-            else if (wifi->signal_level < -70 && wifi->signal_level >= -90) {
+                break;
+            case -80 ... -71:
                 wifi_strength = resource_getSurface(WIFI_SIGNAL_2);
-            }
-            else {
+                break;
+            default:
                 wifi_strength = resource_getSurface(WIFI_SIGNAL_1);
+                break;
             }
+
             SDL_Rect wifi_strength_pos = {
                 640 - WIFI_ICONS_OFFSET - wifi_strength->w,
                 item_center_y - wifi_strength->h / 2};
             SDL_BlitSurface(wifi_strength, NULL, screen, &wifi_strength_pos);
- 
-            if(wifi->connected) {
+
+            if (wifi->known && !wifi->connected) {
+                SDL_Surface *wifi_known = resource_getSurface(WIFI_KNOWN);
+                int offset_x = WIFI_ICONS_OFFSET + wifi_known->w + wifi_strength->w;
+                if (wifi->encrypted)
+                    offset_x += WIFI_ICONS_WIDTH;
+                SDL_Rect wifi_known_pos = {
+                    640 - offset_x,
+                    item_center_y - wifi_known->h / 2};
+                SDL_BlitSurface(wifi_known, NULL, screen, &wifi_known_pos);
+                label_end -= wifi_known->w;
+            }
+
+            if (wifi->connected) {
                 SDL_Surface *wifi_connected = resource_getSurface(WIFI_CONNECTED);
                 int offset_x = WIFI_ICONS_OFFSET + wifi_connected->w + wifi_strength->w;
-                if(wifi->encrypted)
+                if (wifi->encrypted)
                     offset_x += WIFI_ICONS_WIDTH;
                 SDL_Rect wifi_connected_pos = {
                     640 - offset_x,
