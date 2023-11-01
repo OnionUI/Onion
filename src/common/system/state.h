@@ -17,7 +17,8 @@ typedef enum system_state_e {
     MODE_SWITCHER,
     MODE_GAME,
     MODE_APPS,
-    MODE_ADVMENU
+    MODE_ADVMENU,
+    MODE_DRASTIC
 } SystemState;
 static SystemState system_state = MODE_UNKNOWN;
 static pid_t system_state_pid = 0;
@@ -71,6 +72,16 @@ bool check_isGameSwitcher(void)
     return false;
 }
 
+bool check_isDrastic(void)
+{
+    pid_t pid;
+    if (exists(CMD_TO_RUN_PATH) && (pid = process_searchpid("drastic")) != 0) {
+        system_state_pid = pid;
+        return true;
+    }
+    return false;
+}
+
 void system_state_update(void)
 {
     if (check_isGameSwitcher())
@@ -81,6 +92,8 @@ void system_state_update(void)
         system_state = MODE_MAIN_UI;
     else if (check_isAdvMenu())
         system_state = MODE_ADVMENU;
+    else if (check_isDrastic())
+        system_state = MODE_DRASTIC;
     else
         system_state = MODE_APPS;
 

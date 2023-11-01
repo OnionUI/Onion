@@ -75,7 +75,7 @@ bool terminate_retroarch(void)
     char fname[20];
     pid_t pid = process_searchpid("retroarch");
     if (!pid)
-    pid = process_searchpid("ra32");
+        pid = process_searchpid("ra32");
 
     if (pid) {
         screenshot_system();
@@ -89,38 +89,61 @@ bool terminate_retroarch(void)
 
         uint32_t count = 20; // 4s
         while (--count && exists(fname))
-        usleep(200000); // 0.2s 
+            usleep(200000); // 0.2s
         return true;
     }
+    return false;
+}
 
+//
+//    Terminate drasstic before kill/shotdown processes to save progress
+//
+bool terminate_drastic(void)
+{
+    char fname[20];
+    pid_t pid = process_searchpid("retroarch");
     pid = process_searchpid("drastic");
+
     if (pid) {
-        screenshot_system();
+
+        //screenshot_system();
 
         // send signal
         //  kill(pid, SIGCONT);
-        // usleep(100000); 
+        // usleep(100000);
         //kill(pid, SIGTERM);
         //  sprintf(fname, "pkill drastic");
         //  system(fname);
         // wait for terminate
+        /*sprintf(fname, "sendkeys 97 1, 14 1");
+        system(fname);
+        usleep(200000); // 0.2s
+        sprintf(fname, "sendkeys 97 0, 14 0");
+        
+        sleep(1);
+        */
+
         sprintf(fname, "sendkeys 97 1, 18 1");
         system(fname);
         usleep(200000); // 0.2s
         sprintf(fname, "sendkeys 97 0, 18 0");
-
+        system(fname);
         sprintf(fname, "/proc/%d", pid);
-        uint32_t count = 40; // 8s
-        while (--count && exists(fname))
-        usleep(200000); // 0.2s
-        
-        
+        uint32_t count = 8;
+
+        sleep(1);
+        while (--count && exists(fname)) {
+            sprintf(fname, "sendkeys 97 1, 18 1");
+            system(fname);
+            usleep(200000); // 0.2s
+            sprintf(fname, "sendkeys 97 0, 18 0");
+            system(fname);
+            sleep(1);
+        }
         return true;
     }
-
     return false;
 }
-
 
 void quietMainUI(void)
 {

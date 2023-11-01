@@ -78,8 +78,10 @@ int suspend(uint32_t mode)
     int ret = 0;
 
     // terminate retroarch before kill
-    if (mode == 2)
-        ret = terminate_retroarch();
+    if (mode == 2) {
+        terminate_retroarch();
+        terminate_drastic();
+    }
 
     sync();
     procdp = opendir("/proc");
@@ -173,7 +175,7 @@ void shutdown(void)
 {
     system_shutdown();
     terminate_retroarch();
-
+    terminate_drastic();
     system_clock_get();
     system_clock_save();
     sync();
@@ -294,9 +296,14 @@ void deepsleep(void)
     }
     else if (system_state == MODE_APPS) {
         short_pulse();
-        //   remove(CMD_TO_RUN_PATH);
+        remove(CMD_TO_RUN_PATH);
         system_shutdown();
         suspend(1);
+    }
+    else if (system_state == MODE_DRASTIC) {
+        short_pulse();
+        system_shutdown();
+        terminate_drastic();
     }
 }
 
@@ -596,7 +603,7 @@ int main(void)
                 if (DEVICE_ID == MIYOO283) {
                     if (comboKey_menu) {
                         if (config_flag_get(".altBrightness")) {
-                            // MENU + B DOWN : brightness down
+                            // MENU + BTN DOWN : brightness down
                             if (val != RELEASED && settings.brightness > 0) {
                                 settings_setBrightness(settings.brightness - 1, true,
                                                        false);
@@ -608,6 +615,20 @@ int main(void)
                 }
                 break;
             case HW_BTN_VOLUME_UP:
+                printf("go\n");
+                 char fname[20];
+                
+                sprintf(fname, "sendkeys 59 1");
+                system(fname);
+                usleep(200000); // 0.2s
+                sprintf(fname, "sendkeys 59 0");
+                system(fname);
+                system("sendkeys 30 1");
+
+                usleep(200000); // 0.2s
+
+                system("sendkeys 30 0");
+
                 if (comboKey_menu) {
                     // MENU + VOL UP : brightness up
                     if (val != RELEASED &&
@@ -636,6 +657,11 @@ int main(void)
                 osd_showVolumeBar(settings.volume, settings.mute);
                 break;
             case HW_BTN_UP:
+                //if((comboKey_menu)&&((system_state == MODE_DRASTIC)||(system_state == MODE_APPS))){
+                // Send custom keypress for app detection
+
+                //}
+
                 if (DEVICE_ID == MIYOO283) {
                     if (comboKey_menu) {
                         if (config_flag_get(".altBrightness")) {
@@ -740,6 +766,7 @@ int main(void)
         if (settings.low_battery_autosave_at && battery_getPercentage() <= settings.low_battery_autosave_at && check_autosave()) {
             temp_flag_set(".lowBat", true);
             terminate_retroarch();
+            terminate_drastic();
         }
 
         elapsed_sec = 0;

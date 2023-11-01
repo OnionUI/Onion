@@ -55,6 +55,7 @@ void system_powersave(bool enabled)
         // restore
         file_put(fp, CPU_SCALING_MIN_FREQ, "%u", saved_min_freq);
         file_put(fp, CPU_SCALING_GOVERNOR, "%s", saved_governor);
+        system("/mnt/SDCARD/Emu/drastic/cpuclock 1500");
     }
 }
 
