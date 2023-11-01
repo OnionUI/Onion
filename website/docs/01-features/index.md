@@ -181,7 +181,7 @@ More than 60 game ports pre-configured !
 :::note <a href="included-apps">Included apps</a>
 Onion also contains many additional apps like :<br />
 - [a video player](apps/ebook-reader)
-- [a music player](apps/ebook-reader)
+- [a music player](apps/music-player)
 - [a file explorer](apps/ebook-reader)
 - [a terminal](apps/ebook-reader)
 - [ebook & pdf readers](apps/ebook-reader)
