@@ -14,7 +14,7 @@ typedef struct {
     int frequency;
     int signal_level;
     char flags[256];
-    char ssid[33];
+    char ssid[65]; // 32 * 2 because of escape characters + null terminator
     bool connected;
     bool encrypted;
     bool known;

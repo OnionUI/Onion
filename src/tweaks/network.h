@@ -33,6 +33,14 @@
 #define INITIAL_CAPACITY 10 // preallocate for 10 network slots
 #define GROWTH_FACTOR 2     // gets doubled if we hit 10
 #define WIFI_CONNECT_WAIT 7000
+#define PSK_MIN_LENGTH 8
+#define PSK_MAX_LENGTH 63
+#define SSID_MAX_LENGTH 32
+#define WIFI_SCAN_WAIT 3            // how long to wait for a wifi scan in seconds
+#define WIFI_CONNECT_INITIAL_WAIT 4 // how long to wait before checking for a wifi connect in seconds
+#define WIFI_CONNECT_MAX_WAIT 6     // how long to wait additionally to the initial wait in seconds
+#define WIFI_CONNECT_SLEEP 50000    /* how long to sleep between wifi connect checks in microseconds */
+                                    /* needs to be fast to not miss the "DISCONNECTED" state         */
 
 typedef struct { // create a struct to store the wifi networks, we can use access them afterwards if we need to for anything
     WifiNetwork *networks;
@@ -106,58 +114,160 @@ void network_freeWifiNetworks()
 // called by network_handleParsedNetwork.
 bool network_ssidContainsNull(char *str, int len)
 {
+    /* TODO fix this. test with hidden wifis
     for (int i = 0; i < len; i++) {
         if (str[i] == '\x00') {
             return true;
         }
-    }
+    }*/
     return false;
 }
 
-// starts WiFi connection; structure is set as per geckos commits, needs kbinput adding
+// wpa_cli escapes " and \ in the SSID with a backslash.
+void unescape(char *str)
+{
+    if (str == NULL || strlen(str) == 0)
+        return;
+
+    int len = strlen(str);
+    int i, j = 0;
+
+    for (i = 0; i < len; i++) {
+        if (str[i] == '\\' && i < len - 1) {
+            switch (str[i + 1]) {
+            case '\\':
+                str[j++] = '\\';
+                i++;
+                break;
+            case '"':
+                str[j++] = '"';
+                i++;
+                break;
+            default:
+                str[j++] = '\\';
+                break;
+            }
+        }
+        else {
+            str[j++] = str[i];
+        }
+    }
+
+    str[j] = '\0';
+}
+
+// TODO move these out of here maybe
+void escapeForShell(char *str)
+{
+    int i, j;
+    int newLength = strlen(str) * 2;
+    char *result = (char *)malloc(newLength);
+
+    for (i = 0, j = 0; i < strlen(str); i++) {
+        if (str[i] == '\'') {
+            result[j++] = '\'';
+            result[j++] = '\\';
+            result[j++] = '\'';
+            result[j++] = '\'';
+        }
+        else {
+            result[j++] = str[i];
+        }
+    }
+
+    result[j] = '\0';
+    strcpy(str, result);
+    free(result);
+}
+void deleteNetwork(const char *ssid)
+{
+    char cmd[STR_MAX];
+    char escaped_ssid[65];
+    strcpy(escaped_ssid, ssid);
+    escapeForShell(escaped_ssid);
+    sprintf(cmd, "%s/wifi.sh delete \'%s\' &", NET_SCRIPT_PATH, escaped_ssid);
+    printf("deleting network %s\nwith cmd %s\n", escaped_ssid, cmd);
+    system(cmd);
+}
+// the actual connection
+void connectToWiFi(const char *ssid, const char *psk)
+{
+    char cmd[STR_MAX];
+    char escaped_ssid[65];
+    strcpy(escaped_ssid, ssid);
+    escapeForShell(escaped_ssid);
+
+    if (psk) {
+        char escaped_psk[128];
+        strcpy(escaped_psk, psk);
+        escapeForShell(escaped_psk);
+        snprintf(cmd, STR_MAX, "%s/wifi.sh connect \'%s\' \'%s\' &", NET_SCRIPT_PATH, escaped_ssid, escaped_psk);
+    }
+    else
+        snprintf(cmd, STR_MAX, "%s/wifi.sh connect \'%s\' &", NET_SCRIPT_PATH, escaped_ssid);
+
+    system(cmd);
+    char message[STR_MAX];
+    sprintf(message, "Connecting to WiFi network\n%s", ssid);
+    showInfoDialogGeneric("WiFi networks", message, false, 0);
+    sleep(WIFI_CONNECT_INITIAL_WAIT);
+
+    struct timeval t1, t2;
+    int elapsedTime;
+    gettimeofday(&t1, NULL);
+    while (true) {
+        gettimeofday(&t2, NULL);
+        elapsedTime = (t2.tv_sec - t1.tv_sec);
+        
+        if (elapsedTime > WIFI_CONNECT_MAX_WAIT) {
+            // when using a wrong password the 4 way handshake can take long
+            // so we need to delete the network
+            deleteNetwork(ssid);
+            showInfoDialogGeneric("WiFi networks", "WiFi connection timed out.\nPress any button to continue", true, 0);
+            return;
+        }
+
+        char output[STR_MAX];
+        process_start_read_return(NET_SCRIPT_PATH "/wifi.sh wpa_state", output);
+        if (strcmp(output, "COMPLETED") == 0) {
+            showInfoDialogGeneric("WiFi networks", "Connection successful", false, 1000);
+            return;
+        }
+        else if (strcmp(output, "DISCONNECTED") == 0) {
+            deleteNetwork(ssid);
+            showInfoDialogGeneric("WiFi networks", "Failed to connect to WiFi network.\nPress any button to continue", true, 0);
+            return;
+        }
+        usleep(WIFI_CONNECT_SLEEP);
+    }
+}
+
+// starts WiFi connection
 // called in the menu action
 void network_connectWifi(void *pt)
 {
     WifiNetwork *wifi_network = (WifiNetwork *)(((ListItem *)pt)->payload_ptr);
+    if (wifi_network->connected)
+        return;
+
     if (wifi_network->known) {
-        printf("[WiFi] Connecting to known network %s...\n", wifi_network->ssid);
-        char cmd[STR_MAX];
-        snprintf(cmd, STR_MAX, "%s/wifi.sh connect \"%s\" &", NET_SCRIPT_PATH, wifi_network->ssid);
-        system(cmd);
-        char message[STR_MAX];
-        sprintf(message, "Connecting to WiFi network\n%s", wifi_network->ssid);
-        showInfoDialogGeneric("WiFi networks", message, false, WIFI_CONNECT_WAIT);
+        connectToWiFi(wifi_network->ssid, NULL);
     }
     else {
-        printf("[WiFi] Connecting to unknown network %s...\n", wifi_network->ssid);
         if (wifi_network->encrypted) {
-            printf("[WiFi] Connecting to %s...\n", wifi_network->ssid);
             const char *psk = launch_keyboard("", "Enter your WiFi password");
-            if (strlen(psk) < 8) {
-                showInfoDialogGeneric("WiFi networks", "Password too short.\nPress any button to continue", true, 0);
+            if (strlen(psk) < PSK_MIN_LENGTH || strlen(psk) > PSK_MAX_LENGTH) {
+                showInfoDialogGeneric("WiFi networks", "Password must be 8 to 63 characters.\nPress any button to continue", true, 0);
                 return;
             }
             else {
-                char cmd[STR_MAX];
-                snprintf(cmd, STR_MAX, "%s/wifi.sh connect \"%s\" %s &", NET_SCRIPT_PATH, wifi_network->ssid, psk);
-                system(cmd);
-                char message[STR_MAX];
-                sprintf(message, "Connecting to WiFi network\n%s", wifi_network->ssid);
-                showInfoDialogGeneric("WiFi networks", message, false, WIFI_CONNECT_WAIT);
+                connectToWiFi(wifi_network->ssid, psk);
             }
         }
         else {
-            printf("[WiFi] Connecting to unencrypted %s...\n", wifi_network->ssid);
-            char cmd[STR_MAX];
-            snprintf(cmd, STR_MAX, "%s/wifi.sh connect \"%s\" &", NET_SCRIPT_PATH, wifi_network->ssid);
-            system(cmd);
-            char message[STR_MAX];
-            sprintf(message, "Connecting to WiFi network\n%s", wifi_network->ssid);
-            showInfoDialogGeneric("WiFi networks", message, false, WIFI_CONNECT_WAIT);
+            connectToWiFi(wifi_network->ssid, NULL);
         }
     }
-
-    // list would need rebuilding here with fresh data to change connected icon to new netwk, or change the value of the lisitems "connected" state to true/1 then reload the list
     all_changed = true;
     reset_menus = true;
     network_scanWifiNetworks();
@@ -167,12 +277,13 @@ void network_connectWifi(void *pt)
 // called by network_parseAndPopulate.
 bool network_parseLine(const char *line, WifiNetwork *network)
 {
-    int ret = sscanf(line, "%18s\t%d\t%d\t%255s\t%32[^\n]",
+    int ret = sscanf(line, "%18s\t%d\t%d\t%255s\t%64s[^\n]",
                      network->bssid,
                      &network->frequency,
                      &network->signal_level,
                      network->flags,
                      network->ssid);
+    unescape(network->ssid);
     return ret == 5;
 }
 
@@ -180,7 +291,7 @@ bool network_parseLine(const char *line, WifiNetwork *network)
 // called by network_parseAndPopulate.
 void network_handleParsedNetwork(WifiNetwork *network, const char *current_ssid)
 {
-    if (!network_ssidContainsNull(network->ssid, 32)) {
+    if (network_ssidContainsNull(network->ssid, SSID_MAX_LENGTH)) {
         strcpy(network->ssid, "Bad name");
     }
 
@@ -195,12 +306,14 @@ void network_handleParsedNetwork(WifiNetwork *network, const char *current_ssid)
     else
         network->connected = false;
 
-    char cmd[STR_MAX];
-    sprintf(cmd, "%s/wifi.sh known \"%s\" &", NET_SCRIPT_PATH, network->ssid);
-    printf("cmd: %s\n", cmd);
+    char cmd[STR_MAX * 2];
+    char escaped_ssid[STR_MAX];
+    strcpy(escaped_ssid, network->ssid);
+    escapeForShell(escaped_ssid);
+    sprintf(cmd, "%s/wifi.sh known \'%s\' &", NET_SCRIPT_PATH, escaped_ssid);
     char output[STR_MAX];
     process_start_read_return(cmd, output);
-    printf("known output: %s\n", output);
+
     if (strlen(output) > 0) {
         network->known = true;
         network->id = atoi(output);
@@ -209,8 +322,6 @@ void network_handleParsedNetwork(WifiNetwork *network, const char *current_ssid)
         network->known = false;
         network->id = -1;
     }
-
-    printf("network id: %d\t%s\nknown: %d\n", network->id, network->ssid, network->known);
 }
 
 // parses and populates global network list / struct from file pointer.
@@ -258,11 +369,14 @@ void network_scanAndPop()
 {
     network_freeWifiNetworks();
 
-    char current_ssid[33] = "";
-    process_start_read_return("wpa_cli status | grep '^ssid=' | cut -d'=' -f2", current_ssid);
+    char current_ssid[SSID_MAX_LENGTH + 1] = "";
+    char cmd[STR_MAX];
+    sprintf(cmd, "%s/wifi.sh connected &", NET_SCRIPT_PATH);
+    process_start_read_return(cmd, current_ssid);
+    unescape(current_ssid);
 
     system("wpa_cli scan > /dev/null");
-    sleep(3);
+    sleep(WIFI_SCAN_WAIT);
 
     FILE *fp = popen("wpa_cli scan_result | tail -n +3", "r");
     if (fp == NULL) {
@@ -273,20 +387,6 @@ void network_scanAndPop()
     network_parseAndPopulate(fp, current_ssid);
 
     pclose(fp);
-
-    printf("Network List Count: %d\n", globalNetworkList.count);
-    for (int i = 0; i < globalNetworkList.count; i++) { // some debugging, you can remove this
-        printf("Network %d:\n", i);
-        printf("\tBSSID: %s\n", globalNetworkList.networks[i].bssid);
-        printf("\tFrequency: %d\n", globalNetworkList.networks[i].frequency);
-        printf("\tSignal Level: %d\n", globalNetworkList.networks[i].signal_level);
-        printf("\tFlags: %s\n", globalNetworkList.networks[i].flags);
-        printf("\tSSID: %s\n", globalNetworkList.networks[i].ssid);
-        printf("\tEncrypted: %s\n", globalNetworkList.networks[i].encrypted ? "Yes" : "No");
-        printf("\tConnected: %s\n", globalNetworkList.networks[i].connected ? "Yes" : "No");
-        printf("\tKnown: %s\n", globalNetworkList.networks[i].known ? "Yes" : "No");
-        printf("\tID: %d\n", globalNetworkList.networks[i].id);
-    }
 }
 
 int compareSignalLevel(const void *a, const void *b)
@@ -314,11 +414,6 @@ void *network_getWifiNetworks()
     _wifi_networks = networkList.networks;
     network_numWifiNetworks = networkList.count;
 
-    for (int i = 0; i < networkList.count; i++) {
-        printf("Network %d:\n", i);
-        printf("\tSignal Level: %d\n", _wifi_networks[i].signal_level);
-        printf("\tSSID: %s\n", _wifi_networks[i].ssid);
-    }
     list_changed = true;
     reset_menus = true;
     all_changed = true;
@@ -803,12 +898,10 @@ void menu_wifi(void *pt)
     item->value = (int)settings.wifi_on;
 
     if (reset_wifi) {
-        printf("Freeing wifi menu\n");
         list_free(&_menu_wifi);
     }
 
     if (!_menu_wifi._created) {
-        printf("Creating wifi menu\n");
         _menu_wifi = list_createWithTitle(3 + globalNetworkList.count, LIST_SMALL, "WiFi networks"); // use networkList->count instead of MAX_NUM_WIFI_NETWORKS so we're not limited to 35
         list_addItem(&_menu_wifi,
                      (ListItem){
@@ -836,7 +929,6 @@ void menu_wifi(void *pt)
                 .payload_ptr = globalNetworkList.networks + i,
                 .action = network_connectWifi};
             snprintf(wifi_network.label, STR_MAX - 1, "%s", globalNetworkList.networks[i].ssid);
-            printf("Added %s \n", globalNetworkList.networks[i].ssid); // debug adding items to list
             list_addItem(&_menu_wifi, wifi_network);
         }
         list_changed = true;
