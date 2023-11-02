@@ -615,20 +615,6 @@ int main(void)
                 }
                 break;
             case HW_BTN_VOLUME_UP:
-                printf("go\n");
-                 char fname[20];
-                
-                sprintf(fname, "sendkeys 59 1");
-                system(fname);
-                usleep(200000); // 0.2s
-                sprintf(fname, "sendkeys 59 0");
-                system(fname);
-                system("sendkeys 30 1");
-
-                usleep(200000); // 0.2s
-
-                system("sendkeys 30 0");
-
                 if (comboKey_menu) {
                     // MENU + VOL UP : brightness up
                     if (val != RELEASED &&
