@@ -252,6 +252,8 @@ cleanup() {
     rm "/tmp/wpa_supplicant.conf_bk"
     rm "/mnt/SDCARD/RetroArch/retroarch.cookie.client"
     rm "/mnt/SDCARD/RetroArch/retroarch.cookie"
+    rm "/tmp/dismiss_info_panel"
+    sync
 
     log "Cleanup done"
     exit
@@ -663,15 +665,19 @@ flag_enabled() {
 }
 
 build_infoPanel_and_log() {
-    local title="$1"
-    local message="$2"
+	local title="$1"
+	local message="$2"
 
-    log "Info Panel: \n\tStage: $title\n\tMessage: $message"
-
-    infoPanel --title "$title" --message "$message" --persistent &
-    touch /tmp/dismiss_info_panel
-    sync
-    sleep 0.3
+	log "Info Panel: \n\tStage: $title\n\tMessage: $message"
+	if is_running infoPanel; then
+		killall -9 infoPanel
+	fi
+	infoPanel --title "$title" --message "$message" --persistent &
+	sync
+	touch /tmp/dismiss_info_panel
+	sync
+	sleep 0.3
+	sync
 }
 
 confirm_join_panel() {
