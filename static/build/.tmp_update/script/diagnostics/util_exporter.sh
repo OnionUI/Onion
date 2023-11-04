@@ -33,7 +33,7 @@ exporter() {
     7z a -y "$filename" "$workingdir/*" >/dev/null 2>&1
 
     if [ -s "$filename" ]; then
-        log "Exported to: .tmp_update/log_export.7z"
+        log "Exported to: $filename"
         rm -rf $workingdir
     else
         log "Failed to export"
