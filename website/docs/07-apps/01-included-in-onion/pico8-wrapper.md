@@ -96,6 +96,7 @@ The following shortcuts are provided by the Native Wrapper for your convenience 
             <td>Enable/Disable Mouse Mode</td>
         </tr>
     </tbody>
+</table>
 
 ## Using Local Carts
 
