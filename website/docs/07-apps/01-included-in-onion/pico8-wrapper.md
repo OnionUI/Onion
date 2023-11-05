@@ -3,6 +3,11 @@ slug: /apps/pico8-wrapper
 description: PICO-8 Native Wrapper by XK9274
 ---
 
+:::caution 
+This section refers to an application planned for inclusion in a future Onion release. Final instructions and usage details may differ from the ones described here. 
+Check [here](https://www.reddit.com/r/MiyooMini/comments/17nw79r/announcing_native_pico8_wrapper_for_onion_with/k7ueyec/?context=3) for playtesting details.
+:::
+
 # PICO-8 Native Wrapper / Splore
 
 The PICO-8 Native Wrapper allows you to play PICO-8 without the need for emulation (hence providing full compatibility with all PICO-8 games), and grants access to Splore, a "frontend" app that allows you to browse, search and play through the entirety of the PICO-8 catalogue (as indexed by the [Lexaloffle BBS](https://www.lexaloffle.com/bbs/)), as long as you have an internet connection. 
