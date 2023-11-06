@@ -1,4 +1,4 @@
-![image](https://github.com/Fireblend/Onion/assets/917798/64d2312b-b2c6-4104-8e5c-d6450218ae0d)---
+---
 slug: /apps/pico8-wrapper
 description: PICO-8 Native Wrapper by XK9274
 ---
