@@ -1,4 +1,4 @@
----
+![image](https://github.com/Fireblend/Onion/assets/917798/64d2312b-b2c6-4104-8e5c-d6450218ae0d)---
 slug: /apps/pico8-wrapper
 description: PICO-8 Native Wrapper by XK9274
 ---
@@ -80,15 +80,15 @@ The following shortcuts are provided by the Native Wrapper for your convenience 
     <tbody>
         <tr>
             <td><kbd>X</kbd></td>
-            <td>Acts as the `Escape` button on Splore and during cartridge execution (brings up splore/cart menu)</td>
+            <td>Acts as the <code>Escape</code>code> button on Splore and during cartridge execution (brings up splore/cart menu)</td>
         </tr>
         <tr>
             <td><kbd>SELECT</kbd>+<kbd>LEFT</kbd>/<kbd>RIGHT</kbd></td>
-            <td>Change or disable the current screen bezel (you can add new ones by placing your file in `/App/pico/res/borders` directory in your SD card)</td>
+            <td>Change or disable the current screen bezel (you can add new ones by placing your file in <code>/App/pico/res/borders</code>code> directory in your SD card)</td>
         </tr>
         <tr>
             <td><kbd>SELECT</kbd>+<kbd>UP</kbd>/<kbd>DOWN</kbd></td>
-            <td>Raises/lowers the CPU clock rate in increments of 50 (you can override this value by editing the `/App/pico/cfg/onioncfg.json` file); maximum speed allowed is 1700</td>
+            <td>Raises/lowers the CPU clock rate in increments of 50 (you can override this value by editing the <code>/App/pico/cfg/onioncfg.json</code>code> file); maximum speed allowed is 1700</td>
         </tr>
         <tr>
             <td><kbd>SELECT</kbd>+<kbd>L1</kbd></td>
