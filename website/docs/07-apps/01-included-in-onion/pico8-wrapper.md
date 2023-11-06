@@ -88,7 +88,7 @@ The following shortcuts are provided by the Native Wrapper for your convenience 
         </tr>
         <tr>
             <td><kbd>SELECT</kbd>+<kbd>UP</kbd>/<kbd>DOWN</kbd></td>
-            <td>Raises/lowers the CPU clock rate in increments of 50 (you can override this value by editing the `/Apps/pico/cfg/onioncfg.json` file); maximum speed allowed is 1700</td>
+            <td>Raises/lowers the CPU clock rate in increments of 50 (you can override this value by editing the `/App/pico/cfg/onioncfg.json` file); maximum speed allowed is 1700</td>
         </tr>
         <tr>
             <td><kbd>SELECT</kbd>+<kbd>L1</kbd></td>
