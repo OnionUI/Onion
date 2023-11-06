@@ -56,8 +56,7 @@ While in-game, press the <kbd>X</kbd> button to bring up the **cartridge menu**.
 * Toggle options (volume, fullscreen, check button mappings)
 * Reset the cart
 * Exit back to Splore
-
-plus others specific game options, if present (i.e. QR code).
+* ...plus others specific game options, if present (i.e. QR code).
 
 You can also press <kbd>X</kbd> while in the Splore menu to exit Splore (or use the <kbd>SELECT</kbd>+<kbd>MENU</kbd> shortcut).
 
