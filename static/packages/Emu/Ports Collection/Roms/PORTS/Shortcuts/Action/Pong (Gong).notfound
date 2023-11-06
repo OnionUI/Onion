@@ -2,7 +2,7 @@
 # Retroarch Ports Script Template
 
 # main configuration :
-GameName="Gong (Port - Gong)"
+GameName="Pong (Port - Gong)"
 Core="gong"
 RomDir=
 RomFile=
