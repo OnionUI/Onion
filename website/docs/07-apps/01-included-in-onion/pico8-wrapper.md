@@ -20,7 +20,7 @@ This is an alternative to the RetroArch `fake-08` core, which has access to all 
 
 1. Enable the `PICO-8 Native Wrapper` App using the Onion Package Manager's *Apps* section.
 
-2. In order to use the wrapper, you need to have previously purchased PICO-8. It is available as a single purchase at [Lexaloffle's website](https://www.lexaloffle.com/games.php?page=updates). Once downloaded, place the `pico8_dyn` and `pico8.dat` files from the **Raspberry Pi** package in the `/Apps/pico` directory of your Onion SD card.
+2. In order to use the wrapper, you need to have previously purchased PICO-8. It is available as a single purchase at [Lexaloffle's website](https://www.lexaloffle.com/games.php?page=updates). Once downloaded, place the `pico8_dyn` and `pico8.dat` files from the **Raspberry Pi** package in the `/App/pico/bin` directory of your Onion SD card.
 
 :::tip
 Do not use the FTP wireless transfer service to place these files on the SD card, as it may strip their execution privileges and cause the application to fail to launch.
@@ -57,6 +57,8 @@ While in-game, press the <kbd>X</kbd> button to bring up the **cartridge menu**.
 * Reset the cart
 * Exit back to Splore
 
+plus others specific game options, if present (i.e. QR code).
+
 You can also press <kbd>X</kbd> while in the Splore menu to exit Splore (or use the <kbd>SELECT</kbd>+<kbd>MENU</kbd> shortcut).
 
 :::caution
@@ -82,11 +84,11 @@ The following shortcuts are provided by the Native Wrapper for your convenience 
         </tr>
         <tr>
             <td><kbd>SELECT</kbd>+<kbd>LEFT</kbd>/<kbd>RIGHT</kbd></td>
-            <td>Change or disable the current screen bezel (you can add new ones by placing your file in `/Apps/pico/res/borders` directory in your SD card)</td>
+            <td>Change or disable the current screen bezel (you can add new ones by placing your file in `/App/pico/res/borders` directory in your SD card)</td>
         </tr>
         <tr>
             <td><kbd>SELECT</kbd>+<kbd>UP</kbd>/<kbd>DOWN</kbd></td>
-            <td>Raises/lowers the CPU clock rate in increments of 50 (you can override this value by editing the `/Apps/pico/cfg/onioncfg.json` file)</td>
+            <td>Raises/lowers the CPU clock rate in increments of 50 (you can override this value by editing the `/Apps/pico/cfg/onioncfg.json` file); maximum speed allowed is 1700</td>
         </tr>
         <tr>
             <td><kbd>SELECT</kbd>+<kbd>L1</kbd></td>
