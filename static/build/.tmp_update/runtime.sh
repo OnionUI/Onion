@@ -340,8 +340,14 @@ launch_game() {
             retval=$?
         else
             # GAME LAUNCH
+            if [ -f /tmp/new_res_available ]; then
+                fbset -g 752 560 752 1120 32
+            fi
             cd /mnt/SDCARD/RetroArch/
             $sysdir/cmd_to_run.sh
+            if [ -f /tmp/new_res_available ]; then
+                fbset -g 640 480 640 960 32
+            fi
             retval=$?
         fi
     else
@@ -495,6 +501,12 @@ init_system() {
 
     if [ $DEVICE_ID -eq $MODEL_MMP ] && [ -f $sysdir/config/.lcdvolt ]; then
         $sysdir/script/lcdvolt.sh 2> /dev/null
+    fi
+
+    # get actual screen resolution
+    screen_resolution=$(grep 'Current TimingWidth=' /proc/mi_modules/fb/mi_fb0 | sed 's/Current TimingWidth=\([0-9]*\),TimingWidth=\([0-9]*\),.*/\1x\2/')
+    if [ "$screen_resolution" = "752x560" ] && [ "$(/etc/fw_printenv miyoo_version)" = "miyoo_version=202310271401" ]; then
+        touch /tmp/new_res_available
     fi
 
     start_audioserver
