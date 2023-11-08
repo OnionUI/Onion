@@ -9,6 +9,7 @@ logfile=$(basename "$0" .sh)
 
 MODEL_MM=283
 MODEL_MMP=354
+screen_resolution="640x480"
 
 main() {
     # Set model ID
@@ -341,7 +342,9 @@ launch_game() {
         else
             # GAME LAUNCH
             if [ -f /tmp/new_res_available ]; then
-                fbset -g 752 560 752 1120 32
+                res_x=$(echo "$screen_resolution" | cut -d 'x' -f 1)
+                res_y=$(echo "$screen_resolution" | cut -d 'x' -f 2)
+                fbset -g "$res_x" "$res_y" "$res_x" "$((res_y * 2))" 32
             fi
             cd /mnt/SDCARD/RetroArch/
             $sysdir/cmd_to_run.sh
@@ -508,6 +511,7 @@ init_system() {
     if [ "$screen_resolution" = "752x560" ] && [ "$(/etc/fw_printenv miyoo_version)" = "miyoo_version=202310271401" ]; then
         touch /tmp/new_res_available
     fi
+    echo "$screen_resolution" > /tmp/screen_resolution
 
     start_audioserver
 
