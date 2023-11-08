@@ -79,7 +79,7 @@ The following shortcuts are provided by the Native Wrapper for your convenience 
     <tbody>
         <tr>
             <td><kbd>X</kbd></td>
-            <td>Acts as the <code>Escape</code>code> button on Splore and during cartridge execution (brings up splore/cart menu)</td>
+            <td>Acts as the <code>Escape</code> button on Splore and during cartridge execution (brings up splore/cart menu)</td>
         </tr>
         <tr>
             <td><kbd>SELECT</kbd>+<kbd>LEFT</kbd>/<kbd>RIGHT</kbd></td>
