@@ -83,23 +83,27 @@ The following shortcuts are provided by the Native Wrapper for your convenience 
         </tr>
         <tr>
             <td><kbd>SELECT</kbd>+<kbd>LEFT</kbd>/<kbd>RIGHT</kbd></td>
-            <td>Change or disable the current screen bezel (you can add new ones by placing your file in <code>/App/pico/res/borders</code>code> directory in your SD card)</td>
+            <td>Changes or disables the current screen bezel (you can add new ones by placing your file in <code>/App/pico/res/borders</code>code> directory in your SD card)</td>
         </tr>
+        <tr>
+            <td><kbd>SELECT</kbd>+<kbd>R1</kbd></td>
+            <td>Cycles between the following rendering modes: Native, Stretched, Fullscreen</td>
+        </tr>  
         <tr>
             <td><kbd>SELECT</kbd>+<kbd>UP</kbd>/<kbd>DOWN</kbd></td>
             <td>Raises/lowers the CPU clock rate in increments of 50 (you can override this value by editing the <code>/App/pico/cfg/onioncfg.json</code>code> file); maximum speed allowed is 1700</td>
         </tr>
         <tr>
             <td><kbd>SELECT</kbd>+<kbd>L1</kbd></td>
-            <td>Restart the current cart</td>
+            <td>Restarts the current cart</td>
         </tr>
         <tr>
             <td><kbd>SELECT</kbd>+<kbd>MENU</kbd></td>
-            <td>Exit PICO-8 and go back to Onion</td>
+            <td>Exits PICO-8 and go back to Onion</td>
         </tr>
         <tr>
             <td><kbd>L2</kbd></td>
-            <td>Enable/Disable Mouse Mode</td>
+            <td>Enables/Disables Mouse Mode</td>
         </tr>
     </tbody>
 </table>
