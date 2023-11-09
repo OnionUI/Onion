@@ -38,6 +38,7 @@ if [ -e "$currentThemefile" ]; then
 	jq --arg theme "$(cat "$currentThemefile")" '.theme = $theme' "$json_file" > temp.json
 	mv temp.json "$json_file"
 fi
+themeSwitcher --reapply_icons
 
 # Load current time
 ./loadTime.sh
