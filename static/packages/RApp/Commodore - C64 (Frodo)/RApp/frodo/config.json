@@ -1,7 +1,7 @@
 {
 "label":"Frodo",
-"icon":"../../Icons/Default/frodo.png",
-"iconsel":"../../Icons/Default/frodo.png",
+"icon":"../../Icons/Default/rapp/frodo.png",
+"iconsel":"../../Icons/Default/rapp/frodo.png",
 "launch":"launch.sh",
 "rompath":"../../Roms/COMMODORE",
 "imgpath":"../../Roms/COMMODORE/Imgs",
