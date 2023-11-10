@@ -1,0 +1,49 @@
+<body>
+    <style>
+        html,
+        body {
+            height: 100vh;
+        }
+
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            background-color: black;
+        }
+
+        audio {
+            margin-top: 16px;
+        }
+    </style>
+    <script>
+        const params = new URL(location.href).searchParams;
+        const theme = params.get('theme');
+
+        const append = (parent, children) => { children.forEach(el => parent.appendChild(el)); return parent; }
+        const body = (...children) => append(document.body, children);
+        const element = (tagName, attrs, ...children) => append(Object.assign(document.createElement(tagName), attrs), children);
+
+        if (theme) {
+            body(
+                element('img', {
+                    src: `https://raw.githubusercontent.com/OnionUI/Themes/main/themes/${encodeURIComponent(theme)}/preview.png`
+                }),
+                element('audio', {
+                    controls: true,
+                    autoplay: true,
+                    src: `https://github.com/OnionUI/Themes/raw/main/themes/${encodeURIComponent(theme)}/sound/bgm.mp3`
+                })
+            )
+        } else {
+            body(
+                element('h1', {
+                    textContent: "No theme found"
+                })
+            )
+        }
+    </script>
+</body>

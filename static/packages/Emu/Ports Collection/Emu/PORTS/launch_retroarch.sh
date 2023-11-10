@@ -39,7 +39,7 @@ echo --------------------------------------------------------------------
 echo ":: APPLYING ADDITIONNAL CONFIGURATION"
 echo --------------------------------------------------------------------
 
-if [ "$KillAudioserver" = "1" ]; then /mnt/SDCARD/.tmp_update/script/stop_audioserver.sh; fi
+if [ "$KillAudioserver" = "1" ]; then . /mnt/SDCARD/.tmp_update/script/stop_audioserver.sh; fi
 if [ "$PerformanceMode" = "1" ]; then echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor; fi
 
 romcfgpath="$(dirname "$RomFullPath")/.game_config/$(basename "$RomFullPath").name"

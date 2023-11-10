@@ -73,6 +73,7 @@ main() {
         echo -e "\n:: Parsed in $((end-start))s"
 
         touch /tmp/dismiss_info_panel
+		sync
 
         if [ $count -eq 0 ]; then
             result_message="No games found"
