@@ -33,7 +33,7 @@ struct timeval start_time, end_time;
 //
 void display_getRenderResolution()
 {
-    exists("/dev/fb0");
+    print_debug("Getting render resolution\n");
     if (fb_fd < 0)
         fb_fd = open("/dev/fb0", O_RDWR);
     ioctl(fb_fd, FBIOGET_VSCREENINFO, &vinfo);

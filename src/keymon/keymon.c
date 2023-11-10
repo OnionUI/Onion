@@ -314,7 +314,7 @@ int main(void)
     // Initialize
     signal(SIGTERM, quit);
     signal(SIGSEGV, quit);
-
+    signal(SIGUSR1, display_getRenderResolution);
     log_setName("keymon");
 
     getDeviceModel();

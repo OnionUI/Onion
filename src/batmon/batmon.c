@@ -17,6 +17,7 @@ int main(int argc, char *argv[])
     signal(SIGTERM, sigHandler);
     signal(SIGSTOP, sigHandler);
     signal(SIGCONT, sigHandler);
+    signal(SIGUSR1, sigHandler);
 
     display_init();
 
@@ -117,6 +118,9 @@ static void sigHandler(int sig)
         }
         is_suspended = false;
         break;
+    case SIGUSR1:
+        display_getRenderResolution();
+        break;
     default:
         break;
     }
@@ -197,16 +201,10 @@ int batteryPercentage(int value)
 //
 static void *batteryWarning_thread(void *param)
 {
-    int step = 0;
     while (1) {
         display_drawBatteryIcon(0x00FF0000, 15, RENDER_HEIGHT - 30, 10,
                                 0x00FF0000); // draw red battery icon
-        usleep(0x4000);                      // roughly 1/60th of a second
-        step++;
-        if (step > 60) { // roughly once a second + the time it takes to draw
-            step = 0;
-            display_getRenderResolution();
-        }
+        usleep(0x4000);
     }
     return 0;
 }

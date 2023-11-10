@@ -347,11 +347,17 @@ launch_game() {
                 res_x=$(echo "$screen_resolution" | cut -d 'x' -f 1)
                 res_y=$(echo "$screen_resolution" | cut -d 'x' -f 2)
                 fbset -g "$res_x" "$res_y" "$res_x" "$((res_y * 2))" 32
+                # inform batmon and keymon of resolution change
+                killall -SIGUSR1 batmon
+                killall -SIGUSR1 keymon
             fi
             cd /mnt/SDCARD/RetroArch/
             $sysdir/cmd_to_run.sh
             if [ -f /tmp/new_res_available ]; then
                 fbset -g 640 480 640 960 32
+                # inform batmon and keymon of resolution change
+                killall -SIGUSR1 batmon
+                killall -SIGUSR1 keymon
             fi
             retval=$?
         fi
