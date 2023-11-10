@@ -22,8 +22,10 @@ static struct fb_var_screeninfo vinfo;
 static uint32_t stride, bpp;
 static uint8_t *savebuf;
 static bool display_enabled = true;
-static int DISPLAY_WIDTH = 640;
+static int DISPLAY_WIDTH = 640; // physical screen resolution
 static int DISPLAY_HEIGHT = 480;
+int RENDER_WIDTH = 640; // render resolution
+int RENDER_HEIGHT = 480;
 
 //
 //    Get screen resolution
@@ -34,6 +36,11 @@ void display_getResolution()
     if (file == NULL || !(fscanf(file, "%dx%d", &DISPLAY_WIDTH, &DISPLAY_HEIGHT) == 2))
         printf("failed to get screen resolution\n");
     fclose(file);
+    if (fb_fd < 0)
+        fb_fd = open("/dev/fb0", O_RDWR);
+    ioctl(fb_fd, FBIOGET_VSCREENINFO, &vinfo);
+    RENDER_WIDTH = vinfo.xres;
+    RENDER_HEIGHT = vinfo.yres;
 }
 
 void display_init(void)
