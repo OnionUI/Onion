@@ -6,6 +6,8 @@
 
 int main(int argc, char *argv[])
 {
+    log_setName("batmon");
+
     getDeviceModel();
     FILE *fp;
     int old_percentage = -1, current_percentage, warn_at = 15;
@@ -195,10 +197,16 @@ int batteryPercentage(int value)
 //
 static void *batteryWarning_thread(void *param)
 {
+    int step = 0;
     while (1) {
-        display_drawBatteryIcon(0x00FF0000, 15, 450, 10,
+        display_drawBatteryIcon(0x00FF0000, 15, RENDER_HEIGHT - 30, 10,
                                 0x00FF0000); // draw red battery icon
-        usleep(0x4000);
+        usleep(0x4000);                      // roughly 1/60th of a second
+        step++;
+        if (step > 60) { // roughly once a second + the time it takes to draw
+            step = 0;
+            display_getRenderResolution();
+        }
     }
     return 0;
 }

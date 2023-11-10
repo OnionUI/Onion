@@ -220,13 +220,7 @@ void osd_showBar(int value, int value_max, uint32_t color)
     _bar_color = color;
     osd_bar_activated = true;
 
-    // update render resolution as this can change during runtime
-    if (fb_fd < 0)
-        fb_fd = open("/dev/fb0", O_RDWR);
-    ioctl(fb_fd, FBIOGET_VSCREENINFO, &vinfo);
-    RENDER_WIDTH = vinfo.xres;
-    RENDER_HEIGHT = vinfo.yres;
-    
+    display_getRenderResolution();
     config_get("display/meterWidth", CONFIG_INT, &meterWidth);
 
     if (osd_thread_active)

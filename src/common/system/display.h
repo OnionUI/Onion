@@ -26,9 +26,23 @@ static int DISPLAY_WIDTH = 640; // physical screen resolution
 static int DISPLAY_HEIGHT = 480;
 int RENDER_WIDTH = 640; // render resolution
 int RENDER_HEIGHT = 480;
+struct timeval start_time, end_time;
 
 //
-//    Get screen resolution
+//    Get render resolution
+//
+void display_getRenderResolution()
+{
+    exists("/dev/fb0");
+    if (fb_fd < 0)
+        fb_fd = open("/dev/fb0", O_RDWR);
+    ioctl(fb_fd, FBIOGET_VSCREENINFO, &vinfo);
+    RENDER_WIDTH = vinfo.xres;
+    RENDER_HEIGHT = vinfo.yres;
+}
+
+//
+//    Get physical screen resolution
 //
 void display_getResolution()
 {
@@ -36,11 +50,7 @@ void display_getResolution()
     if (file == NULL || !(fscanf(file, "%dx%d", &DISPLAY_WIDTH, &DISPLAY_HEIGHT) == 2))
         printf("failed to get screen resolution\n");
     fclose(file);
-    if (fb_fd < 0)
-        fb_fd = open("/dev/fb0", O_RDWR);
-    ioctl(fb_fd, FBIOGET_VSCREENINFO, &vinfo);
-    RENDER_WIDTH = vinfo.xres;
-    RENDER_HEIGHT = vinfo.yres;
+    display_getRenderResolution();
 }
 
 void display_init(void)
@@ -194,26 +204,26 @@ void display_drawBatteryIcon(uint32_t color, int x, int y, int level,
 
     // Draw battery body wireframe
     for (i = x; i < x + 30; i++) {
-        ofs[i + y * 640] = color;        // Top border
-        ofs[i + (y + 14) * 640] = color; // Bottom border
+        ofs[i + y * RENDER_WIDTH] = color;        // Top border
+        ofs[i + (y + 14) * RENDER_WIDTH] = color; // Bottom border
     }
     for (j = y; j < y + 15; j++) {
-        ofs[x + j * 640] = color;      // Left border
-        ofs[x + 29 + j * 640] = color; // Right border
+        ofs[x + j * RENDER_WIDTH] = color;      // Left border
+        ofs[x + 29 + j * RENDER_WIDTH] = color; // Right border
     }
 
     // Draw battery charge level
     int levelWidth = (level * 26) / 100;
     for (i = x + 3 + 26 - levelWidth; i < x + 1 + 26; i++) {
         for (j = y + 3; j < y + 12; j++) {
-            ofs[i + j * 640] = fillColor;
+            ofs[i + j * RENDER_WIDTH] = fillColor;
         }
     }
 
     // Draw battery head wireframe
     for (i = x - 4; i < x; i++) {
         for (j = y + 2; j < y + 13; j++) {
-            ofs[i + j * 640] = color;
+            ofs[i + j * RENDER_WIDTH] = color;
         }
     }
 }
