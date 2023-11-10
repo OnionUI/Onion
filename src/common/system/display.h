@@ -11,9 +11,6 @@
 #include "utils/file.h"
 #include "utils/log.h"
 
-#define DISPLAY_WIDTH 640
-#define DISPLAY_HEIGHT 480
-
 #define display_on() display_setScreen(true)
 #define display_off() display_setScreen(false)
 
@@ -25,6 +22,19 @@ static struct fb_var_screeninfo vinfo;
 static uint32_t stride, bpp;
 static uint8_t *savebuf;
 static bool display_enabled = true;
+static int DISPLAY_WIDTH = 640;
+static int DISPLAY_HEIGHT = 480;
+
+//
+//    Get screen resolution
+//
+void display_getResolution()
+{
+    FILE *file = fopen("/tmp/screen_resolution", "r");
+    if (file == NULL || !(fscanf(file, "%dx%d", &DISPLAY_WIDTH, &DISPLAY_HEIGHT) == 2))
+        printf("failed to get screen resolution\n");
+    fclose(file);
+}
 
 void display_init(void)
 {
@@ -33,6 +43,7 @@ void display_init(void)
     ioctl(fb_fd, FBIOGET_FSCREENINFO, &finfo);
     fb_addr = (uint32_t *)mmap(0, finfo.smem_len, PROT_READ | PROT_WRITE,
                                MAP_SHARED, fb_fd, 0);
+    display_getResolution();
 }
 
 //

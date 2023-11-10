@@ -90,13 +90,43 @@ bool __get_path_recent(char *path_out)
 
 uint32_t *__screenshot_buffer(void)
 {
-    static size_t buffer_size = DISPLAY_WIDTH * DISPLAY_HEIGHT * sizeof(uint32_t);
+    size_t buffer_size = DISPLAY_WIDTH * DISPLAY_HEIGHT * sizeof(uint32_t);
     uint32_t *buffer = (uint32_t *)malloc(buffer_size);
 
     ioctl(fb_fd, FBIOGET_VSCREENINFO, &vinfo);
     memcpy(buffer, fb_addr + DISPLAY_WIDTH * vinfo.yoffset, buffer_size);
 
     return buffer;
+}
+
+/**
+ * Scales a framebuffer to given size using nearest neighbor interpolation.
+ * @param input Pointer to the input framebuffer.
+ * @param in_width Width of the input framebuffer.
+ * @param in_height Height of the input framebuffer.
+ * @param out_width Width of the output framebuffer.
+ * @param out_height Height of the output framebuffer.
+ * @return Pointer to the scaled output framebuffer.
+ *         Returns NULL if memory allocation fails.
+ */
+uint32_t *__scale_fb(const uint32_t *input, int in_width, int in_height, int out_width, int out_height)
+{
+    printf_debug("Scaling framebuffer from %dx%d to %dx%d\n", in_width, in_height, out_width, out_height);
+    uint32_t *out = (uint32_t *)malloc(out_width * out_height * sizeof(uint32_t));
+    if (!out)
+        return NULL;
+
+    float x_ratio = (float)in_width / out_width;
+    float y_ratio = (float)in_height / out_height;
+
+    for (int y = 0; y < out_height; ++y) {
+        for (int x = 0; x < out_width; ++x) {
+            int px = (int)(x * x_ratio);
+            int py = (int)(y * y_ratio);
+            out[y * out_width + x] = input[py * in_width + px];
+        }
+    }
+    return out;
 }
 
 /**
@@ -110,10 +140,17 @@ uint32_t *__screenshot_buffer(void)
 bool __screenshot_save(const uint32_t *buffer, const char *screenshot_path)
 {
     uint32_t *src;
-    uint32_t line_buffer[DISPLAY_WIDTH], x, y, pix;
+    int screenshot_x = 640;
+    int screenshot_y = 480;
+
+    uint32_t line_buffer[screenshot_x], x, y, pix;
+
     FILE *fp;
     png_structp png_ptr;
     png_infop info_ptr;
+
+    if (!(screenshot_x == DISPLAY_WIDTH) && !(screenshot_y == DISPLAY_HEIGHT))
+        buffer = __scale_fb(buffer, DISPLAY_WIDTH, DISPLAY_HEIGHT, screenshot_x, screenshot_y);
 
     if (!(fp = file_open_ensure_path(screenshot_path, "wb"))) {
         return false;
@@ -123,15 +160,15 @@ bool __screenshot_save(const uint32_t *buffer, const char *screenshot_path)
     info_ptr = png_create_info_struct(png_ptr);
 
     png_init_io(png_ptr, fp);
-    png_set_IHDR(png_ptr, info_ptr, DISPLAY_WIDTH, DISPLAY_HEIGHT, 8,
+    png_set_IHDR(png_ptr, info_ptr, screenshot_x, screenshot_y, 8,
                  PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE,
                  PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
     png_write_info(png_ptr, info_ptr);
 
-    src = (uint32_t *)buffer + DISPLAY_WIDTH * DISPLAY_HEIGHT;
+    src = (uint32_t *)buffer + screenshot_x * screenshot_y;
 
-    for (y = 0; y < DISPLAY_HEIGHT; y++) {
-        for (x = 0; x < DISPLAY_WIDTH; x++) {
+    for (y = 0; y < screenshot_y; y++) {
+        for (x = 0; x < screenshot_x; x++) {
             pix = *--src;
             line_buffer[x] = 0xFF000000 | (pix & 0x0000FF00) | (pix & 0x00FF0000) >> 16 | (pix & 0x000000FF) << 16;
         }
