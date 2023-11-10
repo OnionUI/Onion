@@ -220,7 +220,6 @@ void osd_showBar(int value, int value_max, uint32_t color)
     _bar_color = color;
     osd_bar_activated = true;
 
-    display_getRenderResolution();
     config_get("display/meterWidth", CONFIG_INT, &meterWidth);
 
     if (osd_thread_active)
