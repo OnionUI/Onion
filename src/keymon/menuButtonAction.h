@@ -115,28 +115,28 @@ bool terminate_drastic(void)
         //  sprintf(fname, "pkill drastic");
         //  system(fname);
         // wait for terminate
-        /*sprintf(fname, "sendkeys 97 1, 14 1");
+        /*sprintf(fname, "sendkeys 1 1, 14 1");
         system(fname);
         usleep(200000); // 0.2s
-        sprintf(fname, "sendkeys 97 0, 14 0");
+        sprintf(fname, "sendkeys 1 0, 14 0");
         
         sleep(1);
         */
 
-        sprintf(fname, "sendkeys 97 1, 18 1");
+        sprintf(fname, "sendkeys 1 1, 18 1");
         system(fname);
         usleep(200000); // 0.2s
-        sprintf(fname, "sendkeys 97 0, 18 0");
+        sprintf(fname, "sendkeys 1 0, 18 0");
         system(fname);
         sprintf(fname, "/proc/%d", pid);
         uint32_t count = 8;
 
         sleep(1);
         while (--count && exists(fname)) {
-            sprintf(fname, "sendkeys 97 1, 18 1");
+            sprintf(fname, "sendkeys 1 1, 18 1");
             system(fname);
             usleep(200000); // 0.2s
-            sprintf(fname, "sendkeys 97 0, 18 0");
+            sprintf(fname, "sendkeys 1 0, 18 0");
             system(fname);
             sleep(1);
         }
