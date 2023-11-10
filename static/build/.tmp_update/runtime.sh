@@ -341,7 +341,9 @@ launch_game() {
             retval=$?
         else
             # GAME LAUNCH
-            if [ -f /tmp/new_res_available ]; then
+            if [ -f /tmp/new_res_available ] && ! grep -q "/Emu/drastic/" $sysdir/cmd_to_run.sh ; then
+                # TODO: exception for drastic, probably more of those needed
+                # or change the logic to only change res when launching RA
                 res_x=$(echo "$screen_resolution" | cut -d 'x' -f 1)
                 res_y=$(echo "$screen_resolution" | cut -d 'x' -f 2)
                 fbset -g "$res_x" "$res_y" "$res_x" "$((res_y * 2))" 32
@@ -510,6 +512,9 @@ init_system() {
     screen_resolution=$(grep 'Current TimingWidth=' /proc/mi_modules/fb/mi_fb0 | sed 's/Current TimingWidth=\([0-9]*\),TimingWidth=\([0-9]*\),.*/\1x\2/')
     if [ "$screen_resolution" = "752x560" ] && [ "$(/etc/fw_printenv miyoo_version)" = "miyoo_version=202310271401" ]; then
         touch /tmp/new_res_available
+    else
+        # can't use 752x560 without appropriate firmware or screen
+        screen_resolution="640x480"
     fi
     echo "$screen_resolution" > /tmp/screen_resolution
 
