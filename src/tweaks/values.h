@@ -60,10 +60,10 @@ int value_appShortcut(int button)
     return 0;
 }
 
-int value_blueLight(void)
+int value_blueLightLevel(void)
 {
     int blueLightLevel = 0;
-    config_get("display/blueLight", CONFIG_INT, &blueLightLevel);
+    config_get("display/blueLightLevel", CONFIG_INT, &blueLightLevel);
     return blueLightLevel;
 }
 
@@ -72,6 +72,24 @@ int value_blueLightRGB(void)
     int blueLightRGB= 0;
     config_get("display/blueLightRGB", CONFIG_INT, &blueLightRGB);
     return blueLightRGB;
+}
+
+int value_blueLightTimeOn(void)
+{
+    char blueLightTime[12];
+    int blueLightID = 0;
+    config_get("display/blueLightTime", CONFIG_STR, blueLightTime);
+    blueLightID = formatter_timeStringToID(blueLightTime);
+    return blueLightID;
+}
+
+int value_blueLightTimeOff(void)
+{
+    char blueLightTimeOff[12];
+    int blueLightID = 0;
+    config_get("display/blueLightTimeOff", CONFIG_STR, blueLightTimeOff);
+    blueLightID = formatter_timeStringToID(blueLightTimeOff);
+    return blueLightID;
 }
 
 int value_meterWidth(void)

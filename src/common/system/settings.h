@@ -51,6 +51,10 @@ typedef struct settings_s {
     int ingame_double_press;
     bool disable_standby;
     bool enable_logging;
+    int blue_light_state;
+    int blue_light_level;
+    char blue_light_time[16];
+    char blue_light_time_off[16];
 
     char mainui_button_x[JSON_STRING_LEN];
     char mainui_button_y[JSON_STRING_LEN];
@@ -96,6 +100,10 @@ static settings_s __default_settings = (settings_s){
     .ingame_double_press = 3,
     .disable_standby = false,
     .enable_logging = false,
+    .blue_light_state = false,
+    .blue_light_level = 0,
+    .blue_light_time = "20:00",
+    .blue_light_time_off = "08:00",
     .mainui_button_x = "",
     .mainui_button_y = ""};
 
@@ -174,6 +182,7 @@ void settings_load(void)
     settings.mute = config_flag_get(".muteVolume");
     settings.disable_standby = config_flag_get(".disableStandby");
     settings.enable_logging = config_flag_get(".logging");
+    settings.blue_light_state = config_flag_get(".blf");
 
     if (config_flag_get(".noLowBatteryAutoSave")) // flag is deprecated, but keep compatibility
         settings.low_battery_autosave_at = 0;
@@ -190,6 +199,9 @@ void settings_load(void)
     config_get("startup/addHours", CONFIG_INT, &settings.time_skip);
     config_get("vibration", CONFIG_INT, &settings.vibration);
     config_get("startup/tab", CONFIG_INT, &settings.startup_tab);
+    config_get("display/blueLightLevel", CONFIG_INT, &settings.blue_light_level);
+    config_get("display/blueLightTime", CONFIG_STR, &settings.blue_light_time);
+    config_get("display/blueLightTimeOff", CONFIG_STR, &settings.blue_light_time_off);
 
     if (config_flag_get(".menuInverted")) { // flag is deprecated, but keep compatibility
         settings.ingame_single_press = 2;
@@ -304,12 +316,16 @@ void settings_save(void)
     config_flag_set(".muteVolume", settings.mute);
     config_flag_set(".disableStandby", settings.disable_standby);
     config_flag_set(".logging", settings.enable_logging);
+    config_flag_set(".blf", settings.blue_light_state);
     config_setNumber("battery/warnAt", settings.low_battery_warn_at);
     config_setNumber("battery/exitAt", settings.low_battery_autosave_at);
     config_setNumber("startup/app", settings.startup_application);
     config_setNumber("startup/addHours", settings.time_skip);
     config_setNumber("vibration", settings.vibration);
     config_setNumber("startup/tab", settings.startup_tab);
+    config_setNumber("display/blueLightLevel", settings.blue_light_level);
+    config_setString("display/blueLightTime", settings.blue_light_time);
+    config_setString("display/blueLightTimeOff", settings.blue_light_time_off);
 
     // remove deprecated flags
     remove(CONFIG_PATH ".noLowBatteryAutoSave");

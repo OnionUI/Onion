@@ -27,7 +27,7 @@
 
 #define BLUELIGHT_LABELS                                             \
     {                                                                \
-        "Off", "Subtle", "Moderate", "Balanced", "Strong", "Intense" \
+        "None", "Subtle", "Moderate", "Balanced", "Strong", "Intense" \
     }
 
 void formatter_timezone(void *pt, char *out_label)
@@ -42,6 +42,23 @@ void formatter_timezone(void *pt, char *out_label)
     else {
         sprintf(out_label, utc_value > 0.0 ? "UTC+%02d:%02d" : "UTC-%02d:%02d", (int)floor(abs(utc_value)), half_past ? 30 : 0);
     }
+}
+
+void formatter_Time(void *pt, char *out_label) {
+    ListItem *item = (ListItem *)pt;
+    int value = item->value;
+
+    int hours = value / 4;
+    int minutes = (value % 4) * 15;
+    sprintf(out_label, "%02d:%02d", hours, minutes);
+}
+
+int formatter_timeStringToID(const char *time_str) {
+    int hours, minutes;
+    sscanf(time_str, "%02d:%02d", &hours, &minutes);
+    int intervalsFromHours = hours * 4;
+    int intervalsFromMinutes = minutes / 15;
+    return intervalsFromHours + intervalsFromMinutes;
 }
 
 void formatter_appShortcut(void *pt, char *out_label)

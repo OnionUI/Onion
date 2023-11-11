@@ -706,7 +706,6 @@ int main(void)
         }
 
         // Comes here every CHECK_SEC(def:15) seconds interval
-
         if (delete_flag) {
             if (exists("/tmp/state_changed")) {
                 system_state_update();
@@ -734,6 +733,9 @@ int main(void)
                 hibernate_start = ticks;
             }
         }
+        
+        // Check bluelight filter
+        system("/mnt/SDCARD/.tmp_update/script/blue_light.sh check &");
 
         // Quit RetroArch / auto-save when battery too low
         if (settings.low_battery_autosave_at && battery_getPercentage() <= settings.low_battery_autosave_at && check_autosave()) {

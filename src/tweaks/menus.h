@@ -471,6 +471,57 @@ void menu_themeOverrides(void *_)
     header_changed = true;
 }
 
+void menu_blueLight(void *_)
+{
+    if (!_menu_user_blue_light._created) {
+        _menu_user_blue_light = list_createWithTitle(5, LIST_SMALL, "Blue light filter schedule");
+        list_addItemWithInfoNote(&_menu_user_blue_light,
+                                 (ListItem){
+                                     .label = "Enable",
+                                     .item_type = TOGGLE,
+                                     .value = (int)settings.blue_light_state,
+                                     .action = action_blueLightState},
+                                 "Turn bluelight filter on or off\n");
+        list_addItemWithInfoNote(&_menu_user_blue_light,
+                                 (ListItem){
+                                     .label = "Enable selected strength now",
+                                     .disabled = !settings.blue_light_state,
+                                     .item_type = ACTION,
+                                     .action = action_blueLight},
+                                 "Turn BLF on now \n");
+        list_addItemWithInfoNote(&_menu_user_blue_light,
+                                 (ListItem){
+                                     .label = "Strength",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 5,
+                                     .value_labels = BLUELIGHT_LABELS,
+                                     .action = action_blueLightLevel,
+                                     .value = value_blueLightLevel()},
+                                 "Change the strength of the \n"
+                                 "Blue light filter");
+        list_addItemWithInfoNote(&_menu_user_blue_light,
+                                 (ListItem){
+                                     .label = "Time (On)",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 95,
+                                     .value_formatter = formatter_Time,
+                                     .action = action_blueLightTimeOn,
+                                     .value = value_blueLightTimeOn()},
+                                 "Time schedule for the bluelight filter");
+        list_addItemWithInfoNote(&_menu_user_blue_light,
+                                 (ListItem){
+                                     .label = "Time (Off)",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 95,
+                                     .value_formatter = formatter_Time,
+                                     .action = action_blueLightTimeOff,
+                                     .value = value_blueLightTimeOff()},
+                                 "Time schedule for the bluelight filter");
+    }
+    menu_stack[++menu_level] = &_menu_user_blue_light;
+    header_changed = true;
+}
+
 void menu_userInterface(void *_)
 {
     if (!_menu_user_interface._created) {
@@ -503,16 +554,10 @@ void menu_userInterface(void *_)
                                  "Set the width of the 'OSD bar' shown\n"
                                  "in the left side of the display when\n"
                                  "adjusting brightness, or volume (MMP).");
-        list_addItemWithInfoNote(&_menu_user_interface,
-                                 (ListItem){
-                                     .label = "Blue light filter",
-                                     .item_type = MULTIVALUE,
-                                     .value_max = 5,
-                                     .value_labels = BLUELIGHT_LABELS,
-                                     .value = value_blueLight(),
-                                     .action = action_blueLight},
-                                 "Enable and configure\n"
-                                 "the blue light filter\n");
+        list_addItem(&_menu_user_interface,
+                     (ListItem){
+                         .label = "Blue light filter...",
+                         .action = menu_blueLight});
         list_addItem(&_menu_user_interface,
                      (ListItem){
                          .label = "Theme overrides...",
