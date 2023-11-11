@@ -149,8 +149,11 @@ bool __screenshot_save(const uint32_t *buffer, const char *screenshot_path)
     png_structp png_ptr;
     png_infop info_ptr;
 
-    if (!(screenshot_x == DISPLAY_WIDTH) && !(screenshot_y == DISPLAY_HEIGHT))
-        buffer = __scale_fb(buffer, DISPLAY_WIDTH, DISPLAY_HEIGHT, screenshot_x, screenshot_y);
+    // make sure render resolution is up to date
+    display_getRenderResolution();
+
+    if (RENDER_HEIGHT != screenshot_y || RENDER_WIDTH != screenshot_x)
+        buffer = __scale_fb(buffer, RENDER_WIDTH, RENDER_HEIGHT, screenshot_x, screenshot_y);
 
     if (!(fp = file_open_ensure_path(screenshot_path, "wb"))) {
         return false;
