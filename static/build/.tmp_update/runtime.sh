@@ -246,6 +246,25 @@ check_is_game() {
     echo "$1" | grep -q "retroarch/cores" || echo "$1" | grep -q "/../../Roms/" || echo "$1" | grep -q "/mnt/SDCARD/Roms/"
 }
 
+change_resolution() {
+    res_x=""
+    res_y=""
+
+    if [ -n "$1" ]; then
+        res_x=$(echo "$1" | cut -d 'x' -f 1)
+        res_y=$(echo "$1" | cut -d 'x' -f 2)
+    else
+        res_x=$(echo "$screen_resolution" | cut -d 'x' -f 1)
+        res_y=$(echo "$screen_resolution" | cut -d 'x' -f 2)
+    fi
+    log "change resolution to $res_x x $res_y"
+
+    fbset -g "$res_x" "$res_y" "$res_x" "$((res_y * 2))" 32
+    # inform batmon and keymon of resolution change
+    killall -SIGUSR1 batmon
+    killall -SIGUSR1 keymon
+}
+
 launch_game() {
     log "\n:: Launch game"
     cmd=$(cat $sysdir/cmd_to_run.sh)
@@ -341,23 +360,26 @@ launch_game() {
             retval=$?
         else
             # GAME LAUNCH
-            if [ -f /tmp/new_res_available ] && ! grep -q "/Emu/drastic/" $sysdir/cmd_to_run.sh ; then
-                # TODO: exception for drastic, probably more of those needed
-                # or change the logic to only change res when launching RA
-                res_x=$(echo "$screen_resolution" | cut -d 'x' -f 1)
-                res_y=$(echo "$screen_resolution" | cut -d 'x' -f 2)
-                fbset -g "$res_x" "$res_y" "$res_x" "$((res_y * 2))" 32
-                # inform batmon and keymon of resolution change
-                killall -SIGUSR1 batmon
-                killall -SIGUSR1 keymon
+
+            if [ -f /tmp/new_res_available ]; then
+                # check for games that don't work with 752x560 resolution
+                exceptions_file="$sysdir/config/res_exceptions"
+                exception_found=false
+                while IFS= read -r exception; do
+                    if grep -qF "$exception" $sysdir/cmd_to_run.sh; then
+                        exception_found=true
+                        log "exception found: $exception"
+                        break
+                    fi
+                done < "$exceptions_file"
+                if ! $exception_found ; then
+                    change_resolution
+                fi
             fi
             cd /mnt/SDCARD/RetroArch/
             $sysdir/cmd_to_run.sh
             if [ -f /tmp/new_res_available ]; then
-                fbset -g 640 480 640 960 32
-                # inform batmon and keymon of resolution change
-                killall -SIGUSR1 batmon
-                killall -SIGUSR1 keymon
+                change_resolution "640x480"
             fi
             retval=$?
         fi
