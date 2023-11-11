@@ -1,3 +1,18 @@
+sysdir=/mnt/SDCARD/.tmp_update 
+miyoodir=/mnt/SDCARD/miyoo 
+export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
+
+lockfile="/tmp/blue_light_script.lock"
+
+if [ -f "$lockfile" ]; then
+    # echo "Another instance of the script is already running."
+    exit 1
+fi
+
+touch "$lockfile"
+
+trap 'rm -f "$lockfile"; exit' INT TERM EXIT
+
 to_minutes_since_midnight() {
     hour=$(echo "$1" | cut -d: -f1 | xargs)
     minute=$(echo "$1" | cut -d: -f2 | xargs)
@@ -9,7 +24,13 @@ to_minutes_since_midnight() {
 enable_blue_light_filter() {
     current_blf=$(cat /mnt/SDCARD/.tmp_update/config/display/blueLightLevel)
 
-    openvt -c 17 -- sh -c "sysdir=/mnt/SDCARD/.tmp_update && miyoodir=/mnt/SDCARD/miyoo && export LD_LIBRARY_PATH=\"/lib:/config/lib:\$miyoodir/lib:\$sysdir/lib:\$sysdir/lib/parasyte\" && \$sysdir/bin/tweaks --no_display --bluelightctrl $current_blf" &
+     # move this whole call to tweaks off onto another VT to completely mute it/detach it from any influence on runtime.sh and keymon
+    openvt -c 17 -- sh -c "sysdir=/mnt/SDCARD/.tmp_update && \
+    miyoodir=/mnt/SDCARD/miyoo && \
+    export LD_LIBRARY_PATH=\"/lib:/config/lib:\$miyoodir/lib:\$sysdir/lib:\$sysdir/lib/parasyte\" && \
+    \$sysdir/bin/tweaks --no_display --bluelightctrl $current_blf" &
+    
+    # $sysdir/bin/tweaks --no_display --bluelightctrl $current_blf 2>&1 > /dev/null & # redundant but leaving
     sleep 1 
 
     tweaks_pid=$(pgrep -f "$sysdir/bin/tweaks --no_display --bluelightctrl $current_blf")
@@ -24,7 +45,14 @@ enable_blue_light_filter() {
 }
 
 disable_blue_light_filter() {
-    openvt -c 17 -- sh -c 'sysdir=/mnt/SDCARD/.tmp_update && miyoodir=/mnt/SDCARD/miyoo && export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte" && $sysdir/bin/tweaks --no_display --bluelightctrl 0' &
+
+    # same as above
+    openvt -c 17 -- sh -c 'sysdir=/mnt/SDCARD/.tmp_update && \
+    miyoodir=/mnt/SDCARD/miyoo && \
+    export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte" && \
+    $sysdir/bin/tweaks --no_display --bluelightctrl 0' &   
+    
+    # $sysdir/bin/tweaks --no_display --bluelightctrl 0 2>&1 > /dev/null & # redundant but leaving
     sleep 1
 
     tweaks_pid=$(pgrep -f "$sysdir/bin/tweaks --no_display --bluelightctrl 0")
@@ -69,6 +97,8 @@ check_blf() {
             fi
         fi
     fi
+    
+    rm -f "$lockfile"
 }
 
 case "$1" in
