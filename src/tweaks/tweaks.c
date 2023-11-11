@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 
     if (blueLightControl || use_display || strlen(apply_tool) == 0)
         SDL_InitDefault(true);
-    
+
     if (blueLightControl) {
         action_blueLight_thread(NULL);
         return 0;

@@ -76,7 +76,8 @@ void *action_blueLight_thread(void *arg)
         if (!config_get("display/blueLight", CONFIG_INT, &value)) {
             value = 0;
         }
-    } else {
+    }
+    else {
         ListItem *item = (ListItem *)arg;
         value = item->value;
     }

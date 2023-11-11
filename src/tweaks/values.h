@@ -69,7 +69,7 @@ int value_blueLight(void)
 
 int value_blueLightRGB(void)
 {
-    int blueLightRGB= 0;
+    int blueLightRGB = 0;
     config_get("display/blueLightRGB", CONFIG_INT, &blueLightRGB);
     return blueLightRGB;
 }
