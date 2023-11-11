@@ -474,7 +474,12 @@ void menu_themeOverrides(void *_)
 void menu_blueLight(void *_)
 {
     if (!_menu_user_blue_light._created) {
-        _menu_user_blue_light = list_createWithTitle(5, LIST_SMALL, "Blue light filter schedule");
+        _menu_user_blue_light = list_createWithTitle(6, LIST_SMALL, "Blue light filter schedule");
+        list_addItem(&_menu_user_blue_light,
+                     (ListItem){
+                         .label = "[DATESTRING]",
+                         .disabled = 1,
+                         .action = NULL});
         list_addItemWithInfoNote(&_menu_user_blue_light,
                                  (ListItem){
                                      .label = "Enable",
@@ -518,6 +523,7 @@ void menu_blueLight(void *_)
                                      .value = value_blueLightTimeOff()},
                                  "Time schedule for the bluelight filter");
     }
+    _writeDateString(_menu_user_blue_light.items[0].label);
     menu_stack[++menu_level] = &_menu_user_blue_light;
     header_changed = true;
 }
