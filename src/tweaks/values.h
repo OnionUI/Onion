@@ -67,6 +67,13 @@ int value_blueLight(void)
     return blueLightLevel;
 }
 
+int value_blueLightRGB(void)
+{
+    int blueLightRGB= 0;
+    config_get("display/blueLightRGB", CONFIG_INT, &blueLightRGB);
+    return blueLightRGB;
+}
+
 int value_meterWidth(void)
 {
     int meterWidth = 4;

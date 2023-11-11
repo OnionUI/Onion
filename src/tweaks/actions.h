@@ -59,12 +59,28 @@ void action_meterWidth(void *pt)
 
 static pthread_t last_thread;
 static pthread_mutex_t thread_mutex = PTHREAD_MUTEX_INITIALIZER;
-static int lastB = 128, lastG = 128, lastR = 128;
 
 void *action_blueLight_thread(void *arg)
 {
-    ListItem *item = (ListItem *)arg;
-    int value = item->value;
+    static int lastB, lastG, lastR;
+    int combinedRGB;
+    if (!config_get("display/blueLightRGB", CONFIG_INT, &combinedRGB)) {
+        combinedRGB = (128 << 16) | (128 << 8) | 128;
+    }
+    lastR = (combinedRGB >> 16) & 0xFF;
+    lastG = (combinedRGB >> 8) & 0xFF;
+    lastB = combinedRGB & 0xFF;
+
+    int value;
+    if (arg == NULL) {
+        if (!config_get("display/blueLight", CONFIG_INT, &value)) {
+            value = 0;
+        }
+    } else {
+        ListItem *item = (ListItem *)arg;
+        value = item->value;
+    }
+
     int startB = lastB, startG = lastG, startR = lastR;
     int endB, endG, endR;
     char cmd[128];
@@ -111,12 +127,12 @@ void *action_blueLight_thread(void *arg)
                  startR + (endR - startR) * i / 20);
         system(cmd);
         usleep(50000);
-        lastB = endB;
-        lastG = endG;
-        lastR = endR;
     }
 
     config_setNumber("display/blueLight", value);
+    combinedRGB = (endR << 16) | (endG << 8) | endB;
+    config_setNumber("display/blueLightRGB", combinedRGB);
+
     return NULL;
 }
 
