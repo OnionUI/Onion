@@ -25,8 +25,8 @@
         "-", "Off", "On"    \
     }
 
-#define BLUELIGHT_LABELS                                             \
-    {                                                                \
+#define BLUELIGHT_LABELS                                              \
+    {                                                                 \
         "None", "Subtle", "Moderate", "Balanced", "Strong", "Intense" \
     }
 
@@ -44,7 +44,8 @@ void formatter_timezone(void *pt, char *out_label)
     }
 }
 
-void formatter_Time(void *pt, char *out_label) {
+void formatter_Time(void *pt, char *out_label)
+{
     ListItem *item = (ListItem *)pt;
     int value = item->value;
 
@@ -53,7 +54,8 @@ void formatter_Time(void *pt, char *out_label) {
     sprintf(out_label, "%02d:%02d", hours, minutes);
 }
 
-int formatter_timeStringToID(const char *time_str) {
+int formatter_timeStringToID(const char *time_str)
+{
     int hours, minutes;
     sscanf(time_str, "%02d:%02d", &hours, &minutes);
     int intervalsFromHours = hours * 4;

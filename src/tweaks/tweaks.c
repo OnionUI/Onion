@@ -88,11 +88,12 @@ int main(int argc, char *argv[])
 
     settings_load();
     lang_load();
-        
+
     if (blueLightControl) {
         if (blfLevel >= 0 && blfLevel <= 5) {
             action_blueLight_thread((void *)(intptr_t)blfLevel);
-        } else {
+        }
+        else {
             fprintf(stderr, "Invalid blue light filter level specified.\n");
         }
         return 0;
