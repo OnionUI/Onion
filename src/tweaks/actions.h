@@ -178,6 +178,7 @@ void action_blueLightLevel(void *pt) {
     value = item->value;
     settings.blue_light_level = value;
     config_setNumber("display/blueLightLevel", value);
+    remove("/tmp/blueLightOn");
 }
 
 void action_blueLightState(void *pt) {
