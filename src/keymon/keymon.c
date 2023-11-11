@@ -733,7 +733,7 @@ int main(void)
                 hibernate_start = ticks;
             }
         }
-        
+
         // Check bluelight filter
         system("/mnt/SDCARD/.tmp_update/script/blue_light.sh check &");
 

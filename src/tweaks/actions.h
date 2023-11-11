@@ -62,7 +62,8 @@ static pthread_mutex_t thread_mutex = PTHREAD_MUTEX_INITIALIZER;
 static int blf_changed = 0;
 static int blf_fade_in = 0;
 
-void *action_blueLight_thread(void *arg) {
+void *action_blueLight_thread(void *arg)
+{
     static int lastB, lastG, lastR;
     int combinedRGB;
     int value;
@@ -70,31 +71,34 @@ void *action_blueLight_thread(void *arg) {
     // how is the function being called based on the arg
     if ((intptr_t)arg < 1024) {
         value = (intptr_t)arg;
-    } else if (arg != NULL) {
+    }
+    else if (arg != NULL) {
         ListItem *item = (ListItem *)arg;
         value = item->value;
-    } else {
+    }
+    else {
         value = 0;
     }
-    
+
     // what is the current blf value
     config_get("display/blueLightRGB", CONFIG_INT, &combinedRGB);
 
     if ((intptr_t)arg == 0) {
         // we're turning blf off, fade out to default values (case 0)
         blf_changed = 1;
-    } else {
+    }
+    else {
         // blf is being enabled, fade in
         lastR = lastG = lastB = 128;
     }
-    
+
     if (blf_changed) {
         lastR = (combinedRGB >> 16) & 0xFF;
         lastG = (combinedRGB >> 8) & 0xFF;
         lastB = combinedRGB & 0xFF;
         blf_changed = 0;
     }
-    
+
     if (blf_fade_in) {
         lastR = lastG = lastB = 128;
         blf_fade_in = 0;
@@ -143,7 +147,7 @@ void *action_blueLight_thread(void *arg) {
         combinedRGB = (endR << 16) | (endG << 8) | endB;
         config_setNumber("display/blueLightRGB", combinedRGB);
     }
-    
+
     for (int i = 0; i <= 20; i++) {
         snprintf(cmd, sizeof(cmd), "echo 'colortemp 0 0 0 0 %d %d %d' > /proc/mi_modules/mi_disp/mi_disp0",
                  startB + (endB - startB) * i / 20,
@@ -156,14 +160,15 @@ void *action_blueLight_thread(void *arg) {
     return NULL;
 }
 
-void action_blueLight() {
+void action_blueLight()
+{
     pthread_mutex_lock(&thread_mutex);
     if (last_thread) {
         pthread_cancel(last_thread);
         pthread_join(last_thread, NULL);
     }
 
-    pthread_create(&last_thread, NULL, action_blueLight_thread, (void*)(intptr_t)settings.blue_light_level);
+    pthread_create(&last_thread, NULL, action_blueLight_thread, (void *)(intptr_t)settings.blue_light_level);
     pthread_detach(last_thread);
     pthread_mutex_unlock(&thread_mutex);
     blf_changed = 1;
@@ -172,7 +177,8 @@ void action_blueLight() {
     all_changed = true;
 }
 
-void action_blueLightLevel(void *pt) {
+void action_blueLightLevel(void *pt)
+{
     int value;
     ListItem *item = (ListItem *)pt;
     value = item->value;
@@ -180,7 +186,8 @@ void action_blueLightLevel(void *pt) {
     config_setNumber("display/blueLightLevel", value);
 }
 
-void action_blueLightState(void *pt) {
+void action_blueLightState(void *pt)
+{
     ListItem *item = (ListItem *)pt;
     settings.blue_light_state = item->value == 1;
     config_flag_set(".blf", settings.blue_light_state);
@@ -189,18 +196,20 @@ void action_blueLightState(void *pt) {
         char cmd[128];
         snprintf(cmd, sizeof(cmd), "echo 'colortemp 0 0 0 0 128 128 128' > /proc/mi_modules/mi_disp/mi_disp0");
         system(cmd);
-    } else {
+    }
+    else {
         // blf being enabled, get the default value. set the fade_in flag
         int savedStrength = value_blueLightLevel();
         action_blueLight((void *)(intptr_t)savedStrength);
         blf_fade_in = 1;
     }
-    
+
     reset_menus = true;
     all_changed = true;
 }
 
-void action_blueLightTimeOn(void *pt) {
+void action_blueLightTimeOn(void *pt)
+{
     char time_str[10];
     ListItem *item = (ListItem *)pt;
     int value = item->value;
@@ -208,12 +217,13 @@ void action_blueLightTimeOn(void *pt) {
     int hours = value / 4;
     int minutes = (value % 4) * 15;
     sprintf(time_str, "%02d:%02d", hours, minutes);
-    
+
     strcpy(settings.blue_light_time, time_str);
     config_setString("display/blueLightTime", time_str);
 }
 
-void action_blueLightTimeOff(void *pt) {
+void action_blueLightTimeOff(void *pt)
+{
     char time_str[10];
     ListItem *item = (ListItem *)pt;
     int value = item->value;
