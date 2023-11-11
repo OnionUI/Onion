@@ -88,7 +88,6 @@ int main(int argc, char *argv[])
 
     settings_load();
     lang_load();
-    
         
     if (blueLightControl) {
         if (blfLevel >= 0 && blfLevel <= 5) {
