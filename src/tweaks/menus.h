@@ -474,26 +474,26 @@ void menu_themeOverrides(void *_)
 void menu_blueLight(void *_)
 {
     if (!_menu_user_blue_light._created) {
-        _menu_user_blue_light = list_createWithTitle(5, LIST_SMALL, "Blue light filter schedule");
+        _menu_user_blue_light = list_createWithTitle(6, LIST_SMALL, "Blue light filter schedule");
         list_addItem(&_menu_user_blue_light,
                      (ListItem){
                          .label = "[DATESTRING]",
                          .disabled = 1,
                          .action = NULL});
         list_addItemWithInfoNote(&_menu_user_blue_light,
+                                    (ListItem){
+                                     .label = "Enable now",
+                                     .disabled = !settings.blue_light_state,
+                                     .item_type = ACTION,
+                                     .action = action_blueLight},
+                                 "Test the selected strength \n");
+        list_addItemWithInfoNote(&_menu_user_blue_light,
                                  (ListItem){
-                                     .label = "Enable",
+                                     .label = "Enable schedule",
                                      .item_type = TOGGLE,
                                      .value = (int)settings.blue_light_state,
                                      .action = action_blueLightState},
                                  "Turn bluelight filter on or off\n");
-        // list_addItemWithInfoNote(&_menu_user_blue_light,
-        // (ListItem){
-        // .label = "Enable selected strength now",
-        // .disabled = !settings.blue_light_state,
-        // .item_type = ACTION,
-        // .action = action_blueLight},
-        // "Turn BLF on now \n");
         list_addItemWithInfoNote(&_menu_user_blue_light,
                                  (ListItem){
                                      .label = "Strength",

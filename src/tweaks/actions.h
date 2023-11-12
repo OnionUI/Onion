@@ -177,6 +177,7 @@ void action_blueLight()
     pthread_create(&last_thread, NULL, action_blueLight_thread, (void *)(intptr_t)settings.blue_light_level);
     pthread_detach(last_thread);
     pthread_mutex_unlock(&thread_mutex);
+    remove("/tmp/blueLightOn");
 
     reset_menus = true;
     all_changed = true;
@@ -201,15 +202,15 @@ void action_blueLightState(void *pt)
     settings.blue_light_state = item->value == 1;
     config_flag_set(".blf", settings.blue_light_state);
 
-    if (item->value == 0) {
+    if (item->value == 0) { // blf being disabled
         pthread_create(&last_thread, NULL, action_blueLight_thread, 0);
         pthread_detach(last_thread);
     }
     else {
         // blf being enabled, get the default value. set the fade_in flag
-        int savedStrength = value_blueLightLevel();
-        action_blueLight((void *)(intptr_t)savedStrength);
-        // blf_fade_in = 1;
+        // int savedStrength = value_blueLightLevel();
+        // action_blueLight((void *)(intptr_t)savedStrength);
+        blf_fade_in = 1;
     }
 
     reset_menus = true;
