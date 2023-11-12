@@ -583,8 +583,8 @@ void menu_vnc(void *pt)
                                  (ListItem){
                                      .label = "Framerate",
                                      .item_type = MULTIVALUE,
-                                     .value_max = 31,
-                                     .value_formatter = formatter_vncFps,
+                                     .value_max = 30,
+                                     .value_min = 1,
                                      .value = (int)network_settings.vncfps,
                                      .action = network_setVNCFPS},
                                  "Set the framerate of the VNC server\n"

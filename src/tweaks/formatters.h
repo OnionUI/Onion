@@ -39,19 +39,6 @@ void formatter_timezone(void *pt, char *out_label)
     }
 }
 
-void formatter_vncFps(void *pt, char *out_label)
-{
-    ListItem *item = (ListItem *)pt;
-    int value = item->value;
-
-    if (value > 30)
-        value = 0;
-    else if (value < 0)
-        value = 30;
-
-    sprintf(out_label, "%d", value);
-}
-
 void formatter_appShortcut(void *pt, char *out_label)
 {
     ListItem *item = (ListItem *)pt;
