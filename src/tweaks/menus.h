@@ -481,7 +481,7 @@ void menu_blueLight(void *_)
                          .disabled = 1,
                          .action = NULL});
         list_addItemWithInfoNote(&_menu_user_blue_light,
-                                    (ListItem){
+                                 (ListItem){
                                      .label = "Enable now",
                                      .item_type = ACTION,
                                      .action = action_blueLight},
