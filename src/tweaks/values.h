@@ -60,7 +60,8 @@ int value_appShortcut(int button)
     return 0;
 }
 
-int value_blueLightRGB(void) {
+int value_blueLightRGB(void)
+{
     int blueLightRGB = 0;
     if (!config_get("display/blueLightRGB", CONFIG_INT, &blueLightRGB)) {
         blueLightRGB = settings.blue_light_rgb;
@@ -69,7 +70,8 @@ int value_blueLightRGB(void) {
     return blueLightRGB;
 }
 
-int value_blueLightLevel(void) {
+int value_blueLightLevel(void)
+{
     int blueLightLevel = 0;
     if (!config_get("display/blueLightLevel", CONFIG_INT, &blueLightLevel)) {
         blueLightLevel = settings.blue_light_level;
@@ -79,7 +81,8 @@ int value_blueLightLevel(void) {
     return blueLightLevel;
 }
 
-int value_blueLightTimeOn(void) {
+int value_blueLightTimeOn(void)
+{
     char blueLightTime[12] = {0};
     int blueLightID = 0;
     if (!config_get("display/blueLightTime", CONFIG_STR, blueLightTime)) {
@@ -90,7 +93,8 @@ int value_blueLightTimeOn(void) {
     return blueLightID;
 }
 
-int value_blueLightTimeOff(void) {
+int value_blueLightTimeOff(void)
+{
     char blueLightTimeOff[12] = {0};
     int blueLightID = 0;
     if (!config_get("display/blueLightTimeOff", CONFIG_STR, blueLightTimeOff)) {
