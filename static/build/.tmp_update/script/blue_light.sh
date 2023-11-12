@@ -69,8 +69,17 @@ disable_blue_light_filter() {
 
 check_blf() {
     sync
-    blueLightTimeOn=$(cat /mnt/SDCARD/.tmp_update/config/display/blueLightTime)
-    blueLightTimeOff=$(cat /mnt/SDCARD/.tmp_update/config/display/blueLightTimeOff)
+
+    blueLightTimeOnFile="/mnt/SDCARD/.tmp_update/config/display/blueLightTime"
+    blueLightTimeOffFile="/mnt/SDCARD/.tmp_update/config/display/blueLightTimeOff"
+
+    if [ ! -f "$blueLightTimeOnFile" ] || [ ! -f "$blueLightTimeOffFile" ]; then
+        rm -f "$lockfile"
+        return
+    fi
+
+    blueLightTimeOn=$(cat "$blueLightTimeOnFile")
+    blueLightTimeOff=$(cat "$blueLightTimeOffFile")
 
     currentTime=$(date +"%H:%M")
     currentTimeMinutes=$(to_minutes_since_midnight "$currentTime")
