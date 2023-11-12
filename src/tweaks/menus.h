@@ -488,12 +488,12 @@ void menu_blueLight(void *_)
                                      .action = action_blueLightState},
                                  "Turn bluelight filter on or off\n");
         // list_addItemWithInfoNote(&_menu_user_blue_light,
-                                 // (ListItem){
-                                     // .label = "Enable selected strength now",
-                                     // .disabled = !settings.blue_light_state,
-                                     // .item_type = ACTION,
-                                     // .action = action_blueLight},
-                                 // "Turn BLF on now \n");
+        // (ListItem){
+        // .label = "Enable selected strength now",
+        // .disabled = !settings.blue_light_state,
+        // .item_type = ACTION,
+        // .action = action_blueLight},
+        // "Turn BLF on now \n");
         list_addItemWithInfoNote(&_menu_user_blue_light,
                                  (ListItem){
                                      .label = "Strength",

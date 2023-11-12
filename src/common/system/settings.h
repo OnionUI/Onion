@@ -330,7 +330,6 @@ void settings_save(void)
     config_setNumber("display/blueLightRGB", settings.blue_light_rgb);
     config_setString("display/blueLightTime", settings.blue_light_time);
     config_setString("display/blueLightTimeOff", settings.blue_light_time_off);
-    
 
     // remove deprecated flags
     remove(CONFIG_PATH ".noLowBatteryAutoSave");

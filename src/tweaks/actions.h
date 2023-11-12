@@ -62,22 +62,44 @@ static pthread_mutex_t thread_mutex = PTHREAD_MUTEX_INITIALIZER;
 static int blf_changed = 0;
 static int blf_fade_in = 0;
 
-void setRGBValues(int value, int *endB, int *endG, int *endR) {
+void setRGBValues(int value, int *endB, int *endG, int *endR)
+{
     switch (value) {
-        case 0:
-            *endB = 128; *endG = 128; *endR = 128; break;
-        case 1:
-            *endB = 110; *endG = 125; *endR = 140; break;
-        case 2:
-            *endB = 100; *endG = 120; *endR = 140; break;
-        case 3:
-            *endB = 90; *endG = 115; *endR = 140; break;
-        case 4:
-            *endB = 80; *endG = 110; *endR = 140; break;
-        case 5:
-            *endB = 70; *endG = 105; *endR = 140; break;
-        default:
-            *endB = 0; *endG = 0; *endR = 0; break;
+    case 0:
+        *endB = 128;
+        *endG = 128;
+        *endR = 128;
+        break;
+    case 1:
+        *endB = 110;
+        *endG = 125;
+        *endR = 140;
+        break;
+    case 2:
+        *endB = 100;
+        *endG = 120;
+        *endR = 140;
+        break;
+    case 3:
+        *endB = 90;
+        *endG = 115;
+        *endR = 140;
+        break;
+    case 4:
+        *endB = 80;
+        *endG = 110;
+        *endR = 140;
+        break;
+    case 5:
+        *endB = 70;
+        *endG = 105;
+        *endR = 140;
+        break;
+    default:
+        *endB = 0;
+        *endG = 0;
+        *endR = 0;
+        break;
     }
 }
 
@@ -132,7 +154,7 @@ void *action_blueLight_thread(void *arg)
         config_setNumber("display/blueLightRGB", combinedRGB);
         settings.blue_light_rgb = combinedRGB;
     }
-    
+
     char cmd[128];
     for (int i = 0; i <= 20; i++) {
         snprintf(cmd, sizeof(cmd), "echo 'colortemp 0 0 0 0 %d %d %d' > /proc/mi_modules/mi_disp/mi_disp0",
