@@ -1,6 +1,7 @@
 sysdir=/mnt/SDCARD/.tmp_update 
 miyoodir=/mnt/SDCARD/miyoo 
 export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
+blf_key=$sysdir/config/.blf
 
 lockfile="/tmp/blue_light_script.lock"
 
@@ -76,28 +77,30 @@ check_blf() {
     blueLightTimeOnMinutes=$(to_minutes_since_midnight "$blueLightTimeOn")
     blueLightTimeOffMinutes=$(to_minutes_since_midnight "$blueLightTimeOff")
 
-    if [ "$blueLightTimeOffMinutes" -lt "$blueLightTimeOnMinutes" ]; then
-        if [ "$currentTimeMinutes" -ge "$blueLightTimeOnMinutes" ] || [ "$currentTimeMinutes" -lt "$blueLightTimeOffMinutes" ]; then
-            if [ ! -f /tmp/blueLightOn ]; then
-                enable_blue_light_filter 
+    if [ -f "$blf_key" ]; then
+        if [ "$blueLightTimeOffMinutes" -lt "$blueLightTimeOnMinutes" ]; then
+            if [ "$currentTimeMinutes" -ge "$blueLightTimeOnMinutes" ] || [ "$currentTimeMinutes" -lt "$blueLightTimeOffMinutes" ]; then
+                if [ ! -f /tmp/blueLightOn ]; then
+                    enable_blue_light_filter 
+                fi
+            else
+                if [ -f /tmp/blueLightOn ]; then
+                    disable_blue_light_filter 
+                fi
             fi
         else
-            if [ -f /tmp/blueLightOn ]; then
-                disable_blue_light_filter 
-            fi
-        fi
-    else
-        if [ "$currentTimeMinutes" -ge "$blueLightTimeOnMinutes" ] && [ "$currentTimeMinutes" -lt "$blueLightTimeOffMinutes" ]; then
-            if [ ! -f /tmp/blueLightOn ]; then
-                enable_blue_light_filter 
-            fi
-        else
-            if [ -f /tmp/blueLightOn ]; then
-                disable_blue_light_filter 
+            if [ "$currentTimeMinutes" -ge "$blueLightTimeOnMinutes" ] && [ "$currentTimeMinutes" -lt "$blueLightTimeOffMinutes" ]; then
+                if [ ! -f /tmp/blueLightOn ]; then
+                    enable_blue_light_filter 
+                fi
+            else
+                if [ -f /tmp/blueLightOn ]; then
+                    disable_blue_light_filter 
+                fi
             fi
         fi
     fi
-    
+
     rm -f "$lockfile"
 }
 

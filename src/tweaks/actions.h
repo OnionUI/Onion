@@ -204,15 +204,14 @@ void action_blueLightState(void *pt)
     config_flag_set(".blf", settings.blue_light_state);
 
     if (item->value == 0) {
-        char cmd[128];
-        snprintf(cmd, sizeof(cmd), "echo 'colortemp 0 0 0 0 128 128 128' > /proc/mi_modules/mi_disp/mi_disp0");
-        system(cmd);
+        pthread_create(&last_thread, NULL, action_blueLight_thread, 0);
+        pthread_detach(last_thread);
     }
     else {
         // blf being enabled, get the default value. set the fade_in flag
         int savedStrength = value_blueLightLevel();
         action_blueLight((void *)(intptr_t)savedStrength);
-        blf_fade_in = 1;
+        // blf_fade_in = 1;
     }
 
     reset_menus = true;
@@ -222,13 +221,7 @@ void action_blueLightState(void *pt)
 void action_blueLightTimeOn(void *pt)
 {
     char time_str[10];
-    ListItem *item = (ListItem *)pt;
-    int value = item->value;
-
-    int hours = value / 4;
-    int minutes = (value % 4) * 15;
-    sprintf(time_str, "%02d:%02d", hours, minutes);
-
+    formatter_Time(pt, time_str);
     strcpy(settings.blue_light_time, time_str);
     config_setString("display/blueLightTime", time_str);
 }
@@ -236,13 +229,7 @@ void action_blueLightTimeOn(void *pt)
 void action_blueLightTimeOff(void *pt)
 {
     char time_str[10];
-    ListItem *item = (ListItem *)pt;
-    int value = item->value;
-
-    int hours = value / 4;
-    int minutes = (value % 4) * 15;
-    sprintf(time_str, "%02d:%02d", hours, minutes);
-
+    formatter_Time(pt, time_str);
     strcpy(settings.blue_light_time_off, time_str);
     config_setString("display/blueLightTimeOff", time_str);
 }
