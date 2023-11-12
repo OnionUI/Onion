@@ -205,11 +205,13 @@ void action_blueLightState(void *pt)
     if (item->value == 0) { // blf being disabled
         pthread_create(&last_thread, NULL, action_blueLight_thread, 0);
         pthread_detach(last_thread);
+        remove("/tmp/blueLightOn");
     }
     else {
         // blf being enabled, get the default value. set the fade_in flag
         // int savedStrength = value_blueLightLevel();
         // action_blueLight((void *)(intptr_t)savedStrength);
+        system("/mnt/SDCARD/.tmp_update/script/blue_light.sh check &"); // check if we're within the time values and start now
         blf_fade_in = 1;
     }
 
