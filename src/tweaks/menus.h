@@ -483,7 +483,6 @@ void menu_blueLight(void *_)
         list_addItemWithInfoNote(&_menu_user_blue_light,
                                     (ListItem){
                                      .label = "Enable now",
-                                     .disabled = !settings.blue_light_state,
                                      .item_type = ACTION,
                                      .action = action_blueLight},
                                  "Test the selected strength \n");
