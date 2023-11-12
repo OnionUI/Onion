@@ -62,6 +62,25 @@ static pthread_mutex_t thread_mutex = PTHREAD_MUTEX_INITIALIZER;
 static int blf_changed = 0;
 static int blf_fade_in = 0;
 
+void setRGBValues(int value, int *endB, int *endG, int *endR) {
+    switch (value) {
+        case 0:
+            *endB = 128; *endG = 128; *endR = 128; break;
+        case 1:
+            *endB = 110; *endG = 125; *endR = 140; break;
+        case 2:
+            *endB = 100; *endG = 120; *endR = 140; break;
+        case 3:
+            *endB = 90; *endG = 115; *endR = 140; break;
+        case 4:
+            *endB = 80; *endG = 110; *endR = 140; break;
+        case 5:
+            *endB = 70; *endG = 105; *endR = 140; break;
+        default:
+            *endB = 0; *endG = 0; *endR = 0; break;
+    }
+}
+
 void *action_blueLight_thread(void *arg)
 {
     static int lastB, lastG, lastR;
@@ -71,6 +90,7 @@ void *action_blueLight_thread(void *arg)
     // how is the function being called based on the arg
     if ((intptr_t)arg < 1024) {
         value = (intptr_t)arg;
+        blf_changed = 1;
     }
     else if (arg != NULL) {
         ListItem *item = (ListItem *)arg;
@@ -87,16 +107,16 @@ void *action_blueLight_thread(void *arg)
         // we're turning blf off, fade out to default values (case 0)
         blf_changed = 1;
     }
-    else {
-        // blf is being enabled, fade in
-        lastR = lastG = lastB = 128;
-    }
 
     if (blf_changed) {
         lastR = (combinedRGB >> 16) & 0xFF;
         lastG = (combinedRGB >> 8) & 0xFF;
         lastB = combinedRGB & 0xFF;
         blf_changed = 0;
+
+        if (lastR == 0 && lastG == 0 && lastB == 0) { // recalculate if they get lost
+            setRGBValues(settings.blue_light_level, &lastB, &lastG, &lastR);
+        }
     }
 
     if (blf_fade_in) {
@@ -104,55 +124,21 @@ void *action_blueLight_thread(void *arg)
         blf_fade_in = 0;
     }
 
-    int startB = lastB, startG = lastG, startR = lastR;
     int endB, endG, endR;
-    char cmd[128];
-
-    switch (value) {
-    case 0:
-        endB = 128;
-        endG = 128;
-        endR = 128;
-        break; // off
-    case 1:
-        endB = 110;
-        endG = 125;
-        endR = 140;
-        break;
-    case 2:
-        endB = 100;
-        endG = 120;
-        endR = 140;
-        break;
-    case 3:
-        endB = 90;
-        endG = 115;
-        endR = 140;
-        break;
-    case 4:
-        endB = 80;
-        endG = 110;
-        endR = 140;
-        break;
-    case 5:
-        endB = 70;
-        endG = 105;
-        endR = 140;
-        break;
-    default:
-        return NULL;
-    }
+    setRGBValues(value, &endB, &endG, &endR);
 
     if (settings.blue_light_state == 1) {
         combinedRGB = (endR << 16) | (endG << 8) | endB;
         config_setNumber("display/blueLightRGB", combinedRGB);
+        settings.blue_light_rgb = combinedRGB;
     }
-
+    
+    char cmd[128];
     for (int i = 0; i <= 20; i++) {
         snprintf(cmd, sizeof(cmd), "echo 'colortemp 0 0 0 0 %d %d %d' > /proc/mi_modules/mi_disp/mi_disp0",
-                 startB + (endB - startB) * i / 20,
-                 startG + (endG - startG) * i / 20,
-                 startR + (endR - startR) * i / 20);
+                 lastB + (endB - lastB) * i / 20,
+                 lastG + (endG - lastG) * i / 20,
+                 lastR + (endR - lastR) * i / 20);
         system(cmd);
         usleep(50000);
     }
@@ -171,7 +157,6 @@ void action_blueLight()
     pthread_create(&last_thread, NULL, action_blueLight_thread, (void *)(intptr_t)settings.blue_light_level);
     pthread_detach(last_thread);
     pthread_mutex_unlock(&thread_mutex);
-    blf_changed = 1;
 
     reset_menus = true;
     all_changed = true;
@@ -181,10 +166,13 @@ void action_blueLightLevel(void *pt)
 {
     int value;
     ListItem *item = (ListItem *)pt;
+
     value = item->value;
     settings.blue_light_level = value;
     config_setNumber("display/blueLightLevel", value);
+
     remove("/tmp/blueLightOn");
+    blf_changed = 1;
 }
 
 void action_blueLightState(void *pt)

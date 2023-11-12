@@ -53,6 +53,7 @@ typedef struct settings_s {
     bool enable_logging;
     int blue_light_state;
     int blue_light_level;
+    int blue_light_rgb;
     char blue_light_time[16];
     char blue_light_time_off[16];
 
@@ -102,6 +103,7 @@ static settings_s __default_settings = (settings_s){
     .enable_logging = false,
     .blue_light_state = false,
     .blue_light_level = 0,
+    .blue_light_rgb = 00000,
     .blue_light_time = "20:00",
     .blue_light_time_off = "08:00",
     .mainui_button_x = "",
@@ -202,6 +204,7 @@ void settings_load(void)
     config_get("display/blueLightLevel", CONFIG_INT, &settings.blue_light_level);
     config_get("display/blueLightTime", CONFIG_STR, &settings.blue_light_time);
     config_get("display/blueLightTimeOff", CONFIG_STR, &settings.blue_light_time_off);
+    config_get("display/blueLightRGB", CONFIG_INT, &settings.blue_light_rgb);
 
     if (config_flag_get(".menuInverted")) { // flag is deprecated, but keep compatibility
         settings.ingame_single_press = 2;
@@ -324,8 +327,10 @@ void settings_save(void)
     config_setNumber("vibration", settings.vibration);
     config_setNumber("startup/tab", settings.startup_tab);
     config_setNumber("display/blueLightLevel", settings.blue_light_level);
+    config_setNumber("display/blueLightRGB", settings.blue_light_rgb);
     config_setString("display/blueLightTime", settings.blue_light_time);
     config_setString("display/blueLightTimeOff", settings.blue_light_time_off);
+    
 
     // remove deprecated flags
     remove(CONFIG_PATH ".noLowBatteryAutoSave");
