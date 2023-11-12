@@ -149,11 +149,9 @@ void *action_blueLight_thread(void *arg)
     int endB, endG, endR;
     setRGBValues(value, &endB, &endG, &endR);
 
-    if (settings.blue_light_state == 1) {
-        combinedRGB = (endR << 16) | (endG << 8) | endB;
-        config_setNumber("display/blueLightRGB", combinedRGB);
-        settings.blue_light_rgb = combinedRGB;
-    }
+    combinedRGB = (endR << 16) | (endG << 8) | endB;
+    config_setNumber("display/blueLightRGB", combinedRGB);
+    settings.blue_light_rgb = combinedRGB;
 
     char cmd[128];
     for (int i = 0; i <= 20; i++) {
