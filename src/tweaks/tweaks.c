@@ -223,9 +223,11 @@ int main(int argc, char *argv[])
                         list_changed = true;
                     }
                 }
-                if (isMenu(&_menu_user_blue_light)) {
-                    if (_writeDateString(_menu_user_blue_light.items[0].label)) {
-                        list_changed = true;
+                if (DEVICE_ID == MIYOO354) {
+                    if (isMenu(&_menu_user_blue_light)) {
+                        if (_writeDateString(_menu_user_blue_light.items[0].label)) {
+                            list_changed = true;
+                        }
                     }
                 }
             }
