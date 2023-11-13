@@ -482,12 +482,14 @@ void menu_blueLight(void *_)
                              .label = "[DATESTRING]",
                              .disabled = 1,
                              .action = NULL});
+        }
             list_addItemWithInfoNote(&_menu_user_blue_light,
                                      (ListItem){
                                          .label = "Enable now",
                                          .item_type = ACTION,
                                          .action = action_blueLight},
                                      "Test the selected strength \n");
+        if (DEVICE_ID == MIYOO354) {
             list_addItemWithInfoNote(&_menu_user_blue_light,
                                      (ListItem){
                                          .label = "Enable schedule",
