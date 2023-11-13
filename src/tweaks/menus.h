@@ -483,12 +483,12 @@ void menu_blueLight(void *_)
                              .disabled = 1,
                              .action = NULL});
         }
-            list_addItemWithInfoNote(&_menu_user_blue_light,
-                                     (ListItem){
-                                         .label = "Enable now",
-                                         .item_type = ACTION,
-                                         .action = action_blueLight},
-                                     "Test the selected strength \n");
+        list_addItemWithInfoNote(&_menu_user_blue_light,
+                                 (ListItem){
+                                     .label = "Enable now",
+                                     .item_type = ACTION,
+                                     .action = action_blueLight},
+                                 "Test the selected strength \n");
         if (DEVICE_ID == MIYOO354) {
             list_addItemWithInfoNote(&_menu_user_blue_light,
                                      (ListItem){
