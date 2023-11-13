@@ -474,6 +474,7 @@ void menu_themeOverrides(void *_)
 void menu_blueLight(void *_)
 {
     if (!_menu_user_blue_light._created) {
+        network_loadState();
         _menu_user_blue_light = list_createWithTitle(6, LIST_SMALL, "Blue light filter schedule");
         if (DEVICE_ID == MIYOO354) {
             list_addItem(&_menu_user_blue_light,
