@@ -57,6 +57,17 @@ main() {
 
     cd $sysdir
     bootScreen "Boot"
+    
+    # Set filebrowser branding to "Onion" and apply custom theme
+    if [ -f "$sysdir/config/filebrowser/first.run" ]; then
+        $sysdir/bin/filebrowser config set --branding.name "Onion" -d $sysdir/config/filebrowser/filebrowser.db
+        $sysdir/bin/filebrowser config set --branding.files "$sysdir/config/filebrowser/theme" -d $sysdir/config/filebrowser/filebrowser.db
+
+        rm "$sysdir/config/filebrowser/first.run"
+    fi
+
+    # Start networking (Checks networking, checks timezone)
+    start_networking
 
     # Start the key monitor
     keymon &
@@ -81,15 +92,7 @@ main() {
     # Bind arcade name library to customer path
     mount -o bind $miyoodir/lib/libgamename.so /customer/lib/libgamename.so
 
-    # Set filebrowser branding to "Onion" and apply custom theme
-    if [ -f "$sysdir/config/filebrowser/first.run" ]; then
-        $sysdir/bin/filebrowser config set --branding.name "Onion" -d $sysdir/config/filebrowser/filebrowser.db
-        $sysdir/bin/filebrowser config set --branding.files "$sysdir/config/filebrowser/theme" -d $sysdir/config/filebrowser/filebrowser.db
 
-        rm "$sysdir/config/filebrowser/first.run"
-    fi
-
-    start_networking
     rm -rf /tmp/is_booting
 
     # Auto launch
