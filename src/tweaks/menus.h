@@ -475,6 +475,7 @@ void menu_blueLight(void *_)
 {
     if (!_menu_user_blue_light._created) {
         _menu_user_blue_light = list_createWithTitle(6, LIST_SMALL, "Blue light filter schedule");
+        if (DEVICE_ID == MIYOO354) {
         list_addItem(&_menu_user_blue_light,
                      (ListItem){
                          .label = "[DATESTRING]",
@@ -489,10 +490,12 @@ void menu_blueLight(void *_)
         list_addItemWithInfoNote(&_menu_user_blue_light,
                                  (ListItem){
                                      .label = "Enable schedule",
+                                     .disabled = !network_state.ntp,
                                      .item_type = TOGGLE,
                                      .value = (int)settings.blue_light_state,
                                      .action = action_blueLightState},
                                  "Turn bluelight filter on or off\n");
+        }
         list_addItemWithInfoNote(&_menu_user_blue_light,
                                  (ListItem){
                                      .label = "Strength",
@@ -503,9 +506,11 @@ void menu_blueLight(void *_)
                                      .value = value_blueLightLevel()},
                                  "Change the strength of the \n"
                                  "Blue light filter");
+        if (DEVICE_ID == MIYOO354) {
         list_addItemWithInfoNote(&_menu_user_blue_light,
                                  (ListItem){
                                      .label = "Time (On)",
+                                     .disabled = !network_state.ntp,
                                      .item_type = MULTIVALUE,
                                      .value_max = 95,
                                      .value_formatter = formatter_Time,
@@ -515,14 +520,18 @@ void menu_blueLight(void *_)
         list_addItemWithInfoNote(&_menu_user_blue_light,
                                  (ListItem){
                                      .label = "Time (Off)",
+                                     .disabled = !network_state.ntp,
                                      .item_type = MULTIVALUE,
                                      .value_max = 95,
                                      .value_formatter = formatter_Time,
                                      .action = action_blueLightTimeOff,
                                      .value = value_blueLightTimeOff()},
                                  "Time schedule for the bluelight filter");
+        }
     }
-    _writeDateString(_menu_user_blue_light.items[0].label);
+    if (DEVICE_ID == MIYOO354) {
+        _writeDateString(_menu_user_blue_light.items[0].label);
+    }
     menu_stack[++menu_level] = &_menu_user_blue_light;
     header_changed = true;
 }
