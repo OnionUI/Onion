@@ -22,6 +22,7 @@
 #include "system/keymap_sw.h"
 #include "system/lang.h"
 #include "system/settings.h"
+#include "system/state.h"
 #include "theme/background.h"
 #include "theme/sound.h"
 #include "theme/theme.h"
@@ -38,19 +39,19 @@
 
 #include "../playActivity/cacheDB.h"
 #include "../playActivity/playActivityDB.h"
+#include "./listMigration.h"
 
 #define MAXHISTORY 100
 #define MAXHROMNAMESIZE 250
 #define MAXHROMPATHSIZE 150
 
 #define ROM_SCREENS_DIR "/mnt/SDCARD/Saves/CurrentProfile/romScreens"
-#define HISTORY_PATH \
-    "/mnt/SDCARD/Saves/CurrentProfile/lists/content_history.lpl"
+
+#define RECENTLISTMIGRATED "/mnt/SDCARD/Saves/CurrentProfile/config/.recentListMigrated"
 
 #define MAXFILENAMESIZE 250
 #define MAXSYSPATHSIZE 80
 
-#define MAXHRACOMMAND 500
 #define LOWBATRUMBLE 10
 
 // Max number of records in the DB
@@ -88,11 +89,10 @@ typedef struct {
     uint32_t hash;
     char name[MAXHROMNAMESIZE];
     char shortname[STR_MAX];
-    char core[STR_MAX];
-    char RACommand[STR_MAX * 2 + 80];
+    char LaunchCommand[STR_MAX * 2 + 80];
     char totalTime[100];
     int jsonIndex;
-    int is_duplicate;
+    int lineNumber;
     SDL_Surface *romScreen;
     char romScreenPath[STR_MAX * 2];
     char path[PATH_MAX];
@@ -109,7 +109,6 @@ static int gameNameScrollStart = 20;
 static int gameNameScrollEnd = 20;
 
 static cJSON *json_root = NULL;
-static cJSON *json_items = NULL;
 
 static bool __initial_romscreens_loaded = false;
 
@@ -134,9 +133,8 @@ SDL_Surface *loadRomScreen(int index)
 
     if (game->romScreen == NULL) {
         char currPicture[STR_MAX * 2];
-        sprintf(currPicture, ROM_SCREENS_DIR "/%" PRIu32 "_%s.png", game->hash,
-                game->core);
-
+        sprintf(currPicture, ROM_SCREENS_DIR "/%" PRIu32 ".png", game->hash);
+        print_debug(currPicture);
         if (!exists(currPicture))
             sprintf(currPicture, ROM_SCREENS_DIR "/%" PRIu32 ".png",
                     game->hash);
@@ -205,72 +203,95 @@ void getGameName(char *name_out, const char *rom_path)
  */
 void readHistory()
 {
-    game_list_len = 0;
-
-    if (!exists(HISTORY_PATH)) {
-        print_debug("History file missing");
+    FILE *file;
+    char line[STR_MAX * 3];
+    char *jsonContent;
+    int nbGame = 0;
+    int lineCounter = 0;
+    file = fopen(getMiyooRecentFilePath(), "r");
+    if (file == NULL) {
+        print_debug("Error opening file");
         return;
     }
 
-    char rom_path[STR_MAX], core_path[STR_MAX];
+    while ((fgets(line, STR_MAX * 3, file) != NULL) && (nbGame < MAXHISTORY)) {
+        char label[STR_MAX];
+        char rompath[STR_MAX];
+        char imgpath[STR_MAX];
+        char launch[STR_MAX];
+        int type;
+        lineCounter++;
 
-    if (json_items == NULL) {
-        json_root = json_load(HISTORY_PATH);
-        json_items = cJSON_GetObjectItem(json_root, "items");
-    }
-
-    for (int nbGame = 0; nbGame < MAXHISTORY; nbGame++) {
-        cJSON *subitem = cJSON_GetArrayItem(json_items, nbGame);
-
-        if (subitem == NULL)
-            break;
-
-        if (!json_getString(subitem, "path", rom_path) ||
-            !json_getString(subitem, "core_path", core_path))
-            continue;
-
-        if (strncmp("/mnt/SDCARD/App", rom_path, 15) == 0)
-            continue;
-
-        if (!exists(core_path) || !exists(rom_path))
-            continue;
-
-        Game_s *game = &game_list[game_list_len];
-        game->hash = FNV1A_Pippip_Yurii(rom_path, strlen(rom_path));
-        game->jsonIndex = nbGame;
-        game->romScreen = NULL;
-        game->is_duplicate = 0;
-        game->totalTime[0] = '\0';
-        sprintf(game->RACommand, "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v -L \"%s\" \"%s\"", core_path, rom_path);
-        getGameName(game->name, rom_path);
-        strcpy(game->path, rom_path);
-        strcpy(game->core, basename(core_path));
-        str_split(game->core, "_libretro");
-        file_cleanName(game->shortname, game->name);
-
-        printf_debug("Game loaded:\n"
-                     "\tname: '%s' (%s)\n"
-                     "\tcmd: '%s'\n"
-                     "\thash: %" PRIu32 "\n"
-                     "\tidx: %d\n"
-                     "\n",
-                     game->name, game->shortname,
-                     game->RACommand,
-                     game->hash,
-                     game->jsonIndex);
-
-        // Check for duplicates
-        for (int i = 0; i < game_list_len; i++) {
-            Game_s *other = &game_list[i];
-            if (other->hash == game->hash) {
-                other->is_duplicate += 1;
-                game->is_duplicate = other->is_duplicate;
-            }
+        jsonContent = (char *)malloc(strlen(line) + 1);
+        if (jsonContent == NULL) {
+            print_debug("Memory allocation error");
+            fclose(file);
+            return;
         }
 
-        game_list_len++;
+        strcpy(jsonContent, line);
+
+        sscanf(strstr(jsonContent, "\"type\":") + 7, "%d", &type);
+
+        if (type != 5)
+            continue;
+
+        const char *labelStart = strstr(jsonContent, "\"label\":\"") + 9;
+        const char *labelEnd = strchr(labelStart, '\"');
+        strncpy(label, labelStart, labelEnd - labelStart);
+        label[labelEnd - labelStart] = '\0';
+
+        const char *rompathStart = strstr(jsonContent, "\"rompath\":\"") + 11;
+        const char *rompathEnd = strchr(rompathStart, '\"');
+        strncpy(rompath, rompathStart, rompathEnd - rompathStart);
+        rompath[rompathEnd - rompathStart] = '\0';
+
+        const char *imgpathStart = strstr(jsonContent, "\"imgpath\":\"") + 11;
+        const char *imgpathEnd = strchr(imgpathStart, '\"');
+        strncpy(imgpath, imgpathStart, imgpathEnd - imgpathStart);
+        imgpath[imgpathEnd - imgpathStart] = '\0';
+
+        const char *launchStart = strstr(jsonContent, "\"launch\":\"") + 10;
+        const char *launchEnd = strchr(launchStart, '\"');
+        strncpy(launch, launchStart, launchEnd - launchStart);
+        launch[launchEnd - launchStart] = '\0';
+
+        free(jsonContent);
+        if (!exists(rompath) || !exists(launch))
+            continue;
+
+        print_debug(rompath);
+
+        Game_s *game = &game_list[nbGame];
+
+        game->hash = FNV1A_Pippip_Yurii(rompath, strlen(rompath));
+
+        game->lineNumber = lineCounter;
+        game->romScreen = NULL;
+        game->totalTime[0] = '\0';
+
+        sprintf(game->LaunchCommand, "LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so  \"%s\" \"%s\"", launch, rompath);
+
+        getGameName(game->name, rompath);
+        strcpy(game->path, rompath);
+        file_cleanName(game->shortname, game->name);
+        game->jsonIndex = nbGame + 1;
+
+        game = &game_list[nbGame];
+
+        printf_debug("name: %s\n", game->name);
+        printf_debug("shortname: %s\n", game->shortname);
+        printf_debug("LaunchCommand: %s\n", game->LaunchCommand);
+        printf_debug("totalTime: %i\n", game->totalTime);
+        printf_debug("jsonIndex: %i\n", game->jsonIndex);
+        printf_debug("lineNumber: %i\n", game->lineNumber);
+        printf_debug("romScreenPath: %s\n", game->romScreenPath);
+        printf_debug("path: %s\n", game->path);
+
+        nbGame++;
     }
 
+    game_list_len = nbGame;
     pthread_create(&thread_pt, NULL, _loadRomScreensThread, NULL);
 }
 
@@ -279,25 +300,14 @@ void removeCurrentItem()
     Game_s *game = &game_list[current_game];
 
     printf_debug("removing: %s\n", game->name);
+    printf_debug("linenumber: %i\n", game->lineNumber);
 
     if (game->romScreen != NULL) {
         SDL_FreeSurface(game->romScreen);
         game->romScreen = NULL;
     }
 
-    if (game->is_duplicate > 0) {
-        // Check for duplicates
-        for (int i = 0; i < game_list_len; i++) {
-            Game_s *other = &game_list[i];
-            if (other->hash == game->hash)
-                other->is_duplicate -= 1;
-        }
-    }
-
-    if (json_items != NULL)
-        cJSON_DeleteItemFromArray(json_items, game->jsonIndex);
-
-    json_save(json_root, HISTORY_PATH);
+    file_delete_line(getMiyooRecentFilePath(), game->lineNumber);
 
     if (strlen(game->romScreenPath) > 0 && is_file(game->romScreenPath))
         remove(game->romScreenPath);
@@ -305,7 +315,7 @@ void removeCurrentItem()
     // Copy next element value to current element
     for (int i = current_game; i < game_list_len - 1; i++) {
         game_list[i] = game_list[i + 1];
-        game_list[i].jsonIndex -= 1;
+        game_list[i].lineNumber -= 1;
     }
 
     game_list_len--;
@@ -324,10 +334,18 @@ int checkQuitAction(void)
 int main(void)
 {
     log_setName("gameSwitcher");
-    print_debug("Debug logging enabled");
+    print_debug("\n\nDebug logging enabled");
 
     signal(SIGINT, sigHandler);
     signal(SIGTERM, sigHandler);
+
+    if (!is_file(RECENTLISTMIGRATED)) {
+        print_debug("Recent list migration started");
+        migrateGameSwitcherList();
+        char s_command[STR_MAX];
+        sprintf(s_command, "touch %s", RECENTLISTMIGRATED);
+        system(s_command);
+    }
 
     SDL_InitDefault(true);
 
@@ -644,12 +662,7 @@ int main(void)
                 }
 
                 char game_name_str[STR_MAX * 2 + 4];
-
-                if (game->is_duplicate > 0)
-                    snprintf(game_name_str, STR_MAX * 2 + 3, "%s (%s)",
-                             game->shortname, game->core);
-                else
-                    strcpy(game_name_str, game->shortname);
+                strcpy(game_name_str, game->shortname);
 
                 if (current_game_changed) {
                     if (surfaceGameName != NULL)
@@ -787,16 +800,15 @@ int main(void)
 
     screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
 
-    remove("/mnt/SDCARD/.tmp_update/.runGameSwitcher");
-    remove("/mnt/SDCARD/.tmp_update/cmd_to_run.sh");
-
-    if (exit_to_menu)
+    if (exit_to_menu) {
         print_debug("Exiting to menu");
+        remove("/mnt/SDCARD/.tmp_update/.runGameSwitcher");
+        remove("/mnt/SDCARD/.tmp_update/cmd_to_run.sh");
+    }
+
     else {
         print_debug("Resuming game");
-        FILE *file = fopen("/mnt/SDCARD/.tmp_update/cmd_to_run.sh", "w");
-        fputs(game_list[current_game].RACommand, file);
-        fclose(file);
+        resumeGame(game_list[current_game].jsonIndex);
     }
 
 #ifndef PLATFORM_MIYOOMINI

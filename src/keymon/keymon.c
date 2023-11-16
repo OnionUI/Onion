@@ -79,6 +79,7 @@ int suspend(uint32_t mode)
 
     // terminate retroarch before kill
     if (mode == 2) {
+        screenshot_system();
         terminate_retroarch();
         terminate_drastic();
     }
@@ -173,7 +174,8 @@ void quit(int exitcode)
 //
 void shutdown(void)
 {
-    system_shutdown();
+    set_system_shutdown();
+    screenshot_system();
     terminate_retroarch();
     terminate_drastic();
     system_clock_get();
@@ -274,35 +276,37 @@ void deepsleep(void)
     system_state_update();
     if (system_state == MODE_MAIN_UI) {
         short_pulse();
-        system_shutdown();
+        set_system_shutdown();
         kill_mainUI();
     }
     else if (system_state == MODE_SWITCHER) {
         short_pulse();
-        system_shutdown();
+        set_system_shutdown();
         kill(system_state_pid, SIGTERM);
     }
     else if (system_state == MODE_GAME) {
         if (check_autosave()) {
             short_pulse();
-            system_shutdown();
+            set_system_shutdown();
+            screenshot_system();
             terminate_retroarch();
         }
     }
     else if (system_state == MODE_ADVMENU) {
         short_pulse();
-        system_shutdown();
+        set_system_shutdown();
         kill(system_state_pid, SIGQUIT);
     }
     else if (system_state == MODE_APPS) {
         short_pulse();
         remove(CMD_TO_RUN_PATH);
-        system_shutdown();
+        set_system_shutdown();
         suspend(1);
     }
     else if (system_state == MODE_DRASTIC) {
         short_pulse();
-        system_shutdown();
+        set_system_shutdown();
+        screenshot_system();
         terminate_drastic();
     }
 }
@@ -555,10 +559,12 @@ int main(void)
                 }
                 break;
             case HW_BTN_MENU:
+
                 if (!temp_flag_get("disable_menu_button")) {
                     system_state_update();
                     comboKey_menu = menuButtonAction(val, comboKey_menu);
                 }
+
                 break;
             case HW_BTN_X:
                 if (val == PRESSED && system_state == MODE_MAIN_UI)
@@ -643,11 +649,6 @@ int main(void)
                 osd_showVolumeBar(settings.volume, settings.mute);
                 break;
             case HW_BTN_UP:
-                //if((comboKey_menu)&&((system_state == MODE_DRASTIC)||(system_state == MODE_APPS))){
-                // Send custom keypress for app detection
-
-                //}
-
                 if (DEVICE_ID == MIYOO283) {
                     if (comboKey_menu) {
                         if (config_flag_get(".altBrightness")) {
@@ -751,6 +752,7 @@ int main(void)
         // Quit RetroArch / auto-save when battery too low
         if (settings.low_battery_autosave_at && battery_getPercentage() <= settings.low_battery_autosave_at && check_autosave()) {
             temp_flag_set(".lowBat", true);
+            screenshot_system();
             terminate_retroarch();
             terminate_drastic();
         }

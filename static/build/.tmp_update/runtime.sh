@@ -425,6 +425,7 @@ check_switcher() {
 launch_switcher() {
     log "\n:: Launch switcher"
     cd $sysdir
+    start_audioserver
     LD_PRELOAD="$miyoodir/lib/libpadsp.so" gameSwitcher
     rm $sysdir/.runGameSwitcher
     set_prev_state "switcher"

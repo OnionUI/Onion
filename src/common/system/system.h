@@ -24,7 +24,7 @@
  * which is used by `runtime.sh` for knowing when to show shutdown screen.
  *
  */
-void system_shutdown(void)
+void set_system_shutdown(void)
 {
     temp_flag_set(".offOrder", true);
     system_clock_get();

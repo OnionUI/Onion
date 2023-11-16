@@ -22,7 +22,7 @@ static bool menu_ignore_next = false;
 
 void _action_runApp(const char *app_dir_name)
 {
-    run_app(app_dir_name);
+    set_cmd_app(app_dir_name);
     write_mainui_state(MAIN_MENU, 0, 10);
     kill_mainUI();
 }
@@ -78,7 +78,6 @@ bool terminate_retroarch(void)
         pid = process_searchpid("ra32");
 
     if (pid) {
-        screenshot_system();
 
         // send signal
         kill(pid, SIGCONT);
@@ -100,44 +99,23 @@ bool terminate_retroarch(void)
 //
 bool terminate_drastic(void)
 {
+    pid_t pid = process_searchpid("drastic");
     char fname[20];
-    pid_t pid = process_searchpid("retroarch");
-    pid = process_searchpid("drastic");
 
     if (pid) {
-
-        //screenshot_system();
-
-        // send signal
-        //  kill(pid, SIGCONT);
-        // usleep(100000);
-        //kill(pid, SIGTERM);
-        //  sprintf(fname, "pkill drastic");
-        //  system(fname);
-        // wait for terminate
-        /*sprintf(fname, "sendkeys 97 1, 14 1");
-        system(fname);
+        system("sendkeys 1 1, 18 1");
         usleep(200000); // 0.2s
-        sprintf(fname, "sendkeys 97 0, 14 0");
-        
-        sleep(1);
-        */
 
-        sprintf(fname, "sendkeys 97 1, 18 1");
-        system(fname);
-        usleep(200000); // 0.2s
-        sprintf(fname, "sendkeys 97 0, 18 0");
-        system(fname);
-        sprintf(fname, "/proc/%d", pid);
+        system("sendkeys 1 0, 18 0");
+
         uint32_t count = 8;
 
-        sleep(1);
+        sprintf(fname, "/proc/%d", pid);
         while (--count && exists(fname)) {
-            sprintf(fname, "sendkeys 97 1, 18 1");
-            system(fname);
+
+            system("sendkeys 1 1, 18 1");
             usleep(200000); // 0.2s
-            sprintf(fname, "sendkeys 97 0, 18 0");
-            system(fname);
+            system("sendkeys 1 0, 18 0");
             sleep(1);
         }
         return true;
@@ -165,19 +143,20 @@ void action_MainUI_contextMenu(void)
 
 void action_MainUI_gameSwitcher(void)
 {
-    run_gameSwitcher();
+    set_gameSwitcher();
     kill_mainUI();
 }
 
 void action_MainUI_resumeGame(void)
 {
-    run_resumeGame();
+    set_resumeGame();
     kill_mainUI();
 }
 
 void action_RA_gameSwitcher(void)
 {
-    run_gameSwitcher();
+    screenshot_system();
+    set_gameSwitcher();
     terminate_retroarch();
 }
 
@@ -185,8 +164,29 @@ void action_RA_exitToMenu(void) { terminate_retroarch(); }
 
 void action_RA_quickSwitch(void)
 {
-    run_quickSwitch();
+    screenshot_system();
+    set_quickSwitch();
     terminate_retroarch();
+}
+
+void action_drastic_gameSwitcher(void)
+{
+    screenshot_system();
+    set_gameSwitcher();
+    terminate_drastic();
+}
+
+void action_drastic_exitToMenu(void)
+{
+    screenshot_system();
+    terminate_drastic();
+}
+
+void action_drastic_quickSwitch(void)
+{
+    screenshot_system();
+    set_quickSwitch();
+    terminate_drastic();
 }
 
 void activate_MainUI_action(int action_id)
@@ -220,6 +220,23 @@ void activate_RA_action(int action_id)
     }
 }
 
+void activate_drastic_action(int action_id)
+{
+    switch (action_id) {
+    case 1:
+        action_drastic_gameSwitcher();
+        break;
+    case 2:
+        action_drastic_exitToMenu();
+        break;
+    case 3:
+        action_drastic_quickSwitch();
+        break;
+    default:
+        break;
+    }
+}
+
 void menuButtonEvent_singlePress(void)
 {
     switch (system_state) {
@@ -228,6 +245,9 @@ void menuButtonEvent_singlePress(void)
         break;
     case MODE_GAME:
         activate_RA_action(settings.ingame_single_press);
+        break;
+    case MODE_DRASTIC:
+        activate_drastic_action(settings.ingame_single_press);
         break;
     default:
         break;
@@ -246,6 +266,11 @@ void menuButtonEvent_longPress(void)
             short_pulse();
         activate_RA_action(settings.ingame_long_press);
         break;
+    case MODE_DRASTIC:
+        if (settings.ingame_long_press != 0)
+            short_pulse();
+        activate_drastic_action(settings.ingame_long_press);
+        break;
     default:
         break;
     }
@@ -260,6 +285,9 @@ void menuButtonEvent_doublePress(void)
     case MODE_GAME:
         activate_RA_action(settings.ingame_double_press);
         break;
+    case MODE_DRASTIC:
+        activate_drastic_action(settings.ingame_double_press);
+        break;
     default:
         break;
     }
@@ -271,6 +299,8 @@ bool _hapticSinglePress(void)
     case MODE_MAIN_UI:
         return settings.mainui_single_press != 0;
     case MODE_GAME:
+        return settings.ingame_single_press != 0;
+    case MODE_DRASTIC:
         return settings.ingame_single_press != 0;
     default:
         break;
@@ -286,6 +316,8 @@ bool _hapticDoublePress(void)
     case MODE_MAIN_UI:
         return true;
     case MODE_GAME:
+        return settings.ingame_double_press != 0;
+    case MODE_DRASTIC:
         return settings.ingame_double_press != 0;
     default:
         break;
