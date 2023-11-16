@@ -2,12 +2,12 @@
   "pen":3,
   "theme":4,
   "mode":8,
-  "xv":10000,
-  "yv":12000,
+  "xv":30000,
+  "yv":35000,
   "alpha":3,
   "position":0,
   "border":1,
-  "maxcpu":1600,
+  "maxcpu":1550,
   "touchpad":0,
   "overlay":1,
   "mincpu":500,
@@ -21,5 +21,7 @@
   "menu_c1":"0x000000",
   "menu_c2":"0x289a35",
   "auto_state":1,
-  "auto_slot":0
+  "auto_slot":10,
+  "half_vol":0,
+  "splash":3
 }
