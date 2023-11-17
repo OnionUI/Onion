@@ -137,15 +137,12 @@ SDL_Surface *loadRomScreen(int index)
         // Show artwork
         if (!exists(currPicture))
             sprintf(currPicture, "%s/Imgs/%s.png", extractPath(game->path), file_removeExtension(game->name));
-        
+
         // ports
-        if (!exists(currPicture)){
- sprintf(currPicture, "/mnt/SDCARD/Roms/PORTS/Imgs/%s.png", file_removeExtension(game->name));
+        if (!exists(currPicture)) {
+            sprintf(currPicture, "/mnt/SDCARD/Roms/PORTS/Imgs/%s.png", file_removeExtension(game->name));
             printf_debug("mario64 path %s\n", currPicture);
         }
-           
-
-
 
         if (exists(currPicture)) {
             strcpy(game->romScreenPath, currPicture);
@@ -355,6 +352,7 @@ void removeCurrentItem()
     for (int i = current_game; i < game_list_len - 1; i++) {
         game_list[i] = game_list[i + 1];
         game_list[i].lineNumber -= 1;
+        game_list[i].gameIndex -= 1;
     }
 
     game_list_len--;
@@ -453,7 +451,7 @@ int main(void)
         footer_height = 0;
 
     SDL_Surface *current_bg = NULL;
-   // SDL_Rect frame = {theme()->frame.border_left, 0, 640 - theme()->frame.border_left - theme()->frame.border_right, 480};
+    // SDL_Rect frame = {theme()->frame.border_left, 0, 640 - theme()->frame.border_left - theme()->frame.border_right, 480};
 
     while (!quit) {
         uint32_t ticks = SDL_GetTicks();
@@ -656,9 +654,9 @@ int main(void)
                     current_bg = loadRomScreen(current_game);
 
                     if (current_bg != NULL) {
-                        int x_offset = (int)((640-current_bg->w)/2);
-                        int y_offset = (int)((480-current_bg->h)/2);
-                        SDL_Rect frame_bg = {x_offset,y_offset, 640, 480};
+                        int x_offset = (int)((640 - current_bg->w) / 2);
+                        int y_offset = (int)((480 - current_bg->h) / 2);
+                        SDL_Rect frame_bg = {x_offset, y_offset, 640, 480};
                         SDL_BlitSurface(current_bg, NULL, screen, &frame_bg);
                     }
                 }
