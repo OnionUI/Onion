@@ -231,11 +231,14 @@ void readHistory()
         }
 
         strcpy(jsonContent, line);
+        printf_debug("jsonContent: %s\n", jsonContent);
 
         sscanf(strstr(jsonContent, "\"type\":") + 7, "%d", &type);
 
         if (type != 5)
             continue;
+
+        print_debug("type 5");
 
         const char *labelStart = strstr(jsonContent, "\"label\":\"");
         if (labelStart != NULL) {
@@ -244,7 +247,7 @@ void readHistory()
             strncpy(label, labelStart, labelEnd - labelStart);
             label[labelEnd - labelStart] = '\0';
         }
-
+        printf_debug("label: %s\n", label);
         const char *rompathStart = strstr(jsonContent, "\"rompath\":\"");
         if (rompathStart != NULL) {
             rompathStart += 11;
@@ -252,7 +255,7 @@ void readHistory()
             strncpy(rompath, rompathStart, rompathEnd - rompathStart);
             rompath[rompathEnd - rompathStart] = '\0';
         }
-
+        printf_debug("rompath: %s\n", rompath);
         const char *imgpathStart = strstr(jsonContent, "\"imgpath\":\"");
         if (imgpathStart != NULL) {
             imgpathStart += 11;
@@ -261,20 +264,38 @@ void readHistory()
             imgpath[imgpathEnd - imgpathStart] = '\0';
         }
 
-        const char *launchStart = strstr(jsonContent, "\"launch\":\"");
-        if (launchStart != NULL) {
-            launchStart += 10;
-            const char *launchEnd = strchr(launchStart, '\"');
-            strncpy(launch, launchStart, launchEnd - launchStart);
-            launch[launchEnd - launchStart] = '\0';
+        char *colonPosition = strchr(rompath, ':');
+        if (colonPosition != NULL) {
+
+            int position = (int)(colonPosition - rompath);
+
+            char firstPart[position + 1];
+            strncpy(firstPart, rompath, position);
+            firstPart[position] = '\0';
+
+            char secondPart[strlen(rompath) - position];
+            strcpy(secondPart, colonPosition + 1);
+
+            strcpy(launch, firstPart);
+            strcpy(rompath, secondPart);
+            printf_debug("launch cutted: %s\n", launch);
+            printf_debug("rompath cutted: %s\n", rompath);
+        }
+        else {
+            const char *launchStart = strstr(jsonContent, "\"launch\":\"");
+            if (launchStart != NULL) {
+                launchStart += 10;
+                const char *launchEnd = strchr(launchStart, '\"');
+                strncpy(launch, launchStart, launchEnd - launchStart);
+                launch[launchEnd - launchStart] = '\0';
+            }
         }
 
+        printf_debug("launch: %s\n", launch);
         free(jsonContent);
-        
+
         if (!exists(rompath) || !exists(launch))
             continue;
-
-        print_debug(rompath);
 
         Game_s *game = &game_list[nbGame];
 
