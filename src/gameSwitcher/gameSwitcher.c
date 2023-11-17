@@ -134,18 +134,22 @@ SDL_Surface *loadRomScreen(int index)
     if (game->romScreen == NULL) {
         char currPicture[STR_MAX * 2];
         sprintf(currPicture, ROM_SCREENS_DIR "/%" PRIu32 ".png", game->hash);
-        //print_debug(currPicture);
+        // Show artwork
         if (!exists(currPicture))
-            sprintf(currPicture, ROM_SCREENS_DIR "/%" PRIu32 ".png",
-                    game->hash);
+            sprintf(currPicture, "%s/Imgs/%s.png", extractPath(game->path), file_removeExtension(game->name));
+        
+        // ports
+        if (!exists(currPicture)){
+ sprintf(currPicture, "/mnt/SDCARD/Roms/PORTS/Imgs/%s.png", file_removeExtension(game->name));
+            printf_debug("mario64 path %s\n", currPicture);
+        }
+           
 
-        if (!exists(currPicture))
-            sprintf(currPicture, ROM_SCREENS_DIR "/%s.png",
-                    file_removeExtension(game->name));
+
 
         if (exists(currPicture)) {
-            game->romScreen = IMG_Load(currPicture);
             strcpy(game->romScreenPath, currPicture);
+            game->romScreen = IMG_Load(currPicture);
         }
     }
 
@@ -449,7 +453,7 @@ int main(void)
         footer_height = 0;
 
     SDL_Surface *current_bg = NULL;
-    SDL_Rect frame = {theme()->frame.border_left, 0, 640 - theme()->frame.border_left - theme()->frame.border_right, 480};
+   // SDL_Rect frame = {theme()->frame.border_left, 0, 640 - theme()->frame.border_left - theme()->frame.border_right, 480};
 
     while (!quit) {
         uint32_t ticks = SDL_GetTicks();
@@ -652,10 +656,10 @@ int main(void)
                     current_bg = loadRomScreen(current_game);
 
                     if (current_bg != NULL) {
-                        if (view_mode == VIEW_NORMAL)
-                            SDL_BlitSurface(current_bg, &frame, screen, &frame);
-                        else
-                            SDL_BlitSurface(current_bg, NULL, screen, NULL);
+                        int x_offset = (int)((640-current_bg->w)/2);
+                        int y_offset = (int)((480-current_bg->h)/2);
+                        SDL_Rect frame_bg = {x_offset,y_offset, 640, 480};
+                        SDL_BlitSurface(current_bg, NULL, screen, &frame_bg);
                     }
                 }
             }
@@ -667,6 +671,7 @@ int main(void)
                 SDL_Rect game_name_bg_pos = {0, 360};
 
                 if (view_mode == VIEW_NORMAL) {
+
                     game_name_bg_size.x = game_name_bg_pos.x =
                         theme()->frame.border_left;
                     game_name_bg_size.w -= theme()->frame.border_left +

@@ -169,33 +169,6 @@ char *extractPath(const char *absolutePath)
     return NULL;
 }
 
-char *extractLastDirectory(const char *path)
-{
-    const char *lastSeparator = strrchr(path, '/');
-    if (lastSeparator == NULL || lastSeparator == path) {
-        return NULL;
-    }
-
-    lastSeparator--;
-
-    const char *endOfLastDirectory = lastSeparator;
-    const char *startOfLastDirectory = endOfLastDirectory;
-
-    while (startOfLastDirectory > path && *startOfLastDirectory != '/') {
-        startOfLastDirectory--;
-    }
-    startOfLastDirectory++;
-
-    size_t length = endOfLastDirectory - startOfLastDirectory + 1;
-    char *lastDirectory = (char *)malloc(length + 1);
-    if (lastDirectory != NULL) {
-        strncpy(lastDirectory, startOfLastDirectory, length);
-        lastDirectory[length] = '\0';
-    }
-
-    return lastDirectory;
-}
-
 void file_cleanName(char *name_out, const char *file_name)
 {
     char *name_without_ext = file_removeExtension(strdup(file_name));
