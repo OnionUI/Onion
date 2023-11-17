@@ -42,6 +42,57 @@ void getGameName_migration(char *name_out, const char *rom_path)
     }
 }
 
+char *extractConsoleNameFromRomPath(const char *path)
+{
+    const char *base = "/mnt/SDCARD/Roms/";
+    const char *startOfDir = strstr(path, base);
+
+    if (startOfDir != NULL) {
+        startOfDir += strlen(base);
+
+        // Find the end of the directory
+        const char *endOfDir = strchr(startOfDir, '/');
+
+        // Allocate memory for the result
+        size_t dirLength = endOfDir != NULL ? (size_t)(endOfDir - startOfDir) : strlen(startOfDir);
+        char *directory = (char *)malloc(dirLength + 1);
+
+        // Copy the directory into the new string
+        strncpy(directory, startOfDir, dirLength);
+        directory[dirLength] = '\0';
+
+        return directory;
+    }
+    else {
+        return NULL;
+    }
+}
+
+// Function to extract all subfolders to the right of "/mnt/SDCARD/Roms"
+char *extractAllSubfoldersFromRomPath(const char *path) {
+    const char *base = "/mnt/SDCARD/Roms/";
+    const char *startOfDir = strstr(path, base);
+
+    if (startOfDir != NULL) {
+        startOfDir += strlen(base);
+
+        // Find the end of the path
+        const char *endOfPath = strrchr(startOfDir, '/');
+
+        // Allocate memory for the result
+        size_t pathLength = endOfPath != NULL ? (size_t)(endOfPath - startOfDir) : strlen(startOfDir);
+        char *subfolders = (char *)malloc(pathLength + 1);
+
+        // Copy the subfolders into the new string
+        strncpy(subfolders, startOfDir, pathLength);
+        subfolders[pathLength] = '\0';
+
+        return subfolders;
+    } else {
+        return NULL;
+    }
+}
+
 void readHistoryRA()
 {
     game_list_len_migration = 0;
@@ -128,27 +179,29 @@ void buildRecentFile()
                         game->core);
                 printf_debug("oldPicturePath : %s\n", oldPicturePath);
 
-                char imgPath[STR_MAX];
+                char imgPath[STR_MAX*2];
                 char console_folder[10];
-                sprintf(console_folder, extractLastDirectory(game->path));
+                sprintf(console_folder, extractConsoleNameFromRomPath(game->path));
+
+                char all_subs[STR_MAX];
+                sprintf(all_subs, extractAllSubfoldersFromRomPath(game->path));
 
                 // miyoo boxart png path
-                sprintf(imgPath, "/mnt/SDCARD/Emu/%s/../../Roms/%s/Imgs/%s.png", console_folder, console_folder, file_removeExtension(basename(game->path)));
+                sprintf(imgPath, "/mnt/SDCARD/Emu/%s/../../Roms/%s/Imgs/%s.png", console_folder, all_subs, file_removeExtension(basename(game->path)));
 
-                char tempString[STR_MAX];
-                sprintf(tempString, "/mnt/SDCARD/Emu/%s/../../Roms/%s/%s", console_folder, console_folder, basename(game->path));
+                char tempString[STR_MAX*2];
+                sprintf(tempString, "/mnt/SDCARD/Emu/%s/../../Roms/%s/%s", console_folder, all_subs, basename(game->path));
                 strcpy(game->path, tempString);
 
                 // new screenshot path
-                printf_debug("new path : %s\n", game->path);
+                printf_debug("new rom path : %s\n", game->path);
                 game->hash = FNV1A_Pippip_Yurii(game->path, strlen(game->path));
-                printf_debug("new path : %s\n", game->path);
                 char currPicturePath[PATH_MAX];
                 sprintf(currPicturePath, ROM_SCREENS_DIR "/%" PRIu32 ".png", game->hash);
                 printf_debug("currPicturePath : %s\n", currPicturePath);
 
                 // screenshot renaming
-                if (is_file (oldPicturePath))
+                if (is_file(oldPicturePath))
                     rename(oldPicturePath, currPicturePath);
 
                 printf_debug("png path'%s':\n", imgPath);
@@ -156,13 +209,17 @@ void buildRecentFile()
                     imgPath[0] = '\0';
                 }
 
+                if (!is_file(imgPath))
+                   strcpy(imgPath, "");
+
                 char launchPath[STR_MAX];
 
                 sprintf(launchPath, "/mnt/SDCARD/Emu/%s/launch.sh", console_folder);
-                if (is_file(launchPath)) {
-                    fprintf(temp_file, "{\"label\":\"%s\",\"rompath\":\"%s\",\"imgpath\":\"%s\",\"launch\":\"%s\",\"type\":5}\n", game->name,
-                            game->path, imgPath, launchPath);
-                }
+                printf_debug("{\"label\":\"%s\",\"rompath\":\"%s\",\"imgpath\":\"%s\",\"launch\":\"%s\",\"type\":5}\n", game->name,
+                             game->path, imgPath, launchPath);
+
+                fprintf(temp_file, "{\"label\":\"%s\",\"rompath\":\"%s\",\"imgpath\":\"%s\",\"launch\":\"%s\",\"type\":5}\n", game->name,
+                        game->path, imgPath, launchPath);
             }
         }
     }

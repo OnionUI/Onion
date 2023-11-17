@@ -87,15 +87,15 @@ static char sTotalTimePlayed[50] = "";
 // Game history list
 typedef struct {
     uint32_t hash;
-    char name[MAXHROMNAMESIZE];
-    char shortname[STR_MAX];
-    char LaunchCommand[STR_MAX * 2 + 80];
+    char name[MAXHROMNAMESIZE * 2];
+    char shortname[STR_MAX * 2];
+    char LaunchCommand[STR_MAX * 3 + 80];
     char totalTime[100];
-    int jsonIndex;
+    int gameIndex;
     int lineNumber;
     SDL_Surface *romScreen;
-    char romScreenPath[STR_MAX * 2];
-    char path[PATH_MAX];
+    char romScreenPath[STR_MAX * 4];
+    char path[PATH_MAX * 2];
 } Game_s;
 static Game_s game_list[MAXHISTORY];
 
@@ -134,7 +134,7 @@ SDL_Surface *loadRomScreen(int index)
     if (game->romScreen == NULL) {
         char currPicture[STR_MAX * 2];
         sprintf(currPicture, ROM_SCREENS_DIR "/%" PRIu32 ".png", game->hash);
-        print_debug(currPicture);
+        //print_debug(currPicture);
         if (!exists(currPicture))
             sprintf(currPicture, ROM_SCREENS_DIR "/%" PRIu32 ".png",
                     game->hash);
@@ -209,16 +209,17 @@ void readHistory()
     int nbGame = 0;
     int lineCounter = 0;
     file = fopen(getMiyooRecentFilePath(), "r");
+
     if (file == NULL) {
         print_debug("Error opening file");
         return;
     }
 
-    while ((fgets(line, STR_MAX * 3, file) != NULL) && (nbGame < MAXHISTORY)) {
-        char label[STR_MAX];
-        char rompath[STR_MAX];
-        char imgpath[STR_MAX];
-        char launch[STR_MAX];
+    while ((fgets(line, STR_MAX * 6, file) != NULL) && (nbGame < MAXHISTORY)) {
+        char label[STR_MAX * 2];
+        char rompath[STR_MAX * 2];
+        char imgpath[STR_MAX * 2];
+        char launch[STR_MAX * 2];
         int type;
         lineCounter++;
 
@@ -236,27 +237,40 @@ void readHistory()
         if (type != 5)
             continue;
 
-        const char *labelStart = strstr(jsonContent, "\"label\":\"") + 9;
-        const char *labelEnd = strchr(labelStart, '\"');
-        strncpy(label, labelStart, labelEnd - labelStart);
-        label[labelEnd - labelStart] = '\0';
+        const char *labelStart = strstr(jsonContent, "\"label\":\"");
+        if (labelStart != NULL) {
+            labelStart += 9;
+            const char *labelEnd = strchr(labelStart, '\"');
+            strncpy(label, labelStart, labelEnd - labelStart);
+            label[labelEnd - labelStart] = '\0';
+        }
 
-        const char *rompathStart = strstr(jsonContent, "\"rompath\":\"") + 11;
-        const char *rompathEnd = strchr(rompathStart, '\"');
-        strncpy(rompath, rompathStart, rompathEnd - rompathStart);
-        rompath[rompathEnd - rompathStart] = '\0';
+        const char *rompathStart = strstr(jsonContent, "\"rompath\":\"");
+        if (rompathStart != NULL) {
+            rompathStart += 11;
+            const char *rompathEnd = strchr(rompathStart, '\"');
+            strncpy(rompath, rompathStart, rompathEnd - rompathStart);
+            rompath[rompathEnd - rompathStart] = '\0';
+        }
 
-        const char *imgpathStart = strstr(jsonContent, "\"imgpath\":\"") + 11;
-        const char *imgpathEnd = strchr(imgpathStart, '\"');
-        strncpy(imgpath, imgpathStart, imgpathEnd - imgpathStart);
-        imgpath[imgpathEnd - imgpathStart] = '\0';
+        const char *imgpathStart = strstr(jsonContent, "\"imgpath\":\"");
+        if (imgpathStart != NULL) {
+            imgpathStart += 11;
+            const char *imgpathEnd = strchr(imgpathStart, '\"');
+            strncpy(imgpath, imgpathStart, imgpathEnd - imgpathStart);
+            imgpath[imgpathEnd - imgpathStart] = '\0';
+        }
 
-        const char *launchStart = strstr(jsonContent, "\"launch\":\"") + 10;
-        const char *launchEnd = strchr(launchStart, '\"');
-        strncpy(launch, launchStart, launchEnd - launchStart);
-        launch[launchEnd - launchStart] = '\0';
+        const char *launchStart = strstr(jsonContent, "\"launch\":\"");
+        if (launchStart != NULL) {
+            launchStart += 10;
+            const char *launchEnd = strchr(launchStart, '\"');
+            strncpy(launch, launchStart, launchEnd - launchStart);
+            launch[launchEnd - launchStart] = '\0';
+        }
 
         free(jsonContent);
+        
         if (!exists(rompath) || !exists(launch))
             continue;
 
@@ -270,12 +284,12 @@ void readHistory()
         game->romScreen = NULL;
         game->totalTime[0] = '\0';
 
-        sprintf(game->LaunchCommand, "LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so  \"%s\" \"%s\"", launch, rompath);
+        sprintf(game->LaunchCommand, "LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so \"%s\" \"%s\"", launch, rompath);
 
         getGameName(game->name, rompath);
         strcpy(game->path, rompath);
         file_cleanName(game->shortname, game->name);
-        game->jsonIndex = nbGame + 1;
+        game->gameIndex = nbGame + 1;
 
         game = &game_list[nbGame];
 
@@ -283,7 +297,7 @@ void readHistory()
         printf_debug("shortname: %s\n", game->shortname);
         printf_debug("LaunchCommand: %s\n", game->LaunchCommand);
         printf_debug("totalTime: %i\n", game->totalTime);
-        printf_debug("jsonIndex: %i\n", game->jsonIndex);
+        printf_debug("gameIndex: %i\n", game->gameIndex);
         printf_debug("lineNumber: %i\n", game->lineNumber);
         printf_debug("romScreenPath: %s\n", game->romScreenPath);
         printf_debug("path: %s\n", game->path);
@@ -808,7 +822,7 @@ int main(void)
 
     else {
         print_debug("Resuming game");
-        resumeGame(game_list[current_game].jsonIndex);
+        resumeGame(game_list[current_game].gameIndex);
     }
 
 #ifndef PLATFORM_MIYOOMINI

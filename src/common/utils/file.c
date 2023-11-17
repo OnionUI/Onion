@@ -469,31 +469,3 @@ void file_add_line_to_beginning(const char *filename, const char *lineToAdd)
     print_debug("Line added to the beginning of the file successfully.\n");
 }
 
-int find_line_last_playedg_game(const char *filename, int n) {
-    FILE *file = fopen(filename, "r");
-    if (!file) {
-        fprintf(stderr, "Impossible d'ouvrir le fichier %s\n", filename);
-        return -1;
-    }
-
-    char buffer[1024];
-    int lineNumber = 0;
-    int occurrenceCount = 0;
-
-    while (fgets(buffer, sizeof(buffer), file) != NULL) {
-        lineNumber++;
-
-        if (strstr(buffer, "\"type\":5") != NULL) {
-            occurrenceCount++;
-
-            if (occurrenceCount == n) {
-                fclose(file);
-                return lineNumber;
-            }
-        }
-    }
-
-    fclose(file);
-    return -1; // La n-ième valeur cible n'a pas été trouvée
-}
-

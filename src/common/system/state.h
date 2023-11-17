@@ -285,54 +285,91 @@ char *history_getRecentPath(char *rom_path)
 void resumeGame(int n)
 {
     FILE *file = fopen(getMiyooRecentFilePath(), "r");
-    struct JsonData {
-        char label[256];
-        char rompath[256];
-        char imgpath[256];
-        char launch[256];
-        int type;
-    };
+
+    int type;
 
     if (!file) {
         fprintf(stderr, "Can't open file %s\n", getMiyooRecentFilePath());
         return;
     }
 
-    char buffer[STR_MAX * 4];
-    int type5Count = 0;
+    char jsonContent[STR_MAX * 4];
+    int validGameCount = 0;
     int lineCount = 0;
 
-    while (fgets(buffer, sizeof(buffer), file) != NULL) {
+    while (fgets(jsonContent, sizeof(jsonContent), file) != NULL) {
+        char label[256];
+        char rompath[256];
+        char imgpath[256];
+        char launch[256];
         lineCount++;
-        struct JsonData jsonData;
 
-        if (sscanf(buffer, "{\"label\":\"%[^\"]\",\"rompath\":\"%[^\"]\",\"imgpath\":\"%[^\"]\",\"launch\":\"%[^\"]\",\"type\":%d}",
-                   jsonData.label, jsonData.rompath, jsonData.imgpath, jsonData.launch, &jsonData.type) == 5) {
-            if (jsonData.type == 5) {
-                type5Count++;
-                if (type5Count == n) {
-                    FILE *fp;
-                    char RACommand[STR_MAX * 3];
+        sscanf(strstr(jsonContent, "\"type\":") + 7, "%d", &type);
 
-                    fclose(file);
-                    sprintf(RACommand, "LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so  \"%s\" \"%s\"", jsonData.launch, jsonData.rompath);
+        if (type != 5)
+            continue;
 
-                    remove("/mnt/SDCARD/.tmp_update/.runGameSwitcher");
-                    printf_debug("resume game: %s\n", RACommand);
+        const char *labelStart = strstr(jsonContent, "\"label\":\"");
+        if (labelStart != NULL) {
+            labelStart += 9;
+            const char *labelEnd = strchr(labelStart, '\"');
+            strncpy(label, labelStart, labelEnd - labelStart);
+            label[labelEnd - labelStart] = '\0';
+        }
 
-                    if (lineCount > 1) {
-                        temp_flag_set("quick_switch", true);
+        const char *rompathStart = strstr(jsonContent, "\"rompath\":\"");
+        if (rompathStart != NULL) {
+            rompathStart += 11;
+            const char *rompathEnd = strchr(rompathStart, '\"');
+            strncpy(rompath, rompathStart, rompathEnd - rompathStart);
+            rompath[rompathEnd - rompathStart] = '\0';
+        }
 
-                        file_add_line_to_beginning(getMiyooRecentFilePath(), file_read_lineN(getMiyooRecentFilePath(), lineCount));
-                        file_delete_line(getMiyooRecentFilePath(), lineCount + 1);
-                    }
+        const char *imgpathStart = strstr(jsonContent, "\"imgpath\":\"");
+        print_debug("31\n");
+        if (imgpathStart != NULL) {
+            imgpathStart += 11;
+            const char *imgpathEnd = strchr(imgpathStart, '\"');
+            strncpy(imgpath, imgpathStart, imgpathEnd - imgpathStart);
+            imgpath[imgpathEnd - imgpathStart] = '\0';
+        }
 
-                    file_put_sync(fp, CMD_TO_RUN_PATH, "%s", RACommand);
+        const char *launchStart = strstr(jsonContent, "\"launch\":\"");
+        if (launchStart != NULL) {
+            launchStart += 10;
+            const char *launchEnd = strchr(launchStart, '\"');
+            strncpy(launch, launchStart, launchEnd - launchStart);
+            launch[launchEnd - launchStart] = '\0';
+        }
 
-                    sync();
-                    return;
-                }
+
+        if (!exists(rompath) || !exists(launch))
+            continue;
+
+        validGameCount++;
+
+        if (validGameCount == n) {
+
+            FILE *fp;
+            char LaunchCommand[STR_MAX * 3];
+
+            fclose(file);
+            sprintf(LaunchCommand, "LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so \"%s\" \"%s\"", launch, rompath);
+
+            remove("/mnt/SDCARD/.tmp_update/.runGameSwitcher");
+            printf_debug("resume game: %s\n", LaunchCommand);
+
+            if (lineCount > 1) {
+                temp_flag_set("quick_switch", true);
+
+                file_add_line_to_beginning(getMiyooRecentFilePath(), file_read_lineN(getMiyooRecentFilePath(), lineCount));
+                file_delete_line(getMiyooRecentFilePath(), lineCount + 1);
             }
+
+            file_put_sync(fp, CMD_TO_RUN_PATH, "%s", LaunchCommand);
+
+            sync();
+            return;
         }
     }
     fclose(file);
