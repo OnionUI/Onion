@@ -269,6 +269,18 @@ char *history_getRecentPath(char *rom_path)
 
         free(jsonContent);
 
+        // Game launched with the search panel
+        char *colonPosition = strchr(romPathSearch, ':');
+        if (colonPosition != NULL) {
+
+            int position = (int)(colonPosition - romPathSearch);
+            char secondPart[strlen(romPathSearch) - position];
+            strcpy(secondPart, colonPosition + 1);
+            strcpy(romPathSearch, secondPart);
+        }
+
+        printf_debug("romPathSearch : %s\n", romPathSearch);
+
         if (!exists(romPathSearch))
             continue;
 
