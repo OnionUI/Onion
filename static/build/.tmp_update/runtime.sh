@@ -334,7 +334,6 @@ launch_game() {
         if [ "$romext" == "miyoocmd" ]; then
             emupath=$(dirname $(echo "$cmd" | awk '{ gsub(/"/, "", $2); st = index($2,".."); if (st) { print substr($2,0,st) } else { print $2 } }'))
             cd "$emupath"
-
             chmod a+x "$rompath"
             "$rompath" "$rompath" "$emupath"
             retval=$?
@@ -364,7 +363,12 @@ launch_game() {
 
     # Free memory
     $sysdir/bin/freemma
-
+    if [ -f $sysdir/.runGameSwitcher ]; then
+        bootScreen "End_Save"
+    elif [ -f /tmp/quick_switch ]; then
+        bootScreen "End_Save"
+    fi
+    
     # TIMER END + SHUTDOWN CHECK
     if [ $is_game -eq 1 ]; then
         if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
