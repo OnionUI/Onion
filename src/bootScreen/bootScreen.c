@@ -17,6 +17,7 @@
 int main(int argc, char *argv[])
 {
     // Boot : Loading screen
+    // Save : Transitional panel with autosave (Game -> GS)
     // End_Save : Ending screen with save
     // End : Ending screen without save
 
@@ -29,22 +30,22 @@ int main(int argc, char *argv[])
     SDL_Surface *screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
 
     SDL_Surface *background;
-    bool show_battery = false;
+    bool show_battery = true;
     bool show_version = true;
 
-    if (argc > 1 && strcmp(argv[1], "End_Save") == 0) {
+    if (argc > 1 && strcmp(argv[1], "Save") == 0) {
+        background = theme_loadImage(theme_path, "extra/splash-saving");
+        if (background == NULL)
+            background = theme_loadImage(theme_path, "extra/Screen_Off_Save");
+    }
+    else if (argc > 1 && strcmp(argv[1], "End_Save") == 0) {
         background = theme_loadImage(theme_path, "extra/Screen_Off_Save");
-        show_battery = true;
     }
     else if (argc > 1 && strcmp(argv[1], "End") == 0) {
         background = theme_loadImage(theme_path, "extra/Screen_Off");
-        show_battery = true;
     }
     else if (argc > 1 && strcmp(argv[1], "lowBat") == 0) {
         background = theme_loadImage(theme_path, "extra/lowBat");
-        if (!background) {
-            show_battery = true;
-        }
         show_version = false;
     }
     else {

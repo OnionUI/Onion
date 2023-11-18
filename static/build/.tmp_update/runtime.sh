@@ -201,7 +201,6 @@ launch_main_ui() {
     fi
 
     $sysdir/bin/freemma
-
     mv -f /tmp/cmd_to_run.sh $sysdir/cmd_to_run.sh
 
     set_prev_state "mainui"
@@ -339,9 +338,12 @@ launch_game() {
             retval=$?
         else
             # GAME LAUNCH
+            # Free memory
+            $sysdir/bin/freemma
             cd /mnt/SDCARD/RetroArch/
             $sysdir/cmd_to_run.sh
             retval=$?
+            bootScreen "Save"
         fi
     else
         retval=404
@@ -360,15 +362,7 @@ launch_game() {
 
     # Reset flags
     rm /tmp/stay_awake 2> /dev/null
-
-    # Free memory
-    $sysdir/bin/freemma
-    if [ -f $sysdir/.runGameSwitcher ]; then
-        bootScreen "End_Save"
-    elif [ -f /tmp/quick_switch ]; then
-        bootScreen "End_Save"
-    fi
-    
+        
     # TIMER END + SHUTDOWN CHECK
     if [ $is_game -eq 1 ]; then
         if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
