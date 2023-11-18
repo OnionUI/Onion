@@ -34,9 +34,15 @@ int main(int argc, char *argv[])
     bool show_version = true;
 
     if (argc > 1 && strcmp(argv[1], "Save") == 0) {
-        background = theme_loadImage(theme_path, "extra/splash-saving");
-        if (background == NULL)
-            background = theme_loadImage(theme_path, "extra/Screen_Off_Save");
+        char image_path[512];
+        if (theme_getImagePath(theme_path, "extra/splash-saving", image_path) != 0) {
+            background = IMG_Load(image_path);
+        }
+        else if (theme_getImagePath(theme_path, "extra/screen_off_save", image_path) != 0) {
+            background = IMG_Load(image_path);
+        }
+        else
+            background = theme_loadImage(theme_path, "extra/splash-saving");
     }
     else if (argc > 1 && strcmp(argv[1], "End_Save") == 0) {
         background = theme_loadImage(theme_path, "extra/Screen_Off_Save");
