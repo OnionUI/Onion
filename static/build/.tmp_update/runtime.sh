@@ -343,7 +343,9 @@ launch_game() {
             cd /mnt/SDCARD/RetroArch/
             $sysdir/cmd_to_run.sh
             retval=$?
-            bootScreen "Save"
+            if [ -f $sysdir/.runGameSwitcher ] || [ -f /tmp/quick_switch ]; then
+                bootScreen "Save"
+            fi        
         fi
     else
         retval=404
