@@ -556,7 +556,7 @@ get_screen_resolution() {
         screen_resolution="640x480"
     fi
 
-    echo "$screen_resolution" > /tmp/screen_resolution
+    echo -n "$screen_resolution" > /tmp/screen_resolution
 }
 
 init_system() {
