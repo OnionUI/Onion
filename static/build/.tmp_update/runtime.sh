@@ -9,7 +9,6 @@ logfile=$(basename "$0" .sh)
 
 MODEL_MM=283
 MODEL_MMP=354
-screen_resolution="640x480"
 
 main() {
     # Set model ID
@@ -245,25 +244,6 @@ check_is_game() {
     echo "$1" | grep -q "retroarch/cores" || echo "$1" | grep -q "/../../Roms/" || echo "$1" | grep -q "/mnt/SDCARD/Roms/"
 }
 
-change_resolution() {
-    res_x=""
-    res_y=""
-
-    if [ -n "$1" ]; then
-        res_x=$(echo "$1" | cut -d 'x' -f 1)
-        res_y=$(echo "$1" | cut -d 'x' -f 2)
-    else
-        res_x=$(echo "$screen_resolution" | cut -d 'x' -f 1)
-        res_y=$(echo "$screen_resolution" | cut -d 'x' -f 2)
-    fi
-    log "change resolution to $res_x x $res_y"
-
-    fbset -g "$res_x" "$res_y" "$res_x" "$((res_y * 2))" 32
-    # inform batmon and keymon of resolution change
-    killall -SIGUSR1 batmon
-    killall -SIGUSR1 keymon
-}
-
 launch_game() {
     log "\n:: Launch game"
     cmd=$(cat $sysdir/cmd_to_run.sh)
@@ -358,29 +338,10 @@ launch_game() {
             retval=$?
         else
             # GAME LAUNCH
-
-            if [ -f /tmp/new_res_available ]; then
-                # check for games that don't work with 752x560 resolution
-                exceptions_file="$sysdir/config/res_exceptions"
-                exception_found=false
-                while IFS= read -r exception; do
-                    if grep -qF "$exception" $sysdir/cmd_to_run.sh; then
-                        exception_found=true
-                        log "exception found: $exception"
-                        break
-                    fi
-                done < "$exceptions_file"
-                if ! $exception_found ; then
-                    change_resolution
-                fi
-            fi
             # Free memory
             $sysdir/bin/freemma
             cd /mnt/SDCARD/RetroArch/
             $sysdir/cmd_to_run.sh
-            if [ -f /tmp/new_res_available ]; then
-                change_resolution "640x480"
-            fi
             retval=$?
             if [ -f $sysdir/.runGameSwitcher ] || [ -f /tmp/quick_switch ]; then
                 bootScreen "Splash_Text" "Saving progression ..."
@@ -524,42 +485,6 @@ mount_main_ui() {
     fi
 }
 
-#
-#   attempts to retrieve the physical screen resolution from mi_fb module
-#   resolution is stored in /tmp/screen_resolution
-#   times out after 5 seconds, defaults to 640x480
-#
-get_screen_resolution() {
-    max_attempts=10
-    attempt=0
-
-    log "get_screen_resolution: start"
-    while [ "$attempt" -lt "$max_attempts" ]; do
-        screen_resolution=$(grep 'Current TimingWidth=' /proc/mi_modules/fb/mi_fb0 | sed 's/Current TimingWidth=\([0-9]*\),TimingWidth=\([0-9]*\),.*/\1x\2/')
-        if [ -n "$screen_resolution" ]; then
-            log "get_screen_resolution: success, resolution: $screen_resolution"
-            break
-        fi
-        log "get_screen_resolution: attempt $attempt failed"
-        attempt=$((attempt + 1))
-        sleep 0.5
-    done
-
-    if [ -z "$screen_resolution" ]; then
-        log "get_screen_resolution: failed to get screen resolution, fall back to 640x480"
-        touch /tmp/get_screen_resolution_failed
-    fi
-
-    if [ "$screen_resolution" = "752x560" ] && [ "$(/etc/fw_printenv miyoo_version)" = "miyoo_version=202310271401" ]; then
-        touch /tmp/new_res_available
-    else
-        # can't use 752x560 without appropriate firmware or screen
-        screen_resolution="640x480"
-    fi
-
-    echo "$screen_resolution" > /tmp/screen_resolution
-}
-
 init_system() {
     log "\n:: Init system"
 
@@ -584,8 +509,6 @@ init_system() {
     echo 800 > /sys/class/pwm/pwmchip0/pwm0/period
     echo $brightness_raw > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
     echo 1 > /sys/class/pwm/pwmchip0/pwm0/enable
-
-    get_screen_resolution
 }
 
 device_uuid=$(read_uuid)
