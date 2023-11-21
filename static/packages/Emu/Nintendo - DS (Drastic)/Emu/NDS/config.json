@@ -1,6 +1,6 @@
 {
-"label": "DraStic",
-"icon": "icon.png",
+"label": "NDS",
+"icon": "../../Icons/Default/nds.png",
 "launch": "launch.sh",
 "rompath": "../../Roms/NDS",
 "imgpath": "../../Roms/NDS/Imgs",
