@@ -344,7 +344,7 @@ launch_game() {
             $sysdir/cmd_to_run.sh
             retval=$?
             if [ -f $sysdir/.runGameSwitcher ] || [ -f /tmp/quick_switch ]; then
-                bootScreen "Splash_Text" "Saving progression ..."
+                bootScreen "Splash_Text" "Saving ..."
             fi        
         fi
     else
