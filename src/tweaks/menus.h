@@ -692,6 +692,15 @@ void menu_tools(void *_)
                                  "This generates a 'miyoogamelist.xml' file\n"
                                  "which comes with some limitations, such\n"
                                  "as no subfolder support.");
+        list_addItemWithInfoNote(&_menu_tools,
+                                 (ListItem){
+                                     .label = "Regenerate game switcher list",
+                                     .action = tool_generateGsList},
+                                 "Utilize this tool to recreate your game\n"
+                                 "switcher list using the RetroArch history,\n"
+                                 "particularly in instances of corruption.\n"
+                                 "Keep in mind that NDS games and certain\n"
+                                 "ports may require manual addition.");
     }
     menu_stack[++menu_level] = &_menu_tools;
     header_changed = true;

@@ -8,6 +8,7 @@
 #include <sys/wait.h>
 
 #include "components/list.h"
+#include "system/settings.h"
 #include "theme/theme.h"
 #include "utils/msleep.h"
 
@@ -108,9 +109,15 @@ void tool_generateMiyoogamelists(void *pt)
     _runCommandPopup(tools_short_names[2], "/mnt/SDCARD/.tmp_update/script/miyoogamelist_gen.sh");
 }
 
+void tool_generateGsList(void *pt)
+{
+    _runCommandPopup(tools_short_names[3], "/mnt/SDCARD/.tmp_update/script/gameswitcher_list_gen.sh");
+}
+
 static void (*tools_pt[NUM_TOOLS])(void *) = {
     tool_generateCueFiles,
     tool_buildShortRomGameList,
-    tool_generateMiyoogamelists};
+    tool_generateMiyoogamelists,
+    tool_generateGsList};
 
 #endif // TWEAKS_TOOLS_H__

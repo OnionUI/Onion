@@ -47,8 +47,6 @@
 
 #define ROM_SCREENS_DIR "/mnt/SDCARD/Saves/CurrentProfile/romScreens"
 
-#define RECENTLISTMIGRATED "/mnt/SDCARD/Saves/CurrentProfile/config/.recentListMigrated"
-
 #define MAXFILENAMESIZE 250
 #define MAXSYSPATHSIZE 80
 
@@ -368,7 +366,7 @@ int checkQuitAction(void)
     return 0;
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
     log_setName("gameSwitcher");
     print_debug("\n\nDebug logging enabled");
@@ -376,12 +374,17 @@ int main(void)
     signal(SIGINT, sigHandler);
     signal(SIGTERM, sigHandler);
 
-    if (!is_file(RECENTLISTMIGRATED)) {
+    int b_force_migration = (argc > 1 && strcmp(argv[1], "force_migration") == 0);
+
+    if (!is_file(RECENTLISTMIGRATED) || b_force_migration) {
         print_debug("Recent list migration started");
         migrateGameSwitcherList();
         char s_command[STR_MAX];
         sprintf(s_command, "touch %s", RECENTLISTMIGRATED);
         system(s_command);
+
+        if (b_force_migration)
+            return EXIT_SUCCESS;
     }
 
     SDL_InitDefault(true);
