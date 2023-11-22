@@ -342,7 +342,7 @@ launch_game() {
             cd /mnt/SDCARD/RetroArch/
             $sysdir/cmd_to_run.sh
             retval=$?
-            if [ $is_game -eq 1 ]; then
+            if [ $is_game -eq 1 ] && [ ! -f /tmp/.offOrder ]; then
                 infoPanel --title " " --message  "Saving ..." --persistent --no-footer &
                 touch /tmp/dismiss_info_panel
                 sync
