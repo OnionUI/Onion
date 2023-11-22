@@ -157,8 +157,6 @@ int main(int argc, char *argv[])
                 wait_confirm = false;
             else if (strcmp(argv[i], "-a") == 0 || strcmp(argv[i], "--no-footer") == 0)
                 no_footer = true;
-            else if (strcmp(argv[i], "-a") == 0 || strcmp(argv[i], "--no-header") == 0)
-                no_footer = true;
             else if (strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "--persistent") == 0) {
                 wait_confirm = false;
                 is_persistent = true;
