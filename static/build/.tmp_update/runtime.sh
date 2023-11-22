@@ -243,7 +243,6 @@ check_game() {
 check_is_game() {
     echo "$1" | grep -q "retroarch/cores" || echo "$1" | grep -q "/../../Roms/" || echo "$1" | grep -q "/mnt/SDCARD/Roms/"
 }
-
 launch_game() {
     log "\n:: Launch game"
     cmd=$(cat $sysdir/cmd_to_run.sh)
@@ -343,9 +342,11 @@ launch_game() {
             cd /mnt/SDCARD/RetroArch/
             $sysdir/cmd_to_run.sh
             retval=$?
-            if [ -f $sysdir/.runGameSwitcher ] || [ -f /tmp/quick_switch ]; then
-                bootScreen "Splash_Text" "Saving ..."
-            fi        
+            if [ $is_game -eq 1 ]; then
+                infoPanel --title " " --message  "Saving ..." --persistent --no-footer &
+                touch /tmp/dismiss_info_panel
+                sync
+            fi
         fi
     else
         retval=404
