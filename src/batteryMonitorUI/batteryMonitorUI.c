@@ -1,6 +1,7 @@
 #include "./batteryMonitorUI.h"
-#include "../batmon/batmonDB.h"
 #include "system/device_model.h"
+
+#include "../batmon/batmonDB.h"
 
 static bool quit = false;
 static int current_zoom = 1;

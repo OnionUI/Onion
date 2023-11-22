@@ -18,7 +18,6 @@
 #include "shmvar/shmvar.h"
 #endif
 
-#include "batmonDB.h"
 #include "system/battery.h"
 #include "system/display.h"
 #include "system/system.h"
@@ -26,6 +25,8 @@
 #include "utils/file.h"
 #include "utils/flags.h"
 #include "utils/log.h"
+
+#include "batmonDB.h"
 
 #define CHECK_BATTERY_TIMEOUT_S 15 // s - check battery percentage every 15s
 
