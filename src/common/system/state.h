@@ -225,10 +225,10 @@ char *getMiyooRecentFilePath()
 {
     static char filename[STR_MAX];
 
-    if (exists(RECENTLIST_PATH))
-        sprintf(filename, "%s", RECENTLIST_PATH);
-    else
+    if (exists(RECENTLIST_HIDDEN_PATH))
         sprintf(filename, "%s", RECENTLIST_HIDDEN_PATH);
+    else
+        sprintf(filename, "%s", RECENTLIST_PATH);
 
     return filename;
 }
