@@ -1,5 +1,6 @@
 #!/bin/sh
 mydir=`dirname "$0"`
+cd $mydir
 
 export HOME=$mydir
 export PATH=$mydir:$PATH
@@ -8,13 +9,10 @@ export SDL_VIDEODRIVER=mmiyoo
 export SDL_AUDIODRIVER=mmiyoo
 export EGL_VIDEODRIVER=mmiyoo
 
-
 . /mnt/SDCARD/.tmp_update/script/stop_audioserver.sh
 
-CUST_LOGO=1
+CUST_LOGO=0
 CUST_CPUCLOCK=1
-
-cd $mydir
 
 
 # Uncomment this section if you need to customize the Drastic menu logo :
@@ -24,15 +22,21 @@ cd $mydir
     # ./png2raw
 # fi
 
+resolution=$(head -n 1 /tmp/screen_resolution)
+if [ "$resolution" = "752x560" ]; then
+    USE_752x560_RES=1
+else
+    USE_752x560_RES=0
+fi
+
+
 sv=`cat /proc/sys/vm/swappiness`
 
-# 60 by default
-echo 10 > /proc/sys/vm/swappiness
+echo 10 > /proc/sys/vm/swappiness  # 60 by default
 
 cd $mydir
 
 if [ "$CUST_CPUCLOCK" == "1" ]; then
-    echo "set customized cpuspeed"
     cpuclock 1500
 fi
 
@@ -41,3 +45,7 @@ fi
 sync
 
 echo $sv > /proc/sys/vm/swappiness
+
+if [ "$USE_752x560_RES" == "1" ]; then
+    fbset -g 640 480 640 960 32
+fi
