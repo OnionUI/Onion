@@ -19,7 +19,6 @@
 #include "mi_disp.h"
 #include "mi_sys.h"
 
-
 void display_spawnMIDISP(MI_U16 width, MI_U16 height, MI_U32 luma, MI_U32 contrast, MI_U32 hue, MI_U32 saturation)
 {
     /* 
@@ -92,7 +91,6 @@ void display_spawnMIDISP(MI_U16 width, MI_U16 height, MI_U32 luma, MI_U32 contra
         fclose(file);
     }
 }
-
 
 void action_setAppShortcut(void *pt)
 {
