@@ -599,6 +599,13 @@ int main(void)
                     current_bg = loadRomScreen(current_game);
 
                     if (current_bg != NULL) {
+                        if (current_bg->w != 640 || current_bg->h != 480) {
+                            printf_debug("Scaling screenshot from %dx%d to 640x480\n", current_bg->w, current_bg->h);
+                            SDL_Rect dest_rect = {0, 0, 640, 480};
+                            SDL_SoftStretch(current_bg, NULL, current_bg, &dest_rect);
+                            current_bg->w = 640;
+                            current_bg->h = 480;
+                        }
                         if (view_mode == VIEW_NORMAL)
                             SDL_BlitSurface(current_bg, &frame, screen, &frame);
                         else
