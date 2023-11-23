@@ -56,7 +56,7 @@ void display_spawnMIDISP(MI_U16 width, MI_U16 height, MI_U32 luma, MI_U32 contra
         memset(&stPubAttr, 0, sizeof(MI_DISP_PubAttr_t));
         memset(&stLayerAttr, 0, sizeof(MI_DISP_VideoLayerAttr_t));
         memset(&stInputPortAttr, 0, sizeof(MI_DISP_InputPortAttr_t));
-        
+
         stPubAttr.eIntfSync = E_MI_DISP_OUTPUT_USER;
         stPubAttr.eIntfType = E_MI_DISP_INTF_LCD;
         stPubAttr.u32BgColor = 0x800080;
@@ -77,7 +77,7 @@ void display_spawnMIDISP(MI_U16 width, MI_U16 height, MI_U32 luma, MI_U32 contra
         stLayerAttr.stVidLayerDispWin.u16Height = height;
         MI_DISP_SetVideoLayerAttr(DispLayer, &stLayerAttr);
         MI_DISP_EnableVideoLayer(DispLayer);
-        
+
         stInputPortAttr.u16SrcWidth = width;
         stInputPortAttr.u16SrcHeight = height;
         stInputPortAttr.stDispWin.u16X = 0;
