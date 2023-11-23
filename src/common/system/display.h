@@ -7,11 +7,11 @@
 #include <stdint.h>
 #include <sys/mman.h>
 
+#include "mi_disp.h"
+#include "mi_sys.h"
 #include "system.h"
 #include "utils/file.h"
 #include "utils/log.h"
-#include "mi_sys.h"
-#include "mi_disp.h"
 
 #define DISPLAY_WIDTH 640
 #define DISPLAY_HEIGHT 480
@@ -212,7 +212,8 @@ void display_free(void)
         close(fb_fd);
 }
 
-void display_spawnMIDISP(MI_U16 width, MI_U16 height, MI_U32 luma, MI_U32 contrast, MI_U32 hue, MI_U32 saturation) {
+void display_spawnMIDISP(MI_U16 width, MI_U16 height, MI_U32 luma, MI_U32 contrast, MI_U32 hue, MI_U32 saturation)
+{
     /* 
         if we don't have a valid mi_disp0 endpoint the screen will look washed out. 
         we also can't push changes into it (luma/hue/sat/contrast, sharpness, etc)
@@ -225,7 +226,7 @@ void display_spawnMIDISP(MI_U16 width, MI_U16 height, MI_U32 luma, MI_U32 contra
         
         this function will ONLY run it a mi_disp0 doesn't already exist. If it does you neeed to push CSC changes in via shell.
     */
-    
+
     FILE *file = fopen("/proc/mi_modules/mi_disp/mi_disp0", "r");
     if (file == NULL) {
         MI_DISP_DEV DispDev = 0;
@@ -236,12 +237,12 @@ void display_spawnMIDISP(MI_U16 width, MI_U16 height, MI_U32 luma, MI_U32 contra
         MI_DISP_InputPortAttr_t stInputPortAttr;
         MI_DISP_LcdParam_t lcdParam;
         MI_S32 s32Ret = MI_SUCCESS;
-    
+
         MI_U32 lumaProcessed = luma + 17 * 2;
         MI_U32 satProcessed = saturation * 5;
         MI_U32 contProcessed = contrast + 40;
         MI_U32 hueProcessed = hue * 5;
-        
+
         MI_SYS_Init();
         MI_DISP_Enable(DispDev);
 
@@ -286,10 +287,10 @@ void display_spawnMIDISP(MI_U16 width, MI_U16 height, MI_U32 luma, MI_U32 contra
 
         s32Ret = MI_DISP_EnableInputPort(DispLayer, DispInport);
         printf("MI_DISP_EnableInputPort returned %d\n", s32Ret);
-    } else {
+    }
+    else {
         fclose(file);
     }
-    
 }
 
 #endif // DISPLAY_H__
