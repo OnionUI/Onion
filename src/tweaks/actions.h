@@ -106,8 +106,8 @@ void setRGBValues(int value, int *endB, int *endG, int *endR)
 void *action_blueLight_thread(void *arg)
 {
     //to-do - check the res of the input
-    display_spawnMIDISP(640, 480, settings.lumination, settings.contrast, settings.hue, settings.saturation);    
-    
+    display_spawnMIDISP(640, 480, settings.lumination, settings.contrast, settings.hue, settings.saturation);
+
     static int lastB, lastG, lastR;
     int combinedRGB;
     int value;
