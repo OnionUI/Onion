@@ -21,6 +21,14 @@ static void drawImage(SDL_Surface *image_to_draw, SDL_Surface *screen,
     if (!image_to_draw)
         return;
 
+    if (image_to_draw->w != 640 || image_to_draw->h != 480) {
+        // scale image to 640x480 if needed
+        SDL_Rect dest_rect = {0, 0, 640, 480};
+        SDL_SoftStretch(image_to_draw, NULL, image_to_draw, &dest_rect);
+        image_to_draw->w = 640;
+        image_to_draw->h = 480;
+    }
+
     DEBUG_PRINT(("frame %p\n", frame));
     int border_left = 0;
     SDL_Rect new_frame = {0, 0};
