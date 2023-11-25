@@ -59,11 +59,13 @@ void action_meterWidth(void *pt)
 
 int blueLightToggled = 0;
 
-void action_blueLight() {
+void action_blueLight()
+{
     if (blueLightToggled) {
         system("/mnt/SDCARD/.tmp_update/script/blue_light.sh disable &");
         blueLightToggled = 0;
-    } else {
+    }
+    else {
         system("/mnt/SDCARD/.tmp_update/script/blue_light.sh enable &");
         blueLightToggled = 1;
     }
