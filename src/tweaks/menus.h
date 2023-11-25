@@ -484,11 +484,11 @@ void menu_blueLight(void *_)
                              .action = NULL});
         }
         list_addItemWithInfoNote(&_menu_user_blue_light,
-                                     (ListItem){
-                                         .label = "Toggle now",
-                                         .item_type = ACTION,
-                                         .action = action_blueLight},
-                                     "Test the selected strength \n");
+                                 (ListItem){
+                                     .label = "Toggle now",
+                                     .item_type = ACTION,
+                                     .action = action_blueLight},
+                                 "Test the selected strength \n");
         if (DEVICE_ID == MIYOO354) {
             list_addItemWithInfoNote(&_menu_user_blue_light,
                                      (ListItem){
