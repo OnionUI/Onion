@@ -80,7 +80,6 @@ int main(int argc, char *argv[])
     settings_load();
     lang_load();
 
-
     // Apply tool via command line
     if (strlen(apply_tool) > 0) {
         for (int i = 0; i < NUM_TOOLS; i++) {
