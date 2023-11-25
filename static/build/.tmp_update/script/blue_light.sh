@@ -3,6 +3,8 @@ miyoodir=/mnt/SDCARD/miyoo
 export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 blf_key=$sysdir/config/.blf
 
+sync
+
 lockfile="/tmp/blue_light_script.lock"
 
 if [ -f "$lockfile" ]; then
@@ -32,6 +34,20 @@ setRGBValues() {
         *)
             endB=128; endG=128; endR=128 ;;
     esac
+}
+
+set_intensity() {
+    value=$(cat $sysdir/config/display/blueLightLevel)
+
+    setRGBValues "$value"
+    endB=$endB
+    endG=$endG
+    endR=$endR
+
+    newCombinedRGB=$(( (endR << 16) | (endG << 8) | endB ))
+    echo $newCombinedRGB > $sysdir/config/display/blueLightRGB
+
+    echo ":: Blue Light Filter Intensity Set to $value, ready for next toggle."
 }
 
 blueLightStart() {
@@ -167,8 +183,11 @@ case "$1" in
     check)
         check_blf
         ;;
+    set_intensity)
+        set_intensity
+        ;;
     *)
-        echo "Usage: $0 {enable|disable|check}"
+        echo "Usage: $0 {enable|disable|check|set_intensity}"
         exit 1
         ;;
 esac
