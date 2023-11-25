@@ -79,7 +79,7 @@ void action_blueLightLevel(void *pt)
     value = item->value;
     settings.blue_light_level = value;
     config_setNumber("display/blueLightLevel", value);
-    
+
     system("/mnt/SDCARD/.tmp_update/script/blue_light.sh set_intensity &");
 
     remove("/tmp/blueLightOn");
