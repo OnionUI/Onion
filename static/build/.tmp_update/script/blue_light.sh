@@ -47,6 +47,9 @@ set_intensity() {
     echo $newCombinedRGB > $sysdir/config/display/blueLightRGB
 
     echo ":: Blue Light Filter Intensity Set to $value, ready for next toggle."
+    if [ -f "$sysdir/config/.blf" ]; then
+        touch /tmp/blueLightIntensityChange
+    fi
 }
 
 disable_blue_light_filter() {
@@ -98,7 +101,7 @@ check_disp_init() {
 blueLightStart() {
     sync
     value=$(cat $sysdir/config/display/blueLightLevel)
-
+    
     if [ ! -f /tmp/blueLightOn ] && [ ! -f /tmp/blueLightIntensityChange ]; then
         lastR=128
         lastG=128
@@ -147,7 +150,12 @@ to_minutes_since_midnight() {
     echo "$hour $minute" | awk '{print $1 * 60 + $2}'
 }
 
-enable_blue_light_filter() {       
+enable_blue_light_filter() {   
+    value=$(cat $sysdir/config/display/blueLightLevel)
+    if [ "$value" -eq 0 ]; then
+        return
+    fi
+    
     check_disp_init
     sync
     blueLightStart
