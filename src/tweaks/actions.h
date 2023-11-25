@@ -43,7 +43,6 @@ void display_spawnMIDISP(MI_U16 width, MI_U16 height, MI_U32 luma, MI_U32 contra
         MI_DISP_VideoLayerAttr_t stLayerAttr;
         MI_DISP_InputPortAttr_t stInputPortAttr;
         MI_DISP_LcdParam_t lcdParam;
-        MI_S32 s32Ret = MI_SUCCESS;
 
         MI_U32 lumaProcessed = luma + 17 * 2;
         MI_U32 satProcessed = saturation * 5;
