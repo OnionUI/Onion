@@ -1,4 +1,4 @@
-sysdir=/mnt/SDCARD/.tmp_update 
+sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo 
 export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 blf_key=$sysdir/config/.blf
@@ -14,6 +14,63 @@ touch "$lockfile"
 
 trap 'rm -f "$lockfile"; exit' INT TERM EXIT
 
+setRGBValues() {
+    value=$1
+    case "$value" in
+        0)
+            endB=128; endG=128; endR=128 ;;
+        1)
+            endB=110; endG=125; endR=140 ;;
+        2)
+            endB=100; endG=120; endR=140 ;;
+        3)
+            endB=90;  endG=115; endR=140 ;;
+        4)
+            endB=80;  endG=110; endR=140 ;;
+        5)
+            endB=70;  endG=105; endR=140 ;;
+        *)
+            endB=128; endG=128; endR=128 ;;
+    esac
+}
+
+blueLightStart() {
+    value=$(cat $sysdir/config/display/blueLightLevel)
+
+    combinedRGB=$(cat $sysdir/config/display/blueLightRGB)
+    combinedRGB=$(echo "$combinedRGB" | tr -d '[:space:]/#')
+
+    if [ ! -f /tmp/blueLightOn ]; then
+        lastR=128
+        lastG=128
+        lastB=128
+    else
+        lastR=$(( (combinedRGB >> 16) & 0xFF ))
+        lastG=$(( (combinedRGB >> 8) & 0xFF ))
+        lastB=$(( combinedRGB & 0xFF ))
+    fi
+
+    setRGBValues "$value"
+    endB=$endB
+    endG=$endG
+    endR=$endR
+    
+    echo "Last BGR: B: $lastB, G: $lastG, R: $lastR"
+    echo "Target BGR: B: $endB, G: $endG, R: $endR"
+
+    for i in $(seq 0 20); do
+        newB=$(( lastB + (endB - lastB) * i / 20 ))
+        newG=$(( lastG + (endG - lastG) * i / 20 ))
+        newR=$(( lastR + (endR - lastR) * i / 20 ))
+
+        echo "colortemp 0 0 0 0 $newB $newG $newR" > /proc/mi_modules/mi_disp/mi_disp0
+        usleep 50000
+    done
+
+    newCombinedRGB=$(( (endR << 16) | (endG << 8) | endB ))
+    echo $newCombinedRGB > $sysdir/config/display/blueLightRGB
+}
+
 to_minutes_since_midnight() {
     hour=$(echo "$1" | cut -d: -f1 | xargs)
     minute=$(echo "$1" | cut -d: -f2 | xargs)
@@ -22,56 +79,43 @@ to_minutes_since_midnight() {
     echo "$hour $minute" | awk '{print $1 * 60 + $2}'
 }
 
-enable_blue_light_filter() {
-    current_blf=$(cat /mnt/SDCARD/.tmp_update/config/display/blueLightLevel)
-
-     # move this whole call to tweaks off onto another VT to completely mute it/detach it from any influence on runtime.sh and keymon
-    openvt -c 17 -- sh -c "sysdir=/mnt/SDCARD/.tmp_update && \
-    miyoodir=/mnt/SDCARD/miyoo && \
-    export LD_LIBRARY_PATH=\"/lib:/config/lib:\$miyoodir/lib:\$sysdir/lib:\$sysdir/lib/parasyte\" && \
-    \$sysdir/bin/tweaks --no_display --bluelightctrl $current_blf" &
+enable_blue_light_filter() {    
+    blueLightStart
     
-    # $sysdir/bin/tweaks --no_display --bluelightctrl $current_blf 2>&1 > /dev/null & # redundant but leaving
-    sleep 1 
-
-    tweaks_pid=$(pgrep -f "$sysdir/bin/tweaks --no_display --bluelightctrl $current_blf")
-    sleep 2
-
-    if [ -n "$tweaks_pid" ]; then
-        kill -SIGINT $tweaks_pid
-    fi
-
     echo ":: Blue Light Filter: Enabled"
     touch /tmp/blueLightOn
 }
 
 disable_blue_light_filter() {
+    combinedBGR=$(cat $sysdir/config/display/blueLightRGB)
+    combinedBGR=$(echo "$combinedBGR" | tr -d '[:space:]/#')
 
-    # same as above
-    openvt -c 17 -- sh -c 'sysdir=/mnt/SDCARD/.tmp_update && \
-    miyoodir=/mnt/SDCARD/miyoo && \
-    export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte" && \
-    $sysdir/bin/tweaks --no_display --bluelightctrl 0' &   
+    lastR=$(( (combinedBGR >> 16) & 0xFF ))
+    lastG=$(( (combinedBGR >> 8) & 0xFF ))
+    lastB=$(( combinedBGR & 0xFF ))
     
-    # $sysdir/bin/tweaks --no_display --bluelightctrl 0 2>&1 > /dev/null & # redundant but leaving
-    sleep 1
+    echo "Last BGR: B: $lastB, G: $lastG, R: $lastR"
+    echo "Target BGR: B: 128, G: 128, R: 128"
 
-    tweaks_pid=$(pgrep -f "$sysdir/bin/tweaks --no_display --bluelightctrl 0")
-    sleep 2
-    
-    if [ -n "$tweaks_pid" ]; then
-        kill -SIGINT $tweaks_pid
-    fi
+    for i in $(seq 0 20); do
+        newR=$(( lastR + (128 - lastR) * i / 20 ))
+        newG=$(( lastG + (128 - lastG) * i / 20 ))
+        newB=$(( lastB + (128 - lastB) * i / 20 ))
+
+        echo "colortemp 0 0 0 0 $newB $newG $newR" > /proc/mi_modules/mi_disp/mi_disp0
+        usleep 50000
+    done
 
     echo ":: Blue Light Filter: Disabled"
-    rm /tmp/blueLightOn
+    rm -f /tmp/blueLightOn
 }
+
 
 check_blf() {
     sync
 
-    blueLightTimeOnFile="/mnt/SDCARD/.tmp_update/config/display/blueLightTime"
-    blueLightTimeOffFile="/mnt/SDCARD/.tmp_update/config/display/blueLightTimeOff"
+    blueLightTimeOnFile="$sysdir/config/display/blueLightTime"
+    blueLightTimeOffFile="$sysdir/config/display/blueLightTimeOff"
 
     if [ ! -f "$blueLightTimeOnFile" ] || [ ! -f "$blueLightTimeOffFile" ]; then
         rm -f "$lockfile"

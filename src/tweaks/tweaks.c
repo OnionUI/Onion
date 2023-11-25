@@ -64,40 +64,22 @@ int main(int argc, char *argv[])
     char apply_tool[STR_MAX] = "";
     bool use_display = true;
 
-    bool blueLightControl = false;
-    int blfLevel = -1;
-
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--apply_tool") == 0)
             strncpy(apply_tool, argv[++i], STR_MAX - 1);
         else if (strcmp(argv[i], "--no_display") == 0)
             use_display = false;
-        else if (strcmp(argv[i], "--bluelightctrl") == 0) {
-            blueLightControl = true;
-            if (i + 1 < argc) {
-                blfLevel = atoi(argv[++i]);
-            }
-        }
     }
 
     signal(SIGINT, sigHandler);
     signal(SIGTERM, sigHandler);
 
-    if (blueLightControl || use_display || strlen(apply_tool) == 0)
+    if (use_display || strlen(apply_tool) == 0)
         SDL_InitDefault(true);
 
     settings_load();
     lang_load();
 
-    if (blueLightControl) {
-        if (blfLevel >= 0 && blfLevel <= 5) {
-            action_blueLight_thread((void *)(intptr_t)blfLevel);
-        }
-        else {
-            fprintf(stderr, "Invalid blue light filter level specified.\n");
-        }
-        return 0;
-    }
 
     // Apply tool via command line
     if (strlen(apply_tool) > 0) {

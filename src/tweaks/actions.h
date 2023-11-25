@@ -17,10 +17,6 @@
 #include "./diags.h"
 #include "./values.h"
 
-#ifdef PLATFORM_MIYOOMINI
-#include <./system/mi_display.h>
-#endif
-
 void action_setAppShortcut(void *pt)
 {
     ListItem *item = (ListItem *)pt;
@@ -61,136 +57,9 @@ void action_meterWidth(void *pt)
     osd_showBrightnessBar(settings.brightness);
 }
 
-static pthread_t last_thread;
-static pthread_mutex_t thread_mutex = PTHREAD_MUTEX_INITIALIZER;
-static int blf_changed = 0;
-static int blf_fade_in = 0;
-
-void setRGBValues(int value, int *endB, int *endG, int *endR)
-{
-    switch (value) {
-    case 0:
-        *endB = 128;
-        *endG = 128;
-        *endR = 128;
-        break;
-    case 1:
-        *endB = 110;
-        *endG = 125;
-        *endR = 140;
-        break;
-    case 2:
-        *endB = 100;
-        *endG = 120;
-        *endR = 140;
-        break;
-    case 3:
-        *endB = 90;
-        *endG = 115;
-        *endR = 140;
-        break;
-    case 4:
-        *endB = 80;
-        *endG = 110;
-        *endR = 140;
-        break;
-    case 5:
-        *endB = 70;
-        *endG = 105;
-        *endR = 140;
-        break;
-    default:
-        *endB = 0;
-        *endG = 0;
-        *endR = 0;
-        break;
-    }
-}
-
-void *action_blueLight_thread(void *arg)
-{
-    
-    #ifdef PLATFORM_MIYOOMINI
-    //to-do - check the res of the input
-    display_spawnMIDISP(640, 480, settings.lumination, settings.contrast, settings.hue, settings.saturation);
-    #endif
-    
-    static int lastB, lastG, lastR;
-    int combinedRGB;
-    int value;
-
-    // how is the function being called based on the arg
-    if ((intptr_t)arg < 1024) {
-        value = (intptr_t)arg;
-        blf_changed = 1;
-    }
-    else if (arg != NULL) {
-        ListItem *item = (ListItem *)arg;
-        value = item->value;
-    }
-    else {
-        value = 0;
-    }
-
-    // what is the current blf value
-    config_get("display/blueLightRGB", CONFIG_INT, &combinedRGB);
-
-    if ((intptr_t)arg == 0) {
-        // we're turning blf off, fade out to default values (case 0)
-        blf_changed = 1;
-    }
-
-    if (blf_changed) {
-        lastR = (combinedRGB >> 16) & 0xFF;
-        lastG = (combinedRGB >> 8) & 0xFF;
-        lastB = combinedRGB & 0xFF;
-        blf_changed = 0;
-
-        if (lastR == 0 && lastG == 0 && lastB == 0) { // recalculate if they get lost
-            setRGBValues(settings.blue_light_level, &lastB, &lastG, &lastR);
-        }
-    }
-
-    if (blf_fade_in) {
-        lastR = lastG = lastB = 128;
-        blf_fade_in = 0;
-    }
-
-    int endB, endG, endR;
-    setRGBValues(value, &endB, &endG, &endR);
-
-    combinedRGB = (endR << 16) | (endG << 8) | endB;
-    config_setNumber("display/blueLightRGB", combinedRGB);
-    settings.blue_light_rgb = combinedRGB;
-
-    char cmd[128];
-    for (int i = 0; i <= 20; i++) {
-        snprintf(cmd, sizeof(cmd), "echo 'colortemp 0 0 0 0 %d %d %d' > /proc/mi_modules/mi_disp/mi_disp0",
-                 lastB + (endB - lastB) * i / 20,
-                 lastG + (endG - lastG) * i / 20,
-                 lastR + (endR - lastR) * i / 20);
-        system(cmd);
-        usleep(50000);
-    }
-
-    return NULL;
-}
-
 void action_blueLight()
 {
-    pthread_mutex_lock(&thread_mutex);
-    if (last_thread) {
-        pthread_cancel(last_thread);
-        pthread_join(last_thread, NULL);
-    }
-
-    pthread_create(&last_thread, NULL, action_blueLight_thread, (void *)(intptr_t)settings.blue_light_level);
-    pthread_detach(last_thread);
-    pthread_mutex_unlock(&thread_mutex);
-    remove("/tmp/blueLightOn");
-
-    reset_menus = true;
-    all_changed = true;
+    system("/mnt/SDCARD/.tmp_update/script/blue_light.sh enable &");
 }
 
 void action_blueLightLevel(void *pt)
@@ -203,7 +72,6 @@ void action_blueLightLevel(void *pt)
     config_setNumber("display/blueLightLevel", value);
 
     remove("/tmp/blueLightOn");
-    blf_changed = 1;
 }
 
 void action_blueLightState(void *pt)
@@ -213,18 +81,12 @@ void action_blueLightState(void *pt)
     config_flag_set(".blf", settings.blue_light_state);
 
     if (item->value == 0) { // blf being disabled
-        pthread_create(&last_thread, NULL, action_blueLight_thread, 0);
-        pthread_detach(last_thread);
+        system("/mnt/SDCARD/.tmp_update/script/blue_light.sh disable &");
         remove("/tmp/blueLightOn");
     }
     else {
-        // blf being enabled, get the default value. set the fade_in flag
-        // int savedStrength = value_blueLightLevel();
-        // action_blueLight((void *)(intptr_t)savedStrength);
         system("/mnt/SDCARD/.tmp_update/script/blue_light.sh check &"); // check if we're within the time values and start now
-        blf_fade_in = 1;
     }
-
     reset_menus = true;
     all_changed = true;
 }
