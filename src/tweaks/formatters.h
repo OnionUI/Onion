@@ -48,7 +48,6 @@ void formatter_Time(void *pt, char *out_label)
 {
     ListItem *item = (ListItem *)pt;
     int value = item->value;
-
     int hours = value / 4;
     int minutes = (value % 4) * 15;
     sprintf(out_label, "%02d:%02d", hours, minutes);

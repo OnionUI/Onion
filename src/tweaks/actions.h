@@ -57,9 +57,16 @@ void action_meterWidth(void *pt)
     osd_showBrightnessBar(settings.brightness);
 }
 
-void action_blueLight()
-{
-    system("/mnt/SDCARD/.tmp_update/script/blue_light.sh enable &");
+int blueLightToggled = 0;
+
+void action_blueLight() {
+    if (blueLightEnabled) {
+        system("/mnt/SDCARD/.tmp_update/script/blue_light.sh disable &");
+        blueLightToggle = 0;
+    } else {
+        system("/mnt/SDCARD/.tmp_update/script/blue_light.sh enable &");
+        blueLightToggle = 1;
+    }
 }
 
 void action_blueLightLevel(void *pt)
