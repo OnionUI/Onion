@@ -61,6 +61,10 @@ int blueLightToggled = 0;
 
 void action_blueLight()
 {
+    if (access("/tmp/runningBLF", F_OK) != -1) {
+        return;
+    }
+    
     if (blueLightToggled) {
         system("/mnt/SDCARD/.tmp_update/script/blue_light.sh disable &");
         blueLightToggled = 0;
@@ -81,12 +85,15 @@ void action_blueLightLevel(void *pt)
     config_setNumber("display/blueLightLevel", value);
 
     system("/mnt/SDCARD/.tmp_update/script/blue_light.sh set_intensity &");
-
     remove("/tmp/blueLightOn");
 }
 
 void action_blueLightState(void *pt)
 {
+    if (access("/tmp/runningBLF", F_OK) != -1) {
+        return;
+    }
+    
     ListItem *item = (ListItem *)pt;
     settings.blue_light_state = item->value == 1;
     config_flag_set(".blf", settings.blue_light_state);
