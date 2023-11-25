@@ -37,6 +37,7 @@ setRGBValues() {
 }
 
 set_intensity() {
+    sync
     value=$(cat $sysdir/config/display/blueLightLevel)
 
     setRGBValues "$value"
@@ -51,6 +52,7 @@ set_intensity() {
 }
 
 blueLightStart() {
+    sync
     value=$(cat $sysdir/config/display/blueLightLevel)
 
     combinedRGB=$(cat $sysdir/config/display/blueLightRGB)
@@ -96,6 +98,7 @@ to_minutes_since_midnight() {
 }
 
 enable_blue_light_filter() {    
+    sync
     blueLightStart
     
     echo ":: Blue Light Filter: Enabled"
@@ -103,6 +106,8 @@ enable_blue_light_filter() {
 }
 
 disable_blue_light_filter() {
+    sync
+    
     combinedBGR=$(cat $sysdir/config/display/blueLightRGB)
     combinedBGR=$(echo "$combinedBGR" | tr -d '[:space:]/#')
 
