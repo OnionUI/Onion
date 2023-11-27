@@ -160,6 +160,9 @@ enable_blue_light_filter() {
     check_disp_init
     sync
     blueLightStart
+    
+    echo ":: Blue Light Filter: Enabled"
+    touch /tmp/blueLightOn
 }
 
 disable_blue_light_filter() {    
@@ -184,6 +187,9 @@ disable_blue_light_filter() {
         echo "colortemp 0 0 0 0 $newB $newG $newR" > /proc/mi_modules/mi_disp/mi_disp0
         usleep 50000
     done
+    
+    echo ":: Blue Light Filter: Disabled"
+    rm -f /tmp/blueLightOn
 }
 
 check_blf() {
