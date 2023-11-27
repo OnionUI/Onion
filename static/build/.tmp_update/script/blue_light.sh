@@ -160,17 +160,6 @@ enable_blue_light_filter() {
     check_disp_init
     sync
     blueLightStart
-    
-    echo ":: Blue Light Filter: Enabled"
-    touch /tmp/blueLightOn
-    
-    if pgrep -f "disp_init" > /dev/null; then
-        killall -2 disp_init
-        sleep 1
-        if pgrep -f "disp_init" > /dev/null; then
-            killall -9 disp_init
-        fi
-    fi
 }
 
 disable_blue_light_filter() {    
@@ -195,17 +184,6 @@ disable_blue_light_filter() {
         echo "colortemp 0 0 0 0 $newB $newG $newR" > /proc/mi_modules/mi_disp/mi_disp0
         usleep 50000
     done
-
-    echo ":: Blue Light Filter: Disabled"
-    rm -f /tmp/blueLightOn
-    
-    if pgrep -f "disp_init" > /dev/null; then
-        killall -2 disp_init
-        sleep 1
-        if pgrep -f "disp_init" > /dev/null; then
-            killall -9 disp_init
-        fi
-    fi
 }
 
 check_blf() {
