@@ -95,6 +95,7 @@ check_disp_init() {
     if ! pgrep -f "/dev/l" > /dev/null; then
         $sysdir/bin/disp_init &
     fi
+    sleep 2.5
 }
 
 
