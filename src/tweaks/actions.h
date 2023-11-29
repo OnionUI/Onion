@@ -297,6 +297,29 @@ void action_setAltBrightness(void *pt)
     config_flag_set(".altBrightness", ((ListItem *)pt)->value);
 }
 
+void action_toggleScreenRecIndicator() {
+    return; // not built yet
+}
+
+void action_toggleScreenRecCountdown() {
+    return; // not built yet
+}
+
+void action_hardKillFFmpeg(void *pt) {
+    ListItem *item = (ListItem *)pt;
+    int status = system("/mnt/SDCARD/.tmp_update/script/screen_recorder.sh hardkill");
+    if (status != 0) {
+        list_updateStickyNote(item, "Status: Error occurred.");
+    } else {
+        list_updateStickyNote(item, "Status: Killed");
+    }
+    list_changed = true;
+}
+
+void action_deleteAllRecordings() {
+    system("rm -f /mnt/SDCARD/Media/Videos/Recorded/*");
+}
+
 void action_advancedSetLcdVoltage(void *pt)
 {
     int value = 0x0e - ((ListItem *)pt)->value;
