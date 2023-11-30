@@ -14,8 +14,6 @@
 #include "./appstate.h"
 #include "./tools_defs.h"
 
-#define RECORDED_DIR "/mnt/SDCARD/Media/Videos/Recorded"
-
 static pthread_t thread_pt;
 static bool thread_active = false;
 static bool thread_success = false;
@@ -54,14 +52,14 @@ void _toolDialog(const char *title_str, const char *message_str,
     SDL_Flip(video);
 }
 
-void _runCommandPopup(const char *tool_name, const char *_cmd, const char *msg)
+void _runCommandPopup(const char *tool_name, const char *_cmd)
 {
-    // static char msg_apply[] = "Applying tool...\n \n \n ";
+    static char msg_apply[] = "Applying tool...\n \n \n ";
 
     keys_enabled = false;
     char full_title[STR_MAX];
     sprintf(full_title, "Tool: %s", tool_name);
-    _toolDialog(full_title, msg, false);
+    _toolDialog(full_title, msg_apply, false);
 
     char cmd[STR_MAX];
     strncpy(cmd, _cmd, STR_MAX - 1);
@@ -78,7 +76,7 @@ void _runCommandPopup(const char *tool_name, const char *_cmd, const char *msg)
         msleep(300);
         if (!thread_active)
             break;
-        _toolDialog(full_title, msg, true);
+        _toolDialog(full_title, msg_apply, true);
     }
 
     if (video != NULL)
@@ -97,34 +95,34 @@ void _runCommandPopup(const char *tool_name, const char *_cmd, const char *msg)
 
 void tool_generateCueFiles(void *pt)
 {
-    _runCommandPopup(tools_short_names[0], "/mnt/SDCARD/.tmp_update/script/cue_gen.sh", "Applying tool...\n \n \n " );
+    _runCommandPopup(tools_short_names[0], "/mnt/SDCARD/.tmp_update/script/cue_gen.sh");
 }
 
 void tool_buildShortRomGameList(void *pt)
 {
-    _runCommandPopup(tools_short_names[1], "./bin/gameNameList /mnt/SDCARD /mnt/SDCARD/BIOS/arcade_lists", "Applying tool...\n \n \n ");
+    _runCommandPopup(tools_short_names[1], "./bin/gameNameList /mnt/SDCARD /mnt/SDCARD/BIOS/arcade_lists");
 }
 
 void tool_generateMiyoogamelists(void *pt)
 {
-    _runCommandPopup(tools_short_names[2], "/mnt/SDCARD/.tmp_update/script/miyoogamelist_gen.sh", "Applying tool...\n \n \n ");
+    _runCommandPopup(tools_short_names[2], "/mnt/SDCARD/.tmp_update/script/miyoogamelist_gen.sh");
 }
 
 void tool_screenRecorder(void *pt) {
     ListItem *item = (ListItem *)pt;
     char cmd[STR_MAX];
     char newestFile[STR_MAX / 2];
-    snprintf(cmd, sizeof(cmd), "/mnt/SDCARD/.tmp_update/script/screen_recorder.sh toggle");
+    snprintf(cmd, sizeof(cmd), "/mnt/SDCARD/.tmp_update/script/screen_recorder.sh toggle &");
     int fileCheck;
     fileCheck = exists("/tmp/recorder_active");
 
     if (!fileCheck) {
-        _runCommandPopup("Screen recorder started", cmd, "Screen recorder");
         list_updateStickyNote(item, "Status: Now recording...");
+        system(cmd);
     } else {
-        _runCommandPopup("Screen recorder stopped", cmd, "Screen recorder");
         if (file_findNewest(RECORDED_DIR, newestFile, sizeof(newestFile))) {
             char note[STR_MAX];
+            system(cmd);
             snprintf(note, sizeof(note), "Stopped, saved as: %s", newestFile);
             list_updateStickyNote(item, note);
         } else {
@@ -137,7 +135,6 @@ void tool_screenRecorder(void *pt) {
 static void (*tools_pt[NUM_TOOLS])(void *) = {
     tool_generateCueFiles,
     tool_buildShortRomGameList,
-    tool_generateMiyoogamelists,
-    tool_screenRecorder};
+    tool_generateMiyoogamelists};
 
 #endif // TWEAKS_TOOLS_H__

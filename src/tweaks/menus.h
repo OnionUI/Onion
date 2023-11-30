@@ -663,12 +663,11 @@ void menu_advanced(void *_)
 }
 
 void menu_screen_recorder(void *pt) {
-    const char *recordingActiveFile = "/tmp/recorder_active";
-    int isRecordingActive = exists(recordingActiveFile);
+    int isRecordingActive = exists("/tmp/recorder_active");
     const char *recordingStatus = isRecordingActive ? "Status: Now recording..." : "Status: Idle.";
 
     if (!_menu_screen_recorder._created) {
-        _menu_screen_recorder = list_createWithSticky(6, "Screen recorder setup");
+        _menu_screen_recorder = list_createWithSticky(7, "Screen recorder setup");
         list_addItemWithInfoNote(&_menu_screen_recorder,
                                  (ListItem){
                                      .label = "Start/stop recorder",
@@ -678,9 +677,9 @@ void menu_screen_recorder(void *pt) {
         list_addItemWithInfoNote(&_menu_screen_recorder,
                                  (ListItem){
                                      .label = "Toggle indicator icon",
-                                     .sticky_note = "Turn the \"recording\" indicator on/off",
+                                     .sticky_note = "Turn the indicator on/off",
                                      .item_type = TOGGLE,
-                                     .value = (int)settings.enable_logging,
+                                     .value = (int)settings.rec_indicator,
                                      .action = action_toggleScreenRecIndicator},
                                  "Toggles the display of a\n"
                                  "a flashing icon to remind you\n"
@@ -688,16 +687,25 @@ void menu_screen_recorder(void *pt) {
         list_addItemWithInfoNote(&_menu_screen_recorder,
                                  (ListItem){
                                      .label = "Toggle countdown",
-                                     .sticky_note = "Turn the \"countdown\" on/off",
+                                     .sticky_note = "Turn the countdown on/off",
                                      .item_type = TOGGLE,
-                                     .value = (int)settings.enable_logging,
+                                     .value = (int)settings.rec_countdown,
                                      .action = action_toggleScreenRecCountdown},
                                  "Countdown when starting recording");
         list_addItemWithInfoNote(&_menu_screen_recorder,
                                  (ListItem){
+                                     .label = "Toggle hotkey",
+                                     .sticky_note = "Turn the hotkey (Menu+A) on/off ",
+                                     .item_type = TOGGLE,
+                                     .value = (int)settings.rec_hotkey,
+                                     .action = action_toggleScreenRecHotkey},
+                                 "Enable the hotkey function.\n\n"
+                                 "Recording can be started/stopped\n"
+                                 "with Menu+A");
+        list_addItemWithInfoNote(&_menu_screen_recorder,
+                                 (ListItem){
                                      .label = "Reset screen recorder",
                                      .sticky_note = "Hard kill ffmpeg if it's crashed",
-                                     .value = (int)settings.enable_logging,
                                      .action = action_hardKillFFmpeg},
                                  "Performs a hard kill of ffmpeg\n"
                                  "WARNING: If you're currently\n"
@@ -706,7 +714,6 @@ void menu_screen_recorder(void *pt) {
                                  (ListItem){
                                      .label = "Delete all recordings",
                                      .sticky_note = "Empties the recordings directory",
-                                     .value = (int)settings.enable_logging,
                                      .action = action_deleteAllRecordings},
                                  "Deletes all recorded videos\n"
                                  "WARNING: This action cannot\n"

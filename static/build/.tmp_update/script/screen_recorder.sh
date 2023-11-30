@@ -1,12 +1,13 @@
 #!/bin/sh
 export sysdir=/mnt/SDCARD/.tmp_update
 export miyoodir=/mnt/SDCARD/miyoo
+export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 export PATH="$sysdir/bin:$PATH"
+
 re_dir="/mnt/SDCARD/Media/Videos/Recorded"
 active_file="/tmp/recorder_active"
 lock_file="/tmp/screen_recorder.lock"
-
-echo "Starting screen recorder script..."
+rec_icon="$sysdir/res/rec.png"
 
 if [ -f "$lock_file" ]; then
     exit 1
@@ -20,37 +21,121 @@ fi
 
 cd $re_dir
 
+# we'll hopefully never need this, but it checks whether /dev/l has the screen init already (and mi_disp exists, otherwise we can't change the screen colour)
+# the function will call, the binary will run but if it detects disp is init it will return
+check_disp_init() { 
+    if [ -z "$sysdir" ] || [ ! -x "$sysdir/bin/disp_init" ]; then
+        echo "Error: disp_init not found or not executable"
+        exit 
+    fi
+    
+    if ! pgrep -f "/dev/l" > /dev/null; then
+        $sysdir/bin/disp_init &
+    fi
+}
+
+# use the screen to countdown
+# red -> amber -> green ... recording (back to original screen prop)
+#  3        2        1          0
+# this display colour change doesn't appear in the video, neither does blue light filter.
+
+show_countdown() {  
+    check_disp_init
+    default_colour="128 128 128"
+
+    PASTEL_RED="230 110 110"
+    PASTEL_AMBER="230 191 85"
+    PASTEL_GREEN="110 230 110"
+
+    if [ -f "$sysdir/config/.blf" ] && [ -f "/tmp/blueLightOn" ]; then
+        combinedRGB=$(cat "$sysdir/config/display/blueLightRGB")
+        combinedRGB=$(echo "$combinedRGB" | tr -d '[:space:]/#')
+
+        blfR=$(( (combinedRGB >> 16) & 0xFF ))
+        blfG=$(( (combinedRGB >> 8) & 0xFF ))
+        blfB=$(( combinedRGB & 0xFF ))
+        current_colour="$blfR $blfG $blfB"
+    else
+        current_colour=$default_colour
+    fi
+
+    for target_colour in "$PASTEL_RED" "$PASTEL_AMBER" "$PASTEL_GREEN"; do
+        for step in $(seq 1 10); do
+            new_red=$(echo "$current_colour $target_colour" | awk -v step="$step" '{printf "%.0f", $1 + ($4 - $1) * step / 10}')
+            new_green=$(echo "$current_colour $target_colour" | awk -v step="$step" '{printf "%.0f", $2 + ($5 - $2) * step / 10}')
+            new_blue=$(echo "$current_colour $target_colour" | awk -v step="$step" '{printf "%.0f", $3 + ($6 - $3) * step / 10}')
+
+            echo "colortemp 0 0 0 0 $new_blue $new_green $new_red" > /proc/mi_modules/mi_disp/mi_disp0
+            usleep 50000
+
+            current_colour="$new_red $new_green $new_blue"
+        done
+    done
+
+    if [ -f "$sysdir/config/.blf" ] && [ -f "/tmp/blueLightOn" ]; then
+        echo "colortemp 0 0 0 0 $blfB $blfG $blfR" > /proc/mi_modules/mi_disp/mi_disp0
+    else
+        echo "colortemp 0 0 0 0 $default_colour" > /proc/mi_modules/mi_disp/mi_disp0
+    fi
+}
+
+show_indicator() {
+    imgpop 10000 0 $rec_icon 150 435 > /dev/null 2>&1 &
+}
+
+toggle_ffmpeg() {
+    sync
+    if pgrep -f "ffmpeg -f fbdev -nostdin" > /dev/null; then
+        pkill -2 -f "ffmpeg -f fbdev -nostdin"
+        killall -9 imgpop
+        rm -f "$active_file"
+    else
+    
+        if [ -f "$sysdir/config/.recCountdown" ]; then
+            show_countdown
+        fi
+        
+        if [ -f "$sysdir/config/.recIndicator" ]; then
+            show_indicator
+        fi
+        
+        echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        
+        ffmpeg -f fbdev -nostdin -framerate 25 -i /dev/fb0 -vf "vflip,hflip, format=yuv420p" -c:v libx264 -preset ultrafast -tune zerolatency -maxrate 6000k -bufsize 18000k -threads 0 "$(date +%Y%m%d%H%M%S).mp4" > /dev/null 2>&1 &
+        
+        sleep 0.5
+        
+        if ! pgrep -f "ffmpeg -f fbdev -nostdin" > /dev/null; then
+            return 1
+        fi
+        
+        touch "$active_file"
+    fi
+    rm -f "$lock_file"
+    return 0
+}
+
+hardkill_ffmpeg() {
+    killall -9 ffmpeg
+    sleep 0.5
+    if pgrep -f "ffmpeg -f fbdev -nostdin" > /dev/null; then
+        rm -f "$lock_file"
+        return 1
+    fi
+    rm -f "$active_file"
+    rm -f "$lock_file"
+    killall -9 imgpop
+    return 0
+}
+
 case "$1" in
     toggle)
-        if pgrep -f "ffmpeg -f fbdev -nostdin" > /dev/null; then
-            pkill -2 -f "ffmpeg -f fbdev -nostdin"
-            rm -f "$active_file"
-            rm -f "$lock_file"
-            exit 0
-        else
-            ffmpeg -f fbdev -nostdin -framerate 15 -i /dev/fb0 -vf "vflip,hflip, format=yuv420p" -c:v libx264 -preset faster -tune zerolatency -maxrate 12000k -bufsize 36000k -threads 0 "$(date +%Y%m%d%H%M%S).mp4" > /dev/null 2>&1 &
-            sleep 0.5
-            if pgrep -f "ffmpeg -f fbdev -nostdin" > /dev/null; then
-                touch "$active_file"
-                rm -f "$lock_file"
-                exit 0
-            else
-                rm -f "$lock_file"
-                exit 1
-            fi
-        fi
+        toggle_ffmpeg
+        exit $?
         ;;
     hardkill)
-        killall -9 ffmpeg
-        sleep 0.5
-        if pgrep -f "ffmpeg -f fbdev -nostdin" > /dev/null; then
-            rm -f "$lock_file"
-            exit 1
-        else
-            rm -f "$active_file"
-            rm -f "$lock_file"
-            exit 0
-        fi
+        hardkill_ffmpeg
+        exit $?
         ;;
     *)
         echo "Invalid argument. Usage: $0 {toggle|hardkill}"

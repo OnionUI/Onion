@@ -356,7 +356,7 @@ int main(void)
     bool comboKey_volume = false;
     bool comboKey_menu = false;
     bool comboKey_select = false;
-
+    
     int ticks = getMilliseconds();
     int hibernate_start = ticks;
     int hibernate_time;
@@ -563,6 +563,12 @@ int main(void)
                     applyExtraButtonShortcut(1);
                 break;
             case HW_BTN_A:
+                if (comboKey_menu) {      
+                    if (exists("/mnt/SDCARD/.tmp_update/config/.recHotkey")) {
+                        system("/mnt/SDCARD/.tmp_update/script/screen_recorder.sh toggle &");
+                    }
+                }
+                break;
             case HW_BTN_B:
                 if (val == PRESSED && system_state == MODE_MAIN_UI)
                     temp_flag_set("launch_alt", false);
