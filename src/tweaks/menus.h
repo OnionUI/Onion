@@ -683,12 +683,14 @@ void menu_screen_recorder(void *pt) {
                                  "that you're still recording.");
         list_addItemWithInfoNote(&_menu_screen_recorder,
                                  (ListItem){
-                                     .label = "Toggle countdown",
-                                     .sticky_note = "Turn the countdown on/off",
+                                     .label = "Toggle countdown pulse",
+                                     .sticky_note = "Turn the countdown pulse on/off",
                                      .item_type = TOGGLE,
                                      .value = (int)settings.rec_countdown,
                                      .action = action_toggleScreenRecCountdown},
-                                 "Countdown when starting recording");
+                                 "Countdown when starting recording. \n\n"
+                                 "The screen will pulse white 3 times \n"
+                                 "to signify recording has started/stopped");
         list_addItemWithInfoNote(&_menu_screen_recorder,
                                  (ListItem){
                                      .label = "Toggle hotkey",
@@ -704,7 +706,7 @@ void menu_screen_recorder(void *pt) {
                                      .label = "Reset screen recorder",
                                      .sticky_note = "Hard kill ffmpeg if it's crashed",
                                      .action = action_hardKillFFmpeg},
-                                 "Performs a hard kill of ffmpeg\n"
+                                 "Performs a hard kill of ffmpeg.\n\n"
                                  "WARNING: If you're currently\n"
                                  "recording, you may lose the file!");
         list_addItemWithInfoNote(&_menu_screen_recorder,
@@ -712,7 +714,7 @@ void menu_screen_recorder(void *pt) {
                                      .label = "Delete all recordings",
                                      .sticky_note = "Empties the recordings directory",
                                      .action = action_deleteAllRecordings},
-                                 "Deletes all recorded videos\n"
+                                 "Deletes all recorded videos. \n\n"
                                  "WARNING: This action cannot\n"
                                  "be undone!");
     }
