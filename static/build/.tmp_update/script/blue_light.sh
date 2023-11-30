@@ -92,10 +92,10 @@ check_disp_init() {
         exit 
     fi
     
-    if ! pgrep -f "/dev/l" > /dev/null; then
+    if ! pgrep -f "/dev/l" > /dev/null || [ ! -e "/proc/mi_modules/mi_disp/mi_disp0" ]; then
         $sysdir/bin/disp_init &
+        sleep 2.5
     fi
-    sleep 2.5
 }
 
 
