@@ -35,17 +35,14 @@ check_disp_init() {
 }
 
 # use the screen to countdown
-# red -> amber -> green ... recording (back to original screen prop)
+# pulse -> pulse -> pulse ... recording/stopped (then back to original screen prop)
 #  3        2        1          0
 # this display colour change doesn't appear in the video, neither does blue light filter.
 
 show_countdown() {  
     check_disp_init
     default_colour="128 128 128"
-
-    PASTEL_RED="230 110 110"
-    PASTEL_AMBER="230 191 85"
-    PASTEL_GREEN="110 230 110"
+    pulse_colour="200 200 200"
 
     if [ -f "$sysdir/config/.blf" ] && [ -f "/tmp/blueLightOn" ]; then
         combinedRGB=$(cat "$sysdir/config/display/blueLightRGB")
@@ -59,24 +56,20 @@ show_countdown() {
         current_colour=$default_colour
     fi
 
-    for target_colour in "$PASTEL_RED" "$PASTEL_AMBER" "$PASTEL_GREEN"; do
+    original_colour=$current_colour
+
+    for i in 1 2 3; do
         for step in $(seq 1 10); do
-            new_red=$(echo "$current_colour $target_colour" | awk -v step="$step" '{printf "%.0f", $1 + ($4 - $1) * step / 10}')
-            new_green=$(echo "$current_colour $target_colour" | awk -v step="$step" '{printf "%.0f", $2 + ($5 - $2) * step / 10}')
-            new_blue=$(echo "$current_colour $target_colour" | awk -v step="$step" '{printf "%.0f", $3 + ($6 - $3) * step / 10}')
+            new_red=$(echo "$original_colour $pulse_colour" | awk -v step="$step" '{printf "%.0f", $1 + ($4 - $1) * step / 10}')
+            new_green=$(echo "$original_colour $pulse_colour" | awk -v step="$step" '{printf "%.0f", $2 + ($5 - $2) * step / 10}')
+            new_blue=$(echo "$original_colour $pulse_colour" | awk -v step="$step" '{printf "%.0f", $3 + ($6 - $3) * step / 10}')
 
             echo "colortemp 0 0 0 0 $new_blue $new_green $new_red" > /proc/mi_modules/mi_disp/mi_disp0
             usleep 50000
-
-            current_colour="$new_red $new_green $new_blue"
         done
-    done
 
-    if [ -f "$sysdir/config/.blf" ] && [ -f "/tmp/blueLightOn" ]; then
-        echo "colortemp 0 0 0 0 $blfB $blfG $blfR" > /proc/mi_modules/mi_disp/mi_disp0
-    else
-        echo "colortemp 0 0 0 0 $default_colour" > /proc/mi_modules/mi_disp/mi_disp0
-    fi
+        echo "colortemp 0 0 0 0 $original_colour" > /proc/mi_modules/mi_disp/mi_disp0
+    done
 }
 
 show_indicator() {
@@ -88,6 +81,11 @@ toggle_ffmpeg() {
     if pgrep -f "ffmpeg -f fbdev -nostdin" > /dev/null; then
         pkill -2 -f "ffmpeg -f fbdev -nostdin"
         killall -9 imgpop
+        
+        if [ -f "$sysdir/config/.recCountdown" ]; then
+            show_countdown
+        fi
+
         rm -f "$active_file"
     else
     
@@ -116,12 +114,16 @@ toggle_ffmpeg() {
 }
 
 hardkill_ffmpeg() {
-    killall -9 ffmpeg
-    sleep 0.5
+    killall -2 ffmpeg # give it a chance
+    
+    sleep 1
+    
     if pgrep -f "ffmpeg -f fbdev -nostdin" > /dev/null; then
+        killall -9 ffmpeg
         rm -f "$lock_file"
         return 1
     fi
+   
     rm -f "$active_file"
     rm -f "$lock_file"
     killall -9 imgpop

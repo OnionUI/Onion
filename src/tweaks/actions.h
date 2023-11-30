@@ -318,7 +318,7 @@ void action_hardKillFFmpeg(void *pt) {
     if (status != 0) {
         list_updateStickyNote(item, "Status: Error occurred.");
     } else {
-        list_updateStickyNote(item, "Status: FFmpeg processed stopped");
+        list_updateStickyNote(item, "Status: FFmpeg process stopped");
     }
     list_changed = true;
 }
