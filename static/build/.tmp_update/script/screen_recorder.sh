@@ -48,10 +48,10 @@ show_countdown() {
         combinedRGB=$(cat "$sysdir/config/display/blueLightRGB")
         combinedRGB=$(echo "$combinedRGB" | tr -d '[:space:]/#')
 
-        blfR=$(( (combinedRGB >> 16) & 0xFF ))
-        blfG=$(( (combinedRGB >> 8) & 0xFF ))
         blfB=$(( combinedRGB & 0xFF ))
-        current_colour="$blfR $blfG $blfB"
+        blfG=$(( (combinedRGB >> 8) & 0xFF ))
+        blfR=$(( (combinedRGB >> 16) & 0xFF ))
+        current_colour="$blfB $blfG $blfR"
     else
         current_colour=$default_colour
     fi
@@ -60,17 +60,25 @@ show_countdown() {
 
     for i in 1 2 3; do
         for step in $(seq 1 10); do
-            new_red=$(echo "$original_colour $pulse_colour" | awk -v step="$step" '{printf "%.0f", $1 + ($4 - $1) * step / 10}')
+            new_blue=$(echo "$original_colour $pulse_colour" | awk -v step="$step" '{printf "%.0f", $1 + ($4 - $1) * step / 10}')
             new_green=$(echo "$original_colour $pulse_colour" | awk -v step="$step" '{printf "%.0f", $2 + ($5 - $2) * step / 10}')
-            new_blue=$(echo "$original_colour $pulse_colour" | awk -v step="$step" '{printf "%.0f", $3 + ($6 - $3) * step / 10}')
+            new_red=$(echo "$original_colour $pulse_colour" | awk -v step="$step" '{printf "%.0f", $3 + ($6 - $3) * step / 10}')
 
             echo "colortemp 0 0 0 0 $new_blue $new_green $new_red" > /proc/mi_modules/mi_disp/mi_disp0
             usleep 50000
         done
 
-        echo "colortemp 0 0 0 0 $original_colour" > /proc/mi_modules/mi_disp/mi_disp0
+        for step in $(seq 1 10); do
+            new_blue=$(echo "$pulse_colour $original_colour" | awk -v step="$step" '{printf "%.0f", $1 + ($4 - $1) * step / 10}')
+            new_green=$(echo "$pulse_colour $original_colour" | awk -v step="$step" '{printf "%.0f", $2 + ($5 - $2) * step / 10}')
+            new_red=$(echo "$pulse_colour $original_colour" | awk -v step="$step" '{printf "%.0f", $3 + ($6 - $3) * step / 10}')
+
+            echo "colortemp 0 0 0 0 $new_blue $new_green $new_red" > /proc/mi_modules/mi_disp/mi_disp0
+            usleep 50000
+        done
     done
 }
+
 
 show_indicator() {
     imgpop 10000 0 $rec_icon 150 435 > /dev/null 2>&1 &
@@ -116,7 +124,7 @@ toggle_ffmpeg() {
 hardkill_ffmpeg() {
     killall -2 ffmpeg # give it a chance
     
-    sleep 1
+    sleep 0.5
     
     if pgrep -f "ffmpeg -f fbdev -nostdin" > /dev/null; then
         killall -9 ffmpeg
@@ -137,7 +145,7 @@ case "$1" in
         ;;
     hardkill)
         hardkill_ffmpeg
-        exit $?
+        exit $? 
         ;;
     *)
         echo "Invalid argument. Usage: $0 {toggle|hardkill}"
