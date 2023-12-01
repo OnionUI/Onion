@@ -692,6 +692,18 @@ void menu_tools(void *_)
                                  "This generates a 'miyoogamelist.xml' file\n"
                                  "which comes with some limitations, such\n"
                                  "as no subfolder support.");
+        list_addItemWithInfoNote(&_menu_tools,
+                                 (ListItem){
+                                     .label = "Sort applist A-Z",
+                                     .action = tool_sortAppsAZ},
+                                 "Use this tool to sort your App list\n"
+                                 "ascending from A to Z.\n");
+        list_addItemWithInfoNote(&_menu_tools,
+                                 (ListItem){
+                                     .label = "Sort applist Z-A",
+                                     .action = tool_sortAppZA},
+                                 "Use this tool to sort your App list\n"
+                                 "descending from Z to A.\n");
     }
     menu_stack[++menu_level] = &_menu_tools;
     header_changed = true;
