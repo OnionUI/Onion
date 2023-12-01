@@ -65,7 +65,7 @@ show_countdown() {
             new_red=$(echo "$original_colour $pulse_colour" | awk -v step="$step" '{printf "%.0f", $3 + ($6 - $3) * step / 10}')
 
             echo "colortemp 0 0 0 0 $new_blue $new_green $new_red" > /proc/mi_modules/mi_disp/mi_disp0
-            usleep 50000
+            usleep 20000
         done
 
         for step in $(seq 1 10); do
@@ -74,7 +74,7 @@ show_countdown() {
             new_red=$(echo "$pulse_colour $original_colour" | awk -v step="$step" '{printf "%.0f", $3 + ($6 - $3) * step / 10}')
 
             echo "colortemp 0 0 0 0 $new_blue $new_green $new_red" > /proc/mi_modules/mi_disp/mi_disp0
-            usleep 50000
+            usleep 20000
         done
     done
 }
