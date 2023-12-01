@@ -297,33 +297,39 @@ void action_setAltBrightness(void *pt)
     config_flag_set(".altBrightness", ((ListItem *)pt)->value);
 }
 
-void action_toggleScreenRecIndicator(void *pt) {
+void action_toggleScreenRecIndicator(void *pt)
+{
     config_flag_set(".recIndicator", ((ListItem *)pt)->value);
     settings.rec_indicator = ((ListItem *)pt)->value == 1;
 }
 
-void action_toggleScreenRecCountdown(void *pt) {
+void action_toggleScreenRecCountdown(void *pt)
+{
     config_flag_set(".recCountdown", ((ListItem *)pt)->value);
     settings.rec_countdown = ((ListItem *)pt)->value == 1;
 }
 
-void action_toggleScreenRecHotkey(void *pt) {
+void action_toggleScreenRecHotkey(void *pt)
+{
     config_flag_set(".recHotkey", ((ListItem *)pt)->value);
     settings.rec_hotkey = ((ListItem *)pt)->value == 1;
 }
 
-void action_hardKillFFmpeg(void *pt) {
+void action_hardKillFFmpeg(void *pt)
+{
     ListItem *item = (ListItem *)pt;
     int status = system("/mnt/SDCARD/.tmp_update/script/screen_recorder.sh hardkill");
     if (status != 0) {
         list_updateStickyNote(item, "Status: Error occurred.");
-    } else {
+    }
+    else {
         list_updateStickyNote(item, "Status: FFmpeg process stopped");
     }
     list_changed = true;
 }
 
-void action_deleteAllRecordings(void *pt) {
+void action_deleteAllRecordings(void *pt)
+{
     ListItem *item = (ListItem *)pt;
     system("rm -f /mnt/SDCARD/Media/Videos/Recorded/*");
     list_updateStickyNote(item, "Recorded directory emptied!");

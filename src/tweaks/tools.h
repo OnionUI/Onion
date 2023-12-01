@@ -108,7 +108,8 @@ void tool_generateMiyoogamelists(void *pt)
     _runCommandPopup(tools_short_names[2], "/mnt/SDCARD/.tmp_update/script/miyoogamelist_gen.sh");
 }
 
-void tool_screenRecorder(void *pt) {
+void tool_screenRecorder(void *pt)
+{
     ListItem *item = (ListItem *)pt;
     char cmd[STR_MAX];
     char newestFile[STR_MAX / 2];
@@ -119,13 +120,15 @@ void tool_screenRecorder(void *pt) {
     if (!fileCheck) {
         list_updateStickyNote(item, "Status: Now recording...");
         system(cmd);
-    } else {
+    }
+    else {
         if (file_findNewest(RECORDED_DIR, newestFile, sizeof(newestFile))) {
             char note[STR_MAX];
             system(cmd);
             snprintf(note, sizeof(note), "Stopped, saved as: %s", newestFile);
             list_updateStickyNote(item, note);
-        } else {
+        }
+        else {
             list_updateStickyNote(item, "Status: Recording ended, no new file found.");
         }
     }

@@ -662,7 +662,8 @@ void menu_advanced(void *_)
     header_changed = true;
 }
 
-void menu_screen_recorder(void *pt) {
+void menu_screen_recorder(void *pt)
+{
     if (!_menu_screen_recorder._created) {
         _menu_screen_recorder = list_createWithSticky(7, "Screen recorder setup");
         list_addItemWithInfoNote(&_menu_screen_recorder,
@@ -757,11 +758,10 @@ void menu_tools(void *_)
                                  "This generates a 'miyoogamelist.xml' file\n"
                                  "which comes with some limitations, such\n"
                                  "as no subfolder support.");
-                    list_addItem(&_menu_tools,
-                                 (ListItem){
-                                     .label = "Screen recorder...",
-                                     .action = menu_screen_recorder});
-                                     
+        list_addItem(&_menu_tools,
+                     (ListItem){
+                         .label = "Screen recorder...",
+                         .action = menu_screen_recorder});
     }
     menu_stack[++menu_level] = &_menu_tools;
     header_changed = true;

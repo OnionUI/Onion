@@ -359,7 +359,7 @@ int main(void)
     bool comboKey_select = false;
     bool menuAndAPressed = false;
     int menuAndAPressedTime = 0;
-    
+
     int ticks = getMilliseconds();
     int hibernate_start = ticks;
     int hibernate_time;
@@ -556,7 +556,8 @@ int main(void)
                             menuAndAPressed = true;
                             menuAndAPressedTime = getMilliseconds();
                         }
-                    } else if (val == RELEASED) {
+                    }
+                    else if (val == RELEASED) {
                         menuAndAPressed = false;
                     }
                     system_state_update();
@@ -580,7 +581,8 @@ int main(void)
                         menuAndAPressed = true;
                         menuAndAPressedTime = getMilliseconds();
                     }
-                } else if (val == RELEASED) {
+                }
+                else if (val == RELEASED) {
                     a_Pressed = false;
                     menuAndAPressed = false;
                 }
@@ -675,7 +677,7 @@ int main(void)
             default:
                 break;
             }
-            
+
             // start screen recording after holding for >2secs
             if (menuAndAPressed && (getMilliseconds() - menuAndAPressedTime >= 2000)) {
                 system("/mnt/SDCARD/.tmp_update/script/screen_recorder.sh toggle &");
