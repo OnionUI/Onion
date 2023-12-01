@@ -107,7 +107,7 @@ toggle_ffmpeg() {
         
         echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
         
-        ffmpeg -f fbdev -nostdin -framerate 25 -i /dev/fb0 -vf "vflip,hflip, format=yuv420p" -c:v libx264 -preset ultrafast -tune zerolatency -maxrate 6000k -bufsize 18000k -threads 0 "$(date +%Y%m%d%H%M%S).mp4" > /dev/null 2>&1 &
+        ffmpeg -f fbdev -nostdin -framerate 25 -i /dev/fb0 -vf "vflip,hflip, format=yuv420p" -c:v libx264 -preset ultrafast -tune zerolatency -maxrate 2000k -bufsize 6000k -threads 0 "$(date +%Y%m%d%H%M%S).mp4" > /dev/null 2>&1 &
         
         sleep 0.5
         
