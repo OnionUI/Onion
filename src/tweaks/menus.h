@@ -759,7 +759,7 @@ void menu_tools(void *_)
                                  "as no subfolder support.");
                     list_addItem(&_menu_tools,
                                  (ListItem){
-                                     .label = "Screen recorder control...",
+                                     .label = "Screen recorder...",
                                      .action = menu_screen_recorder});
                                      
     }
