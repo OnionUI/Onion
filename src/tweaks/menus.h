@@ -662,6 +662,25 @@ void menu_advanced(void *_)
     header_changed = true;
 }
 
+void menu_tools_m3uGenerator(void *_)
+{
+    if (!_menu_tools_m3uGenerator._created) {
+        _menu_tools_m3uGenerator = list_createWithTitle(2, LIST_SMALL, "m3u Generator");
+        list_addItemWithInfoNote(&_menu_tools_m3uGenerator,
+                                 (ListItem){
+                                     .label = "Multiple directories (.Game_Name)",
+                                     .action = tool_generateM3uFiles_md},
+                                 "One directory for each game \".Game_Name\"");
+        list_addItemWithInfoNote(&_menu_tools_m3uGenerator,
+                                 (ListItem){
+                                     .label = "Single directory (.multi-disc)",
+                                     .action = tool_generateM3uFiles_sd},
+                                 "One single directory \".multi-disc\"\nwill contains all multi-disc files");
+    }
+    menu_stack[++menu_level] = &_menu_tools_m3uGenerator;
+    header_changed = true;
+}
+
 void menu_tools(void *_)
 {
     if (!_menu_tools._created) {
@@ -674,6 +693,14 @@ void menu_tools(void *_)
                                  "PSX roms in '.bin' format needs a\n"
                                  "matching '.cue' file. Use this tool\n"
                                  "to automatically generate them.");
+        list_addItemWithInfoNote(&_menu_tools,
+                                 (ListItem){
+                                     .label = "Generate M3U files for PSX games...",
+                                     .action = menu_tools_m3uGenerator},
+                                 "PSX multidisc roms require to create\n"
+                                 "a playslist file (.m3u). It allows to \n"
+                                 "have only one entry for each multidisc\n"
+                                 "game and one unique save file for each game");
         list_addItemWithInfoNote(&_menu_tools,
                                  (ListItem){
                                      .label = "Generate game list for short name roms",

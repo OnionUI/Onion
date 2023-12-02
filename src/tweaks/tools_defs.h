@@ -3,10 +3,12 @@
 
 #include "utils/str.h"
 
-#define NUM_TOOLS 3
+#define NUM_TOOLS 5
 
 static char tools_short_names[NUM_TOOLS][STR_MAX] = {
     "cue_gen",
+    "m3u_gen_sd",
+    "m3u_gen_md",
     "build_short_rom_game_list",
     "miyoogamelist_gen"};
 
