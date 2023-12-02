@@ -33,9 +33,13 @@ sort_and_copy_back() {
 }
 
 cleanup() {
+    #restart mainui to refresh app list (if called from a button/script while main is running)
+    if pgrep "MainUI" > /dev/null; then
+        pkill -2 "MainUI"
+    fi
+
     rm -rf /mnt/SDCARD/App.temp
     rm "$temp_file"
-    killall -2 MainUI
 }
 
 main() {

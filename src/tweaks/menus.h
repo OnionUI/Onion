@@ -701,7 +701,7 @@ void menu_tools(void *_)
         list_addItemWithInfoNote(&_menu_tools,
                                  (ListItem){
                                      .label = "Sort applist Z-A",
-                                     .action = tool_sortAppZA},
+                                     .action = tool_sortAppsZA},
                                  "Use this tool to sort your App list\n"
                                  "descending from Z to A.\n");
     }
