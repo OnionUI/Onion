@@ -60,19 +60,23 @@ short_vibration() {
 pulsating_vibration() {
     setup_gpio_for_vibration
 
+    if pgrep -f "tweaks" > /dev/null; then
+        usleep_duration=500000
+    else
+        usleep_duration=400000
+    fi
+
     i=1
     while [ "$i" -le 6 ]; do
         vibrate 1
         usleep 15000
         vibrate 0
-        usleep 400000
+        usleep "$usleep_duration"
         i=$((i + 1))
     done
-    
+
     short_vibration
-
 }
-
 
 # use the screen to countdown
 # pulse -> pulse -> pulse ... recording/stopped (then back to original screen prop)
@@ -139,9 +143,11 @@ toggle_ffmpeg() {
 
         rm -f "$active_file"
     else
-    
+        
         if [ -f "$sysdir/config/.recCountdown" ]; then
             show_countdown
+        else 
+            short_vibration
         fi
         
         if [ -f "$sysdir/config/.recIndicator" ]; then
