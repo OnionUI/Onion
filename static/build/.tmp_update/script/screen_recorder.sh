@@ -51,6 +51,12 @@ vibrate() {
     file_write "/sys/class/gpio/gpio48/value" "$([ "$1" -eq 1 ] && echo "0" || echo "1")"
 }
 
+short_vibration() {
+    vibrate 1
+    usleep 100000
+    vibrate 0
+}
+
 pulsating_vibration() {
     setup_gpio_for_vibration
 
@@ -59,14 +65,14 @@ pulsating_vibration() {
         vibrate 1
         usleep 15000
         vibrate 0
-        usleep 500000
+        usleep 450000
         i=$((i + 1))
     done
+    
+    short_vibration
 
-    vibrate 1
-    usleep 100000
-    vibrate 0
 }
+
 
 # use the screen to countdown
 # pulse -> pulse -> pulse ... recording/stopped (then back to original screen prop)
@@ -125,6 +131,7 @@ toggle_ffmpeg() {
     if pgrep -f "ffmpeg -f fbdev -nostdin" > /dev/null; then
         pkill -2 -f "ffmpeg -f fbdev -nostdin"
         killall -9 imgpop
+        short_vibration
         
         if [ -f "$sysdir/config/.recCountdown" ]; then
             show_countdown
@@ -144,6 +151,8 @@ toggle_ffmpeg() {
         echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
         
         ffmpeg -f fbdev -nostdin -framerate 25 -i /dev/fb0 -vf "vflip,hflip, format=yuv420p" -c:v libx264 -preset ultrafast -tune zerolatency -maxrate 2000k -bufsize 6000k -threads 0 "$(date +%Y%m%d%H%M%S).mp4" > /dev/null 2>&1 &
+        
+        short_vibration
         
         sleep 0.5
         
