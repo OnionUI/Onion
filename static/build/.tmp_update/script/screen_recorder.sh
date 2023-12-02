@@ -34,6 +34,40 @@ check_disp_init() {
     fi
 }
 
+file_write() {
+    echo "$2" > "$1"
+}
+
+setup_gpio_for_vibration() {
+    file_write "/sys/class/gpio/export" "48"
+    file_write "/sys/class/gpio/gpio48/direction" "out"
+}
+
+# use the vibration motor to countdown
+# pulse -> pulse -> pulse ... recording/stopped
+#  3        2        1          0
+
+vibrate() {
+    file_write "/sys/class/gpio/gpio48/value" "$([ "$1" -eq 1 ] && echo "0" || echo "1")"
+}
+
+pulsating_vibration() {
+    setup_gpio_for_vibration
+
+    i=1
+    while [ "$i" -le 6 ]; do
+        vibrate 1
+        usleep 15000
+        vibrate 0
+        usleep 500000
+        i=$((i + 1))
+    done
+
+    vibrate 1
+    usleep 100000
+    vibrate 0
+}
+
 # use the screen to countdown
 # pulse -> pulse -> pulse ... recording/stopped (then back to original screen prop)
 #  3        2        1          0
@@ -41,6 +75,7 @@ check_disp_init() {
 
 show_countdown() {  
     check_disp_init
+    pulsating_vibration &
     default_colour="128 128 128"
     pulse_colour="200 200 200"
 
@@ -77,6 +112,7 @@ show_countdown() {
             usleep 20000
         done
     done
+   
 }
 
 
