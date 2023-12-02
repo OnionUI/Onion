@@ -65,7 +65,7 @@ pulsating_vibration() {
         vibrate 1
         usleep 15000
         vibrate 0
-        usleep 450000
+        usleep 400000
         i=$((i + 1))
     done
     
@@ -151,8 +151,6 @@ toggle_ffmpeg() {
         echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
         
         ffmpeg -f fbdev -nostdin -framerate 25 -i /dev/fb0 -vf "vflip,hflip, format=yuv420p" -c:v libx264 -preset ultrafast -tune zerolatency -maxrate 2000k -bufsize 6000k -threads 0 "$(date +%Y%m%d%H%M%S).mp4" > /dev/null 2>&1 &
-        
-        short_vibration
         
         sleep 0.5
         
