@@ -12,7 +12,7 @@ if [ "$3" = "DynamicLabel" ]; then
 	romdirname="$6"
 	romext="$7"
 	if [ -z "$romdirname" ] || [ "$romext" == "miyoocmd" ]; then
-		DynamicLabel = "none"
+		DynamicLabel="none"
 	else
 		netplaycore_info=$(grep "^${romdirname};" "$sysdir/config/netplay_cores.conf")
 		if [ -n "$netplaycore_info" ]; then
