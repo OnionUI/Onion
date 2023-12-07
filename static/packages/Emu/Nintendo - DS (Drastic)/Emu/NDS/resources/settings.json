@@ -15,12 +15,13 @@
   "swap_l1l2":0,
   "swap_r1r2":0,
   "cust_menu":1,
-  "lang":"en",
-  "keys_90d":0,
+  "lang":"english",
+  "keys_rotate":0,
   "menu_c0":"0xffffff",
   "menu_c1":"0x000000",
   "menu_c2":"0x289a35",
   "auto_state":1,
   "auto_slot":10,
-  "splash":3
+  "splash":3,
+  "hotkey":0
 }
