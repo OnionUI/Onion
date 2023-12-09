@@ -1,6 +1,6 @@
 {
   "pen":3,
-  "theme":7,
+  "theme":0,
   "mode":8,
   "xv":30000,
   "yv":35000,
@@ -23,5 +23,6 @@
   "auto_state":1,
   "auto_slot":10,
   "splash":3,
-  "hotkey":0
+  "hotkey":0,
+  "states":"\/mnt\/SDCARD\/Saves\/CurrentProfile\/states\/Drastic"
 }
