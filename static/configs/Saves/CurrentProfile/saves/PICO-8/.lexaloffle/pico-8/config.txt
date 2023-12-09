@@ -124,7 +124,7 @@ allow_function_keys 1
 check_for_cart_updates 1
 
 // 0 off 1 on: allow access to hardware GPIO at 0x5f80..0x5fff (might need to sudo pico8)
-enable_gpio 1
+enable_gpio 0
 
 // hide mouse cursor for n seconds when typing.
 auto_hide_mouse_cursor 5
