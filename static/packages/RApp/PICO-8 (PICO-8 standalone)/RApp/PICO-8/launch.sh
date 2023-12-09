@@ -18,7 +18,7 @@ fi
 
 # some users have reported black screens at boot. we'll check if the file exists, then check the keys to see if they match the known good config
 fixconfig() {
-    config_file="${picodir}/.lexaloffle/pico-8/config.txt"
+    config_file="${picoconfig}/.lexaloffle/pico-8/config.txt"
 
     if [ ! -f "$config_file" ]; then
         echo "Config file not found, creating with default values."
