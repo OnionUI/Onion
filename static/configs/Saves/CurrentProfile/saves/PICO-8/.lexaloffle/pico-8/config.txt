@@ -115,7 +115,7 @@ tab_width 1
 draw_tabs 0
 
 // 0 off 1 on: record the current cartridge and editor view every 3 seconds (see [appdata]/activity.log.txt)
-record_activity_log 1
+record_activity_log 0
 
 // 0 off 1 on: allow F6..F9 (alternative: ctrl 6..9)
 allow_function_keys 1
