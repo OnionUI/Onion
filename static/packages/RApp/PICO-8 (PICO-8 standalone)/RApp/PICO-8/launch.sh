@@ -3,14 +3,18 @@ echo $0 $*
 picodir=`dirname "$0"`
 
 export picodir="$picodir"
-export picoconfig="/mnt/SDCARD/Saves/CurrentProfile/saves/PICO-8/"
+export picoconfig="/mnt/SDCARD/Saves/CurrentProfile/saves/PICO-8"
 export rompath="$1"
 export filename=`basename "$rompath"`
 
 cd $picodir
 export PATH=$PATH:$PWD/bin
 export HOME=$picoconfig
+export BBS_DIR="/mnt/SDCARD/Roms/PICO/Splore history/" # change me to a location for the bbs carts to go to
 
+if [ ! -d "$BBS_DIR" ]; then
+    mkdir -p "$BBS_DIR"
+fi
 
 # some users have reported black screens at boot. we'll check if the file exists, then check the keys to see if they match the known good config
 fixconfig() {
@@ -88,12 +92,15 @@ start_pico() {
     export EGL_VIDEODRIVER=mmiyoo
 	
     fixconfig
+    
     . /mnt/SDCARD/.tmp_update/script/stop_audioserver.sh
+    
     libpadspblocker
+    
 	if [ "$filename" = "~Run PICO-8.pico-8" ]; then 
-		pico8_dyn -splore -preblit_scale 3 -pixel_perfect 0
+		LD_PRELOAD="$picodir/lib/libcpt_hook.so" pico8_dyn -splore -preblit_scale 3 -pixel_perfect 0
 	else
-		pico8_dyn -preblit_scale 3 -pixel_perfect 0 -run "$rompath"
+		LD_PRELOAD="$picodir/lib/libcpt_hook.so" pico8_dyn -preblit_scale 3 -pixel_perfect 0 -run "$rompath"
 	fi
 }
 
