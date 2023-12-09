@@ -19,18 +19,18 @@ show_fps 0 // Draw frames per second in the corner
 windowed 0 // 1 to start up in windowed mode
 window_position -1 -1 // x and y position of window (-1, -1 to let the window manager decide)
 frameless 1 // 1 to use a window with no frame
-fullscreen_method 2 // 0 maximized window (linux)  1 borderless desktop-sized window  2 hardware fullscreen (warning: erratic behaviour under some drivers)
-blit_method 0  // 0 auto  1 software (slower but sometimes more reliable)  2 hardware (can do filtered scaling) 
+fullscreen_method 0 // 0 maximized window (linux)  1 borderless desktop-sized window  2 hardware fullscreen (warning: erratic behaviour under some drivers)
+blit_method 2  // 0 auto  1 software (slower but sometimes more reliable)  2 hardware (can do filtered scaling) 
 
 
 
 // :: System Settings
 
-foreground_sleep_ms 4 // number of milliseconds to sleep each frame. Try 10 to conserve battery power
+foreground_sleep_ms 5 // number of milliseconds to sleep each frame. Try 10 to conserve battery power
 
-background_sleep_ms 8 // number of milliseconds to sleep each frame when running in the background
+background_sleep_ms 10 // number of milliseconds to sleep each frame when running in the background
 
-sessions 864 // number of times program has been run
+sessions 0 // number of times program has been run
 
 // (scancode) hold this key down and left-click to simulate right-click
 rmb_key 0 // 0 for none  226 for LALT
