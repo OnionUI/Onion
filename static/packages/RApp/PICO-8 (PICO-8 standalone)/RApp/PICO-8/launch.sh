@@ -61,23 +61,6 @@ fixconfig() {
     grep -E "window_size|screen_size|windowed|window_position|frameless|fullscreen_method|blit_method|transform_screen" "$config_file"
 }
 
-# when wifi is restarted, udhcpc and wpa_supplicant may be started with libpadsp.so preloaded, this is bad as they can hold mi_ao open even after audioserver has been killed.
-libpadspblocker() {
-    wpa_pid=$(ps -e | grep "[w]pa_supplicant" | awk 'NR==1{print $1}')
-    udhcpc_pid=$(ps -e | grep "[u]dhcpc" | awk 'NR==1{print $1}')
-    if [ -n "$wpa_pid" ] && [ -n "$udhcpc_pid" ]; then
-        if grep -q "libpadsp.so" /proc/$wpa_pid/maps || grep -q "libpadsp.so" /proc/$udhcpc_pid/maps; then
-            echo "Network Checker: $wpa_pid(WPA) and $udhcpc_pid(UDHCPC) found preloaded with libpadsp.so"
-            unset LD_PRELOAD
-            killall -9 wpa_supplicant
-            killall -9 udhcpc
-            $miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf &
-            udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
-            echo "Network Checker: Removing libpadsp.so preload on wpa_supp/udhcpc"
-        fi
-    fi
-}
-
 start_pico() {
 
     if [ ! -e "$picodir/bin/pico8_dyn" ]; then
@@ -93,8 +76,6 @@ start_pico() {
     fixconfig
 
     . /mnt/SDCARD/.tmp_update/script/stop_audioserver.sh
-
-    libpadspblocker
 
     if [ "$filename" = "~Run PICO-8 with Splore.pico-8" ]; then
         num_files_before=$(ls -1 "$BBS_DIR" | wc -l)
