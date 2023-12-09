@@ -24,48 +24,49 @@ purge_devil() {
 
 # some users have reported black screens at boot. we'll check if the file exists, then check the keys to see if they match the known good config
 fixconfig() {
-    config_file="${picoconfig}.lexaloffle/pico-8/config.txt"
-	echo "======================================== config_file $config_file" 
-
-    default_video_settings="window_size 640 480\nscreen_size 640 480\nshow_fps 0\ntransform_screen 134"
-    default_window_settings="windowed 0\nwindow_position -1 -1\nframeless 1\nfullscreen_method 2\nblit_method 0"
+    config_file="${picodir}/.lexaloffle/pico-8/config.txt"
 
     if [ ! -f "$config_file" ]; then
         echo "Config file not found, creating with default values."
-        printf "// :: Video Settings\n%s\n\n// :: Window Settings\n%s\n" "$default_video_settings" "$default_window_settings" > "$config_file"
         return
     fi
 
     echo "Config checker: Validating display settings in config.txt"
 
-    for setting in window_size screen_size windowed window_position frameless fullscreen_method blit_method transform_screen; do
-        current_value=$(grep "$setting" "$config_file")
+    set_window_size="window_size 640 480"
+    set_screen_size="screen_size 640 480"
+    set_windowed="windowed 0"
+    set_window_position="window_position -1 -1"
+    set_frameless="frameless 1"
+    set_fullscreen_method="fullscreen_method 0"
+    set_blit_method="blit_method 2"
+    set_transform_screen="transform_screen 134"
 
-        if [ -z "$current_value" ]; then
-            case $setting in
-                window_size|screen_size) printf "%s 640 480\n" "$setting" >> "$config_file" ;;
-                windowed) printf "%s 0\n" "$setting" >> "$config_file" ;;
-                window_position) printf "%s -1 -1\n" "$setting" >> "$config_file" ;;
-                frameless) printf "%s 1\n" "$setting" >> "$config_file" ;;
-                fullscreen_method) printf "%s 2\n" "$setting" >> "$config_file" ;;
-                blit_method) printf "%s 0\n" "$setting" >> "$config_file" ;;
-                transform_screen) printf "%s 134\n" "$setting" >> "$config_file" ;;
-            esac
-            echo "Added missing setting: ${setting}"
+    for setting in window_size screen_size windowed window_position frameless fullscreen_method blit_method transform_screen; do
+        case $setting in
+            window_size) new_value="$set_window_size" ;;
+            screen_size) new_value="$set_screen_size" ;;
+            windowed) new_value="$set_windowed" ;;
+            window_position) new_value="$set_window_position" ;;
+            frameless) new_value="$set_frameless" ;;
+            fullscreen_method) new_value="$set_fullscreen_method" ;;
+            blit_method) new_value="$set_blit_method" ;;
+            transform_screen) new_value="$set_transform_screen" ;;
+        esac
+
+        if grep -q "^$setting" "$config_file"; then
+            sed -i "s/^$setting.*/$new_value/" "$config_file"
+            echo "Updated setting: $setting"
         else
-            echo "Current ${setting} setting: $current_value"
-            case $setting in
-                window_size|screen_size)
-                    sed -i "s/$setting 0 0/$setting 640 480/g" "$config_file" ;;
-                transform_screen)
-                    sed -i "s/$setting [0-9]+/$setting 134/g" "$config_file" ;;
-            esac
+            echo "$new_value" >> "$config_file"
+            echo "Added missing setting: $setting"
         fi
     done
 
     echo "Updated settings:"
     grep -E "window_size|screen_size|windowed|window_position|frameless|fullscreen_method|blit_method|transform_screen" "$config_file"
 }
+
 
 # when wifi is restarted, udhcpc and wpa_supplicant may be started with libpadsp.so preloaded, this is bad as they can hold mi_ao open even after audioserver has been killed.
 libpadspblocker() { 
