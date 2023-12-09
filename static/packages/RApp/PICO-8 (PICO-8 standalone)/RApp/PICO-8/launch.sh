@@ -12,16 +12,6 @@ export PATH=$PATH:$PWD/bin
 export HOME=$picoconfig
 
 
-
-purge_devil() {
-    if pgrep -f "/dev/l" > /dev/null; then
-        echo "Process /dev/l is running. Killing it now..."
-        killall -9 l
-    else
-        echo "Process /dev/l is not running."
-    fi
-}
-
 # some users have reported black screens at boot. we'll check if the file exists, then check the keys to see if they match the known good config
 fixconfig() {
     config_file="${picodir}/.lexaloffle/pico-8/config.txt"
@@ -97,7 +87,6 @@ start_pico() {
     export SDL_AUDIODRIVER=mmiyoo
     export EGL_VIDEODRIVER=mmiyoo
 	
-    purge_devil
     fixconfig
     . /mnt/SDCARD/.tmp_update/script/stop_audioserver.sh
     libpadspblocker
