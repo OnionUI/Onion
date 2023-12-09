@@ -10,7 +10,7 @@ export filename=`basename "$rompath"`
 cd $picodir
 export PATH=$PATH:$PWD/bin
 export HOME=$picoconfig
-export BBS_DIR="/mnt/SDCARD/Roms/PICO/Splore history/" # change me to a location for the bbs carts to go to
+export BBS_DIR="/mnt/SDCARD/Roms/PICO/bbs/" # change me to a location for the bbs carts to go to
 
 if [ ! -d "$BBS_DIR" ]; then
     mkdir -p "$BBS_DIR"
