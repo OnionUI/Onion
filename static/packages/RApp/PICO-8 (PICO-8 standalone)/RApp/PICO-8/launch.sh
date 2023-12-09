@@ -91,9 +91,9 @@ start_pico() {
     . /mnt/SDCARD/.tmp_update/script/stop_audioserver.sh
     libpadspblocker
 	if [ "$filename" = "~Run PICO-8.pico-8" ]; then 
-		pico8_dyn -splore
+		pico8_dyn -splore -preblit_scale 3 -pixel_perfect 0
 	else
-		pico8_dyn -run "$rompath"
+		pico8_dyn -preblit_scale 3 -pixel_perfect 0 -run "$rompath"
 	fi
 }
 
