@@ -471,10 +471,78 @@ void menu_themeOverrides(void *_)
     header_changed = true;
 }
 
+void menu_blueLight(void *_)
+{
+    if (!_menu_user_blue_light._created) {
+        network_loadState();
+        _menu_user_blue_light = list_createWithTitle(6, LIST_SMALL, "Blue light filter schedule");
+        if (DEVICE_ID == MIYOO354) {
+            list_addItem(&_menu_user_blue_light,
+                         (ListItem){
+                             .label = "[DATESTRING]",
+                             .disabled = 1,
+                             .action = NULL});
+        }
+        list_addItemWithInfoNote(&_menu_user_blue_light,
+                                 (ListItem){
+                                     .label = "Toggle now",
+                                     .item_type = ACTION,
+                                     .action = action_blueLight},
+                                 "Test the selected strength \n");
+        if (DEVICE_ID == MIYOO354) {
+            list_addItemWithInfoNote(&_menu_user_blue_light,
+                                     (ListItem){
+                                         .label = "Enable schedule",
+                                         .disabled = !network_state.ntp,
+                                         .item_type = TOGGLE,
+                                         .value = (int)settings.blue_light_state,
+                                         .action = action_blueLightState},
+                                     "Turn bluelight filter on or off\n");
+        }
+        list_addItemWithInfoNote(&_menu_user_blue_light,
+                                 (ListItem){
+                                     .label = "Strength",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 5,
+                                     .value_labels = BLUELIGHT_LABELS,
+                                     .action = action_blueLightLevel,
+                                     .value = value_blueLightLevel()},
+                                 "Change the strength of the \n"
+                                 "Blue light filter");
+        if (DEVICE_ID == MIYOO354) {
+            list_addItemWithInfoNote(&_menu_user_blue_light,
+                                     (ListItem){
+                                         .label = "Time (On)",
+                                         .disabled = !network_state.ntp,
+                                         .item_type = MULTIVALUE,
+                                         .value_max = 95,
+                                         .value_formatter = formatter_Time,
+                                         .action = action_blueLightTimeOn,
+                                         .value = value_blueLightTimeOn()},
+                                     "Time schedule for the bluelight filter");
+            list_addItemWithInfoNote(&_menu_user_blue_light,
+                                     (ListItem){
+                                         .label = "Time (Off)",
+                                         .disabled = !network_state.ntp,
+                                         .item_type = MULTIVALUE,
+                                         .value_max = 95,
+                                         .value_formatter = formatter_Time,
+                                         .action = action_blueLightTimeOff,
+                                         .value = value_blueLightTimeOff()},
+                                     "Time schedule for the bluelight filter");
+        }
+    }
+    if (DEVICE_ID == MIYOO354) {
+        _writeDateString(_menu_user_blue_light.items[0].label);
+    }
+    menu_stack[++menu_level] = &_menu_user_blue_light;
+    header_changed = true;
+}
+
 void menu_userInterface(void *_)
 {
     if (!_menu_user_interface._created) {
-        _menu_user_interface = list_createWithTitle(5, LIST_SMALL, "Appearance");
+        _menu_user_interface = list_createWithTitle(6, LIST_SMALL, "Appearance");
         list_addItemWithInfoNote(&_menu_user_interface,
                                  (ListItem){
                                      .label = "Show recents",
@@ -503,6 +571,10 @@ void menu_userInterface(void *_)
                                  "Set the width of the 'OSD bar' shown\n"
                                  "in the left side of the display when\n"
                                  "adjusting brightness, or volume (MMP).");
+        list_addItem(&_menu_user_interface,
+                     (ListItem){
+                         .label = "Blue light filter...",
+                         .action = menu_blueLight});
         list_addItem(&_menu_user_interface,
                      (ListItem){
                          .label = "Theme overrides...",
