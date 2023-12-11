@@ -60,6 +60,51 @@ int value_appShortcut(int button)
     return 0;
 }
 
+int value_blueLightRGB(void)
+{
+    int blueLightRGB = 0;
+    if (!config_get("display/blueLightRGB", CONFIG_INT, &blueLightRGB)) {
+        blueLightRGB = settings.blue_light_rgb;
+        config_setNumber("display/blueLightRGB", blueLightRGB);
+    }
+    return blueLightRGB;
+}
+
+int value_blueLightLevel(void)
+{
+    int blueLightLevel = 0;
+    if (!config_get("display/blueLightLevel", CONFIG_INT, &blueLightLevel)) {
+        blueLightLevel = settings.blue_light_level;
+        config_setNumber("display/blueLightLevel", blueLightLevel);
+    }
+    value_blueLightRGB(); // also init a default rgb size
+    return blueLightLevel;
+}
+
+int value_blueLightTimeOn(void)
+{
+    char blueLightTime[12] = {0};
+    int blueLightID = 0;
+    if (!config_get("display/blueLightTime", CONFIG_STR, blueLightTime)) {
+        strcpy(blueLightTime, settings.blue_light_time);
+        config_setString("display/blueLightTime", blueLightTime);
+    }
+    blueLightID = formatter_timeStringToID(blueLightTime);
+    return blueLightID;
+}
+
+int value_blueLightTimeOff(void)
+{
+    char blueLightTimeOff[12] = {0};
+    int blueLightID = 0;
+    if (!config_get("display/blueLightTimeOff", CONFIG_STR, blueLightTimeOff)) {
+        strcpy(blueLightTimeOff, settings.blue_light_time_off);
+        config_setString("display/blueLightTimeOff", blueLightTimeOff);
+    }
+    blueLightID = formatter_timeStringToID(blueLightTimeOff);
+    return blueLightID;
+}
+
 int value_meterWidth(void)
 {
     int meterWidth = 4;

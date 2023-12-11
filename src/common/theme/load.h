@@ -8,7 +8,7 @@
 #include "utils/file.h"
 #include "utils/str.h"
 
-#define SYSTEM_CONFIG "/appconfigs/system.json"
+#define SYSTEM_CONFIG "/mnt/SDCARD/system.json"
 #define FALLBACK_FONT "/customer/app/Exo-2-Bold-Italic.ttf"
 #define FALLBACK_PATH "/mnt/SDCARD/miyoo/app/"
 #define SYSTEM_RESOURCES "/mnt/SDCARD/.tmp_update/res/"

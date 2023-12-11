@@ -222,10 +222,19 @@ h2,
 h3,
 h4 {
   &+sup {
+    display: inline-block;
     position: relative;
     top: -1em;
     margin-bottom: -1em;
     font-style: italic;
+  }
+}
+
+.theme-doc-sidebar-menu {
+  ul.menu__list {
+    border-left: 1px solid var(--ifm-toc-border-color);
+    margin-left: 14px;
+    padding-left: 6px;
   }
 }
 

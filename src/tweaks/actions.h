@@ -57,6 +57,74 @@ void action_meterWidth(void *pt)
     osd_showBrightnessBar(settings.brightness);
 }
 
+int blueLightToggled = 0;
+
+void action_blueLight()
+{
+    if (access("/tmp/runningBLF", F_OK) != -1) {
+        return;
+    }
+
+    if (blueLightToggled) {
+        system("/mnt/SDCARD/.tmp_update/script/blue_light.sh disable &");
+        blueLightToggled = 0;
+    }
+    else {
+        system("/mnt/SDCARD/.tmp_update/script/blue_light.sh enable &");
+        blueLightToggled = 1;
+    }
+}
+
+void action_blueLightLevel(void *pt)
+{
+    int value;
+    ListItem *item = (ListItem *)pt;
+
+    value = item->value;
+    settings.blue_light_level = value;
+    config_setNumber("display/blueLightLevel", value);
+
+    system("/mnt/SDCARD/.tmp_update/script/blue_light.sh set_intensity &");
+    remove("/tmp/blueLightOn");
+}
+
+void action_blueLightState(void *pt)
+{
+    if (access("/tmp/runningBLF", F_OK) != -1) {
+        return;
+    }
+
+    ListItem *item = (ListItem *)pt;
+    settings.blue_light_state = item->value == 1;
+    config_flag_set(".blf", settings.blue_light_state);
+
+    if (item->value == 0) { // blf being disabled
+        system("/mnt/SDCARD/.tmp_update/script/blue_light.sh disable &");
+        remove("/tmp/blueLightOn");
+    }
+    else {
+        system("/mnt/SDCARD/.tmp_update/script/blue_light.sh check &"); // check if we're within the time values and start now
+    }
+    reset_menus = true;
+    all_changed = true;
+}
+
+void action_blueLightTimeOn(void *pt)
+{
+    char time_str[10];
+    formatter_Time(pt, time_str);
+    strcpy(settings.blue_light_time, time_str);
+    config_setString("display/blueLightTime", time_str);
+}
+
+void action_blueLightTimeOff(void *pt)
+{
+    char time_str[10];
+    formatter_Time(pt, time_str);
+    strcpy(settings.blue_light_time_off, time_str);
+    config_setString("display/blueLightTimeOff", time_str);
+}
+
 void action_setStartupAutoResume(void *pt)
 {
     settings.startup_auto_resume = ((ListItem *)pt)->value == 1;

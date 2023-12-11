@@ -236,67 +236,8 @@ Menu_Config_BackgroundScraping()
         Menu_Config
 }
 
-##########################################################################################
-
-Menu_Config_SSMediaPreferences()
-{
-    # Check if the configuration file exists
-    if [ ! -f "$ScraperConfigFile" ]; then
-      echo "Error: configuration file not found"
-      read -n 1 -s -r -p "Press A to continue"
-      exit 1
-    fi
-    
-    clear
-    echo -e 
-    echo -e "====================================================\n\n"
-    echo -e "All the media types are not available on\neach scraper engine.\n\n"
-    echo -e "	SS = Screenscraper" 
-    echo -e "	LB = Launchbox" 
-    echo -e "	RA = Retroarch\n\n"
-  
-    echo -e "====================================================\n\n\n"
-    read -n 1 -s -r -p "Press A to continue"
-    clear
-    test="test\r\nte\rst"
-    config=$(cat "$ScraperConfigFile")
-    MediaType=$(echo "$config" | jq -r '.MediaType')
-
-Mychoice=$( echo -e "
-Box Art                    (available on SS,LB,RA)
-Screenshot - Title Screen  (available on SS,LB,RA)
-Screenshot - In Game       (available on SS,LB,RA)
-Box Art - 3D               (available on SS,LB)
-Wheel                      (available on SS,LB)
-Marquee                    (available on SS,LB)
-Screenscraper Mix V1       (available on SS)
-Screenscraper Mix V2       (available on SS)
-" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "Media $test Type ?     (currently: $MediaType)" -b "Press $test A to valid\r\nate your choice.")
-
-
-
-        case "$Mychoice" in
-            "Box Art (default)") MediaType="box-2D" ;;
-            "Box Art - 3D") MediaType="box-3D" ;;
-            "Screenshot - Title Screen") MediaType="sstitle" ;;
-            "Screenshot - In Game") MediaType="ss" ;;
-            "Wheel") MediaType="wheel" ;;
-            "Marquee") MediaType="screenmarqueesmall" ;;
-            "Screenscraper Mix V1") MediaType="mixrbv1" ;;
-            "Screenscraper Mix V2") MediaType="mixrbv2" ;;
-            *) false ;;                
-        esac
-
-        config=$(cat $ScraperConfigFile)
-        config=$(echo "$config" | jq --arg MediaType "$MediaType" '.MediaType = $MediaType')
-        echo "$config" > $ScraperConfigFile
-        sync
-        Menu_Config
-}
 
 ##########################################################################################
-
-
 
 
 Menu_Config_MediaType()
@@ -340,7 +281,7 @@ Menu_Config_MediaType()
     Option08="Screenscraper Mix V2       (available on SS)"
 	Option09="Back to Configuration Menu"
 
-    Mychoice=$( echo -e "$Option01\n$Option02\n$Option03\n$Option04\n$Option05n$Option06\n$Option07\n$Option08\n$Option09\n" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t\ "Current media type : $ScreenscraperMediaType" -b "Press A to validate your choice.")
+    Mychoice=$( echo -e "$Option01\n$Option02\n$Option03\n$Option04\n$Option05\n$Option06\n$Option07\n$Option08\n$Option09\n" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t\ "Current media type : $ScreenscraperMediaType" -b "Press A to validate your choice.")
     
     [ "$Mychoice" = "$Option01" ]  && SSmediaType="box-2D"                 && LBmediaType="Box - Front"                      && RAmediaType="Named_Boxarts"  
     [ "$Mychoice" = "$Option02" ]  && SSmediaType="sstitle"                && LBmediaType="Screenshot - Game Title"          && RAmediaType="Named_Titles"  
@@ -537,7 +478,7 @@ Launch_Scraping ()
             /mnt/SDCARD/.tmp_update/script/scraper/scrap_screenscraper.sh $CurrentSystem "$onerom"
         fi
     fi
-    if [ -f "$romimage" ] && ! [ "$onerom" = "" ] ; then echo exiting $romimage; exit; fi;  # exit if only one rom must be scraped and is already found
+    if [ -f "$romimage" ] && ! [ "$onerom" = "" ] ; then echo exiting $romimage; pkill st; fi;  # exit if only one rom must be scraped and is already found
 
     if [ "$Launchbox_enabled" = "true" ]; then
         if [ "$ScrapeInBackground" = "true" ]; then
@@ -546,7 +487,7 @@ Launch_Scraping ()
             /mnt/SDCARD/.tmp_update/script/scraper/scrap_launchbox.sh $CurrentSystem "$onerom"
         fi
     fi
-    if [ -f "$romimage" ] && ! [ "$onerom" = "" ] ; then  echo exiting $romimage ;  exit;fi;
+    if [ -f "$romimage" ] && ! [ "$onerom" = "" ] ; then  echo exiting $romimage ; pkill st; fi;
     
     if [ "$Retroarch_enabled" = "true" ]; then
         if [ "$ScrapeInBackground" = "true" ]; then
@@ -555,10 +496,10 @@ Launch_Scraping ()
             /mnt/SDCARD/.tmp_update/script/scraper/scrap_retroarch.sh $CurrentSystem "$onerom"
         fi
     fi
-    if [ -f "$romimage" ] && ! [ "$onerom" = "" ] ; then  echo exiting $romimage ;  exit;fi;
+    if [ -f "$romimage" ] && ! [ "$onerom" = "" ] ; then  echo exiting $romimage ; pkill st; fi;
 
 	rm -f /tmp/stay_awake
-    exit
+	pkill st
 }
 
 ##########################################################################################

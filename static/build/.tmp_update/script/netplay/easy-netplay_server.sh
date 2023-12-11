@@ -4,7 +4,6 @@
 # 	Create a cookie file containing details for the client,
 # 	Start FTP to be able to host this file,
 # 	Start RA as a netplay host with -H, the core path and the rom path.
-# 	Leave WPS commented out until it's further tested, it works but leads to an unstable connection. Possible issue with the new hostapd binary.
 # Used within GLO as an addon script.
 
 # Env setup
@@ -133,7 +132,8 @@ cleanup() {
 	# Remove some files we prepared and received
 	log "Removing stale files"
 	rm "/mnt/SDCARD/RetroArch/retroarch.cookie"
-
+	rm "/tmp/dismiss_info_panel"
+	sync
 	log "Cleanup done"
 	exit
 
@@ -148,11 +148,15 @@ build_infoPanel_and_log() {
 	local message="$2"
 
 	log "Info Panel: \n\tStage: $title\n\tMessage: $message"
-
+	if is_running infoPanel; then
+		killall -9 infoPanel
+	fi
 	infoPanel --title "$title" --message "$message" --persistent &
+	sync
 	touch /tmp/dismiss_info_panel
 	sync
 	sleep 0.3
+	sync
 }
 
 restore_ftp() {

@@ -102,10 +102,10 @@ void action_resetMainUI(void *pt)
     if (!_disable_confirm && !_confirmReset(title_str, "Are you sure you want to\nreset MainUI settings?"))
         return;
 
-    system("rm -f /appconfigs/system.json");
+    system("rm -f /mnt/SDCARD/system.json");
 
     char cmd_str[80];
-    sprintf(cmd_str, "cp /mnt/SDCARD/.tmp_update/res/miyoo%d_system.json /appconfigs/system.json", DEVICE_ID);
+    sprintf(cmd_str, "cp /mnt/SDCARD/.tmp_update/res/miyoo%d_system.json /mnt/SDCARD/system.json", DEVICE_ID);
     system(cmd_str);
 
     if (DEVICE_ID == MIYOO354) {
