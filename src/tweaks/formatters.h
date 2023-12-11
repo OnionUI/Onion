@@ -25,13 +25,12 @@
         "-", "Off", "On"    \
     }
 
-#define BLUELIGHT_LABELS                                              \
-    {                                                                 \
-        "None", "Subtle", "Moderate", "Balanced", "Strong", "Intense" \
-#define PWM_FREQUENCIES                                                                                                \
-    {                                                                                                                  \
-        "100 Hz", "200 Hz", "300 Hz", "400 Hz", "500 Hz", "600 Hz", "700 Hz", "800  Hz (Default)", "900 Hz", "1000 Hz" \
-    }
+#define BLUELIGHT_LABELS                                                                                                   \
+    {                                                                                                                      \
+        "None", "Subtle", "Moderate", "Balanced", "Strong", "Intense" #define PWM_FREQUENCIES                              \
+        {                                                                                                                  \
+            "100 Hz", "200 Hz", "300 Hz", "400 Hz", "500 Hz", "600 Hz", "700 Hz", "800  Hz (Default)", "900 Hz", "1000 Hz" \
+        }
 
 void formatter_timezone(void *pt, char *out_label)
 {
