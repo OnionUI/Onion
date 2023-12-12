@@ -353,6 +353,16 @@ void action_advancedSetFrameThrottle(void *pt)
     stored_value_frame_throttle_changed = true;
 }
 
+void action_advancedSetPWMFreqency(void *pt)
+{
+    FILE *fp;
+    int item_value = ((ListItem *)pt)->value;
+    int pwmfrequency = atoi(((ListItem *)pt)->value_labels[item_value]);
+    char *filename = "/sys/class/pwm/pwmchip0/pwm0/period";
+    file_put(fp, filename, "%d", pwmfrequency);
+    config_setNumber(".pwmfrequency", item_value);
+}
+
 void action_advancedSetSwapTriggers(void *pt)
 {
     int item_value = ((ListItem *)pt)->value;

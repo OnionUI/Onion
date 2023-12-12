@@ -677,7 +677,7 @@ void menu_diagnostics(void *pt)
 void menu_advanced(void *_)
 {
     if (!_menu_advanced._created) {
-        _menu_advanced = list_createWithTitle(6, LIST_SMALL, "Advanced");
+        _menu_advanced = list_createWithTitle(7, LIST_SMALL, "Advanced");
         list_addItemWithInfoNote(&_menu_advanced,
                                  (ListItem){
                                      .label = "Swap triggers (L<>L2, R<>R2)",
@@ -707,6 +707,17 @@ void menu_advanced(void *_)
                                      .value_formatter = formatter_fastForward,
                                      .action = action_advancedSetFrameThrottle},
                                  "Set the maximum fast forward rate.");
+        list_addItemWithInfoNote(&_menu_advanced,
+                                 (ListItem){
+                                     .label = "PWM frequency",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 9,
+                                     .value_labels = PWM_FREQUENCIES,
+                                     .value = value_getPWMFrequency(),
+                                     .action = action_advancedSetPWMFreqency},
+                                 "Change the PWM frequency\n"
+                                 "Lower values for less buzzing\n"
+                                 "Experimental feature");
         if (DEVICE_ID == MIYOO354) {
             list_addItemWithInfoNote(&_menu_advanced,
                                      (ListItem){
