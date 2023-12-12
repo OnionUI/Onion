@@ -472,10 +472,78 @@ void menu_themeOverrides(void *_)
     header_changed = true;
 }
 
+void menu_blueLight(void *_)
+{
+    if (!_menu_user_blue_light._created) {
+        network_loadState();
+        _menu_user_blue_light = list_createWithTitle(6, LIST_SMALL, "Blue light filter schedule");
+        if (DEVICE_ID == MIYOO354) {
+            list_addItem(&_menu_user_blue_light,
+                         (ListItem){
+                             .label = "[DATESTRING]",
+                             .disabled = 1,
+                             .action = NULL});
+        }
+        list_addItemWithInfoNote(&_menu_user_blue_light,
+                                 (ListItem){
+                                     .label = "Toggle now",
+                                     .item_type = ACTION,
+                                     .action = action_blueLight},
+                                 "Test the selected strength \n");
+        if (DEVICE_ID == MIYOO354) {
+            list_addItemWithInfoNote(&_menu_user_blue_light,
+                                     (ListItem){
+                                         .label = "Enable schedule",
+                                         .disabled = !network_state.ntp,
+                                         .item_type = TOGGLE,
+                                         .value = (int)settings.blue_light_state,
+                                         .action = action_blueLightState},
+                                     "Turn bluelight filter on or off\n");
+        }
+        list_addItemWithInfoNote(&_menu_user_blue_light,
+                                 (ListItem){
+                                     .label = "Strength",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 5,
+                                     .value_labels = BLUELIGHT_LABELS,
+                                     .action = action_blueLightLevel,
+                                     .value = value_blueLightLevel()},
+                                 "Change the strength of the \n"
+                                 "Blue light filter");
+        if (DEVICE_ID == MIYOO354) {
+            list_addItemWithInfoNote(&_menu_user_blue_light,
+                                     (ListItem){
+                                         .label = "Time (On)",
+                                         .disabled = !network_state.ntp,
+                                         .item_type = MULTIVALUE,
+                                         .value_max = 95,
+                                         .value_formatter = formatter_Time,
+                                         .action = action_blueLightTimeOn,
+                                         .value = value_blueLightTimeOn()},
+                                     "Time schedule for the bluelight filter");
+            list_addItemWithInfoNote(&_menu_user_blue_light,
+                                     (ListItem){
+                                         .label = "Time (Off)",
+                                         .disabled = !network_state.ntp,
+                                         .item_type = MULTIVALUE,
+                                         .value_max = 95,
+                                         .value_formatter = formatter_Time,
+                                         .action = action_blueLightTimeOff,
+                                         .value = value_blueLightTimeOff()},
+                                     "Time schedule for the bluelight filter");
+        }
+    }
+    if (DEVICE_ID == MIYOO354) {
+        _writeDateString(_menu_user_blue_light.items[0].label);
+    }
+    menu_stack[++menu_level] = &_menu_user_blue_light;
+    header_changed = true;
+}
+
 void menu_userInterface(void *_)
 {
     if (!_menu_user_interface._created) {
-        _menu_user_interface = list_createWithTitle(5, LIST_SMALL, "Appearance");
+        _menu_user_interface = list_createWithTitle(6, LIST_SMALL, "Appearance");
         list_addItemWithInfoNote(&_menu_user_interface,
                                  (ListItem){
                                      .label = "Show recents",
@@ -504,6 +572,10 @@ void menu_userInterface(void *_)
                                  "Set the width of the 'OSD bar' shown\n"
                                  "in the left side of the display when\n"
                                  "adjusting brightness, or volume (MMP).");
+        list_addItem(&_menu_user_interface,
+                     (ListItem){
+                         .label = "Blue light filter...",
+                         .action = menu_blueLight});
         list_addItem(&_menu_user_interface,
                      (ListItem){
                          .label = "Theme overrides...",
@@ -606,7 +678,7 @@ void menu_diagnostics(void *pt)
 void menu_advanced(void *_)
 {
     if (!_menu_advanced._created) {
-        _menu_advanced = list_createWithTitle(6, LIST_SMALL, "Advanced");
+        _menu_advanced = list_createWithTitle(7, LIST_SMALL, "Advanced");
         list_addItemWithInfoNote(&_menu_advanced,
                                  (ListItem){
                                      .label = "Swap triggers (L<>L2, R<>R2)",
@@ -636,6 +708,17 @@ void menu_advanced(void *_)
                                      .value_formatter = formatter_fastForward,
                                      .action = action_advancedSetFrameThrottle},
                                  "Set the maximum fast forward rate.");
+        list_addItemWithInfoNote(&_menu_advanced,
+                                 (ListItem){
+                                     .label = "PWM frequency",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 9,
+                                     .value_labels = PWM_FREQUENCIES,
+                                     .value = value_getPWMFrequency(),
+                                     .action = action_advancedSetPWMFreqency},
+                                 "Change the PWM frequency\n"
+                                 "Lower values for less buzzing\n"
+                                 "Experimental feature");
         if (DEVICE_ID == MIYOO354) {
             list_addItemWithInfoNote(&_menu_advanced,
                                      (ListItem){
@@ -663,6 +746,25 @@ void menu_advanced(void *_)
     header_changed = true;
 }
 
+void menu_tools_m3uGenerator(void *_)
+{
+    if (!_menu_tools_m3uGenerator._created) {
+        _menu_tools_m3uGenerator = list_createWithTitle(2, LIST_SMALL, "m3u Generator");
+        list_addItemWithInfoNote(&_menu_tools_m3uGenerator,
+                                 (ListItem){
+                                     .label = "Multiple directories (.Game_Name)",
+                                     .action = tool_generateM3uFiles_md},
+                                 "One directory for each game \".Game_Name\"");
+        list_addItemWithInfoNote(&_menu_tools_m3uGenerator,
+                                 (ListItem){
+                                     .label = "Single directory (.multi-disc)",
+                                     .action = tool_generateM3uFiles_sd},
+                                 "One single directory \".multi-disc\"\nwill contains all multi-disc files");
+    }
+    menu_stack[++menu_level] = &_menu_tools_m3uGenerator;
+    header_changed = true;
+}
+
 void menu_tools(void *_)
 {
     if (!_menu_tools._created) {
@@ -675,6 +777,14 @@ void menu_tools(void *_)
                                  "PSX roms in '.bin' format needs a\n"
                                  "matching '.cue' file. Use this tool\n"
                                  "to automatically generate them.");
+        list_addItemWithInfoNote(&_menu_tools,
+                                 (ListItem){
+                                     .label = "Generate M3U files for PSX games...",
+                                     .action = menu_tools_m3uGenerator},
+                                 "PSX multidisc roms require to create\n"
+                                 "a playslist file (.m3u). It allows to \n"
+                                 "have only one entry for each multidisc\n"
+                                 "game and one unique save file for each game");
         list_addItemWithInfoNote(&_menu_tools,
                                  (ListItem){
                                      .label = "Generate game list for short name roms",
@@ -693,6 +803,18 @@ void menu_tools(void *_)
                                  "This generates a 'miyoogamelist.xml' file\n"
                                  "which comes with some limitations, such\n"
                                  "as no subfolder support.");
+        list_addItemWithInfoNote(&_menu_tools,
+                                 (ListItem){
+                                     .label = "Sort applist A-Z",
+                                     .action = tool_sortAppsAZ},
+                                 "Use this tool to sort your App list\n"
+                                 "ascending from A to Z.\n");
+        list_addItemWithInfoNote(&_menu_tools,
+                                 (ListItem){
+                                     .label = "Sort applist Z-A",
+                                     .action = tool_sortAppsZA},
+                                 "Use this tool to sort your App list\n"
+                                 "descending from Z to A.\n");
     }
     menu_stack[++menu_level] = &_menu_tools;
     header_changed = true;
