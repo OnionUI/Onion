@@ -10,6 +10,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "components/kbinput_wrapper.h"
 #include "components/list.h"
 #include "system/device_model.h"
 #include "system/display.h"
