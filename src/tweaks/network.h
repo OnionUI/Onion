@@ -43,17 +43,9 @@ static struct network_s {
     bool keep_alive;
     bool vncserv;
     bool loaded;
-} network_state;
-
-typedef struct network_set {
     int vncfps;
-    int vncrot;
-    bool loaded;
-} network_set;
-
-static network_set network_settings = {
+} network_state = {
     .vncfps = 20,
-    .vncrot = 0,
 };
 
 void network_loadState(void)
@@ -76,14 +68,8 @@ void network_loadState(void)
     network_state.check_updates = config_flag_get(".checkUpdates");
     network_state.keep_alive = config_flag_get(".keepServicesAlive");
     network_state.vncserv = config_flag_get(".vncServer");
+    config_get(".vncfps", CONFIG_INT, &network_state.vncfps);
     network_state.loaded = true;
-
-    // netset
-    if (network_settings.loaded)
-        return;
-
-    config_get(".vncfps", CONFIG_INT, &network_settings.vncfps);
-    network_settings.loaded = true;
 }
 
 typedef struct {
@@ -386,7 +372,7 @@ void network_toggleVNC(void *pt)
     char command_start[STR_MAX];
     char command_stop[STR_MAX];
 
-    int new_fps = (int)network_settings.vncfps;
+    int new_fps = (int)network_state.vncfps;
 
     sprintf(command_start, "/mnt/SDCARD/.tmp_update/bin/vncserver -k /dev/input/event0 -F %d -r 180 > /dev/null 2>&1 &", new_fps);
     sprintf(command_stop, "killall -9 vncserver");
@@ -411,8 +397,8 @@ void network_toggleVNC(void *pt)
 
 void network_setVNCFPS(void *pt)
 {
-    network_settings.vncfps = ((ListItem *)pt)->value;
-    config_setNumber(".vncfps", network_settings.vncfps);
+    network_state.vncfps = ((ListItem *)pt)->value;
+    config_setNumber(".vncfps", network_state.vncfps);
 
     if (network_state.vncserv) {
         network_toggleVNC(pt);
@@ -585,7 +571,7 @@ void menu_vnc(void *pt)
                                      .item_type = MULTIVALUE,
                                      .value_max = 30,
                                      .value_min = 1,
-                                     .value = (int)network_settings.vncfps,
+                                     .value = (int)network_state.vncfps,
                                      .action = network_setVNCFPS},
                                  "Set the framerate of the VNC server\n"
                                  "between 1 and 30. The higher the \n"
