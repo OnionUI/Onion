@@ -569,12 +569,12 @@ void menu_vnc(void *pt)
                                  (ListItem){
                                      .label = "Framerate",
                                      .item_type = MULTIVALUE,
-                                     .value_max = 30,
+                                     .value_max = 20,
                                      .value_min = 1,
                                      .value = (int)network_state.vncfps,
                                      .action = network_setVNCFPS},
                                  "Set the framerate of the VNC server\n"
-                                 "between 1 and 30. The higher the \n"
+                                 "between 1 and 20. The higher the \n"
                                  "framerate the more CPU it will use \n");
     }
     menu_stack[++menu_level] = &_menu_vnc;
