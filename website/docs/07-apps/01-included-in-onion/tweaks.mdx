@@ -1,0 +1,486 @@
+---
+slug: /apps/tweaks
+---
+
+
+import DynamicTweaksSection from '@site/src/components/DynamicTweaksSection';
+import IconLink from '@site/src/components/IconLink';
+
+
+# Tweaks
+
+*System tweaks and tools*
+
+## Presentation
+
+Tweaks is the backbone of onion's configuration and personalization! With Tweaks you can adjust System settings, enable network services, configure your button shortcuts and more!
+
+<p align="center"><img src={require('./assets/tweaks.webp').default} style={{width: 320}} /></p>
+
+### features
+
+- **System settings:** Startup behavior, auto-save and exit, vibration
+- **Custom shortcuts:** Single/long/double press <kbd>MENU</kbd>, and launch apps or tools via <kbd>X</kbd> or <kbd>Y</kbd> in MainUI
+  - *Known limitation:* Some apps can't be launched this way (for now only Music Player / GMU is known not to support this)
+- **User interface:** Show/hide recents/expert tabs, theme overrides
+- **Advanced:** Quick access to advanced emulator settings, plus a submenu to reset different settings
+- **Tools:** Sort favorites, fix thumbnails, remove OSX system files
+- **Network:** Network section is reserved to the Miyoo Mini Plus, [see an overview of all the network features by clicking here.](../network-features)
+- **Tips popup:** Press <kbd>Select</kbd> to show a popup explanation of the setting you've selected.
+
+<p align="center"><img src="https://user-images.githubusercontent.com/44569252/189440460-0afffde0-2e5e-41a4-b85e-0484b23c461a.png" /></p>
+
+## Usage
+
+<p align="center"><img src={require('./assets/tweaks-popup.png').default} style={{width: 320}} /><br />
+<sub>An example when you press <kbd>select</kbd> to display the Tips popup</sub>
+</p>
+
+
+---
+
+## Tweaks Features Descriptions
+
+<DynamicTweaksSection>
+
+
+<details><summary>
+
+## <img align="left" src={require('./assets/tweaks_system.png').default} style={{width: 40}} /><sup>System</sup>
+
+</summary>
+<details><summary>
+
+### Startup...
+</summary>
+<details><summary>
+
+#### Auto-resume last game 
+</summary>
+<div>Auto-resume happens when you shutdown the device while a game is running. At startup, the system will resume where you left off last time. If disabled the main interface will be displayed after boot, your last game played will not resume.</div>
+</details>
+<details><summary>
+
+#### Start application
+</summary>
+<div>With this option you can choose which frontend you want to launch into on startup.
+
+It can be MainUI, [GameSwitcher](./game-switcher), [Retroarch](./retroarch) or [AdvanceMenu](./advancemenu).
+</div>
+</details>
+<details><summary>
+
+#### MainUI: Start tab
+</summary>
+<div>Here you can set which tab you want MainUI to launch into.</div>
+</details>
+</details>
+<details><summary>
+
+### Date and time...
+</summary>
+<details><summary>
+
+#### now : 2023-10-12 18:31:08
+</summary>
+<div>Current Date (read-only label)</div>
+</details>
+<details><summary>
+
+#### Set automatically via the internet
+</summary>
+<div>Use the internet connection to sync "date and time on startup."</div>
+</details>
+<details><summary>
+
+#### Wait for sync on startup
+</summary>
+<div>Wait for date and time synchronization "on system startup. Ensures that time is synced before a game is launched. Useful for games like Pokemon which requires a synced time.</div>
+</details>
+<details><summary>
+
+#### Get time zone via IP address
+</summary>
+<div>If this is enabled, the system will try "to retrieve your time zone from your IP "address.</div>
+</details>
+<details><summary>
+
+#### Select time zone
+</summary>
+<div>Manually set your time zone. "You need to adjust for DST as well." (available only if "Get time zone via IP address is disabled)</div>
+</details>
+<details><summary>
+
+#### Emulated time skip
+</summary>
+<div>Without RTC the system time stands still while the device is off. This option lets you add a specific amount of hours at startup.</div>
+</details>
+</details>
+<details><summary>
+
+### Low battery warning
+</summary>
+<div>Show a red battery icon warning in the top right corner when the battery is at or below this value.</div>
+</details>
+<details><summary>
+
+### Low batt.: Save and exit
+</summary>
+<div>Set the battery percentage at which the system should save and exit RetroArch.</div>
+</details>
+<details><summary>
+
+### Vibration intensity
+</summary>
+<div>Set the vibration strength for haptic feedback when pressing system shortcuts.</div>
+</details>
+</details>
+
+
+
+
+
+
+
+
+<details><summary>
+
+## <img align="left" src={require('./assets/tweaks_network.png').default} style={{width: 40}} /><sup>Network</sup>
+
+</summary>
+<details><summary>
+
+### IP address: x.x.x.x
+</summary>
+<div>Current IP (read-only label)</div>
+</details>
+<details><summary>
+
+### Samba: Network file share...
+</summary>
+<div>Samba is a file sharing protocol that provides integrated sharing of files and directories between your Miyoo Mini Plus and your PC.</div>
+</details>
+<details><summary>
+
+### HTTP: Web-based file sync...
+</summary>
+<div>HTTP file server allows you to manage your files through a web browser on your phone, PC, or tablet. Think of it as a website hosted by Onion; simply enter the IP address in your browser.</div>
+</details>
+<details><summary>
+
+### SSH: Secure shell...
+</summary>
+<div>SSH provides a secure command line host for communicating with your device remotely. SFTP provides a secure file transfer protocol.</div>
+</details>
+<details><summary>
+
+### FTP: File server...
+</summary>
+<div>FTP provides a method of transferring files between Onion and a PC, phone, or tablet. You'll need an FTP client installed on the other device.</div>
+</details>
+<details><summary>
+
+### Telnet: Remote shell
+</summary>
+<div>Telnet provides unencrypted remote shell access to your device.</div>
+</details>
+<details><summary>
+
+### Disable services in-game
+</summary>
+<div>Disable all network services (except WiFi) while playing games. This helps to conserve battery and to keep performance at a maximum.</div>
+</details>
+</details>
+
+
+
+
+
+
+
+
+
+<details><summary>
+
+## <img align="left" src={require('./assets/tweaks_menu_button.png').default} style={{width: 40}} /><sup>Button shortcuts</sup>
+
+</summary>
+<details><summary>
+
+### Menu single press vibration
+</summary>
+<div>Enable haptic feedback for the menu button single and double press.</div>
+</details>
+<details><summary>
+
+### In-game: Menu button...
+</summary>
+<details><summary>
+
+#### Single press
+</summary>
+<div>
+Set the action for single pressing the menu button while in MainUI.
+
+(Off, Exit to menu, Quick Switch, Game Switcher) 
+</div>
+</details>
+<details><summary>
+
+#### Long press
+</summary>
+<div>Set the action for long pressing the menu button while in MainUI.</div>
+</details>
+<details><summary>
+
+#### Double press
+</summary>
+<div>Set the action for double pressing the menu button while in MainUI.</div>
+</details>
+</details>
+<details><summary>
+
+### MainUI: Menu button...
+</summary>
+<details><summary>
+
+#### Single press
+</summary>
+<div>Set the action for single pressing the menu button while in-game.</div>
+</details>
+<details><summary>
+
+#### Long press
+</summary>
+<div>Set the action for long pressing the menu button while in-game.</div>
+</details>
+<details><summary>
+
+#### Double press
+</summary>
+<div>Set the action for double pressing the menu button while in-game.</div>
+</details>
+</details>
+<details><summary>
+
+### MainUI: X button
+</summary>
+<div>Set the X button action in MainUI.</div>
+</details>
+<details><summary>
+
+### MainUI: Y button
+</summary>
+<div>Set the Y button action in MainUI.</div>
+</details>
+<details><summary>
+
+### Power single press
+</summary>
+<div>Change the power button single press action to either 'standby' or 'shutdown'.</div>
+</details>
+</details>
+
+
+
+
+
+
+
+<details><summary>
+
+## <img align="left" src={require('./assets/tweaks_user_interface.png').default} style={{width: 40}} /><sup>Appearance</sup>
+
+</summary>
+<details><summary>
+
+### Show recent
+</summary>
+<div>Toggle the visibility of the recents tab in the main menu.</div>
+</details>
+<details><summary>
+
+### Show expert mode
+</summary>
+<div>Toggle the visibility of the expert tab in the main menu.</div>
+</details>
+<details><summary>
+
+### OSD bar size
+</summary>
+<div>Set the width of the 'OSD bar' shown on the left side of the display when adjusting brightness or volume (MMP).</div>
+</details>
+<details><summary>
+
+### Theme overrides...
+</summary>
+<details><summary>
+
+#### Battery percentage...
+</summary>
+<div>Visible</div>
+<div>Font family</div>
+<div>Font size</div>
+<div>Text alignment</div>
+<div>Fixed position</div>
+<div>Horizontal offset</div>
+<div>Vertical offset</div>
+</details>
+<details><summary>
+
+#### Hide icon labels
+</summary>
+<div>Hide hint labels</div>
+</details>
+</details>
+<details><summary>
+
+### Icons packs...
+</summary>
+<details><summary>
+
+#### Apply icon pack..
+</summary>
+
+</details>
+<details><summary>
+
+#### Edit console icon.....
+</summary>
+
+
+</details>
+<details><summary>
+
+#### Edit expert icon...
+</summary>
+
+
+</details>
+<details><summary>
+
+#### expert icon...
+</summary>
+
+
+</details>
+</details>
+</details>
+
+
+
+
+
+
+
+
+<details><summary>
+
+## <img align="left" src={require('./assets/tweaks_advanced.png').default} style={{width: 40}} /><sup>Advanced</sup>
+
+</summary>
+<details><summary>
+
+### Swap triggers \(L<\>L2, R<\>R2\)
+</summary>
+<div>Swap the function of L1&lt;&gt;L2 and R1&lt;&gt;R2 (only affects in-game actions).</div>
+</details>
+<details><summary>
+
+### Brightness control
+</summary>
+<div>Change the shortcut for brightness (on MM only).</div>
+</details>
+<details><summary>
+
+### Fast forward rate
+</summary>
+<div>Set the maximum fast forward rate.</div>
+</details>
+<details><summary>
+
+### LCD undervolt
+</summary>
+<div>Use this option if you're seeing small artifacts on the display (MMP only).</div>
+</details>
+<details><summary>
+
+### Reset settings...
+</summary>
+<details><summary>
+
+#### Reset system tweaks
+</summary>
+<div>Reset all Onion system tweaks, including network setup.</div>
+</details>
+<details><summary>
+
+#### Reset theme overrides
+</summary>
+<div>Resets the settings stored on the device, such as theme, display options, and volume. Also resets WiFi configuration.</div>
+</details>
+<details><summary>
+
+#### Reset RetroArch main configuration
+</summary>
+<div>Reset all RetroArch core overrides.</div>
+</details>
+<details><summary>
+
+#### Reset AdvanceMENU/MAME/MESS
+</summary>
+<div>Reset everything.</div>
+</details>
+</details>
+<details><summary>
+
+### Diagnostics...
+</summary>
+<details><summary>
+
+#### Enable global logging
+</summary>
+<div>Enable global logging for system & networking. Logs will be generated in SD:/.tmp_update/logs.</div>
+</details>
+<details><summary>
+
+#### Util: System log snapshot
+</summary>
+<div>Take a snapshot of the system logs and export them to SD:log_export.7z. Attach these logs to your issue or send directly to a dev.</div>
+</details>
+</details>
+</details>
+
+
+
+
+
+<details><summary>
+
+## <img align="left" src={require('./assets/tweaks_tools.png').default} style={{width: 40}} /><sup>Tools</sup>
+
+</summary>
+<details><summary>
+
+### Generate CUE files for PSX games
+</summary>
+<div>PSX roms in '.bin' format need a matching '.cue' file. Use this tool to automatically generate them.</div>
+</details>
+<details><summary>
+
+### Generate game list for short name roms
+</summary>
+<div>This tool replaces the short names in game caches with their equivalent real names. This ensures the list is sorted correctly.</div>
+</details>
+<details><summary>
+
+### Generate miyoogamelist with digest names
+</summary>
+<div>Use this tool to clean your game names without having to rename the rom files (removes parens, rankings, and much more). This generates a 'miyoogamelist.xml' file which comes with some limitations, such as no subfolder support.</div>
+</details>
+</details>
+
+
+
+
+</DynamicTweaksSection>

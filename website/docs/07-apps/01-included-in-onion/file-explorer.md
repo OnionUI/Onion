@@ -5,10 +5,17 @@ description: Organize your Onion with DinguxCommander
 
 # File Explorer
 
+## Presentation
 
 A dual-pane file explorer that allows you to manage files directly on your device.
 
-Shortcuts:
+![](./assets/file-explorer.png)
+
+## Usage
+
+File Explorer is available in [Package Manager](package-manager).
+
+### Controls
 
 | Button        | Function                                            |
 | ------------- | --------------------------------------------------- |
@@ -19,4 +26,6 @@ Shortcuts:
 | Y/Menu button | Open general submenu (Select all/New Directory etc) |
 | L1/R1         | Scroll page                                         |
 
-![](./assets/file-explorer.png)
+## Advanced
+
+[File Explorer / DinguxCommander source code](https://github.com/OnionUI/app-DinguxCommander/).

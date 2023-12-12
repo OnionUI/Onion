@@ -16,6 +16,9 @@ main() {
     export DEVICE_ID=$([ $? -eq 0 ] && echo $MODEL_MMP || echo $MODEL_MM)
     echo -n "$DEVICE_ID" > /tmp/deviceModel
 
+    SERIAL_NUMBER=$(read_uuid) 
+    echo -n "$SERIAL_NUMBER" > /tmp/deviceSN
+    
     touch /tmp/is_booting
     check_installer
     clear_logs
@@ -57,6 +60,17 @@ main() {
 
     cd $sysdir
     bootScreen "Boot"
+    
+    # Set filebrowser branding to "Onion" and apply custom theme
+    if [ -f "$sysdir/config/filebrowser/first.run" ]; then
+        $sysdir/bin/filebrowser config set --branding.name "Onion" -d $sysdir/config/filebrowser/filebrowser.db
+        $sysdir/bin/filebrowser config set --branding.files "$sysdir/config/filebrowser/theme" -d $sysdir/config/filebrowser/filebrowser.db
+
+        rm "$sysdir/config/filebrowser/first.run"
+    fi
+
+    # Start networking (Checks networking, checks timezone)
+    start_networking
 
     # Start the key monitor
     keymon &
@@ -64,7 +78,7 @@ main() {
     # Init
     rm /tmp/.offOrder 2> /dev/null
     HOME=/mnt/SDCARD/RetroArch/
-
+    
     # Detect if MENU button is held
     detectKey 1
     menu_pressed=$?
@@ -81,15 +95,7 @@ main() {
     # Bind arcade name library to customer path
     mount -o bind $miyoodir/lib/libgamename.so /customer/lib/libgamename.so
 
-    # Set filebrowser branding to "Onion" and apply custom theme
-    if [ -f "$sysdir/config/filebrowser/first.run" ]; then
-        $sysdir/bin/filebrowser config set --branding.name "Onion" -d $sysdir/config/filebrowser/filebrowser.db
-        $sysdir/bin/filebrowser config set --branding.files "$sysdir/config/filebrowser/theme" -d $sysdir/config/filebrowser/filebrowser.db
 
-        rm "$sysdir/config/filebrowser/first.run"
-    fi
-
-    start_networking
     rm -rf /tmp/is_booting
 
     # Auto launch
@@ -256,6 +262,7 @@ launch_game() {
     retroarch_core=""
 
     start_audioserver
+    save_settings
 
     # TIMER BEGIN
     if check_is_game "$cmd"; then
@@ -486,6 +493,8 @@ mount_main_ui() {
 init_system() {
     log "\n:: Init system"
 
+    load_settings
+
     # init_lcd
     cat /proc/ls
     sleep 0.25
@@ -496,6 +505,47 @@ init_system() {
 
     start_audioserver
 
+    brightness=$(/customer/app/jsonval brightness)
+    brightness_raw=$(awk "BEGIN { print int(3 * exp(0.350656 * $brightness) + 0.5) }")
+    log "brightness: $brightness -> $brightness_raw"
+
+    # init backlight
+    echo 0 > /sys/class/pwm/pwmchip0/export
+    pwmfile="$sysdir/config/.pwmfrequency"
+    if [ -s $pwmfile ]; then
+        # 0 - 9 = 100 - 1000 Hz
+        frequency=$((($(cat "$pwmfile") + 1) * 100))
+    else
+        frequency=800
+    fi
+    echo $frequency > /sys/class/pwm/pwmchip0/pwm0/period
+    echo $brightness_raw > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
+    echo 1 > /sys/class/pwm/pwmchip0/pwm0/enable
+}
+
+device_uuid=$(read_uuid)
+device_settings="/mnt/SDCARD/.tmp_update/config/system/$device_uuid.json"
+
+load_settings() {
+    if [ -f "$device_settings" ]; then
+        cp -f "$device_settings" /mnt/SDCARD/system.json
+    fi
+
+    # make sure MainUI settings exist
+    if [ ! -f /mnt/SDCARD/system.json ]; then
+        if [ -f /appconfigs/system.json ]; then
+            cp -f /appconfigs/system.json /mnt/SDCARD/system.json
+        else
+            cp -f $sysdir/res/miyoo${DEVICE_ID}_system.json /mnt/SDCARD/system.json
+        fi
+    fi
+
+    # link /appconfigs/system.json to SD card
+    if [ -L /appconfigs/system.json ] && [ "$(readlink /appconfigs/system.json)" == "/mnt/SDCARD/system.json" ]; then
+        rm /appconfigs/system.json
+    fi
+    ln -s /mnt/SDCARD/system.json /appconfigs/system.json
+
     if [ $DEVICE_ID -eq $MODEL_MM ]; then
         # init charger detection
         if [ ! -f /sys/devices/gpiochip0/gpio/gpio59/direction ]; then
@@ -505,23 +555,19 @@ init_system() {
 
         if [ $(/customer/app/jsonval vol) -ne 20 ] || [ $(/customer/app/jsonval mute) -ne 0 ]; then
             # Force volume and mute settings
-            cat /appconfigs/system.json |
+            cat /mnt/SDCARD/system.json |
                 sed 's/^\s*"vol":\s*[0-9][0-9]*/\t"vol":\t20/g' |
                 sed 's/^\s*"mute":\s*[0-9][0-9]*/\t"mute":\t0/g' \
                     > temp
-            mv -f temp /appconfigs/system.json
+            mv -f temp /mnt/SDCARD/system.json
         fi
     fi
+}
 
-    brightness=$(/customer/app/jsonval brightness)
-    brightness_raw=$(awk "BEGIN { print int(3 * exp(0.350656 * $brightness) + 0.5) }")
-    log "brightness: $brightness -> $brightness_raw"
-
-    # init backlight
-    echo 0 > /sys/class/pwm/pwmchip0/export
-    echo 800 > /sys/class/pwm/pwmchip0/pwm0/period
-    echo $brightness_raw > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
-    echo 1 > /sys/class/pwm/pwmchip0/pwm0/enable
+save_settings() {
+    if [ -f /mnt/SDCARD/system.json ]; then
+        cp -f /mnt/SDCARD/system.json "$device_settings"
+    fi
 }
 
 update_time() {

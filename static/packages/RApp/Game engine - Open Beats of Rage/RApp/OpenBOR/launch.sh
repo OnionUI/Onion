@@ -10,6 +10,6 @@ echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 
 cd $mydir
 
-/mnt/SDCARD/.tmp_update/script/stop_audioserver.sh
+. /mnt/SDCARD/.tmp_update/script/stop_audioserver.sh
 
 ./OpenBOR "$1"
