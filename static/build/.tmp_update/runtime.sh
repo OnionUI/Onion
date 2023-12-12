@@ -57,6 +57,17 @@ main() {
 
     cd $sysdir
     bootScreen "Boot"
+    
+    # Set filebrowser branding to "Onion" and apply custom theme
+    if [ -f "$sysdir/config/filebrowser/first.run" ]; then
+        $sysdir/bin/filebrowser config set --branding.name "Onion" -d $sysdir/config/filebrowser/filebrowser.db
+        $sysdir/bin/filebrowser config set --branding.files "$sysdir/config/filebrowser/theme" -d $sysdir/config/filebrowser/filebrowser.db
+
+        rm "$sysdir/config/filebrowser/first.run"
+    fi
+
+    # Start networking (Checks networking, checks timezone)
+    start_networking
 
     # Start the key monitor
     keymon &
@@ -64,7 +75,7 @@ main() {
     # Init
     rm /tmp/.offOrder 2> /dev/null
     HOME=/mnt/SDCARD/RetroArch/
-
+    
     # Detect if MENU button is held
     detectKey 1
     menu_pressed=$?
@@ -81,15 +92,7 @@ main() {
     # Bind arcade name library to customer path
     mount -o bind $miyoodir/lib/libgamename.so /customer/lib/libgamename.so
 
-    # Set filebrowser branding to "Onion" and apply custom theme
-    if [ -f "$sysdir/config/filebrowser/first.run" ]; then
-        $sysdir/bin/filebrowser config set --branding.name "Onion" -d $sysdir/config/filebrowser/filebrowser.db
-        $sysdir/bin/filebrowser config set --branding.files "$sysdir/config/filebrowser/theme" -d $sysdir/config/filebrowser/filebrowser.db
 
-        rm "$sysdir/config/filebrowser/first.run"
-    fi
-
-    start_networking
     rm -rf /tmp/is_booting
 
     # Auto launch
@@ -505,7 +508,14 @@ init_system() {
 
     # init backlight
     echo 0 > /sys/class/pwm/pwmchip0/export
-    echo 800 > /sys/class/pwm/pwmchip0/pwm0/period
+    pwmfile="$sysdir/config/.pwmfrequency"
+    if [ -s $pwmfile ]; then
+        # 0 - 9 = 100 - 1000 Hz
+        frequency=$((($(cat "$pwmfile") + 1) * 100))
+    else
+        frequency=800
+    fi
+    echo $frequency > /sys/class/pwm/pwmchip0/pwm0/period
     echo $brightness_raw > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
     echo 1 > /sys/class/pwm/pwmchip0/pwm0/enable
 }
