@@ -18,7 +18,7 @@ const oembedOpts = {
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'Onion',
-  tagline: 'OS overhaul for Miyoo Mini',
+  tagline: 'OS overhaul for Miyoo Mini and Mini+',
   favicon: 'img/favicon.png',
   trailingSlash: false,
 
@@ -198,7 +198,7 @@ const config = {
                 href: 'https://github.com/OnionUI/Onion',
               },
               {
-                href: 'https://www.youtube.com/@OnionUIOfficial',
+                href: 'https://www.youtube.com/@OnionUI',
                 label: 'YouTube',
               },
               {

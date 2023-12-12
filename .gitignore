@@ -58,3 +58,5 @@ src/**/easter
 !easter/
 src/**/axp
 !axp/
+src/**/batteryMonitorUI
+!batteryMonitorUI/

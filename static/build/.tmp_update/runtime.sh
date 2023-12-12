@@ -16,6 +16,9 @@ main() {
     export DEVICE_ID=$([ $? -eq 0 ] && echo $MODEL_MMP || echo $MODEL_MM)
     echo -n "$DEVICE_ID" > /tmp/deviceModel
 
+    SERIAL_NUMBER=$(read_uuid) 
+    echo -n "$SERIAL_NUMBER" > /tmp/deviceSN
+    
     touch /tmp/is_booting
     check_installer
     clear_logs
@@ -57,6 +60,17 @@ main() {
 
     cd $sysdir
     bootScreen "Boot"
+    
+    # Set filebrowser branding to "Onion" and apply custom theme
+    if [ -f "$sysdir/config/filebrowser/first.run" ]; then
+        $sysdir/bin/filebrowser config set --branding.name "Onion" -d $sysdir/config/filebrowser/filebrowser.db
+        $sysdir/bin/filebrowser config set --branding.files "$sysdir/config/filebrowser/theme" -d $sysdir/config/filebrowser/filebrowser.db
+
+        rm "$sysdir/config/filebrowser/first.run"
+    fi
+
+    # Start networking (Checks networking, checks timezone)
+    start_networking
 
     # Start the key monitor
     keymon &
@@ -65,9 +79,9 @@ main() {
     rm /tmp/.offOrder 2> /dev/null
     HOME=/mnt/SDCARD/RetroArch/
     
-    # Disable VNC server (if enabled) at boot
+    # Disable VNC server flag at boot
     rm $sysdir/config/.vncServer
-
+    
     # Detect if MENU button is held
     detectKey 1
     menu_pressed=$?
@@ -84,15 +98,7 @@ main() {
     # Bind arcade name library to customer path
     mount -o bind $miyoodir/lib/libgamename.so /customer/lib/libgamename.so
 
-    # Set filebrowser branding to "Onion" and apply custom theme
-    if [ -f "$sysdir/config/filebrowser/first.run" ]; then
-        $sysdir/bin/filebrowser config set --branding.name "Onion" -d $sysdir/config/filebrowser/filebrowser.db
-        $sysdir/bin/filebrowser config set --branding.files "$sysdir/config/filebrowser/theme" -d $sysdir/config/filebrowser/filebrowser.db
 
-        rm "$sysdir/config/filebrowser/first.run"
-    fi
-
-    start_networking
     rm -rf /tmp/is_booting
 
     # Auto launch
@@ -490,6 +496,8 @@ mount_main_ui() {
 init_system() {
     log "\n:: Init system"
 
+    load_settings
+
     # init_lcd
     cat /proc/ls
     sleep 0.25
@@ -500,15 +508,20 @@ init_system() {
 
     start_audioserver
 
-    load_settings
-
     brightness=$(/customer/app/jsonval brightness)
     brightness_raw=$(awk "BEGIN { print int(3 * exp(0.350656 * $brightness) + 0.5) }")
     log "brightness: $brightness -> $brightness_raw"
 
     # init backlight
     echo 0 > /sys/class/pwm/pwmchip0/export
-    echo 800 > /sys/class/pwm/pwmchip0/pwm0/period
+    pwmfile="$sysdir/config/.pwmfrequency"
+    if [ -s $pwmfile ]; then
+        # 0 - 9 = 100 - 1000 Hz
+        frequency=$((($(cat "$pwmfile") + 1) * 100))
+    else
+        frequency=800
+    fi
+    echo $frequency > /sys/class/pwm/pwmchip0/pwm0/period
     echo $brightness_raw > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
     echo 1 > /sys/class/pwm/pwmchip0/pwm0/enable
 }
