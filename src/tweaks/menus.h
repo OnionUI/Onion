@@ -868,10 +868,10 @@ void menu_tools(void *_)
                                  "This generates a 'miyoogamelist.xml' file\n"
                                  "which comes with some limitations, such\n"
                                  "as no subfolder support.");
-                    list_addItem(&_menu_tools,
-                                 (ListItem){
-                                     .label = "Screen recorder...",
-                                     .action = menu_screen_recorder});
+        list_addItem(&_menu_tools,
+                     (ListItem){
+                         .label = "Screen recorder...",
+                         .action = menu_screen_recorder});
         list_addItemWithInfoNote(&_menu_tools,
                                  (ListItem){
                                      .label = "Sort applist A-Z",
