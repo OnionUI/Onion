@@ -1,0 +1,22 @@
+{
+	"88":	"VELG",
+	"89":	"TILBAKE",
+	"90":	"NAV",
+	"91":	"MENY",
+	"92":	"Fortsett",
+	"93":	"Lagre",
+	"94":	"Last inn",
+	"95":	"Volum",
+	"96":	"Gå ut til menyen",
+	"97":	"Tilstand %d/%d",
+	"98":	"Tom",
+	"99":	"Ingen miniatyrbilde",
+	"100":	"Last inn feilet",
+	"101":	"Lagre feilet",
+	"102":	"Tilstand %d lagret",
+	"103":  "Fullskjerm",
+	"104":  "PÅ",
+	"105":  "AV",
+	"106":  "AVANSERT",
+    "138":  "Netplay"	
+}

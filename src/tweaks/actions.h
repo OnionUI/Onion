@@ -57,6 +57,74 @@ void action_meterWidth(void *pt)
     osd_showBrightnessBar(settings.brightness);
 }
 
+int blueLightToggled = 0;
+
+void action_blueLight()
+{
+    if (access("/tmp/runningBLF", F_OK) != -1) {
+        return;
+    }
+
+    if (blueLightToggled) {
+        system("/mnt/SDCARD/.tmp_update/script/blue_light.sh disable &");
+        blueLightToggled = 0;
+    }
+    else {
+        system("/mnt/SDCARD/.tmp_update/script/blue_light.sh enable &");
+        blueLightToggled = 1;
+    }
+}
+
+void action_blueLightLevel(void *pt)
+{
+    int value;
+    ListItem *item = (ListItem *)pt;
+
+    value = item->value;
+    settings.blue_light_level = value;
+    config_setNumber("display/blueLightLevel", value);
+
+    system("/mnt/SDCARD/.tmp_update/script/blue_light.sh set_intensity &");
+    remove("/tmp/blueLightOn");
+}
+
+void action_blueLightState(void *pt)
+{
+    if (access("/tmp/runningBLF", F_OK) != -1) {
+        return;
+    }
+
+    ListItem *item = (ListItem *)pt;
+    settings.blue_light_state = item->value == 1;
+    config_flag_set(".blf", settings.blue_light_state);
+
+    if (item->value == 0) { // blf being disabled
+        system("/mnt/SDCARD/.tmp_update/script/blue_light.sh disable &");
+        remove("/tmp/blueLightOn");
+    }
+    else {
+        system("/mnt/SDCARD/.tmp_update/script/blue_light.sh check &"); // check if we're within the time values and start now
+    }
+    reset_menus = true;
+    all_changed = true;
+}
+
+void action_blueLightTimeOn(void *pt)
+{
+    char time_str[10];
+    formatter_Time(pt, time_str);
+    strcpy(settings.blue_light_time, time_str);
+    config_setString("display/blueLightTime", time_str);
+}
+
+void action_blueLightTimeOff(void *pt)
+{
+    char time_str[10];
+    formatter_Time(pt, time_str);
+    strcpy(settings.blue_light_time_off, time_str);
+    config_setString("display/blueLightTimeOff", time_str);
+}
+
 void action_setStartupAutoResume(void *pt)
 {
     settings.startup_auto_resume = ((ListItem *)pt)->value == 1;
@@ -285,6 +353,16 @@ void action_advancedSetFrameThrottle(void *pt)
     stored_value_frame_throttle_changed = true;
 }
 
+void action_advancedSetPWMFreqency(void *pt)
+{
+    FILE *fp;
+    int item_value = ((ListItem *)pt)->value;
+    int pwmfrequency = atoi(((ListItem *)pt)->value_labels[item_value]);
+    char *filename = "/sys/class/pwm/pwmchip0/pwm0/period";
+    file_put(fp, filename, "%d", pwmfrequency);
+    config_setNumber(".pwmfrequency", item_value);
+}
+
 void action_advancedSetSwapTriggers(void *pt)
 {
     int item_value = ((ListItem *)pt)->value;
@@ -328,6 +406,13 @@ void action_advancedSetLcdVoltage(void *pt)
 
     FILE *fp;
     file_put(fp, LCD_VOLT_CONFIG, "%x", 0x0e);
+}
+
+const char *action_LaunchKeyboardWrapper(const char *initial_value, const char *title)
+{
+    const char *result = launch_keyboard(initial_value, title);
+    all_changed = true;
+    return result;
 }
 
 #endif // TWEAKS_ACTIONS_H__

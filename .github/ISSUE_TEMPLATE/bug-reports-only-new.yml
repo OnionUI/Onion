@@ -17,7 +17,7 @@ body:
       options:
         - label: I am reporting a bug in the Onion OS - Any issues with the closed source frontend ([MainUI](https://github.com/OnionUI/MainUI-issues)), or [RetroArch](https://github.com/libretro/RetroArch) or any of the cores should be directed to their respective repositories
           required: true
-        - label: I have reviewed the [Onion Wiki](https://github.com/OnionUI/Onion/wiki) and did not find the answer
+        - label: I have reviewed the [Onion Docs](https://onionui.github.io/docs) and did not find the answer
           required: true
         - label: I have searched the existing (open and closed) issues to ensure I do not log a duplicate
           required: true

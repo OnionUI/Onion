@@ -1,7 +1,7 @@
 ###########################################################
 
 TARGET=Onion
-VERSION=4.2.1
+VERSION=4.2.2
 RA_SUBVERSION=1.15.0.6
 
 ###########################################################
@@ -151,6 +151,8 @@ core: $(CACHE)/.setup
 
 apps: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
+	@cd $(SRC_DIR)/batteryMonitorUI && BUILD_DIR="$(PACKAGES_APP_DEST)/Battery monitor tool/App/BatteryMonitorUI" make
+	@find $(SRC_DIR)/batteryMonitorUI -depth -type d -name res -exec cp -r {}/. "$(PACKAGES_APP_DEST)/Battery monitor tool/App/BatteryMonitorUI/res/" \;
 	@cd $(SRC_DIR)/playActivityUI && BUILD_DIR="$(PACKAGES_APP_DEST)/Activity Tracker/App/PlayActivity" make
 	@find $(SRC_DIR)/playActivityUI -depth -type d -name res -exec cp -r {}/. "$(PACKAGES_APP_DEST)/Activity Tracker/App/PlayActivity/res/" \;
 	@find $(SRC_DIR)/packageManager -depth -type d -name res -exec cp -r {}/. $(BUILD_DIR)/App/PackageManager/res/ \;
