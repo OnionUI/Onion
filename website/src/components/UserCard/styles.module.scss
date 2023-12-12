@@ -1,0 +1,90 @@
+.userCard {
+    --image-size: 132px;
+
+    :global(.card) {
+        display: grid;
+        grid-template-columns: calc(var(--image-size) + 24px) 1fr 1fr;
+        grid-template-rows: auto;
+        grid-template-areas:
+            "image header footer"
+            "image main main";
+        margin-bottom: 16px;
+
+        :global(.card__header) {
+            grid-area: header;
+            display: flex;
+            white-space: nowrap;
+            align-items: center;
+
+            h3 {
+                display: inline-block;
+                margin-bottom: 0;
+                margin-right: 16px;
+            }
+
+            i {
+                display: inline-block;
+                opacity: .6;
+            }
+        }
+
+        :global(.card__image) {
+            grid-area: image;
+            text-align: center;
+
+            img {
+                border-radius: calc(var(--image-size) / 2);
+                overflow: hidden;
+                max-width: var(--image-size);
+                aspect-ratio: 1;
+                margin: 16px;
+                box-sizing: border-box;
+            }
+        }
+
+        :global(.card__body) {
+            grid-area: main;
+            font-size: .95em;
+            font-style: italic;
+        }
+
+        :global(.card__footer) {
+            grid-area: footer;
+            font-size: .95em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @media (min-width: 577px) {
+            :global(.card__body) {
+                padding-bottom: 16px;
+            }
+
+            :global(.card__footer) {
+                justify-content: flex-end;
+                padding-bottom: 0;
+            }
+        }
+
+        @media (max-width: 576px) {
+            & {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "image"
+                    "header"
+                    "main"
+                    "footer";
+            }
+
+            :global(.card__header) {
+                padding-top: 0;
+                flex-direction: column;
+
+                h3 {
+                    margin-right: 0;
+                }
+            }
+        }
+    }
+}

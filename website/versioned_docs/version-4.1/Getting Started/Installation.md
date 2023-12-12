@@ -45,15 +45,15 @@ upgrading the firmware. Take a look at the [*firmware upgrade guide*](https://us
 - Extract the contents of the [`Onion-v4.x.x.zip`](https://github.com/OnionUI/Onion/releases/latest) file and copy _all_ 6 folders to the root of your SD card.
   > The 6 folders are: `.tmp_update`, `BIOS`, `miyoo`, `Media`, `RetroArch`, and `Themes`.  
   > Make sure that you've enabled viewing hidden folders on your operating system to correctly copy _all_ of the folders to your SD card (hit <kbd>Command</kbd>+<kbd>Shift</kbd>+<kbd>.</kbd> on Mac).
-- The installation will begin when you insert your SD Card and boot up your Miyoo Mini.
+- The installation will begin when you insert your SD card and boot up your Miyoo Mini.
 - When the installation is done, press the <kbd>A</kbd> button (or wait 10s) and the device will turn off.
 
 ### Step 3: Copy over your bios and rom files
-- Copy your bios files into the `BIOS` folder (from `RetroArch/.retroarch/system` on the Miyoo SD Card).  
+- Copy your bios files into the `BIOS` folder (from `RetroArch/.retroarch/system` on the Miyoo SD card).  
 - Copy your roms into their respective folder in `Roms` (see the *[Emulators](emulators)* page for more information).  
 - Do NOT delete the `.tmp_update` folder, despite its name this must stay on your SD card.  
-- Insert your SD Card, boot up your Mini and press <kbd>SELECT</kbd> from the `Games` tab in the main menu to refresh roms.  
-- If you are a macOS user, run `Apps` > `Tweaks` > `Tools` > `Remove OSX files`, in Onion, to purge `._` index files from your SD Card (and game lists).  
+- Insert your SD card, boot up your Mini and press <kbd>SELECT</kbd> from the `Games` tab in the main menu to refresh roms.  
+- If you are a macOS user, run `Apps` > `Tweaks` > `Tools` > `Remove OSX files`, in Onion, to purge `._` index files from your SD card (and game lists).  
 
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179321292-8198613d-380c-4022-8ce6-ea020cc9b347.png" width="54" /></sup>Upgrading (from stock or Onion)
@@ -86,8 +86,8 @@ delete any non-working save states after upgrading.
 ### Step 3: Check that your files are in the correct folders
 - If they're not already in place, place your bios files in the `BIOS` folder and roms in their respective subfolder inside the `Roms` folder (see the *[Emulators](emulators)* page for more information, here you'll find the [Rom Folders](emulators#rom-folders---quick-reference) table).
 - Despite its name, the `.tmp_update` folder must stay on your SD card.
-- Insert your SD Card, boot up your Mini and press <kbd>SELECT</kbd> from the `Games` tab in the main menu to refresh roms.  
-- If you are a macOS user, run `Apps` > `Tweaks` > `Tools` > `Remove OSX files`, in Onion, to purge `._` index files from your SD Card (and game lists).
+- Insert your SD card, boot up your Mini and press <kbd>SELECT</kbd> from the `Games` tab in the main menu to refresh roms.  
+- If you are a macOS user, run `Apps` > `Tweaks` > `Tools` > `Remove OSX files`, in Onion, to purge `._` index files from your SD card (and game lists).
 
 
 <table align="center"><tr><td>

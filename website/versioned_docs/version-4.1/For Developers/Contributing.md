@@ -12,5 +12,5 @@ The Onion Dev Team are an open and friendly bunch that welcomes contributors and
 
 If you are a developer wishing to support the project by getting involved, or if you have a specific feature you would like to implement yourself, please feel free to reach out.
 
-The best way to do this is to contact a member of the [Core Team](https://github.com/OnionUI/Onion/wiki/Acknowledgments) by joining the _Retro Game Handhelds_ [discord server](https://discord.gg/Jd2azKX).
+The best way to do this is to contact a member of the [Core Team](../About/Acknowledgments) by joining the _Retro Game Handhelds_ [discord server](https://discord.gg/Jd2azKX).
 When you've joined the server, you will find a _Miyoo Mini_ [specific channel](https://discord.com/channels/529983248114122762/891336865540620338/) which also includes an [_Onion - Dev Thread_](https://discord.com/channels/529983248114122762/1007796369785897090) for development activities.

@@ -73,6 +73,7 @@ main() {
         echo -e "\n:: Parsed in $((end-start))s"
 
         touch /tmp/dismiss_info_panel
+		sync
 
         if [ $count -eq 0 ]; then
             result_message="No games found"
@@ -87,6 +88,7 @@ main() {
     )
 
     rm -f /tmp/dismiss_info_panel 2> /dev/null
+	sync
 
 	# Reset list and cache
 	/mnt/SDCARD/.tmp_update/script/reset_list.sh "$scandir"

@@ -14,6 +14,7 @@
 #include "utils/msleep.h"
 
 #include "./appstate.h"
+#include "./diags.h"
 #include "./values.h"
 
 void action_setAppShortcut(void *pt)
@@ -56,6 +57,74 @@ void action_meterWidth(void *pt)
     osd_showBrightnessBar(settings.brightness);
 }
 
+int blueLightToggled = 0;
+
+void action_blueLight()
+{
+    if (access("/tmp/runningBLF", F_OK) != -1) {
+        return;
+    }
+
+    if (blueLightToggled) {
+        system("/mnt/SDCARD/.tmp_update/script/blue_light.sh disable &");
+        blueLightToggled = 0;
+    }
+    else {
+        system("/mnt/SDCARD/.tmp_update/script/blue_light.sh enable &");
+        blueLightToggled = 1;
+    }
+}
+
+void action_blueLightLevel(void *pt)
+{
+    int value;
+    ListItem *item = (ListItem *)pt;
+
+    value = item->value;
+    settings.blue_light_level = value;
+    config_setNumber("display/blueLightLevel", value);
+
+    system("/mnt/SDCARD/.tmp_update/script/blue_light.sh set_intensity &");
+    remove("/tmp/blueLightOn");
+}
+
+void action_blueLightState(void *pt)
+{
+    if (access("/tmp/runningBLF", F_OK) != -1) {
+        return;
+    }
+
+    ListItem *item = (ListItem *)pt;
+    settings.blue_light_state = item->value == 1;
+    config_flag_set(".blf", settings.blue_light_state);
+
+    if (item->value == 0) { // blf being disabled
+        system("/mnt/SDCARD/.tmp_update/script/blue_light.sh disable &");
+        remove("/tmp/blueLightOn");
+    }
+    else {
+        system("/mnt/SDCARD/.tmp_update/script/blue_light.sh check &"); // check if we're within the time values and start now
+    }
+    reset_menus = true;
+    all_changed = true;
+}
+
+void action_blueLightTimeOn(void *pt)
+{
+    char time_str[10];
+    formatter_Time(pt, time_str);
+    strcpy(settings.blue_light_time, time_str);
+    config_setString("display/blueLightTime", time_str);
+}
+
+void action_blueLightTimeOff(void *pt)
+{
+    char time_str[10];
+    formatter_Time(pt, time_str);
+    strcpy(settings.blue_light_time_off, time_str);
+    config_setString("display/blueLightTimeOff", time_str);
+}
+
 void action_setStartupAutoResume(void *pt)
 {
     settings.startup_auto_resume = ((ListItem *)pt)->value == 1;
@@ -90,6 +159,22 @@ void action_setEnableLogging(void *pt)
     char new_value[22];
     sprintf(new_value, "log_to_file = %s", settings.enable_logging ? "\"true\"" : "\"false\"");
     file_changeKeyValue(RETROARCH_CONFIG, "log_to_file =", new_value);
+}
+
+void action_runDiagnosticScript(void *payload_ptr)
+{ // run the script based on what the payload_ptr gives us
+    ListItem *item = (ListItem *)payload_ptr;
+    char *filename = (char *)item->payload_ptr;
+    char script_path[DIAG_MAX_PATH_LENGTH + 1];
+    snprintf(script_path, sizeof(script_path), "%s/%s", DIAG_SCRIPT_PATH, filename);
+
+    pthread_t thread;
+    if (pthread_create(&thread, NULL, diags_runScript, payload_ptr) != 0) {
+        list_updateStickyNote(item, "Failed to run script..."); // threading issues
+        list_changed = true;
+    }
+
+    pthread_detach(thread);
 }
 
 void action_setMenuButtonHaptics(void *pt)
@@ -266,6 +351,16 @@ void action_advancedSetFrameThrottle(void *pt)
     int item_value = ((ListItem *)pt)->value;
     stored_value_frame_throttle = item_value;
     stored_value_frame_throttle_changed = true;
+}
+
+void action_advancedSetPWMFreqency(void *pt)
+{
+    FILE *fp;
+    int item_value = ((ListItem *)pt)->value;
+    int pwmfrequency = atoi(((ListItem *)pt)->value_labels[item_value]);
+    char *filename = "/sys/class/pwm/pwmchip0/pwm0/period";
+    file_put(fp, filename, "%d", pwmfrequency);
+    config_setNumber(".pwmfrequency", item_value);
 }
 
 void action_advancedSetSwapTriggers(void *pt)
