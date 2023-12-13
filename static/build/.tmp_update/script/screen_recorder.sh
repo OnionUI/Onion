@@ -58,16 +58,19 @@ short_vibration() {
 }
 
 pulsating_vibration() {
+    loop_count="${1:-6}"
+
     setup_gpio_for_vibration
 
-    if pgrep -f "tweaks" > /dev/null; then
-        usleep_duration=500000
+    if [ ! -f "/tmp/time_warp" ]; then
+        usleep_duration=550000
     else
-        usleep_duration=400000
+        usleep_duration=450000
+        rm -rf /tmp/time_warp
     fi
 
     i=1
-    while [ "$i" -le 6 ]; do
+    while [ "$i" -le "$loop_count" ]; do
         vibrate 1
         usleep 15000
         vibrate 0
@@ -83,9 +86,10 @@ pulsating_vibration() {
 #  3        2        1          0
 # this display colour change doesn't appear in the video, neither does blue light filter.
 
-show_countdown() {  
+show_countdown() {
+    count="${1:-3}"
+
     check_disp_init
-    pulsating_vibration &
     default_colour="128 128 128"
     pulse_colour="200 200 200"
 
@@ -103,7 +107,13 @@ show_countdown() {
 
     original_colour=$current_colour
 
-    for i in 1 2 3; do
+    if [ "$count" -eq 3 ]; then
+        pulsating_vibration &
+    else
+        pulsating_vibration 1 &
+    fi
+
+    for i in $(seq 1 "$count"); do
         for step in $(seq 1 10); do
             new_blue=$(echo "$original_colour $pulse_colour" | awk -v step="$step" '{printf "%.0f", $1 + ($4 - $1) * step / 10}')
             new_green=$(echo "$original_colour $pulse_colour" | awk -v step="$step" '{printf "%.0f", $2 + ($5 - $2) * step / 10}')
@@ -122,7 +132,6 @@ show_countdown() {
             usleep 20000
         done
     done
-   
 }
 
 
@@ -135,12 +144,7 @@ toggle_ffmpeg() {
     if pgrep -f "ffmpeg -f fbdev -nostdin" > /dev/null; then
         pkill -2 -f "ffmpeg -f fbdev -nostdin"
         killall -9 imgpop
-        short_vibration
-        
-        if [ -f "$sysdir/config/.recCountdown" ]; then
-            show_countdown
-        fi
-
+        show_countdown 1
         rm -f "$active_file"
     else
         
