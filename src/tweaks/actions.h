@@ -15,8 +15,8 @@
 
 #include "./appstate.h"
 #include "./diags.h"
-#include "./values.h"
 #include "./reset.h"
+#include "./values.h"
 
 void action_setAppShortcut(void *pt)
 {
