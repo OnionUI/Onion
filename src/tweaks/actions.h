@@ -414,7 +414,7 @@ void action_deleteAllRecordings(void *pt)
         list_updateStickyNote(item, "Cancelled");
         return;
     }
-    system("rm -f /mnt/SDCARD/Media/Videos/Recorded/*");
+    system("rm -f /mnt/SDCARD/Media/Videos/Recorded/*.mp4");
     list_updateStickyNote(item, "Recorded directory emptied!");
     if (!_disable_confirm)
         _notifyResetDone("Deleted!");
