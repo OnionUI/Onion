@@ -805,6 +805,15 @@ void menu_tools(void *_)
                                  "as no subfolder support.");
         list_addItemWithInfoNote(&_menu_tools,
                                  (ListItem){
+                                     .label = "Regenerate game switcher list",
+                                     .action = tool_generateGsList},
+                                 "Utilize this tool to recreate your game\n"
+                                 "switcher list using the RetroArch history,\n"
+                                 "particularly in instances of corruption.\n"
+                                 "Keep in mind that NDS games and certain\n"
+                                 "ports may require manual addition.");
+        list_addItemWithInfoNote(&_menu_tools,
+                                 (ListItem){
                                      .label = "Sort applist A-Z",
                                      .action = tool_sortAppsAZ},
                                  "Use this tool to sort your App list\n"

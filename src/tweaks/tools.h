@@ -8,6 +8,7 @@
 #include <sys/wait.h>
 
 #include "components/list.h"
+#include "system/settings.h"
 #include "theme/theme.h"
 #include "utils/msleep.h"
 
@@ -157,12 +158,18 @@ void tool_sortAppsZA(void *pt)
     _runCommandPopup(tools_short_names[4], "/mnt/SDCARD/.tmp_update/script/app_sorter.sh desc");
 }
 
+void tool_generateGsList(void *pt)
+{
+    _runCommandPopup(tools_short_names[3], "/mnt/SDCARD/.tmp_update/script/gameswitcher_list_gen.sh");
+}
+
 static void (*tools_pt[NUM_TOOLS])(void *) = {
     tool_generateCueFiles,
     tool_generateM3uFiles_sd,
     tool_generateM3uFiles_md,
     tool_buildShortRomGameList,
     tool_generateMiyoogamelists,
+    tool_generateGsList,
     tool_sortAppsAZ,
     tool_sortAppsZA};
 

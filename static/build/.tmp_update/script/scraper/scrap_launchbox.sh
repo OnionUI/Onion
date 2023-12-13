@@ -144,6 +144,7 @@ get_launchbox_alias() {
     # MICROW8)            platform="";;
     MS)                   platform="Sega Master System";;
     MSX)                  platform="Microsoft MSX";;
+    NDS)                  platform="Nintendo DS";;
     NEOCD)                platform="SNK Neo Geo CD";;
     NEOGEO)               platform="SNK Neo Geo AES";;
     NGP)                  platform="SNK Neo Geo Pocket";;

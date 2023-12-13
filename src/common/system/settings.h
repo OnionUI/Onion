@@ -15,6 +15,9 @@
 #define RETROARCH_CONFIG "/mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg"
 #define HISTORY_PATH \
     "/mnt/SDCARD/Saves/CurrentProfile/lists/content_history.lpl"
+#define RECENTLIST_PATH "/mnt/SDCARD/Roms/recentlist.json"
+#define RECENTLIST_HIDDEN_PATH "/mnt/SDCARD/Roms/recentlist-hidden.json"
+#define RECENTLISTMIGRATED "/mnt/SDCARD/Saves/CurrentProfile/config/.recentListMigrated"
 #define DEFAULT_THEME_PATH "/mnt/SDCARD/Themes/Silky by DiMo/"
 
 typedef struct settings_s {

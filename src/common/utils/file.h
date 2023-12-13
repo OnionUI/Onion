@@ -83,6 +83,11 @@ bool file_write(const char *path, const char *str, uint32_t len);
 void file_copy(const char *src_path, const char *dest_path);
 
 char *file_removeExtension(char *myStr);
+
+char *extractPath(const char *absolutePath);
+
+char *extractLastDirectory(const char *path);
+
 void file_cleanName(char *name_out, const char *file_name);
 
 const char *file_getExtension(const char *filename);
@@ -96,5 +101,11 @@ void file_changeKeyValue(const char *file_path, const char *key,
 bool file_path_relative_to(char *path_out, const char *path_from, const char *path_to);
 
 FILE *file_open_ensure_path(const char *path, const char *mode);
+
+char *file_read_lineN(const char *filename, int n);
+
+void file_delete_line(const char *fileName, int n);
+
+void file_add_line_to_beginning(const char *filename, const char *lineToAdd);
 
 #endif // UTILS_FILE_H__
