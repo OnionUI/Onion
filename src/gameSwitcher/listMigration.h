@@ -69,7 +69,8 @@ char *extractConsoleNameFromRomPath(const char *path)
 }
 
 // Function to extract all subfolders to the right of "/mnt/SDCARD/Roms"
-char *extractAllSubfoldersFromRomPath(const char *path) {
+char *extractAllSubfoldersFromRomPath(const char *path)
+{
     const char *base = "/mnt/SDCARD/Roms/";
     const char *startOfDir = strstr(path, base);
 
@@ -88,7 +89,8 @@ char *extractAllSubfoldersFromRomPath(const char *path) {
         subfolders[pathLength] = '\0';
 
         return subfolders;
-    } else {
+    }
+    else {
         return NULL;
     }
 }
@@ -179,7 +181,7 @@ void buildRecentFile()
                         game->core);
                 printf_debug("oldPicturePath : %s\n", oldPicturePath);
 
-                char imgPath[STR_MAX*2];
+                char imgPath[STR_MAX * 2];
                 char console_folder[10];
                 sprintf(console_folder, extractConsoleNameFromRomPath(game->path));
 
@@ -189,7 +191,7 @@ void buildRecentFile()
                 // miyoo boxart png path
                 sprintf(imgPath, "/mnt/SDCARD/Emu/%s/../../Roms/%s/Imgs/%s.png", console_folder, all_subs, file_removeExtension(basename(game->path)));
 
-                char tempString[STR_MAX*2];
+                char tempString[STR_MAX * 2];
                 sprintf(tempString, "/mnt/SDCARD/Emu/%s/../../Roms/%s/%s", console_folder, all_subs, basename(game->path));
                 strcpy(game->path, tempString);
 
@@ -210,7 +212,7 @@ void buildRecentFile()
                 }
 
                 if (!is_file(imgPath))
-                   strcpy(imgPath, "");
+                    strcpy(imgPath, "");
 
                 char launchPath[STR_MAX];
 

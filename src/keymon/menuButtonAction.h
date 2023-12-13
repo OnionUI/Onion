@@ -160,7 +160,11 @@ void action_RA_gameSwitcher(void)
     terminate_retroarch();
 }
 
-void action_RA_exitToMenu(void) { screenshot_system(); terminate_retroarch(); }
+void action_RA_exitToMenu(void)
+{
+    screenshot_system();
+    terminate_retroarch();
+}
 
 void action_RA_quickSwitch(void)
 {

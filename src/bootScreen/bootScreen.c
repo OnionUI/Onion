@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     char theme_path[STR_MAX];
     theme_getPath(theme_path);
 
-    SDL_Surface *video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE );
+    SDL_Surface *video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
     SDL_Surface *screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
 
     SDL_Surface *background;

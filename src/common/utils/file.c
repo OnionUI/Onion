@@ -340,7 +340,7 @@ FILE *file_open_ensure_path(const char *path, const char *mode)
 
 char *file_read_lineN(const char *filename, int n)
 {
-    char line[STR_MAX*4]; 
+    char line[STR_MAX * 4];
     int lineNumber = 1;
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
@@ -366,8 +366,9 @@ char *file_read_lineN(const char *filename, int n)
     return NULL;
 }
 
-void file_delete_line(const char *fileName, int n){
-    
+void file_delete_line(const char *fileName, int n)
+{
+
     FILE *file = fopen(fileName, "r");
     if (file == NULL) {
         print_debug("Error opening file");
@@ -381,7 +382,7 @@ void file_delete_line(const char *fileName, int n){
         return;
     }
 
-    char line[STR_MAX*4];
+    char line[STR_MAX * 4];
     int lineNumber = 1;
 
     while (fgets(line, sizeof(line), file) != NULL) {
@@ -425,7 +426,7 @@ void file_add_line_to_beginning(const char *filename, const char *lineToAdd)
     }
     fputs(lineToAdd, tempFile);
 
-    char line[STR_MAX*4];
+    char line[STR_MAX * 4];
     while (fgets(line, sizeof(line), file) != NULL) {
         fputs(line, tempFile);
     }
@@ -441,4 +442,3 @@ void file_add_line_to_beginning(const char *filename, const char *lineToAdd)
     }
     print_debug("Line added to the beginning of the file successfully.\n");
 }
-
