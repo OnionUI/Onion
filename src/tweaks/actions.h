@@ -16,6 +16,7 @@
 #include "./appstate.h"
 #include "./diags.h"
 #include "./values.h"
+#include "./reset.h"
 
 void action_setAppShortcut(void *pt)
 {
@@ -409,9 +410,14 @@ void action_hardKillFFmpeg(void *pt)
 void action_deleteAllRecordings(void *pt)
 {
     ListItem *item = (ListItem *)pt;
+    if (!_disable_confirm && !_confirmReset("Delete?", "Are you sure you want to\ndelete all recordings?")) {
+        list_updateStickyNote(item, "Cancelled");
+        return;
+    }
     system("rm -f /mnt/SDCARD/Media/Videos/Recorded/*");
     list_updateStickyNote(item, "Recorded directory emptied!");
-    list_changed = true;
+    if (!_disable_confirm)
+        _notifyResetDone("Deleted!");
 }
 
 void action_advancedSetLcdVoltage(void *pt)
