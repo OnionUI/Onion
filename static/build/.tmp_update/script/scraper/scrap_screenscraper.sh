@@ -477,14 +477,14 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 
 			# this jq query will search all the images of type "MediaType" and will display it by order defined in RegionOrder
 			MediaURL=$(echo "$api_result" | jq --arg MediaType "$MediaType" \
-									--arg Region1 "$region1" \
-									--arg Region2 "$region2" \
-									--arg Region3 "$region3" \
-									--arg Region4 "$region4" \
-									--arg Region5 "$region5" \
-									--arg Region6 "$region6" \
-									--arg Region7 "$region7" \
-									--arg Region8 "$region8" \
+									--arg Region1 "$Region1" \
+									--arg Region2 "$Region2" \
+									--arg Region3 "$Region3" \
+									--arg Region4 "$Region4" \
+									--arg Region5 "$Region5" \
+									--arg Region6 "$Region6" \
+									--arg Region7 "$Region7" \
+									--arg Region8 "$Region8" \
 									'map(select(.type == $MediaType)) |
 									  sort_by(if .region == $Region1 then 0
 											elif .region == $Region2 then 1
