@@ -24,7 +24,7 @@ do
     if [[ ! -f "$zipfile" ]]
     then
         echo "-- downloading theme: $element"
-        wget -O "$zipfile" "https://github.com/OnionUI/Themes/raw/main/release/$element.zip?raw=true" -q --show-progress
+        wget -O "$zipfile" "https://github.com/OnionUI/Themes/raw/main/release/$element.zip" -q --show-progress
     fi
 
     if [ "$element" == "Silky by DiMo" ]; then
