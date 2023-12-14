@@ -89,6 +89,7 @@ pulsating_vibration() {
 show_countdown() {
     if [ $# -gt 0 ] && echo "$1" | grep -qE '^[0-9]+$' && [ "$1" -ge 0 ] && [ "$1" -le 10 ]; then
         count="$1"
+        echo $count
     else 
         count=0
     fi

@@ -179,6 +179,7 @@ void tool_screenRecorder(void *pt)
         }
         else {
             list_updateStickyNote(item, "Status: Recording ended, no new file found.");
+            snprintf(cmd, sizeof(cmd), "/mnt/SDCARD/.tmp_update/script/screen_recorder.sh hardkill &");
         }
     }
     list_changed = true;
