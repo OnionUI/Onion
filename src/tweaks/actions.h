@@ -384,7 +384,7 @@ void action_toggleScreenRecIndicator(void *pt)
 
 void action_toggleScreenRecCountdown(void *pt)
 {
-    config_flag_set(".recCountdown", ((ListItem *)pt)->value);
+    config_setNumber("recCountdown", ((ListItem *)pt)->value);
     settings.rec_countdown = ((ListItem *)pt)->value == 1;
 }
 

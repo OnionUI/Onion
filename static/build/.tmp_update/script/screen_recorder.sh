@@ -87,7 +87,20 @@ pulsating_vibration() {
 # this display colour change doesn't appear in the video, neither does blue light filter.
 
 show_countdown() {
-    count="${1:-3}"
+    if [ $# -gt 0 ]; then
+        count="$1"
+    else
+        if [ -f "$sysdir/config/recCountdown" ]; then
+            count=$(cat "$sysdir/config/recCountdown")
+            count=${count:-3}
+        else
+            count=3
+        fi
+
+        if [ "$count" -lt 0 ] || [ "$count" -gt 5 ]; then
+            count=3
+        fi
+    fi
 
     check_disp_init
     default_colour="128 128 128"
@@ -110,7 +123,7 @@ show_countdown() {
     if [ "$count" -eq 3 ]; then
         pulsating_vibration &
     else
-        pulsating_vibration 1 &
+        pulsating_vibration $(( $count * 2 )) &
     fi
 
     for i in $(seq 1 "$count"); do
@@ -148,8 +161,12 @@ toggle_ffmpeg() {
         rm -f "$active_file"
     else
         
-        if [ -f "$sysdir/config/.recCountdown" ]; then
-            show_countdown
+        if [ -f "$sysdir/config/recCountdown" ]; then
+            if [ "$(cat "$sysdir/config/recCountdown")" != "0" ]; then
+                show_countdown
+            else
+                short_vibration
+            fi
         else 
             short_vibration
         fi

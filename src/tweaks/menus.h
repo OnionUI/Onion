@@ -757,6 +757,17 @@ void menu_screen_recorder(void *pt)
                                  "Start or stop the recorder");
         list_addItemWithInfoNote(&_menu_screen_recorder,
                                  (ListItem){
+                                     .label = "Countdown (seconds)",
+                                     .sticky_note = "Specify the countdown",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 10,
+                                     .value = (int)settings.rec_countdown,
+                                     .action = action_toggleScreenRecCountdown},
+                                 "Countdown when starting recording. \n\n"
+                                 "The screen will pulse white n times \n"
+                                 "to signify recording has started/stopped");
+        list_addItemWithInfoNote(&_menu_screen_recorder,
+                                 (ListItem){
                                      .label = "Toggle indicator icon",
                                      .sticky_note = "Turn the indicator on/off",
                                      .item_type = TOGGLE,
@@ -765,16 +776,6 @@ void menu_screen_recorder(void *pt)
                                  "Toggles the display of a\n"
                                  "a flashing icon to remind you\n"
                                  "that you're still recording.");
-        list_addItemWithInfoNote(&_menu_screen_recorder,
-                                 (ListItem){
-                                     .label = "Toggle countdown pulse",
-                                     .sticky_note = "Turn the countdown pulse on/off",
-                                     .item_type = TOGGLE,
-                                     .value = (int)settings.rec_countdown,
-                                     .action = action_toggleScreenRecCountdown},
-                                 "Countdown when starting recording. \n\n"
-                                 "The screen will pulse white 3 times \n"
-                                 "to signify recording has started/stopped");
         list_addItemWithInfoNote(&_menu_screen_recorder,
                                  (ListItem){
                                      .label = "Toggle hotkey",
