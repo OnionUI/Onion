@@ -746,6 +746,73 @@ void menu_advanced(void *_)
     header_changed = true;
 }
 
+void menu_screen_recorder(void *pt)
+{
+    if (!_menu_screen_recorder._created) {
+        _menu_screen_recorder = list_createWithSticky(7, "Screen recorder setup");
+        list_addItemWithInfoNote(&_menu_screen_recorder,
+                                 (ListItem){
+                                     .label = "Start/stop recorder",
+                                     .sticky_note = "Status:...",
+                                     .action = tool_screenRecorder},
+                                 "Start or stop the recorder");
+        list_addItemWithInfoNote(&_menu_screen_recorder,
+                                 (ListItem){
+                                     .label = "Countdown (seconds)",
+                                     .sticky_note = "Specify the countdown",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 10,
+                                     .value = (int)settings.rec_countdown,
+                                     .action = action_toggleScreenRecCountdown},
+                                 "Countdown when starting recording. \n\n"
+                                 "The screen will pulse white n times \n"
+                                 "to signify recording has started/stopped");
+        list_addItemWithInfoNote(&_menu_screen_recorder,
+                                 (ListItem){
+                                     .label = "Toggle indicator icon",
+                                     .sticky_note = "Turn the indicator on/off",
+                                     .item_type = TOGGLE,
+                                     .value = (int)settings.rec_indicator,
+                                     .action = action_toggleScreenRecIndicator},
+                                 "Toggles the display of a\n"
+                                 "a flashing icon to remind you\n"
+                                 "that you're still recording.");
+        list_addItemWithInfoNote(&_menu_screen_recorder,
+                                 (ListItem){
+                                     .label = "Toggle hotkey",
+                                     .sticky_note = "Turn the hotkey (Menu+A) on/off ",
+                                     .item_type = TOGGLE,
+                                     .value = (int)settings.rec_hotkey,
+                                     .action = action_toggleScreenRecHotkey},
+                                 "Enable the hotkey function.\n\n"
+                                 "Recording can be started/stopped\n"
+                                 "with Menu+A");
+        list_addItemWithInfoNote(&_menu_screen_recorder,
+                                 (ListItem){
+                                     .label = "Reset screen recorder",
+                                     .sticky_note = "Hard kill ffmpeg if it's crashed",
+                                     .action = action_hardKillFFmpeg},
+                                 "Performs a hard kill of ffmpeg.\n\n"
+                                 "WARNING: If you're currently\n"
+                                 "recording, you may lose the file!");
+        list_addItemWithInfoNote(&_menu_screen_recorder,
+                                 (ListItem){
+                                     .label = "Delete all recordings",
+                                     .sticky_note = "Empties the recordings directory",
+                                     .action = action_deleteAllRecordings},
+                                 "Deletes all recorded videos. \n\n"
+                                 "WARNING: This action cannot\n"
+                                 "be undone!");
+    }
+
+    int isRecordingActive = exists("/tmp/recorder_active");
+    const char *recordingStatus = isRecordingActive ? "Status: Now recording..." : "Status: Idle.";
+    strncpy(_menu_screen_recorder.items[0].sticky_note, recordingStatus, sizeof(_menu_screen_recorder.items[0].sticky_note) - 1);
+    _menu_screen_recorder.items[0].sticky_note[sizeof(_menu_screen_recorder.items[0].sticky_note) - 1] = '\0';
+    menu_stack[++menu_level] = &_menu_screen_recorder;
+    header_changed = true;
+}
+
 void menu_tools_m3uGenerator(void *_)
 {
     if (!_menu_tools_m3uGenerator._created) {
@@ -803,6 +870,10 @@ void menu_tools(void *_)
                                  "This generates a 'miyoogamelist.xml' file\n"
                                  "which comes with some limitations, such\n"
                                  "as no subfolder support.");
+        list_addItem(&_menu_tools,
+                     (ListItem){
+                         .label = "Screen recorder...",
+                         .action = menu_screen_recorder});
         list_addItemWithInfoNote(&_menu_tools,
                                  (ListItem){
                                      .label = "Regenerate game switcher list",

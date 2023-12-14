@@ -15,6 +15,7 @@
 
 #include "./appstate.h"
 #include "./diags.h"
+#include "./reset.h"
 #include "./values.h"
 
 void action_setAppShortcut(void *pt)
@@ -373,6 +374,66 @@ void action_advancedSetSwapTriggers(void *pt)
 void action_setAltBrightness(void *pt)
 {
     config_flag_set(".altBrightness", ((ListItem *)pt)->value);
+}
+
+void action_toggleScreenRecIndicator(void *pt)
+{
+    config_flag_set(".recIndicator", ((ListItem *)pt)->value);
+    settings.rec_indicator = ((ListItem *)pt)->value == 1;
+}
+
+void action_toggleScreenRecCountdown(void *pt)
+{
+    config_setNumber("recCountdown", ((ListItem *)pt)->value);
+    settings.rec_countdown = ((ListItem *)pt)->value;
+}
+
+void action_toggleScreenRecHotkey(void *pt)
+{
+    config_flag_set(".recHotkey", ((ListItem *)pt)->value);
+    settings.rec_hotkey = ((ListItem *)pt)->value == 1;
+}
+
+void action_hardKillFFmpeg(void *pt)
+{
+    ListItem *item = (ListItem *)pt;
+    int status = system("/mnt/SDCARD/.tmp_update/script/screen_recorder.sh hardkill");
+    if (status != 0) {
+        list_updateStickyNote(item, "Status: Error occurred.");
+    }
+    else {
+        list_updateStickyNote(item, "Status: FFmpeg process stopped");
+    }
+    list_changed = true;
+}
+
+void action_deleteAllRecordings(void *pt)
+{
+    ListItem *item = (ListItem *)pt;
+    int fileCheck;
+    fileCheck = exists("/tmp/recorder_active");
+
+    if (fileCheck) {
+        if (!_disable_confirm && !_confirmReset("Recording!", "You're still recording!\nAre you sure you want to\ndelete all recordings?")) {
+            return;
+        }
+        else {
+            system("/mnt/SDCARD/.tmp_update/script/screen_recorder.sh hardkill &");
+            strncpy(_menu_screen_recorder.items[0].sticky_note, "Status: Idle.", sizeof(_menu_screen_recorder.items[0].sticky_note) - 1);
+            _menu_screen_recorder.items[0].sticky_note[sizeof(_menu_screen_recorder.items[0].sticky_note) - 1] = '\0';
+        }
+    }
+    else {
+        if (!_disable_confirm && !_confirmReset("Delete?", "Are you sure you want to\ndelete all recordings?")) {
+            list_updateStickyNote(item, "Cancelled");
+            return;
+        }
+    }
+
+    system("rm -f /mnt/SDCARD/Media/Videos/Recorded/*.mp4");
+    list_updateStickyNote(item, "Recorded directory emptied!");
+    if (!_disable_confirm)
+        _notifyResetDone("Deleted!");
 }
 
 void action_advancedSetLcdVoltage(void *pt)

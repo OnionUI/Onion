@@ -338,6 +338,38 @@ FILE *file_open_ensure_path(const char *path, const char *mode)
     return fopen(path, mode);
 }
 
+bool file_findNewest(const char *dir_path, char *newest_file, size_t buffer_size)
+{
+    DIR *d;
+    struct dirent *dir;
+    struct stat file_stat;
+    time_t newest_mtime = 0;
+
+    d = opendir(dir_path);
+    if (d == NULL) {
+        return false;
+    }
+
+    bool found = false;
+    while ((dir = readdir(d)) != NULL) {
+        if (dir->d_type == DT_REG) {
+            char full_path[PATH_MAX];
+            snprintf(full_path, sizeof(full_path), "%s/%s", dir_path, dir->d_name);
+
+            if (stat(full_path, &file_stat) == 0) {
+                if (!found || file_stat.st_mtime > newest_mtime) {
+                    newest_mtime = file_stat.st_mtime;
+                    strncpy(newest_file, dir->d_name, buffer_size);
+                    newest_file[buffer_size - 1] = '\0';
+                    found = true;
+                }
+            }
+        }
+    }
+
+    closedir(d);
+    return found;
+}
 char *file_read_lineN(const char *filename, int n)
 {
     char line[STR_MAX * 4];

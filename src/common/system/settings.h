@@ -19,6 +19,7 @@
 #define RECENTLIST_HIDDEN_PATH "/mnt/SDCARD/Roms/recentlist-hidden.json"
 #define RECENTLISTMIGRATED "/mnt/SDCARD/Saves/CurrentProfile/config/.recentListMigrated"
 #define DEFAULT_THEME_PATH "/mnt/SDCARD/Themes/Silky by DiMo/"
+#define RECORDED_DIR "/mnt/SDCARD/Media/Videos/Recorded"
 
 typedef struct settings_s {
     int volume;
@@ -55,6 +56,9 @@ typedef struct settings_s {
     bool disable_standby;
     int pwmfrequency;
     bool enable_logging;
+    bool rec_indicator;
+    bool rec_hotkey;
+    int rec_countdown;
     int blue_light_state;
     int blue_light_level;
     int blue_light_rgb;
@@ -112,7 +116,11 @@ static settings_s __default_settings = (settings_s){
     .blue_light_time_off = "08:00",
     .pwmfrequency = 7,
     .mainui_button_x = "",
-    .mainui_button_y = ""};
+    .mainui_button_y = "",
+    //utility
+    .rec_countdown = false,
+    .rec_indicator = false,
+    .rec_hotkey = false};
 
 void _settings_clone(settings_s *dst, settings_s *src)
 {
@@ -189,6 +197,8 @@ void settings_load(void)
     settings.mute = config_flag_get(".muteVolume");
     settings.disable_standby = config_flag_get(".disableStandby");
     settings.enable_logging = config_flag_get(".logging");
+    settings.rec_indicator = config_flag_get(".recIndicator");
+    settings.rec_hotkey = config_flag_get(".recHotkey");
     settings.blue_light_state = config_flag_get(".blf");
 
     if (config_flag_get(".noLowBatteryAutoSave")) // flag is deprecated, but keep compatibility
@@ -211,6 +221,7 @@ void settings_load(void)
     config_get("display/blueLightTimeOff", CONFIG_STR, &settings.blue_light_time_off);
     config_get("display/blueLightRGB", CONFIG_INT, &settings.blue_light_rgb);
     config_get("pwmfrequency", CONFIG_INT, &settings.pwmfrequency);
+    config_get("recCountdown", CONFIG_INT, &settings.rec_countdown);
 
     if (config_flag_get(".menuInverted")) { // flag is deprecated, but keep compatibility
         settings.ingame_single_press = 2;
@@ -325,6 +336,8 @@ void settings_save(void)
     config_flag_set(".muteVolume", settings.mute);
     config_flag_set(".disableStandby", settings.disable_standby);
     config_flag_set(".logging", settings.enable_logging);
+    config_flag_set(".recIndicator", settings.rec_indicator);
+    config_flag_set(".recHotkey", settings.rec_hotkey);
     config_flag_set(".blf", settings.blue_light_state);
     config_setNumber("battery/warnAt", settings.low_battery_warn_at);
     config_setNumber("battery/exitAt", settings.low_battery_autosave_at);
@@ -332,6 +345,7 @@ void settings_save(void)
     config_setNumber("startup/addHours", settings.time_skip);
     config_setNumber("vibration", settings.vibration);
     config_setNumber("startup/tab", settings.startup_tab);
+    config_setNumber("recCountdown", settings.rec_countdown);
     config_setNumber("display/blueLightLevel", settings.blue_light_level);
     config_setNumber("display/blueLightRGB", settings.blue_light_rgb);
     config_setString("display/blueLightTime", settings.blue_light_time);

@@ -59,7 +59,6 @@ static List _menu_main;
 static List _menu_system;
 static List _menu_date_time;
 static List _menu_system_display;
-static List _menu_user_blue_light;
 static List _menu_system_startup;
 static List _menu_button_action;
 static List _menu_button_action_mainui_menu;
@@ -72,6 +71,8 @@ static List _menu_reset_settings;
 static List _menu_tools;
 static List _menu_tools_m3uGenerator;
 static List _menu_diagnostics;
+static List _menu_screen_recorder;
+static List _menu_user_blue_light;
 
 void menu_free_all(void)
 {
@@ -91,6 +92,7 @@ void menu_free_all(void)
     list_free(&_menu_tools);
     list_free(&_menu_tools_m3uGenerator);
     list_free(&_menu_diagnostics);
+    list_free(&_menu_screen_recorder);
     list_free(&_menu_user_blue_light);
 
     menu_icons_free_all();
