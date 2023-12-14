@@ -79,6 +79,9 @@ main() {
     rm /tmp/.offOrder 2> /dev/null
     HOME=/mnt/SDCARD/RetroArch/
     
+    # Disable VNC server flag at boot
+    rm $sysdir/config/.vncServer
+    
     # Detect if MENU button is held
     detectKey 1
     menu_pressed=$?

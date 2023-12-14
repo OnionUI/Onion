@@ -23,6 +23,7 @@ static List _menu_wps;
 static List _menu_http;
 static List _menu_ssh;
 static List _menu_smbd;
+static List _menu_vnc;
 
 void menu_network_free_all(void)
 {
@@ -34,6 +35,7 @@ void menu_network_free_all(void)
     list_free(&_menu_http);
     list_free(&_menu_ssh);
     list_free(&_menu_smbd);
+    list_free(&_menu_vnc);
 }
 
 static List _menu_icons;
