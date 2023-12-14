@@ -10,6 +10,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "components/kbinput_wrapper.h"
 #include "components/list.h"
 #include "system/device_model.h"
 #include "system/display.h"
@@ -873,6 +874,15 @@ void menu_tools(void *_)
                      (ListItem){
                          .label = "Screen recorder...",
                          .action = menu_screen_recorder});
+        list_addItemWithInfoNote(&_menu_tools,
+                                 (ListItem){
+                                     .label = "Regenerate game switcher list",
+                                     .action = tool_generateGsList},
+                                 "Utilize this tool to recreate your game\n"
+                                 "switcher list using the RetroArch history,\n"
+                                 "particularly in instances of corruption.\n"
+                                 "Keep in mind that NDS games and certain\n"
+                                 "ports may require manual addition.");
         list_addItemWithInfoNote(&_menu_tools,
                                  (ListItem){
                                      .label = "Sort applist A-Z",

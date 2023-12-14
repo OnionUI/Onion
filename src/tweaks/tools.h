@@ -8,6 +8,7 @@
 #include <sys/wait.h>
 
 #include "components/list.h"
+#include "system/settings.h"
 #include "theme/theme.h"
 #include "utils/msleep.h"
 
@@ -183,6 +184,9 @@ void tool_screenRecorder(void *pt)
         }
     }
     list_changed = true;
+void tool_generateGsList(void *pt)
+{
+    _runCommandPopup(tools_short_names[3], "/mnt/SDCARD/.tmp_update/script/gameswitcher_list_gen.sh");
 }
 
 static void (*tools_pt[NUM_TOOLS])(void *) = {
@@ -191,6 +195,7 @@ static void (*tools_pt[NUM_TOOLS])(void *) = {
     tool_generateM3uFiles_md,
     tool_buildShortRomGameList,
     tool_generateMiyoogamelists,
+    tool_generateGsList,
     tool_sortAppsAZ,
     tool_sortAppsZA};
 

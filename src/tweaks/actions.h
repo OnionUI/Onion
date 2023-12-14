@@ -467,4 +467,11 @@ void action_advancedSetLcdVoltage(void *pt)
     file_put(fp, LCD_VOLT_CONFIG, "%x", 0x0e);
 }
 
+const char *action_LaunchKeyboardWrapper(const char *initial_value, const char *title)
+{
+    const char *result = launch_keyboard(initial_value, title);
+    all_changed = true;
+    return result;
+}
+
 #endif // TWEAKS_ACTIONS_H__
