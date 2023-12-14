@@ -87,27 +87,12 @@ pulsating_vibration() {
 # this display colour change doesn't appear in the video, neither does blue light filter.
 
 show_countdown() {
-    if [ $# -gt 0 ]; then
-        if [ "$1" = "off" ]; then
-            count=0
-        elif echo "$1" | grep -qE '^[0-9]+$'; then
-            count="$1"
-        else
-            count=3
-        fi
-    else
-        if [ -f "$sysdir/config/recCountdown" ]; then
-            count=$(cat "$sysdir/config/recCountdown")
-            count=${count:-3}
-        else
-            count=3
-        fi
+    if [ $# -gt 0 ] && echo "$1" | grep -qE '^[0-9]+$' && [ "$1" -ge 0 ] && [ "$1" -le 10 ]; then
+        count="$1"
+    else 
+        count=0
     fi
-
-    if [ "$count" -lt 0 ] || [ "$count" -gt 5 ]; then
-        count=3
-    fi
-
+    
     check_disp_init
     default_colour="128 128 128"
     pulse_colour="200 200 200"
@@ -125,7 +110,7 @@ show_countdown() {
     fi
 
     original_colour=$current_colour
-
+    
     if [ "$count" -gt 1 ]; then
         pulsating_vibration $(( $count * 2 )) &
     else
@@ -163,22 +148,19 @@ toggle_ffmpeg() {
     if pgrep -f "ffmpeg -f fbdev -nostdin" > /dev/null; then
         pkill -2 -f "ffmpeg -f fbdev -nostdin"
         killall -9 imgpop
-        if [ "$(cat "$sysdir/config/recCountdown")" != "0" ]; then
-            show_countdown off
+        
+        if [ "$(cat "$sysdir/config/recCountdown")" -lt 1 ]; then
+            show_countdown 0
+        else
+            show_countdown 1
         fi
+        
         rm -f "$active_file"
     else
-        
-        if [ -f "$sysdir/config/recCountdown" ]; then
-            if [ "$(cat "$sysdir/config/recCountdown")" != "0" ]; then
-                show_countdown $count
-            else
-                short_vibration
-            fi
-        else 
-            short_vibration
+        if [ "$(cat "$sysdir/config/recCountdown")" -gt 1 ]; then
+            show_countdown $(cat "$sysdir/config/recCountdown")
         fi
-        
+
         if [ -f "$sysdir/config/.recIndicator" ]; then
             show_indicator
         fi
