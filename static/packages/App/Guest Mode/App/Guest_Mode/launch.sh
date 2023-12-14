@@ -2,6 +2,7 @@
 
 json_file="/mnt/SDCARD/system.json"
 currentThemefile="/mnt/SDCARD/Saves/CurrentProfile/theme/currentTheme"
+defautTheme="/mnt/SDCARD/Themes/Silky by DiMo/"
 
 progdir=`cd -- "$(dirname "$0")" >/dev/null 2>&1; pwd -P`
 cd $progdir
@@ -32,6 +33,11 @@ fi
 
 # Favourites + RecentList restoration
 cp /mnt/SDCARD/Saves/CurrentProfile/lists/*.json /mnt/SDCARD/Roms
+
+if [ ! -e "$currentThemefile" ]; then
+	# Default theme file
+    echo "$themeString" > "$currentThemefile"
+fi
 
 # Theme restoration
 if [ -e "$currentThemefile" ]; then
