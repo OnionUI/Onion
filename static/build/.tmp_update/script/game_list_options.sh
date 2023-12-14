@@ -463,6 +463,7 @@ get_core_extensions() {
         ./bin/infoPanel --title "CACHING CORES" --message "Caching core info\n \nThis may take a minute..." --persistent &
         ./script/build_ext_cache.sh "$radir"
         touch /tmp/dismiss_info_panel
+        sync
     fi
 }
 

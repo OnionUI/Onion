@@ -1,0 +1,6 @@
+{
+	"label":	"Onion Battery Tool",
+	"icon":	"/mnt/SDCARD/Icons/Default/app/battery_monitor.png",
+	"launch":	"launch.sh",
+	"description":	"Monitor your Miyoo battery"
+}

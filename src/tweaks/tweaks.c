@@ -139,6 +139,7 @@ int main(int argc, char *argv[])
                 if (list_currentItem(menu_stack[menu_level])->action != NULL) {
                     sound_change();
                     skip_next_change = true;
+                    keystate[SW_BTN_A] = RELEASED;
                 }
                 key_changed = list_activateItem(menu_stack[menu_level]) || header_changed;
             }
@@ -198,9 +199,18 @@ int main(int argc, char *argv[])
             battery_changed = true;
 
         if (acc_ticks >= time_step) {
-            if (isMenu(&_menu_date_time)) {
-                if (_writeDateString(_menu_date_time.items[0].label)) {
-                    list_changed = true;
+            if (isMenu(&_menu_date_time) || isMenu(&_menu_user_blue_light)) {
+                if (isMenu(&_menu_date_time)) {
+                    if (_writeDateString(_menu_date_time.items[0].label)) {
+                        list_changed = true;
+                    }
+                }
+                if (DEVICE_ID == MIYOO354) {
+                    if (isMenu(&_menu_user_blue_light)) {
+                        if (_writeDateString(_menu_user_blue_light.items[0].label)) {
+                            list_changed = true;
+                        }
+                    }
                 }
             }
             if (isMenu(&_menu_network) || isMenu(&_menu_wifi)) {
