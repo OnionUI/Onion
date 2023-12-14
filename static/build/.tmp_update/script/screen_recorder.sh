@@ -88,7 +88,13 @@ pulsating_vibration() {
 
 show_countdown() {
     if [ $# -gt 0 ]; then
-        count="$1"
+        if [ "$1" = "off" ]; then
+            count=0
+        elif echo "$1" | grep -qE '^[0-9]+$'; then
+            count="$1"
+        else
+            count=3
+        fi
     else
         if [ -f "$sysdir/config/recCountdown" ]; then
             count=$(cat "$sysdir/config/recCountdown")
@@ -96,10 +102,10 @@ show_countdown() {
         else
             count=3
         fi
+    fi
 
-        if [ "$count" -lt 0 ] || [ "$count" -gt 5 ]; then
-            count=3
-        fi
+    if [ "$count" -lt 0 ] || [ "$count" -gt 5 ]; then
+        count=3
     fi
 
     check_disp_init
@@ -120,10 +126,10 @@ show_countdown() {
 
     original_colour=$current_colour
 
-    if [ "$count" -eq 3 ]; then
-        pulsating_vibration &
-    else
+    if [ "$count" -gt 1 ]; then
         pulsating_vibration $(( $count * 2 )) &
+    else
+        pulsating_vibration 1 &
     fi
 
     for i in $(seq 1 "$count"); do
@@ -157,13 +163,15 @@ toggle_ffmpeg() {
     if pgrep -f "ffmpeg -f fbdev -nostdin" > /dev/null; then
         pkill -2 -f "ffmpeg -f fbdev -nostdin"
         killall -9 imgpop
-        show_countdown 1
+        if [ "$(cat "$sysdir/config/recCountdown")" != "0" ]; then
+            show_countdown off
+        fi
         rm -f "$active_file"
     else
         
         if [ -f "$sysdir/config/recCountdown" ]; then
             if [ "$(cat "$sysdir/config/recCountdown")" != "0" ]; then
-                show_countdown
+                show_countdown $count
             else
                 short_vibration
             fi
