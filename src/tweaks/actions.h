@@ -412,26 +412,28 @@ void action_deleteAllRecordings(void *pt)
     ListItem *item = (ListItem *)pt;
     int fileCheck;
     fileCheck = exists("/tmp/recorder_active");
-    
+
     if (fileCheck) {
         if (!_disable_confirm && !_confirmReset("Recording!", "You're still recording!\nAre you sure you want to\ndelete all recordings?")) {
             return;
-        } else {
+        }
+        else {
             system("/mnt/SDCARD/.tmp_update/script/screen_recorder.sh hardkill &");
             strncpy(_menu_screen_recorder.items[0].sticky_note, "Status: Idle.", sizeof(_menu_screen_recorder.items[0].sticky_note) - 1);
             _menu_screen_recorder.items[0].sticky_note[sizeof(_menu_screen_recorder.items[0].sticky_note) - 1] = '\0';
         }
-    } else {
+    }
+    else {
         if (!_disable_confirm && !_confirmReset("Delete?", "Are you sure you want to\ndelete all recordings?")) {
             list_updateStickyNote(item, "Cancelled");
             return;
         }
-    } 
-    
+    }
+
     system("rm -f /mnt/SDCARD/Media/Videos/Recorded/*.mp4");
     list_updateStickyNote(item, "Recorded directory emptied!");
     if (!_disable_confirm)
-    _notifyResetDone("Deleted!");
+        _notifyResetDone("Deleted!");
 }
 
 void action_advancedSetLcdVoltage(void *pt)
