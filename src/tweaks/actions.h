@@ -15,6 +15,7 @@
 
 #include "./appstate.h"
 #include "./diags.h"
+#include "./reset.h"
 #include "./values.h"
 
 void action_setAppShortcut(void *pt)
@@ -55,6 +56,74 @@ void action_meterWidth(void *pt)
 {
     config_setNumber("display/meterWidth", ((ListItem *)pt)->value);
     osd_showBrightnessBar(settings.brightness);
+}
+
+int blueLightToggled = 0;
+
+void action_blueLight()
+{
+    if (access("/tmp/runningBLF", F_OK) != -1) {
+        return;
+    }
+
+    if (blueLightToggled) {
+        system("/mnt/SDCARD/.tmp_update/script/blue_light.sh disable &");
+        blueLightToggled = 0;
+    }
+    else {
+        system("/mnt/SDCARD/.tmp_update/script/blue_light.sh enable &");
+        blueLightToggled = 1;
+    }
+}
+
+void action_blueLightLevel(void *pt)
+{
+    int value;
+    ListItem *item = (ListItem *)pt;
+
+    value = item->value;
+    settings.blue_light_level = value;
+    config_setNumber("display/blueLightLevel", value);
+
+    system("/mnt/SDCARD/.tmp_update/script/blue_light.sh set_intensity &");
+    remove("/tmp/blueLightOn");
+}
+
+void action_blueLightState(void *pt)
+{
+    if (access("/tmp/runningBLF", F_OK) != -1) {
+        return;
+    }
+
+    ListItem *item = (ListItem *)pt;
+    settings.blue_light_state = item->value == 1;
+    config_flag_set(".blf", settings.blue_light_state);
+
+    if (item->value == 0) { // blf being disabled
+        system("/mnt/SDCARD/.tmp_update/script/blue_light.sh disable &");
+        remove("/tmp/blueLightOn");
+    }
+    else {
+        system("/mnt/SDCARD/.tmp_update/script/blue_light.sh check &"); // check if we're within the time values and start now
+    }
+    reset_menus = true;
+    all_changed = true;
+}
+
+void action_blueLightTimeOn(void *pt)
+{
+    char time_str[10];
+    formatter_Time(pt, time_str);
+    strcpy(settings.blue_light_time, time_str);
+    config_setString("display/blueLightTime", time_str);
+}
+
+void action_blueLightTimeOff(void *pt)
+{
+    char time_str[10];
+    formatter_Time(pt, time_str);
+    strcpy(settings.blue_light_time_off, time_str);
+    config_setString("display/blueLightTimeOff", time_str);
 }
 
 void action_setStartupAutoResume(void *pt)
@@ -285,6 +354,16 @@ void action_advancedSetFrameThrottle(void *pt)
     stored_value_frame_throttle_changed = true;
 }
 
+void action_advancedSetPWMFreqency(void *pt)
+{
+    FILE *fp;
+    int item_value = ((ListItem *)pt)->value;
+    int pwmfrequency = atoi(((ListItem *)pt)->value_labels[item_value]);
+    char *filename = "/sys/class/pwm/pwmchip0/pwm0/period";
+    file_put(fp, filename, "%d", pwmfrequency);
+    config_setNumber(".pwmfrequency", item_value);
+}
+
 void action_advancedSetSwapTriggers(void *pt)
 {
     int item_value = ((ListItem *)pt)->value;
@@ -295,6 +374,66 @@ void action_advancedSetSwapTriggers(void *pt)
 void action_setAltBrightness(void *pt)
 {
     config_flag_set(".altBrightness", ((ListItem *)pt)->value);
+}
+
+void action_toggleScreenRecIndicator(void *pt)
+{
+    config_flag_set(".recIndicator", ((ListItem *)pt)->value);
+    settings.rec_indicator = ((ListItem *)pt)->value == 1;
+}
+
+void action_toggleScreenRecCountdown(void *pt)
+{
+    config_setNumber("recCountdown", ((ListItem *)pt)->value);
+    settings.rec_countdown = ((ListItem *)pt)->value;
+}
+
+void action_toggleScreenRecHotkey(void *pt)
+{
+    config_flag_set(".recHotkey", ((ListItem *)pt)->value);
+    settings.rec_hotkey = ((ListItem *)pt)->value == 1;
+}
+
+void action_hardKillFFmpeg(void *pt)
+{
+    ListItem *item = (ListItem *)pt;
+    int status = system("/mnt/SDCARD/.tmp_update/script/screen_recorder.sh hardkill");
+    if (status != 0) {
+        list_updateStickyNote(item, "Status: Error occurred.");
+    }
+    else {
+        list_updateStickyNote(item, "Status: FFmpeg process stopped");
+    }
+    list_changed = true;
+}
+
+void action_deleteAllRecordings(void *pt)
+{
+    ListItem *item = (ListItem *)pt;
+    int fileCheck;
+    fileCheck = exists("/tmp/recorder_active");
+
+    if (fileCheck) {
+        if (!_disable_confirm && !_confirmReset("Recording!", "You're still recording!\nAre you sure you want to\ndelete all recordings?")) {
+            return;
+        }
+        else {
+            system("/mnt/SDCARD/.tmp_update/script/screen_recorder.sh hardkill &");
+            strncpy(_menu_screen_recorder.items[0].sticky_note, "Status: Idle.", sizeof(_menu_screen_recorder.items[0].sticky_note) - 1);
+            _menu_screen_recorder.items[0].sticky_note[sizeof(_menu_screen_recorder.items[0].sticky_note) - 1] = '\0';
+        }
+    }
+    else {
+        if (!_disable_confirm && !_confirmReset("Delete?", "Are you sure you want to\ndelete all recordings?")) {
+            list_updateStickyNote(item, "Cancelled");
+            return;
+        }
+    }
+
+    system("rm -f /mnt/SDCARD/Media/Videos/Recorded/*.mp4");
+    list_updateStickyNote(item, "Recorded directory emptied!");
+    if (!_disable_confirm)
+        _notifyResetDone("Deleted!");
 }
 
 void action_advancedSetLcdVoltage(void *pt)
@@ -328,6 +467,13 @@ void action_advancedSetLcdVoltage(void *pt)
 
     FILE *fp;
     file_put(fp, LCD_VOLT_CONFIG, "%x", 0x0e);
+}
+
+const char *action_LaunchKeyboardWrapper(const char *initial_value, const char *title)
+{
+    const char *result = launch_keyboard(initial_value, title);
+    all_changed = true;
+    return result;
 }
 
 #endif // TWEAKS_ACTIONS_H__

@@ -104,6 +104,7 @@ done
 IFS="$OIFS"
 
 touch /tmp/dismiss_info_panel
+sync
 
 ports_total=$((count_found + count_notfound))
 infoPanel -t "Ports Import" -m "Found $count_found of $ports_total $([ $ports_total -eq 1 ] && (echo "port") || (echo "ports"))" --auto

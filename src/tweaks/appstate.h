@@ -23,6 +23,7 @@ static List _menu_wps;
 static List _menu_http;
 static List _menu_ssh;
 static List _menu_smbd;
+static List _menu_vnc;
 
 void menu_network_free_all(void)
 {
@@ -34,6 +35,7 @@ void menu_network_free_all(void)
     list_free(&_menu_http);
     list_free(&_menu_ssh);
     list_free(&_menu_smbd);
+    list_free(&_menu_vnc);
 }
 
 static List _menu_icons;
@@ -67,7 +69,10 @@ static List _menu_battery_percentage;
 static List _menu_advanced;
 static List _menu_reset_settings;
 static List _menu_tools;
+static List _menu_tools_m3uGenerator;
 static List _menu_diagnostics;
+static List _menu_screen_recorder;
+static List _menu_user_blue_light;
 
 void menu_free_all(void)
 {
@@ -85,7 +90,10 @@ void menu_free_all(void)
     list_free(&_menu_advanced);
     list_free(&_menu_reset_settings);
     list_free(&_menu_tools);
+    list_free(&_menu_tools_m3uGenerator);
     list_free(&_menu_diagnostics);
+    list_free(&_menu_screen_recorder);
+    list_free(&_menu_user_blue_light);
 
     menu_icons_free_all();
     menu_network_free_all();

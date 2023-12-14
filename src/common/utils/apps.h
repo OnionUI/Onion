@@ -116,7 +116,7 @@ bool getAppPosition(const char *app_dir_name, int *currpos, int *total)
     return found;
 }
 
-void run_app(const char *app_dir_name)
+void set_cmd_app(const char *app_dir_name)
 {
     char app_dir[STR_MAX], config_path[STR_MAX];
 
