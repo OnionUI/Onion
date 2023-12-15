@@ -59,8 +59,6 @@ void action_meterWidth(void *pt)
 
 void action_blueLight(void *pt)
 {
-    ListItem *item = (ListItem *)pt;
-
     blf_changing = true;
     reset_menus = true;
     
