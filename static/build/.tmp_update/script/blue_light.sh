@@ -2,6 +2,8 @@ sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo 
 export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 blf_key=$sysdir/config/.blf
+blf_key_on=$sysdir/config/.blfOn
+track_sched=/tmp/.blfonsched
 
 sync
 lockfile="/tmp/blue_light_script.lock"
@@ -35,8 +37,14 @@ setRGBValues() {
 }
 
 set_intensity() {
+    reset_to_default=${1:-1}
     sync
     value=$(cat $sysdir/config/display/blueLightLevel)
+
+    if [ "$reset_to_default" -eq 0 ]; then
+        echo "8421504" > $sysdir/config/display/blueLightRGB
+        return
+    fi
 
     setRGBValues "$value"
     endB=$endB
@@ -46,9 +54,10 @@ set_intensity() {
     newCombinedRGB=$(( (endR << 16) | (endG << 8) | endB ))
     echo $newCombinedRGB > $sysdir/config/display/blueLightRGB
 
-    echo ":: Blue Light Filter Intensity Set to $value, ready for next toggle."
-    if [ -f "$sysdir/config/.blf" ]; then
+    # echo ":: Blue Light Filter Intensity Set to $value, ready for next toggle." 
+    if [ -f "$sysdir/config/.blfOn" ]; then
         touch /tmp/blueLightIntensityChange
+        blueLightStart
     fi
 }
 
@@ -83,7 +92,7 @@ disable_blue_light_filter() {
     done
 
     echo ":: Blue Light Filter: Disabled"
-    rm -f /tmp/blueLightOn
+    rm -f $blf_key_on
 }
 
 check_disp_init() {
@@ -103,7 +112,7 @@ blueLightStart() {
     sync
     value=$(cat $sysdir/config/display/blueLightLevel)
     
-    if [ ! -f /tmp/blueLightOn ] && [ ! -f /tmp/blueLightIntensityChange ]; then
+    if [ ! -f $blf_key_on ] && [ ! -f /tmp/blueLightIntensityChange ]; then
         lastR=128
         lastG=128
         lastB=128
@@ -162,7 +171,7 @@ enable_blue_light_filter() {
     blueLightStart
     
     echo ":: Blue Light Filter: Enabled"
-    touch /tmp/blueLightOn
+    touch $blf_key_on
 }
 
 disable_blue_light_filter() {    
@@ -189,7 +198,7 @@ disable_blue_light_filter() {
     done
     
     echo ":: Blue Light Filter: Disabled"
-    rm -f /tmp/blueLightOn
+    rm -f $blf_key_on
 }
 
 check_blf() {
@@ -218,22 +227,30 @@ check_blf() {
     if [ -f "$blf_key" ]; then
         if [ "$blueLightTimeOffMinutes" -lt "$blueLightTimeOnMinutes" ]; then
             if [ "$currentTimeMinutes" -ge "$blueLightTimeOnMinutes" ] || [ "$currentTimeMinutes" -lt "$blueLightTimeOffMinutes" ]; then
-                if [ ! -f /tmp/blueLightOn ]; then
+                if [ ! -f $blf_key_on ]; then
                     enable_blue_light_filter 
+                    touch $track_sched
+                    touch $blf_key_on
                 fi
             else
-                if [ -f /tmp/blueLightOn ]; then
+                if [ -f $blf_key_on ]; then
                     disable_blue_light_filter 
+                    rm $track_sched
+                    rm $blf_key_on
                 fi
             fi
         else
             if [ "$currentTimeMinutes" -ge "$blueLightTimeOnMinutes" ] && [ "$currentTimeMinutes" -lt "$blueLightTimeOffMinutes" ]; then
-                if [ ! -f /tmp/blueLightOn ]; then
+                if [ ! -f $blf_key_on ]; then
                     enable_blue_light_filter 
+                    touch $track_sched
+                    touch $blf_key_on
                 fi
             else
-                if [ -f /tmp/blueLightOn ]; then
+                if [ -f $blf_key_on ]; then
                     disable_blue_light_filter 
+                    rm $blf_key_on
+                    rm $track_sched
                 fi
             fi
         fi
@@ -242,28 +259,29 @@ check_blf() {
     rm -f "$lockfile"
 }
 
+set_default() {
+    disable_blue_light_filter
+    set_intensity 0
+}
 
 case "$1" in
     enable)
-        touch /tmp/runningBLF
         enable_blue_light_filter
-        rm -rf /tmp/runningBLF
         ;;
     disable)
-        touch /tmp/runningBLF
         disable_blue_light_filter
-        rm -rf /tmp/runningBLF
         ;;
     check)
-        touch /tmp/runningBLF
         check_blf
-        rm -rf /tmp/runningBLF
         ;;
     set_intensity)
-        set_intensity
+        set_intensity "$2"
+        ;;
+    set_default)
+        set_default
         ;;
     *)
-        echo "Usage: $0 {enable|disable|check|set_intensity}"
+        echo "Usage: $0 {enable|disable|check|set_intensity [reset_arg]|set_default}"
         exit 1
         ;;
 esac

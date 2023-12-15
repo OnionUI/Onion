@@ -196,6 +196,13 @@ int main(int argc, char *argv[])
 
         if (battery_hasChanged(ticks, &battery_percentage))
             battery_changed = true;
+        
+        blf_changing = exists("/tmp/blue_light_script.lock");
+
+        if (blf_changing != prev_blf_changing) {
+            reset_menus = true;
+            prev_blf_changing = blf_changing;
+        }
 
         if (acc_ticks >= time_step) {
             if (isMenu(&_menu_date_time) || isMenu(&_menu_user_blue_light)) {

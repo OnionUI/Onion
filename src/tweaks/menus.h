@@ -486,23 +486,28 @@ void menu_blueLight(void *_)
         list_addItemWithInfoNote(&_menu_user_blue_light,
                                  (ListItem){
                                      .label = "Toggle now",
-                                     .item_type = ACTION,
+                                     .disabled = blf_changing,
+                                     .disable_arrows = blf_changing,
+                                     .item_type = TOGGLE,
+                                     .value = (int)settings.blue_light_state || exists("/tmp/.blfon"),
                                      .action = action_blueLight},
-                                 "Test the selected strength \n");
+                                 "Set the selected strength now\n");
         if (DEVICE_ID == MIYOO354) {
             list_addItemWithInfoNote(&_menu_user_blue_light,
                                      (ListItem){
                                          .label = "Enable schedule",
                                          .disabled = !network_state.ntp,
                                          .item_type = TOGGLE,
-                                         .value = (int)settings.blue_light_state,
-                                         .action = action_blueLightState},
+                                         .value = (int)settings.blue_light_schedule,
+                                         .action = action_blueLightSchedule},
                                      "Turn bluelight filter on or off\n");
         }
         list_addItemWithInfoNote(&_menu_user_blue_light,
                                  (ListItem){
                                      .label = "Strength",
                                      .item_type = MULTIVALUE,
+                                     .disabled = blf_changing,
+                                     .disable_arrows = blf_changing,
                                      .value_max = 5,
                                      .value_labels = BLUELIGHT_LABELS,
                                      .action = action_blueLightLevel,
