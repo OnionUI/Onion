@@ -46,6 +46,9 @@ set_intensity() {
         echo "8421504" > $sysdir/config/display/blueLightRGB
         return
     fi
+    
+    currentRGB=$(cat $sysdir/config/display/blueLightRGB)
+    echo $currentRGB > $sysdir/config/display/blueLightRGBtemp
 
     setRGBValues "$value"
     endB=$endB
@@ -108,33 +111,27 @@ check_disp_init() {
 blueLightStart() {
     sync
     value=$(cat $sysdir/config/display/blueLightLevel)
-    
-    if [ ! -f $blf_key_on ] && [ ! -f /tmp/blueLightIntensityChange ]; then
-        lastR=128
-        lastG=128
-        lastB=128
-    elif [ -f /tmp/blueLightIntensityChange ]; then
-        combinedRGB=$(cat $sysdir/config/display/blueLightRGBtemp)
-        combinedRGB=$(echo "$combinedRGB" | tr -d '[:space:]/#')
-        lastR=$(( (combinedRGB >> 16) & 0xFF ))
-        lastG=$(( (combinedRGB >> 8) & 0xFF ))
-        lastB=$(( combinedRGB & 0xFF ))
+
+    if [ -f $blf_key_on ]; then
+        if [ -f /tmp/blueLightIntensityChange ]; then
+            combinedRGB=$(cat $sysdir/config/display/blueLightRGBtemp)
+        else
+            combinedRGB=$(cat $sysdir/config/display/blueLightRGB)
+        fi
     else
-        combinedRGB=$(cat $sysdir/config/display/blueLightRGB)
-        combinedRGB=$(echo "$combinedRGB" | tr -d '[:space:]/#')
-        lastR=$(( (combinedRGB >> 16) & 0xFF ))
-        lastG=$(( (combinedRGB >> 8) & 0xFF ))
-        lastB=$(( combinedRGB & 0xFF ))
+        combinedRGB="8421504"
     fi
+    combinedRGB=$(echo "$combinedRGB" | tr -d '[:space:]/#')
+    lastR=$(( (combinedRGB >> 16) & 0xFF ))
+    lastG=$(( (combinedRGB >> 8) & 0xFF ))
+    lastB=$(( combinedRGB & 0xFF ))
 
     setRGBValues "$value"
-    endB=$endB
-    endG=$endG
-    endR=$endR
     
     # echo "Last BGR: B: $lastB, G: $lastG, R: $lastR"
     # echo "Target BGR: B: $endB, G: $endG, R: $endR"
 
+    # Fading loop
     for i in $(seq 0 20); do
         newB=$(( lastB + (endB - lastB) * i / 20 ))
         newG=$(( lastG + (endG - lastG) * i / 20 ))
@@ -148,6 +145,7 @@ blueLightStart() {
     echo $newCombinedRGB > $sysdir/config/display/blueLightRGB
     rm -f /tmp/blueLightIntensityChange
 }
+
 
 to_minutes_since_midnight() {
     hour=$(echo "$1" | cut -d: -f1 | xargs)
