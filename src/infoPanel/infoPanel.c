@@ -94,7 +94,7 @@ static void drawInfoPanel(SDL_Surface *screen, SDL_Surface *video,
     if (has_message) {
         const char *str = str_replace(message_str, "\\n", "\n");
         message = theme_textboxSurface(str, resource_getFont(TITLE),
-                                       theme()->grid.color, ALIGN_CENTER);
+                                       theme()->list.color, ALIGN_CENTER);
         message_rect.x -= message->w / 2;
         message_rect.y -= message->h / 2;
         SDL_BlitSurface(message, NULL, screen, &message_rect);
@@ -137,6 +137,7 @@ int main(int argc, char *argv[])
     bool wait_confirm = true;
     bool is_persistent = false;
     bool info_panel_mode = false;
+    bool no_footer = false;
 
     for (int i = 1; i < argc; i++) {
         if (argv[i][0] == '-') {
@@ -154,6 +155,8 @@ int main(int argc, char *argv[])
                 g_show_theme_controls = true;
             else if (strcmp(argv[i], "-a") == 0 || strcmp(argv[i], "--auto") == 0)
                 wait_confirm = false;
+            else if (strcmp(argv[i], "-a") == 0 || strcmp(argv[i], "--no-footer") == 0)
+                no_footer = true;
             else if (strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "--persistent") == 0) {
                 wait_confirm = false;
                 is_persistent = true;
@@ -164,7 +167,7 @@ int main(int argc, char *argv[])
     signal(SIGINT, sigHandler);
     signal(SIGTERM, sigHandler);
 
-    SDL_InitDefault(true);
+    SDL_InitDefault(false);
 
     settings_load();
     lang_load();
@@ -359,7 +362,7 @@ int main(int argc, char *argv[])
                         }
                     }
 
-                    if (footer_changed) {
+                    if (footer_changed && !no_footer) {
                         theme_renderFooter(screen);
 
                         const char *a_btn_text = lang_get(LANG_NEXT, LANG_FALLBACK_NEXT);

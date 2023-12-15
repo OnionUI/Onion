@@ -10,6 +10,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "components/kbinput_wrapper.h"
 #include "components/list.h"
 #include "system/device_model.h"
 #include "system/display.h"
@@ -682,7 +683,7 @@ void menu_diagnostics(void *pt)
 void menu_advanced(void *_)
 {
     if (!_menu_advanced._created) {
-        _menu_advanced = list_createWithTitle(6, LIST_SMALL, "Advanced");
+        _menu_advanced = list_createWithTitle(7, LIST_SMALL, "Advanced");
         list_addItemWithInfoNote(&_menu_advanced,
                                  (ListItem){
                                      .label = "Swap triggers (L<>L2, R<>R2)",
@@ -712,6 +713,17 @@ void menu_advanced(void *_)
                                      .value_formatter = formatter_fastForward,
                                      .action = action_advancedSetFrameThrottle},
                                  "Set the maximum fast forward rate.");
+        list_addItemWithInfoNote(&_menu_advanced,
+                                 (ListItem){
+                                     .label = "PWM frequency",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 9,
+                                     .value_labels = PWM_FREQUENCIES,
+                                     .value = value_getPWMFrequency(),
+                                     .action = action_advancedSetPWMFreqency},
+                                 "Change the PWM frequency\n"
+                                 "Lower values for less buzzing\n"
+                                 "Experimental feature");
         if (DEVICE_ID == MIYOO354) {
             list_addItemWithInfoNote(&_menu_advanced,
                                      (ListItem){
@@ -736,6 +748,73 @@ void menu_advanced(void *_)
                          .action = menu_diagnostics});
     }
     menu_stack[++menu_level] = &_menu_advanced;
+    header_changed = true;
+}
+
+void menu_screen_recorder(void *pt)
+{
+    if (!_menu_screen_recorder._created) {
+        _menu_screen_recorder = list_createWithSticky(7, "Screen recorder setup");
+        list_addItemWithInfoNote(&_menu_screen_recorder,
+                                 (ListItem){
+                                     .label = "Start/stop recorder",
+                                     .sticky_note = "Status:...",
+                                     .action = tool_screenRecorder},
+                                 "Start or stop the recorder");
+        list_addItemWithInfoNote(&_menu_screen_recorder,
+                                 (ListItem){
+                                     .label = "Countdown (seconds)",
+                                     .sticky_note = "Specify the countdown",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 10,
+                                     .value = (int)settings.rec_countdown,
+                                     .action = action_toggleScreenRecCountdown},
+                                 "Countdown when starting recording. \n\n"
+                                 "The screen will pulse white n times \n"
+                                 "to signify recording has started/stopped");
+        list_addItemWithInfoNote(&_menu_screen_recorder,
+                                 (ListItem){
+                                     .label = "Toggle indicator icon",
+                                     .sticky_note = "Turn the indicator on/off",
+                                     .item_type = TOGGLE,
+                                     .value = (int)settings.rec_indicator,
+                                     .action = action_toggleScreenRecIndicator},
+                                 "Toggles the display of a\n"
+                                 "a flashing icon to remind you\n"
+                                 "that you're still recording.");
+        list_addItemWithInfoNote(&_menu_screen_recorder,
+                                 (ListItem){
+                                     .label = "Toggle hotkey",
+                                     .sticky_note = "Turn the hotkey (Menu+A) on/off ",
+                                     .item_type = TOGGLE,
+                                     .value = (int)settings.rec_hotkey,
+                                     .action = action_toggleScreenRecHotkey},
+                                 "Enable the hotkey function.\n\n"
+                                 "Recording can be started/stopped\n"
+                                 "with Menu+A");
+        list_addItemWithInfoNote(&_menu_screen_recorder,
+                                 (ListItem){
+                                     .label = "Reset screen recorder",
+                                     .sticky_note = "Hard kill ffmpeg if it's crashed",
+                                     .action = action_hardKillFFmpeg},
+                                 "Performs a hard kill of ffmpeg.\n\n"
+                                 "WARNING: If you're currently\n"
+                                 "recording, you may lose the file!");
+        list_addItemWithInfoNote(&_menu_screen_recorder,
+                                 (ListItem){
+                                     .label = "Delete all recordings",
+                                     .sticky_note = "Empties the recordings directory",
+                                     .action = action_deleteAllRecordings},
+                                 "Deletes all recorded videos. \n\n"
+                                 "WARNING: This action cannot\n"
+                                 "be undone!");
+    }
+
+    int isRecordingActive = exists("/tmp/recorder_active");
+    const char *recordingStatus = isRecordingActive ? "Status: Now recording..." : "Status: Idle.";
+    strncpy(_menu_screen_recorder.items[0].sticky_note, recordingStatus, sizeof(_menu_screen_recorder.items[0].sticky_note) - 1);
+    _menu_screen_recorder.items[0].sticky_note[sizeof(_menu_screen_recorder.items[0].sticky_note) - 1] = '\0';
+    menu_stack[++menu_level] = &_menu_screen_recorder;
     header_changed = true;
 }
 
@@ -796,6 +875,19 @@ void menu_tools(void *_)
                                  "This generates a 'miyoogamelist.xml' file\n"
                                  "which comes with some limitations, such\n"
                                  "as no subfolder support.");
+        list_addItem(&_menu_tools,
+                     (ListItem){
+                         .label = "Screen recorder...",
+                         .action = menu_screen_recorder});
+        list_addItemWithInfoNote(&_menu_tools,
+                                 (ListItem){
+                                     .label = "Regenerate game switcher list",
+                                     .action = tool_generateGsList},
+                                 "Utilize this tool to recreate your game\n"
+                                 "switcher list using the RetroArch history,\n"
+                                 "particularly in instances of corruption.\n"
+                                 "Keep in mind that NDS games and certain\n"
+                                 "ports may require manual addition.");
         list_addItemWithInfoNote(&_menu_tools,
                                  (ListItem){
                                      .label = "Sort applist A-Z",

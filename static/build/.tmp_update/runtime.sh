@@ -16,6 +16,9 @@ main() {
     export DEVICE_ID=$([ $? -eq 0 ] && echo $MODEL_MMP || echo $MODEL_MM)
     echo -n "$DEVICE_ID" > /tmp/deviceModel
 
+    SERIAL_NUMBER=$(read_uuid) 
+    echo -n "$SERIAL_NUMBER" > /tmp/deviceSN
+    
     touch /tmp/is_booting
     check_installer
     clear_logs
@@ -75,6 +78,9 @@ main() {
     # Init
     rm /tmp/.offOrder 2> /dev/null
     HOME=/mnt/SDCARD/RetroArch/
+    
+    # Disable VNC server flag at boot
+    rm $sysdir/config/.vncServer
     
     # Detect if MENU button is held
     detectKey 1
@@ -204,7 +210,6 @@ launch_main_ui() {
     fi
 
     $sysdir/bin/freemma
-
     mv -f /tmp/cmd_to_run.sh $sysdir/cmd_to_run.sh
 
     set_prev_state "mainui"
@@ -247,7 +252,6 @@ check_game() {
 check_is_game() {
     echo "$1" | grep -q "retroarch/cores" || echo "$1" | grep -q "/../../Roms/" || echo "$1" | grep -q "/mnt/SDCARD/Roms/"
 }
-
 launch_game() {
     log "\n:: Launch game"
     cmd=$(cat $sysdir/cmd_to_run.sh)
@@ -337,15 +341,21 @@ launch_game() {
         if [ "$romext" == "miyoocmd" ]; then
             emupath=$(dirname $(echo "$cmd" | awk '{ gsub(/"/, "", $2); st = index($2,".."); if (st) { print substr($2,0,st) } else { print $2 } }'))
             cd "$emupath"
-
             chmod a+x "$rompath"
             "$rompath" "$rompath" "$emupath"
             retval=$?
         else
             # GAME LAUNCH
+            # Free memory
+            $sysdir/bin/freemma
             cd /mnt/SDCARD/RetroArch/
             $sysdir/cmd_to_run.sh
             retval=$?
+            if [ $is_game -eq 1 ] && [ ! -f /tmp/.offOrder ]; then
+                infoPanel --title " " --message  "Saving ..." --persistent --no-footer &
+                touch /tmp/dismiss_info_panel
+                sync
+            fi
         fi
     else
         retval=404
@@ -364,10 +374,7 @@ launch_game() {
 
     # Reset flags
     rm /tmp/stay_awake 2> /dev/null
-
-    # Free memory
-    $sysdir/bin/freemma
-
+        
     # TIMER END + SHUTDOWN CHECK
     if [ $is_game -eq 1 ]; then
         if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
@@ -428,6 +435,7 @@ check_switcher() {
 launch_switcher() {
     log "\n:: Launch switcher"
     cd $sysdir
+    start_audioserver
     LD_PRELOAD="$miyoodir/lib/libpadsp.so" gameSwitcher
     rm $sysdir/.runGameSwitcher
     set_prev_state "switcher"
@@ -508,7 +516,14 @@ init_system() {
 
     # init backlight
     echo 0 > /sys/class/pwm/pwmchip0/export
-    echo 800 > /sys/class/pwm/pwmchip0/pwm0/period
+    pwmfile="$sysdir/config/.pwmfrequency"
+    if [ -s $pwmfile ]; then
+        # 0 - 9 = 100 - 1000 Hz
+        frequency=$((($(cat "$pwmfile") + 1) * 100))
+    else
+        frequency=800
+    fi
+    echo $frequency > /sys/class/pwm/pwmchip0/pwm0/period
     echo $brightness_raw > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
     echo 1 > /sys/class/pwm/pwmchip0/pwm0/enable
 }
