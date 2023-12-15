@@ -39,6 +39,7 @@ setRGBValues() {
 set_intensity() {
     reset_to_default=${1:-1}
     sync
+
     value=$(cat $sysdir/config/display/blueLightLevel)
 
     if [ "$reset_to_default" -eq 0 ]; then
@@ -53,21 +54,17 @@ set_intensity() {
 
     newCombinedRGB=$(( (endR << 16) | (endG << 8) | endB ))
     echo $newCombinedRGB > $sysdir/config/display/blueLightRGB
+    sync
 
     # echo ":: Blue Light Filter Intensity Set to $value, ready for next toggle." 
     if [ -f "$sysdir/config/.blfOn" ]; then
         touch /tmp/blueLightIntensityChange
         blueLightStart
     fi
+    rm $lockfile
 }
 
-disable_blue_light_filter() {
-
-    if [ -f /tmp/runningBLF ]; then
-        echo "Another instance of the script is already running."
-        exit 1
-    fi  
-    
+disable_blue_light_filter() {   
     sync
     
     combinedBGR=$(cat $sysdir/config/display/blueLightRGB)
