@@ -490,7 +490,7 @@ void menu_blueLight(void *_)
                                      .disable_arrows = blf_changing,
                                      .disable_a_btn = blf_changing,
                                      .item_type = TOGGLE,
-                                     .value = (int)settings.blue_light_state || exists("/tmp/.blfon"),
+                                     .value = (int)settings.blue_light_state || exists("/tmp/.blfOn"),
                                      .action = action_blueLight},
                                  "Set the selected strength now\n");
         if (DEVICE_ID == MIYOO354) {
@@ -580,6 +580,10 @@ void menu_userInterface(void *_)
         list_addItem(&_menu_user_interface,
                      (ListItem){
                          .label = "Blue light filter...",
+                         .item_type = TOGGLE,
+                         .alternative_arrow_action = true,
+                         .value = (int)settings.blue_light_state || exists("/tmp/.blfOn"),
+                         .arrow_action = action_blueLight,
                          .action = menu_blueLight});
         list_addItem(&_menu_user_interface,
                      (ListItem){

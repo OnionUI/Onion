@@ -63,10 +63,11 @@ void action_blueLight(void *pt)
     blf_changing = true;
     reset_menus = true;
 
-    if (settings.blue_light_state) {
+    if (settings.blue_light_state || exists("/tmp/.blfOn")) {
         system("/mnt/SDCARD/.tmp_update/script/blue_light.sh set_default &");
         if (exists("/tmp/.blfonsched")) {
             remove("/tmp/.blfonsched");
+            remove("/tmp/.blfOn");
         }
     }
     else {
@@ -86,7 +87,7 @@ void action_blueLightLevel(void *pt)
     settings.blue_light_level = item->value;
     config_setNumber("display/blueLightLevel", item->value);
 
-    if (settings.blue_light_state) {
+    if (settings.blue_light_state || exists("/tmp/.blfOn")) {
         system("/mnt/SDCARD/.tmp_update/script/blue_light.sh set_intensity &");
     }
     else {
@@ -100,7 +101,7 @@ void action_blueLightSchedule(void *pt)
     reset_menus = true;
 
     ListItem *item = (ListItem *)pt;
-    settings.blue_light_schedule = item->value == 1;
+    settings.blue_light_schedule = ((ListItem *)pt)->value;
     config_flag_set(".blf", settings.blue_light_schedule);
 
     if (item->value == 0) {
@@ -108,6 +109,7 @@ void action_blueLightSchedule(void *pt)
         settings.blue_light_state = 0;
         if (exists("/tmp/.blfonsched")) {
             remove("/tmp/.blfonsched");
+            remove("/tmp/.blfOn");
         }
     }
     else {

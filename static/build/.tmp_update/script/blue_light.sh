@@ -2,7 +2,7 @@ sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo 
 export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 blf_key=$sysdir/config/.blf
-blf_key_on=$sysdir/config/.blfOn
+blf_key_on=/tmp/.blfOn
 track_sched=/tmp/.blfonsched
 
 sync
