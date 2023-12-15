@@ -62,18 +62,19 @@ void action_blueLight(void *pt)
 {
     blf_changing = true;
     reset_menus = true;
-    
+
     if (settings.blue_light_state) {
         system("/mnt/SDCARD/.tmp_update/script/blue_light.sh set_default &");
         if (exists("/tmp/.blfonsched")) {
             remove("/tmp/.blfonsched");
         }
-    } else {
+    }
+    else {
         system("/mnt/SDCARD/.tmp_update/script/blue_light.sh enable &");
     }
 
     settings.blue_light_state = ((ListItem *)pt)->value;
-    config_flag_set(".blfOn", ((ListItem *)pt)->value); 
+    config_flag_set(".blfOn", ((ListItem *)pt)->value);
 }
 
 void action_blueLightLevel(void *pt)
@@ -81,13 +82,14 @@ void action_blueLightLevel(void *pt)
     blf_changing = true;
     reset_menus = true;
     ListItem *item = (ListItem *)pt;
-   
+
     settings.blue_light_level = item->value;
     config_setNumber("display/blueLightLevel", item->value);
-    
+
     if (settings.blue_light_state) {
         system("/mnt/SDCARD/.tmp_update/script/blue_light.sh set_intensity &");
-    } else {
+    }
+    else {
         system("timeout -t 1 /mnt/SDCARD/.tmp_update/script/blue_light.sh set_intensity &");
     }
 }
@@ -96,7 +98,7 @@ void action_blueLightSchedule(void *pt)
 {
     blf_changing = true;
     reset_menus = true;
-    
+
     ListItem *item = (ListItem *)pt;
     settings.blue_light_schedule = item->value == 1;
     config_flag_set(".blf", settings.blue_light_schedule);
@@ -111,7 +113,7 @@ void action_blueLightSchedule(void *pt)
     else {
         system("/mnt/SDCARD/.tmp_update/script/blue_light.sh check &"); // check if we're within the time values and start now
     }
-   
+
     reset_menus = true;
     all_changed = true;
 }

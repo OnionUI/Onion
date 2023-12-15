@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
 
         if (battery_hasChanged(ticks, &battery_percentage))
             battery_changed = true;
-        
+
         blf_changing = exists("/tmp/blue_light_script.lock");
 
         if (blf_changing != prev_blf_changing) {
