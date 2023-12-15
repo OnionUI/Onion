@@ -488,7 +488,7 @@ void menu_blueLight(void *_)
                                  (ListItem){
                                      .label = "Toggle now",
                                      .disable_arrows = blf_changing,
-                                     .disable_a_btn = blf_changing,
+                                     .disable_ab = blf_changing,
                                      .item_type = TOGGLE,
                                      .value = (int)settings.blue_light_state || exists("/tmp/.blfon"),
                                      .action = action_blueLight},
@@ -508,7 +508,7 @@ void menu_blueLight(void *_)
                                      .label = "Strength",
                                      .item_type = MULTIVALUE,
                                      .disable_arrows = blf_changing,
-                                     .disable_a_btn = blf_changing,
+                                     .disable_ab = blf_changing,
                                      .value_max = 5,
                                      .value_labels = BLUELIGHT_LABELS,
                                      .action = action_blueLightLevel,
