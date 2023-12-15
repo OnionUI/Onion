@@ -23,6 +23,7 @@ typedef struct ListItem {
     bool disabled;
     bool show_opaque;
     bool disable_arrows;
+    bool disable_ab;
     bool alternative_arrow_action;
     char label[STR_MAX];
     char description[STR_MAX];
@@ -350,7 +351,7 @@ bool list_activateItem(List *list)
 {
     ListItem *item = list_currentItem(list);
 
-    if (item == NULL)
+    if (item == NULL || item->disable_ab)
         return false;
 
     int old_value = item->value;
