@@ -165,6 +165,7 @@ enable_blue_light_filter() {
     
     echo ":: Blue Light Filter: Enabled"
     touch $blf_key_on
+    touch $sysdir/config/.blfOn
 }
 
 disable_blue_light_filter() {    
