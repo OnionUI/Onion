@@ -70,7 +70,7 @@ void action_blueLight(void *pt)
     else {
         system("/mnt/SDCARD/.tmp_update/script/blue_light.sh enable &");
     }
-    
+
     settings.blue_light_state = ((ListItem *)pt)->value;
     config_flag_set(".blfOn", ((ListItem *)pt)->value);
     list_changed = true;
