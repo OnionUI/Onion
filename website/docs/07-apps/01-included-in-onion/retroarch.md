@@ -74,4 +74,4 @@ Meny additional shortcuts are available for Retroarch, do not forget to check [O
 
 ### <sub>Overclocking</sub>
 
-Onion's Retroarch includes overcloking feature. There's no UI for it currently. This feature is described [in this post](https://github.com/OnionUI/Onion/issues/768#issuecomment-1659968668).
+Onion's Retroarch includes overclocking feature. There's no UI for it currently. This feature is described [in this post](https://github.com/OnionUI/Onion/issues/768#issuecomment-1659968668).
