@@ -692,7 +692,9 @@ int main(void)
 
             // start screen recording after holding for >2secs
             if (menuAndAPressed && (getMilliseconds() - menuAndAPressedTime >= 2000)) {
-                system("/mnt/SDCARD/.tmp_update/script/screen_recorder.sh toggle &");
+                if (access("/mnt/SDCARD/.tmp_update/config/.recHotkey", F_OK) != -1) {
+                    system("/mnt/SDCARD/.tmp_update/script/screen_recorder.sh toggle &");
+                }
 
                 menuAndAPressed = false;
                 menuAndAPressedTime = 0;
