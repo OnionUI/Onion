@@ -547,6 +547,8 @@ void menu_blueLight(void *_)
 
 void menu_userInterface(void *_)
 {
+    settings.blue_light_state = config_flag_get(".blfOn");
+    all_changed = true;
     if (!_menu_user_interface._created) {
         _menu_user_interface = list_createWithTitle(6, LIST_SMALL, "Appearance");
         list_addItemWithInfoNote(&_menu_user_interface,

@@ -3,13 +3,11 @@ miyoodir=/mnt/SDCARD/miyoo
 export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 blf_key=$sysdir/config/.blf
 blf_key_on=/tmp/.blfOn
-track_sched=/tmp/.blfonsched
 
 sync
 lockfile="/tmp/blue_light_script.lock"
 
 if [ -f "$lockfile" ]; then
-    # echo "Another instance of the script is already running."
     exit 1
 fi
 
@@ -60,7 +58,7 @@ set_intensity() {
     sync
 
     # echo ":: Blue Light Filter Intensity Set to $value, ready for next toggle." 
-    if [ -f "$sysdir/config/.blfOn" ]; then
+    if [ -f "$blf_key_on" ]; then
         touch /tmp/blueLightIntensityChange
         blueLightStart
     fi
@@ -224,13 +222,11 @@ check_blf() {
             if [ "$currentTimeMinutes" -ge "$blueLightTimeOnMinutes" ] || [ "$currentTimeMinutes" -lt "$blueLightTimeOffMinutes" ]; then
                 if [ ! -f $blf_key_on ]; then
                     enable_blue_light_filter 
-                    touch $track_sched
                     touch $blf_key_on
                 fi
             else
                 if [ -f $blf_key_on ]; then
                     disable_blue_light_filter 
-                    rm $track_sched
                     rm $blf_key_on
                 fi
             fi
@@ -238,14 +234,12 @@ check_blf() {
             if [ "$currentTimeMinutes" -ge "$blueLightTimeOnMinutes" ] && [ "$currentTimeMinutes" -lt "$blueLightTimeOffMinutes" ]; then
                 if [ ! -f $blf_key_on ]; then
                     enable_blue_light_filter 
-                    touch $track_sched
                     touch $blf_key_on
                 fi
             else
                 if [ -f $blf_key_on ]; then
                     disable_blue_light_filter 
                     rm $blf_key_on
-                    rm $track_sched
                 fi
             fi
         fi

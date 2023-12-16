@@ -65,17 +65,15 @@ void action_blueLight(void *pt)
 
     if (settings.blue_light_state || exists("/tmp/.blfOn")) {
         system("/mnt/SDCARD/.tmp_update/script/blue_light.sh set_default &");
-        if (exists("/tmp/.blfonsched")) {
-            remove("/tmp/.blfonsched");
-            remove("/tmp/.blfOn");
-        }
+        remove("/tmp/.blfOn");
     }
     else {
         system("/mnt/SDCARD/.tmp_update/script/blue_light.sh enable &");
     }
-
+    
     settings.blue_light_state = ((ListItem *)pt)->value;
     config_flag_set(".blfOn", ((ListItem *)pt)->value);
+    list_changed = true;
 }
 
 void action_blueLightLevel(void *pt)
@@ -107,10 +105,7 @@ void action_blueLightSchedule(void *pt)
     if (item->value == 0) {
         system("/mnt/SDCARD/.tmp_update/script/blue_light.sh set_default &");
         settings.blue_light_state = 0;
-        if (exists("/tmp/.blfonsched")) {
-            remove("/tmp/.blfonsched");
-            remove("/tmp/.blfOn");
-        }
+        remove("/tmp/.blfOn");
     }
     else {
         system("/mnt/SDCARD/.tmp_update/script/blue_light.sh check &"); // check if we're within the time values and start now
