@@ -360,7 +360,6 @@ int main(void)
     int konamiCodeIndex = 0;
     bool b_BTN_Not_Menu_Pressed = false;
     bool b_BTN_Menu_Pressed = false;
-    bool a_Pressed = false;
     bool power_pressed = false;
     bool volUp_state = false;
     bool volUp_active = false;
@@ -369,8 +368,10 @@ int main(void)
     bool comboKey_volume = false;
     bool comboKey_menu = false;
     bool comboKey_select = false;
-    bool menuAndAPressed = false;
+    bool menuAndAPressed = false; // screen recorder
+    bool menuAndBPressed = false; // blue light filter
     int menuAndAPressedTime = 0;
+    int menuAndBPressedTime = 0;
 
     int ticks = getMilliseconds();
     int hibernate_start = ticks;
@@ -564,15 +565,6 @@ int main(void)
             case HW_BTN_MENU:
 
                 if (!temp_flag_get("disable_menu_button")) {
-                    if (val == PRESSED) {
-                        if (a_Pressed) {
-                            menuAndAPressed = true;
-                            menuAndAPressedTime = getMilliseconds();
-                        }
-                    }
-                    else if (val == RELEASED) {
-                        menuAndAPressed = false;
-                    }
                     system_state_update();
                     comboKey_menu = menuButtonAction(val, comboKey_menu);
                 }
@@ -590,18 +582,24 @@ int main(void)
                 break;
             case HW_BTN_A:
                 if (val == PRESSED) {
-                    a_Pressed = true;
                     if (b_BTN_Menu_Pressed) {
                         menuAndAPressed = true;
                         menuAndAPressedTime = getMilliseconds();
                     }
                 }
                 else if (val == RELEASED) {
-                    a_Pressed = false;
                     menuAndAPressed = false;
                 }
                 break;
             case HW_BTN_B:
+                if (val == PRESSED) {
+                    if (b_BTN_Menu_Pressed) {
+                        menuAndBPressed = true;
+                        menuAndBPressedTime = getMilliseconds();
+                    }
+                } else if (val == RELEASED) {
+                    menuAndBPressed = false;
+                }
                 if (val == PRESSED && system_state == MODE_MAIN_UI)
                     temp_flag_set("launch_alt", false);
                 break;
@@ -698,6 +696,18 @@ int main(void)
 
                 menuAndAPressed = false;
                 menuAndAPressedTime = 0;
+            }
+            
+            // toggle blue light filter
+            if (menuAndBPressed && (getMilliseconds() - menuAndBPressedTime >= 2000)) {
+                if (access("/tmp/.blfOn", F_OK) != -1) {
+                     system("/mnt/SDCARD/.tmp_update/script/blue_light.sh disable &"); 
+                } else {
+                    system("/mnt/SDCARD/.tmp_update/script/blue_light.sh enable &"); 
+                }
+
+                menuAndBPressed = false;
+                menuAndBPressedTime = 0;
             }
 
             if (val == PRESSED && !osd_bar_activated) {

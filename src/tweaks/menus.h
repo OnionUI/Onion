@@ -583,9 +583,6 @@ void menu_userInterface(void *_)
                      (ListItem){
                          .label = "Blue light filter...",
                          .item_type = TOGGLE,
-                         .alternative_arrow_action = true,
-                         .value = (int)settings.blue_light_state || exists("/tmp/.blfOn"),
-                         .arrow_action = action_blueLight,
                          .action = menu_blueLight});
         list_addItem(&_menu_user_interface,
                      (ListItem){
