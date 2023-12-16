@@ -270,7 +270,7 @@ case "$1" in
         set_default
         ;;
     *)
-        echo "Usage: $0 {enable|disable|check|set_intensity [reset_arg]}"
+        echo "Usage: $0 {enable|disable|check|set_intensity [reset_arg]|set_default}"
         exit 1
         ;;
 esac
