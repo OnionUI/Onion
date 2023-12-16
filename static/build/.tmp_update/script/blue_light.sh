@@ -3,6 +3,7 @@ miyoodir=/mnt/SDCARD/miyoo
 export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 blf_key=$sysdir/config/.blf
 blf_key_on=/tmp/.blfOn
+ignore_schedule=/tmp/.blfIgnoreSchedule
 
 sync
 lockfile="/tmp/blue_light_script.lock"
@@ -198,61 +199,62 @@ disable_blue_light_filter() {
 
 check_blf() {
     sync
-    
-    if [ ! -f "$sysdir/config/.ntpState" ]; then
-        return
-    fi
-    
-    blueLightTimeOnFile="$sysdir/config/display/blueLightTime"
-    blueLightTimeOffFile="$sysdir/config/display/blueLightTimeOff"
+    if [ ! -f "$ignore_schedule" ]; then
+        if [ ! -f "$sysdir/config/.ntpState" ]; then
+            return
+        fi
+        
+        blueLightTimeOnFile="$sysdir/config/display/blueLightTime"
+        blueLightTimeOffFile="$sysdir/config/display/blueLightTimeOff"
 
-    if [ ! -f "$blueLightTimeOnFile" ] || [ ! -f "$blueLightTimeOffFile" ]; then
-        rm -f "$lockfile"
-        return
-    fi
+        if [ ! -f "$blueLightTimeOnFile" ] || [ ! -f "$blueLightTimeOffFile" ]; then
+            rm -f "$lockfile"
+            return
+        fi
 
-    blueLightTimeOn=$(cat "$blueLightTimeOnFile")
-    blueLightTimeOff=$(cat "$blueLightTimeOffFile")
+        blueLightTimeOn=$(cat "$blueLightTimeOnFile")
+        blueLightTimeOff=$(cat "$blueLightTimeOffFile")
 
-    currentTime=$(date +"%H:%M")
-    currentTimeMinutes=$(to_minutes_since_midnight "$currentTime")
-    blueLightTimeOnMinutes=$(to_minutes_since_midnight "$blueLightTimeOn")
-    blueLightTimeOffMinutes=$(to_minutes_since_midnight "$blueLightTimeOff")
+        currentTime=$(date +"%H:%M")
+        currentTimeMinutes=$(to_minutes_since_midnight "$currentTime")
+        blueLightTimeOnMinutes=$(to_minutes_since_midnight "$blueLightTimeOn")
+        blueLightTimeOffMinutes=$(to_minutes_since_midnight "$blueLightTimeOff")
 
-    if [ -f "$blf_key" ]; then
-        if [ "$blueLightTimeOffMinutes" -lt "$blueLightTimeOnMinutes" ]; then
-            if [ "$currentTimeMinutes" -ge "$blueLightTimeOnMinutes" ] || [ "$currentTimeMinutes" -lt "$blueLightTimeOffMinutes" ]; then
-                if [ ! -f $blf_key_on ]; then
-                    enable_blue_light_filter 
-                    touch $blf_key_on
+        if [ -f "$blf_key" ]; then
+            if [ "$blueLightTimeOffMinutes" -lt "$blueLightTimeOnMinutes" ]; then
+                if [ "$currentTimeMinutes" -ge "$blueLightTimeOnMinutes" ] || [ "$currentTimeMinutes" -lt "$blueLightTimeOffMinutes" ]; then
+                    if [ ! -f $blf_key_on ]; then
+                        enable_blue_light_filter 
+                        touch $blf_key_on
+                    fi
+                else
+                    if [ -f $blf_key_on ]; then
+                        disable_blue_light_filter 
+                        rm $blf_key_on
+                    fi
                 fi
             else
-                if [ -f $blf_key_on ]; then
-                    disable_blue_light_filter 
-                    rm $blf_key_on
-                fi
-            fi
-        else
-            if [ "$currentTimeMinutes" -ge "$blueLightTimeOnMinutes" ] && [ "$currentTimeMinutes" -lt "$blueLightTimeOffMinutes" ]; then
-                if [ ! -f $blf_key_on ]; then
-                    enable_blue_light_filter 
-                    touch $blf_key_on
-                fi
-            else
-                if [ -f $blf_key_on ]; then
-                    disable_blue_light_filter 
-                    rm $blf_key_on
+                if [ "$currentTimeMinutes" -ge "$blueLightTimeOnMinutes" ] && [ "$currentTimeMinutes" -lt "$blueLightTimeOffMinutes" ]; then
+                    if [ ! -f $blf_key_on ]; then
+                        enable_blue_light_filter 
+                        touch $blf_key_on
+                    fi
+                else
+                    if [ -f $blf_key_on ]; then
+                        disable_blue_light_filter 
+                        rm $blf_key_on
+                    fi
                 fi
             fi
         fi
     fi
-
     rm -f "$lockfile"
 }
 
 set_default() {
     disable_blue_light_filter
     set_intensity 0
+    rm -f "$ignore_schedule"
 }
 
 case "$1" in

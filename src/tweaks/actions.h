@@ -109,6 +109,7 @@ void action_blueLightSchedule(void *pt)
     }
     else {
         system("/mnt/SDCARD/.tmp_update/script/blue_light.sh check &"); // check if we're within the time values and start now
+        remove("/tmp/.blfIgnoreSchedule");
     }
 
     reset_menus = true;
