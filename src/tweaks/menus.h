@@ -502,7 +502,6 @@ void menu_blueLight(void *_)
                                          .value = (int)settings.blue_light_schedule,
                                          .action = action_blueLightSchedule},
                                      "Enable or disable the bluelight filter schedule\n");
-            
         }
         list_addItemWithInfoNote(&_menu_user_blue_light,
                                  (ListItem){
@@ -542,7 +541,7 @@ void menu_blueLight(void *_)
     if (DEVICE_ID == MIYOO354) {
         _writeDateString(_menu_user_blue_light.items[0].label);
     }
-    
+
     char scheduleToggleLabel[100];
     strcpy(scheduleToggleLabel, exists("/tmp/.blfIgnoreSchedule") ? "Toggle schedule (ignored)" : "Toggle schedule");
 
