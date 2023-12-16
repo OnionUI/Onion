@@ -597,7 +597,8 @@ int main(void)
                         menuAndBPressed = true;
                         menuAndBPressedTime = getMilliseconds();
                     }
-                } else if (val == RELEASED) {
+                }
+                else if (val == RELEASED) {
                     menuAndBPressed = false;
                 }
                 if (val == PRESSED && system_state == MODE_MAIN_UI)
@@ -699,13 +700,14 @@ int main(void)
                 menuAndAPressed = false;
                 menuAndAPressedTime = 0;
             }
-            
+
             // toggle blue light filter
             if (menuAndBPressed && (getMilliseconds() - menuAndBPressedTime >= 2000)) {
                 if (access("/tmp/.blfOn", F_OK) != -1) {
-                     system("/mnt/SDCARD/.tmp_update/script/blue_light.sh disable &"); 
-                } else {
-                    system("/mnt/SDCARD/.tmp_update/script/blue_light.sh enable &"); 
+                    system("/mnt/SDCARD/.tmp_update/script/blue_light.sh disable &");
+                }
+                else {
+                    system("/mnt/SDCARD/.tmp_update/script/blue_light.sh enable &");
                 }
 
                 menuAndBPressed = false;
