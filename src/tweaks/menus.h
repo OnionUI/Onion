@@ -502,7 +502,6 @@ void menu_blueLight(void *_)
                                          .value = (int)settings.blue_light_schedule,
                                          .action = action_blueLightSchedule},
                                      "Enable or disable the bluelight filter schedule\n");
-            
         }
         list_addItemWithInfoNote(&_menu_user_blue_light,
                                  (ListItem){
@@ -545,8 +544,6 @@ void menu_blueLight(void *_)
         strcpy(scheduleToggleLabel, exists("/tmp/.blfIgnoreSchedule") ? "Toggle schedule (ignored)" : "Toggle schedule");
         strcpy(_menu_user_blue_light.items[2].label, scheduleToggleLabel);
     }
-    
-
     menu_stack[++menu_level] = &_menu_user_blue_light;
     header_changed = true;
 }
