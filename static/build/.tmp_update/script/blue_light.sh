@@ -192,6 +192,7 @@ disable_blue_light_filter() {
     
     echo ":: Blue Light Filter: Disabled"
     rm -f $blf_key_on
+    rm -f $sysdir/config/.blfOn
 }
 
 check_blf() {
@@ -200,7 +201,7 @@ check_blf() {
     if [ ! -f "$sysdir/config/.ntpState" ]; then
         return
     fi
-
+    
     blueLightTimeOnFile="$sysdir/config/display/blueLightTime"
     blueLightTimeOffFile="$sysdir/config/display/blueLightTimeOff"
 
