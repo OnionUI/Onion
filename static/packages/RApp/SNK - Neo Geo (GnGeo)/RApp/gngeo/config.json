@@ -1,0 +1,12 @@
+{
+    "label": "GnGeo",
+    "icon": "../../Icons/Default/rapp/gngeo.png",
+    "iconsel": "../../Icons/Default/rapp/gngeo.png",
+    "launch": "launch.sh",
+    "rompath": "../../Roms/GNGEO",
+    "imgpath": "../../Roms/GNGEO/Imgs",
+    "useswap": 1,
+    "shortname": 1,
+    "hidebios": 1,
+    "extlist": "gno"
+}
