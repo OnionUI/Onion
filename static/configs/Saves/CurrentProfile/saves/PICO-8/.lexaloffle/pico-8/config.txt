@@ -1,0 +1,149 @@
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Configuration for pico-8
+// 
+// config.txt is read on startup and saved on exit.
+// To generate the default config.txt, delete this file.
+// 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+// :: Video Settings
+
+window_size 640 480 // window width, height
+screen_size 640 480 // screen width, height (stretched to window) 
+show_fps 0 // Draw frames per second in the corner
+
+
+// :: Window Settings
+
+windowed 0 // 1 to start up in windowed mode
+window_position -1 -1 // x and y position of window (-1, -1 to let the window manager decide)
+frameless 1 // 1 to use a window with no frame
+fullscreen_method 0 // 0 maximized window (linux)  1 borderless desktop-sized window  2 hardware fullscreen (warning: erratic behaviour under some drivers)
+blit_method 2  // 0 auto  1 software (slower but sometimes more reliable)  2 hardware (can do filtered scaling) 
+
+
+
+// :: System Settings
+
+foreground_sleep_ms 5 // number of milliseconds to sleep each frame. Try 10 to conserve battery power
+
+background_sleep_ms 10 // number of milliseconds to sleep each frame when running in the background
+
+sessions 0 // number of times program has been run
+
+// (scancode) hold this key down and left-click to simulate right-click
+rmb_key 0 // 0 for none  226 for LALT
+
+// Desktop for saving screenshots etc. Defaults to $HOME/Desktop
+desktop_path 
+
+// 1 to allow controller input even when application is in background
+read_controllers_in_background 0
+
+
+
+// :: Audio Settings (use "volume" for PICO-8)
+
+sound_volume 256 // 0..256
+music_volume 256 // 0..256
+
+
+// :: usually 1024. Try 2048 if you get choppy sound
+
+mix_buffer_size 1024
+
+
+// :: map scancodes. Format: 44=47,80=89,..  (scancode a, scancode b -- when press a, generates b)
+// run the program with -scancodes to determine which scancodes to use
+map_scancodes 
+
+
+// :: pico-8 
+
+version 0.2.5g
+
+// audio volume: 0..256 
+volume 256
+
+
+// Location of pico-8's root folder
+root_path /mnt/SDCARD/Roms/PICO/
+
+
+// Location of cartridge save data
+cdata_path /mnt/SDCARD/Saves/CurrentProfile/saves/PICO-8/.lexaloffle/pico-8/cdata/
+
+
+// Specify which player index joystick control begins at (0..7)
+joystick_index 0
+
+
+// Custom keyboard scancodes for buttons. player0 0..6, player1 0..5
+button_keys 0 0 0 0 0 0 0 0 0 0 0 0 0 
+
+// Play notes as they are plotted in frequency mode
+live_notes 0
+
+// iff 1: when using keyboard cursor, snap to closest pixel / map cel
+cursor_snap 0
+
+// 0 default  1 dark blue background in code editor  2 black background in code editor   3 gray background in code editor   
+gui_theme 0
+
+// scale of screenshots and gifs // 2 means 256x256
+screenshot_scale 3
+gif_scale 2
+
+// maximum gif length in seconds (0..120; 0 means no gif recording)
+gif_len 8
+
+// when 1, reset the recording when pressing ctrl-9 (useful for creating a non-overlapping sequence)
+gif_reset_mode 0
+
+// 0 for off. 1 for auto. 2 to allow control of a cart's framerate due to host machine's cpu capacity
+host_framerate_control 1
+
+// filter splore cartridges
+// 0 off   1 on (exclude cartridge tagged as 'mature' by community)
+splore_filter 0
+
+// tab display width (1 ~ 4 spaces)
+tab_width 1
+
+// 0 off 1 on: draw tab characters as small vertical lines
+draw_tabs 0
+
+// 0 off 1 on: record the current cartridge and editor view every 3 seconds (see [appdata]/activity.log.txt)
+record_activity_log 0
+
+// 0 off 1 on: allow F6..F9 (alternative: ctrl 6..9)
+allow_function_keys 1
+
+// 0 off 1 on: automatically check for a newer version of a BBS cart each time it is run.
+check_for_cart_updates 1
+
+// 0 off 1 on: allow access to hardware GPIO at 0x5f80..0x5fff (might need to sudo pico8)
+enable_gpio 0
+
+// hide mouse cursor for n seconds when typing.
+auto_hide_mouse_cursor 5
+
+// 0 off 1 on: backup with a new timestamped filename on every run
+// normally not needed -- was used for debugging crash-on-run
+aggressive_backups 0
+
+// back up cartridge in editor every n minutes when not idle (0 for no periodic backups)
+periodic_backups 20
+
+// global screen transformations:
+//  129 flip horizontally
+//  130 flip vertically
+//  133 rotate CW 90 degrees
+//  134 rotate CW 180 degrees
+//  135 rotate CW 270 degrees
+transform_screen 134
+
+// 0 off  > 1: colour to draw pixel grid in the gfx editor at zoom:8 and zoom:4 (16 for black)
+gfx_grid_lines 0
+

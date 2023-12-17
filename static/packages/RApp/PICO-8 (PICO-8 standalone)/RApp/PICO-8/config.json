@@ -1,0 +1,11 @@
+{
+	"label":	"Pico-8",
+	"icon":	"/mnt/SDCARD/Icons/Default/rapp/pico-8.png",
+	"launch":	"launch.sh",
+	"rompath":	"../../Roms/PICO",
+	"imgpath":	"../../Roms/PICO",
+	"useswap":	1,
+	"shortname":	0,
+	"hidebios":	1,
+	"extlist":	"p8|png|miyoocmd|pico-8"
+}

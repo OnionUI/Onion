@@ -58,54 +58,60 @@ void action_meterWidth(void *pt)
     osd_showBrightnessBar(settings.brightness);
 }
 
-int blueLightToggled = 0;
-
-void action_blueLight()
+void action_blueLight(void *pt)
 {
-    if (access("/tmp/runningBLF", F_OK) != -1) {
-        return;
-    }
+    blf_changing = true;
+    reset_menus = true;
 
-    if (blueLightToggled) {
-        system("/mnt/SDCARD/.tmp_update/script/blue_light.sh disable &");
-        blueLightToggled = 0;
+    if (settings.blue_light_state || exists("/tmp/.blfOn")) {
+        system("/mnt/SDCARD/.tmp_update/script/blue_light.sh set_default &");
+        remove("/tmp/.blfOn");
     }
     else {
         system("/mnt/SDCARD/.tmp_update/script/blue_light.sh enable &");
-        blueLightToggled = 1;
     }
+
+    settings.blue_light_state = ((ListItem *)pt)->value;
+    config_flag_set(".blfOn", ((ListItem *)pt)->value);
+    list_changed = true;
 }
 
 void action_blueLightLevel(void *pt)
 {
-    int value;
+    blf_changing = true;
+    reset_menus = true;
     ListItem *item = (ListItem *)pt;
 
-    value = item->value;
-    settings.blue_light_level = value;
-    config_setNumber("display/blueLightLevel", value);
+    settings.blue_light_level = item->value;
+    config_setNumber("display/blueLightLevel", item->value);
 
-    system("/mnt/SDCARD/.tmp_update/script/blue_light.sh set_intensity &");
-    remove("/tmp/blueLightOn");
+    if (settings.blue_light_state || exists("/tmp/.blfOn")) {
+        system("/mnt/SDCARD/.tmp_update/script/blue_light.sh set_intensity &");
+    }
+    else {
+        system("timeout -t 1 /mnt/SDCARD/.tmp_update/script/blue_light.sh set_intensity &");
+    }
 }
 
-void action_blueLightState(void *pt)
+void action_blueLightSchedule(void *pt)
 {
-    if (access("/tmp/runningBLF", F_OK) != -1) {
-        return;
-    }
+    blf_changing = true;
+    reset_menus = true;
 
     ListItem *item = (ListItem *)pt;
-    settings.blue_light_state = item->value == 1;
-    config_flag_set(".blf", settings.blue_light_state);
+    settings.blue_light_schedule = ((ListItem *)pt)->value;
+    config_flag_set(".blf", settings.blue_light_schedule);
 
-    if (item->value == 0) { // blf being disabled
-        system("/mnt/SDCARD/.tmp_update/script/blue_light.sh disable &");
-        remove("/tmp/blueLightOn");
+    if (item->value == 0) {
+        system("/mnt/SDCARD/.tmp_update/script/blue_light.sh set_default &");
+        settings.blue_light_state = 0;
+        remove("/tmp/.blfOn");
     }
     else {
         system("/mnt/SDCARD/.tmp_update/script/blue_light.sh check &"); // check if we're within the time values and start now
+        remove("/tmp/.blfIgnoreSchedule");
     }
+
     reset_menus = true;
     all_changed = true;
 }

@@ -2,12 +2,13 @@ sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo 
 export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 blf_key=$sysdir/config/.blf
+blf_key_on=/tmp/.blfOn
+ignore_schedule=/tmp/.blfIgnoreSchedule
 
 sync
 lockfile="/tmp/blue_light_script.lock"
 
 if [ -f "$lockfile" ]; then
-    # echo "Another instance of the script is already running."
     exit 1
 fi
 
@@ -35,8 +36,18 @@ setRGBValues() {
 }
 
 set_intensity() {
+    reset_to_default=${1:-1}
     sync
+
     value=$(cat $sysdir/config/display/blueLightLevel)
+
+    if [ "$reset_to_default" -eq 0 ]; then
+        echo "8421504" > $sysdir/config/display/blueLightRGB
+        return
+    fi
+    
+    currentRGB=$(cat $sysdir/config/display/blueLightRGB)
+    echo $currentRGB > $sysdir/config/display/blueLightRGBtemp
 
     setRGBValues "$value"
     endB=$endB
@@ -45,20 +56,17 @@ set_intensity() {
 
     newCombinedRGB=$(( (endR << 16) | (endG << 8) | endB ))
     echo $newCombinedRGB > $sysdir/config/display/blueLightRGB
+    sync
 
-    echo ":: Blue Light Filter Intensity Set to $value, ready for next toggle."
-    if [ -f "$sysdir/config/.blf" ]; then
+    # echo ":: Blue Light Filter Intensity Set to $value, ready for next toggle." 
+    if [ -f "$blf_key_on" ]; then
         touch /tmp/blueLightIntensityChange
+        blueLightStart
     fi
+    rm $lockfile
 }
 
-disable_blue_light_filter() {
-
-    if [ -f /tmp/runningBLF ]; then
-        echo "Another instance of the script is already running."
-        exit 1
-    fi  
-    
+disable_blue_light_filter() {   
     sync
     
     combinedBGR=$(cat $sysdir/config/display/blueLightRGB)
@@ -83,7 +91,7 @@ disable_blue_light_filter() {
     done
 
     echo ":: Blue Light Filter: Disabled"
-    rm -f /tmp/blueLightOn
+    rm -f $blf_key_on
 }
 
 check_disp_init() {
@@ -102,33 +110,27 @@ check_disp_init() {
 blueLightStart() {
     sync
     value=$(cat $sysdir/config/display/blueLightLevel)
-    
-    if [ ! -f /tmp/blueLightOn ] && [ ! -f /tmp/blueLightIntensityChange ]; then
-        lastR=128
-        lastG=128
-        lastB=128
-    elif [ -f /tmp/blueLightIntensityChange ]; then
-        combinedRGB=$(cat $sysdir/config/display/blueLightRGBtemp)
-        combinedRGB=$(echo "$combinedRGB" | tr -d '[:space:]/#')
-        lastR=$(( (combinedRGB >> 16) & 0xFF ))
-        lastG=$(( (combinedRGB >> 8) & 0xFF ))
-        lastB=$(( combinedRGB & 0xFF ))
+
+    if [ -f $blf_key_on ]; then
+        if [ -f /tmp/blueLightIntensityChange ]; then
+            combinedRGB=$(cat $sysdir/config/display/blueLightRGBtemp)
+        else
+            combinedRGB=$(cat $sysdir/config/display/blueLightRGB)
+        fi
     else
-        combinedRGB=$(cat $sysdir/config/display/blueLightRGB)
-        combinedRGB=$(echo "$combinedRGB" | tr -d '[:space:]/#')
-        lastR=$(( (combinedRGB >> 16) & 0xFF ))
-        lastG=$(( (combinedRGB >> 8) & 0xFF ))
-        lastB=$(( combinedRGB & 0xFF ))
+        combinedRGB="8421504"
     fi
+    combinedRGB=$(echo "$combinedRGB" | tr -d '[:space:]/#')
+    lastR=$(( (combinedRGB >> 16) & 0xFF ))
+    lastG=$(( (combinedRGB >> 8) & 0xFF ))
+    lastB=$(( combinedRGB & 0xFF ))
 
     setRGBValues "$value"
-    endB=$endB
-    endG=$endG
-    endR=$endR
     
     # echo "Last BGR: B: $lastB, G: $lastG, R: $lastR"
     # echo "Target BGR: B: $endB, G: $endG, R: $endR"
 
+    # Fading loop
     for i in $(seq 0 20); do
         newB=$(( lastB + (endB - lastB) * i / 20 ))
         newG=$(( lastG + (endG - lastG) * i / 20 ))
@@ -142,6 +144,7 @@ blueLightStart() {
     echo $newCombinedRGB > $sysdir/config/display/blueLightRGB
     rm -f /tmp/blueLightIntensityChange
 }
+
 
 to_minutes_since_midnight() {
     hour=$(echo "$1" | cut -d: -f1 | xargs)
@@ -162,7 +165,8 @@ enable_blue_light_filter() {
     blueLightStart
     
     echo ":: Blue Light Filter: Enabled"
-    touch /tmp/blueLightOn
+    touch $blf_key_on
+    touch $sysdir/config/.blfOn
 }
 
 disable_blue_light_filter() {    
@@ -189,81 +193,88 @@ disable_blue_light_filter() {
     done
     
     echo ":: Blue Light Filter: Disabled"
-    rm -f /tmp/blueLightOn
+    rm -f $blf_key_on
+    rm -f $sysdir/config/.blfOn
 }
 
 check_blf() {
     sync
-    
-    if [ ! -f "$sysdir/config/.ntpState" ]; then
-        return
-    fi
+    if [ ! -f "$ignore_schedule" ]; then
+        if [ ! -f "$sysdir/config/.ntpState" ]; then
+            return
+        fi
+        
+        blueLightTimeOnFile="$sysdir/config/display/blueLightTime"
+        blueLightTimeOffFile="$sysdir/config/display/blueLightTimeOff"
 
-    blueLightTimeOnFile="$sysdir/config/display/blueLightTime"
-    blueLightTimeOffFile="$sysdir/config/display/blueLightTimeOff"
+        if [ ! -f "$blueLightTimeOnFile" ] || [ ! -f "$blueLightTimeOffFile" ]; then
+            rm -f "$lockfile"
+            return
+        fi
 
-    if [ ! -f "$blueLightTimeOnFile" ] || [ ! -f "$blueLightTimeOffFile" ]; then
-        rm -f "$lockfile"
-        return
-    fi
+        blueLightTimeOn=$(cat "$blueLightTimeOnFile")
+        blueLightTimeOff=$(cat "$blueLightTimeOffFile")
 
-    blueLightTimeOn=$(cat "$blueLightTimeOnFile")
-    blueLightTimeOff=$(cat "$blueLightTimeOffFile")
+        currentTime=$(date +"%H:%M")
+        currentTimeMinutes=$(to_minutes_since_midnight "$currentTime")
+        blueLightTimeOnMinutes=$(to_minutes_since_midnight "$blueLightTimeOn")
+        blueLightTimeOffMinutes=$(to_minutes_since_midnight "$blueLightTimeOff")
 
-    currentTime=$(date +"%H:%M")
-    currentTimeMinutes=$(to_minutes_since_midnight "$currentTime")
-    blueLightTimeOnMinutes=$(to_minutes_since_midnight "$blueLightTimeOn")
-    blueLightTimeOffMinutes=$(to_minutes_since_midnight "$blueLightTimeOff")
-
-    if [ -f "$blf_key" ]; then
-        if [ "$blueLightTimeOffMinutes" -lt "$blueLightTimeOnMinutes" ]; then
-            if [ "$currentTimeMinutes" -ge "$blueLightTimeOnMinutes" ] || [ "$currentTimeMinutes" -lt "$blueLightTimeOffMinutes" ]; then
-                if [ ! -f /tmp/blueLightOn ]; then
-                    enable_blue_light_filter 
+        if [ -f "$blf_key" ]; then
+            if [ "$blueLightTimeOffMinutes" -lt "$blueLightTimeOnMinutes" ]; then
+                if [ "$currentTimeMinutes" -ge "$blueLightTimeOnMinutes" ] || [ "$currentTimeMinutes" -lt "$blueLightTimeOffMinutes" ]; then
+                    if [ ! -f $blf_key_on ]; then
+                        enable_blue_light_filter 
+                        touch $blf_key_on
+                    fi
+                else
+                    if [ -f $blf_key_on ]; then
+                        disable_blue_light_filter 
+                        rm $blf_key_on
+                    fi
                 fi
             else
-                if [ -f /tmp/blueLightOn ]; then
-                    disable_blue_light_filter 
-                fi
-            fi
-        else
-            if [ "$currentTimeMinutes" -ge "$blueLightTimeOnMinutes" ] && [ "$currentTimeMinutes" -lt "$blueLightTimeOffMinutes" ]; then
-                if [ ! -f /tmp/blueLightOn ]; then
-                    enable_blue_light_filter 
-                fi
-            else
-                if [ -f /tmp/blueLightOn ]; then
-                    disable_blue_light_filter 
+                if [ "$currentTimeMinutes" -ge "$blueLightTimeOnMinutes" ] && [ "$currentTimeMinutes" -lt "$blueLightTimeOffMinutes" ]; then
+                    if [ ! -f $blf_key_on ]; then
+                        enable_blue_light_filter 
+                        touch $blf_key_on
+                    fi
+                else
+                    if [ -f $blf_key_on ]; then
+                        disable_blue_light_filter 
+                        rm $blf_key_on
+                    fi
                 fi
             fi
         fi
     fi
-
     rm -f "$lockfile"
 }
 
+set_default() {
+    disable_blue_light_filter
+    set_intensity 0
+    rm -f "$ignore_schedule"
+}
 
 case "$1" in
     enable)
-        touch /tmp/runningBLF
         enable_blue_light_filter
-        rm -rf /tmp/runningBLF
         ;;
     disable)
-        touch /tmp/runningBLF
         disable_blue_light_filter
-        rm -rf /tmp/runningBLF
         ;;
     check)
-        touch /tmp/runningBLF
         check_blf
-        rm -rf /tmp/runningBLF
         ;;
     set_intensity)
-        set_intensity
+        set_intensity "$2"
+        ;;
+    set_default)
+        set_default
         ;;
     *)
-        echo "Usage: $0 {enable|disable|check|set_intensity}"
+        echo "Usage: $0 {enable|disable|check|set_intensity [reset_arg]|set_default}"
         exit 1
         ;;
 esac
