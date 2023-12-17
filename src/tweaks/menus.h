@@ -476,7 +476,7 @@ void menu_blueLight(void *_)
 {
     if (!_menu_user_blue_light._created) {
         network_loadState();
-        _menu_user_blue_light = list_createWithTitle(6, LIST_SMALL, "Blue light filter schedule");
+        _menu_user_blue_light = list_createWithTitle(6, LIST_SMALL, "Blue light filter");
         if (DEVICE_ID == MIYOO354) {
             list_addItem(&_menu_user_blue_light,
                          (ListItem){
@@ -486,7 +486,7 @@ void menu_blueLight(void *_)
         }
         list_addItemWithInfoNote(&_menu_user_blue_light,
                                  (ListItem){
-                                     .label = "Toggle now",
+                                     .label = "State",
                                      .disable_arrows = blf_changing,
                                      .disable_a_btn = blf_changing,
                                      .item_type = TOGGLE,
@@ -541,7 +541,7 @@ void menu_blueLight(void *_)
     if (DEVICE_ID == MIYOO354) {
         _writeDateString(_menu_user_blue_light.items[0].label);
         char scheduleToggleLabel[100];
-        strcpy(scheduleToggleLabel, exists("/tmp/.blfIgnoreSchedule") ? "Toggle schedule (ignored)" : "Toggle schedule");
+        strcpy(scheduleToggleLabel, exists("/tmp/.blfIgnoreSchedule") ? "Schedule (ignored)" : "Schedule");
         strcpy(_menu_user_blue_light.items[2].label, scheduleToggleLabel);
     }
     menu_stack[++menu_level] = &_menu_user_blue_light;
