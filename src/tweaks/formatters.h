@@ -25,8 +25,8 @@
         "-", "Off", "On"    \
     }
 
-#define BLUELIGHT_LABELS                                              \
-    {                                                                 \
+#define BLUELIGHT_LABELS                                                                  \
+    {                                                                                     \
         "None", "Subtle 1/5", "Moderate 2/5", "Balanced 3/5", "Strong 4/5", "Intense 5/5" \
     }
 
