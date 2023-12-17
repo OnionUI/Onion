@@ -4,7 +4,7 @@
 #include "./changes.h"
 #include "./globals.h"
 
-void layerToggleAll(int layer, bool only_when_all_off)
+void layerToggleAll(int layer, bool only_when_all_off_and_has_roms)
 {
     bool all_on = true;
     bool all_off = true;
@@ -38,7 +38,7 @@ void layerToggleAll(int layer, bool only_when_all_off)
     else if (all_on)
         mode = 0;
 
-    if (only_when_all_off && !all_off)
+    if (only_when_all_off_and_has_roms && (!all_off || !has_roms))
         return;
 
     setItemsInstallValue(mode, layer);
