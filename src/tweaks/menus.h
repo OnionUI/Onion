@@ -476,7 +476,7 @@ void menu_blueLight(void *_)
 {
     if (!_menu_user_blue_light._created) {
         network_loadState();
-        _menu_user_blue_light = list_createWithTitle(6, LIST_SMALL, "Blue light filter schedule");
+        _menu_user_blue_light = list_createWithTitle(6, LIST_SMALL, "Blue light filter");
         if (DEVICE_ID == MIYOO354) {
             list_addItem(&_menu_user_blue_light,
                          (ListItem){
@@ -486,24 +486,29 @@ void menu_blueLight(void *_)
         }
         list_addItemWithInfoNote(&_menu_user_blue_light,
                                  (ListItem){
-                                     .label = "Toggle now",
-                                     .item_type = ACTION,
+                                     .label = "State",
+                                     .disable_arrows = blf_changing,
+                                     .disable_a_btn = blf_changing,
+                                     .item_type = TOGGLE,
+                                     .value = (int)settings.blue_light_state || exists("/tmp/.blfOn"),
                                      .action = action_blueLight},
-                                 "Test the selected strength \n");
+                                 "Set the selected strength now\n");
         if (DEVICE_ID == MIYOO354) {
             list_addItemWithInfoNote(&_menu_user_blue_light,
                                      (ListItem){
-                                         .label = "Enable schedule",
+                                         .label = "",
                                          .disabled = !network_state.ntp,
                                          .item_type = TOGGLE,
-                                         .value = (int)settings.blue_light_state,
-                                         .action = action_blueLightState},
-                                     "Turn bluelight filter on or off\n");
+                                         .value = (int)settings.blue_light_schedule,
+                                         .action = action_blueLightSchedule},
+                                     "Enable or disable the bluelight filter schedule\n");
         }
         list_addItemWithInfoNote(&_menu_user_blue_light,
                                  (ListItem){
                                      .label = "Strength",
                                      .item_type = MULTIVALUE,
+                                     .disable_arrows = blf_changing,
+                                     .disable_a_btn = blf_changing,
                                      .value_max = 5,
                                      .value_labels = BLUELIGHT_LABELS,
                                      .action = action_blueLightLevel,
@@ -535,6 +540,9 @@ void menu_blueLight(void *_)
     }
     if (DEVICE_ID == MIYOO354) {
         _writeDateString(_menu_user_blue_light.items[0].label);
+        char scheduleToggleLabel[100];
+        strcpy(scheduleToggleLabel, exists("/tmp/.blfIgnoreSchedule") ? "Schedule (ignored)" : "Schedule");
+        strcpy(_menu_user_blue_light.items[2].label, scheduleToggleLabel);
     }
     menu_stack[++menu_level] = &_menu_user_blue_light;
     header_changed = true;
@@ -542,6 +550,8 @@ void menu_blueLight(void *_)
 
 void menu_userInterface(void *_)
 {
+    settings.blue_light_state = config_flag_get(".blfOn");
+    all_changed = true;
     if (!_menu_user_interface._created) {
         _menu_user_interface = list_createWithTitle(6, LIST_SMALL, "Appearance");
         list_addItemWithInfoNote(&_menu_user_interface,
