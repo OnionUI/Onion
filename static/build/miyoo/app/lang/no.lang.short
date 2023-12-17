@@ -10,13 +10,13 @@
 	"96":	"Gå ut til menyen",
 	"97":	"Tilstand %d/%d",
 	"98":	"Tom",
-	"99":	"Ingen miniatyrbilde",
-	"100":	"Last inn feilet",
-	"101":	"Lagre feilet",
+	"99":	"Intet miniatyrbilde",
+	"100":	"Innlasting mislyktes",
+	"101":	"Lagring mislyktes",
 	"102":	"Tilstand %d lagret",
 	"103":  "Fullskjerm",
 	"104":  "PÅ",
 	"105":  "AV",
-	"106":  "AVANSERT",
+	"106":  "Avansert",
     "138":  "Netplay"	
 }
