@@ -59,6 +59,7 @@ static List _menu_main;
 static List _menu_system;
 static List _menu_date_time;
 static List _menu_system_display;
+static List _menu_user_blue_light;
 static List _menu_system_startup;
 static List _menu_button_action;
 static List _menu_button_action_mainui_menu;
@@ -109,6 +110,8 @@ static KeyState keystate[320] = {(KeyState)0};
 static bool keys_enabled = true;
 static bool reset_menus = false;
 static bool skip_next_change = false;
+static bool blf_changing = false;
+static bool prev_blf_changing = false;
 
 static bool _disable_confirm = false;
 static SDL_Surface *background_cache = NULL;

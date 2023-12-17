@@ -60,6 +60,7 @@ typedef struct settings_s {
     bool rec_hotkey;
     int rec_countdown;
     int blue_light_state;
+    int blue_light_schedule;
     int blue_light_level;
     int blue_light_rgb;
     char blue_light_time[16];
@@ -110,6 +111,7 @@ static settings_s __default_settings = (settings_s){
     .disable_standby = false,
     .enable_logging = false,
     .blue_light_state = false,
+    .blue_light_schedule = false,
     .blue_light_level = 0,
     .blue_light_rgb = 8421504,
     .blue_light_time = "20:00",
@@ -197,9 +199,10 @@ void settings_load(void)
     settings.mute = config_flag_get(".muteVolume");
     settings.disable_standby = config_flag_get(".disableStandby");
     settings.enable_logging = config_flag_get(".logging");
+    settings.blue_light_state = config_flag_get(".blfOn");
+    settings.blue_light_schedule = config_flag_get(".blf");
     settings.rec_indicator = config_flag_get(".recIndicator");
     settings.rec_hotkey = config_flag_get(".recHotkey");
-    settings.blue_light_state = config_flag_get(".blf");
 
     if (config_flag_get(".noLowBatteryAutoSave")) // flag is deprecated, but keep compatibility
         settings.low_battery_autosave_at = 0;
@@ -336,9 +339,10 @@ void settings_save(void)
     config_flag_set(".muteVolume", settings.mute);
     config_flag_set(".disableStandby", settings.disable_standby);
     config_flag_set(".logging", settings.enable_logging);
+    config_flag_set(".blfOn", settings.blue_light_state);
+    config_flag_set(".blf", settings.blue_light_schedule);
     config_flag_set(".recIndicator", settings.rec_indicator);
     config_flag_set(".recHotkey", settings.rec_hotkey);
-    config_flag_set(".blf", settings.blue_light_state);
     config_setNumber("battery/warnAt", settings.low_battery_warn_at);
     config_setNumber("battery/exitAt", settings.low_battery_autosave_at);
     config_setNumber("startup/app", settings.startup_application);
