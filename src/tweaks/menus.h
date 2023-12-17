@@ -10,6 +10,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "components/kbinput_wrapper.h"
 #include "components/list.h"
 #include "system/device_model.h"
 #include "system/display.h"
@@ -471,10 +472,88 @@ void menu_themeOverrides(void *_)
     header_changed = true;
 }
 
+void menu_blueLight(void *_)
+{
+    if (!_menu_user_blue_light._created) {
+        network_loadState();
+        _menu_user_blue_light = list_createWithTitle(6, LIST_SMALL, "Blue light filter");
+        if (DEVICE_ID == MIYOO354) {
+            list_addItem(&_menu_user_blue_light,
+                         (ListItem){
+                             .label = "[DATESTRING]",
+                             .disabled = 1,
+                             .action = NULL});
+        }
+        list_addItemWithInfoNote(&_menu_user_blue_light,
+                                 (ListItem){
+                                     .label = "State",
+                                     .disable_arrows = blf_changing,
+                                     .disable_a_btn = blf_changing,
+                                     .item_type = TOGGLE,
+                                     .value = (int)settings.blue_light_state || exists("/tmp/.blfOn"),
+                                     .action = action_blueLight},
+                                 "Set the selected strength now\n");
+        if (DEVICE_ID == MIYOO354) {
+            list_addItemWithInfoNote(&_menu_user_blue_light,
+                                     (ListItem){
+                                         .label = "",
+                                         .disabled = !network_state.ntp,
+                                         .item_type = TOGGLE,
+                                         .value = (int)settings.blue_light_schedule,
+                                         .action = action_blueLightSchedule},
+                                     "Enable or disable the bluelight filter schedule\n");
+        }
+        list_addItemWithInfoNote(&_menu_user_blue_light,
+                                 (ListItem){
+                                     .label = "Strength",
+                                     .item_type = MULTIVALUE,
+                                     .disable_arrows = blf_changing,
+                                     .disable_a_btn = blf_changing,
+                                     .value_max = 5,
+                                     .value_labels = BLUELIGHT_LABELS,
+                                     .action = action_blueLightLevel,
+                                     .value = value_blueLightLevel()},
+                                 "Change the strength of the \n"
+                                 "Blue light filter");
+        if (DEVICE_ID == MIYOO354) {
+            list_addItemWithInfoNote(&_menu_user_blue_light,
+                                     (ListItem){
+                                         .label = "Time (On)",
+                                         .disabled = !network_state.ntp,
+                                         .item_type = MULTIVALUE,
+                                         .value_max = 95,
+                                         .value_formatter = formatter_Time,
+                                         .action = action_blueLightTimeOn,
+                                         .value = value_blueLightTimeOn()},
+                                     "Time schedule for the bluelight filter");
+            list_addItemWithInfoNote(&_menu_user_blue_light,
+                                     (ListItem){
+                                         .label = "Time (Off)",
+                                         .disabled = !network_state.ntp,
+                                         .item_type = MULTIVALUE,
+                                         .value_max = 95,
+                                         .value_formatter = formatter_Time,
+                                         .action = action_blueLightTimeOff,
+                                         .value = value_blueLightTimeOff()},
+                                     "Time schedule for the bluelight filter");
+        }
+    }
+    if (DEVICE_ID == MIYOO354) {
+        _writeDateString(_menu_user_blue_light.items[0].label);
+        char scheduleToggleLabel[100];
+        strcpy(scheduleToggleLabel, exists("/tmp/.blfIgnoreSchedule") ? "Schedule (ignored)" : "Schedule");
+        strcpy(_menu_user_blue_light.items[2].label, scheduleToggleLabel);
+    }
+    menu_stack[++menu_level] = &_menu_user_blue_light;
+    header_changed = true;
+}
+
 void menu_userInterface(void *_)
 {
+    settings.blue_light_state = config_flag_get(".blfOn");
+    all_changed = true;
     if (!_menu_user_interface._created) {
-        _menu_user_interface = list_createWithTitle(5, LIST_SMALL, "Appearance");
+        _menu_user_interface = list_createWithTitle(6, LIST_SMALL, "Appearance");
         list_addItemWithInfoNote(&_menu_user_interface,
                                  (ListItem){
                                      .label = "Show recents",
@@ -503,6 +582,10 @@ void menu_userInterface(void *_)
                                  "Set the width of the 'OSD bar' shown\n"
                                  "in the left side of the display when\n"
                                  "adjusting brightness, or volume (MMP).");
+        list_addItem(&_menu_user_interface,
+                     (ListItem){
+                         .label = "Blue light filter...",
+                         .action = menu_blueLight});
         list_addItem(&_menu_user_interface,
                      (ListItem){
                          .label = "Theme overrides...",
@@ -605,7 +688,7 @@ void menu_diagnostics(void *pt)
 void menu_advanced(void *_)
 {
     if (!_menu_advanced._created) {
-        _menu_advanced = list_createWithTitle(6, LIST_SMALL, "Advanced");
+        _menu_advanced = list_createWithTitle(7, LIST_SMALL, "Advanced");
         list_addItemWithInfoNote(&_menu_advanced,
                                  (ListItem){
                                      .label = "Swap triggers (L<>L2, R<>R2)",
@@ -635,6 +718,17 @@ void menu_advanced(void *_)
                                      .value_formatter = formatter_fastForward,
                                      .action = action_advancedSetFrameThrottle},
                                  "Set the maximum fast forward rate.");
+        list_addItemWithInfoNote(&_menu_advanced,
+                                 (ListItem){
+                                     .label = "PWM frequency",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 9,
+                                     .value_labels = PWM_FREQUENCIES,
+                                     .value = value_getPWMFrequency(),
+                                     .action = action_advancedSetPWMFreqency},
+                                 "Change the PWM frequency\n"
+                                 "Lower values for less buzzing\n"
+                                 "Experimental feature");
         if (DEVICE_ID == MIYOO354) {
             list_addItemWithInfoNote(&_menu_advanced,
                                      (ListItem){
@@ -662,6 +756,92 @@ void menu_advanced(void *_)
     header_changed = true;
 }
 
+void menu_screen_recorder(void *pt)
+{
+    if (!_menu_screen_recorder._created) {
+        _menu_screen_recorder = list_createWithSticky(7, "Screen recorder setup");
+        list_addItemWithInfoNote(&_menu_screen_recorder,
+                                 (ListItem){
+                                     .label = "Start/stop recorder",
+                                     .sticky_note = "Status:...",
+                                     .action = tool_screenRecorder},
+                                 "Start or stop the recorder");
+        list_addItemWithInfoNote(&_menu_screen_recorder,
+                                 (ListItem){
+                                     .label = "Countdown (seconds)",
+                                     .sticky_note = "Specify the countdown",
+                                     .item_type = MULTIVALUE,
+                                     .value_max = 10,
+                                     .value = (int)settings.rec_countdown,
+                                     .action = action_toggleScreenRecCountdown},
+                                 "Countdown when starting recording. \n\n"
+                                 "The screen will pulse white n times \n"
+                                 "to signify recording has started/stopped");
+        list_addItemWithInfoNote(&_menu_screen_recorder,
+                                 (ListItem){
+                                     .label = "Toggle indicator icon",
+                                     .sticky_note = "Turn the indicator on/off",
+                                     .item_type = TOGGLE,
+                                     .value = (int)settings.rec_indicator,
+                                     .action = action_toggleScreenRecIndicator},
+                                 "Toggles the display of a\n"
+                                 "a flashing icon to remind you\n"
+                                 "that you're still recording.");
+        list_addItemWithInfoNote(&_menu_screen_recorder,
+                                 (ListItem){
+                                     .label = "Toggle hotkey",
+                                     .sticky_note = "Turn the hotkey (Menu+A) on/off ",
+                                     .item_type = TOGGLE,
+                                     .value = (int)settings.rec_hotkey,
+                                     .action = action_toggleScreenRecHotkey},
+                                 "Enable the hotkey function.\n\n"
+                                 "Recording can be started/stopped\n"
+                                 "with Menu+A");
+        list_addItemWithInfoNote(&_menu_screen_recorder,
+                                 (ListItem){
+                                     .label = "Reset screen recorder",
+                                     .sticky_note = "Hard kill ffmpeg if it's crashed",
+                                     .action = action_hardKillFFmpeg},
+                                 "Performs a hard kill of ffmpeg.\n\n"
+                                 "WARNING: If you're currently\n"
+                                 "recording, you may lose the file!");
+        list_addItemWithInfoNote(&_menu_screen_recorder,
+                                 (ListItem){
+                                     .label = "Delete all recordings",
+                                     .sticky_note = "Empties the recordings directory",
+                                     .action = action_deleteAllRecordings},
+                                 "Deletes all recorded videos. \n\n"
+                                 "WARNING: This action cannot\n"
+                                 "be undone!");
+    }
+
+    int isRecordingActive = exists("/tmp/recorder_active");
+    const char *recordingStatus = isRecordingActive ? "Status: Now recording..." : "Status: Idle.";
+    strncpy(_menu_screen_recorder.items[0].sticky_note, recordingStatus, sizeof(_menu_screen_recorder.items[0].sticky_note) - 1);
+    _menu_screen_recorder.items[0].sticky_note[sizeof(_menu_screen_recorder.items[0].sticky_note) - 1] = '\0';
+    menu_stack[++menu_level] = &_menu_screen_recorder;
+    header_changed = true;
+}
+
+void menu_tools_m3uGenerator(void *_)
+{
+    if (!_menu_tools_m3uGenerator._created) {
+        _menu_tools_m3uGenerator = list_createWithTitle(2, LIST_SMALL, "m3u Generator");
+        list_addItemWithInfoNote(&_menu_tools_m3uGenerator,
+                                 (ListItem){
+                                     .label = "Multiple directories (.Game_Name)",
+                                     .action = tool_generateM3uFiles_md},
+                                 "One directory for each game \".Game_Name\"");
+        list_addItemWithInfoNote(&_menu_tools_m3uGenerator,
+                                 (ListItem){
+                                     .label = "Single directory (.multi-disc)",
+                                     .action = tool_generateM3uFiles_sd},
+                                 "One single directory \".multi-disc\"\nwill contains all multi-disc files");
+    }
+    menu_stack[++menu_level] = &_menu_tools_m3uGenerator;
+    header_changed = true;
+}
+
 void menu_tools(void *_)
 {
     if (!_menu_tools._created) {
@@ -674,6 +854,14 @@ void menu_tools(void *_)
                                  "PSX roms in '.bin' format needs a\n"
                                  "matching '.cue' file. Use this tool\n"
                                  "to automatically generate them.");
+        list_addItemWithInfoNote(&_menu_tools,
+                                 (ListItem){
+                                     .label = "Generate M3U files for PSX games...",
+                                     .action = menu_tools_m3uGenerator},
+                                 "PSX multidisc roms require to create\n"
+                                 "a playslist file (.m3u). It allows to \n"
+                                 "have only one entry for each multidisc\n"
+                                 "game and one unique save file for each game");
         list_addItemWithInfoNote(&_menu_tools,
                                  (ListItem){
                                      .label = "Generate game list for short name roms",
@@ -692,6 +880,31 @@ void menu_tools(void *_)
                                  "This generates a 'miyoogamelist.xml' file\n"
                                  "which comes with some limitations, such\n"
                                  "as no subfolder support.");
+        list_addItem(&_menu_tools,
+                     (ListItem){
+                         .label = "Screen recorder...",
+                         .action = menu_screen_recorder});
+        list_addItemWithInfoNote(&_menu_tools,
+                                 (ListItem){
+                                     .label = "Regenerate game switcher list",
+                                     .action = tool_generateGsList},
+                                 "Utilize this tool to recreate your game\n"
+                                 "switcher list using the RetroArch history,\n"
+                                 "particularly in instances of corruption.\n"
+                                 "Keep in mind that NDS games and certain\n"
+                                 "ports may require manual addition.");
+        list_addItemWithInfoNote(&_menu_tools,
+                                 (ListItem){
+                                     .label = "Sort applist A-Z",
+                                     .action = tool_sortAppsAZ},
+                                 "Use this tool to sort your App list\n"
+                                 "ascending from A to Z.\n");
+        list_addItemWithInfoNote(&_menu_tools,
+                                 (ListItem){
+                                     .label = "Sort applist Z-A",
+                                     .action = tool_sortAppsZA},
+                                 "Use this tool to sort your App list\n"
+                                 "descending from Z to A.\n");
     }
     menu_stack[++menu_level] = &_menu_tools;
     header_changed = true;

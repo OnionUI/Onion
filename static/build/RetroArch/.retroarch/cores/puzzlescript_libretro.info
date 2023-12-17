@@ -1,0 +1,30 @@
+# Software Information
+display_name = "PuzzleScript (pzretro)"
+categories = "Game engine"
+authors = "Nathan Whitehead"
+corename = "puzzlescript"
+supported_extensions = "pz"
+license = "MIT"
+permissions = ""
+
+# Hardware Information
+systemname = "PuzzleScript"
+systemid = "puzzlescript"
+
+# Libretro Features
+savestate = "false"
+savestate_features = "deterministic"
+cheats = "false"
+input_descriptors = "true"
+memory_descriptors = "false"
+libretro_saves = "false"
+core_options = "true"
+core_options_version = "1.3"
+load_subsystem = "false"
+supports_no_game = "false"
+database = "PuzzleScript"
+hw_render = "false"
+needs_fullpath = "false"
+disk_control = "false"
+
+description = "Plays PuzzleScript games"
