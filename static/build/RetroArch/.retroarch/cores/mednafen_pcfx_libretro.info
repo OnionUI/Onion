@@ -1,7 +1,7 @@
 # Software Information
 display_name = "NEC - PC-FX (Beetle PC-FX)"
 authors = "Mednafen Team"
-supported_extensions = "cue|ccd|toc|chd"
+supported_extensions = "cue|ccd|toc|chd|m3u"
 corename = "Beetle PC-FX"
 license = "GPLv2"
 permissions = ""

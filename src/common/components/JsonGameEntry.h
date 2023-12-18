@@ -5,8 +5,6 @@
 #include "utils/json.h"
 #include "utils/str.h"
 
-#define RECENTLIST_PATH "/mnt/SDCARD/Roms/recentlist.json"
-#define RECENTLIST_HIDDEN_PATH "/mnt/SDCARD/Roms/recentlist-hidden.json"
 #define FAVORITES_PATH "/mnt/SDCARD/Roms/favourite.json"
 
 typedef struct json_game_entry_s {

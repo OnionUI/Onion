@@ -24,7 +24,7 @@
  * which is used by `runtime.sh` for knowing when to show shutdown screen.
  *
  */
-void system_shutdown(void)
+void set_system_shutdown(void)
 {
     temp_flag_set(".offOrder", true);
     system_clock_get();
@@ -44,8 +44,18 @@ void system_powersave(bool enabled)
     FILE *fp;
 
     if (enabled) {
+        char buffer[128];
+        FILE *pipe = popen("cpuclock", "r");
+
+        if (pipe) {
+            while (fgets(buffer, sizeof(buffer), pipe) != NULL) {
+                saved_min_freq = atoi(buffer);
+            }
+        }
+
+        pclose(pipe);
+
         // save values for restoring later
-        file_get(fp, CPU_SCALING_MIN_FREQ, "%u", &saved_min_freq);
         file_get(fp, CPU_SCALING_GOVERNOR, "%15s", saved_governor);
         // set powersaving values
         file_put(fp, CPU_SCALING_MIN_FREQ, "%u", 0);
@@ -53,7 +63,9 @@ void system_powersave(bool enabled)
     }
     else {
         // restore
-        file_put(fp, CPU_SCALING_MIN_FREQ, "%u", saved_min_freq);
+        char sCommand[15];
+        sprintf(sCommand, "cpuclock %u", saved_min_freq);
+        system(sCommand);
         file_put(fp, CPU_SCALING_GOVERNOR, "%s", saved_governor);
     }
 }
