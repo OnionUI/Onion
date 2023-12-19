@@ -366,6 +366,11 @@ launch_game() {
                 exceptions_file="$sysdir/config/res_exceptions"
                 exception_found=false
                 while IFS= read -r exception; do
+                    case "$exception" in
+                        ""|\#*)
+                            continue
+                            ;;
+                    esac
                     if grep -qF "$exception" $sysdir/cmd_to_run.sh; then
                         exception_found=true
                         log "exception found: $exception"
