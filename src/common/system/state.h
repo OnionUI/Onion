@@ -244,8 +244,7 @@ char *history_getRecentPath(char *rom_path)
     file = fopen(getMiyooRecentFilePath(), "r");
 
     if (file == NULL) {
-        perror("Erreur lors de l'ouverture du fichier");
-        return NULL; // Renvoie NULL en cas d'erreur d'ouverture du fichier
+        return NULL; 
     }
 
     while (fgets(line, STR_MAX * 3, file) != NULL) {
