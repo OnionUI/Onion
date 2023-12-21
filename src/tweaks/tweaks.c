@@ -201,11 +201,6 @@ int main(int argc, char *argv[])
 
         blf_changing = exists("/tmp/blue_light_script.lock");
 
-        if (blf_changing != prev_blf_changing) {
-            reset_menus = true;
-            prev_blf_changing = blf_changing;
-        }
-
         if (acc_ticks >= time_step) {
             if (isMenu(&_menu_date_time) || isMenu(&_menu_user_blue_light)) {
                 if (isMenu(&_menu_date_time)) {
@@ -252,6 +247,11 @@ int main(int argc, char *argv[])
             if (header_changed || list_changed || footer_changed || battery_changed) {
                 SDL_BlitSurface(screen, NULL, video, NULL);
                 SDL_Flip(video);
+            }
+            
+            if (blf_changing != prev_blf_changing) {
+                reset_menus = true;
+                prev_blf_changing = blf_changing;
             }
 
             header_changed = false;

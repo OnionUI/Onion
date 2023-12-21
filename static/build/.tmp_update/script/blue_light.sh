@@ -2,6 +2,7 @@ sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo 
 export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 blf_key=$sysdir/config/.blf
+blf_key_on_user=$sysdir/config/.blfOn
 blf_key_on=/tmp/.blfOn
 ignore_schedule=/tmp/.blfIgnoreSchedule
 
@@ -19,16 +20,14 @@ setRGBValues() {
     value=$1
     case "$value" in
         0)
-            endB=128; endG=128; endR=128 ;;
-        1)
             endB=110; endG=125; endR=140 ;;
-        2)
+        1)
             endB=100; endG=120; endR=140 ;;
-        3)
+        2)
             endB=90;  endG=115; endR=140 ;;
-        4)
+        3)
             endB=80;  endG=110; endR=140 ;;
-        5)
+        4)
             endB=70;  endG=105; endR=140 ;;
         *)
             endB=128; endG=128; endR=128 ;;
@@ -59,7 +58,8 @@ set_intensity() {
     sync
 
     # echo ":: Blue Light Filter Intensity Set to $value, ready for next toggle." 
-    if [ -f "$blf_key_on" ]; then
+    if [ -f "$blf_key_on" ] || [ -f "$blf_key_on_user" ]; then
+        touch $blf_key_on
         touch /tmp/blueLightIntensityChange
         blueLightStart
     fi
@@ -92,6 +92,7 @@ disable_blue_light_filter() {
 
     echo ":: Blue Light Filter: Disabled"
     rm -f $blf_key_on
+    rm -f $blf_key_on_user
 }
 
 check_disp_init() {
@@ -105,7 +106,6 @@ check_disp_init() {
         sleep 2.5
     fi
 }
-
 
 blueLightStart() {
     sync
@@ -155,18 +155,14 @@ to_minutes_since_midnight() {
 }
 
 enable_blue_light_filter() {   
-    value=$(cat $sysdir/config/display/blueLightLevel)
-    if [ "$value" -eq 0 ]; then
-        return
-    fi
-    
     check_disp_init
     sync
     blueLightStart
     
     echo ":: Blue Light Filter: Enabled"
     touch $blf_key_on
-    touch $sysdir/config/.blfOn
+    touch $blf_key_on_user
+    sync
 }
 
 disable_blue_light_filter() {    

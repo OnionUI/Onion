@@ -61,8 +61,7 @@ void action_meterWidth(void *pt)
 void action_blueLight(void *pt)
 {
     blf_changing = true;
-    reset_menus = true;
-
+    
     if (settings.blue_light_state || exists("/tmp/.blfOn")) {
         system("/mnt/SDCARD/.tmp_update/script/blue_light.sh set_default &");
         remove("/tmp/.blfOn");
@@ -73,7 +72,8 @@ void action_blueLight(void *pt)
 
     settings.blue_light_state = ((ListItem *)pt)->value;
     config_flag_set(".blfOn", ((ListItem *)pt)->value);
-    list_changed = true;
+    reset_menus = true;
+    all_changed = true;
 }
 
 void action_blueLightLevel(void *pt)
