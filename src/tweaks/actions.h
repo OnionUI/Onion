@@ -93,9 +93,6 @@ void action_blueLightLevel(void *pt)
     if (settings.blue_light_state || exists("/tmp/.blfOn")) {
         system("/mnt/SDCARD/.tmp_update/script/blue_light.sh set_intensity &");
     }
-    else {
-        system("timeout -t 0.5 /mnt/SDCARD/.tmp_update/script/blue_light.sh set_intensity &");
-    }
 }
 
 void action_blueLightSchedule(void *pt)
