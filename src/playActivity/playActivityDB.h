@@ -48,7 +48,7 @@ struct PlayActivities {
 
 sqlite3 *play_activity_db = NULL;
 
-char * get_rom_image_path(char * rom_file) {
+char * get_rom_image_path(char *rom_file) {
     
     if(str_endsWith(rom_file, ".p8") || str_endsWith(rom_file, ".png")) {
         char * path[STR_MAX];
@@ -56,9 +56,9 @@ char * get_rom_image_path(char * rom_file) {
         return strdup(path);
     };
 
-    char *clean_rom_name = file_removeExtension(basename(strdup(rom_file)));
-    
-    char *rom_path = str_replace(rom_file, basename(strdup(rom_file)), "");
+    char *clean_rom_name = file_removeExtension(basename(rom_file));
+    char *rom_path = str_replace(rom_file, basename(rom_file), "");
+
     char base_path[STR_MAX];
     concat(base_path, "/mnt/SDCARD/Roms/",rom_path);
 
