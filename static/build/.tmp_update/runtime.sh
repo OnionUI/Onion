@@ -209,6 +209,9 @@ launch_main_ui() {
         LD_PRELOAD="$miyoodir/lib/libpadsp.so" \
         ./MainUI 2>&1 > /dev/null
 
+    # Merge the last game launched into the recent list
+    check_hide_recents
+
     # Check if wifi setting changed
     if [ $(/customer/app/jsonval wifi) -ne $wifi_setting ]; then
         touch /tmp/network_changed
