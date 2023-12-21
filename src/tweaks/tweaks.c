@@ -248,7 +248,7 @@ int main(int argc, char *argv[])
                 SDL_BlitSurface(screen, NULL, video, NULL);
                 SDL_Flip(video);
             }
-            
+
             if (blf_changing != prev_blf_changing) {
                 reset_menus = true;
                 prev_blf_changing = blf_changing;
