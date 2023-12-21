@@ -205,6 +205,7 @@ get_ssSystemID() {
     MEGADUCK)           ssSystemID="90";;    # Megaduck
     MS)                 ssSystemID="2";;     # Sega Master System
     MSX)                ssSystemID="113";;   # MSX
+    NDS)                ssSystemID="15";;    # NDS
     NEOCD)              ssSystemID="70";;    # Neo Geo CD
     NEOGEO)             ssSystemID="142";;   # Neo Geo AES
     NGP)                ssSystemID="25";;    # Neo Geo Pocket

@@ -17,6 +17,9 @@ main() {
     export DEVICE_ID=$([ $? -eq 0 ] && echo $MODEL_MMP || echo $MODEL_MM)
     echo -n "$DEVICE_ID" > /tmp/deviceModel
 
+    SERIAL_NUMBER=$(read_uuid) 
+    echo -n "$SERIAL_NUMBER" > /tmp/deviceSN
+    
     touch /tmp/is_booting
     check_installer
     clear_logs
@@ -55,9 +58,25 @@ main() {
 
     # Make sure MainUI doesn't show charging animation
     touch /tmp/no_charging_ui
+    
+    # Check if blf needs enabling
+    if [ -f $sysdir/config/.blfOn ]; then
+        /mnt/SDCARD/.tmp_update/script/blue_light.sh enable &
+    fi
 
     cd $sysdir
     bootScreen "Boot"
+    
+    # Set filebrowser branding to "Onion" and apply custom theme
+    if [ -f "$sysdir/config/filebrowser/first.run" ]; then
+        $sysdir/bin/filebrowser config set --branding.name "Onion" -d $sysdir/config/filebrowser/filebrowser.db
+        $sysdir/bin/filebrowser config set --branding.files "$sysdir/config/filebrowser/theme" -d $sysdir/config/filebrowser/filebrowser.db
+
+        rm "$sysdir/config/filebrowser/first.run"
+    fi
+
+    # Start networking (Checks networking, checks timezone)
+    start_networking
 
     # Start the key monitor
     keymon &
@@ -65,7 +84,10 @@ main() {
     # Init
     rm /tmp/.offOrder 2> /dev/null
     HOME=/mnt/SDCARD/RetroArch/
-
+    
+    # Disable VNC server flag at boot
+    rm $sysdir/config/.vncServer
+    
     # Detect if MENU button is held
     detectKey 1
     menu_pressed=$?
@@ -82,15 +104,7 @@ main() {
     # Bind arcade name library to customer path
     mount -o bind $miyoodir/lib/libgamename.so /customer/lib/libgamename.so
 
-    # Set filebrowser branding to "Onion" and apply custom theme
-    if [ -f "$sysdir/config/filebrowser/first.run" ]; then
-        $sysdir/bin/filebrowser config set --branding.name "Onion" -d $sysdir/config/filebrowser/filebrowser.db
-        $sysdir/bin/filebrowser config set --branding.files "$sysdir/config/filebrowser/theme" -d $sysdir/config/filebrowser/filebrowser.db
 
-        rm "$sysdir/config/filebrowser/first.run"
-    fi
-
-    start_networking
     rm -rf /tmp/is_booting
 
     # Auto launch
@@ -187,12 +201,17 @@ launch_main_ui() {
 
     start_audioserver
 
+    mute_theme_bgm
+
     # MainUI launch
     cd $miyoodir/app
     PATH="$miyoodir/app:$PATH" \
         LD_LIBRARY_PATH="$miyoodir/lib:/config/lib:/lib" \
         LD_PRELOAD="$miyoodir/lib/libpadsp.so" \
         ./MainUI 2>&1 > /dev/null
+
+    # Merge the last game launched into the recent list
+    check_hide_recents
 
     # Check if wifi setting changed
     if [ $(/customer/app/jsonval wifi) -ne $wifi_setting ]; then
@@ -202,7 +221,6 @@ launch_main_ui() {
     fi
 
     $sysdir/bin/freemma
-
     mv -f /tmp/cmd_to_run.sh $sysdir/cmd_to_run.sh
 
     set_prev_state "mainui"
@@ -354,7 +372,6 @@ launch_game() {
         if [ "$romext" == "miyoocmd" ]; then
             emupath=$(dirname $(echo "$cmd" | awk '{ gsub(/"/, "", $2); st = index($2,".."); if (st) { print substr($2,0,st) } else { print $2 } }'))
             cd "$emupath"
-
             chmod a+x "$rompath"
             "$rompath" "$rompath" "$emupath"
             retval=$?
@@ -381,12 +398,19 @@ launch_game() {
                     change_resolution
                 fi
             fi
+            # Free memory
+            $sysdir/bin/freemma
             cd /mnt/SDCARD/RetroArch/
             $sysdir/cmd_to_run.sh
             if [ -f /tmp/new_res_available ]; then
                 change_resolution "640x480"
             fi
             retval=$?
+            if [ $is_game -eq 1 ] && [ ! -f /tmp/.offOrder ]; then
+                infoPanel --title " " --message  "Saving ..." --persistent --no-footer &
+                touch /tmp/dismiss_info_panel
+                sync
+            fi
         fi
     else
         retval=404
@@ -405,10 +429,7 @@ launch_game() {
 
     # Reset flags
     rm /tmp/stay_awake 2> /dev/null
-
-    # Free memory
-    $sysdir/bin/freemma
-
+        
     # TIMER END + SHUTDOWN CHECK
     if [ $is_game -eq 1 ]; then
         if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
@@ -469,6 +490,7 @@ check_switcher() {
 launch_switcher() {
     log "\n:: Launch switcher"
     cd $sysdir
+    start_audioserver
     LD_PRELOAD="$miyoodir/lib/libpadsp.so" gameSwitcher
     rm $sysdir/.runGameSwitcher
     set_prev_state "switcher"
@@ -564,6 +586,23 @@ get_screen_resolution() {
     echo -n "$screen_resolution" > /tmp/screen_resolution
 }
 
+mute_theme_bgm() {
+    bgm_muted=$(/customer/app/jsonval bgmmute)
+    system_theme="$(/customer/app/jsonval theme)"
+    bgm_file="${system_theme}sound/bgm.mp3"
+    muted_bgm_file="${system_theme}sound/bgm_muted.mp3"
+
+    if [ $bgm_muted -eq 1 ]; then
+        if [[ -f "$bgm_file" ]]; then
+            mv -f "$bgm_file" "$muted_bgm_file"
+        fi
+    else
+        if [[ -f "$muted_bgm_file" ]]; then
+            mv -f "$muted_bgm_file" "$bgm_file"
+        fi
+    fi
+}
+
 init_system() {
     log "\n:: Init system"
 
@@ -585,7 +624,14 @@ init_system() {
 
     # init backlight
     echo 0 > /sys/class/pwm/pwmchip0/export
-    echo 800 > /sys/class/pwm/pwmchip0/pwm0/period
+    pwmfile="$sysdir/config/.pwmfrequency"
+    if [ -s $pwmfile ]; then
+        # 0 - 9 = 100 - 1000 Hz
+        frequency=$((($(cat "$pwmfile") + 1) * 100))
+    else
+        frequency=800
+    fi
+    echo $frequency > /sys/class/pwm/pwmchip0/pwm0/period
     echo $brightness_raw > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
     echo 1 > /sys/class/pwm/pwmchip0/pwm0/enable
 
@@ -640,6 +686,10 @@ save_settings() {
 }
 
 update_time() {
+    # Give hardware modders an option to disable time restore
+    if [ -f $sysdir/config/.noTimeRestore ]; then
+        return
+    fi
     timepath=/mnt/SDCARD/Saves/CurrentProfile/saves/currentTime.txt
     currentTime=0
     # Load current time

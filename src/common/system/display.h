@@ -136,7 +136,6 @@ void display_setScreen(bool enabled)
     else {
         display_save();
     }
-
     display_enabled = enabled;
 }
 
