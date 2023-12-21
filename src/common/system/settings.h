@@ -25,6 +25,7 @@ typedef struct settings_s {
     int volume;
     char keymap[JSON_STRING_LEN];
     int mute;
+    int bgm_mute;
     int bgm_volume;
     int brightness;
     char language[JSON_STRING_LEN];
@@ -78,6 +79,7 @@ static settings_s __default_settings = (settings_s){
     .volume = 20,
     .keymap = "L2,L,R2,R,X,A,B,Y",
     .mute = 0,
+    .bgm_mute = 0,
     .bgm_volume = 20,
     .brightness = 7,
     .language = "en.lang",
@@ -167,6 +169,7 @@ void _settings_load_mainui(void)
 
     json_getInt(json_root, "vol", &settings.volume);
     json_getInt(json_root, "bgmvol", &settings.bgm_volume);
+    json_getInt(json_root, "bgmmute", &settings.bgm_mute);
     json_getInt(json_root, "brightness", &settings.brightness);
     json_getInt(json_root, "hibernate", &settings.sleep_timer);
     json_getInt(json_root, "lumination", &settings.lumination);
@@ -281,6 +284,7 @@ bool _settings_dirty_mainui(void)
     return settings.volume != __settings.volume ||
            strcmp(settings.keymap, __settings.keymap) != 0 ||
            settings.mute != __settings.mute ||
+           settings.bgm_mute != __settings.bgm_mute ||
            settings.bgm_volume != __settings.bgm_volume ||
            settings.brightness != __settings.brightness ||
            strcmp(settings.language, __settings.language) != 0 ||
@@ -311,6 +315,7 @@ void _settings_save_mainui(void)
     fprintf(fp, JSON_FORMAT_TAB_NUMBER, "vol", settings.volume);
     fprintf(fp, JSON_FORMAT_TAB_STRING, "keymap", settings.keymap);
     fprintf(fp, JSON_FORMAT_TAB_NUMBER, "mute", settings.mute);
+    fprintf(fp, JSON_FORMAT_TAB_NUMBER, "bgmmute", settings.bgm_mute);
     fprintf(fp, JSON_FORMAT_TAB_NUMBER, "bgmvol", settings.bgm_volume);
     fprintf(fp, JSON_FORMAT_TAB_NUMBER, "brightness", settings.brightness);
     fprintf(fp, JSON_FORMAT_TAB_STRING, "language", settings.language);
