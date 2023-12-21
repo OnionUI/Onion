@@ -60,10 +60,8 @@ void action_meterWidth(void *pt)
 
 void action_blueLight(void *pt)
 {
-    if (settings.blue_light_level > 0) {
-        blf_changing = true;
-        reset_menus = true;
-    }
+    blf_changing = true;
+    reset_menus = true;
 
     if (settings.blue_light_state || exists("/tmp/.blfOn")) {
         system("/mnt/SDCARD/.tmp_update/script/blue_light.sh set_default &");
