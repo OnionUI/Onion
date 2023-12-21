@@ -330,7 +330,7 @@ void readHistory()
         if (bGameExists) {
             // recentlist line deletion
             file_delete_line(getMiyooRecentFilePath(), lineCounter);
-            lineCounter --;
+            lineCounter--;
             continue;
         }
 
