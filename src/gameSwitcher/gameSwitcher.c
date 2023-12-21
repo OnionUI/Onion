@@ -492,7 +492,7 @@ int main(int argc, char *argv[])
         footer_height = 0;
 
     SDL_Surface *current_bg = NULL;
-    // SDL_Rect frame = {theme()->frame.border_left, 0, 640 - theme()->frame.border_left - theme()->frame.border_right, 480};
+    SDL_Rect frame = {theme()->frame.border_left, 0, 640 - theme()->frame.border_left - theme()->frame.border_right, 480};
 
     while (!quit) {
         uint32_t ticks = SDL_GetTicks();
