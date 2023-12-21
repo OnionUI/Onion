@@ -516,7 +516,7 @@ void menu_blueLight(void *_)
                                      .item_type = MULTIVALUE,
                                      .disable_arrows = blf_changing,
                                      .disable_a_btn = blf_changing,
-                                     .value_max = 5,
+                                     .value_max = 4,
                                      .value_labels = BLUELIGHT_LABELS,
                                      .action = action_blueLightLevel,
                                      .value = value_blueLightLevel()},
