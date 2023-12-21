@@ -584,6 +584,10 @@ save_settings() {
 }
 
 update_time() {
+    # Give hardware modders an option to disable time restore
+    if [ -f $sysdir/config/.noTimeRestore ]; then
+        return
+    fi
     timepath=/mnt/SDCARD/Saves/CurrentProfile/saves/currentTime.txt
     currentTime=0
     # Load current time
