@@ -22,6 +22,7 @@ int main(int argc, char *argv[])
     signal(SIGTERM, sigHandler);
     signal(SIGSTOP, sigHandler);
     signal(SIGCONT, sigHandler);
+    signal(SIGUSR1, sigHandler);
 
     display_init();
     int ticks = CHECK_BATTERY_TIMEOUT_S;
@@ -159,6 +160,9 @@ static void sigHandler(int sig)
             adc_value_g = updateADCValue(0);
         }
         is_suspended = false;
+        break;
+    case SIGUSR1:
+        display_getRenderResolution();
         break;
     default:
         break;
@@ -380,7 +384,7 @@ int batteryPercentage(int value)
 static void *batteryWarning_thread(void *param)
 {
     while (1) {
-        display_drawBatteryIcon(0x00FF0000, 15, 450, 10,
+        display_drawBatteryIcon(0x00FF0000, 15, RENDER_HEIGHT - 30, 10,
                                 0x00FF0000); // draw red battery icon
         usleep(0x4000);
     }
