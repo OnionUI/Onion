@@ -330,7 +330,7 @@ void readHistory()
         if (bGameExists) {
             // recentlist line deletion
             file_delete_line(getMiyooRecentFilePath(), lineCounter);
-            lineCounter --;
+            lineCounter--;
             continue;
         }
 
@@ -492,7 +492,7 @@ int main(int argc, char *argv[])
         footer_height = 0;
 
     SDL_Surface *current_bg = NULL;
-    // SDL_Rect frame = {theme()->frame.border_left, 0, 640 - theme()->frame.border_left - theme()->frame.border_right, 480};
+    SDL_Rect frame = {theme()->frame.border_left, 0, 640 - theme()->frame.border_left - theme()->frame.border_right, 480};
 
     while (!quit) {
         uint32_t ticks = SDL_GetTicks();
@@ -695,10 +695,17 @@ int main(int argc, char *argv[])
                     current_bg = loadRomScreen(current_game);
 
                     if (current_bg != NULL) {
-                        int x_offset = (int)((640 - current_bg->w) / 2);
-                        int y_offset = (int)((480 - current_bg->h) / 2);
-                        SDL_Rect frame_bg = {x_offset, y_offset, 640, 480};
-                        SDL_BlitSurface(current_bg, NULL, screen, &frame_bg);
+                        if (current_bg->w != 640 || current_bg->h != 480) {
+                            printf_debug("Scaling screenshot from %dx%d to 640x480\n", current_bg->w, current_bg->h);
+                            SDL_Rect dest_rect = {0, 0, 640, 480};
+                            SDL_SoftStretch(current_bg, NULL, current_bg, &dest_rect);
+                            current_bg->w = 640;
+                            current_bg->h = 480;
+                        }
+                        if (view_mode == VIEW_NORMAL)
+                            SDL_BlitSurface(current_bg, &frame, screen, &frame);
+                        else
+                            SDL_BlitSurface(current_bg, NULL, screen, NULL);
                     }
                 }
             }

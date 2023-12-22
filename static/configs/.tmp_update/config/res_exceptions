@@ -1,0 +1,4 @@
+# each line is matched against cmd_to_run.sh and if it matches, the resolution is not changed to 560p
+# blank lines and lines starting with # are ignored
+
+/mnt/SDCARD/App/

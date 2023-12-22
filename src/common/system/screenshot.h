@@ -83,7 +83,7 @@ bool __get_path_recent(char *path_out)
 
 uint32_t *__screenshot_buffer(void)
 {
-    static size_t buffer_size = DISPLAY_WIDTH * DISPLAY_HEIGHT * sizeof(uint32_t);
+    size_t buffer_size = DISPLAY_WIDTH * DISPLAY_HEIGHT * sizeof(uint32_t);
     uint32_t *buffer = (uint32_t *)malloc(buffer_size);
 
     ioctl(fb_fd, FBIOGET_VSCREENINFO, &vinfo);
@@ -103,10 +103,14 @@ uint32_t *__screenshot_buffer(void)
 bool __screenshot_save(const uint32_t *buffer, const char *screenshot_path)
 {
     uint32_t *src;
-    uint32_t line_buffer[DISPLAY_WIDTH], x, y, pix;
+    uint32_t line_buffer[RENDER_WIDTH], x, y, pix;
+
     FILE *fp;
     png_structp png_ptr;
     png_infop info_ptr;
+
+    // make sure render resolution is up to date
+    display_getRenderResolution();
 
     if (!(fp = file_open_ensure_path(screenshot_path, "wb"))) {
         return false;
@@ -116,15 +120,15 @@ bool __screenshot_save(const uint32_t *buffer, const char *screenshot_path)
     info_ptr = png_create_info_struct(png_ptr);
 
     png_init_io(png_ptr, fp);
-    png_set_IHDR(png_ptr, info_ptr, DISPLAY_WIDTH, DISPLAY_HEIGHT, 8,
+    png_set_IHDR(png_ptr, info_ptr, RENDER_WIDTH, RENDER_HEIGHT, 8,
                  PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE,
                  PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
     png_write_info(png_ptr, info_ptr);
 
-    src = (uint32_t *)buffer + DISPLAY_WIDTH * DISPLAY_HEIGHT;
+    src = (uint32_t *)buffer + RENDER_WIDTH * RENDER_HEIGHT;
 
-    for (y = 0; y < DISPLAY_HEIGHT; y++) {
-        for (x = 0; x < DISPLAY_WIDTH; x++) {
+    for (y = 0; y < RENDER_HEIGHT; y++) {
+        for (x = 0; x < RENDER_WIDTH; x++) {
             pix = *--src;
             line_buffer[x] = 0xFF000000 | (pix & 0x0000FF00) | (pix & 0x00FF0000) >> 16 | (pix & 0x000000FF) << 16;
         }
