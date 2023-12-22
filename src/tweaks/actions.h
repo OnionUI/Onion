@@ -61,7 +61,6 @@ void action_meterWidth(void *pt)
 void action_blueLight(void *pt)
 {
     blf_changing = true;
-    reset_menus = true;
 
     if (settings.blue_light_state || exists("/tmp/.blfOn")) {
         system("/mnt/SDCARD/.tmp_update/script/blue_light.sh set_default &");
@@ -73,13 +72,17 @@ void action_blueLight(void *pt)
 
     settings.blue_light_state = ((ListItem *)pt)->value;
     config_flag_set(".blfOn", ((ListItem *)pt)->value);
-    list_changed = true;
+    reset_menus = true;
+    all_changed = true;
 }
 
 void action_blueLightLevel(void *pt)
 {
-    blf_changing = true;
-    reset_menus = true;
+    if (settings.blue_light_state) {
+        blf_changing = true;
+        reset_menus = true;
+    }
+
     ListItem *item = (ListItem *)pt;
 
     settings.blue_light_level = item->value;
@@ -87,9 +90,6 @@ void action_blueLightLevel(void *pt)
 
     if (settings.blue_light_state || exists("/tmp/.blfOn")) {
         system("/mnt/SDCARD/.tmp_update/script/blue_light.sh set_intensity &");
-    }
-    else {
-        system("timeout -t 1 /mnt/SDCARD/.tmp_update/script/blue_light.sh set_intensity &");
     }
 }
 
@@ -314,7 +314,7 @@ void action_hideLabelsIcons(void *pt)
     theme_changeOverride("hideLabels", "icons", NULL, value_types[item_value]);
 }
 
-void action_toggleBackgroundMusic(void *pt) 
+void action_toggleBackgroundMusic(void *pt)
 {
     settings.bgm_mute = ((ListItem *)pt)->value == 1;
 };
