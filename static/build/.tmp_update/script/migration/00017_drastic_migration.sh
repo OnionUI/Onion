@@ -23,8 +23,12 @@ migrate_drastic() {
         # if some save states were present, we keep the existing bios for compatibility
         retVal=$?
         if [ $retVal -eq 0 ]; then
-            mkdir -p /tmp/drasticBios/
-            cp "$old_drastic_folder"/system/*.bin "/tmp/drasticBios/"
+            if [ -e "$old_drastic_folder"/system/nds_bios_arm7.bin ] || [ -e "$old_drastic_folder"/system/nds_bios_arm9.bin ] || [ -e "$old_drastic_folder"/system/nds_firmware.bin ]; then
+                mkdir -p /tmp/drasticBios/
+                cp "$old_drastic_folder"/system/*.bin "/tmp/drasticBios/"
+                touch "$new_save_folder/.originalBiosRequired"
+            fi
+
         fi
 
         7z a -r -mx0 "$backup_zip_file" "$old_drastic_folder"/
