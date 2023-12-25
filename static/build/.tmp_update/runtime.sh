@@ -587,12 +587,11 @@ get_screen_resolution() {
 }
 
 mute_theme_bgm() {
-    bgm_muted=$(/customer/app/jsonval bgmmute)
     system_theme="$(/customer/app/jsonval theme)"
     bgm_file="${system_theme}sound/bgm.mp3"
     muted_bgm_file="${system_theme}sound/bgm_muted.mp3"
 
-    if [ $bgm_muted -eq 1 ]; then
+    if [ -f "$sysdir/config/.bgmMute" ]; then
         if [[ -f "$bgm_file" ]]; then
             mv -f "$bgm_file" "$muted_bgm_file"
         fi
