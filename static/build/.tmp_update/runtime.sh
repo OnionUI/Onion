@@ -379,25 +379,24 @@ launch_game() {
             # GAME LAUNCH
 
             if [ -f /tmp/new_res_available ]; then
-                # check for games that don't work with 752x560 resolution
-                exceptions_file="$sysdir/config/res_exceptions"
-                exception_found=false
-                while IFS= read -r exception; do
-                    case "$exception" in
-                        ""|\#*)
-                            continue
-                            ;;
-                    esac
-                    if grep -qF "$exception" $sysdir/cmd_to_run.sh; then
-                        exception_found=true
-                        log "exception found: $exception"
-                        break
-                    fi
-                done < "$exceptions_file"
-                if ! $exception_found ; then
+                # Check if the program to be launched supports 560p
+                # This is determined by looking for a file "full_resolution" in the same directory as the launch script 
+
+                if grep -qF "/mnt/SDCARD/App/" $sysdir/cmd_to_run.sh; then
+                    # App launch scripts look different from game launch scripts
+                    full_resolution_path=$(cat $sysdir/cmd_to_run.sh | cut -d' ' -f 2 | sed 's/;/\/full_resolution/')
+                else
+                    full_resolution_path=$(grep -o '".*launch\.sh"' $sysdir/cmd_to_run.sh | sed 's/"//g' | sed 's/launch\.sh/full_resolution/')
+                fi
+
+                if [ -f "$full_resolution_path" ]; then
+                    log "Screen and program to be launched support 560p"
                     change_resolution
+                else
+                    log "Screen supports 560p, but program to be launched does not"
                 fi
             fi
+
             # Free memory
             $sysdir/bin/freemma
             cd /mnt/SDCARD/RetroArch/
