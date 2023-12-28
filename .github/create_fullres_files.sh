@@ -6,7 +6,7 @@
 # Include hidden folders
 shopt -s dotglob
 
-packages="/root/workspace/build/App/PackageManager/data"
+packages="./build/App/PackageManager/data"
 
 # Emulators using RetroArch
 for dir in "$packages"/{Emu,RApp}/*/{Emu,RApp}/*/; do
