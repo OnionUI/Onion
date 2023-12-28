@@ -61,6 +61,8 @@ main() {
     else
         currentrecentlist=$recentlist
     fi
+
+    firstrecententry=$(head -n 1 "$currentrecentlist")
     sed '1d' $currentrecentlist > $recentlist_temp
     mv $recentlist_temp $currentrecentlist
 
@@ -234,6 +236,11 @@ check_is_game() {
     echo "$1" | grep -q "retroarch" || echo "$1" | grep -q "/../../Roms/"
 }
 
+add_game_to_recent_list() {
+    echo "$firstrecententry" | cat - "$currentrecentlist" > "$recentlist_temp"
+    mv "$recentlist_temp" "$currentrecentlist"
+}
+
 add_script_files() {
     scriptdir="$1"
     if [ -d "$scriptdir" ]; then
@@ -332,6 +339,7 @@ reset_game() {
     echo ":: reset_game $*"
     echo -e "savestate_auto_load = \"false\"\nconfig_save_on_exit = \"false\"\n" > $sysdir/reset.cfg
     echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v --appendconfig \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+    add_game_to_recent_list
     exit 0
 }
 
