@@ -518,7 +518,6 @@ check_hide_recents() {
             mv -f $recentlist_temp $recentlist_hidden
             rm -f $recentlist
         fi
-        # Hide recents off
     else
         # Restore recentlist
         if [ -f $recentlist_hidden ]; then

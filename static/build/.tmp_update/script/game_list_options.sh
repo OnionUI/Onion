@@ -4,6 +4,10 @@ radir=/mnt/SDCARD/RetroArch/.retroarch
 ext_cache_path=$radir/cores/cache/core_extensions.cache
 globalscriptdir=/mnt/SDCARD/App/romscripts
 
+recentlist=/mnt/SDCARD/Roms/recentlist.json
+recentlist_hidden=/mnt/SDCARD/Roms/recentlist-hidden.json
+recentlist_temp=/tmp/recentlist-temp.json
+
 UI_TITLE="OPTIONS"
 
 mkdir -p $radir/cores/cache
@@ -50,6 +54,15 @@ main() {
         echo "cmd_to_run.sh not found"
         exit 1
     fi
+
+    # Recent list entry removal
+    if [ ! -f $sysdir/config/.showRecents ]; then
+        currentrecentlist=$recentlist_hidden
+    else
+        currentrecentlist=$recentlist
+    fi
+    sed '1d' $currentrecentlist > $recentlist_temp
+    mv $recentlist_temp $currentrecentlist
 
     if [ $current_tab -eq $TAB_GAMES ]; then
         echo "tab: games"
