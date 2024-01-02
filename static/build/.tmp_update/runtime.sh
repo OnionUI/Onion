@@ -379,6 +379,7 @@ launch_game() {
 
     if [ $is_game -eq 0 ] || [ -f "$rompath" ]; then
         if [ "$romext" == "miyoocmd" ]; then
+            /mnt/SDCARD/.tmp_update/script/remove_last_recent_entry.sh
             emupath=$(dirname $(echo "$cmd" | awk '{ gsub(/"/, "", $2); st = index($2,".."); if (st) { print substr($2,0,st) } else { print $2 } }'))
             cd "$emupath"
             chmod a+x "$rompath"
@@ -414,7 +415,8 @@ launch_game() {
                 change_resolution "640x480"
             fi
             retval=$?
-            if [ $is_game -eq 1 ] && [ ! -f /tmp/.offOrder ]; then
+            if [ $is_game -eq 1 ] && [ ! -f /tmp/.offOrder ] && [ -f /tmp/.displaySavingMessage ]; then
+                rm /tmp/.displaySavingMessage
                 infoPanel --title " " --message  "Saving ..." --persistent --no-footer &
                 touch /tmp/dismiss_info_panel
                 sync

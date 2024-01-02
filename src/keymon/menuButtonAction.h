@@ -95,7 +95,7 @@ bool terminate_retroarch(void)
 }
 
 //
-//    Terminate drasstic before kill/shotdown processes to save progress
+//    Terminate drastic before kill/shotdown processes to save progress
 //
 bool terminate_drastic(void)
 {
@@ -248,9 +248,11 @@ void menuButtonEvent_singlePress(void)
         activate_MainUI_action(settings.mainui_single_press);
         break;
     case MODE_GAME:
+        temp_flag_set(".displaySavingMessage", true);
         activate_RA_action(settings.ingame_single_press);
         break;
     case MODE_DRASTIC:
+        temp_flag_set(".displaySavingMessage", true);
         activate_drastic_action(settings.ingame_single_press);
         break;
     default:
@@ -268,11 +270,13 @@ void menuButtonEvent_longPress(void)
     case MODE_GAME:
         if (settings.ingame_long_press != 0)
             short_pulse();
+        temp_flag_set(".displaySavingMessage", true);
         activate_RA_action(settings.ingame_long_press);
         break;
     case MODE_DRASTIC:
         if (settings.ingame_long_press != 0)
             short_pulse();
+        temp_flag_set(".displaySavingMessage", true);
         activate_drastic_action(settings.ingame_long_press);
         break;
     default:
