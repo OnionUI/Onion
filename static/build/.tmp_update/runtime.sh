@@ -284,7 +284,7 @@ change_resolution() {
         res_x=$(echo "$screen_resolution" | cut -d 'x' -f 1)
         res_y=$(echo "$screen_resolution" | cut -d 'x' -f 2)
     fi
-    log "change resolution to $res_x x $res_y"
+    log "Changing resolution to $res_x x $res_y"
 
     fbset -g "$res_x" "$res_y" "$res_x" "$((res_y * 2))" 32
     # inform batmon and keymon of resolution change
@@ -301,6 +301,7 @@ launch_game() {
     romext=""
     romcfgpath=""
     retroarch_core=""
+    full_resolution_path=""
 
     start_audioserver
     save_settings
@@ -331,6 +332,40 @@ launch_game() {
             log "rompath: $rompath (ext: $romext)"
             log "romcfgpath: $romcfgpath"
             is_game=1
+        fi
+    fi
+
+    if [ -f /tmp/new_res_available ]; then
+        # Check if the program to be launched supports 560p
+        # Different programs need different checks (Apps vs Ports vs the rest)
+
+        if grep -qF "/mnt/SDCARD/App/" $sysdir/cmd_to_run.sh; then
+            # ----- App launch ----- #
+
+            full_resolution_path=$(cat $sysdir/cmd_to_run.sh | cut -d' ' -f 2 | sed 's/;/\/full_resolution/')
+
+        elif grep -qF "/mnt/SDCARD/Roms/PORTS/" $sysdir/cmd_to_run.sh; then
+            # ----- Port launch ----- #
+
+            dot_port_path=$(grep -o '\/mnt\/SDCARD\/Roms\/PORTS.*\.port' $sysdir/cmd_to_run.sh)
+
+            if grep -qE "launch_retroarch\.sh|FullResolution=1" "$dot_port_path"; then
+                # Ports that use RetroArch should always support 560p
+                # for others look for FullResolution=1 in the .port file
+
+                # set full_resolution_path to a file that will always exist
+                full_resolution_path="/tmp/new_res_available"
+            fi
+
+        else
+            # ----- Everything else ----- #
+            if grep -qF "./retroarch -v" $sysdir/cmd_to_run.sh; then
+                # RetroArch startup launch
+                full_resolution_path="/tmp/new_res_available"
+            else
+                # The rest
+                full_resolution_path=$(grep -o '".*launch\.sh"' $sysdir/cmd_to_run.sh | sed 's/"//g; s/launch\.sh/full_resolution/')
+            fi
         fi
     fi
 
@@ -388,23 +423,16 @@ launch_game() {
         else
             # GAME LAUNCH
 
+            # Change resolution if needed
             if [ -f /tmp/new_res_available ]; then
-                # Check if the program to be launched supports 560p
-                # This is determined by looking for a file "full_resolution" in the same directory as the launch script 
-
-                if grep -qF "/mnt/SDCARD/App/" $sysdir/cmd_to_run.sh; then
-                    # App launch scripts look different from game launch scripts
-                    full_resolution_path=$(cat $sysdir/cmd_to_run.sh | cut -d' ' -f 2 | sed 's/;/\/full_resolution/')
-                else
-                    full_resolution_path=$(grep -o '".*launch\.sh"' $sysdir/cmd_to_run.sh | sed 's/"//g' | sed 's/launch\.sh/full_resolution/')
-                fi
-
                 if [ -f "$full_resolution_path" ]; then
                     log "Screen and program to be launched support 560p"
                     change_resolution
                 else
                     log "Screen supports 560p, but program to be launched does not"
                 fi
+            else
+                log "Screen does not support 560p"
             fi
 
             # Free memory
@@ -412,6 +440,7 @@ launch_game() {
             cd /mnt/SDCARD/RetroArch/
             $sysdir/cmd_to_run.sh
             if [ -f /tmp/new_res_available ]; then
+                # Restore resolution
                 change_resolution "640x480"
             fi
             retval=$?
