@@ -1,5 +1,6 @@
 #include "batmon.h"
 #include "system/device_model.h"
+#include "utils/process.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -127,9 +128,11 @@ int main(int argc, char *argv[])
             batteryWarning_hide();
         else if (current_percentage < warn_at &&
                  !config_flag_get(".noBatteryWarning"))
-            batteryWarning_show();
-        else
-            batteryWarning_hide();
+            if (!process_isRunning("MainUI")) {
+                batteryWarning_show();
+            }
+            else
+                batteryWarning_hide();
 #endif
         if (battery_current_state_duration > MAX_DURATION_BEFORE_UPDATE)
             update_current_duration();
