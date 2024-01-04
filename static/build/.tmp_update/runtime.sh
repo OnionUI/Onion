@@ -338,7 +338,7 @@ launch_game() {
     if [ -f /tmp/new_res_available ]; then
         # Check if the program to be launched supports 560p
         # Different programs need different checks (Apps vs Ports vs the rest)
-
+        full_resolution_path=""
         if grep -qF "/mnt/SDCARD/App/" $sysdir/cmd_to_run.sh; then
             # ----- App launch ----- #
 
@@ -349,23 +349,16 @@ launch_game() {
 
             dot_port_path=$(grep -o '\/mnt\/SDCARD\/Roms\/PORTS.*\.port' $sysdir/cmd_to_run.sh)
 
-            if grep -qE "launch_retroarch\.sh|FullResolution=1" "$dot_port_path"; then
-                # Ports that use RetroArch should always support 560p
-                # for others look for FullResolution=1 in the .port file
-
+            if grep -qE "FullResolution=1" "$dot_port_path"; then
+                # Look for FullResolution=1 in the .port file
                 # set full_resolution_path to a file that will always exist
                 full_resolution_path="/tmp/new_res_available"
             fi
 
         else
             # ----- Everything else ----- #
-            if grep -qF "./retroarch -v" $sysdir/cmd_to_run.sh; then
-                # RetroArch startup launch
-                full_resolution_path="/tmp/new_res_available"
-            else
-                # The rest
-                full_resolution_path=$(grep -o '".*launch\.sh"' $sysdir/cmd_to_run.sh | sed 's/"//g; s/launch\.sh/full_resolution/')
-            fi
+
+            full_resolution_path=$(grep -o '".*launch\.sh"' $sysdir/cmd_to_run.sh | sed 's/"//g; s/launch\.sh/full_resolution/')
         fi
     fi
 
@@ -426,10 +419,10 @@ launch_game() {
             # Change resolution if needed
             if [ -f /tmp/new_res_available ]; then
                 if [ -f "$full_resolution_path" ]; then
-                    log "Screen and program to be launched support 560p"
+                    log "Found full_resolution file, changing resolution to 560p"
                     change_resolution
                 else
-                    log "Screen supports 560p, but program to be launched does not"
+                    log "No full_resolution file found"
                 fi
             else
                 log "Screen does not support 560p"
