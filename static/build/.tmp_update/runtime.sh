@@ -417,15 +417,9 @@ launch_game() {
             # GAME LAUNCH
 
             # Change resolution if needed
-            if [ -f /tmp/new_res_available ]; then
-                if [ -f "$full_resolution_path" ]; then
-                    log "Found full_resolution file, changing resolution to 560p"
-                    change_resolution
-                else
-                    log "No full_resolution file found"
-                fi
-            else
-                log "Screen does not support 560p"
+            if [ -f /tmp/new_res_available ] && [ -f "$full_resolution_path" ]; then
+                log "Found full_resolution file, changing resolution to 560p"
+                change_resolution
             fi
 
             # Free memory
