@@ -124,15 +124,19 @@ int main(int argc, char *argv[])
         }
 
 #ifdef PLATFORM_MIYOOMINI
-        if (is_suspended || current_percentage == 500)
+        if (is_suspended || current_percentage == 500) {
             batteryWarning_hide();
-        else if (current_percentage < warn_at &&
-                 !config_flag_get(".noBatteryWarning"))
-            if (!process_isRunning("MainUI")) {
-                batteryWarning_show();
+        }
+        else {
+            if (current_percentage < warn_at && !config_flag_get(".noBatteryWarning")) {
+                if (!process_isRunning("MainUI")) {
+                    batteryWarning_show();
+                }
+                else {
+                    batteryWarning_hide();
+                }
             }
-            else
-                batteryWarning_hide();
+        }
 #endif
         if (battery_current_state_duration > MAX_DURATION_BEFORE_UPDATE)
             update_current_duration();
