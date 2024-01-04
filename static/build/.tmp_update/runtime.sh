@@ -349,7 +349,7 @@ launch_game() {
 
             dot_port_path=$(grep -o '\/mnt\/SDCARD\/Roms\/PORTS.*\.port' $sysdir/cmd_to_run.sh)
 
-            if grep -qE "FullResolution=1" "$dot_port_path"; then
+            if grep -qF "FullResolution=1" "$dot_port_path"; then
                 # Look for FullResolution=1 in the .port file
                 # set full_resolution_path to a file that will always exist
                 full_resolution_path="/tmp/new_res_available"
