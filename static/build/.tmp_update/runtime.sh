@@ -196,9 +196,6 @@ launch_main_ui() {
 
     cd $sysdir
 
-    # Generate battery percentage image
-    mainUiBatPerc
-
     # Hide any new recents if applicable
     check_hide_recents
 
@@ -215,7 +212,7 @@ launch_main_ui() {
     # MainUI launch
     cd $miyoodir/app
     PATH="$miyoodir/app:$PATH" \
-        LD_LIBRARY_PATH="$miyoodir/lib:/config/lib:/lib" \
+        LD_LIBRARY_PATH="$miyoodir/lib:/config/lib:$sysdir/lib:/lib" \
         LD_PRELOAD="$sysdir/lib/libmainuihooks.so:$miyoodir/lib/libpadsp.so" \
         ./MainUI 2>&1 > /dev/null
 

@@ -6,7 +6,7 @@
 
 ThemeImages _getBatteryRequest(int percentage)
 {
-    if (percentage == 500)
+    if (battery_isCharging())
         return BATTERY_CHARGING;
     if (percentage < 5)
         return BATTERY_0;

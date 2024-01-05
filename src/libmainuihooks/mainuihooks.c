@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 #include <SDL/SDL.h>
+#include <SDL/SDL_ttf.h>
 #include <dlfcn.h>
 #include <pthread.h>
 #include <stdbool.h>
@@ -7,10 +8,14 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "system/battery.h"
+#include "theme/theme.h"
+#include "utils/file.h"
+
 #define PREFIX "\x1B[31m[MainUIHooks]\x1B[0m "
 #define NUM_BAT_SURFACES 5
 #define MAX_PATH 256
-#define BATICON_UPDATE_INTERVAL 5
+#define BATICON_UPDATE_INTERVAL 10 // seconds
 
 typedef int (*SDL_Flip_t)(SDL_Surface *screen);
 typedef int (*SDL_UpperBlit_t)(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect);
@@ -26,25 +31,37 @@ static SDL_Surface *batPercSurface[NUM_BAT_SURFACES];
 static SDL_Surface *convBatPercSurface[NUM_BAT_SURFACES];
 static SDL_Surface *batIcon = NULL;
 
-static char batIconPath[MAX_PATH];
+static char batIconPath[MAX_PATH + 16];
+static char themePath[MAX_PATH];
 int batSurfaceCount = 0;
 static pthread_t updateBatteryIconThread;
+static pthread_mutex_t batIconMutex = PTHREAD_MUTEX_INITIALIZER;
 
-char *extractPath(const char *absolutePath)
+// updates the battery percentage icon every BATICON_UPDATE_INTERVAL seconds
+static void *updateBatteryPercentage()
 {
-    const char *lastSlash = strrchr(absolutePath, '/');
-    if (lastSlash != NULL) {
-        char *path;
-        size_t pathLength = lastSlash - absolutePath + 1;
-        path = (char *)malloc(pathLength + 1);
-        if (path != NULL) {
-            strncpy(path, absolutePath, pathLength);
-            path[pathLength] = '\0';
-        }
-        return path;
+    while (true) {
+        while (batIconPath[0] == '\0')
+            usleep(100000); // wait for batIconPath to be set in IMG_Load
+
+        TTF_Init();
+        int percentage = battery_getPercentage();
+
+        pthread_mutex_lock(&batIconMutex);
+        if (batIcon != NULL)
+            SDL_FreeSurface(batIcon);
+        batIcon = theme_batterySurfaceWithBg(percentage, theme_background());
+        pthread_mutex_unlock(&batIconMutex);
+
+        TTF_Quit();
+        sleep(BATICON_UPDATE_INTERVAL);
     }
     return NULL;
 }
+
+/* ################################################# */
+/* #  The following functions are hooked functions # */
+/* ################################################# */
 
 SDL_Surface *IMG_Load(const char *file)
 {
@@ -55,9 +72,13 @@ SDL_Surface *IMG_Load(const char *file)
 
         printf(PREFIX "IMG_Load batt-perc.png\n");
         if (batIconPath[0] == '\0') {
-            sprintf(batIconPath, "%s/.batt-perc.png", extractPath(file));
+            strcpy(themePath, extractPath(file));
+            sprintf(batIconPath, "%s.batt-perc.png", themePath);
             printf(PREFIX "batIconPath: %s\n", batIconPath);
+
+            pthread_mutex_lock(&batIconMutex);
             batIcon = original_IMG_Load(batIconPath);
+            pthread_mutex_unlock(&batIconMutex);
         }
         batPercSurface[batSurfaceCount] = original_IMG_Load(file);
 
@@ -74,7 +95,6 @@ SDL_Surface *SDL_ConvertSurface(SDL_Surface *src, SDL_PixelFormat *fmt, Uint32 f
 
         printf(PREFIX "SDL_ConvertSurface bat-perc.png\n");
         convBatPercSurface[batSurfaceCount] = original_SDL_ConvertSurface(src, fmt, flags);
-
         return convBatPercSurface[batSurfaceCount++];
     }
     return original_SDL_ConvertSurface(src, fmt, flags);
@@ -86,9 +106,18 @@ int SDL_UpperBlit(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rec
     // MainUI blits the battery icon at least once a second
 
     for (int i = 0; i < NUM_BAT_SURFACES; i++)
-        if (convBatPercSurface[i] == src)
-            return original_SDL_UpperBlit(batIcon, srcrect, dst, dstrect);
+        if (convBatPercSurface[i] == src) {
 
+            pthread_mutex_lock(&batIconMutex);
+            int result;
+            if (batIcon != NULL)
+                result = original_SDL_UpperBlit(batIcon, srcrect, dst, dstrect);
+            else
+                result = 0;
+            pthread_mutex_unlock(&batIconMutex);
+
+            return result;
+        }
     // otherwise, blit normally
     return original_SDL_UpperBlit(src, srcrect, dst, dstrect);
 }
@@ -101,16 +130,9 @@ int SDL_Flip(SDL_Surface *screen)
     return original_SDL_Flip(screen);
 }
 
-static void *updateBatteryPercentage()
-{
-    while (true) {
-        printf(PREFIX "updateBatteryPercentage\n");
-        system("/mnt/SDCARD/.tmp_update/script/run_mainuibatperc.sh");
-        batIcon = original_IMG_Load(batIconPath);
-        sleep(BATICON_UPDATE_INTERVAL);
-    }
-    return NULL;
-}
+/* ################################################# */
+/* #  Constructor and destructor for this library  # */
+/* ################################################# */
 
 void __attribute__((constructor)) libmainuihooks(void)
 {
@@ -132,6 +154,10 @@ void __attribute__((constructor)) libmainuihooks(void)
 
 void __attribute__((destructor)) libmainuihooks_end(void)
 {
+    pthread_mutex_lock(&batIconMutex);
+    if (batIcon != NULL)
+        SDL_FreeSurface(batIcon);
+    pthread_mutex_unlock(&batIconMutex);
+
     printf(PREFIX "Bye from libmainuihooks\n");
-    
 }
