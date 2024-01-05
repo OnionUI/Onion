@@ -30,6 +30,7 @@ BUILD_DIR           := $(ROOT_DIR)/build
 BUILD_TEST_DIR      := $(ROOT_DIR)/build_test
 TEST_SRC_DIR		:= $(ROOT_DIR)/test
 BIN_DIR             := $(ROOT_DIR)/build/.tmp_update/bin
+LIB_DIR			    := $(ROOT_DIR)/build/.tmp_update/lib
 DIST_DIR            := $(ROOT_DIR)/dist
 INSTALLER_DIR       := $(DIST_DIR)/miyoo/app/.tmp_update
 RELEASE_DIR         := $(ROOT_DIR)/release
@@ -138,6 +139,7 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/pngScale && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/libgamename && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/gameNameList && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/libmainuihooks && BUILD_DIR=$(LIB_DIR) make
 # Build dependencies for installer
 	@mkdir -p $(INSTALLER_DIR)/bin
 	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(INSTALLER_DIR)/bin/ VERSION=$(VERSION) make
