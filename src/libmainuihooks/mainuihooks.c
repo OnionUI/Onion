@@ -127,10 +127,11 @@ void __attribute__((constructor)) libmainuihooks(void)
 
     // start the battery percentage update thread
     pthread_create(&updateBatteryIconThread, NULL, updateBatteryPercentage, NULL);
+    pthread_detach(updateBatteryIconThread);
 }
 
 void __attribute__((destructor)) libmainuihooks_end(void)
 {
     printf(PREFIX "Bye from libmainuihooks\n");
-    pthread_cancel(updateBatteryIconThread);
+    
 }
