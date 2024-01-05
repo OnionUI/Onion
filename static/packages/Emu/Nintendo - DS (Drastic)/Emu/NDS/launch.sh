@@ -2,13 +2,6 @@
 mydir=$(dirname "$0")
 cd $mydir
 
-if [ -e "/mnt/SDCARD/Saves/CurrentProfile/states/Drastic/.originalBiosRequired" ]; then
-    if [ ! -e "/mnt/SDCARD/Emu/NDS/system/nds_bios_arm7.bin" ] || [ ! -e "/mnt/SDCARD/Emu/NDS/system/nds_bios_arm9.bin" ] || [ ! -e "/mnt/SDCARD/Emu/NDS/system/nds_firmware.bin" ]; then
-        infoPanel --title "NDS Bios Required" --message "Your save states require official NDS bios to work.\nDrastic emulator will not run until you add\nthe following files in  'Emu/NDS/system':\nnds_bios_arm7.bin\nnds_bios_arm9.bin\nnds_firmware.bin"
-        exit
-    fi
-fi
-
 export HOME=$mydir
 export PATH=$mydir:$PATH
 export LD_LIBRARY_PATH=$mydir/libs:$LD_LIBRARY_PATH
