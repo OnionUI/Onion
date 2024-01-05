@@ -139,7 +139,8 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/pngScale && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/libgamename && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/gameNameList && BUILD_DIR=$(BIN_DIR) make
-# for libmainuihooks, cJSON needs to be recompiled with -fPIC
+# for libmainuihooks, these files needs to be recompiled with -fPIC
+	@rm $(SRC_DIR)/common/utils/*.o
 	@rm $(ROOT_DIR)/include/cjson/cJSON.o
 	@cd $(SRC_DIR)/libmainuihooks && BUILD_DIR=$(LIB_DIR) make
 # Build dependencies for installer
