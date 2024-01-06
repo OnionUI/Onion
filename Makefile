@@ -110,7 +110,7 @@ $(CACHE)/.setup:
 # Set flag: finished setup
 	@touch $(CACHE)/.setup
 
-build: core apps external
+build: core apps libs external
 	@$(ECHO) $(PRINT_DONE)
 
 core: $(CACHE)/.setup
@@ -139,10 +139,6 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/pngScale && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/libgamename && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/gameNameList && BUILD_DIR=$(BIN_DIR) make
-# for libmainuihooks, these files needs to be recompiled with -fPIC
-	@rm $(SRC_DIR)/common/utils/*.o
-	@rm $(ROOT_DIR)/include/cjson/cJSON.o
-	@cd $(SRC_DIR)/libmainuihooks && BUILD_DIR=$(LIB_DIR) make
 # Build dependencies for installer
 	@mkdir -p $(INSTALLER_DIR)/bin
 	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(INSTALLER_DIR)/bin/ VERSION=$(VERSION) make
@@ -280,3 +276,9 @@ static-analysis:
 
 format:
 	@find ./src -regex '.*\.\(c\|h\|cpp\|hpp\)' -exec clang-format -style=file -i {} \;
+
+libs:
+# for libmainuihooks, these files needs to be recompiled with -fPIC
+	@rm $(SRC_DIR)/common/utils/*.o
+	@rm $(ROOT_DIR)/include/cjson/cJSON.o
+	@cd $(SRC_DIR)/libmainuihooks && BUILD_DIR=$(LIB_DIR) make
