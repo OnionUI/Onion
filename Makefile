@@ -2,7 +2,7 @@
 
 TARGET=Onion
 VERSION=4.3.0-beta
-RA_SUBVERSION=1.15.0.11
+RA_SUBVERSION=1.15.0.12
 
 ###########################################################
 
@@ -261,7 +261,7 @@ with-toolchain: $(CACHE)/.docker
 patch:
 	@chmod a+x $(ROOT_DIR)/.github/create_patch.sh && $(ROOT_DIR)/.github/create_patch.sh
 
-lib:
+external-libs:
 	@cd $(ROOT_DIR)/include/cJSON && make clean && make
 	@cd $(ROOT_DIR)/include/SDL && make clean && make
 
