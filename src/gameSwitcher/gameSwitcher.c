@@ -256,7 +256,7 @@ void readHistory()
 
         sscanf(strstr(jsonContent, "\"type\":") + 7, "%d", &type);
 
-        if (type != 5)
+        if ((type != 5)&&(type != 17))
             continue;
 
         print_debug("type 5");

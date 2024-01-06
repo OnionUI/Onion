@@ -255,7 +255,7 @@ char *history_getRecentPath(char *rom_path)
         strcpy(jsonContent, line);
         sscanf(strstr(jsonContent, "\"type\":") + 7, "%d", &type);
 
-        if (type != 5) {
+        if ((type != 5)&&(type != 17)) {
             free(jsonContent);
             continue;
         }
@@ -317,7 +317,7 @@ void resumeGame(int n)
 
         sscanf(strstr(jsonContent, "\"type\":") + 7, "%d", &type);
 
-        if (type != 5)
+        if ((type != 5)&&(type != 17))
             continue;
 
         const char *labelStart = strstr(jsonContent, "\"label\":\"");
