@@ -18,7 +18,7 @@ This is an alternative to the RetroArch `fake-08` core, which has access to all 
 
 ## How to Enable and Launch
 
-1. Enable the `PICO-8 Native Wrapper` App using the Onion Package Manager's *Apps* section.
+1. Enable the `PICO-8 Native Wrapper` App using the Onion Package Manager's *Expert* section.
 
 2. In order to use the wrapper, you need to have previously purchased PICO-8. It is available as a single purchase at [Lexaloffle's website](https://www.lexaloffle.com/games.php?page=updates). Once downloaded, place the `pico8_dyn` and `pico8.dat` files from the **Raspberry Pi** package in the `/App/pico/bin` directory of your Onion SD card.
 
@@ -98,7 +98,7 @@ The following shortcuts are provided by the Native Wrapper for your convenience 
             <td>Restarts the current cart</td>
         </tr>
         <tr>
-            <td><kbd>SELECT</kbd>+<kbd>MENU</kbd></td>
+            <td><kbd>MENU</kbd></td>
             <td>Exits PICO-8 and go back to Onion</td>
         </tr>
         <tr>
