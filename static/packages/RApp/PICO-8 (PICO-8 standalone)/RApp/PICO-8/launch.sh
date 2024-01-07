@@ -65,6 +65,8 @@ start_pico() {
 
     if [ ! -e "$picodir/bin/pico8_dyn" ]; then
         infoPanel --title "PICO-8 binaries not found" --message "Native PICO-8 engine requires to purchase official \nbinaries which are not provided in Onion. \nGo to Lexaloffle's website, get Raspberry Pi version\n and copy \"pico8_dyn\" and \"pico8.dat\"\n to your SD card in \"/RApp/PICO-8/bin\"."
+        cd /mnt/SDCARD/.tmp_update/script
+        ./remove_last_recent_entry.sh
         exit
     fi
 

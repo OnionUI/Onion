@@ -12,3 +12,4 @@ else
 fi
 
 sed -i '1d' $currentrecentlist
+sync
