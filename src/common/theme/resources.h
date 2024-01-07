@@ -6,9 +6,11 @@
 #include <SDL/SDL_ttf.h>
 #include <stdbool.h>
 
-#include "./config.h"
 #include "system/lang.h"
+#include "utils/flags.h"
 #include "utils/log.h"
+
+#include "./config.h"
 
 #define RES_MAX_REQUESTS 200
 
@@ -96,6 +98,15 @@ SDL_Surface *_loadImage(ThemeImages request)
 {
     Theme_s *t = theme();
     int real_location, backup_location;
+
+    if (request == BATTERY_0 ||
+        request == BATTERY_20 ||
+        request == BATTERY_50 ||
+        request == BATTERY_80 ||
+        request == BATTERY_100 ||
+        request == BATTERY_CHARGING) {
+        temp_flag_set("hasBatteryDisplay", true);
+    }
 
     switch (request) {
     case BG_TITLE:
@@ -301,6 +312,8 @@ SDL_Surface *resource_getBrightness(int brightness)
 
 void resources_free()
 {
+    temp_flag_set("hasBatteryDisplay", false);
+
     for (int i = 0; i < images_count; i++)
         if (resources.surfaces[i] != NULL)
             SDL_FreeSurface(resources.surfaces[i]);

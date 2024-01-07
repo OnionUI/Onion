@@ -1,5 +1,6 @@
 #include "batmon.h"
 #include "system/device_model.h"
+#include "utils/process.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -123,13 +124,15 @@ int main(int argc, char *argv[])
         }
 
 #ifdef PLATFORM_MIYOOMINI
-        if (is_suspended || current_percentage == 500)
+        if (is_suspended || current_percentage == 500) {
             batteryWarning_hide();
-        else if (current_percentage < warn_at &&
-                 !config_flag_get(".noBatteryWarning"))
+        }
+        else if (current_percentage < warn_at && !warningDisabled()) {
             batteryWarning_show();
-        else
+        }
+        else {
             batteryWarning_hide();
+        }
 #endif
         if (battery_current_state_duration > MAX_DURATION_BEFORE_UPDATE)
             update_current_duration();
@@ -384,6 +387,8 @@ int batteryPercentage(int value)
 static void *batteryWarning_thread(void *param)
 {
     while (1) {
+        if (temp_flag_get("hasBatteryDisplay"))
+            break;
         display_drawBatteryIcon(0x00FF0000, 15, RENDER_HEIGHT - 30, 10,
                                 0x00FF0000); // draw red battery icon
         usleep(0x4000);
@@ -406,4 +411,9 @@ void batteryWarning_hide(void)
     pthread_cancel(adc_pt);
     pthread_join(adc_pt, NULL);
     adcthread_active = false;
+}
+
+bool warningDisabled(void)
+{
+    return config_flag_get(".noBatteryWarning") || temp_flag_get("hasBatteryDisplay") || process_isRunning("MainUI");
 }

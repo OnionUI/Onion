@@ -1,0 +1,137 @@
+---
+slug: /installation/fresh
+description: Installing on an empty SD card
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+
+# Fresh install
+
+
+## Step 1: Preparing the SD card (only necessary first time)
+
+
+:::caution Beware
+The SD card included with the Miyoo Mini is known to be slow, and will likely ruin your experience and/or data.
+Stick to using SD cards from reputable brands (e.g. SanDisk or Samsung).
+:::
+
+### Format your SD card as `FAT32` (not `exFAT`!)
+
+
+<Tabs groupId="os" queryString>
+<TabItem value="win" label="Windows">
+
+If your SD card is larger than 32 GB, you need to use a third-party tool like [Rufus](https://rufus.ie/):
+
+1. In Rufus, select the device that corresponds with the SD card you want to format
+2. Set **Boot selection** to `Non bootable`
+3. **Partition scheme** should already be set to `MBR`
+4. Set **File system** to `Large FAT32`
+5. **Cluster size** at `32 kilobytes` should be fine (`16 kilobytes` might extend the life of your SD card)
+6. Click **START** to format the card, when it's done you can close the window
+
+:::info GUIFormat / fat32format
+We do not recommend using *GUIFormat / fat32format*, since many users are reporting file system errors on cards above 128 GB
+:::
+
+</TabItem>
+<TabItem value="mac" label="Mac">
+
+On Mac, you can format your SD card with the built-in **Disk Utilities**:
+
+1. Open **Application** › **Utilities** › **Disk Utilities**
+2. From the sidebar, select the USB drive that corresponds with the SD card you want to format (Choose to format the root element [as on this picture](./assets/format-usb-to-fat32-on-mac.webp))
+3. Choose **Erase** from the toolbar
+4. Set **Format** › `MS-DOS (FAT)`
+5. Set **Scheme** (if it exists) › `Master Boot Record`
+6. Click **Erase** and wait for the process to finish
+
+</TabItem>
+<TabItem value="linux" label="Linux">
+
+There are lots of ways to format an SD card on Linux. 3 methods are presented in [this blog post](https://www.golinuxcloud.com/steps-to-format-sd-card-in-linux/).
+
+Make sure you choose: `For use with all systems and devices (FAT)`
+
+</TabItem>
+<TabItem value="chromeos" label="Chrome OS">
+
+Chrome already has a tool to format an SD card. Insert the card into your Chromebook, right-click it and click **Format Device**, make sure `FAT32` is selected under **Format** and click or tap **Erase & Format**. 
+
+</TabItem>
+</Tabs>
+
+
+## Step 2: Copy the installation files and boot up your device to begin the installation
+
+<Tabs groupId="os" queryString>
+<TabItem value="win" label="Windows">
+
+1. Right click the `Onion-v4.x.x.zip` file and select **Extract all** › **Extract**
+2. Select and copy the 7 folders to the root of your SD card
+
+</TabItem>
+<TabItem value="mac" label="Mac">
+
+1. Unzip (expand) the `Onion-v4.x.x.zip` file: Double-click the `.zip` file.  
+   The unzipped item will appear in the same folder as the `.zip` file.  
+   If you want to, you can delete the `.zip` file.
+2. Select and copy the 7 folders to the root of your SD card  
+   Make sure hidden files are shown (press <kbd>Command</kbd>+<kbd>Shift</kbd>+<kbd>.</kbd> in Finder)
+
+</TabItem>
+<TabItem value="linux" label="Linux">
+
+1. Unzip the `Onion-v4.x.x.zip` file using the following command (replace `Onion-v4.2.0` with the filename of the zip you downloaded):
+
+   ```sh
+   unzip Onion-v4.2.0.zip -d Onion-v4.2.0
+   ```
+
+2. Copy the 7 folders to your SD card, using the following command (replace `/run/media/mmcblk0p1` with the path to your SD card):
+
+   ```sh
+   cp -r Onion-v4.2.0/* /run/media/mmcblk0p1
+   ```
+
+</TabItem>
+<TabItem value="chromeos" label="Chrome OS">
+
+1. Double-click the `Onion-v4.x.x.zip` file and make sure hidden files are visible by clicking or tapping the top-right corner 3-dots icon and making sure `Show Hidden Files` is toggled on.
+2. Copy the 7 folders to your SD card, dragging them into your SD card drive icon on the left panel.
+
+</TabItem>
+</Tabs>
+
+:::note Installation files
+The Onion installation files consists of the following folders:
+```sh showLineNumbers
+.tmp_update/  # Might be hidden
+BIOS/
+Media/
+miyoo/
+miyoo354/
+RetroArch/
+Themes/
+```
+:::
+
+3. Insert the SD card into the Miyoo device, and turn it on to begin the installation.
+4. When the installation is done, you'll be prompted with the **Quick Guide** - *a quick overview of Onion*
+5. Then you'll presented with the **Package Manager**, choose the systems and apps you want enabled, then press <kbd>START</kbd> twice
+6. When the installation is done, press the <kbd>A</kbd> button and the device will turn off (MM) or reboot (MMP).
+
+
+## Step 3: Copy over your bios and rom files
+
+1. Copy your bios files to the `BIOS` folder (stock bios files are available at `RetroArch/.retroarch/system` on the stock SD card).  
+2. Copy your roms into their respective subfolders in `Roms` (see the *[Emulators](../emulators)* page for more information - here you'll find the [Rom Folders](../emulators/folders) table).
+
+:::info Part of the system
+Despite its name, the `.tmp_update` folder must stay on your SD card.
+:::
+
+3. Insert your SD card, boot up your Mini and press <kbd>SELECT</kbd> › **Refresh all roms** from the **Games** tab in the main menu to refresh roms (forcing a reindex of your games).

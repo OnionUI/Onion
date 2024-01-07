@@ -66,5 +66,6 @@ int batteryPercentage(int);
 static void *batteryWarning_thread(void *param);
 void batteryWarning_show(void);
 void batteryWarning_hide(void);
+bool warningDisabled(void);
 
 #endif // ADC_H__
