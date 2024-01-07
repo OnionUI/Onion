@@ -1,0 +1,12 @@
+{
+	"label":	"PuzzleScript",
+	"icon":	"/mnt/SDCARD/Icons/Default/rapp/puzzlescript.png",
+	"launch":	"launch.sh",
+	"rompath":	"../../Roms/PUZZLE",
+	"imgpath":	"../../Roms/PUZZLE",
+	"gamelist":	"../../Roms/PUZZLE/miyoogamelist.xml",
+	"useswap":	0,
+	"shortname":	1,
+	"hidebios":	1,
+	"extlist":	"pz"
+}

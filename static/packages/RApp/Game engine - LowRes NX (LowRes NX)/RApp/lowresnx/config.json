@@ -1,0 +1,12 @@
+{
+"label":"LowRes NX",
+"icon":"../../Icons/Default/rapp/lowresnx.png",
+"iconsel":"../../Icons/Default/rapp/lowresnx.png",
+"launch":"launch.sh",
+"rompath":"../../Roms/LOWRESNX",
+"imgpath":"../../Roms/LOWRESNX/Imgs",
+"useswap":0,
+"shortname":1,
+"hidebios":0,
+"extlist":"nx|zip|7z"
+}

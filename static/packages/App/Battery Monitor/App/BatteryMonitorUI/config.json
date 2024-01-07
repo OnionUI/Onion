@@ -1,0 +1,6 @@
+{
+	"label":	"Battery Monitor",
+	"icon":	"/mnt/SDCARD/Icons/Default/app/battery_monitor.png",
+	"launch":	"launch.sh",
+	"description":	"Monitor your battery usage"
+}
