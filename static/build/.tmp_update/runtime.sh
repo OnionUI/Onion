@@ -295,6 +295,7 @@ change_resolution() {
 launch_game() {
     log "\n:: Launch game"
     cmd=$(cat $sysdir/cmd_to_run.sh)
+    TZ_VALUE=$(cat "$sysdir/config/.tz")
 
     is_game=0
     rompath=""
@@ -425,7 +426,8 @@ launch_game() {
             # Free memory
             $sysdir/bin/freemma
             cd /mnt/SDCARD/RetroArch/
-            $sysdir/cmd_to_run.sh
+            # make the cmd_to_run shell env aware of the new timezone
+            TZ="$TZ_VALUE" $sysdir/cmd_to_run.sh 
             if [ -f /tmp/new_res_available ]; then
                 # Restore resolution
                 change_resolution "640x480"
@@ -783,23 +785,12 @@ start_networking() {
 }
 
 check_networking() {
-    if [ $DEVICE_ID -ne $MODEL_MMP ] || [ ! -f /tmp/network_changed ] && [ -f /tmp/ntp_synced ]; then
-        check_timezone
-        return
-    fi
-
     if pgrep -f update_networking.sh; then
         log "update_networking already running"
     else
         rm /tmp/network_changed
         $sysdir/script/network/update_networking.sh check
     fi
-
-    check_timezone
-}
-
-check_timezone() {
-    export TZ=$(cat "$sysdir/config/.tz")
 }
 
 check_installer() {
