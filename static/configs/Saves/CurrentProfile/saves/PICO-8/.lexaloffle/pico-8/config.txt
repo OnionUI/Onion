@@ -26,7 +26,7 @@ blit_method 2  // 0 auto  1 software (slower but sometimes more reliable)  2 har
 
 // :: System Settings
 
-foreground_sleep_ms 5 // number of milliseconds to sleep each frame. Try 10 to conserve battery power
+foreground_sleep_ms 10 // number of milliseconds to sleep each frame. Try 10 to conserve battery power
 
 background_sleep_ms 10 // number of milliseconds to sleep each frame when running in the background
 
