@@ -378,20 +378,78 @@ void action_setLuminance(void *pt)
     settings.lumination = ((ListItem *)pt)->value;
     set_LCDParams();
 }
+
 void action_setHue(void *pt)
 {
     settings.hue = ((ListItem *)pt)->value;
     set_LCDParams();
 }
+
 void action_setSaturation(void *pt)
 {
     settings.saturation = ((ListItem *)pt)->value;
     set_LCDParams();
 }
+
 void action_setContrast(void *pt)
 {
     settings.contrast = ((ListItem *)pt)->value;
     set_LCDParams();
+}
+
+const char *action_LaunchKeyboardWrapper(const char *initial_value, const char *title)
+{
+    const char *result = launch_keyboard(initial_value, title);
+    all_changed = true;
+    return result;
+}
+
+void action_addHiddenNetwork(void *pt) {
+    system("cp -f /appconfigs/wpa_supplicant.conf /appconfigs/wpa_supplicant.conf_usr"); // backup the current user data
+    system("cp -f /appconfigs/wpa_supplicant.conf_bak /appconfigs/wpa_supplicant.conf"); // blank the current conf
+
+    FILE *configFile;
+    configFile = fopen("/appconfigs/wpa_supplicant.conf", "a");
+
+    if (configFile == NULL) {
+        printf_debug("Error opening file");
+        return;
+    }
+
+    const char *netSSID = action_LaunchKeyboardWrapper("", "Enter SSID");
+    const char *netPSK = action_LaunchKeyboardWrapper("", "Enter Password");
+
+    // add the new network into the file
+    fprintf(configFile, "\n\nnetwork={\n");
+    fprintf(configFile, "\tssid=\"%s\"\n", netSSID);
+    fprintf(configFile, "\tscan_ssid=1\n");
+    fprintf(configFile, "\tpsk=\"%s\"\n", netPSK);
+    fprintf(configFile, "}\n");
+
+    fclose(configFile);
+
+    // ask wpa_cli if the ctrl interface replies to ping (with pong)
+    FILE *fp;
+    char response[1035];
+    fp = popen("/customer/app/wpa_cli ping", "r");
+    if (fp != NULL) {
+        int shouldReconfigure = 0;
+        while (fgets(response, sizeof(response), fp) != NULL) {
+            if (strstr(response, "PONG") != NULL) {
+                shouldReconfigure = 1;
+                break;
+            }
+        }
+        pclose(fp);
+
+        // if it does reply, reconfigure to enable the changes to wpa_supp.conf
+        if (shouldReconfigure) {
+            system("/customer/app/wpa_cli -i wlan0 reconfigure");
+        }
+    } else {
+        // probably ask your wifi.sh script to manage the new connection
+        printf_debug("Failed to run wpa_cli ping command");
+    }
 }
 
 #endif // TWEAKS_ACTIONS_H__

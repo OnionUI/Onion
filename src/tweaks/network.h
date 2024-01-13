@@ -902,7 +902,7 @@ void menu_wifi(void *pt)
     }
 
     if (!_menu_wifi._created) {
-        _menu_wifi = list_createWithTitle(3 + globalNetworkList.count, LIST_SMALL, "WiFi networks"); // use networkList->count instead of MAX_NUM_WIFI_NETWORKS so we're not limited to 35
+        _menu_wifi = list_createWithTitle(4 + globalNetworkList.count, LIST_SMALL, "WiFi networks"); // use networkList->count instead of MAX_NUM_WIFI_NETWORKS so we're not limited to 35
         list_addItem(&_menu_wifi,
                      (ListItem){
                          .label = "Enabled",
@@ -914,6 +914,10 @@ void menu_wifi(void *pt)
                          .label = "WPS connect",
                          .disabled = !settings.wifi_on,
                          .action = network_wpsConnect});
+        list_addItem(&_menu_wifi,
+                     (ListItem){
+                         .label = "Add a hidden WiFi network...",
+                         .action = action_addHiddenNetwork});
         list_addItem(&_menu_wifi,
                      (ListItem){
                          .label = "Scan for networks",
