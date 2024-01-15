@@ -242,7 +242,7 @@ void suspend_exec(int timeout)
             // shutdown
             system_powersave_off();
             resume();
-            usleep(100000);
+            usleep(150000);
             shutdown();
         }
     }
@@ -251,7 +251,7 @@ void suspend_exec(int timeout)
     system_powersave_off();
     if (killexit) {
         resume();
-        usleep(100000);
+        usleep(150000);
         suspend(2);
         usleep(400000);
     }
