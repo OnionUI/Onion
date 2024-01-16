@@ -117,8 +117,7 @@ int suspend(uint32_t mode)
                             (strcmp(comm, "(MainUI)")) &&
                             (strcmp(comm, "(tee)")) &&
                             (strncmp(comm, "(audioserver", 12)) &&
-                            (strcmp(comm, "(batmon)")) &&
-                            (strcmp(comm, "(drastic)"))) {
+                            (strcmp(comm, "(batmon)"))){
                             kill(pid, (mode == 1) ? SIGTERM : SIGKILL);
                             ret++;
                         }
