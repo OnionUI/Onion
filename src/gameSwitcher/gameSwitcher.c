@@ -256,7 +256,7 @@ void readHistory()
 
         sscanf(strstr(jsonContent, "\"type\":") + 7, "%d", &type);
 
-        if ((type != 5)&&(type != 17))
+        if ((type != 5) && (type != 17))
             continue;
 
         print_debug("type 5");
@@ -379,8 +379,11 @@ void removeCurrentItem()
 
     file_delete_line(getMiyooRecentFilePath(), game->lineNumber);
 
-    if (strlen(game->romScreenPath) > 0 && is_file(game->romScreenPath))
-        remove(game->romScreenPath);
+    if (strlen(game->romScreenPath) > 0 && is_file(game->romScreenPath)) {
+        if (strncmp(game->romScreenPath, ROM_SCREENS_DIR, strlen(ROM_SCREENS_DIR)) == 0) {
+            remove(game->romScreenPath);
+        }
+    }
 
     // Copy next element value to current element
     for (int i = current_game; i < game_list_len - 1; i++) {
@@ -709,7 +712,7 @@ int main(int argc, char *argv[])
                         SDL_Rect game_name_bg_pos = {offSetX, offSetY};
 
                         SDL_Rect frame = {theme()->frame.border_left, 0, 640 - theme()->frame.border_left - theme()->frame.border_right, 480};
-                        SDL_Rect frame_pos = {offSetX+theme()->frame.border_left, offSetY};
+                        SDL_Rect frame_pos = {offSetX + theme()->frame.border_left, offSetY};
 
                         if (view_mode == VIEW_NORMAL)
                             SDL_BlitSurface(current_bg, &frame, screen, &frame_pos);
