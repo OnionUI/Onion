@@ -84,7 +84,6 @@ static char sTotalTimePlayed[50] = "";
 
 // Game history list
 typedef struct {
-    uint32_t hash;
     char name[MAXHROMNAMESIZE * 2];
     char shortname[STR_MAX * 2];
     char LaunchCommand[STR_MAX * 3 + 80];
@@ -92,7 +91,7 @@ typedef struct {
     int gameIndex;
     int lineNumber;
     SDL_Surface *romScreen;
-    char romScreenPath[STR_MAX * 4];
+    char romImagePath[STR_MAX * 4];
     char path[PATH_MAX * 2];
 } Game_s;
 static Game_s game_list[MAXHISTORY];
@@ -131,20 +130,16 @@ SDL_Surface *loadRomScreen(int index)
 
     if (game->romScreen == NULL) {
         char currPicture[STR_MAX * 2];
-        sprintf(currPicture, ROM_SCREENS_DIR "/%" PRIu32 ".png", game->hash);
+        uint32_t hash;
+        hash = FNV1A_Pippip_Yurii(game->path, strlen(game->path));
+        sprintf(currPicture, ROM_SCREENS_DIR "/%" PRIu32 ".png", hash);
 
         // Show artwork
         if (!exists(currPicture))
-            sprintf(currPicture, "%s/Imgs/%s.png", extractPath(game->path), file_removeExtension(game->name));
-
-        // ports
-        if (!exists(currPicture)) {
-            sprintf(currPicture, "/mnt/SDCARD/Roms/PORTS/Imgs/%s.png", file_removeExtension(game->name));
-            printf_debug("mario64 path %s\n", currPicture);
-        }
+           sprintf(currPicture, game->romImagePath);
 
         if (exists(currPicture)) {
-            strcpy(game->romScreenPath, currPicture);
+            strcpy(game->romImagePath, currPicture);
             game->romScreen = IMG_Load(currPicture);
         }
     }
@@ -212,7 +207,7 @@ void printHistory()
         printf_debug("totalTime: %i\n", game_list[i].totalTime);
         printf_debug("gameIndex: %i\n", game_list[i].gameIndex);
         printf_debug("lineNumber: %i\n", game_list[i].lineNumber);
-        printf_debug("romScreenPath: %s\n", game_list[i].romScreenPath);
+        printf_debug("romImagePath: %s\n", game_list[i].romImagePath);
         printf_debug("path: %s\n", game_list[i].path);
         print_debug("\n\n");
     }
@@ -284,6 +279,7 @@ void readHistory()
             strncpy(imgpath, imgpathStart, imgpathEnd - imgpathStart);
             imgpath[imgpathEnd - imgpathStart] = '\0';
         }
+        printf_debug("imgpath: %s\n", imgpath);
 
         char *colonPosition = strchr(rompath, ':');
         if (colonPosition != NULL) {
@@ -335,8 +331,6 @@ void readHistory()
 
         Game_s *game = &game_list[nbGame];
 
-        game->hash = FNV1A_Pippip_Yurii(rompath, strlen(rompath));
-
         game->lineNumber = lineCounter;
         game->romScreen = NULL;
         game->totalTime[0] = '\0';
@@ -345,6 +339,7 @@ void readHistory()
 
         getGameName(game->name, rompath);
         strcpy(game->path, rompath);
+        strcpy(game->romImagePath, imgpath);
         file_cleanName(game->shortname, game->name);
         game->gameIndex = nbGame + 1;
         game = &game_list[nbGame];
@@ -357,7 +352,7 @@ void readHistory()
         printf_debug("totalTime: %i\n", game->totalTime);
         printf_debug("gameIndex: %i\n", game->gameIndex);
         printf_debug("lineNumber: %i\n", game->lineNumber);
-        printf_debug("romScreenPath: %s\n", game->romScreenPath);
+        printf_debug("romImagePath: %s\n", game->romImagePath);
         printf_debug("path: %s\n", game->path);
     }
 
@@ -379,9 +374,9 @@ void removeCurrentItem()
 
     file_delete_line(getMiyooRecentFilePath(), game->lineNumber);
 
-    if (strlen(game->romScreenPath) > 0 && is_file(game->romScreenPath)) {
-        if (strncmp(game->romScreenPath, ROM_SCREENS_DIR, strlen(ROM_SCREENS_DIR)) == 0) {
-            remove(game->romScreenPath);
+    if (strlen(game->romImagePath) > 0 && is_file(game->romImagePath)) {
+        if (strncmp(game->romImagePath, ROM_SCREENS_DIR, strlen(ROM_SCREENS_DIR)) == 0) {
+            remove(game->romImagePath);
         }
     }
 
@@ -433,7 +428,7 @@ int main(int argc, char *argv[])
     SDL_Flip(video);
 
     readHistory();
-    printHistory();
+    //printHistory();
 
     settings_load();
     lang_load();
