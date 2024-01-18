@@ -406,9 +406,6 @@ launch_game() {
     log "$(cat $sysdir/cmd_to_run.sh)"
 
     if [ $is_game -eq 0 ] || [ -f "$rompath" ]; then
-        if [ "$romext" == "pico-8" ]; then
-             /mnt/SDCARD/.tmp_update/script/remove_last_recent_entry.sh
-        fi
         if [ "$romext" == "miyoocmd" ]; then
             /mnt/SDCARD/.tmp_update/script/remove_last_recent_entry.sh
             emupath=$(dirname $(echo "$cmd" | awk '{ gsub(/"/, "", $2); st = index($2,".."); if (st) { print substr($2,0,st) } else { print $2 } }'))
