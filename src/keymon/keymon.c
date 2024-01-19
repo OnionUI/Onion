@@ -243,7 +243,7 @@ void suspend_exec(int timeout)
             system_powersave_off();
             resume();
             usleep(150000);
-            shutdown();
+            deepsleep();
         }
     }
 
