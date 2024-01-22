@@ -150,16 +150,19 @@ bool __screenshot_perform(bool(get_path)(char *))
     bool retval = false;
     char path[512];
     uint32_t *buffer;
-    pid_t ra_pid;
+    pid_t pid_number;
 
-    if ((ra_pid = process_searchpid("retroarch")) != 0) {
-        kill(ra_pid, SIGSTOP);
+    if ((pid_number = process_searchpid("retroarch")) != 0) {
+        kill(pid_number, SIGSTOP);
+    }
+    else if ((pid_number = process_searchpid("drastic")) != 0) {
+        kill(pid_number, SIGSTOP);
     }
 
     buffer = __screenshot_buffer();
 
-    if (ra_pid != 0) {
-        kill(ra_pid, SIGCONT);
+    if (pid_number != 0) {
+        kill(pid_number, SIGCONT);
     }
 
     if (get_path(path)) {
@@ -167,7 +170,6 @@ bool __screenshot_perform(bool(get_path)(char *))
     }
 
     free(buffer);
-
     return retval;
 }
 
@@ -178,7 +180,11 @@ bool screenshot_recent(void)
 
 bool screenshot_system(void)
 {
-    return __screenshot_perform(__get_path_romscreen);
+    bool bReturn = false;
+    if ((process_searchpid("retroarch") != 0) || (process_searchpid("drastic"))) {
+        bReturn = __screenshot_perform(__get_path_romscreen);
+    }
+    return bReturn;
 }
 
 #endif // SCREENSHOT_H__
