@@ -17,9 +17,9 @@ main() {
     export DEVICE_ID=$([ $? -eq 0 ] && echo $MODEL_MMP || echo $MODEL_MM)
     echo -n "$DEVICE_ID" > /tmp/deviceModel
 
-    SERIAL_NUMBER=$(read_uuid) 
+    SERIAL_NUMBER=$(read_uuid)
     echo -n "$SERIAL_NUMBER" > /tmp/deviceSN
-    
+
     touch /tmp/is_booting
     check_installer
     clear_logs
@@ -58,7 +58,7 @@ main() {
 
     # Make sure MainUI doesn't show charging animation
     touch /tmp/no_charging_ui
-    
+
     # Check if blf needs enabling
     if [ -f $sysdir/config/.blfOn ]; then
         /mnt/SDCARD/.tmp_update/script/blue_light.sh enable &
@@ -66,7 +66,7 @@ main() {
 
     cd $sysdir
     bootScreen "Boot"
-    
+
     # Set filebrowser branding to "Onion" and apply custom theme
     if [ -f "$sysdir/config/filebrowser/first.run" ]; then
         $sysdir/bin/filebrowser config set --branding.name "Onion" -d $sysdir/config/filebrowser/filebrowser.db
@@ -84,10 +84,10 @@ main() {
     # Init
     rm /tmp/.offOrder 2> /dev/null
     HOME=/mnt/SDCARD/RetroArch/
-    
+
     # Disable VNC server flag at boot
     rm $sysdir/config/.vncServer
-    
+
     # Detect if MENU button is held
     detectKey 1
     menu_pressed=$?
@@ -104,17 +104,16 @@ main() {
     # Bind arcade name library to customer path
     mount -o bind $miyoodir/lib/libgamename.so /customer/lib/libgamename.so
 
-
     rm -rf /tmp/is_booting
 
-	#EmuDeck - Startup scripts
-	mkdir -p "$sysdir/startup"
-	mkdir -p "$sysdir/checkoff"
-	startup_scripts=$(find "$sysdir/startup" -type f -name "*.sh")
+    #EmuDeck - Startup scripts
+    mkdir -p "$sysdir/startup"
+    mkdir -p "$sysdir/checkoff"
+    startup_scripts=$(find "$sysdir/startup" -type f -name "*.sh")
 
-	for startup_script in $startup_scripts; do
-	  sh "$startup_script"
-	done
+    for startup_script in $startup_scripts; do
+        sh "$startup_script"
+    done
 
     # Auto launch
     if [ ! -f $sysdir/config/.noAutoStart ]; then
@@ -306,7 +305,6 @@ launch_game() {
     start_audioserver
     save_settings
 
-    # TIMER BEGIN
     if check_is_game "$cmd"; then
         rompath=$(echo "$cmd" | awk '{ st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3)}')
 
@@ -335,50 +333,11 @@ launch_game() {
         fi
     fi
 
-    if [ -f /tmp/new_res_available ]; then
-        # Check if the program to be launched supports 560p
-        # Different programs need different checks (Apps vs Ports vs the rest)
-        full_resolution_path=""
-        if grep -qF "/mnt/SDCARD/App/" $sysdir/cmd_to_run.sh; then
-            # ----- App launch ----- #
-
-            full_resolution_path=$(cat $sysdir/cmd_to_run.sh | cut -d' ' -f 2 | sed 's/;/\/full_resolution/')
-
-        elif grep -qF "/mnt/SDCARD/Roms/PORTS/" $sysdir/cmd_to_run.sh; then
-            # ----- Port launch ----- #
-
-            dot_port_path=$(grep -o '\/mnt\/SDCARD\/Roms\/PORTS.*\.port' $sysdir/cmd_to_run.sh)
-
-            if grep -qF "FullResolution=1" "$dot_port_path"; then
-                # Look for FullResolution=1 in the .port file
-                # set full_resolution_path to a file that will always exist
-                full_resolution_path="/tmp/new_res_available"
-            fi
-
-        else
-            # ----- Everything else ----- #
-
-            full_resolution_path=$(grep -o '".*launch\.sh"' $sysdir/cmd_to_run.sh | sed 's/"//g; s/launch\.sh/full_resolution/')
-        fi
-    fi
+    full_resolution_path="$(get_full_resolution_path)"
 
     if [ $is_game -eq 1 ]; then
         if [ -f "$romcfgpath" ]; then
-            romcfg=$(cat "$romcfgpath")
-            retroarch_core=$(get_info_value "$romcfg" core)
-            corepath=".retroarch/cores/$retroarch_core.so"
-
-            log "per game core: $retroarch_core" >> $sysdir/logs/game_list_options.log
-
-            if [ -f "/mnt/SDCARD/RetroArch/$corepath" ] &&
-                # Do not override game core when launching from GS
-                echo "$cmd" | grep -qv "retroarch/cores"; then
-                if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
-                    echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v --appendconfig \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
-                else
-                    echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
-                fi
-            fi
+            override_game_core "$romcfgpath"
         fi
 
         # Handle dollar sign
@@ -414,8 +373,6 @@ launch_game() {
             "$rompath" "$rompath" "$emupath"
             retval=$?
         else
-            # GAME LAUNCH
-
             # Change resolution if needed
             if [ -f /tmp/new_res_available ] && [ -f "$full_resolution_path" ]; then
                 log "Found full_resolution file, changing resolution to 560p"
@@ -424,16 +381,20 @@ launch_game() {
 
             # Free memory
             $sysdir/bin/freemma
+
+            # GAME LAUNCH
             cd /mnt/SDCARD/RetroArch/
             $sysdir/cmd_to_run.sh
+            retval=$?
+
             if [ -f /tmp/new_res_available ]; then
                 # Restore resolution
                 change_resolution "640x480"
             fi
-            retval=$?
+
             if [ $is_game -eq 1 ] && [ ! -f /tmp/.offOrder ] && [ -f /tmp/.displaySavingMessage ]; then
                 rm /tmp/.displaySavingMessage
-                infoPanel --title " " --message  "Saving ..." --persistent --no-footer &
+                infoPanel --title " " --message "Saving ..." --persistent --no-footer &
                 touch /tmp/dismiss_info_panel
                 sync
             fi
@@ -450,12 +411,37 @@ launch_game() {
         infoPanel --title "Fatal error occurred" --message "The program exited unexpectedly.\n(Error code: $retval)" --auto
     fi
 
+    launch_game_postprocess $is_game "$cmd" "$rompath"
+}
+
+override_game_core() {
+    romcfgpath="$1"
+    romcfg=$(cat "$romcfgpath")
+    retroarch_core=$(get_info_value "$romcfg" core)
+    corepath=".retroarch/cores/$retroarch_core.so"
+
+    log "per game core: $retroarch_core" >> $sysdir/logs/game_list_options.log
+
+    if [ -f "/mnt/SDCARD/RetroArch/$corepath" ] && echo "$cmd" | grep -qv "retroarch/cores"; then # Do not override game core when launching from GS
+        if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
+            echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v --appendconfig \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+        else
+            echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+        fi
+    fi
+}
+
+launch_game_postprocess() {
+    is_game=$1
+    cmd="$2"
+    rompath="$3"
+
     # Reset CPU frequency
     echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 
     # Reset flags
     rm /tmp/stay_awake 2> /dev/null
-        
+
     # TIMER END + SHUTDOWN CHECK
     if [ $is_game -eq 1 ]; then
         if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
@@ -486,6 +472,33 @@ launch_game() {
     else
         set_prev_state "app"
         check_off_order "End"
+    fi
+}
+
+get_full_resolution_path() {
+    if [ -f /tmp/new_res_available ]; then
+        # Check if the program to be launched supports 560p
+        # Different programs need different checks (Apps vs Ports vs the rest)
+        if grep -qF "/mnt/SDCARD/App/" $sysdir/cmd_to_run.sh; then
+            # ----- App launch ----- #
+
+            echo "$(cat $sysdir/cmd_to_run.sh | cut -d' ' -f 2 | sed 's/;/\/full_resolution/')"
+
+        elif grep -qF "/mnt/SDCARD/Roms/PORTS/" $sysdir/cmd_to_run.sh; then
+            # ----- Port launch ----- #
+
+            dot_port_path=$(grep -o '\/mnt\/SDCARD\/Roms\/PORTS.*\.port' $sysdir/cmd_to_run.sh)
+
+            if grep -qF "FullResolution=1" "$dot_port_path"; then
+                # Look for FullResolution=1 in the .port file
+                # set full_resolution_path to a file that will always exist
+                echo "/tmp/new_res_available"
+            fi
+
+        else
+            # ----- Everything else ----- #
+            echo "$(grep -o '".*launch\.sh"' $sysdir/cmd_to_run.sh | sed 's/"//g; s/launch\.sh/full_resolution/')"
+        fi
     fi
 }
 
@@ -526,12 +539,12 @@ launch_switcher() {
 check_off_order() {
     if [ -f /tmp/.offOrder ]; then
 
-		#EmuDeck - CheckOff scripts
-		check_off_scripts=$(find "$sysdir/checkoff" -type f -name "*.sh")
+        #EmuDeck - CheckOff scripts
+        check_off_scripts=$(find "$sysdir/checkoff" -type f -name "*.sh")
 
-		for check_off_script in $check_off_scripts; do
-	  		sh "$check_off_script"
-		done
+        for check_off_script in $check_off_scripts; do
+            sh "$check_off_script"
+        done
 
         bootScreen "$1" &
         sleep 1 # Allow the bootScreen to be displayed
