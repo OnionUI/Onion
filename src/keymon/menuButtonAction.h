@@ -108,13 +108,10 @@ bool terminate_drastic(void)
         system("sendkeys 1 0, 18 0");
 
         sprintf(fname, "/proc/%d", pid);
-        while (exists(fname)) {
-            sleep(1);
-        }
-        if (config_flag_get(".offOrder")) {
-            sleep(3);
-        }
-
+        uint32_t count = 150; // 30s
+        
+        while (--count && exists(fname))
+            usleep(200000); // 0.2s
         return true;
     }
     return false;
