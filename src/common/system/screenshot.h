@@ -169,6 +169,13 @@ bool __screenshot_perform(bool(get_path)(char *), pid_t p_id)
     return retval;
 }
 
+pid_t get_game_pid(void)
+{
+    pid_t p_id;
+    (p_id = process_searchpid("retroarch")) != 0 || (p_id = process_searchpid("drastic")) != 0;
+    return p_id;
+}
+
 bool screenshot_recent(void)
 {
     return __screenshot_perform(__get_path_recent, get_game_pid());
@@ -181,13 +188,6 @@ bool screenshot_system(void)
         return __screenshot_perform(__get_path_romscreen, p_id);
     }
     return false;
-}
-
-pid_t get_game_pid(void)
-{
-    pid_t p_id;
-    (p_id = process_searchpid("retroarch")) != 0 || (p_id = process_searchpid("drastic")) != 0;
-    return p_id;
 }
 
 #endif // SCREENSHOT_H__
