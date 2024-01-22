@@ -109,7 +109,7 @@ bool terminate_drastic(void)
 
         sprintf(fname, "/proc/%d", pid);
         uint32_t count = 150; // 30s
-        
+
         while (--count && exists(fname))
             usleep(200000); // 0.2s
         return true;
