@@ -171,8 +171,10 @@ bool __screenshot_perform(bool(get_path)(char *), pid_t p_id)
 
 pid_t get_game_pid(void)
 {
-    pid_t p_id;
-    (p_id = process_searchpid("retroarch")) != 0 || (p_id = process_searchpid("drastic")) != 0;
+    pid_t p_id = process_searchpid("retroarch");
+    if (p_id == 0) {
+        p_id = process_searchpid("drastic");
+    }
     return p_id;
 }
 
