@@ -145,24 +145,20 @@ bool __screenshot_save(const uint32_t *buffer, const char *screenshot_path)
     return true;
 }
 
-bool __screenshot_perform(bool(get_path)(char *))
+bool __screenshot_perform(bool(get_path)(char *), pid_t p_id)
 {
     bool retval = false;
     char path[512];
     uint32_t *buffer;
-    pid_t pid_number;
 
-    if ((pid_number = process_searchpid("retroarch")) != 0) {
-        kill(pid_number, SIGSTOP);
-    }
-    else if ((pid_number = process_searchpid("drastic")) != 0) {
-        kill(pid_number, SIGSTOP);
+    if (p_id != 0) {
+        kill(p_id, SIGSTOP);
     }
 
     buffer = __screenshot_buffer();
 
-    if (pid_number != 0) {
-        kill(pid_number, SIGCONT);
+    if (p_id != 0) {
+        kill(p_id, SIGCONT);
     }
 
     if (get_path(path)) {
@@ -175,16 +171,23 @@ bool __screenshot_perform(bool(get_path)(char *))
 
 bool screenshot_recent(void)
 {
-    return __screenshot_perform(__get_path_recent);
+    return __screenshot_perform(__get_path_recent, get_game_pid());
 }
 
 bool screenshot_system(void)
 {
-    bool bReturn = false;
-    if ((process_searchpid("retroarch") != 0) || (process_searchpid("drastic"))) {
-        bReturn = __screenshot_perform(__get_path_romscreen);
+    pid_t p_id = get_game_pid();
+    if (p_id != 0) {
+        return __screenshot_perform(__get_path_romscreen, p_id);
     }
-    return bReturn;
+    return false;
+}
+
+pid_t get_game_pid(void)
+{
+    pid_t p_id;
+    (p_id = process_searchpid("retroarch")) != 0 || (p_id = process_searchpid("drastic")) != 0;
+    return p_id;
 }
 
 #endif // SCREENSHOT_H__
