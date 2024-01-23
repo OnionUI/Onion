@@ -117,7 +117,7 @@ int suspend(uint32_t mode)
                             (strcmp(comm, "(MainUI)")) &&
                             (strcmp(comm, "(tee)")) &&
                             (strncmp(comm, "(audioserver", 12)) &&
-                            (strcmp(comm, "(batmon)"))) {
+                            (strcmp(comm, "(batmon)"))){
                             kill(pid, (mode == 1) ? SIGTERM : SIGKILL);
                             ret++;
                         }
@@ -242,7 +242,7 @@ void suspend_exec(int timeout)
             // shutdown
             system_powersave_off();
             resume();
-            usleep(100000);
+            usleep(150000);
             shutdown();
         }
     }
@@ -251,7 +251,7 @@ void suspend_exec(int timeout)
     system_powersave_off();
     if (killexit) {
         resume();
-        usleep(100000);
+        usleep(150000);
         suspend(2);
         usleep(400000);
     }
