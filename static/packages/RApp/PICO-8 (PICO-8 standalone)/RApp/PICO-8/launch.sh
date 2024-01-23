@@ -22,7 +22,6 @@ fixconfig() {
 
     if [ ! -f "$config_file" ]; then
         echo "Config file not found, creating with default values."
-        return
     fi
 
     echo "Config checker: Validating display settings in config.txt"
