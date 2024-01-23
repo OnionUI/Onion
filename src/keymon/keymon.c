@@ -229,7 +229,9 @@ void deepsleep(void)
         terminate_drastic();
     }
 
-    sleep(30);
+    sleep(10);
+    // catch the resolution change signal on MMV4
+    sleep(20);
     shutdown();
 }
 
