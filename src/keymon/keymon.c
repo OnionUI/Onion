@@ -117,7 +117,7 @@ int suspend(uint32_t mode)
                             (strcmp(comm, "(MainUI)")) &&
                             (strcmp(comm, "(tee)")) &&
                             (strncmp(comm, "(audioserver", 12)) &&
-                            (strcmp(comm, "(batmon)"))){
+                            (strcmp(comm, "(batmon)"))) {
                             kill(pid, (mode == 1) ? SIGTERM : SIGKILL);
                             ret++;
                         }
@@ -188,6 +188,52 @@ void shutdown(void)
 }
 
 //
+//    [onion] deepsleep if MainUI/gameSwitcher/retroarch is running
+//
+void deepsleep(void)
+{
+    system_state_update();
+    if (system_state == MODE_MAIN_UI) {
+        short_pulse();
+        set_system_shutdown();
+        kill_mainUI();
+    }
+    else if (system_state == MODE_SWITCHER) {
+        short_pulse();
+        set_system_shutdown();
+        kill(system_state_pid, SIGTERM);
+    }
+    else if (system_state == MODE_GAME) {
+        if (check_autosave()) {
+            short_pulse();
+            set_system_shutdown();
+            screenshot_system();
+            terminate_retroarch();
+        }
+    }
+    else if (system_state == MODE_ADVMENU) {
+        short_pulse();
+        set_system_shutdown();
+        kill(system_state_pid, SIGQUIT);
+    }
+    else if (system_state == MODE_APPS) {
+        short_pulse();
+        remove(CMD_TO_RUN_PATH);
+        set_system_shutdown();
+        suspend(1);
+    }
+    else if (system_state == MODE_DRASTIC) {
+        short_pulse();
+        set_system_shutdown();
+        screenshot_system();
+        terminate_drastic();
+    }
+
+    sleep(30);
+    shutdown();
+}
+
+//
 //    Suspend interface
 //
 void suspend_exec(int timeout)
@@ -243,7 +289,7 @@ void suspend_exec(int timeout)
             system_powersave_off();
             resume();
             usleep(150000);
-            shutdown();
+            deepsleep();
         }
     }
 
@@ -266,49 +312,6 @@ void suspend_exec(int timeout)
     }
 
     keyinput_enable();
-}
-
-//
-//    [onion] deepsleep if MainUI/gameSwitcher/retroarch is running
-//
-void deepsleep(void)
-{
-    system_state_update();
-    if (system_state == MODE_MAIN_UI) {
-        short_pulse();
-        set_system_shutdown();
-        kill_mainUI();
-    }
-    else if (system_state == MODE_SWITCHER) {
-        short_pulse();
-        set_system_shutdown();
-        kill(system_state_pid, SIGTERM);
-    }
-    else if (system_state == MODE_GAME) {
-        if (check_autosave()) {
-            short_pulse();
-            set_system_shutdown();
-            screenshot_system();
-            terminate_retroarch();
-        }
-    }
-    else if (system_state == MODE_ADVMENU) {
-        short_pulse();
-        set_system_shutdown();
-        kill(system_state_pid, SIGQUIT);
-    }
-    else if (system_state == MODE_APPS) {
-        short_pulse();
-        remove(CMD_TO_RUN_PATH);
-        set_system_shutdown();
-        suspend(1);
-    }
-    else if (system_state == MODE_DRASTIC) {
-        short_pulse();
-        set_system_shutdown();
-        screenshot_system();
-        terminate_drastic();
-    }
 }
 
 void turnOffScreen(void)
