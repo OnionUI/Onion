@@ -60,14 +60,31 @@ fixconfig() {
     grep -E "window_size|screen_size|windowed|window_position|frameless|fullscreen_method|blit_method|transform_screen" "$config_file"
 }
 
-start_pico() {
+purge_devil() {
+    if pgrep -f "/dev/l" > /dev/null; then
+        echo "Process /dev/l is running. Killing it now..."
+        killall -2 l
+    else
+        echo "Process /dev/l is not running."
+    fi
+    
+    # this handles a second startup of pico-8, if /dev/l has already been replaced by disp_init
+    if pgrep -f "disp_init" > /dev/null; then
+        echo "Process disp_init is running. Killing it now..."
+        killall -9 disp_init
+    else
+        echo "Process disp_init is not running."
+    fi
+}
 
+start_pico() {   
     if [ ! -e "$picodir/bin/pico8_dyn" ]; then
         infoPanel --title "PICO-8 binaries not found" --message "Native PICO-8 engine requires to purchase official \nbinaries which are not provided in Onion. \nGo to Lexaloffle's website, get Raspberry Pi version\n and copy \"pico8_dyn\" and \"pico8.dat\"\n to your SD card in \"/RApp/PICO-8/bin\"."
         cd /mnt/SDCARD/.tmp_update/script
         ./remove_last_recent_entry.sh
         exit
     fi
+    purge_devil
 
     export LD_LIBRARY_PATH="$picodir/lib:$LD_LIBRARY_PATH"
     export SDL_VIDEODRIVER=mmiyoo
@@ -75,7 +92,7 @@ start_pico() {
     export EGL_VIDEODRIVER=mmiyoo
 
     fixconfig
-
+    
     . /mnt/SDCARD/.tmp_update/script/stop_audioserver.sh
 
     if [ "$filename" = "~Run PICO-8 with Splore.png" ]; then
@@ -94,6 +111,7 @@ start_pico() {
 main() {
     echo performance >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
     start_pico
+    disp_init & # re-init mi_disp and push csc in
 }
 
 main
