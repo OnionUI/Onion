@@ -110,8 +110,11 @@ start_pico() {
 
 main() {
     echo performance >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+    sv=`cat /proc/sys/vm/swappiness`
+    echo 10 > /proc/sys/vm/swappiness
     start_pico
     disp_init & # re-init mi_disp and push csc in
+    echo $sv > /proc/sys/vm/swappiness
 }
 
 main
