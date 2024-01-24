@@ -1,4 +1,8 @@
 #!/bin/sh
+export sysdir="/mnt/SDCARD/.tmp_update"
+export miyoodir="/mnt/SDCARD/miyoo"
+export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte:/sbin:/usr/sbin:/bin:/usr/bin"
+export PATH="$sysdir/bin:$PATH"
 
 # to push the default display values into mi_disp when a soft reset of mi_disp is done (if /dev/l doesn't exist for some reason)
 # this script is called by `disp_init` but can be called standalone
@@ -12,15 +16,16 @@ CONTRAST_OFFSET=40
 # grab the values from system.json
 filename="/appconfigs/system.json"
 
-lumination=$(grep '"lumination":' $filename | awk -F': ' '{print $2}' | tr -d ',}')
-hue=$(grep '"hue":' $filename | awk -F': ' '{print $2}' | tr -d ',}')
-saturation=$(grep '"saturation":' $filename | awk -F': ' '{print $2}' | tr -d ',}')
-contrast=$(grep '"contrast":' $filename | awk -F': ' '{print $2}' | tr -d ',}')
+readout=$(jq -r '.lumination, .hue, .saturation, .contrast' "$filename")
 
-lumination=$(echo $lumination | tr -d '[:space:]' | tr -d '}')
-hue=$(echo $hue | tr -d '[:space:]' | tr -d '}')
-saturation=$(echo $saturation | tr -d '[:space:]' | tr -d '}')
-contrast=$(echo $contrast | tr -d '[:space:]' | tr -d '}')
+while IFS= read -r line; do
+  [ -z "$lumination" ] && lumination="$line" && continue
+  [ -z "$hue" ] && hue="$line" && continue
+  [ -z "$saturation" ] && saturation="$line" && continue
+  [ -z "$contrast" ] && contrast="$line" && continue
+done <<EOF
+$readout
+EOF
 
 # check if they're within bounds, if not force defaults of 7/10/10/10 like miyoo do.
 if ! echo "$lumination" | grep -qE '^[0-9]+$' || [ "$lumination" -lt 0 ] || [ "$lumination" -gt 20 ]; then lumination=7; fi
