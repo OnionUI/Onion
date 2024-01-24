@@ -31,8 +31,8 @@ fixconfig() {
     set_windowed="windowed 0"
     set_window_position="window_position -1 -1"
     set_frameless="frameless 1"
-    set_fullscreen_method="fullscreen_method 0"
-    set_blit_method="blit_method 2"
+    set_fullscreen_method="fullscreen_method 2"
+    set_blit_method="blit_method 0"
     set_transform_screen="transform_screen 134"
 
     for setting in window_size screen_size windowed window_position frameless fullscreen_method blit_method transform_screen; do
