@@ -129,8 +129,8 @@ get_release_info() {
 	Release_url=$(echo $Release_asset | jq '.browser_download_url' | tr -d '"')
 	Release_FullVersion=$(echo $Release_asset | jq '.name' | tr -d "\"" | sed 's/^Onion-v//g' | sed 's/\.zip$//g')
 	Release_Version=$(echo $Release_FullVersion | sed 's/-dev.*$//g')
-	Release_size_bytes=$(echo $Release_asset | jq -r '.size')
-	Release_size_MB=$(echo "$(($Release_size_bytes/1024/1024))MB")
+	Release_size=$(echo $Release_asset | jq -r '.size')
+	Release_size_MB=$(echo "$(($Release_size / 1024 / 1024))MB")
 	Release_Date=$(echo $Release_asset | jq -r '.created_at')
 	Release_info=$(echo $Release_assets_info | jq '.body')
 
@@ -169,7 +169,7 @@ download_update() {
 	read -n 1 -s -r -p "Press A to continue"
 	echo -ne "${NC}"
 
-	Mychoice=$(echo -e "No\nYes" | $sysdir/script/shellect.sh -t "Download $Release_Version ($((($Release_size / 1024) / 1024))MB) ?" -b "Press A to validate your choice.")
+	Mychoice=$(echo -e "No\nYes" | $sysdir/script/shellect.sh -t "Download $Release_Version ($Release_size_MB) ?" -b "Press A to validate your choice.")
 	clear
 	if [ "$Mychoice" = "Yes" ]; then
 
