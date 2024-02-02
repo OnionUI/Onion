@@ -39,7 +39,6 @@
 
 #include "../playActivity/cacheDB.h"
 #include "../playActivity/playActivityDB.h"
-#include "./listMigration.h"
 
 #define MAXHISTORY 100
 #define MAXHROMNAMESIZE 250
@@ -407,19 +406,6 @@ int main(int argc, char *argv[])
 
     signal(SIGINT, sigHandler);
     signal(SIGTERM, sigHandler);
-
-    int b_force_migration = (argc > 1 && strcmp(argv[1], "force_migration") == 0);
-
-    if (!is_file(RECENTLISTMIGRATED) || b_force_migration) {
-        print_debug("Recent list migration started");
-        migrateGameSwitcherList();
-        char s_command[STR_MAX];
-        sprintf(s_command, "touch %s", RECENTLISTMIGRATED);
-        system(s_command);
-
-        if (b_force_migration)
-            return EXIT_SUCCESS;
-    }
 
     SDL_InitDefault(true);
 
