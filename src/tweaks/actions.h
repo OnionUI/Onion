@@ -554,13 +554,6 @@ void action_setContrast(void *pt)
     set_LCDParams();
 }
 
-const char *action_LaunchKeyboardWrapper(const char *initial_value, const char *title)
-{
-    const char *result = launch_keyboard(initial_value, title);
-    all_changed = true;
-    return result;
-}
-
 void action_addHiddenNetwork(void *pt) {
     system("cp -f /appconfigs/wpa_supplicant.conf /appconfigs/wpa_supplicant.conf_usr"); // backup the current user data
     system("cp -f /appconfigs/wpa_supplicant.conf_bak /appconfigs/wpa_supplicant.conf"); // blank the current conf

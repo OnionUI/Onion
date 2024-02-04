@@ -969,7 +969,7 @@ void menu_vnc(void *pt)
     header_changed = true;
 }
 
-void menu_wifi(void *_)
+void menu_wifi(void *pt)
 {
     ListItem *item = (ListItem *)pt;
     item->value = (int)settings.wifi_on;
