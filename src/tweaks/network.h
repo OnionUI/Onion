@@ -225,7 +225,7 @@ void connectToWiFi(const char *ssid, const char *psk)
     while (true) {
         gettimeofday(&t2, NULL);
         elapsedTime = (t2.tv_sec - t1.tv_sec);
-        
+
         if (elapsedTime > WIFI_CONNECT_MAX_WAIT) {
             // when using a wrong password the 4 way handshake can take long
             // so we need to delete the network
@@ -434,19 +434,21 @@ void *network_getWifiNetworks()
 
 // thread function to update wifi scanning text in UI during scan.
 // called by network_scanWifiNetworks.
-void *network_updateScanningLabel()
+void *network_updateScanningLabel(void *pt)
 {
+    ListItem *item = (ListItem *)pt;
+    int id = item->_id;
     while (wifi_scan_running) {
-        if (strcmp(_menu_wifi.items[2].label, "Scanning...") == 0)
-            strcpy(_menu_wifi.items[2].label, "Scanning");
-        else if (strcmp(_menu_wifi.items[2].label, "Scanning") == 0)
-            strcpy(_menu_wifi.items[2].label, "Scanning.");
-        else if (strcmp(_menu_wifi.items[2].label, "Scanning.") == 0)
-            strcpy(_menu_wifi.items[2].label, "Scanning..");
-        else if (strcmp(_menu_wifi.items[2].label, "Scanning..") == 0)
-            strcpy(_menu_wifi.items[2].label, "Scanning...");
+        if (strcmp(_menu_wifi.items[id].label, "Scanning...") == 0)
+            strcpy(_menu_wifi.items[id].label, "Scanning");
+        else if (strcmp(_menu_wifi.items[id].label, "Scanning") == 0)
+            strcpy(_menu_wifi.items[id].label, "Scanning.");
+        else if (strcmp(_menu_wifi.items[id].label, "Scanning.") == 0)
+            strcpy(_menu_wifi.items[id].label, "Scanning..");
+        else if (strcmp(_menu_wifi.items[id].label, "Scanning..") == 0)
+            strcpy(_menu_wifi.items[id].label, "Scanning...");
         else
-            strcpy(_menu_wifi.items[2].label, "Scanning");
+            strcpy(_menu_wifi.items[id].label, "Scanning");
         list_changed = true;
         all_changed = true;
         usleep(500000);
@@ -462,7 +464,7 @@ void network_scanWifiNetworks(void *pt)
     _wifi_networks = NULL;
     wifi_scan_running = true;
     pthread_t network_updateScanningLabel_thread;
-    pthread_create(&network_updateScanningLabel_thread, NULL, network_updateScanningLabel, NULL);
+    pthread_create(&network_updateScanningLabel_thread, NULL, network_updateScanningLabel, pt);
     pthread_detach(network_updateScanningLabel_thread);
 
     pthread_t wifi_thread;
