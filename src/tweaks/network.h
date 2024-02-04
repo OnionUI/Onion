@@ -400,12 +400,7 @@ int compareSignalLevel(const void *a, const void *b)
 {
     WifiNetwork *wifiA = (WifiNetwork *)a;
     WifiNetwork *wifiB = (WifiNetwork *)b;
-    if (wifiA->signal_level < wifiB->signal_level)
-        return 1;
-    else if (wifiA->signal_level > wifiB->signal_level)
-        return -1;
-    else
-        return 0;
+    return wifiB->signal_level - wifiA->signal_level;
 }
 
 void *network_getWifiNetworks()
@@ -452,7 +447,7 @@ void *network_updateScanningLabel(void *pt)
 }
 
 // starts wifi scanning in new threads for scanning new networks, non blocking as threaded
-// called by action men u item
+// called by action menu item
 void network_scanWifiNetworks(void *pt)
 {
     network_numWifiNetworks = 0;
