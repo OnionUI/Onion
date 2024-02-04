@@ -30,8 +30,6 @@
 #define NET_SCRIPT_PATH "/mnt/SDCARD/.tmp_update/script/network"
 #define SMBD_CONFIG_PATH "/mnt/SDCARD/.tmp_update/config/smb.conf"
 
-#define INITIAL_CAPACITY 10 // preallocate for 10 network slots
-#define GROWTH_FACTOR 2     // gets doubled if we hit 10
 #define WIFI_CONNECT_WAIT 7000
 #define PSK_MIN_LENGTH 8
 #define PSK_MAX_LENGTH 63
@@ -42,12 +40,12 @@
 #define WIFI_CONNECT_SLEEP 50000    /* how long to sleep between wifi connect checks in microseconds */
                                     /* needs to be fast to not miss the "DISCONNECTED" state         */
 
-typedef struct { // create a struct to store the wifi networks, we can use access them afterwards if we need to for anything
-    WifiNetwork *networks;
-    int count; // keep track of the count
+typedef struct { // linked list for wifi networks
+    WifiNetwork *head;
+    int count;
 } WifiNetworkList;
 
-WifiNetworkList globalNetworkList; // define global struct
+WifiNetworkList globalNetworkList;
 
 static struct network_s {
     bool smbd;
@@ -99,21 +97,23 @@ void network_loadState(void)
 static Share *_network_shares = NULL;
 static int network_numShares;
 
-WifiNetwork *_wifi_networks = NULL;
-static int network_numWifiNetworks;
-
 static bool reset_wifi = false;
 pthread_mutex_t wifi_scan_mutex = PTHREAD_MUTEX_INITIALIZER;
 bool wifi_scan_running = false;
 
 // forward decs
 void network_scanWifiNetworks();
+
+// frees the global network list
 void network_freeWifiNetworks()
 {
-    if (globalNetworkList.networks != NULL) {
-        free(globalNetworkList.networks);
-        globalNetworkList.networks = NULL;
+    WifiNetwork *current = globalNetworkList.head;
+    while (current != NULL) {
+        WifiNetwork *next = current->next;
+        free(current);
+        current = next;
     }
+    globalNetworkList.head = NULL;
     globalNetworkList.count = 0;
 }
 
@@ -196,6 +196,7 @@ void deleteNetwork(const char *ssid)
     printf("deleting network %s\nwith cmd %s\n", escaped_ssid, cmd);
     system(cmd);
 }
+
 // the actual connection
 void connectToWiFi(const char *ssid, const char *psk)
 {
@@ -336,37 +337,44 @@ void network_handleParsedNetwork(WifiNetwork *network, const char *current_ssid)
 void network_parseAndPopulate(FILE *fp, const char *current_ssid)
 {
     char line[STR_MAX];
-    int capacity = INITIAL_CAPACITY;
-    globalNetworkList.networks = (WifiNetwork *)calloc(capacity, sizeof(WifiNetwork));
-    if (globalNetworkList.networks == NULL) {
-        perror("Failed to allocate memory");
-        return;
-    }
+    WifiNetwork *new_network;
     globalNetworkList.count = 0;
-
     while (fgets(line, sizeof(line), fp) != NULL) {
-        if (globalNetworkList.count >= capacity) {
-            capacity *= GROWTH_FACTOR;
-            WifiNetwork *new_networks = (WifiNetwork *)realloc(globalNetworkList.networks, capacity * sizeof(WifiNetwork));
-            if (new_networks == NULL) {
-                perror("Failed to reallocate memory");
-                free(globalNetworkList.networks);
-                globalNetworkList.count = 0;
-                return;
-            }
-            globalNetworkList.networks = new_networks;
+        new_network = (WifiNetwork *)malloc(sizeof(WifiNetwork));
+        if (new_network == NULL) {
+            perror("Failed to allocate memory");
+            return;
         }
 
-        WifiNetwork *current_network = &globalNetworkList.networks[globalNetworkList.count];
-        if (network_parseLine(line, current_network)) {
-            network_handleParsedNetwork(current_network, current_ssid);
-            globalNetworkList.count++;
+        if (network_parseLine(line, new_network)) {
+            network_handleParsedNetwork(new_network, current_ssid);
         }
         else {
-            strcpy(current_network->ssid, "Hidden");
+            strcpy(new_network->ssid, "Hidden");
             printf("HIDDEN NETWORK %s", line);
-            globalNetworkList.count++;
         }
+
+        // insert into list based on signal level
+        WifiNetwork *prev = NULL;
+        WifiNetwork *current = globalNetworkList.head;
+
+        // step through the list until we find a signal level lower than the new network
+        while (current != NULL && current->signal_level > new_network->signal_level) {
+            prev = current;
+            current = current->next;
+        }
+
+        if (prev == NULL) {
+            // we have the highest signal level, insert at the beginning
+            new_network->next = globalNetworkList.head;
+            globalNetworkList.head = new_network;
+        }
+        else {
+            // insert after prev
+            prev->next = new_network;
+            new_network->next = current;
+        }
+        globalNetworkList.count++;
     }
 }
 
@@ -410,11 +418,7 @@ void *network_getWifiNetworks()
     wifi_scan_running = true;
     printf("[WiFi] scan thread START %ld\n", syscall(__NR_gettid));
 
-    WifiNetworkList networkList = {0};
-    network_scanAndPop(&networkList);
-
-    _wifi_networks = networkList.networks;
-    network_numWifiNetworks = networkList.count;
+    network_scanAndPop();
 
     list_changed = true;
     reset_menus = true;
@@ -450,8 +454,6 @@ void *network_updateScanningLabel(void *pt)
 // called by action menu item
 void network_scanWifiNetworks(void *pt)
 {
-    network_numWifiNetworks = 0;
-    _wifi_networks = NULL;
     wifi_scan_running = true;
     pthread_t network_updateScanningLabel_thread;
     pthread_create(&network_updateScanningLabel_thread, NULL, network_updateScanningLabel, pt);
@@ -971,7 +973,7 @@ void menu_wifi(void *pt)
     }
 
     if (!_menu_wifi._created) {
-        _menu_wifi = list_createWithTitle(4 + globalNetworkList.count, LIST_SMALL, "WiFi networks"); // use networkList->count instead of MAX_NUM_WIFI_NETWORKS so we're not limited to 35
+        _menu_wifi = list_createWithTitle(4 + globalNetworkList.count, LIST_SMALL, "WiFi networks");
         list_addItem(&_menu_wifi,
                      (ListItem){
                          .label = "Enabled",
@@ -993,17 +995,19 @@ void menu_wifi(void *pt)
                          .disabled = !settings.wifi_on,
                          .action = network_scanWifiNetworks});
 
-        // sort before displaying
-        qsort(globalNetworkList.networks, globalNetworkList.count, sizeof(WifiNetwork), compareSignalLevel);
+        WifiNetwork *current = globalNetworkList.head;
 
-        for (int i = 0; i < globalNetworkList.count; i++) {
+        while (current != NULL) {
             ListItem wifi_network = {
                 .item_type = WIFINETWORK,
-                .payload_ptr = globalNetworkList.networks + i,
+                .payload_ptr = current,
                 .action = network_connectWifi};
-            snprintf(wifi_network.label, STR_MAX - 1, "%s", globalNetworkList.networks[i].ssid);
+            snprintf(wifi_network.label, STR_MAX - 1, "%s", current->ssid);
             list_addItem(&_menu_wifi, wifi_network);
+
+            current = current->next;
         }
+
         list_changed = true;
         all_changed = true;
         reset_wifi = false;

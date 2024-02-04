@@ -9,7 +9,7 @@ typedef struct {
     long availablePos; // in file position for the available property
 } Share;
 
-typedef struct {
+typedef struct WifiNetwork {
     char bssid[18];
     int frequency;
     int signal_level;
@@ -19,6 +19,7 @@ typedef struct {
     bool encrypted;
     bool known;
     int id;
+    struct WifiNetwork *next;
 } WifiNetwork;
 
 #endif // TYPES_H__
