@@ -562,7 +562,7 @@ void action_addHiddenNetwork(void *pt) {
     configFile = fopen("/appconfigs/wpa_supplicant.conf", "a");
 
     if (configFile == NULL) {
-        printf_debug("Error opening file");
+        printf_debug("Error opening file", 1);
         return;
     }
 
@@ -598,7 +598,7 @@ void action_addHiddenNetwork(void *pt) {
         }
     } else {
         // probably ask your wifi.sh script to manage the new connection
-        printf_debug("Failed to run wpa_cli ping command");
+        printf_debug("Failed to run wpa_cli ping command", 1);
     }
 }
 

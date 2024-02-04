@@ -454,6 +454,8 @@ void *network_updateScanningLabel(void *pt)
 // called by action menu item
 void network_scanWifiNetworks(void *pt)
 {
+    if (wifi_scan_running)
+        return;
     wifi_scan_running = true;
     pthread_t network_updateScanningLabel_thread;
     pthread_create(&network_updateScanningLabel_thread, NULL, network_updateScanningLabel, pt);
