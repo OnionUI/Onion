@@ -25,12 +25,14 @@ typedef struct ListItem {
     bool disabled;
     bool show_opaque;
     bool disable_arrows;
+    bool disable_a_btn;
     bool alternative_arrow_action;
     char label[STR_MAX];
     char description[STR_MAX];
     char payload[STR_MAX];
     void *payload_ptr;
     int value;
+    int value_min;
     int value_max;
     char value_labels[MAX_NUM_VALUES][STR_MAX];
     void (*value_formatter)(void *self, char *out_label);
@@ -115,7 +117,7 @@ List list_create(int max_items, ListType list_type)
 {
     return (List){.scroll_height = list_type == LIST_SMALL ? 6 : 4,
                   .list_type = list_type,
-                  .items = (ListItem *)malloc(sizeof(ListItem) * max_items),
+                  .items = (ListItem *)calloc(max_items, sizeof(ListItem)),
                   ._created = true,
                   ._id = list_id_incr++};
 }
@@ -286,7 +288,7 @@ bool list_keyLeft(List *list, bool key_repeat)
         }
         break;
     case MULTIVALUE:
-        if (item->value == 0) {
+        if (item->value == item->value_min) {
             if (!key_repeat)
                 item->value = item->value_max;
         }
@@ -328,7 +330,7 @@ bool list_keyRight(List *list, bool key_repeat)
     case MULTIVALUE:
         if (item->value == item->value_max) {
             if (!key_repeat)
-                item->value = 0;
+                item->value = item->value_min;
         }
         else
             item->value++;
@@ -352,7 +354,7 @@ bool list_activateItem(List *list)
 {
     ListItem *item = list_currentItem(list);
 
-    if (item == NULL)
+    if (item == NULL || item->disable_a_btn)
         return false;
 
     int old_value = item->value;
@@ -363,7 +365,7 @@ bool list_activateItem(List *list)
         break;
     case MULTIVALUE:
         if (item->value == item->value_max)
-            item->value = 0;
+            item->value = item->value_min;
         else
             item->value++;
         break;

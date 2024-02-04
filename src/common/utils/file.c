@@ -153,6 +153,22 @@ char *file_removeExtension(char *myStr)
     return retStr;
 }
 
+char *extractPath(const char *absolutePath)
+{
+    const char *lastSlash = strrchr(absolutePath, '/');
+    if (lastSlash != NULL) {
+        char *path;
+        size_t pathLength = lastSlash - absolutePath + 1;
+        path = (char *)malloc(pathLength + 1);
+        if (path != NULL) {
+            strncpy(path, absolutePath, pathLength);
+            path[pathLength] = '\0';
+        }
+        return path;
+    }
+    return NULL;
+}
+
 void file_cleanName(char *name_out, const char *file_name)
 {
     char *name_without_ext = file_removeExtension(strdup(file_name));
@@ -320,4 +336,141 @@ FILE *file_open_ensure_path(const char *path, const char *mode)
     mkdirs(dirname(_path));
     free(_path);
     return fopen(path, mode);
+}
+
+bool file_findNewest(const char *dir_path, char *newest_file, size_t buffer_size)
+{
+    DIR *d;
+    struct dirent *dir;
+    struct stat file_stat;
+    time_t newest_mtime = 0;
+
+    d = opendir(dir_path);
+    if (d == NULL) {
+        return false;
+    }
+
+    bool found = false;
+    while ((dir = readdir(d)) != NULL) {
+        if (dir->d_type == DT_REG) {
+            char full_path[PATH_MAX];
+            snprintf(full_path, sizeof(full_path), "%s/%s", dir_path, dir->d_name);
+
+            if (stat(full_path, &file_stat) == 0) {
+                if (!found || file_stat.st_mtime > newest_mtime) {
+                    newest_mtime = file_stat.st_mtime;
+                    strncpy(newest_file, dir->d_name, buffer_size);
+                    newest_file[buffer_size - 1] = '\0';
+                    found = true;
+                }
+            }
+        }
+    }
+
+    closedir(d);
+    return found;
+}
+char *file_read_lineN(const char *filename, int n)
+{
+    char line[STR_MAX * 4];
+    int lineNumber = 1;
+    FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        print_debug("Error opening the file");
+        return NULL;
+    }
+
+    while (fgets(line, sizeof(line), file) != NULL) {
+        if (lineNumber == n) {
+            fclose(file);
+            char *lineN = malloc(strlen(line) + 1);
+            if (lineN == NULL) {
+                print_debug("Memory allocation error");
+                return NULL;
+            }
+            strcpy(lineN, line);
+            return lineN;
+        }
+        lineNumber++;
+    }
+
+    fclose(file);
+    return NULL;
+}
+
+void file_delete_line(const char *fileName, int n)
+{
+
+    FILE *file = fopen(fileName, "r");
+    if (file == NULL) {
+        print_debug("Error opening file");
+        return;
+    }
+
+    FILE *tempFile = fopen("temp.txt", "w");
+    if (tempFile == NULL) {
+        fclose(file);
+        print_debug("Error creating temporary file");
+        return;
+    }
+
+    char line[STR_MAX * 4];
+    int lineNumber = 1;
+
+    while (fgets(line, sizeof(line), file) != NULL) {
+        if (lineNumber != n) {
+            fputs(line, tempFile);
+        }
+        lineNumber++;
+    }
+
+    fclose(file);
+    fclose(tempFile);
+
+    if (remove(fileName) != 0) {
+        print_debug("Error deleting original file");
+        return;
+    }
+
+    if (rename("temp.txt", fileName) != 0) {
+        print_debug("Error renaming temporary file");
+        return;
+    }
+
+    printf_debug("Line %d has been successfully deleted.\n", n);
+}
+
+void file_add_line_to_beginning(const char *filename, const char *lineToAdd)
+{
+    FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        print_debug("Error opening the file");
+        return;
+    }
+    char tempPath[STR_MAX];
+    sprintf(tempPath, "%s/temp.txt", extractPath(filename));
+
+    FILE *tempFile = fopen(tempPath, "w");
+    if (tempFile == NULL) {
+        fclose(file);
+        print_debug("Error creating the temporary file");
+        return;
+    }
+    fputs(lineToAdd, tempFile);
+
+    char line[STR_MAX * 4];
+    while (fgets(line, sizeof(line), file) != NULL) {
+        fputs(line, tempFile);
+    }
+    fclose(file);
+    fclose(tempFile);
+    if (remove(filename) != 0) {
+        print_debug("Error removing the original file");
+        return;
+    }
+    if (rename(tempPath, filename) != 0) {
+        print_debug("Error renaming the temporary file");
+        return;
+    }
+    print_debug("Line added to the beginning of the file successfully.\n");
 }

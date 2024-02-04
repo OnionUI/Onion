@@ -9,12 +9,16 @@ logfile=$(basename "$0" .sh)
 
 MODEL_MM=283
 MODEL_MMP=354
+screen_resolution="640x480"
 
 main() {
     # Set model ID
     axp 0 > /dev/null
     export DEVICE_ID=$([ $? -eq 0 ] && echo $MODEL_MMP || echo $MODEL_MM)
     echo -n "$DEVICE_ID" > /tmp/deviceModel
+
+    SERIAL_NUMBER=$(read_uuid)
+    echo -n "$SERIAL_NUMBER" > /tmp/deviceSN
 
     touch /tmp/is_booting
     check_installer
@@ -55,8 +59,24 @@ main() {
     # Make sure MainUI doesn't show charging animation
     touch /tmp/no_charging_ui
 
+    # Check if blf needs enabling
+    if [ -f $sysdir/config/.blfOn ]; then
+        /mnt/SDCARD/.tmp_update/script/blue_light.sh enable &
+    fi
+
     cd $sysdir
     bootScreen "Boot"
+
+    # Set filebrowser branding to "Onion" and apply custom theme
+    if [ -f "$sysdir/config/filebrowser/first.run" ]; then
+        $sysdir/bin/filebrowser config set --branding.name "Onion" -d $sysdir/config/filebrowser/filebrowser.db
+        $sysdir/bin/filebrowser config set --branding.files "$sysdir/config/filebrowser/theme" -d $sysdir/config/filebrowser/filebrowser.db
+
+        rm "$sysdir/config/filebrowser/first.run"
+    fi
+
+    # Start networking (Checks networking, checks timezone)
+    start_networking
 
     # Start the key monitor
     keymon &
@@ -64,6 +84,9 @@ main() {
     # Init
     rm /tmp/.offOrder 2> /dev/null
     HOME=/mnt/SDCARD/RetroArch/
+
+    # Disable VNC server flag at boot
+    rm $sysdir/config/.vncServer
 
     # Detect if MENU button is held
     detectKey 1
@@ -81,16 +104,16 @@ main() {
     # Bind arcade name library to customer path
     mount -o bind $miyoodir/lib/libgamename.so /customer/lib/libgamename.so
 
-    # Set filebrowser branding to "Onion" and apply custom theme
-    if [ -f "$sysdir/config/filebrowser/first.run" ]; then
-        $sysdir/bin/filebrowser config set --branding.name "Onion" -d $sysdir/config/filebrowser/filebrowser.db
-        $sysdir/bin/filebrowser config set --branding.files "$sysdir/config/filebrowser/theme" -d $sysdir/config/filebrowser/filebrowser.db
-
-        rm "$sysdir/config/filebrowser/first.run"
-    fi
-
-    start_networking
     rm -rf /tmp/is_booting
+
+    #EmuDeck - Startup scripts
+    mkdir -p "$sysdir/startup"
+    mkdir -p "$sysdir/checkoff"
+    startup_scripts=$(find "$sysdir/startup" -type f -name "*.sh")
+
+    for startup_script in $startup_scripts; do
+        sh "$startup_script"
+    done
 
     # Auto launch
     if [ ! -f $sysdir/config/.noAutoStart ]; then
@@ -186,6 +209,7 @@ launch_main_ui() {
 
     start_audioserver
 
+    mute_theme_bgm
 
     # MainUI launch
     cd $miyoodir/app
@@ -193,6 +217,9 @@ launch_main_ui() {
         LD_LIBRARY_PATH="$miyoodir/lib:/config/lib:/lib" \
         LD_PRELOAD="$sysdir/lib/libmainuihooks.so:$miyoodir/lib/libpadsp.so" \
         ./MainUI 2>&1 > /dev/null
+
+    # Merge the last game launched into the recent list
+    check_hide_recents
 
     # Check if wifi setting changed
     if [ $(/customer/app/jsonval wifi) -ne $wifi_setting ]; then
@@ -202,7 +229,6 @@ launch_main_ui() {
     fi
 
     $sysdir/bin/freemma
-
     mv -f /tmp/cmd_to_run.sh $sysdir/cmd_to_run.sh
 
     set_prev_state "mainui"
@@ -246,20 +272,40 @@ check_is_game() {
     echo "$1" | grep -q "retroarch/cores" || echo "$1" | grep -q "/../../Roms/" || echo "$1" | grep -q "/mnt/SDCARD/Roms/"
 }
 
+change_resolution() {
+    res_x=""
+    res_y=""
+
+    if [ -n "$1" ]; then
+        res_x=$(echo "$1" | cut -d 'x' -f 1)
+        res_y=$(echo "$1" | cut -d 'x' -f 2)
+    else
+        res_x=$(echo "$screen_resolution" | cut -d 'x' -f 1)
+        res_y=$(echo "$screen_resolution" | cut -d 'x' -f 2)
+    fi
+    log "Changing resolution to $res_x x $res_y"
+
+    fbset -g "$res_x" "$res_y" "$res_x" "$((res_y * 2))" 32
+    # inform batmon and keymon of resolution change
+    killall -SIGUSR1 batmon
+    killall -SIGUSR1 keymon
+}
+
 launch_game() {
     log "\n:: Launch game"
     cmd=$(cat $sysdir/cmd_to_run.sh)
+    TZ_VALUE=$(cat "$sysdir/config/.tz")
 
     is_game=0
     rompath=""
     romext=""
     romcfgpath=""
     retroarch_core=""
+    full_resolution_path=""
 
     start_audioserver
     save_settings
 
-    # TIMER BEGIN
     if check_is_game "$cmd"; then
         rompath=$(echo "$cmd" | awk '{ st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3)}')
 
@@ -288,23 +334,11 @@ launch_game() {
         fi
     fi
 
+    full_resolution_path="$(get_full_resolution_path)"
+
     if [ $is_game -eq 1 ]; then
         if [ -f "$romcfgpath" ]; then
-            romcfg=$(cat "$romcfgpath")
-            retroarch_core=$(get_info_value "$romcfg" core)
-            corepath=".retroarch/cores/$retroarch_core.so"
-
-            log "per game core: $retroarch_core" >> $sysdir/logs/game_list_options.log
-
-            if [ -f "/mnt/SDCARD/RetroArch/$corepath" ] &&
-                # Do not override game core when launching from GS
-                echo "$cmd" | grep -qv "retroarch/cores"; then
-                if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
-                    echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v --appendconfig \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
-                else
-                    echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
-                fi
-            fi
+            override_game_core "$romcfgpath"
         fi
 
         # Handle dollar sign
@@ -333,17 +367,40 @@ launch_game() {
 
     if [ $is_game -eq 0 ] || [ -f "$rompath" ]; then
         if [ "$romext" == "miyoocmd" ]; then
+            /mnt/SDCARD/.tmp_update/script/remove_last_recent_entry.sh
             emupath=$(dirname $(echo "$cmd" | awk '{ gsub(/"/, "", $2); st = index($2,".."); if (st) { print substr($2,0,st) } else { print $2 } }'))
             cd "$emupath"
-
             chmod a+x "$rompath"
             "$rompath" "$rompath" "$emupath"
             retval=$?
         else
+            # Change resolution if needed
+            if [ -f /tmp/new_res_available ] && [ -f "$full_resolution_path" ]; then
+                log "Found full_resolution file, changing resolution to 560p"
+                change_resolution
+            fi
+
+            # Free memory
+            $sysdir/bin/freemma
+
             # GAME LAUNCH
             cd /mnt/SDCARD/RetroArch/
-            $sysdir/cmd_to_run.sh
+
+            # make the cmd_to_run shell env aware of the new timezone
+            TZ="$TZ_VALUE" $sysdir/cmd_to_run.sh
             retval=$?
+
+            if [ -f /tmp/new_res_available ]; then
+                # Restore resolution
+                change_resolution "640x480"
+            fi
+
+            if [ $is_game -eq 1 ] && [ ! -f /tmp/.offOrder ] && [ -f /tmp/.displaySavingMessage ]; then
+                rm /tmp/.displaySavingMessage
+                infoPanel --title " " --message "Saving ..." --persistent --no-footer &
+                touch /tmp/dismiss_info_panel
+                sync
+            fi
         fi
     else
         retval=404
@@ -357,14 +414,36 @@ launch_game() {
         infoPanel --title "Fatal error occurred" --message "The program exited unexpectedly.\n(Error code: $retval)" --auto
     fi
 
+    launch_game_postprocess $is_game "$cmd" "$rompath"
+}
+
+override_game_core() {
+    romcfgpath="$1"
+    romcfg=$(cat "$romcfgpath")
+    retroarch_core=$(get_info_value "$romcfg" core)
+    corepath=".retroarch/cores/$retroarch_core.so"
+
+    log "per game core: $retroarch_core" >> $sysdir/logs/game_list_options.log
+
+    if [ -f "/mnt/SDCARD/RetroArch/$corepath" ] && echo "$cmd" | grep -qv "retroarch/cores"; then # Do not override game core when launching from GS
+        if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
+            echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v --appendconfig \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+        else
+            echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+        fi
+    fi
+}
+
+launch_game_postprocess() {
+    is_game=$1
+    cmd="$2"
+    rompath="$3"
+
     # Reset CPU frequency
     echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 
     # Reset flags
     rm /tmp/stay_awake 2> /dev/null
-
-    # Free memory
-    $sysdir/bin/freemma
 
     # TIMER END + SHUTDOWN CHECK
     if [ $is_game -eq 1 ]; then
@@ -399,6 +478,33 @@ launch_game() {
     fi
 }
 
+get_full_resolution_path() {
+    if [ -f /tmp/new_res_available ]; then
+        # Check if the program to be launched supports 560p
+        # Different programs need different checks (Apps vs Ports vs the rest)
+        if grep -qF "/mnt/SDCARD/App/" $sysdir/cmd_to_run.sh; then
+            # ----- App launch ----- #
+
+            echo "$(cat $sysdir/cmd_to_run.sh | cut -d' ' -f 2 | sed 's/;/\/full_resolution/')"
+
+        elif grep -qF "/mnt/SDCARD/Roms/PORTS/" $sysdir/cmd_to_run.sh; then
+            # ----- Port launch ----- #
+
+            dot_port_path=$(grep -o '\/mnt\/SDCARD\/Roms\/PORTS.*\.port' $sysdir/cmd_to_run.sh)
+
+            if grep -qF "FullResolution=1" "$dot_port_path"; then
+                # Look for FullResolution=1 in the .port file
+                # set full_resolution_path to a file that will always exist
+                echo "/tmp/new_res_available"
+            fi
+
+        else
+            # ----- Everything else ----- #
+            echo "$(grep -o '".*launch\.sh"' $sysdir/cmd_to_run.sh | sed 's/"//g; s/launch\.sh/full_resolution/')"
+        fi
+    fi
+}
+
 is_running() {
     process_name="$1"
     pgrep "$process_name" > /dev/null
@@ -426,6 +532,7 @@ check_switcher() {
 launch_switcher() {
     log "\n:: Launch switcher"
     cd $sysdir
+    start_audioserver
     LD_PRELOAD="$miyoodir/lib/libpadsp.so" gameSwitcher
     rm $sysdir/.runGameSwitcher
     set_prev_state "switcher"
@@ -434,6 +541,14 @@ launch_switcher() {
 
 check_off_order() {
     if [ -f /tmp/.offOrder ]; then
+
+        #EmuDeck - CheckOff scripts
+        check_off_scripts=$(find "$sysdir/checkoff" -type f -name "*.sh")
+
+        for check_off_script in $check_off_scripts; do
+            sh "$check_off_script"
+        done
+
         bootScreen "$1" &
         sleep 1 # Allow the bootScreen to be displayed
         shutdown
@@ -453,7 +568,6 @@ check_hide_recents() {
             mv -f $recentlist_temp $recentlist_hidden
             rm -f $recentlist
         fi
-        # Hide recents off
     else
         # Restore recentlist
         if [ -f $recentlist_hidden ]; then
@@ -485,6 +599,58 @@ mount_main_ui() {
     fi
 }
 
+#
+#   attempts to retrieve the physical screen resolution from mi_fb module
+#   resolution is stored in /tmp/screen_resolution
+#   times out after 5 seconds, defaults to 640x480
+#
+get_screen_resolution() {
+    max_attempts=10
+    attempt=0
+
+    log "get_screen_resolution: start"
+    while [ "$attempt" -lt "$max_attempts" ]; do
+        screen_resolution=$(grep 'Current TimingWidth=' /proc/mi_modules/fb/mi_fb0 | sed 's/Current TimingWidth=\([0-9]*\),TimingWidth=\([0-9]*\),.*/\1x\2/')
+        if [ -n "$screen_resolution" ]; then
+            log "get_screen_resolution: success, resolution: $screen_resolution"
+            break
+        fi
+        log "get_screen_resolution: attempt $attempt failed"
+        attempt=$((attempt + 1))
+        sleep 0.5
+    done
+
+    if [ -z "$screen_resolution" ]; then
+        log "get_screen_resolution: failed to get screen resolution, fall back to 640x480"
+        touch /tmp/get_screen_resolution_failed
+    fi
+
+    if [ "$screen_resolution" = "752x560" ] && [ "$(/etc/fw_printenv miyoo_version)" = "miyoo_version=202310271401" ]; then
+        touch /tmp/new_res_available
+    else
+        # can't use 752x560 without appropriate firmware or screen
+        screen_resolution="640x480"
+    fi
+
+    echo -n "$screen_resolution" > /tmp/screen_resolution
+}
+
+mute_theme_bgm() {
+    system_theme="$(/customer/app/jsonval theme)"
+    bgm_file="${system_theme}sound/bgm.mp3"
+    muted_bgm_file="${system_theme}sound/bgm_muted.mp3"
+
+    if [ -f "$sysdir/config/.bgmMute" ]; then
+        if [[ -f "$bgm_file" ]]; then
+            mv -f "$bgm_file" "$muted_bgm_file"
+        fi
+    else
+        if [[ -f "$muted_bgm_file" ]]; then
+            mv -f "$muted_bgm_file" "$bgm_file"
+        fi
+    fi
+}
+
 init_system() {
     log "\n:: Init system"
 
@@ -506,9 +672,18 @@ init_system() {
 
     # init backlight
     echo 0 > /sys/class/pwm/pwmchip0/export
-    echo 800 > /sys/class/pwm/pwmchip0/pwm0/period
+    pwmfile="$sysdir/config/.pwmfrequency"
+    if [ -s $pwmfile ]; then
+        # 0 - 9 = 100 - 1000 Hz
+        frequency=$((($(cat "$pwmfile") + 1) * 100))
+    else
+        frequency=800
+    fi
+    echo $frequency > /sys/class/pwm/pwmchip0/pwm0/period
     echo $brightness_raw > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
     echo 1 > /sys/class/pwm/pwmchip0/pwm0/enable
+
+    get_screen_resolution
 }
 
 device_uuid=$(read_uuid)
@@ -559,6 +734,10 @@ save_settings() {
 }
 
 update_time() {
+    # Give hardware modders an option to disable time restore
+    if [ -f $sysdir/config/.noTimeRestore ]; then
+        return
+    fi
     timepath=/mnt/SDCARD/Saves/CurrentProfile/saves/currentTime.txt
     currentTime=0
     # Load current time
@@ -620,23 +799,12 @@ start_networking() {
 }
 
 check_networking() {
-    if [ $DEVICE_ID -ne $MODEL_MMP ] || [ ! -f /tmp/network_changed ] && [ -f /tmp/ntp_synced ]; then
-        check_timezone
-        return
-    fi
-
     if pgrep -f update_networking.sh; then
         log "update_networking already running"
     else
         rm /tmp/network_changed
         $sysdir/script/network/update_networking.sh check
     fi
-
-    check_timezone
-}
-
-check_timezone() {
-    export TZ=$(cat "$sysdir/config/.tz")
 }
 
 check_installer() {

@@ -53,10 +53,10 @@ const config = {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/OnionUI/Onion/edit/main/website',
-          lastVersion: 'current',
+          lastVersion: '4.2',
           versions: {
             current: {
-              label: '4.2'
+              label: '4.3'
             },
           },
           remarkPlugins: [

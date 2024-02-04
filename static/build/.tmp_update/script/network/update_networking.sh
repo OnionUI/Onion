@@ -456,13 +456,13 @@ check_ntpstate() {
         if [ "$got_ip" -eq 1 ]; then
             while true; do
                 log "NTPwait: get_time attempt $attempts"
-                if ping -q -c 1 -W 1 google.com > /dev/null 2>&1; then
+                if ping -q -c 1 -W 1 worldtimeapi.org > /dev/null 2>&1; then
                     if get_time; then
                         ret_val=0
                         break
                     fi
                 else
-                    log "NTPwait: Can't reach google."
+                    log "NTPwait: Can't reach network."
                 fi
                 attempts=$((attempts + 1))
                 if [ $attempts -eq $max_attempts ]; then

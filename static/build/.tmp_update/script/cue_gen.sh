@@ -1,10 +1,15 @@
 #!/bin/sh
 rootdir="/mnt/SDCARD/Roms"
-targets=PS SEGACD NEOCD
+
+if [ $# -gt 0 ]; then
+    targets="$1"
+else
+    targets="PS SEGACD NEOCD PCE PCFX AMIGA"
+fi
 
 cd "$rootdir"
 
-find $targets -name *.bin -type f | (
+find $targets -maxdepth 3 -name *.bin -type f | (
     count=0
 
     while read target ; do
@@ -31,4 +36,4 @@ find $targets -name *.bin -type f | (
     echo "$count cue $([ $count -eq 1 ] && (echo "file") || (echo "files")) created"
 )
 
-find $targets -type f -name "*_cache6.db" -exec rm -f {} \;
+find $targets -maxdepth 1 -type f -name "*_cache6.db" -exec rm -f {} \;

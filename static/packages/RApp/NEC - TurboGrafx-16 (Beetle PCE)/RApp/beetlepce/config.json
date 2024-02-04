@@ -1,0 +1,13 @@
+{
+"label":"Beetle PCE",
+"icon":"../../Icons/Default/rapp/beetlepce.png",
+"iconsel":"../../Icons/Default/rapp/beetlepce.png",
+"launch":"launch.sh",
+"rompath":"../../Roms/PCE",
+"imgpath":"../../Roms/PCE/Imgs",
+"gamelist":"../../Roms/PCE/miyoogamelist.xml",
+"useswap":1,
+"shortname":0,
+"hidebios":0,
+"extlist":"pce|ccd|iso|img|chd|cue|zip|7z"
+}

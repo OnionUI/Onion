@@ -26,7 +26,7 @@ void kill_mainUI(void)
     }
 }
 
-void run_gameSwitcher(void)
+void set_gameSwitcher(void)
 {
     flag_set("/mnt/SDCARD/.tmp_update/", ".runGameSwitcher", true);
 }

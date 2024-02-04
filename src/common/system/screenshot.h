@@ -16,20 +16,13 @@
 
 bool __get_path_romscreen(char *path_out)
 {
-    char filename[STR_MAX] = "";
+    char filename[STR_MAX];
     char file_path[STR_MAX];
-    char core_path[STR_MAX];
 
     if (history_getRecentPath(file_path) != NULL) {
         sprintf(filename, "%" PRIu32, FNV1A_Pippip_Yurii(file_path, strlen(file_path)));
     }
-
-    if (history_getRecentCorePath(core_path) != NULL) {
-        strcat(filename, "_");
-        strcat(filename, basename(core_path));
-        str_split(filename, "_libretro");
-    }
-
+    print_debug(file_path);
     if (strlen(filename) > 0) {
         sprintf(path_out, "/mnt/SDCARD/Saves/CurrentProfile/romScreens/%s.png", filename);
         return true;
@@ -90,7 +83,7 @@ bool __get_path_recent(char *path_out)
 
 uint32_t *__screenshot_buffer(void)
 {
-    static size_t buffer_size = DISPLAY_WIDTH * DISPLAY_HEIGHT * sizeof(uint32_t);
+    size_t buffer_size = DISPLAY_WIDTH * DISPLAY_HEIGHT * sizeof(uint32_t);
     uint32_t *buffer = (uint32_t *)malloc(buffer_size);
 
     ioctl(fb_fd, FBIOGET_VSCREENINFO, &vinfo);
@@ -110,10 +103,14 @@ uint32_t *__screenshot_buffer(void)
 bool __screenshot_save(const uint32_t *buffer, const char *screenshot_path)
 {
     uint32_t *src;
-    uint32_t line_buffer[DISPLAY_WIDTH], x, y, pix;
+    uint32_t line_buffer[RENDER_WIDTH], x, y, pix;
+
     FILE *fp;
     png_structp png_ptr;
     png_infop info_ptr;
+
+    // make sure render resolution is up to date
+    display_getRenderResolution();
 
     if (!(fp = file_open_ensure_path(screenshot_path, "wb"))) {
         return false;
@@ -123,15 +120,15 @@ bool __screenshot_save(const uint32_t *buffer, const char *screenshot_path)
     info_ptr = png_create_info_struct(png_ptr);
 
     png_init_io(png_ptr, fp);
-    png_set_IHDR(png_ptr, info_ptr, DISPLAY_WIDTH, DISPLAY_HEIGHT, 8,
+    png_set_IHDR(png_ptr, info_ptr, RENDER_WIDTH, RENDER_HEIGHT, 8,
                  PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE,
                  PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
     png_write_info(png_ptr, info_ptr);
 
-    src = (uint32_t *)buffer + DISPLAY_WIDTH * DISPLAY_HEIGHT;
+    src = (uint32_t *)buffer + RENDER_WIDTH * RENDER_HEIGHT;
 
-    for (y = 0; y < DISPLAY_HEIGHT; y++) {
-        for (x = 0; x < DISPLAY_WIDTH; x++) {
+    for (y = 0; y < RENDER_HEIGHT; y++) {
+        for (x = 0; x < RENDER_WIDTH; x++) {
             pix = *--src;
             line_buffer[x] = 0xFF000000 | (pix & 0x0000FF00) | (pix & 0x00FF0000) >> 16 | (pix & 0x000000FF) << 16;
         }
@@ -148,21 +145,20 @@ bool __screenshot_save(const uint32_t *buffer, const char *screenshot_path)
     return true;
 }
 
-bool __screenshot_perform(bool(get_path)(char *))
+bool __screenshot_perform(bool(get_path)(char *), pid_t p_id)
 {
     bool retval = false;
     char path[512];
     uint32_t *buffer;
-    pid_t ra_pid;
 
-    if ((ra_pid = process_searchpid("retroarch")) != 0) {
-        kill(ra_pid, SIGSTOP);
+    if (p_id != 0) {
+        kill(p_id, SIGSTOP);
     }
 
     buffer = __screenshot_buffer();
 
-    if (ra_pid != 0) {
-        kill(ra_pid, SIGCONT);
+    if (p_id != 0) {
+        kill(p_id, SIGCONT);
     }
 
     if (get_path(path)) {
@@ -170,18 +166,30 @@ bool __screenshot_perform(bool(get_path)(char *))
     }
 
     free(buffer);
-
     return retval;
+}
+
+pid_t get_game_pid(void)
+{
+    pid_t p_id = process_searchpid("retroarch");
+    if (p_id == 0) {
+        p_id = process_searchpid("drastic");
+    }
+    return p_id;
 }
 
 bool screenshot_recent(void)
 {
-    return __screenshot_perform(__get_path_recent);
+    return __screenshot_perform(__get_path_recent, get_game_pid());
 }
 
 bool screenshot_system(void)
 {
-    return __screenshot_perform(__get_path_romscreen);
+    pid_t p_id = get_game_pid();
+    if (p_id != 0) {
+        return __screenshot_perform(__get_path_romscreen, p_id);
+    }
+    return false;
 }
 
 #endif // SCREENSHOT_H__

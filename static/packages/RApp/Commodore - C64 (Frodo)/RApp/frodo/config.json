@@ -1,0 +1,12 @@
+{
+"label":"Frodo",
+"icon":"../../Icons/Default/rapp/frodo.png",
+"iconsel":"../../Icons/Default/rapp/frodo.png",
+"launch":"launch.sh",
+"rompath":"../../Roms/COMMODORE",
+"imgpath":"../../Roms/COMMODORE/Imgs",
+"useswap":0,
+"shortname":0,
+"hidebios":0,
+"extlist":"d64|t64|x64|p00|lnx|zip"
+}
