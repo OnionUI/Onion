@@ -438,19 +438,14 @@ void *network_updateScanningLabel(void *pt)
 {
     ListItem *item = (ListItem *)pt;
     int id = item->_id;
+    const char *labelVariations[] = {"Scanning", "Scanning.", "Scanning..", "Scanning..."};
+    const int numVariations = sizeof(labelVariations) / sizeof(labelVariations[0]);
+    int counter = 0;
+
     while (wifi_scan_running) {
-        if (strcmp(_menu_wifi.items[id].label, "Scanning...") == 0)
-            strcpy(_menu_wifi.items[id].label, "Scanning");
-        else if (strcmp(_menu_wifi.items[id].label, "Scanning") == 0)
-            strcpy(_menu_wifi.items[id].label, "Scanning.");
-        else if (strcmp(_menu_wifi.items[id].label, "Scanning.") == 0)
-            strcpy(_menu_wifi.items[id].label, "Scanning..");
-        else if (strcmp(_menu_wifi.items[id].label, "Scanning..") == 0)
-            strcpy(_menu_wifi.items[id].label, "Scanning...");
-        else
-            strcpy(_menu_wifi.items[id].label, "Scanning");
+        strcpy(_menu_wifi.items[id].label, labelVariations[counter]);
+        counter = (counter + 1) % numVariations;
         list_changed = true;
-        all_changed = true;
         usleep(500000);
     }
     return NULL;
