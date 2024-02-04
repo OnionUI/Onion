@@ -413,21 +413,24 @@ int compareSignalLevel(const void *a, const void *b)
 
 void *network_getWifiNetworks()
 {
-    if (pthread_mutex_trylock(&wifi_scan_mutex) != 0)
-        return NULL;
-    wifi_scan_running = true;
     printf("[WiFi] scan thread START %ld\n", syscall(__NR_gettid));
 
-    network_scanAndPop();
+    if (pthread_mutex_trylock(&wifi_scan_mutex) == 0) {
 
-    list_changed = true;
-    reset_menus = true;
-    all_changed = true;
-    reset_wifi = true;
+        network_scanAndPop();
+
+        list_changed = true;
+        reset_menus = true;
+        all_changed = true;
+        reset_wifi = true;
+
+        pthread_mutex_unlock(&wifi_scan_mutex);
+    }
+
+    wifi_scan_running = false;
+    keys_enabled = true;
 
     printf("[WiFi] scan thread END %ld\n", syscall(__NR_gettid));
-    wifi_scan_running = false;
-    pthread_mutex_unlock(&wifi_scan_mutex);
     return NULL;
 }
 
@@ -457,6 +460,7 @@ void network_scanWifiNetworks(void *pt)
     if (wifi_scan_running)
         return;
     wifi_scan_running = true;
+    keys_enabled = false;
     pthread_t network_updateScanningLabel_thread;
     pthread_create(&network_updateScanningLabel_thread, NULL, network_updateScanningLabel, pt);
     pthread_detach(network_updateScanningLabel_thread);
