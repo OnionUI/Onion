@@ -105,19 +105,13 @@ bool terminate_drastic(void)
     if (pid) {
         system("sendkeys 1 1, 18 1");
         usleep(200000); // 0.2s
-
         system("sendkeys 1 0, 18 0");
 
-        uint32_t count = 8;
-
         sprintf(fname, "/proc/%d", pid);
-        while (--count && exists(fname)) {
+        uint32_t count = 150; // 30s
 
-            system("sendkeys 1 1, 18 1");
+        while (--count && exists(fname))
             usleep(200000); // 0.2s
-            system("sendkeys 1 0, 18 0");
-            sleep(1);
-        }
         return true;
     }
     return false;

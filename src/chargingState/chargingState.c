@@ -31,7 +31,7 @@
 #define PRESSED 1
 #define REPEATING 2
 
-#define DISPLAY_TIMEOUT 10000
+#define DISPLAY_TIMEOUT 15000
 
 static bool quit = false;
 static bool suspended = false;
