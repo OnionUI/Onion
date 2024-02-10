@@ -21,12 +21,26 @@ static void drawImage(SDL_Surface *image_to_draw, SDL_Surface *screen,
     if (!image_to_draw)
         return;
 
-    if (image_to_draw->w != 640 || image_to_draw->h != 480) {
-        // scale image to 640x480 if needed
+    if (image_to_draw->w > 640 || image_to_draw->h > 480) {
+        // scale image to 640x480 only if bigger (v4 752x560)
+
         SDL_Rect dest_rect = {0, 0, 640, 480};
-        SDL_SoftStretch(image_to_draw, NULL, image_to_draw, &dest_rect);
-        image_to_draw->w = 640;
-        image_to_draw->h = 480;
+        SDL_Surface *scaled_image = SDL_CreateRGBSurface(
+            SDL_SWSURFACE, 640, 480, image_to_draw->format->BitsPerPixel,
+            image_to_draw->format->Rmask, image_to_draw->format->Gmask,
+            image_to_draw->format->Bmask, image_to_draw->format->Amask);
+
+        if (!scaled_image) {
+            printf("SDL_CreateRGBSurface failed: %s\n", SDL_GetError());
+        }
+        else {
+            int ret = SDL_SoftStretch(image_to_draw, NULL, scaled_image, &dest_rect);
+            if (ret == 0)
+                image_to_draw = scaled_image;
+            else
+                // failed to scale, draw unscaled
+                printf("SDL_SoftStretch failed: %s\n", SDL_GetError());
+        }
     }
 
     DEBUG_PRINT(("frame %p\n", frame));
