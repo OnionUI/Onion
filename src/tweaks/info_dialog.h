@@ -7,13 +7,13 @@
 
 #include "./appstate.h"
 
-void __showInfoDialog(const char *title, const char *message, bool waitinput, int timeout)
+int __showInfoDialog(const char *title, const char *message, bool waitinput, int timeout)
 {
     bool confirm_quit = false;
     SDLKey changed_key = SDLK_UNKNOWN;
 
     keys_enabled = false;
-
+    int ret_val = 0;
     background_cache = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
     SDL_BlitSurface(screen, NULL, background_cache, NULL);
 
@@ -25,21 +25,23 @@ void __showInfoDialog(const char *title, const char *message, bool waitinput, in
             if (updateKeystate(keystate, &confirm_quit, true, &changed_key)) {
                 if ((changed_key == SW_BTN_A || changed_key == SW_BTN_B || changed_key == SW_BTN_SELECT) && keystate[changed_key] == PRESSED) {
                     confirm_quit = true;
+                    ret_val = changed_key;
                     sound_change();
                 }
             }
         }
     }
-    if (timeout > 0) {
+    if (timeout != NULL && timeout > 0) {
         SDL_Delay(timeout);
     }
     keys_enabled = true;
     all_changed = true;
+    return ret_val;
 }
 
-void showInfoDialogGeneric(const char *title, const char *message, bool waitinput, int timeout)
+int showInfoDialogGeneric(const char *title, const char *message, bool waitinput, int timeout)
 {
-    __showInfoDialog(title, message, waitinput, timeout);
+    return __showInfoDialog(title, message, waitinput, timeout);
 }
 
 void showInfoDialog(List *list, bool waitinput, int timeout)

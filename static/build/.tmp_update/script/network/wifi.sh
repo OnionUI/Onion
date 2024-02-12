@@ -192,7 +192,7 @@ case "$1" in
     echo "  delete_all  Delete all known Wi-Fi networks"
     echo "  scan        Scan for available Wi-Fi networks"
     echo "  reset       Reset Wi-Fi settings"
-    echo "  wpa_state  Get the current WPA state"
+    echo "  wpa_state   Get the current WPA state"
     exit 1
     ;;
 esac

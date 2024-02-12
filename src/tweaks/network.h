@@ -21,11 +21,14 @@
 #include "theme/render/dialog.h"
 #include "theme/sound.h"
 #include "utils/apply_icons.h"
+#include "utils/file.h"
 #include "utils/json.h"
 #include "utils/keystate.h"
 #include "utils/netinfo.h"
+#include "utils/process.h"
 
 #include "./appstate.h"
+#include "./info_dialog.h"
 
 #define NET_SCRIPT_PATH "/mnt/SDCARD/.tmp_update/script/network"
 #define SMBD_CONFIG_PATH "/mnt/SDCARD/.tmp_update/config/smb.conf"
@@ -39,11 +42,6 @@
 #define WIFI_CONNECT_MAX_WAIT 6     // how long to wait additionally to the initial wait in seconds
 #define WIFI_CONNECT_SLEEP 50000    /* how long to sleep between wifi connect checks in microseconds */
                                     /* needs to be fast to not miss the "DISCONNECTED" state         */
-
-typedef struct { // linked list for wifi networks
-    WifiNetwork *head;
-    int count;
-} WifiNetworkList;
 
 WifiNetworkList globalNetworkList;
 
@@ -100,6 +98,7 @@ static int network_numShares;
 static bool reset_wifi = false;
 pthread_mutex_t wifi_scan_mutex = PTHREAD_MUTEX_INITIALIZER;
 bool wifi_scan_running = false;
+int scan_item_id = 0; // used to modify the "scan for networks" label in the menu
 
 // forward decs
 void network_scanWifiNetworks();
@@ -231,7 +230,7 @@ void connectToWiFi(const char *ssid, const char *psk)
             // when using a wrong password the 4 way handshake can take long
             // so we need to delete the network
             deleteNetwork(ssid);
-            showInfoDialogGeneric("WiFi networks", "WiFi connection timed out.\nPress any button to continue", true, 0);
+            showInfoDialogGeneric("WiFi networks", "WiFi connection timed out.\nPress A to continue", true, 0);
             return;
         }
 
@@ -243,11 +242,19 @@ void connectToWiFi(const char *ssid, const char *psk)
         }
         else if (strcmp(output, "DISCONNECTED") == 0) {
             deleteNetwork(ssid);
-            showInfoDialogGeneric("WiFi networks", "Failed to connect to WiFi network.\nPress any button to continue", true, 0);
+            showInfoDialogGeneric("WiFi networks", "Failed to connect to WiFi network.\nPress A to continue", true, 0);
             return;
         }
         usleep(WIFI_CONNECT_SLEEP);
     }
+}
+
+void network_resetWifi(void *pt)
+{
+    system(NET_SCRIPT_PATH "/wifi.sh off");
+    system(NET_SCRIPT_PATH "/wifi.sh reset");
+    system(NET_SCRIPT_PATH "/wifi.sh on");
+    showInfoDialogGeneric("WiFi networks", "WiFi reset\nPress A to continue", true, 0);
 }
 
 // starts WiFi connection
@@ -265,7 +272,7 @@ void network_connectWifi(void *pt)
         if (wifi_network->encrypted) {
             const char *psk = launch_keyboard("", "Enter your WiFi password");
             if (strlen(psk) < PSK_MIN_LENGTH || strlen(psk) > PSK_MAX_LENGTH) {
-                showInfoDialogGeneric("WiFi networks", "Password must be 8 to 63 characters.\nPress any button to continue", true, 0);
+                showInfoDialogGeneric("WiFi networks", "Password must be 8 to 63 characters.\nPress A to continue", true, 0);
                 return;
             }
             else {
@@ -411,7 +418,7 @@ int compareSignalLevel(const void *a, const void *b)
     return wifiB->signal_level - wifiA->signal_level;
 }
 
-void *network_getWifiNetworks()
+void *network_getWifiNetworks(void *pt)
 {
     printf("[WiFi] scan thread START %ld\n", syscall(__NR_gettid));
 
@@ -438,14 +445,12 @@ void *network_getWifiNetworks()
 // called by network_scanWifiNetworks.
 void *network_updateScanningLabel(void *pt)
 {
-    ListItem *item = (ListItem *)pt;
-    int id = item->_id;
     const char *labelVariations[] = {"Scanning", "Scanning.", "Scanning..", "Scanning..."};
     const int numVariations = sizeof(labelVariations) / sizeof(labelVariations[0]);
     int counter = 0;
 
     while (wifi_scan_running) {
-        strcpy(_menu_wifi.items[id].label, labelVariations[counter]);
+        strcpy(_menu_wifi.items[scan_item_id].label, labelVariations[counter]);
         counter = (counter + 1) % numVariations;
         list_changed = true;
         usleep(500000);
@@ -455,14 +460,14 @@ void *network_updateScanningLabel(void *pt)
 
 // starts wifi scanning in new threads for scanning new networks, non blocking as threaded
 // called by action menu item
-void network_scanWifiNetworks(void *pt)
+void network_scanWifiNetworks()
 {
     if (wifi_scan_running)
         return;
     wifi_scan_running = true;
     keys_enabled = false;
     pthread_t network_updateScanningLabel_thread;
-    pthread_create(&network_updateScanningLabel_thread, NULL, network_updateScanningLabel, pt);
+    pthread_create(&network_updateScanningLabel_thread, NULL, network_updateScanningLabel, NULL);
     pthread_detach(network_updateScanningLabel_thread);
 
     pthread_t wifi_thread;
@@ -809,6 +814,56 @@ void network_setVNCFPS(void *pt)
     }
 }
 
+int network_getKnownNetworks(KnownNetwork **networks)
+{
+    // get the list of known networks from wpa_cli
+    char known_networks_string[SSID_MAX_LENGTH * 2 * 64]; // hmm
+    int result = process_start_read_return(NET_SCRIPT_PATH "/wifi.sh list", known_networks_string);
+    if (result != 0)
+        return result;
+
+    // add a newline at the end of the string if it isn't empty
+    if (strlen(known_networks_string) > 0)
+        strcat(known_networks_string, "\n");
+
+    int numNetworks = 0;
+
+    // Count the number of lines in the string and allocate memory accordingly
+    for (const char *ptr = known_networks_string; *ptr != '\0'; ++ptr)
+        if (*ptr == '\n')
+            numNetworks++;
+
+    *networks = (KnownNetwork *)malloc(numNetworks * sizeof(KnownNetwork));
+    if (*networks == NULL) {
+        perror("malloc");
+        return -1;
+    }
+
+    // Parse the string and populate the array
+    char *token = strtok(known_networks_string, "\n");
+    int index = 0;
+
+    while (token != NULL) {
+        KnownNetwork *network = &(*networks)[index];
+        if (sscanf(token, "%d %s %*s %[^\n]", &network->id, network->SSID, network->flags) == 3)
+            index++;
+
+        token = strtok(NULL, "\n");
+    }
+
+    return numNetworks;
+}
+
+void network_deleteAllNetworks(void *pt)
+{
+    int selection = showInfoDialogGeneric("Confirm", "Delete all networks?\nA = yes\nB = no", true, 0);
+    if (selection == SW_BTN_A) {
+        system(NET_SCRIPT_PATH "/wifi.sh delete_all");
+        showInfoDialogGeneric("OK", "All known networks deleted\nPress A to continue", true, 0);
+        reset_menus = true;
+    }
+}
+
 void menu_smbd(void *pt)
 {
     ListItem *item = (ListItem *)pt;
@@ -969,6 +1024,72 @@ void menu_vnc(void *pt)
     header_changed = true;
 }
 
+void menu_wifi_advanced_known_networks(void *pt)
+{
+    KnownNetwork *networks;
+    int numNetworks = network_getKnownNetworks(&networks);
+
+    // fresh list every time
+    if (_menu_wifi_advanced_known_networks._created)
+        list_free(&_menu_wifi_advanced_known_networks);
+
+    _menu_wifi_advanced_known_networks = list_create(1 + numNetworks, LIST_SMALL);
+    strcpy(_menu_wifi_advanced_known_networks.title, "Known networks");
+    list_addItem(&_menu_wifi_advanced_known_networks,
+                 (ListItem){
+                     .item_type = ACTION,
+                     .label = "Delete all known networks",
+                     .action = network_deleteAllNetworks});
+
+    for (int i = 0; i < numNetworks; i++) {
+        ListItem networkItem = {
+            .item_type = ACTION,
+            .payload_ptr = networks + i,
+            .value = networks[i].id,
+            .action = NULL};
+
+        snprintf(networkItem.label, STR_MAX - 1, "%s %s", networks[i].SSID, networks[i].flags);
+        list_addItem(&_menu_wifi_advanced_known_networks, networkItem);
+    }
+
+    menu_stack[++menu_level] = &_menu_wifi_advanced_known_networks;
+    header_changed = true;
+}
+
+void menu_wifi_advanced(void *pt)
+{
+    if (!_menu_wifi_advanced._created) {
+        _menu_wifi_advanced = list_create(5, LIST_SMALL);
+        strcpy(_menu_wifi_advanced.title, "WiFi advanced");
+        list_addItem(&_menu_wifi_advanced,
+                     (ListItem){
+                         .item_type = ACTION,
+                         .label = "Manage known networks...",
+                         .action = menu_wifi_advanced_known_networks});
+
+        list_addItem(&_menu_wifi_advanced,
+                     (ListItem){
+                         .item_type = ACTION,
+                         .label = "IP Settings",
+                         .action = NULL});
+        list_addItem(&_menu_wifi_advanced,
+                     (ListItem){
+                         .disabled = !settings.wifi_on,
+                         .label = "WPS connect",
+                         .action = network_wpsConnect});
+        list_addItem(&_menu_wifi_advanced,
+                     (ListItem){
+                         .label = "Add a hidden WiFi network...",
+                         .action = action_addHiddenNetwork});
+        list_addItem(&_menu_wifi_advanced,
+                     (ListItem){
+                         .label = "Reset WiFi",
+                         .action = network_resetWifi});
+    }
+    menu_stack[++menu_level] = &_menu_wifi_advanced;
+    header_changed = true;
+}
+
 void menu_wifi(void *pt)
 {
     ListItem *item = (ListItem *)pt;
@@ -979,7 +1100,7 @@ void menu_wifi(void *pt)
     }
 
     if (!_menu_wifi._created) {
-        _menu_wifi = list_createWithTitle(4 + globalNetworkList.count, LIST_SMALL, "WiFi networks");
+        _menu_wifi = list_createWithTitle(3 + globalNetworkList.count, LIST_SMALL, "WiFi networks");
         list_addItem(&_menu_wifi,
                      (ListItem){
                          .label = "Enabled",
@@ -988,19 +1109,15 @@ void menu_wifi(void *pt)
                          .action = network_toggleWifi});
         list_addItem(&_menu_wifi,
                      (ListItem){
-                         .label = "WPS connect",
-                         .disabled = !settings.wifi_on,
-                         .action = network_wpsConnect});
-        list_addItem(&_menu_wifi,
-                     (ListItem){
-                         .label = "Add a hidden WiFi network...",
-                         .action = action_addHiddenNetwork});
-        list_addItem(&_menu_wifi,
-                     (ListItem){
-                         .label = "Scan for networks",
-                         .disabled = !settings.wifi_on,
-                         .action = network_scanWifiNetworks});
-
+                         .label = "Advanced...",
+                         .item_type = ACTION,
+                         .action = menu_wifi_advanced});
+        ListItem *scan_item = list_addItem(&_menu_wifi,
+                                           (ListItem){
+                                               .label = "Scan for networks",
+                                               .disabled = !settings.wifi_on,
+                                               .action = network_scanWifiNetworks});
+        scan_item_id = scan_item->_id;
         WifiNetwork *current = globalNetworkList.head;
 
         while (current != NULL) {

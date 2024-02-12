@@ -2,6 +2,8 @@
 #ifndef TYPES_H__
 #define TYPES_H__
 
+#define SSID_MAX_LENGTH 32
+
 typedef struct {
     char name[STR_MAX - 11];
     char path[STR_MAX];
@@ -21,5 +23,16 @@ typedef struct WifiNetwork {
     int id;
     struct WifiNetwork *next;
 } WifiNetwork;
+
+typedef struct {
+    int id;
+    char SSID[SSID_MAX_LENGTH];
+    char flags[64]; // arbitrary number
+} KnownNetwork;
+
+typedef struct { // linked list for wifi networks
+    WifiNetwork *head;
+    int count;
+} WifiNetworkList;
 
 #endif // TYPES_H__
