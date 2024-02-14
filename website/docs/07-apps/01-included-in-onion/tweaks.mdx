@@ -13,7 +13,7 @@ import IconLink from '@site/src/components/IconLink';
 
 ## Presentation
 
-Tweaks is the backbone of onion's configuration and personalization! With Tweaks you can adjust System settings, enable network services, configure your button shortcuts and more!
+Tweaks is the backbone of Onion's configuration and personalization! With Tweaks you can adjust System settings, enable network services, configure your button shortcuts and more!
 
 <p align="center"><img src={require('./assets/tweaks.webp').default} style={{width: 320}} /></p>
 
@@ -201,7 +201,7 @@ It can be MainUI, [GameSwitcher](./game-switcher), [Retroarch](./retroarch) or [
 
 ### VNC: Screen share...
 </summary>
-<div>Connect to your MMP from another device.</div>
+<div>Share your MMP Screen to another device for demonstrations or applications or themes (The MMP does not have the performance to stream game footage through this feature).</div>
 </details>
 <details><summary>
 
@@ -340,6 +340,12 @@ Set the action for single pressing the menu button while in MainUI.
 
 ### Blue light filter
 </summary>
+<div>Control the blue light filter schedule, intensity, or state. (You can also hold <kbd>MENU</kbd>+<kbd>B</kbd> for 2 seconds to enable or disable BLF!).</div>
+
+<div>Warning: Bluelight filter schedule depends on NTP being available.</div>
+<div>If you do not have an up-to-date time on your device, the BLF may behave unexpectedly.</div>
+<div>You can override the BLF schedule by using the <kbd>MENU</kbd>+<kbd>B</kbd> hotkey.</div> 
+&nbsp;
 <details><summary>
 
 #### State
@@ -473,7 +479,8 @@ Set the action for single pressing the menu button while in MainUI.
 
 ### PWM frequency
 </summary>
-<div>Change the PWM frequency Lower values for less buzzing (Experimental feature).</div>
+<div>Set the PWM frequency, a lower value will result in less "whine" from the devices speaker.</div>
+<div>Warning: The lower this value, the more chance your screen will begin to "flicker", the perception of this varies from person to person.</div>
 </details>
 <details><summary>
 
@@ -564,8 +571,9 @@ Set the action for single pressing the menu button while in MainUI.
 <details><summary>
 
 ### Generate M3U files for PSX games...
-<div>PSX multidisc roms require to create a playslist file (.m3u). It allows to have only one entry for each multidisc game and one unique save file for each game.</div>
 </summary>
+<div>PSX multidisc roms require to create a playslist file (.m3u). It allows to have only one entry for each multidisc game and one unique save file for each game.</div>
+&nbsp;
 <details><summary>
 
 #### Multiple directories (.Game_Name)
@@ -595,6 +603,8 @@ Set the action for single pressing the menu button while in MainUI.
 
 ### Screen recorder...
 </summary>
+<div>A tool to record the screen, this tool will not offer perfect performance in games, but can be used to record/demonstrate apps and features (You can also hold <kbd>MENU</kbd>+<kbd>A</kbd> for 2 seconds to start recording!).</div>
+&nbsp;
 <details><summary>
 
 
