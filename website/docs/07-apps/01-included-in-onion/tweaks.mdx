@@ -13,7 +13,7 @@ import IconLink from '@site/src/components/IconLink';
 
 ## Presentation
 
-Tweaks is the backbone of onion's configuration and personalization! With Tweaks you can adjust System settings, enable network services, configure your button shortcuts and more!
+Tweaks is the backbone of Onion's configuration and personalization! With Tweaks you can adjust System settings, enable network services, configure your button shortcuts and more!
 
 <p align="center"><img src={require('./assets/tweaks.webp').default} style={{width: 320}} /></p>
 
@@ -186,6 +186,12 @@ It can be MainUI, [GameSwitcher](./game-switcher), [Retroarch](./retroarch) or [
 </details>
 <details><summary>
 
+### VNC: Screen share
+</summary>
+<div>Share your MMP Screen to another device for demonstrations or applications or themes (The MMP does not have the performance to stream game footage through this feature).</div>
+</details>
+<details><summary>
+
 ### Disable services in-game
 </summary>
 <div>Disable all network services (except WiFi) while playing games. This helps to conserve battery and to keep performance at a maximum.</div>
@@ -312,6 +318,17 @@ Set the action for single pressing the menu button while in MainUI.
 </details>
 <details><summary>
 
+### Blue light filter
+</summary>
+<div>Control the blue light filter schedule, intensity, or state. (You can also hold <kbd>MENU</kbd>+<kbd>B</kbd> for 2 seconds to enable or disable BLF!).</div>
+
+<div>Warning: Bluelight filter schedule depends on NTP being available.</div>
+<div>If you do not have an up-to-date time on your device, the BLF may behave unexpectedly.</div>
+<div>You can override the BLF schedule by using the Menu+B hotkey.</div>
+
+</details>
+<details><summary>
+
 ### Theme overrides...
 </summary>
 <details><summary>
@@ -328,7 +345,19 @@ Set the action for single pressing the menu button while in MainUI.
 </details>
 <details><summary>
 
+#### Mute background music
+</summary>
+<div>Disable the background music of any theme</div>
+</details>
+<details><summary>
+
 #### Hide icon labels
+</summary>
+<div>Hide icon labels</div>
+</details>
+<details><summary>
+
+#### Hide hint labels
 </summary>
 <div>Hide hint labels</div>
 </details>
@@ -354,14 +383,6 @@ Set the action for single pressing the menu button while in MainUI.
 
 #### Edit expert icon...
 </summary>
-
-
-</details>
-<details><summary>
-
-#### expert icon...
-</summary>
-
 
 </details>
 </details>
@@ -396,6 +417,13 @@ Set the action for single pressing the menu button while in MainUI.
 ### Fast forward rate
 </summary>
 <div>Set the maximum fast forward rate.</div>
+</details>
+<details><summary>
+
+### PWM Frequency
+</summary>
+<div>Set the PWM frequency, a lower value will result in less "whine" from the devices speaker.</div>
+<div>Warning: The lower this value, the more chance your screen will begin to "flicker", the perception of this varies from person to person</div>
 </details>
 <details><summary>
 
@@ -468,6 +496,12 @@ Set the action for single pressing the menu button while in MainUI.
 </details>
 <details><summary>
 
+### Generate M3U files for PSX games
+</summary>
+<div>This tool will generate m3u files for multi-disk PSX games so you don't have to.</div>
+</details>
+<details><summary>
+
 ### Generate game list for short name roms
 </summary>
 <div>This tool replaces the short names in game caches with their equivalent real names. This ensures the list is sorted correctly.</div>
@@ -477,6 +511,30 @@ Set the action for single pressing the menu button while in MainUI.
 ### Generate miyoogamelist with digest names
 </summary>
 <div>Use this tool to clean your game names without having to rename the rom files (removes parens, rankings, and much more). This generates a 'miyoogamelist.xml' file which comes with some limitations, such as no subfolder support.</div>
+</details>
+<details><summary>
+
+### Screen recorder
+</summary>
+<div>A tool to record the screen, this tool will not offer perfect performance in games, but can be used to record/demonstrate apps and features (You can also hold <kbd>MENU</kbd>+<kbd>A</kbd> for 2 seconds to start recording!)</div>
+</details>
+<details><summary>
+
+### Regenerate gameswitcher list
+</summary>
+<div>Refresh the data the gameswitcher holds.</div>
+</details>
+<details><summary>
+
+### Sort applist A-Z
+</summary>
+<div>This tool will sort your devices applist A-Z (Depending on the number of apps, this could take some time).</div>
+</details>
+<details><summary>
+
+### Sort applist Z-A
+</summary>
+<div>This tool will sort your devices applist Z-A (Depending on the number of apps, this could take some time).</div>
 </details>
 </details>
 
