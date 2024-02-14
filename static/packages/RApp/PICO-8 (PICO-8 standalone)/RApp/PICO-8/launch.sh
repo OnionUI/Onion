@@ -59,7 +59,7 @@ fixconfig() {
     done
 
     echo "Updated settings:"
-    grep -E "window_size|screen_size|windowed|window_position|frameless|fullscreen_method|blit_method|transform_screen" "$config_file"
+    grep -E "window_size|screen_size|windowed|window_position|frameless|fullscreen_method|blit_method|transform_screen|host_framerate_control" "$config_file"
 }
 
 purge_devil() {
@@ -99,14 +99,14 @@ start_pico() {
 
     if [ "$filename" = "~Run PICO-8 with Splore.png" ]; then
         num_files_before=$(ls -1 "$BBS_DIR" | wc -l)
-        LD_PRELOAD="$picodir/lib/libcpt_hook.so" pico8_dyn -splore -preblit_scale 3 -pixel_perfect 0
+        LD_PRELOAD="$picodir/lib/libcpt_hook.so" pico8_dyn -splore -preblit_scale 3
         num_files_after=$(ls -1 "$BBS_DIR" | wc -l)
         if [ "$num_files_before" -ne "$num_files_after" ]; then
             rm -f /mnt/SDCARD/Roms/PICO/PICO_cache6.db
         fi
 
     else
-        LD_PRELOAD="$picodir/lib/libcpt_hook.so" pico8_dyn -preblit_scale 3 -pixel_perfect 0 -run "$rompath"
+        LD_PRELOAD="$picodir/lib/libcpt_hook.so" pico8_dyn -preblit_scale 3 -run "$rompath"
     fi
 }
 
