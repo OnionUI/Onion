@@ -22,8 +22,11 @@
   "menu_c2":"0x289a35",
   "auto_state":1,
   "auto_slot":10,
+  "half_vol":0,
   "splash":3,
   "hotkey":0,
   "menu_bg":1,
-  "states":"\/mnt\/SDCARD\/Saves\/CurrentProfile\/states\/Drastic"
+  "states":"\/mnt\/SDCARD\/Saves\/CurrentProfile\/states\/Drastic",
+  "menu_cursor":1,
+  "fast_forward":6
 }
