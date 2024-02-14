@@ -85,11 +85,11 @@ The following shortcuts are provided by the Native Wrapper for your convenience 
         </tr>
         <tr>
             <td><kbd>SELECT</kbd>+<kbd>LEFT</kbd>/<kbd>RIGHT</kbd></td>
-            <td>Change or disable the current screen bezel (you can add new ones by placing your file in `/Apps/pico/res/borders` directory in your SD card)</td>
+            <td>Change or disable the current screen bezel (you can add new ones by placing your file in `/RApp/PICO-8/res/bezel` directory in your SD card)</td>
         </tr>
         <tr>
             <td><kbd>SELECT</kbd>+<kbd>UP</kbd>/<kbd>DOWN</kbd></td>
-            <td>Raises/lowers the CPU clock rate in increments of 50 (you can override this value by editing the `/Apps/pico/cfg/onioncfg.json` file)</td>
+            <td>Raises/lowers the CPU clock rate in increments of 50 (you can override this value by editing the `/RApp/PICO-8/cfg/onioncfg.json` file)</td>
         </tr>
         <tr>
             <td><kbd>SELECT</kbd>+<kbd>L1</kbd></td>
