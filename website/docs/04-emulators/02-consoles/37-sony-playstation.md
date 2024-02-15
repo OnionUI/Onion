@@ -7,7 +7,7 @@ slug: /emulators/psx
 <img src="https://user-images.githubusercontent.com/44569252/188292823-4d971dd0-9c8a-4c99-a132-db16416e352a.png" align="right" width="240" />
 
 - Alias: *PS*, *PS1*, *PSX*
-- Emulator: **lr-pcsx-rearmed**
+- Emulator: **lr-pcsx-rearmed**, km_duckswanstation_xtreme_amped
 - Rom Folder: `PS`
 - Extensions: `.chd` `.pbp` `.bin/.cue` `.img` `.mdf` `.toc` `.cbn` `.m3u` `.ccd` (must be lowercase)
 - Bios: `PSXONPSP660.bin`, `scph101.bin`, `scph7001.bin`, `scph5501.bin`, `scph1001.bin`
@@ -32,3 +32,7 @@ https://www.youtube.com/watch?v=5DdSP1KxzSE
 - PAL/EUR games run at 50fps, NTSC/USA/JP games run at 60fps. This is by design and as per original hardware.
 
 - Some titles (e.g. Looney Tunes Sheep Rider, Jedi Power Battles, and 2xtreme/espn extreme games) need to have `SMC Checks` disabled or games will eventually slow down and crash. Go to RetroArch Quick Menu (<kbd>MENU</kbd>+<kbd>SELECT</kbd> while in-game), select `Options` and toggle on `(Speed Hack) Disable SMC Checks`.  
+
+## Notes on Duckstation/SwanStation
+
+Duckstation is a core from Expert section compiled by KMFD. It is slower than PCSX, however it allows to run some games like [Fromage](https://www.reddit.com/r/MiyooMini/comments/190avun/swanstation_fromage/). Could be interesting on rhythm games too.
