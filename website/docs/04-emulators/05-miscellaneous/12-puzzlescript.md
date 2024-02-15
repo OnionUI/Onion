@@ -18,4 +18,4 @@ Like Pico-8, Lowres NX, MicroW8 or LÖVE, [PuzzleScript](https://www.puzzlescrip
 All games are free an open source. 
 They have [an official game list here](https://www.puzzlescript.net/Gallery/index.html) but has also a real community which create many puzzles so you can find other games [here](https://philschatz.com/puzzlescript/) and on other places over the web ! 
 
-To add a game you need to dump its sources in a .pz file, it's well explained [here](https://github.com/nwhitehead/pzretrohttps://github.com/nwhitehead/pzretro). 
+To add a game you need to dump its sources in a .pz file, it's well explained [here](https://github.com/nwhitehead/pzretro). 

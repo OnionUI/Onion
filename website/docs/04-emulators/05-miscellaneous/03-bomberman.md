@@ -1,5 +1,5 @@
 ---
-slug: /emulators/pico-8
+slug: /emulators/bomberman
 ---
 
 # Bomberman / Mr.Boom ✔

@@ -4,6 +4,8 @@ slug: /emulators/chailove
 
 # chailove ⚠
 
+<img src="https://raw.githubusercontent.com/OnionUI/Onion/main/static/build/Icons/Default/rapp/chai.png" align="right" width="240" />
+
 - Emulator: **lr-chailove**
 - Rom Folder: `CHAI`
 - Extensions: `.chailove `

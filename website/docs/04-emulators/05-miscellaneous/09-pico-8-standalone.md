@@ -2,7 +2,7 @@
 slug: /emulators/pico-8-standalone
 description: PICO-8 Standalone by XK9274
 ---
-# Pico-8 Standalone ✔
+# Pico-8 Standalone ⚠
 
 <img src="https://user-images.githubusercontent.com/44569252/188293050-691f7376-544e-4275-a612-bb042576dbe3.png" align="right" width="240" />
 
