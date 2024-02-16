@@ -24,9 +24,18 @@ import DocCardList from '@theme/DocCardList';
 
 - **Experimental systems** are marked with ⚠
 
-  These are found in the "Expert" section of Package Manager and will be installed in the `Expert` tab (hidden by default). The `Expert` tab can be accessed by installing the `Expert` shortcut or by enabling it via `Apps` › `Tweaks` › `User interface` › `Show expert mode`.
+  These are found in the "Expert" section of [Package Manager](apps/package-manager) and will be installed in the `Expert` tab (hidden by default).
+  
+  The `Expert` tab is not displayed by default, it can be accessed by installing the `Expert` shortcut from [Package Manager](apps/package-manager) or by enabling it via [Tweaks apps](apps/tweaks#show-expert-mode) (`User interface` › `Show expert mode`).
 
-  > **Note:** These may require additional learning, files and configuration by the user to get working. Some may have performance or compatibility issues, please research and refer to the libretro core documentation.
+  > **Note:**  
+  A system is in expert section when :
+  - Its integration is not perfect in Onion (no automatic save states, not compatible with Game Switcher, different shortcuts...). It is the case of most standalone emulators (like ScummVM standalone or PCSX-ReArmed standalone which are very good but with their own shortcuts).
+  - When it's slow.
+  - When it's not tested.
+  - When there's already a verified (better or as good) emulator compatible with the same roms.
+
+These expert emulators may require additional learning, files and configuration by the user to get working. Some may have performance or compatibility issues, please research and refer to the libretro core documentation.
 
 
 ### Bios files
