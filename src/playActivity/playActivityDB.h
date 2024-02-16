@@ -149,21 +149,33 @@ int play_activity_get_total_play_time(void)
     return total_play_time;
 }
 
-PlayActivities *play_activity_find_all(void)
+PlayActivities *play_activity_find_all(bool include_hidden)
 {
     PlayActivities *play_activities = NULL;
-    char *sql =
-        "SELECT * FROM ("
-        "    SELECT rom.id, rom.type, rom.name, rom.file_path, "
-        "           COUNT(play_activity.ROWID) AS play_count_total, "
-        "           SUM(play_activity.play_time) AS play_time_total, "
-        "           SUM(play_activity.play_time)/COUNT(play_activity.ROWID) AS play_time_average, "
-        "           datetime(MIN(play_activity.created_at), 'unixepoch') AS first_played_at, "
-        "           datetime(MAX(play_activity.created_at), 'unixepoch') AS last_played_at "
-        "    FROM rom LEFT JOIN play_activity ON rom.id = play_activity.rom_id "
-        "    GROUP BY rom.id) "
-        "WHERE play_time_total > 60 "
-        "ORDER BY play_time_total DESC;";
+    char *sql = include_hidden
+                    ? "SELECT * FROM ("
+                      "    SELECT rom.id, rom.type, rom.name, rom.file_path, rom.image_path, "
+                      "           COUNT(play_activity.ROWID) AS play_count_total, "
+                      "           SUM(play_activity.play_time) AS play_time_total, "
+                      "           SUM(play_activity.play_time)/COUNT(play_activity.ROWID) AS play_time_average, "
+                      "           datetime(MIN(play_activity.created_at), 'unixepoch') AS first_played_at, "
+                      "           datetime(MAX(play_activity.created_at), 'unixepoch') AS last_played_at "
+                      "    FROM rom LEFT JOIN play_activity ON rom.id = play_activity.rom_id "
+                      "    GROUP BY rom.id) "
+                      "WHERE play_time_total > 60 "
+                      "ORDER BY play_time_total DESC;"
+                    : "SELECT * FROM ("
+                      "    SELECT rom.id, rom.type, rom.name, rom.file_path, rom.image_path, "
+                      "           COUNT(play_activity.ROWID) AS play_count_total, "
+                      "           SUM(play_activity.play_time) AS play_time_total, "
+                      "           SUM(play_activity.play_time)/COUNT(play_activity.ROWID) AS play_time_average, "
+                      "           datetime(MIN(play_activity.created_at), 'unixepoch') AS first_played_at, "
+                      "           datetime(MAX(play_activity.created_at), 'unixepoch') AS last_played_at "
+                      "    FROM rom LEFT JOIN play_activity ON rom.id = play_activity.rom_id "
+                      "    WHERE hidden = 0"
+                      "    GROUP BY rom.id) "
+                      "WHERE play_time_total > 60 "
+                      "ORDER BY play_time_total DESC;";
     sqlite3_stmt *stmt;
 
     play_activity_db_open();
@@ -545,7 +557,7 @@ void play_activity_list_all(void)
 {
     print_debug("\n:: play_activity_list_all()");
     int total_play_time = play_activity_get_total_play_time();
-    PlayActivities *pas = play_activity_find_all();
+    PlayActivities *pas = play_activity_find_all(true);
 
     printf("\n");
 
@@ -566,4 +578,8 @@ void play_activity_list_all(void)
     free_play_activities(pas);
 }
 
+void play_activity_hide(int rom_id)
+{
+    play_activity_db_execute(sqlite3_mprintf("UPDATE rom SET hidden = 1 WHERE id = %d;", rom_id));
+}
 #endif // PLAY_ACTIVITY_DB_H
