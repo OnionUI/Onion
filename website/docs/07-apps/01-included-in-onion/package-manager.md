@@ -35,19 +35,23 @@ Removing an emulator or an app will not remove the associated roms and data.
 If you install an item from the `Expert` section, you'll need to display the expert section in [Tweaks app](tweaks#show-recent) -> `Appearance` -> `Show expert mode`
 :::
 
+:::info
+Since Onion 4.3.0, Package Manager allows to auto select emulators that has roms present: a cartridge icon is visible on emulators with roms present. To select automatically all the emulators with roms press <kbd>X</kbd> to toggle the selection (none, auto, all)
+:::
+
 ### controls
 
 
-| Button | Function                                                 |
-| ------ | -------------------                                      |
-| <kbd>D-pad</kbd>  | Navigate & Check/uncheck                      |
-| <kbd>A</kbd>      | Check/uncheck the current item                |
-| <kbd>B</kbd>      | Quit                                          |
-| <kbd>X</kbd>      | Check/uncheck everything in the current tab   |
-| <kbd>Y</kbd>      | Reset all the current modification            |
-| <kbd>L1/R1</kbd>  | Previous/Next tab                             |
-| <kbd>L2/R2</kbd>  | Previous/Next item page                       |
-| <kbd>Start</kbd>  | Install summary / validate the modifications  |
+| Button | Function                                                                               |
+| ------ | -------------------                                                                    |
+| <kbd>D-pad</kbd>  | Navigate & Check/uncheck                                                    |
+| <kbd>A</kbd>      | Check/uncheck the current item                                              |
+| <kbd>B</kbd>      | Quit                                                                        |
+| <kbd>X</kbd>      | Check  / uncheck everything /check emulators with roms in the current tab   |
+| <kbd>Y</kbd>      | Reset all the current modification                                          |
+| <kbd>L1/R1</kbd>  | Previous/Next tab                                                           |
+| <kbd>L2/R2</kbd>  | Previous/Next item page                                                     |
+| <kbd>Start</kbd>  | Install summary / validate the modifications                                |
 
 
 
