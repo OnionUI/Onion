@@ -355,7 +355,7 @@ int confirmDialog(const char *message)
 //
 void deleteIndex(int index)
 {
-    log_debug("hiding play activity for %s\n", play_activities->play_activity[index]->rom->name);
+    printf_debug("hiding play activity for %s\n", play_activities->play_activity[index]->rom->name);
     play_activity_hide(play_activities->play_activity[index]->rom->id);
     play_activities->count--;
 
@@ -386,7 +386,7 @@ int main(int argc, char *argv[])
     SDL_Rect rectMileage = {484, 8, 170, 42};
 
     int num_pages, play_time_total;
-    char num_pages_str[25];
+    char num_entries_str[25];
     char play_time_total_formatted[STR_MAX];
     while (!quit) {
         if (reload_list) {
@@ -469,8 +469,8 @@ int main(int argc, char *argv[])
 
         SDL_BlitSurface(background, NULL, screen, NULL);
 
-        sprintf(num_pages_str, "%d/%d", current_page * NUM_ROWS + selected + 1, play_activities->count);
-        renderTextAlignRight(num_pages_str, font30, color_white, &rectPages);
+        sprintf(num_entries_str, "%d/%d", current_page * NUM_ROWS + selected + 1, play_activities->count);
+        renderTextAlignRight(num_entries_str, font30, color_white, &rectPages);
 
         renderText(play_time_total_formatted, font30, color_white, &rectMileage);
 
