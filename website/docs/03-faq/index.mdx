@@ -668,7 +668,33 @@ After the boot, the first binary launched from the SD card by the firmware is th
 
 </details>
 
+<details><summary>
 
+### How to <u>overclock</u> my Miyoo Mini?
+
+</summary>
+
+Since Onion 4.2.0, overclock is possible. The speed improvement can be very noticable (up to 20%).
+
+For now the overclock feature is manual.
+
+Onion's overclock works with `cpuclock.txt` text files.
+Retroarch will check the presence of this file in the core config folder first, then the RA root folder.
+The content of cpuclock.txt is simply a 4-digit number(MHz).
+
+The max speed overclock speed are :
+
+    For the Miyoo Mini : 1700Mhz (1600 recommended for optimal stability)
+    For the Miyoo Mini Plus : 1900Mhz (1800 recommended for optimal stability)
+
+For example, if you want to improve the PSX speed with PCSX-ReARMed (which can allow to enable *enhanced resolution* on many additional games) you can create a `cpuclock.txt` file in `Saves/CurrentProfile/config/PCSX-ReARMed` folder with the value `1600` inside.
+
+> Notes:  
+> Do not use values above the recommend ones. It could impact the stability of your device or damage your device.
+
+https://youtu.be/2ptdAy3nZ8Y
+
+</details>
 
 
 

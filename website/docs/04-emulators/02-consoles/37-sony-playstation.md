@@ -31,10 +31,12 @@ Concerning multidisc games :
 
 ## Notes on performance
 
+- Most of PSX games run at 60 FPS natively on the Miyoo Mini. For most demanding games you'll find solutions here to run it at full speed.
 - Rewind and Fast Forward capability should be disabled while playing PSX as performance may suffer greatly. 
 - PAL/EUR games run at 50fps, NTSC/USA/JP games run at 60fps. This is by design and as per original hardware.
 - Some titles (e.g. Looney Tunes Sheep Rider, Jedi Power Battles, and 2xtreme/espn extreme games) need to have `SMC Checks` disabled or games will eventually slow down and crash. Go to RetroArch Quick Menu (<kbd>MENU</kbd>+<kbd>SELECT</kbd> while in-game), select `Options` and toggle on `(Speed Hack) Disable SMC Checks`.  
 - PCSX-ReARMed standalone offer better performances than the default RetroArch core (see below for details)
+- overclocking is also an excellent way to improve PCSX-ReARMed performances on most demanding games. [More information in the FAQ](../faq#how-to-overclock-my-miyoo-mini). 
 
 ## Notes on PCSX-ReARMed standalone
 
