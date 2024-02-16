@@ -40,7 +40,7 @@ Onion Battery Tool will allow you to see a little more than the last 24h of use 
 [Activity Tracker source code](https://github.com/OnionUI/Onion/tree/main/src/batteryMonitorUI).
 
 
-## Key points to note:
+## Key points to note
 
 It remains device-independent, even if you switch SD cards to another device. It also continue to monitor if the user switch profile.
 
@@ -49,6 +49,6 @@ The log database only adds/update a new entry only when a significant battery in
 It performs a final update upon detecting a SIGTERM or a change in the charging state.
 The log database follows a FILO (First-In, Last-Out) management strategy to limit its size.
 
-## Limitations:
+## Limitations
 
 Due to the battery-friendly nature of batmon, there may be up to a 5-minute delay in the graph compared to the real battery state. It is not really noticeable.
