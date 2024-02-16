@@ -1,6 +1,6 @@
 #include "./playActivityUI.h"
-#include <pthread.h>
 
+// one day we'll have resolution independence
 #define RENDER_WIDTH 640
 #define RENDER_HEIGHT 480
 #define RENDER_DEPTH 32
@@ -46,7 +46,7 @@ static SDL_Color color_white = {255, 255, 255};
 static SDL_Color color_purple = {136, 97, 252};
 static SDL_Color color_grey = {117, 123, 156};
 static SDL_Color color_lightgrey = {214, 223, 246};
-static SDL_Color color_message = {0x68, 0x68, 0x68};
+static SDL_Color color_message = {104, 104, 104};
 
 static bool show_raw_names = false;
 static int selected = 0;
@@ -111,6 +111,7 @@ int _renderText(const char *text, TTF_Font *font, SDL_Color color, SDL_Rect *rec
     SDL_Surface *textSurface = TTF_RenderUTF8_Blended(font, text, color);
     if (textSurface != NULL) {
         text_width = textSurface->w;
+
         if (right_align)
             SDL_BlitSurface(textSurface, NULL, screen, &(SDL_Rect){rect->x - textSurface->w, rect->y, rect->w, rect->h});
         else
@@ -170,7 +171,7 @@ void renderPage(int current_page, int num_pages)
     if (last_page != current_page) {
         last_page = current_page;
 
-        // if we are on the last page and it has less than NUM_ROWS, we might need to adjust the selected index
+        // if we are on the last page and it has less than NUM_ROWS entries, we might need to adjust the selected index
         if (current_page == num_pages - 1 && selected >= (play_activities->count % NUM_ROWS == 0 ? NUM_ROWS : play_activities->count % NUM_ROWS))
             selected = (play_activities->count - 1) % NUM_ROWS;
     }
@@ -207,6 +208,7 @@ void renderPage(int current_page, int num_pages)
             strncpy(rom_name, rom->name, STR_MAX - 1);
         else
             file_cleanName(rom_name, rom->name);
+
         renderText(rom_name, includeCJK(rom_name) ? fontCJKRomName25 : font30, color_white, &(SDL_Rect){num_width + 100, 75 + ROW_HEIGHT * row, 400, 40});
 
         str_serializeTime(total, entry->play_time_total);
@@ -221,6 +223,11 @@ void renderPage(int current_page, int num_pages)
     }
 }
 
+//
+// Create a textbox surface with the provided message
+// The message will be split into lines at newline characters
+// Lines longer than max_width will be truncated
+//
 SDL_Surface *textboxSurface(const char *message, TTF_Font *font,
                             SDL_Color fg, int max_width)
 {
@@ -276,6 +283,10 @@ SDL_Surface *textboxSurface(const char *message, TTF_Font *font,
     return textbox;
 }
 
+//
+// Display a confirmation dialog with the provided message
+// Stolen from theme_renderDialog but without theming
+//
 int confirmDialog(const char *message)
 {
     SDL_Surface *transparent_bg = SDL_CreateRGBSurface(
@@ -350,8 +361,7 @@ int confirmDialog(const char *message)
 }
 
 //
-// Delete the play activity for the selected index
-// Maybe we shouldn't delete but just mark it as deleted/hidden?
+// Delete (hide) the play activity for the provided index
 //
 void deleteIndex(int index)
 {
@@ -388,27 +398,8 @@ int main(int argc, char *argv[])
     int num_pages, play_time_total;
     char num_entries_str[25];
     char play_time_total_formatted[STR_MAX];
+
     while (!quit) {
-        if (reload_list) {
-            SDL_BlitSurface(background, NULL, screen, NULL);
-
-            play_activities = play_activity_find_all(false);
-            printf_debug("found %d roms\n", play_activities->count);
-
-            num_pages = (int)ceil((double)play_activities->count / (double)NUM_ROWS);
-
-            renderPage(current_page, num_pages);
-
-            play_time_total = play_activities->play_time_total;
-
-            str_serializeTime(play_time_total_formatted, play_time_total);
-            renderText(play_time_total_formatted, font30, color_white, &rectMileage);
-
-            SDL_BlitSurface(screen, NULL, video, NULL);
-            SDL_Flip(video);
-            reload_list = false;
-        }
-
         if (keys_enabled && updateKeystate(keystate, &quit, true, NULL)) {
             if (keystate[SW_BTN_B] == PRESSED)
                 quit = true;
@@ -451,17 +442,31 @@ int main(int argc, char *argv[])
             if (keystate[SW_BTN_X] == PRESSED && play_activities->count > 0) {
                 // delete selected
                 int index = current_page * NUM_ROWS + selected;
-                char *message = malloc(STR_MAX);
-                if (message == NULL) {
-                    perror("malloc");
-                    continue;
-                }
+                char message[STR_MAX];
                 snprintf(message, STR_MAX, "Delete the play activity for\n%s", play_activities->play_activity[index]->rom->name);
                 if (confirmDialog(message))
                     deleteIndex(index);
-
-                free(message);
             }
+        }
+
+        if (reload_list) {
+            SDL_BlitSurface(background, NULL, screen, NULL);
+
+            play_activities = play_activity_find_all(false);
+            printf_debug("found %d roms\n", play_activities->count);
+
+            num_pages = (int)ceil((double)play_activities->count / (double)NUM_ROWS);
+
+            renderPage(current_page, num_pages);
+
+            play_time_total = play_activities->play_time_total;
+
+            str_serializeTime(play_time_total_formatted, play_time_total);
+            renderText(play_time_total_formatted, font30, color_white, &rectMileage);
+
+            SDL_BlitSurface(screen, NULL, video, NULL);
+            SDL_Flip(video);
+            reload_list = false;
         }
 
         if (!changed)
