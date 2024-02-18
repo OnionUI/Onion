@@ -310,7 +310,7 @@ AppState *init()
 
     log_setName("playActivityUI");
     print_debug("Debug logging enabled");
-
+    getDeviceModel();
     SDL_InitDefault(true);
 
     renderLoadingText();
@@ -359,13 +359,8 @@ int main()
 
         handleKeys(st);
 
-        if (battery_hasChanged(0, &st->battery_percentage)) {
+        if (battery_hasChanged(0, &st->battery_percentage))
             st->battery_changed = true;
-            printf("Battery changed: %d\n", st->battery_percentage);
-        }
-        else {
-            printf("Battery not changed: %d\n", st->battery_percentage);
-        }
 
         // happens on first run and when toggling clean names
         if (st->list_content_changed)
