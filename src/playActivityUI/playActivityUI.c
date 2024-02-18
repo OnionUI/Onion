@@ -6,6 +6,7 @@
 
 #include "../playActivity/playActivityDB.h"
 #include "components/list.h"
+#include "system/battery.h"
 #include "system/keymap_sw.h"
 #include "system/settings.h"
 #include "theme/sound.h"
@@ -25,7 +26,6 @@ typedef struct {
     SDL_Surface *default_image;
     bool default_image_loaded;
     SDL_Surface *footer;
-    SDL_Surface *header;
 } UIResources;
 
 typedef struct {
@@ -39,6 +39,8 @@ typedef struct {
     bool list_content_changed;
     bool footer_changed;
     bool key_changed;
+    bool battery_changed;
+    int battery_percentage;
     int tmp_active_pos;
     int tmp_scroll_pos;
     UIResources *res;
@@ -120,7 +122,7 @@ void createActivityList(AppState *st)
         str_serializeTime(total, entry->play_time_total);
         str_serializeTime(average, entry->play_time_average);
         snprintf(plays, 24, "%d", entry->play_count);
-        snprintf(rom_description, STR_MAX, "TOTAL %s AVG %s PLAYS %s", total, average, plays);
+        snprintf(rom_description, STR_MAX, "%s ~ %s / %s plays", total, average, plays);
 
         ListItem item = {
             .item_type = PLAYACTIVITY,
@@ -151,8 +153,6 @@ void freeResources(AppState *st)
     SDL_FreeSurface(st->res->default_image);
     if (st->res->footer)
         SDL_FreeSurface(st->res->footer);
-    if (st->res->header)
-        SDL_FreeSurface(st->res->header);
     list_free(&st->activity_list, st->res->default_image);
     free_play_activities(st->play_activities);
     free(st->res);
@@ -291,19 +291,6 @@ void renderLoadingText()
 }
 
 //
-// Render the total playtime on the header
-//
-void renderCustomHeaderInfo(AppState *st)
-{
-    char total_playtime_str[STR_MAX];
-    str_serializeTime(total_playtime_str, st->play_activities->play_time_total);
-    SDL_Surface *total_playtime = TTF_RenderUTF8_Blended(resource_getFont(HINT), total_playtime_str, theme()->hint.color);
-    SDL_Rect total_playtime_rect = {RENDER_WIDTH - total_playtime->w - 30, 0 + st->res->header->h / 2 - total_playtime->h / 2 - 3};
-    SDL_BlitSurface(total_playtime, NULL, screen, &total_playtime_rect);
-    SDL_FreeSurface(total_playtime);
-}
-
-//
 // Render current/total number of items on the footer
 //
 void renderCustomFooterInfo(AppState *st)
@@ -311,7 +298,7 @@ void renderCustomFooterInfo(AppState *st)
     char total_items_str[STR_MAX];
     snprintf(total_items_str, STR_MAX, "%d/%d", st->activity_list.active_pos + 1, st->activity_list.item_count);
     SDL_Surface *total_items = TTF_RenderUTF8_Blended(resource_getFont(HINT), total_items_str, theme()->hint.color);
-    SDL_Rect total_items_rect = {RENDER_WIDTH / 2 - total_items->w / 2, RENDER_HEIGHT - st->res->footer->h / 2 - total_items->h / 2};
+    SDL_Rect total_items_rect = {RENDER_WIDTH - total_items->w - 20, RENDER_HEIGHT - st->res->footer->h / 2 - total_items->h / 2};
     SDL_BlitSurface(total_items, NULL, screen, &total_items_rect);
     SDL_FreeSurface(total_items);
 }
@@ -344,18 +331,7 @@ AppState *init()
         exit(EXIT_FAILURE);
     }
     st->all_changed = st->list_content_changed = true;
-
-    // load custom images if available
-    char header_path[STR_MAX];
-    if (theme_getImagePath(theme()->path, "extra/at-top-bar", header_path)) {
-        st->res->header = IMG_Load(header_path);
-        if (!st->res->header)
-            printf("Error loading footer image: %s\n", IMG_GetError());
-    }
-    else {
-        st->res->header = NULL;
-    }
-
+    // load custom footer if available
     char footer_path[STR_MAX];
     if (theme_getImagePath(theme()->path, "extra/at-bottom-bar", footer_path)) {
         st->res->footer = IMG_Load(footer_path);
@@ -383,20 +359,25 @@ int main()
 
         handleKeys(st);
 
+        if (battery_hasChanged(0, &st->battery_percentage)) {
+            st->battery_changed = true;
+            printf("Battery changed: %d\n", st->battery_percentage);
+        } else {
+            printf("Battery not changed: %d\n", st->battery_percentage);
+        }
+
         // happens on first run and when toggling clean names
         if (st->list_content_changed)
             createActivityList(st);
 
-        if (st->header_changed || st->all_changed) {
+        if (st->header_changed || st->battery_changed || st->all_changed) {
             START_TIMER(tm_renderHeader);
-
-            if (st->res->header) {
-                SDL_BlitSurface(st->res->header, NULL, screen, NULL);
-                renderCustomHeaderInfo(st);
-            }
-            else
-                theme_renderHeader(screen, "Activity Tracker", false);
-
+            char total_str[25] = "Total: ";
+            char total[25];
+            str_serializeTime(total, st->play_activities->play_time_total);
+            strcat(total_str, total);
+            theme_renderHeader(screen, total_str, false);
+            theme_renderHeaderBattery(screen, st->battery_percentage);
             END_TIMER(tm_renderHeader);
         }
 
@@ -421,7 +402,7 @@ int main()
             }
             else {
                 theme_renderFooter(screen);
-                theme_renderStandardHint(screen, "Delete", "Exit");
+                theme_renderStandardHint(screen, "DELETE", "EXIT");
                 theme_renderFooterStatus(screen, st->activity_list.active_pos + 1, st->activity_list.item_count);
             }
 
@@ -429,11 +410,11 @@ int main()
         }
 
         // if anything changed, update the screen
-        if (st->list_changed || st->header_changed || st->footer_changed || st->all_changed) {
+        if (st->list_changed || st->header_changed || st->footer_changed || st->all_changed || st->battery_changed) {
             print_debug("Blitting");
             SDL_BlitSurface(screen, NULL, video, NULL);
             SDL_Flip(video);
-            st->list_changed = st->header_changed = st->footer_changed = st->all_changed = false;
+            st->list_changed = st->header_changed = st->footer_changed = st->all_changed = st->battery_changed = false;
         }
         if (first) {
             first = false;
