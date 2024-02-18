@@ -362,7 +362,8 @@ int main()
         if (battery_hasChanged(0, &st->battery_percentage)) {
             st->battery_changed = true;
             printf("Battery changed: %d\n", st->battery_percentage);
-        } else {
+        }
+        else {
             printf("Battery not changed: %d\n", st->battery_percentage);
         }
 
