@@ -202,7 +202,7 @@ For the Miyoo Mini Plus (equiped with wifi) Onion offers many additional possibi
 - [Automatic date/time synchronisation](apps/tweaks#set-automatically-via-the-internet) (NTP, via Tweaks app)
 - [Retroachivements](https://www.retroarch.com/?page=achievements)
 - [Scraper](/docs/apps/scraper) : import game covers directly from your MMP
-- [Network Services](network-features) : [Samba/SMB share](network/samba), [http server](network/http), [SSH](network/ssh), [FTP](network/ftp), [Telnet](network/telnet), [Hotspot](network/hotspot)...
+- [Network Services](network-features) : [Samba/SMB share](network/samba), [http server](network/http), [SSH](network/ssh), [FTP](network/ftp), [Telnet](network/telnet), [Hotspot](network/hotspot), [VNC server](network/vnc)...
 :::
 
 
