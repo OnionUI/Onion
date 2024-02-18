@@ -16,9 +16,7 @@ import ThemeCollection, { ThemeCard } from '@site/src/components/ThemeCollection
 
 *Official release notes for Onion V4.3.0*
 
-Greetings, Miyoo Mini enthusiasts!
-
-This feature includes new systems, such as Nintendo DS and PICO-8, a lot of new and updated apps such as the Battery Monitor and the Blue light filter,
+This release includes new systems, such as Nintendo DS and PICO-8, a lot of new and updated apps such as the Battery Monitor and the Blue light filter,
 support for the v4 Miyoo Mini's 560p screen as well as lots of other new features and fixes.
 
 <Truncate />
@@ -227,7 +225,7 @@ An easy way to run scripts at Onion's startup and just before powering off.
 
 <Card readMore="../../docs/emulators/nds">
 
-#### Nintendo DS / DraStic
+#### Nintendo DS / DraStic (new standalone emulator)
 <sup>
 
 by Steward-Fu, integration by @Sichroteph and @schmurtzm
@@ -238,37 +236,22 @@ A very awaited emulator, integrated in Onion with attention : we made it compati
 
 </Card>
 
-<Card readMore="../../docs/emulators/scummvm">
+<Card readMore="../../docs/emulators/pico-8-standalone">
 
-#### ScummVM 2.9.0 Standalone
+#### Pico-8 Wrapper (new standalone emulator)
 <sup>
 
-by @XK9274 and @schmurtzm
+by @XK9274
 
 </sup>
 
-This version of ScummVM 2.9.0 standalone offers awesome performances compared to the RetroArch performances.
+An awesome port of the official Pico-8 engine. It offers an optimal compatibility and the native Pico-8 online store called "Splore". (In order to use the wrapper, you need to have previously purchased PICO-8)
 
 </Card>
-
-
-<Card readMore="../../docs/emulators/psx#notes-on-duckstationswanstation">
-
-#### DuckStation Xtreme Amped by KMFD
-<sup>
-
-by @schmurtzm
-
-</sup>
-
-Duckstation is slower than PCSX, however it allows to run some games like [Fromage](https://www.reddit.com/r/MiyooMini/comments/190avun/swanstation_fromage/). Could be interesting on rhythm games too.
-
-</Card>
-
 
 <Card readMore="../../docs/emulators/neogeo#notes-on-gngeo">
 
-#### GnGeo - standalone emulator
+#### GnGeo (new standalone emulator)
 <sup>
 
 By bankbank , @schmurtzm
@@ -279,10 +262,35 @@ GnGeo is an Neo-Geo MVS and Neo-Geo AES standalone emulator. It supports GNO fil
 
 </Card>
 
+<Card readMore="../../docs/emulators/scummvm">
+
+#### ScummVM 2.9.0 Standalone (updated standalone emulator)
+<sup>
+
+by @XK9274 and @schmurtzm
+
+</sup>
+
+This version of ScummVM 2.9.0 standalone offers awesome performances compared to the RetroArch core performances.
+
+</Card>
+
+<Card readMore="../../docs/emulators/psx#notes-on-duckstationswanstation">
+
+#### DuckStation Xtreme Amped by KMFD (new core)
+<sup>
+
+by @schmurtzm
+
+</sup>
+
+Duckstation is slower than PCSX, however it allows to run some games like [Fromage](https://www.reddit.com/r/MiyooMini/comments/190avun/swanstation_fromage/). Could be interesting on rhythm games too.
+
+</Card>
 
 <Card readMore="../../docs/emulators/superbroswar">
 
-#### Super Bros War / Super Cat Wars core
+#### Super Bros War / Super Cat Wars core (new core)
 <sup>
 
 by @schmurtzm
@@ -296,7 +304,7 @@ Super Mario War / Super Cat Wars is a fan-made multiplayer Super Mario Bros.
 
 <Card readMore="../../docs/emulators/lowresnx">
 
-#### LowRes NX in PacMan Expert section
+#### LowRes NX (new core)
 <sup>
 
 by @schmurtzm
@@ -310,7 +318,7 @@ A great 2D game engine with many free games available.
 
 <Card readMore="../../docs/emulators/puzzlescript">
 
-#### PuzzleScript core (71f0346)
+#### PuzzleScript (new core)
 <sup>
 
 by @schmurtzm
@@ -324,21 +332,21 @@ A great core to run many retro puzzles games. Many puzzles available from the Pu
 
 <Card readMore="../../docs/emulators/amiga">
 
-#### PUAE Xtreme Amped
+#### PUAE Xtreme Amped (New core)
 <sup>
 
 by @schmurtzm
 
 </sup>
 
-A new alternative PUAE core made by KMFD. Available in Expert section of Package Manager.
+A new alternative PUAE core made by KMFD. This Commodore core is Available in Expert section of Package Manager.
 
 </Card>
 
 
 <Card readMore="../../docs/emulators/cpc">
 
-#### Caprice32 (CPC)
+#### Caprice32 (new core)
 <sup>
 
 by @schmurtzm
@@ -352,7 +360,7 @@ Captice32 is a core for Amstrad CPC, note that it offers better performances and
 
 <Card readMore="../../docs/emulators/pong">
 
-#### Gong Port
+#### Gong / Pong (new core)
 <sup>
 
 by @schmurtzm
@@ -366,7 +374,7 @@ Gong is a port of Pong game to libretro. This core is included in Ports section 
 
 <Card readMore="../../docs/emulators/c64">
 
-#### Frodo (C64)
+#### Frodo (new core)
 <sup>
 
 by @schmurtzm
@@ -380,14 +388,14 @@ Frodo is an alternative core for Commodore 64.
 
 <Card readMore="../../docs/emulators/turbografx">
 
-#### Beetle PCE
+#### Beetle PCE (new core)
 <sup>
 
 by @schmurtzm
 
 </sup>
 
-"Beetle PCE" slower than "Beetle PCE Fast" but more accurate, full speed at 1900mhz, so more reserved to MMP.
+"Beetle PCE" is a PC Engine core slower than "Beetle PCE Fast" but more accurate.
 
 </Card>
 
@@ -408,14 +416,14 @@ If vice x64 was long to load, this fix could help. Note that using .crt files is
 
 <Card readMore="../../docs/emulators/cpc">
 
-#### Updating CrocoDS (CPC) to f1b4b91 (+keyboard fix)
+#### Update CrocoDS core (f1b4b91) (+keyboard fix)
 <sup>
 
 by @schmurtzm
 
 </sup>
 
-The core has two modifications for Onion :
+This CPC core has two modifications for Onion :
 - [Fix keyboard to QWERTY](https://github.com/libretro/libretro-crocods/issues/18)
 - [Change default internal config path to BIOS folder instead of Retroarch folder.](https://github.com/libretro/libretro-crocods/blob/f1b4b91291ba1e8e7c0be02269cd0d75c7fa71b9/crocods-core/platform.c#L1399)
 
