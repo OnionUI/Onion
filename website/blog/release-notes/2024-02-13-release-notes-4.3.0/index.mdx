@@ -33,33 +33,72 @@ support for the v4 Miyoo Mini's 560p screen as well as lots of other new feature
 
 ### Core Onion features & apps
 
-<Card readMore="../../docs/apps/tweaks#sort-applist-a-z">
 
-#### App list sorting tool
+<Card>
+#### Miyoo Mini v4 560p support
+<sup>
+
+by @tGecko
+
+</sup>
+
+Support for the Miyoo Mini v4 with its 560p screen has been added.  
+The resolution is now automatically and 560p is the default resolution for RetroArch on the v4.
+A system to allow ports to use the new resolution is also in place, but has to be added to the ports manually.
+
+</Card>
+
+<Card readMore="../../docs/apps/tweaks#screen-recorder">
+
+#### Screen recorder
 <sup>
 
 by @XK9274
 
 </sup>
 
-This new tool included in Tweaks app will sort your Onion app list A-Z or Z-A.
+A tool to record the screen, this tool will not offer perfect performance in games, but can be used to record/demonstrate apps and features.
 
 </Card>
 
+<Card readMore="../../docs/apps/tweaks#vnc-screen-share">
 
-<Card readMore="../../docs/apps/package-manager">
-
-#### Automatic selection of emulators in Package Manager
+#### VNC server
 <sup>
 
-by @aemiii91
+by @XK9274
 
 </sup>
 
-Package Manager allows to auto select emulators that has roms present.
+Remote display and remote control of your Miyoo Mini Plus from your computer thanks to VNC.
 
 </Card>
 
+<Card readMore="../../docs/apps/tweaks#blue-light-filter">
+
+#### Blue light filter
+<sup>
+
+by @XK9274
+
+</sup>
+
+Control the blue light filter schedule, intensity, or state.
+
+</Card>
+
+<Card readMore="../../docs/apps/tweaks#pwm-frequency">
+
+#### PWM frequency adjustment
+<sup>
+
+by @tGecko
+
+</sup>
+
+Added an option in Tweaks app to control the backlights PWM frequency. This can help reduce the buzzing sound coming from the speaker.
+
+</Card>
 
 <Card readMore="../../docs/apps/battery-tool">
 
@@ -74,21 +113,57 @@ Onion Battery Tool enables to track and monitor historical battery charge while 
 
 </Card>
 
+<Card readMore="../../docs/faq#what-is-the-optimal-way-to-organize-multi-disk-games">
 
-<Card readMore="../../docs/apps/tweaks#blue-light-filter">
+#### M3U playlist generator
+<sup>
 
-#### Blue light filter
+by @schmurtzm
+
+</sup>
+
+This Tweaks app tool will generate automatically the m3u playlist files for multi-disc games.
+
+</Card>
+
+<Card readMore="../../docs/apps/tweaks#sort-applist-a-z">
+
+#### App list sorting tool
 <sup>
 
 by @XK9274
 
 </sup>
 
-Control the blue light filter schedule, intensity, or state.
-
+This new tool included in Tweaks app will sort your Onion app list A-Z or Z-A.
 
 </Card>
 
+<Card readMore="../../docs/apps/package-manager">
+
+#### Automatic selection of emulators in Package Manager
+<sup>
+
+by @aemiii91
+
+</sup>
+
+Package Manager allows to auto select emulators that has roms present.
+
+</Card>
+
+<Card readMore="../../docs/apps/tweaks#mute-background-music">
+
+#### Mute background music option
+<sup>
+
+by @theUnBurn
+
+</sup>
+
+Mute background music for themes.
+
+</Card>
 
 <Card>
 
@@ -104,63 +179,18 @@ To use it, create the file `SD/.tmp_update/config/.noTimeRestore`
 
 </Card>
 
-<Card readMore="TODO">
+<Card readMore="https://github.com/OnionUI/Onion/pull/1309">
 
 #### Updated Filebrowser to 2.26
 <sup>
 
-by @edmunek
+by @edmunek and @XK9274
 
 </sup>
 
-TODO summary and fix link
+Update Filebrowser to 2.26 to fix CSS issue.
 
 </Card>
-
-
-<Card readMore="../../docs/faq#what-is-the-optimal-way-to-organize-multi-disk-games">
-
-#### M3U playlist generator
-<sup>
-
-by @schmurtzm
-
-</sup>
-
-This Tweaks app tool will generate automatically the m3u playlist files for multidisk games.
-
-</Card>
-
-
-<Card>
-
-#### Miyoo Mini v4 560p support
-<sup>
-
-by @tGecko
-
-</sup>
-
-Support for the Miyoo Mini v4 with its 560p screen has been added.  
-The resolution is now automatically and 560p is the default resolution for RetroArch on the v4.
-A system to allow ports to use the new resolution is also in place, but has to be added to the ports manually.
-
-</Card>
-
-
-<Card readMore="../../docs/apps/tweaks#mute-background-music">
-
-#### Mute background music option
-<sup>
-
-by @theUnBurn
-
-</sup>
-
-Mute background music for themes.
-
-</Card>
-
 
 <Card readMore="">
 
@@ -175,33 +205,6 @@ Themes favorites and rencent lists are now associated to the current profile onl
 
 </Card>
 
-
-<Card readMore="../../docs/apps/tweaks#pwm-frequency">
-
-#### PWM frequency adjustment
-<sup>
-
-by @tGecko
-
-</sup>
-
-Added an option in Tweaks app to control the backlights PWM frequency. This can help reduce the buzzing sound coming from the speaker.
-
-</Card>
-
-
-<Card readMore="../../docs/apps/tweaks#vnc-screen-share">
-
-#### Screen recorder and VNC
-<sup>
-
-by @XK9274
-
-</sup>
-
-Remote display and remote control of your Miyoo Mini Plus from your computer thanks to VNC.
-
-</Card>
 
 
 <Card>
@@ -223,7 +226,7 @@ An easy way to run scripts at Onion's startup and just before powering off.
 
 <Card readMore="../../docs/emulators/nds">
 
-#### DraStic
+#### Nintendo DS / DraStic
 <sup>
 
 by Steward-Fu, integration by @Sichroteph and @schmurtzm
@@ -234,8 +237,7 @@ A very awaited emulator, integrated in Onion with attention : we made it compati
 
 </Card>
 
-
-<Card readMore="../../docs/emulators/nds">
+<Card readMore="../../docs/emulators/scummvm">
 
 #### ScummVM 2.9.0 Standalone
 <sup>
@@ -375,7 +377,7 @@ Frodo is an alternative core for Commodore 64.
 </Card>
 
 
-<Card readMore="TODO">
+<Card readMore="../../docs/emulators/turbografx">
 
 #### Beetle PCE
 <sup>
