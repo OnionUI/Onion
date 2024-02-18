@@ -6,7 +6,7 @@ slug: /emulators/scummvm
 
 <img src="https://user-images.githubusercontent.com/44569252/188293068-a2814bb4-6c1a-4097-98a7-5a3a8e3af279.png" align="right" width="240" />
 
-- Emulator: **lr-scummvm**
+- Emulator: **lr-scummvm**, ScummVM Standalone
 - Rom Folder: `SCUMMVM`
 - Extensions: `.target`
 
@@ -29,4 +29,8 @@ We recommend sourcing original `.sou` audio files for `Full Throttle`, `The Dig`
 
 On demanding games like Grim Fandango, you can adjust "Target FPS for stutter reduction" in core options to 25 or 15 (baphomet 2.5 works fine with 25 for example).
 
-Do not hesitate to test the standalone version of ScummVM in "expert" section of Package Manager, this one offers impressive performances (Grim, Monkey Island 4 or Blade Runner works perfectly but the standalone version will not be compatible with the Game Switcher and auto save states).
+
+:::note
+ScummVM Standalone (not a RetroArch core but the classical emulator) can be found in the "Expert" section of [Package Manager](../apps/package-manager). It offers much improved performances (Grim, Monkey Island 4 or Blade Runner works perfectly).
+However its integration in Onion is not perfect : no automatic save states, no resume at boot , different shortcuts...
+:::
