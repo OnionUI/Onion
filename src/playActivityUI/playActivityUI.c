@@ -25,6 +25,7 @@ typedef struct {
     SDL_Surface *default_image;
     bool default_image_loaded;
     SDL_Surface *footer;
+    SDL_Surface *header;
 } UIResources;
 
 typedef struct {
@@ -123,7 +124,7 @@ void createActivityList(AppState *st)
 
         ListItem item = {
             .item_type = PLAYACTIVITY,
-            .payload_ptr = entry,
+            // .payload_ptr = entry,
             .icon_ptr = loadRomImage(st, image_path)};
 
         strncpy(item.description, rom_description, sizeof(item.description) - 1);
@@ -148,7 +149,10 @@ void createActivityList(AppState *st)
 void freeResources(AppState *st)
 {
     SDL_FreeSurface(st->res->default_image);
-    SDL_FreeSurface(st->res->footer);
+    if (st->res->footer)
+        SDL_FreeSurface(st->res->footer);
+    if (st->res->header)
+        SDL_FreeSurface(st->res->header);
     list_free(&st->activity_list, st->res->default_image);
     free_play_activities(st->play_activities);
     free(st->res);
@@ -164,6 +168,8 @@ bool deletePlayActivity(AppState *st)
     if (st->activity_list.item_count == 0)
         return false;
 
+    sound_change();
+
     // draw confirmation dialog
     START_TIMER(tm_delete_dialog)
     char message[STR_MAX];
@@ -172,14 +178,13 @@ bool deletePlayActivity(AppState *st)
     theme_renderDialog(screen, "Remove Play Activity?", message, true);
     SDL_BlitSurface(screen, NULL, video, NULL);
     SDL_Flip(video);
-    sound_change();
     END_TIMER(tm_delete_dialog)
 
     // wait for user input
     while (!quit) {
         if (updateKeystate(st->keystate, &quit, true, NULL)) {
             if (st->keystate[SW_BTN_A] == PRESSED) {
-                // delete the play activity
+                // delete the play activity for the selected rom
                 START_TIMER(tm_delete_item)
                 st->tmp_active_pos = st->activity_list.active_pos - 1 < 0 ? 0 : st->activity_list.active_pos - 1;
                 play_activity_hide(st->play_activities->play_activity[st->activity_list.active_pos]->rom->id);
@@ -235,7 +240,7 @@ void handleKeys(AppState *st)
             st->footer_changed = st->key_changed = list_keyUp(&st->activity_list, st->keystate[SW_BTN_UP] == REPEATING);
         else if (st->play_activities->count > 0 && st->keystate[SW_BTN_X] == PRESSED && st->res->footer)
             st->key_changed = deletePlayActivity(st);
-        else if (st->play_activities->count > 0 && st->keystate[SW_BTN_A] == PRESSED && !st->res->footer)
+        else if (st->play_activities->count > 0 && st->keystate[SW_BTN_A] == PRESSED && !st->res->footer) // no footer means no X hint, so A is the delete option. not sure if good idea
             st->key_changed = deletePlayActivity(st);
         else if (st->play_activities->count > 0 && st->keystate[SW_BTN_Y] == PRESSED)
             st->key_changed = toggleCleanNames(st);
@@ -286,23 +291,27 @@ void renderLoadingText()
 }
 
 //
-// Render the total playtime and current/total number of items
+// Render the total playtime on the header
 //
-void renderCustomFooterInfo(AppState *st)
+void renderCustomHeaderInfo(AppState *st)
 {
-    // play time
     char total_playtime_str[STR_MAX];
     str_serializeTime(total_playtime_str, st->play_activities->play_time_total);
     SDL_Surface *total_playtime = TTF_RenderUTF8_Blended(resource_getFont(HINT), total_playtime_str, theme()->hint.color);
-    SDL_Rect total_playtime_rect = {190, RENDER_HEIGHT - st->res->footer->h / 2 - total_playtime->h / 2};
+    SDL_Rect total_playtime_rect = {RENDER_WIDTH - total_playtime->w - 30, 0 + st->res->header->h / 2 - total_playtime->h / 2 - 3};
     SDL_BlitSurface(total_playtime, NULL, screen, &total_playtime_rect);
     SDL_FreeSurface(total_playtime);
+}
 
-    // current/total items
+//
+// Render current/total number of items on the footer
+//
+void renderCustomFooterInfo(AppState *st)
+{
     char total_items_str[STR_MAX];
     snprintf(total_items_str, STR_MAX, "%d/%d", st->activity_list.active_pos + 1, st->activity_list.item_count);
     SDL_Surface *total_items = TTF_RenderUTF8_Blended(resource_getFont(HINT), total_items_str, theme()->hint.color);
-    SDL_Rect total_items_rect = {400, RENDER_HEIGHT - st->res->footer->h / 2 - total_items->h / 2};
+    SDL_Rect total_items_rect = {RENDER_WIDTH / 2 - total_items->w / 2, RENDER_HEIGHT - st->res->footer->h / 2 - total_items->h / 2};
     SDL_BlitSurface(total_items, NULL, screen, &total_items_rect);
     SDL_FreeSurface(total_items);
 }
@@ -335,6 +344,17 @@ AppState *init()
         exit(EXIT_FAILURE);
     }
     st->all_changed = st->list_content_changed = true;
+
+    // load custom images if available
+    char header_path[STR_MAX];
+    if (theme_getImagePath(theme()->path, "extra/at-top-bar", header_path)) {
+        st->res->header = IMG_Load(header_path);
+        if (!st->res->header)
+            printf("Error loading footer image: %s\n", IMG_GetError());
+    }
+    else {
+        st->res->header = NULL;
+    }
 
     char footer_path[STR_MAX];
     if (theme_getImagePath(theme()->path, "extra/at-bottom-bar", footer_path)) {
@@ -369,7 +389,14 @@ int main()
 
         if (st->header_changed || st->all_changed) {
             START_TIMER(tm_renderHeader);
-            theme_renderHeader(screen, "Activity Tracker", false);
+
+            if (st->res->header) {
+                SDL_BlitSurface(st->res->header, NULL, screen, NULL);
+                renderCustomHeaderInfo(st);
+            }
+            else
+                theme_renderHeader(screen, "Activity Tracker", false);
+
             END_TIMER(tm_renderHeader);
         }
 
