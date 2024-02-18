@@ -400,7 +400,7 @@ int main()
 
             END_TIMER(tm_renderFooter);
         }
-    
+
         // if anything changed, update the screen
         if (st->list_changed || st->header_changed || st->footer_changed || st->all_changed) {
             print_debug("Blitting");
