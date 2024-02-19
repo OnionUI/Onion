@@ -85,7 +85,7 @@ void play_activity_db_open(void)
     if (!play_activity_db_created) {
         sqlite3_exec(play_activity_db,
                      "DROP TABLE IF EXISTS rom;"
-                     "CREATE TABLE rom(id INTEGER PRIMARY KEY, type TEXT, name TEXT, file_path TEXT, image_path TEXT, created_at INTEGER DEFAULT (strftime('%s', 'now')), updated_at INTEGER);"
+                     "CREATE TABLE rom(id INTEGER PRIMARY KEY, type TEXT, name TEXT, file_path TEXT, image_path TEXT, created_at INTEGER DEFAULT (strftime('%s', 'now')), updated_at INTEGER, deletion_id INTEGER DEFAULT 0);"
                      "CREATE UNIQUE INDEX rom_id_index ON rom(id);",
                      NULL, NULL, NULL);
         sqlite3_exec(play_activity_db,
@@ -172,7 +172,7 @@ PlayActivities *play_activity_find_all(bool include_hidden)
                       "           datetime(MIN(play_activity.created_at), 'unixepoch') AS first_played_at, "
                       "           datetime(MAX(play_activity.created_at), 'unixepoch') AS last_played_at "
                       "    FROM rom LEFT JOIN play_activity ON rom.id = play_activity.rom_id "
-                      "    WHERE hidden = 0"
+                      "    WHERE (rom.deletion_id IS NULL OR play_activity.rowid > rom.deletion_id)"
                       "    GROUP BY rom.id) "
                       "WHERE play_time_total > 60 "
                       "ORDER BY play_time_total DESC;";
@@ -586,6 +586,23 @@ void play_activity_list_all(void)
 
 void play_activity_hide(int rom_id)
 {
-    play_activity_db_execute(sqlite3_mprintf("UPDATE rom SET hidden = 1 WHERE id = %d;", rom_id));
+    print_debug("\n:: play_activity_hide()");
+    sqlite3_stmt *stmt;
+    int deletion_id = -1;
+
+    // get highest play_activity.rowid for given rom_id
+    char *sql = sqlite3_mprintf("SELECT MAX(ROWID) FROM play_activity WHERE rom_id = %d", rom_id);
+
+    play_activity_db_open();
+    stmt = play_activity_db_prepare(sql);
+
+    if (sqlite3_step(stmt) == SQLITE_ROW)
+        deletion_id = sqlite3_column_int(stmt, 0);
+
+    sqlite3_finalize(stmt);
+    play_activity_db_close();
+
+    // update rom deletion_id
+    play_activity_db_execute(sqlite3_mprintf("UPDATE rom SET deletion_id = %d WHERE id = %d;", deletion_id, rom_id));
 }
 #endif // PLAY_ACTIVITY_DB_H
