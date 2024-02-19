@@ -98,7 +98,7 @@ Many formats are supported, after a few tests a little everything below 1080p is
 
 #### How to force 16:9 startup
 
-1. On your SD card, go to the folder `Emu/ffplay/bin`
+1. On your SD card, go to the folder `.tmp_update/bin`
 
 2. Rename the file `ffplay` to `ffplay_4_3`
 

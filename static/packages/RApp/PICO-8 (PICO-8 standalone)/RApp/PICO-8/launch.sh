@@ -31,11 +31,12 @@ fixconfig() {
     set_windowed="windowed 0"
     set_window_position="window_position -1 -1"
     set_frameless="frameless 1"
-    set_fullscreen_method="fullscreen_method 0"
-    set_blit_method="blit_method 2"
+    set_fullscreen_method="fullscreen_method 2"
+    set_blit_method="blit_method 0"
     set_transform_screen="transform_screen 134"
+    set_host_framerate_control="host_framerate_control 0"
 
-    for setting in window_size screen_size windowed window_position frameless fullscreen_method blit_method transform_screen; do
+    for setting in window_size screen_size windowed window_position frameless fullscreen_method blit_method transform_screen host_framerate_control; do
         case $setting in
         window_size) new_value="$set_window_size" ;;
         screen_size) new_value="$set_screen_size" ;;
@@ -45,6 +46,7 @@ fixconfig() {
         fullscreen_method) new_value="$set_fullscreen_method" ;;
         blit_method) new_value="$set_blit_method" ;;
         transform_screen) new_value="$set_transform_screen" ;;
+        host_framerate_control) new_value="$set_host_framerate_control" ;;
         esac
 
         if grep -q "^$setting" "$config_file"; then
@@ -57,17 +59,34 @@ fixconfig() {
     done
 
     echo "Updated settings:"
-    grep -E "window_size|screen_size|windowed|window_position|frameless|fullscreen_method|blit_method|transform_screen" "$config_file"
+    grep -E "window_size|screen_size|windowed|window_position|frameless|fullscreen_method|blit_method|transform_screen|host_framerate_control" "$config_file"
+}
+
+purge_devil() {
+    if pgrep -f "/dev/l" >/dev/null; then
+        echo "Process /dev/l is running. Killing it now..."
+        killall -2 l
+    else
+        echo "Process /dev/l is not running."
+    fi
+
+    # this handles a second startup of pico-8, if /dev/l has already been replaced by disp_init
+    if pgrep -f "disp_init" >/dev/null; then
+        echo "Process disp_init is running. Killing it now..."
+        killall -9 disp_init
+    else
+        echo "Process disp_init is not running."
+    fi
 }
 
 start_pico() {
-
     if [ ! -e "$picodir/bin/pico8_dyn" ]; then
         infoPanel --title "PICO-8 binaries not found" --message "Native PICO-8 engine requires to purchase official \nbinaries which are not provided in Onion. \nGo to Lexaloffle's website, get Raspberry Pi version\n and copy \"pico8_dyn\" and \"pico8.dat\"\n to your SD card in \"/RApp/PICO-8/bin\"."
         cd /mnt/SDCARD/.tmp_update/script
         ./remove_last_recent_entry.sh
         exit
     fi
+    purge_devil
 
     export LD_LIBRARY_PATH="$picodir/lib:$LD_LIBRARY_PATH"
     export SDL_VIDEODRIVER=mmiyoo
@@ -80,20 +99,24 @@ start_pico() {
 
     if [ "$filename" = "~Run PICO-8 with Splore.png" ]; then
         num_files_before=$(ls -1 "$BBS_DIR" | wc -l)
-        LD_PRELOAD="$picodir/lib/libcpt_hook.so" pico8_dyn -splore -preblit_scale 3 -pixel_perfect 0
+        LD_PRELOAD="$picodir/lib/libcpt_hook.so" pico8_dyn -splore -preblit_scale 3
         num_files_after=$(ls -1 "$BBS_DIR" | wc -l)
         if [ "$num_files_before" -ne "$num_files_after" ]; then
             rm -f /mnt/SDCARD/Roms/PICO/PICO_cache6.db
         fi
 
     else
-        LD_PRELOAD="$picodir/lib/libcpt_hook.so" pico8_dyn -preblit_scale 3 -pixel_perfect 0 -run "$rompath"
+        LD_PRELOAD="$picodir/lib/libcpt_hook.so" pico8_dyn -preblit_scale 3 -run "$rompath"
     fi
 }
 
 main() {
     echo performance >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+    sv=$(cat /proc/sys/vm/swappiness)
+    echo 10 >/proc/sys/vm/swappiness
     start_pico
+    disp_init & # re-init mi_disp and push csc in
+    echo $sv >/proc/sys/vm/swappiness
 }
 
 main

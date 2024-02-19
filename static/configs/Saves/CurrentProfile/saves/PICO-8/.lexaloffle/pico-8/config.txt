@@ -19,14 +19,13 @@ show_fps 0 // Draw frames per second in the corner
 windowed 0 // 1 to start up in windowed mode
 window_position -1 -1 // x and y position of window (-1, -1 to let the window manager decide)
 frameless 1 // 1 to use a window with no frame
-fullscreen_method 0 // 0 maximized window (linux)  1 borderless desktop-sized window  2 hardware fullscreen (warning: erratic behaviour under some drivers)
-blit_method 2  // 0 auto  1 software (slower but sometimes more reliable)  2 hardware (can do filtered scaling) 
-
+fullscreen_method 2 // 0 maximized window (linux)  1 borderless desktop-sized window  2 hardware fullscreen (warning: erratic behaviour under some drivers)
+blit_method 0  // 0 auto  1 software (slower but sometimes more reliable)  2 hardware (can do filtered scaling) 
 
 
 // :: System Settings
 
-foreground_sleep_ms 10 // number of milliseconds to sleep each frame. Try 10 to conserve battery power
+foreground_sleep_ms 5 // number of milliseconds to sleep each frame. Try 10 to conserve battery power
 
 background_sleep_ms 10 // number of milliseconds to sleep each frame when running in the background
 
@@ -93,16 +92,16 @@ gui_theme 0
 
 // scale of screenshots and gifs // 2 means 256x256
 screenshot_scale 3
-gif_scale 2
+gif_scale 3
 
 // maximum gif length in seconds (0..120; 0 means no gif recording)
-gif_len 8
+gif_len 16
 
 // when 1, reset the recording when pressing ctrl-9 (useful for creating a non-overlapping sequence)
 gif_reset_mode 0
 
 // 0 for off. 1 for auto. 2 to allow control of a cart's framerate due to host machine's cpu capacity
-host_framerate_control 1
+host_framerate_control 0
 
 // filter splore cartridges
 // 0 off   1 on (exclude cartridge tagged as 'mature' by community)
@@ -124,7 +123,7 @@ allow_function_keys 1
 check_for_cart_updates 1
 
 // 0 off 1 on: allow access to hardware GPIO at 0x5f80..0x5fff (might need to sudo pico8)
-enable_gpio 0
+enable_gpio 1
 
 // hide mouse cursor for n seconds when typing.
 auto_hide_mouse_cursor 5
@@ -145,5 +144,5 @@ periodic_backups 20
 transform_screen 134
 
 // 0 off  > 1: colour to draw pixel grid in the gfx editor at zoom:8 and zoom:4 (16 for black)
-gfx_grid_lines 0
+gfx_grid_lines 16
 
