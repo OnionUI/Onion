@@ -127,8 +127,13 @@ Shortcuts in Onion are managed by an app called `keymon`. This app has no graphi
             <td><em>Always</em></td>
         </tr>
         <tr>
-            <td><kbd>Menu</kbd> + <kbd>B</kbd></td>
+            <td><kbd>Menu</kbd> + <kbd>B</kbd> <sup>hold 2s</sup></td>
             <td>Toggle Blue light filter</td>
+            <td><em>Always</em></td>
+        </tr>
+        <tr>
+            <td><kbd>Menu</kbd> + <kbd>A</kbd> <sup>hold 2s</sup></td>
+            <td>Launch / stop screen recorder</td>
             <td><em>Always</em></td>
         </tr>
         <tr>

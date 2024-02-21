@@ -36,7 +36,7 @@ You'll find it in Tweaks app: [`Appearance` -› `Blue light filter...`](/docs/a
 1. **State** - Shows the current state of Blue Light Filter, can be used too to enable/disable Blue Light Filter now.
 2. **Schedule** - Allow to enable Blue Light Filter automatically during the time interval defined below.
 3. **Strength** - Choose one of the 5 presets available here.
-4 **Time (On)** - Time Blue light filter will be activated
+4. **Time (On)** - Time Blue light filter will be activated
 5. **Time (Off)** - Time Blue light filter will be disabled
 
 :::note
@@ -47,6 +47,6 @@ To use Schedule you'll need a Miyoo Mini Plus with "[Set time automatically via 
 
 | Button          | Function                                 |
 | --------------- | -----------------------------------      |
-| <kbd>Menu</kbd>+<kbd>B</kbd>    | Force enable/disable Blue light filter |
+| <kbd>Menu</kbd>+<kbd>B</kbd> <sup>hold 2s</sup>  | Force enable/disable Blue light filter |
 
 
