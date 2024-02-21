@@ -27,6 +27,8 @@ Drastic is the first standalone emulator (not RetroArch core) which is compatibl
 
 Drastic is compatible with the Miyoo Mini v4 resolution (752 x 560).
 
+For more details about advanced configuration check the [Steward-Fu Drastic Github repository](https://github.com/steward-fu/nds/blob/master/README.mdetting-file-drasticresourcessettingsjson).
+
 ## Hotkeys
 
 ### In game Hotkeys
@@ -81,6 +83,12 @@ Drastic is compatible with the Miyoo Mini v4 resolution (752 x 560).
 
 
 
-## Note
+## Migration from previous Drastic versions
 
-For more details about advanced configuration check the [Steward-Fu Drastic Github repository](https://github.com/steward-fu/nds/blob/master/README.mdetting-file-drasticresourcessettingsjson).
+If you have installed Drastic manually with Steward-Fu version before Onion 4.3.0 then your Drastic installation will be migrated during the installation of Onion 4.3.0.
+All your saves and save states will be automatically moved to `Saves/CurrentProfile/states/Drastic`, the official Drastic version compatible with Onion will be automatically installed and your old manual Drastic installation will be removed. Your roms will not move.
+
+Note that you'll find a backup of your previous NDS installation in `Emu/NDS_old.7z` or `Emu/drastic_old.7z`.
+
+
+
