@@ -18,9 +18,9 @@ Remote display and remote control of your Miyoo Mini Plus from your computer tha
 
 ## Enabling VNC access
 
-You can either use the master toggle to turn the VNC server on with your Right/Left arrows, or press A to enter the submenu.
+You'll find it in Tweaks app: [`Network` -› `VNC: Screen share`](/docs/apps/tweaks#vnc-screen-share).
 
-You'll find it in Tweaks app: [`Network` -› `VNC: Screen share`](/docs/apps/tweaks#vnc-screen-share) and you'll get 2 options:
+You can either use the master toggle to turn the VNC server on with your Right/Left arrows, or press A to enter the submenu and you'll get 2 options:
 
 1. **Enable** - Activate VNC Server
 2. **Framerate** - Set the framerate of the VNC Server between 1 and 20. The higher the framerate, the more CPU will be use.

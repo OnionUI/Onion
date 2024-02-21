@@ -107,7 +107,12 @@ Thanks to `Activity Tracker` app you can :
 - Share your playtimes by taking a screenshot (press <kbd>MENU</kbd>+<kbd>POWER</kbd> - screenshot is saved in `Screenshots` folder).
 :::
 
+## <sup><img src={require('./assets/blue-light-filter.webp').default} style={{width: 54}} /></sup>Blue light filter
 
+:::note <a href="apps/blue-light-filter">Blue light filter</a>
+Thanks to `Blue light filter` feature from Tweaks app take care to your eyes !
+It allows you to change the colortemp of the screen to have more eye confort in low-light environments.
+:::
 
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179318731-7e262588-cb92-4ea3-9001-2991c4f8ccbe.png" width="54" /></sup>RetroArch
