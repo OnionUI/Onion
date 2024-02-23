@@ -280,6 +280,12 @@ run_installation() {
     install_configs $reset_configs
 
     run_migration_scripts
+    
+    if [ -d "/mnt/SDCARD/Emu/drastic" ]; then
+        echo "Migrating drastic ..."
+        cd /mnt/SDCARD/.tmp_update/script
+        ./drastic_migration.sh
+    fi
 
     echo "Finishing up - Get ready!" >> /tmp/.update_msg
 
