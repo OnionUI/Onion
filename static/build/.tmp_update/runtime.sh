@@ -651,9 +651,22 @@ mute_theme_bgm() {
     fi
 }
 
+create_swap() {
+  swapfile="/mnt/SDCARD/cachefile"
+    if [ ! -e "$swapfile" ] ; then
+        log "Creating swap file"
+        dd if=/dev/zero of="$swapfile" bs=1M count=128
+        mkswap "$swapfile"
+    fi
+    log "Enabling swap"
+    swapon "$swapfile"
+}
+
+
 init_system() {
     log "\n:: Init system"
 
+    create_swap
     load_settings
 
     # init_lcd
