@@ -1,15 +1,5 @@
 #!/bin/sh
 mydir=$(dirname "$0")
-
-purge_devil() {
-    if pgrep -f "/dev/l" > /dev/null; then
-        echo "Process /dev/l is running. Killing it now..."
-        killall -9 l
-    else
-        echo "Process /dev/l is not running."
-    fi
-}
-
 cd $mydir
 
 export HOME=$mydir
