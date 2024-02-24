@@ -1,5 +1,9 @@
 #!/bin/sh
 
+sysdir=/mnt/SDCARD/.tmp_update
+logfile=$(basename "$0" .sh)
+. $sysdir/script/log.sh
+
 res_x=""
 res_y=""
 
@@ -10,7 +14,7 @@ else
     res_x=640
     res_y=480
 fi
-echo "Changing resolution to $res_x x $res_y"
+log "Changing resolution to $res_x x $res_y"
 
 fbset -g "$res_x" "$res_y" "$res_x" "$((res_y * 2))" 32
 
