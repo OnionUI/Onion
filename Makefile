@@ -270,7 +270,7 @@ test:
 	@cp -R $(TEST_SRC_DIR)/infoPanel_test_data $(BUILD_TEST_DIR)/
 	cd $(BUILD_TEST_DIR) && ./test
 
-static-analysis:
+static-analysis: external-libs
 	@cd $(ROOT_DIR) && cppcheck -I $(INCLUDE_DIR) --enable=all $(SRC_DIR)
 
 format:
