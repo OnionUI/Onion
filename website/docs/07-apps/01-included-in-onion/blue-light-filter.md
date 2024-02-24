@@ -11,7 +11,7 @@ slug: /apps/blue-light-filter
 
 ## Presentation
 Blue Light Filter is a tool included in Tweaks app which allows you to change the colortemp of the screen to have more eye confort in low-light environments.
-It can be compared to "f.lux", "Night shit" on IOS or "Night Light" on Windows.
+It can be compared to "f.lux", "Night Shift" on IOS or "Night Light" on Windows.
 
 ![](./assets/blue-light-filter.webp)
 
