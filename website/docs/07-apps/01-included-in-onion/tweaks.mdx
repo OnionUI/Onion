@@ -55,7 +55,7 @@ Tweaks is the backbone of Onion's configuration and personalization! With Tweaks
 </summary>
 <details><summary>
 
-#### Auto-resume last game 
+#### Auto-resume last game
 </summary>
 <div>Auto-resume happens when you shutdown the device while a game is running. At startup, the system will resume where you left off last time. If disabled the main interface will be displayed after boot, your last game played will not resume.</div>
 </details>
@@ -81,7 +81,7 @@ It can be MainUI, [GameSwitcher](./game-switcher), [Retroarch](./retroarch) or [
 </summary>
 <details><summary>
 
-#### now : 2023-10-12 18:31:08
+#### now : 2024-02-14 18:31:08
 </summary>
 <div>Current Date (read-only label)</div>
 </details>
@@ -156,6 +156,25 @@ It can be MainUI, [GameSwitcher](./game-switcher), [Retroarch](./retroarch) or [
 </details>
 <details><summary>
 
+
+### WiFi: Hotspot/WPS...
+</summary>
+<details><summary>
+
+
+#### WiFi Hotspot
+</summary>
+<div>Use hotspot to host all the network services on the go, no router needed. Stay connected at anytime, anywhere. Compatible with Easy Netplay and regular netplay.</div>
+</details>
+<details><summary>
+
+#### WPS connect
+</summary>
+<div>Use your WiFi router's WPS function to connect your device with a single press. First press the WPS button on your router, then click this option to connect.</div>
+</details>
+</details>
+<details><summary>
+
 ### Samba: Network file share...
 </summary>
 <div>Samba is a file sharing protocol that provides integrated sharing of files and directories between your Miyoo Mini Plus and your PC.</div>
@@ -177,6 +196,12 @@ It can be MainUI, [GameSwitcher](./game-switcher), [Retroarch](./retroarch) or [
 ### FTP: File server...
 </summary>
 <div>FTP provides a method of transferring files between Onion and a PC, phone, or tablet. You'll need an FTP client installed on the other device.</div>
+</details>
+<details><summary>
+
+### VNC: Screen share...
+</summary>
+<div>Share your MMP Screen to another device for demonstrations or applications or themes (The MMP does not have the performance to stream game footage through this feature).</div>
 </details>
 <details><summary>
 
@@ -228,7 +253,7 @@ It can be MainUI, [GameSwitcher](./game-switcher), [Retroarch](./retroarch) or [
 <div>
 Set the action for single pressing the menu button while in MainUI.
 
-(Off, Exit to menu, Quick Switch, Game Switcher) 
+(Off, Exit to menu, Quick Switch, Game Switcher)
 </div>
 </details>
 <details><summary>
@@ -324,10 +349,41 @@ Set the action for single pressing the menu button while in MainUI.
 
 <div>Warning: Bluelight filter schedule depends on NTP being available.</div>
 <div>If you do not have an up-to-date time on your device, the BLF may behave unexpectedly.</div>
-<div>You can override the BLF schedule by using the Menu+B hotkey.</div>
+<div>You can override the BLF schedule by using the <kbd>MENU</kbd>+<kbd>B</kbd> hotkey.</div>
+&nbsp;
+<details><summary>
 
+#### State
+</summary>
+<div>Set the selected strength now.</div>
 </details>
 <details><summary>
+
+#### schedule
+</summary>
+<div>Enable or disable the bluelight filter schedule.</div>
+</details>
+<details><summary>
+
+#### Strength
+</summary>
+<div>Change the strength of the Blue light filter</div>
+</details>
+<details><summary>
+
+#### Time (On)
+</summary>
+<div>Time schedule for the bluelight filter.</div>
+</details>
+<details><summary>
+
+#### Time (Off)
+</summary>
+<div>Time schedule for the bluelight filter.</div>
+</details>
+</details>
+<details><summary>
+
 
 ### Theme overrides...
 </summary>
@@ -347,19 +403,19 @@ Set the action for single pressing the menu button while in MainUI.
 
 #### Mute background music
 </summary>
-<div>Disable the background music of any theme</div>
+<div>Mute background music for themes.</div>
 </details>
 <details><summary>
 
 #### Hide icon labels
 </summary>
-<div>Hide icon labels</div>
+<div>Hide the labels under the main menu icons.</div>
 </details>
 <details><summary>
 
 #### Hide hint labels
 </summary>
-<div>Hide hint labels</div>
+<div>Hide the labels at the bottom of the screen.</div>
 </details>
 </details>
 <details><summary>
@@ -370,19 +426,25 @@ Set the action for single pressing the menu button while in MainUI.
 
 #### Apply icon pack..
 </summary>
-
+<div>The list of installed icon packs will be displayed here.</div>
 </details>
 <details><summary>
 
 #### Edit console icon.....
 </summary>
+<div>To modify console icons one by one.</div>
+</details>
+<details><summary>
 
-
+#### Edit app icon...
+</summary>
+<div>To modify apps icons one by one.</div>
 </details>
 <details><summary>
 
 #### Edit expert icon...
 </summary>
+<div>To modify expert icons one by one.</div>
 
 </details>
 </details>
@@ -420,10 +482,10 @@ Set the action for single pressing the menu button while in MainUI.
 </details>
 <details><summary>
 
-### PWM Frequency
+### PWM frequency
 </summary>
 <div>Set the PWM frequency, a lower value will result in less "whine" from the devices speaker.</div>
-<div>Warning: The lower this value, the more chance your screen will begin to "flicker", the perception of this varies from person to person</div>
+<div>Warning: The lower this value, the more chance your screen will begin to "flicker", the perception of this varies from person to person.</div>
 </details>
 <details><summary>
 
@@ -445,17 +507,35 @@ Set the action for single pressing the menu button while in MainUI.
 
 #### Reset theme overrides
 </summary>
+<div>Resets the current theme modifications.</div>
+</details>
+<details><summary>
+
+#### Reset MainUI settings
+</summary>
 <div>Resets the settings stored on the device, such as theme, display options, and volume. Also resets WiFi configuration.</div>
 </details>
 <details><summary>
 
 #### Reset RetroArch main configuration
 </summary>
-<div>Reset all RetroArch core overrides.</div>
+<div>Restore Onion default RetroArch main configuration.</div>
+</details>
+<details><summary>
+
+#### Reset all RetroArch core overrides
+</summary>
+<div>Restore all Onion default RetroArch core overrides.</div>
 </details>
 <details><summary>
 
 #### Reset AdvanceMENU/MAME/MESS
+</summary>
+<div>Restore AdvanceMENU/MAME/MESS default settings.</div>
+</details>
+<details><summary>
+
+#### Reset everything
 </summary>
 <div>Reset everything.</div>
 </details>
@@ -482,7 +562,6 @@ Set the action for single pressing the menu button while in MainUI.
 
 
 
-
 <details><summary>
 
 ## <img align="left" src={require('./assets/tweaks_tools.png').default} style={{width: 40}} /><sup>Tools</sup>
@@ -496,9 +575,22 @@ Set the action for single pressing the menu button while in MainUI.
 </details>
 <details><summary>
 
-### Generate M3U files for PSX games
+### Generate M3U files for PSX games...
 </summary>
-<div>This tool will generate m3u files for multi-disk PSX games so you don't have to.</div>
+<div>PSX multidisc roms require to create a playslist file (.m3u). It allows to have only one entry for each multidisc game and one unique save file for each game.</div>
+&nbsp;
+<details><summary>
+
+#### Multiple directories (.Game_Name)
+</summary>
+<div>One directory for each game: ".Game_Name".</div>
+</details>
+<details><summary>
+
+#### Single directory (.multi-disc)
+</summary>
+<div>One single directory ".multi-disc" will contains all multi-disc files.</div>
+</details>
 </details>
 <details><summary>
 
@@ -514,15 +606,53 @@ Set the action for single pressing the menu button while in MainUI.
 </details>
 <details><summary>
 
-### Screen recorder
+### Screen recorder...
 </summary>
-<div>A tool to record the screen, this tool will not offer perfect performance in games, but can be used to record/demonstrate apps and features (You can also hold <kbd>MENU</kbd>+<kbd>A</kbd> for 2 seconds to start recording!)</div>
+<div>A tool to record the screen, this tool will not offer perfect performance in games, but can be used to record/demonstrate apps and features (You can also hold <kbd>MENU</kbd>+<kbd>A</kbd> for 2 seconds to start recording!).</div>
+&nbsp;
+<details><summary>
+
+
+#### Start/stop recorder
+</summary>
+<div>Start or stop the recorder.</div>
 </details>
 <details><summary>
 
-### Regenerate gameswitcher list
+#### Countdown (seconds)
 </summary>
-<div>Refresh the data the gameswitcher holds.</div>
+<div>Countdown when starting recording. The screen will pulse white n times to signify recording has started/stopped.</div>
+</details>
+<details><summary>
+
+#### Toggle indicator icon
+</summary>
+<div>Toggles the display of a flashing icon to remind you that you're still recording.</div>
+</details>
+<details><summary>
+
+#### Toggle hotkey
+</summary>
+<div>Enable the hotkey function. Recording can be started/stopped with Menu+A</div>
+</details>
+<details><summary>
+
+#### Reset screen recorder
+</summary>
+<div>Performs a hard kill of ffmpeg. WARNING: If you're currently recording, you may lose the file!.</div>
+</details>
+<details><summary>
+
+#### Delete all recordings
+</summary>
+<div>Deletes all recorded videos. WARNING: This action cannot be undone!.</div>
+</details>
+</details>
+<details><summary>
+
+### Regenerate game switcher list
+</summary>
+<div>Utilize this tool to recreate your game switcher list using the RetroArch history, particularly in instances of corruption. Keep in mind that NDS games and certain ports may require manual addition.</div>
 </details>
 <details><summary>
 

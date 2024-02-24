@@ -11,3 +11,8 @@ slug: /emulators/cpc
 - Rom Folder: `CPC`
 - Extensions: `.sna` `.dsk` `.kcr`
 - Bios: None
+
+:::note
+Caprice32 probably offers a better compatibility and performances than the current default CrocoDS for CPC games (require testers).
+A remap file allows to use the keypad to display the virtual keyboard (Select + Start)
+:::
