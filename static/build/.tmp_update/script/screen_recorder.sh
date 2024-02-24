@@ -150,6 +150,7 @@ show_indicator() {
 toggle_ffmpeg() {
     sync
     if pgrep -f "ffmpeg -f fbdev -nostdin" >/dev/null; then
+        cpuclock 1200
         pkill -2 -f "ffmpeg -f fbdev -nostdin"
         killall -9 imgpop
 
@@ -171,9 +172,8 @@ toggle_ffmpeg() {
             show_indicator
         fi
 
-        echo performance >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-
-        ffmpeg -f fbdev -nostdin -framerate 25 -i /dev/fb0 -vf "vflip,hflip, format=yuv420p" -c:v libx264 -preset ultrafast -tune zerolatency -maxrate 2000k -bufsize 6000k -threads 0 "$(date +%Y%m%d%H%M%S).mp4" >/dev/null 2>&1 &
+        cpuclock 1600
+        ffmpeg -f fbdev -nostdin -framerate 25 -i /dev/fb0 -vf "vflip,hflip, format=yuv420p" -c:v libx264 -preset superfast -maxrate 3000k -bufsize 6000k -threads 2 "$(date +%Y%m%d%H%M%S).mp4" >/dev/null 2>&1 &
 
         sleep 0.5
 
