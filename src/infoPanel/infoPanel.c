@@ -102,16 +102,6 @@ static void drawInfoPanel(SDL_Surface *screen, SDL_Surface *video,
     }
 }
 
-static void drawImage(const char *image_path, SDL_Surface *screen)
-{
-    SDL_Surface *image = IMG_Load(image_path);
-    if (image) {
-        SDL_Rect image_rect = {320 - image->w / 2, 240 - image->h / 2};
-        SDL_BlitSurface(image, NULL, screen, &image_rect);
-        SDL_FreeSurface(image);
-    }
-}
-
 static void sdlQuit(SDL_Surface *screen, SDL_Surface *video)
 {
     SDL_FreeSurface(screen);
@@ -125,6 +115,16 @@ const SDL_Rect *getControlsAwareFrame(const SDL_Rect *frame)
         return frame;
     }
     return NULL;
+}
+
+void drawBackground(void)
+{
+    if (g_show_theme_controls) {
+        SDL_BlitSurface(theme_background(), NULL, screen, NULL);
+    }
+    else {
+        SDL_FillRect(screen, NULL, 0);
+    }
 }
 
 int main(int argc, char *argv[])
@@ -180,20 +180,27 @@ int main(int argc, char *argv[])
 
     bool cache_used = false;
 
-    const SDL_Rect themedFrame = {theme()->frame.border_left, 0, 640 - theme()->frame.border_right, 480};
+    const SDL_Rect themedFrame = {
+        theme()->frame.border_left, 60,
+        640 - theme()->frame.border_left - theme()->frame.border_right, 360};
+
+    SDL_Surface *static_image = NULL;
 
     if (exists(image_path)) {
         g_images_paths_count = 1;
         g_image_index = 0;
-        SDL_BlitSurface(theme_background(), NULL, screen, NULL);
-        drawImage(image_path, screen);
+
+        drawBackground();
+
+        static_image = IMG_Load(image_path);
+        drawImage(static_image, screen, NULL);
     }
     else if (exists(images_json_path)) {
         if (loadImagesPathsFromJson(images_json_path, &g_images_paths,
                                     &g_images_paths_count, &g_images_titles) &&
             g_images_paths_count > 0) {
             g_image_index = 0;
-            SDL_BlitSurface(theme_background(), NULL, screen, NULL);
+            drawBackground();
             drawImageByIndex(0, g_image_index, g_images_paths,
                              g_images_paths_count, screen,
                              getControlsAwareFrame(&themedFrame), &cache_used);
@@ -208,7 +215,7 @@ int main(int argc, char *argv[])
                                    &g_images_paths_count) &&
             g_images_paths_count > 0) {
             g_image_index = 0;
-            SDL_BlitSurface(theme_background(), NULL, screen, NULL);
+            drawBackground();
             drawImageByIndex(0, g_image_index, g_images_paths,
                              g_images_paths_count, screen,
                              getControlsAwareFrame(&themedFrame), &cache_used);
@@ -267,7 +274,7 @@ int main(int argc, char *argv[])
                     break;
                 case SW_BTN_Y:
                     g_show_theme_controls = !g_show_theme_controls;
-                    SDL_BlitSurface(theme_background(), NULL, screen, NULL);
+                    drawBackground();
 
                     if (g_images_paths) {
                         drawImageByIndex(
@@ -275,8 +282,8 @@ int main(int argc, char *argv[])
                             g_images_paths_count, screen,
                             getControlsAwareFrame(&themedFrame), &cache_used);
                     }
-                    else if (exists(image_path)) {
-                        drawImage(image_path, screen);
+                    else if (static_image != NULL) {
+                        drawImage(static_image, screen, NULL);
                     }
                     else {
                         g_show_theme_controls = true;
@@ -312,7 +319,7 @@ int main(int argc, char *argv[])
 
                 const int current_index = g_image_index;
                 navigating_forward ? g_image_index++ : g_image_index--;
-                SDL_BlitSurface(theme_background(), NULL, screen, NULL);
+                drawBackground();
                 drawImageByIndex(g_image_index, current_index, g_images_paths,
                                  g_images_paths_count, screen,
                                  getControlsAwareFrame(&themedFrame),
@@ -435,6 +442,10 @@ int main(int argc, char *argv[])
         msleep(2000);
 
     cleanImagesCache();
+
+    if (static_image != NULL) {
+        SDL_FreeSurface(static_image);
+    }
 
     lang_free();
     resources_free();

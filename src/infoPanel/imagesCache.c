@@ -2,6 +2,7 @@
 
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
+#include <SDL/SDL_rotozoom.h>
 
 static SDL_Surface *g_image_cache_prev = NULL;
 static SDL_Surface *g_image_cache_current = NULL;
@@ -15,56 +16,45 @@ static SDL_Surface *g_image_cache_next = NULL;
     } while (0)
 #endif
 
-static void drawImage(SDL_Surface *image_to_draw, SDL_Surface *screen,
-                      const SDL_Rect *frame)
+#define MIN(a, b) (a < b) ? (a) : (b)
+
+void drawImage(SDL_Surface *image, SDL_Surface *screen,
+               const SDL_Rect *frame)
 {
-    if (!image_to_draw)
+    if (!image)
         return;
 
-    if (image_to_draw->w > 640 || image_to_draw->h > 480) {
-        // scale image to 640x480 only if bigger (v4 752x560)
+    SDL_Surface *scaled_image = NULL;
+    SDL_Rect target = {0, 0, screen->w, screen->h};
 
-        SDL_Rect dest_rect = {0, 0, 640, 480};
-        SDL_Surface *scaled_image = SDL_CreateRGBSurface(
-            SDL_SWSURFACE, 640, 480, image_to_draw->format->BitsPerPixel,
-            image_to_draw->format->Rmask, image_to_draw->format->Gmask,
-            image_to_draw->format->Bmask, image_to_draw->format->Amask);
+    if (frame != NULL) {
+        target = *frame;
+    }
 
-        if (!scaled_image) {
-            printf("SDL_CreateRGBSurface failed: %s\n", SDL_GetError());
+    // scale image to 640x480 only if bigger (v4 752x560)
+    if (image->w > target.w || image->h > target.h) {
+        double ratio_x = (double)target.w / image->w;
+        double ratio_y = (double)target.h / image->h;
+        double scale = MIN(ratio_x, ratio_y);
+        scaled_image = rotozoomSurface(image, 0.0, scale, true);
+
+        if (scaled_image == NULL) {
+            printf("rotozoomSurface failed: %s\n", SDL_GetError());
         }
         else {
-            int ret = SDL_SoftStretch(image_to_draw, NULL, scaled_image, &dest_rect);
-            if (ret == 0)
-                image_to_draw = scaled_image;
-            else
-                // failed to scale, draw unscaled
-                printf("SDL_SoftStretch failed: %s\n", SDL_GetError());
+            image = scaled_image;
         }
     }
 
-    DEBUG_PRINT(("frame %p\n", frame));
-    int border_left = 0;
-    SDL_Rect new_frame = {0, 0};
-    if (frame != NULL) {
-        DEBUG_PRINT(("x-%d y-%d\n", frame->x, frame->y));
-        new_frame = *frame;
-        border_left = new_frame.x;
+    SDL_Rect image_pos = {
+        target.x + (target.w - image->w) / 2,
+        target.y + (target.h - image->h) / 2};
+
+    SDL_BlitSurface(image, NULL, screen, &image_pos);
+
+    if (scaled_image != NULL) {
+        SDL_FreeSurface(scaled_image);
     }
-    DEBUG_PRINT(("border_left %d\n", border_left));
-    int16_t image_x = 320 - (int16_t)(image_to_draw->w / 2);
-    if (image_x < border_left) {
-        image_x = border_left;
-    }
-    else {
-        new_frame.x -= border_left;
-    }
-    SDL_Rect image_rect = {image_x, (int16_t)(240 - image_to_draw->h / 2)};
-    DEBUG_PRINT(("image_rect x-%d y-%d\n", image_rect.x, image_rect.y));
-    if (frame != NULL)
-        SDL_BlitSurface(image_to_draw, &new_frame, screen, &image_rect);
-    else
-        SDL_BlitSurface(image_to_draw, NULL, screen, &image_rect);
 }
 
 char *drawImageByIndex(const int new_image_index, const int image_index,
