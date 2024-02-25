@@ -483,12 +483,10 @@ get_full_resolution_path() {
         # Different programs need different checks (Apps vs Ports vs the rest)
         if grep -qF "/mnt/SDCARD/App/" $sysdir/cmd_to_run.sh; then
             # ----- App launch ----- #
-
-            echo "$(cat $sysdir/cmd_to_run.sh | cut -d' ' -f 2 | sed 's/;/\/full_resolution/')"
+            cat $sysdir/cmd_to_run.sh | cut -d' ' -f 2 | sed 's/;/\/full_resolution/'
 
         elif grep -qF "/mnt/SDCARD/Roms/PORTS/" $sysdir/cmd_to_run.sh; then
             # ----- Port launch ----- #
-
             dot_port_path=$(grep -o '\/mnt\/SDCARD\/Roms\/PORTS.*\.port' $sysdir/cmd_to_run.sh)
 
             if grep -qF "FullResolution=1" "$dot_port_path"; then
@@ -496,10 +494,9 @@ get_full_resolution_path() {
                 # set full_resolution_path to a file that will always exist
                 echo "/tmp/new_res_available"
             fi
-
         else
             # ----- Everything else ----- #
-            echo "$(grep -o '".*launch\.sh"' $sysdir/cmd_to_run.sh | sed 's/"//g; s/launch\.sh/full_resolution/')"
+            grep -o '".*launch\.sh"' $sysdir/cmd_to_run.sh | sed 's/"//g; s/launch\.sh/full_resolution/'
         fi
     fi
 }
