@@ -13,7 +13,7 @@ if [ -f "$lockfile" ]; then
     exit 1
 fi
 
-export TZ=$(cat "$sysdir/config/.tz")
+export TZ=$(cat "$sysdir/config/.tz" 2>/dev/null) 
 
 touch "$lockfile"
 trap 'rm -f "$lockfile"; exit' INT TERM EXIT
