@@ -13,8 +13,8 @@ screen_resolution="640x480"
 
 main() {
     # Set model ID
-    axp 0 > /dev/null
-    export DEVICE_ID=$([ $? -eq 0 ] && echo $MODEL_MMP || echo $MODEL_MM)
+    export DEVICE_ID="$([ -f /customer/app/axp_test ] && echo $MODEL_MMP || echo $MODEL_MM)"
+
     echo -n "$DEVICE_ID" > /tmp/deviceModel
 
     touch /tmp/is_booting
