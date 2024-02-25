@@ -758,21 +758,24 @@ update_time() {
         currentTime=$(cat $timepath)
     fi
     date +%s -s @$currentTime
+    
+    if [ "$DEVICE_ID" -eq  "$MODEL_MMP" ] && [ -f $sysdir/config/.ntpState ]; then
+        return
+    fi
 
     # Ensure that all play activities are closed
     playActivity stop_all
 
-    #Add 4 hours to the current time
+    # Simulated time increase, default 4 hours
     hours=4
     if [ -f $sysdir/config/startup/addHours ]; then
         hours=$(cat $sysdir/config/startup/addHours)
     fi
     addTime=$(($hours * 3600))
-    if [ ! -f $sysdir/config/.ntpState ]; then
-        currentTime=$(($currentTime + $addTime))
-    fi
+    currentTime=$(($currentTime + $addTime))
     date +%s -s @$currentTime
 }
+
 
 set_startup_tab() {
     startup_tab=0
