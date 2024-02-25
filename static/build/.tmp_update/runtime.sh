@@ -351,9 +351,7 @@ launch_game() {
         # Kill services for maximum performance
         if [ ! -f $sysdir/config/.keepServicesAlive ]; then
             for process in dropbear bftpd filebrowser telnetd smbd; do
-                if is_running $process; then
-                    killall -9 $process
-                fi
+                killall -q -SIGKILL $process
             done
         fi
 
