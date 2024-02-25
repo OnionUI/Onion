@@ -75,8 +75,10 @@ main() {
         rm "$sysdir/config/filebrowser/first.run"
     fi
 
-    # Start networking (Checks networking, checks timezone)
-    start_networking
+    if [ "$DEVICE_ID" -eq $MODEL_MMP ]; then
+        # Start networking (Checks networking, checks timezone)
+        start_networking
+    fi
 
     # Start the key monitor
     keymon &
@@ -150,7 +152,9 @@ main() {
 state_change() {
     log "state change: $1"
     runifnecessary "keymon" keymon
-    check_networking
+    if [ "$DEVICE_ID" -eq $MODEL_MMP ]; then
+        check_networking
+    fi
     touch /tmp/state_changed
     sync
     eval "$1"
