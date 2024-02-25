@@ -730,12 +730,9 @@ load_settings() {
         fi
 
         if [ $(/customer/app/jsonval vol) -ne 20 ] || [ $(/customer/app/jsonval mute) -ne 0 ]; then
-            # Force volume and mute settings
-            cat /mnt/SDCARD/system.json |
-                sed 's/^\s*"vol":\s*[0-9][0-9]*/\t"vol":\t20/g' |
-                sed 's/^\s*"mute":\s*[0-9][0-9]*/\t"mute":\t0/g' \
-                    > temp
-            mv -f temp /mnt/SDCARD/system.json
+            # Force max volume and disable mute on MM (controlled by hardware wheel)
+            sed -i -e 's/^\s*"vol":\s*[0-9][0-9]*/\t"vol":\t20/g' \
+                -e 's/^\s*"mute":\s*[0-9][0-9]*/\t"mute":\t0/g' /mnt/SDCARD/system.json
         fi
     fi
 }
