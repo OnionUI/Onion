@@ -55,7 +55,7 @@ The Onion shortcuts are very powerful it allows you quick actions like rewind, f
 
 :::note <a href="apps/game-switcher">Game Switcher overview</a>
 The GameSwitcher is designed to be the central user interface of Onion. It allows browse and resume the last games played in few seconds.
-Launch the GameSwitcher by pressing the <kbd>MENU</kbd> button, then you'll see a screenshot of where you were in your game ! Use Left and right to browse the last games played like this.
+Launch the GameSwitcher by pressing the <kbd>MENU</kbd> button, then you'll see a screenshot of where you were in your game! Use Left and right to browse the last games played like this.
 It also allows you to quickly change games and many other features.
 :::
 
@@ -76,7 +76,7 @@ The "Package Manager" app is a powerful tool that allows users to easily install
 
 
 :::note <a href="apps/tweaks">Tweaks overview</a>
-Tweaks is the backbone of onion's configuration and personalization! With Tweaks you can adjust System settings, enable network services, configure your button shortcuts and more!
+Tweaks is the backbone of Onion's configuration and personalization! With Tweaks you can adjust System settings, enable network services, configure your button shortcuts and more!
 :::
 
 
@@ -98,8 +98,8 @@ Search also allows to filter a game list to include only games containing a spec
 
 
 :::note <a href="apps/theme-switcher">Theme-switcher overview</a>
-Onion loves themes. In Onion themes allow to customize the background, the entry categories, console icons, music bacground, fonts... And best of all, the chosen theme impacts all Onion's internal applications!<br />
-Themes in Onion are two things : <br /> 
+Onion loves themes. In Onion themes allow to customize the background, the entry categories, console icons, music background, fonts... And best of all, the chosen theme impacts all Onion's internal applications!<br />
+Themes in Onion are two things: <br /> 
 - [A fabulous theme repository](https://github.com/OnionUI/Themes/blob/main/README.md) with a very active participation from Onion community <sup><sub>❤️</sub></sup>
 - An application called <a href="apps/theme-switcher">Theme-switcher</a> included in Onion which allows to preview and change themes.
 :::
@@ -110,16 +110,16 @@ Themes in Onion are two things : <br />
 <p align="center"><img src={require('./assets/activity-tracker.webp').default} style={{width: 320}} /></p>
 
 :::note <a href="apps/activity-tracker">Activity Tracker overview</a>
-Thanks to `Activity Tracker` app you can : 
-- Track your game playtimes.
-- View your total playtime in the top bar.
+Thanks to `Activity Tracker` app you can: 
+- Track your game playtimes
+- View your total playtime in the top bar
 - Share your playtimes by taking a screenshot (press <kbd>MENU</kbd>+<kbd>POWER</kbd> - screenshot is saved in `Screenshots` folder).
 :::
 
 ## <sup><img src={require('./assets/blue-light-filter.webp').default} style={{width: 54}} /></sup>Blue light filter
 
 :::note <a href="apps/blue-light-filter">Blue light filter</a>
-Thanks to `Blue light filter` feature from Tweaks app take care to your eyes !
+Thanks to `Blue light filter` feature from Tweaks app take care to your eyes!
 It allows you to change the colortemp of the screen to have more eye confort in low-light environments.
 :::
 
@@ -136,8 +136,8 @@ Screen Recorder adds screen record ability for demoing apps/content/features/bug
 
 
 :::note <a href="apps/retroarch">Retroarch overview</a>
-A full Retroarch in a such tiny device ! Retroarch is regularly updated from the offcial repository. Onion benefits to dedicated drivers created by [Eggs](https://discordapp.com/users/778867980096241715) for precision and performance.
-Dedicated customations are also included : all the core are configured with attention to detail, [custom overlays and custom filters](apps/retroarch#customized-overlays-and-filters) made specially for the Miyoo Mini screen. 
+A full Retroarch in a such tiny device! Retroarch is regularly updated from the official repository. Onion benefits to dedicated drivers created by [Eggs](https://discordapp.com/users/778867980096241715) for precision and performance.
+Dedicated customizations are also included: all the core are configured with attention to detail, [custom overlays and custom filters](apps/retroarch#customized-overlays-and-filters) made specially for the Miyoo Mini screen. 
 :::
 
 ## <sup><img src={require('./assets/optimized.png').default} style={{width: 54}} /></sup>Optimized emulators
@@ -146,8 +146,8 @@ Dedicated customations are also included : all the core are configured with atte
 
 
 :::note <a href="emulators">Optimized emulators</a>
-Onion has its own emulators, many optimizations on the Retroarch cores but also some dedicated emulators like :
-- PCSX Standalone (with awesome performances)
+Onion has its own emulators, many optimizations on the Retroarch cores but also some dedicated emulators like:
+- PCSX standalone (with awesome performances)
 - ScummVM standalone (awesome performances too)
 - Gambatte core (GB/GBC) with an [unique organization of color palettes](https://github.com/schmurtzm/gambatte-libretro/tree/advanced-color-organisation)
 
@@ -160,7 +160,7 @@ Onion has its own emulators, many optimizations on the Retroarch cores but also 
 <img src="https://user-images.githubusercontent.com/44569252/226447388-8c9c95f1-536a-4946-8b0f-f4b8ead0e97e.png" width="320" />
 
 :::note <a href="apps/game-list-options">Game List Options overview</a>
-*Game List Options (GLO Menu) is a tool to make actions for the selected game or the entire list. Press <kbd>Y</kbd> in a game list then from this menu you can choose the Retroarch core, download the image cover of your game (wifi/MMP required), launch a Netplay session, reset your game (to skip the last save state), filter the list of games with a keyword,...<br />Thanks to GLO menu flexibility, you can even add your own scripts here !*
+*Game List Options (GLO Menu) is a tool to make actions for the selected game or the entire list. Press <kbd>Y</kbd> in a game list then from this menu you can choose the Retroarch core, download the image cover of your game (wifi/MMP required), launch a Netplay session, reset your game (to skip the last save state), filter the list of games with a keyword, ...<br />Thanks to GLO menu flexibility, you can even add your own scripts here!*
 :::
 
 
@@ -174,7 +174,7 @@ Guest mode is a separate profile so you can safely lend your device to your kid 
 ## <sup><img align="left" title="Random Game Picker" src={require('./assets/random-game-picker.png').default} style={{width: 48}} /></sup>Random Game Picker
 
 :::note <a href="apps/random-game">Random Game Picker overview</a>
-Random Game will allow you to discover new games in your collection !
+Random Game will allow you to discover new games in your collection!
 :::
 
 ## <sup><img align="left" title="AdvanceMENU" src={require('./assets/advancemenu.png').default} style={{width: 48}} /></sup>AdvanceMENU
@@ -191,7 +191,7 @@ An alternative user interface with animated game previews!
 <img title="Included apps" src={require('./assets/ports.webp').default} style={{width: 320}} />
 
 :::note <a href="ports">Ports Collection</a>
-More than 60 game ports pre-configured !
+More than 60 game ports pre-configured!
 :::
 
 ## <sup><img align="left" title="Included apps" src={require('./assets/apps.png').default} style={{width: 48}} /></sup>Included apps
@@ -199,7 +199,7 @@ More than 60 game ports pre-configured !
 <img title="Included apps" src={require('./assets/apps.gif').default} style={{width: 320}} />
 
 :::note <a href="included-apps">Included apps</a>
-Onion also contains many additional apps like :<br />
+Onion also contains many additional apps like:<br />
 - [a video player](apps/video-player)
 - [a music player](apps/music-player)
 - [a file explorer](apps/file-explorer)
@@ -215,14 +215,14 @@ Check the <a href="included-apps">included apps</a> documentation for more infor
 <img title="Included apps" src={require('./assets/network-features.gif').default} style={{width: 320}} />
 
 :::note <a href="network-features">Network Features</a>
-For the Miyoo Mini Plus (equiped with wifi) Onion offers many additional possibilites :<br />
-- [Multiplayer / Netplay](multiplayer) : play in multiplayer over internet or on you lcoal network to your favorite retro games:
-- [Easy Netplay](multiplayer/easynetplay): play multiplayer games anywhere (compatible with GBC/GBC Pokemon trading !)
-- [OTA (Over The Air) updates](apps/ota-update) : update Onion directly from your MMP
-- [Automatic date/time synchronisation](apps/tweaks#set-automatically-via-the-internet) (NTP, via Tweaks app)
+For the Miyoo Mini Plus (equipped with wifi) Onion offers many additional possibilites:<br />
+- [Multiplayer / Netplay](multiplayer): play in multiplayer over internet or on you local network to your favorite retro games:
+- [Easy Netplay](multiplayer/easynetplay): play multiplayer games anywhere (compatible with GBC/GBC Pokemon trading!)
+- [OTA (Over The Air) updates](apps/ota-update): update Onion directly from your MMP
+- [Automatic date/time synchronisation](apps/tweaks#set-automatically-via-the-internet): NTP, via Tweaks app
 - [Retroachivements](https://www.retroarch.com/?page=achievements)
-- [Scraper](/docs/apps/scraper) : import game covers directly from your MMP
-- [Network Services](network-features) : [Samba/SMB share](network/samba), [http server](network/http), [SSH](network/ssh), [FTP](network/ftp), [Telnet](network/telnet), [Hotspot](network/hotspot), [VNC server](network/vnc)...
+- [Scraper](/docs/apps/scraper): import game covers directly from your MMP
+- [Network Services](network-features): [Samba/SMB share](network/samba), [http server](network/http), [SSH](network/ssh), [FTP](network/ftp), [Telnet](network/telnet), [Hotspot](network/hotspot), [VNC server](network/vnc), ...
 :::
 
 
@@ -240,7 +240,7 @@ Simply copy this folder when you want to backup your data.
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179305495-2ae1f522-6918-469f-a2eb-63dd30262e17.png" width="54" /></sup>MainUI improvements
 
 :::note MainUI improvements
-MainUI is the main interface of Onion provided by Miyoo and modified by Onion Team with these improvements :
+MainUI is the main interface of Onion provided by Miyoo and modified by Onion Team with these improvements:
 
 - Battery percentage is shown in the top bar  
   > You can configure the battery percentage visibility and color in the theme configuration file. It is also possible to make a theme that only shows the percentage text.
