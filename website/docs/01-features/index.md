@@ -55,7 +55,7 @@ The Onion shortcuts are very powerful it allows you quick actions like rewind, f
 
 :::note <a href="apps/game-switcher">Game Switcher overview</a>
 The GameSwitcher is designed to be the central user interface of Onion. It allows browse and resume the last games played in few seconds.
-Launch the GameSwitcher by pressing the <kbd>MENU</kbd> button, then you'll see a screenshot of where you were in your game! Use Left and right to browse the last games played like this.
+Launch the GameSwitcher by pressing the <kbd>MENU</kbd> button, then you'll see a screenshot of where you were in your game! Use left and right to browse the last games played like this.
 It also allows you to quickly change games and many other features.
 :::
 
@@ -215,7 +215,7 @@ Check the <a href="included-apps">included apps</a> documentation for more infor
 <img title="Included apps" src={require('./assets/network-features.gif').default} style={{width: 320}} />
 
 :::note <a href="network-features">Network Features</a>
-For the Miyoo Mini Plus (equipped with wifi) Onion offers many additional possibilites:<br />
+For the Miyoo Mini Plus (equipped with wifi) Onion offers many additional possibilities:<br />
 - [Multiplayer / Netplay](multiplayer): play in multiplayer over internet or on you local network to your favorite retro games:
 - [Easy Netplay](multiplayer/easynetplay): play multiplayer games anywhere (compatible with GBC/GBC Pokemon trading!)
 - [OTA (Over The Air) updates](apps/ota-update): update Onion directly from your MMP
