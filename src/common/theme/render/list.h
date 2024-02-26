@@ -5,6 +5,7 @@
 #include "theme/background.h"
 #include "theme/config.h"
 #include "theme/resources.h"
+#include "utils/surfaceSetAlpha.h"
 
 #define HIDDEN_ITEM_ALPHA 60
 

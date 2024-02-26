@@ -21,6 +21,9 @@ SOURCES := $(SOURCES) .
 ifeq ($(INCLUDE_CJSON),1)
 SOURCES := $(SOURCES) ../../include/cjson
 endif
+ifeq ($(INCLUDE_COMPONENT_LIST),1)
+CFILES := $(CFILES) ../common/components/list.c
+endif
 ifneq ($(INCLUDE_UTILS),0)
 CFILES := $(CFILES) \
 	../common/utils/str.c \

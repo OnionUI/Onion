@@ -14,6 +14,7 @@
 #include "components/list.h"
 #include "system/device_model.h"
 #include "system/display.h"
+#include "theme/render/list.h"
 #include "utils/apps.h"
 
 #include "./actions.h"

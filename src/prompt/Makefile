@@ -1,5 +1,6 @@
 INCLUDE_SHMVAR=1
 INCLUDE_CJSON=1
+INCLUDE_COMPONENT_LIST=1
 include ../common/config.mk
 
 TARGET = prompt

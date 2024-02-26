@@ -18,6 +18,7 @@
 #include "system/lang.h"
 #include "system/settings.h"
 #include "theme/background.h"
+#include "theme/render/list.h"
 #include "theme/sound.h"
 #include "theme/theme.h"
 #include "utils/keystate.h"
