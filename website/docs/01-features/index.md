@@ -136,7 +136,7 @@ Screen Recorder adds screen record ability for demoing apps/content/features/bug
 
 
 :::note <a href="apps/retroarch">Retroarch overview</a>
-A full Retroarch in a such tiny device! Retroarch is regularly updated from the official repository. Onion benefits to dedicated drivers created by [Eggs](https://discordapp.com/users/778867980096241715) for precision and performance.
+A full RetroArch in a such tiny device! RetroArch is regularly updated from the official repository. Onion benefits to dedicated drivers created by [Eggs](https://discordapp.com/users/778867980096241715) for precision and performance.
 Dedicated customizations are also included: all the core are configured with attention to detail, [custom overlays and custom filters](apps/retroarch#customized-overlays-and-filters) made specially for the Miyoo Mini screen. 
 :::
 
@@ -146,7 +146,7 @@ Dedicated customizations are also included: all the core are configured with att
 
 
 :::note <a href="emulators">Optimized emulators</a>
-Onion has its own emulators, many optimizations on the Retroarch cores but also some dedicated emulators like:
+Onion has its own emulators, many optimizations on the RetroArch cores but also some dedicated emulators like:
 - PCSX standalone (with awesome performances)
 - ScummVM standalone (awesome performances too)
 - Gambatte core (GB/GBC) with an [unique organization of color palettes](https://github.com/schmurtzm/gambatte-libretro/tree/advanced-color-organisation)
@@ -160,7 +160,7 @@ Onion has its own emulators, many optimizations on the Retroarch cores but also 
 <img src="https://user-images.githubusercontent.com/44569252/226447388-8c9c95f1-536a-4946-8b0f-f4b8ead0e97e.png" width="320" />
 
 :::note <a href="apps/game-list-options">Game List Options overview</a>
-*Game List Options (GLO Menu) is a tool to make actions for the selected game or the entire list. Press <kbd>Y</kbd> in a game list then from this menu you can choose the Retroarch core, download the image cover of your game (wifi/MMP required), launch a Netplay session, reset your game (to skip the last save state), filter the list of games with a keyword, ...<br />Thanks to GLO menu flexibility, you can even add your own scripts here!*
+*Game List Options (GLO Menu) is a tool to make actions for the selected game or the entire list. Press <kbd>Y</kbd> in a game list then from this menu you can choose the RetroArch core, download the image cover of your game (wifi/MMP required), launch a Netplay session, reset your game (to skip the last save state), filter the list of games with a keyword, ...<br />Thanks to GLO menu flexibility, you can even add your own scripts here!*
 :::
 
 
