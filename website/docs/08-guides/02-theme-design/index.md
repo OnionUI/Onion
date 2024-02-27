@@ -17,28 +17,28 @@ The Onion Theme Repository has moved to its own *repository*.
 
 ## Contributing
 
-Do you want to share your own custom themes with the community? <sup><sub>❤️</sub></sup> [Click here !](https://github.com/OnionUI/Themes/blob/main/CONTRIBUTING.md)
+Do you want to share your own custom themes with the community? <sup><sub>❤️</sub></sup> [Click here!](https://github.com/OnionUI/Themes/blob/main/CONTRIBUTING.md)
 
 
 ## Template 
 
 ### Blueprint Theme <sub><sup>(Credit: Aemiii91)</sup></sub>
 
-The *Blueprint* theme can be used as theming layout template for starting any new theme :
+The *Blueprint* theme can be used as theming layout template for starting any new theme:
 
 <p align="center"><a href="https://github.com/OnionUI/Themes/blob/main/release/Blueprint%20by%20Aemiii91.zip?raw=true"><img title="Blueprint by Aemiii91" width="280px" src="https://github.com/OnionUI/Themes/raw/main/themes/Blueprint%20by%20Aemiii91/preview.png?raw=true" /><br/>
 Download the Blueprint theme</a></p>
 
 Since Onion v4 you have additional assets in `skin/extra` folder: 
-* `bootScreen.png` : Custom boot screen
-* `Screen_Off.png` : Shutting down screen
-* `Screen_Off_Save.png` : Saving + Shutting down screen
-* `chargingState0.png` -> `chargingState23.png` : 24 images for charging animation, and you can add `chargingState.json` containing a frame delay value (default: 80 milliseconds - values over 10,000 will be parsed as microseconds):
+* `bootScreen.png`: Custom boot screen
+* `Screen_Off.png`: Shutting down screen
+* `Screen_Off_Save.png`: Saving + Shutting down screen
+* `chargingState0.png` -> `chargingState23.png`: 24 images for charging animation, and you can add `chargingState.json` containing a frame delay value (default: 80 milliseconds - values over 10,000 will be parsed as microseconds):
   ```json
   { "frame_delay": 80 }
   ```
 * `lum0.png` -> `lum10.png`: 11 images for brightness slider
-* `toggle-on` and `toggle-off` -> little toggle which are present in Pack Manager and Tweaks for example.
+* `toggle-on` and `toggle-off` -> little toggle which are present in Package Manager and Tweaks for example.
 
 ### Default Fonts <sub><sup>(Credit: Aemiii91)</sup></sub>
 
