@@ -399,7 +399,6 @@ start_hotspot() {
     ifconfig wlan1 $hotspot0addr netmask $subnetmask >> /dev/null 2>&1
 
     # Start
-
     $sysdir/bin/dnsmasq --conf-file=$sysdir/config/dnsmasq.conf -u root &
     $sysdir/bin/hostapd -i wlan1 $sysdir/config/hostapd.conf >> /dev/null 2>&1 &
 
@@ -648,11 +647,12 @@ full_reset() {
 
 update_main_ui_control() {
     control_status="$1"
-    jq --arg control_status "$control_status" '.main_ui_control = $control_status' "$jsonfile" > "$jsonfile.tmp" && mv "$jsonfile.tmp" "$jsonfile"
+    sed -i'' -e "/\"main_ui_control\"/s/: \".*\"/: \"$control_status\"/" "$jsonfile"
 }
 
 get_main_ui_control() {
-    jq -r '.main_ui_control // "0"' "$jsonfile"
+    value=$(grep '"main_ui_control"' "$jsonfile" | sed -n 's/.*"main_ui_control": "\([^"]*\)".*/\1/p')
+    echo "${value:-0}"
 }
 
 convert_seconds_to_utc_offset() {
