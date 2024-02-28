@@ -1,0 +1,6 @@
+{
+	"label":	"Emulator Sorting",
+	"icon":	"../../Icons/Default/app/emusort.png",
+	"launch":	"launch.sh",
+	"description":	"Sort your game systems"
+}
