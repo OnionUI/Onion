@@ -19,7 +19,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#define PLAY_ACTIVITY_DB_PATH "/mnt/SDCARD/Saves/CurrentProfile/play_activity/play_activity_db.sqlite"
 #define HIDE_SPLASH_FLAG "/mnt/SDCARD/App/EmuSort/hide_splash"
 #define EMU_DIR "/mnt/SDCARD/Emu"
 #define MAX_EMU_COUNT 200
