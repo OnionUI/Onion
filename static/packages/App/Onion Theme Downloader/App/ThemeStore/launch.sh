@@ -11,6 +11,10 @@ home="$PWD"
 cd "$progdir"
 touch /tmp/stay_awake
 st -q -e $home"/downloadmain.sh"
+#Check if a current version of the Theme README has already been downloaded
+#Checking if the file exists 
+
+#check sum ends
 # running thumbnails_generator for AdvanceMenu
 #./thumbnails_generator.sh
 if [ -f "/mnt/SDCARD/.tmp_update/onionVersion/version.txt" ]; then
