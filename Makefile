@@ -1,7 +1,7 @@
 ###########################################################
 
 TARGET=Onion
-VERSION=4.3.0-RC
+VERSION=4.3.0
 RA_SUBVERSION=1.15.0.12
 
 ###########################################################
@@ -262,15 +262,14 @@ patch:
 	@chmod a+x $(ROOT_DIR)/.github/create_patch.sh && $(ROOT_DIR)/.github/create_patch.sh
 
 external-libs:
-	@cd $(ROOT_DIR)/include/cJSON && make clean && make
 	@cd $(ROOT_DIR)/include/SDL && make clean && make
 
-test:
+test: external-libs
 	@mkdir -p $(BUILD_TEST_DIR)/infoPanel_test_data && cd $(TEST_SRC_DIR) && BUILD_DIR=$(BUILD_TEST_DIR)/ make dev
 	@cp -R $(TEST_SRC_DIR)/infoPanel_test_data $(BUILD_TEST_DIR)/
 	cd $(BUILD_TEST_DIR) && ./test
 
-static-analysis:
+static-analysis: external-libs
 	@cd $(ROOT_DIR) && cppcheck -I $(INCLUDE_DIR) --enable=all $(SRC_DIR)
 
 format:
