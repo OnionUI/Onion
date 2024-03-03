@@ -51,7 +51,7 @@ main() {
     fi
 
     # Show charging animation
-    if [ $is_charging -eq 1 ]; then
+    if [ $is_charging -eq 1 ] && [ ! -f $sysdir/config/.noChargingAnimation ]; then
         cd $sysdir
         chargingState
     fi
