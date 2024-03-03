@@ -26,8 +26,9 @@
 #define IMG_MAX_WIDTH 80
 #define IMG_MAX_HEIGHT 80
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
+#define EXIT_CANCEL 42
 
-static bool quit = false;
+static bool quit = false, cancel = false;
 
 typedef struct {
     char label[MAX_LABEL_LEN];
@@ -342,7 +343,7 @@ void handleKeys(AppState *st)
     if (updateKeystate(st->keystate, &quit, true, NULL)) {
 
         if (st->keystate[SW_BTN_B] == PRESSED) // quit
-            quit = true;
+            cancel = quit = true;
         else if (st->keystate[SW_BTN_A] == PRESSED) // save & quit
             saveItems(st);
         else if (st->keystate[SW_BTN_DOWN] >= PRESSED) // scroll down
@@ -745,5 +746,5 @@ int main()
     SDL_Flip(video);
 
     freeResources(st);
-    return EXIT_SUCCESS;
+    return cancel ? EXIT_CANCEL : EXIT_SUCCESS;
 }
