@@ -601,28 +601,10 @@ mount_main_ui() {
 #   times out after 5 seconds, defaults to 640x480
 #
 get_screen_resolution() {
-    max_attempts=10
-    attempt=0
 
-    log "get_screen_resolution: start"
-    while [ "$attempt" -lt "$max_attempts" ]; do
-        screen_resolution=$(grep 'Current TimingWidth=' /proc/mi_modules/fb/mi_fb0 | sed 's/Current TimingWidth=\([0-9]*\),TimingWidth=\([0-9]*\),.*/\1x\2/')
-        if [ -n "$screen_resolution" ]; then
-            log "get_screen_resolution: success, resolution: $screen_resolution"
-            break
-        fi
-        log "get_screen_resolution: attempt $attempt failed"
-        attempt=$((attempt + 1))
-        sleep 0.5
-    done
-
-    if [ -z "$screen_resolution" ]; then
-        log "get_screen_resolution: failed to get screen resolution, fall back to 640x480"
-        touch /tmp/get_screen_resolution_failed
-    fi
-
-    if [ "$screen_resolution" = "752x560" ] && [ "$(/etc/fw_printenv miyoo_version)" = "miyoo_version=202310271401" ]; then
+    if [ "$(/etc/fw_printenv miyoo_version)" = "miyoo_version=202310271401" ]; then
         touch /tmp/new_res_available
+        screen_resolution="752x560"
     else
         # can't use 752x560 without appropriate firmware or screen
         screen_resolution="640x480"
