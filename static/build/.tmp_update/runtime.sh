@@ -1,4 +1,5 @@
 #!/bin/sh
+cut -d' ' -f1 /proc/uptime >/tmp/boot_start_time
 sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo
 export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
@@ -21,8 +22,8 @@ main() {
     check_installer
     clear_logs
 
-    init_system
-    update_time
+    init_system &
+    update_time &
 
     # Remount passwd/group to add our own users
     mount -o bind $sysdir/config/passwd /etc/passwd
@@ -60,9 +61,11 @@ main() {
     if [ -f $sysdir/config/.blfOn ]; then
         /mnt/SDCARD/.tmp_update/script/blue_light.sh enable &
     fi
-
-    cd $sysdir
-    bootScreen "Boot"
+    
+    if [ "$DEVICE_ID" -eq $MODEL_MMP ]; then
+        cd $sysdir
+        bootScreen "Boot"
+    fi
 
     # Set filebrowser branding to "Onion" and apply custom theme
     if [ -f "$sysdir/config/filebrowser/first.run" ]; then
@@ -138,12 +141,22 @@ main() {
     state_change check_switcher
     set_startup_tab
     # Main runtime loop
+    boot_end "Main runtime loop" &
     while true; do
         state_change check_main_ui
         state_change check_game_menu
         state_change check_game
         state_change check_switcher
     done
+}
+
+boot_end() {
+    if [ -f /tmp/boot_start_time ]; then
+        boot_end_time=$(cut -d' ' -f1 /proc/uptime)
+        boot_start_time=$(cat /tmp/boot_start_time)
+        log "Boot ended at $1\n\tBoot time: $(awk "BEGIN {print $boot_end_time - $boot_start_time}")"
+        rm /tmp/boot_start_time
+    fi
 }
 
 state_change() {
@@ -175,6 +188,7 @@ clear_logs() {
         ./runtime.log \
         ./update_networking.log \
         ./easy_netplay.log \
+        ./change_resolution.log \
         2> /dev/null
 }
 
@@ -265,6 +279,7 @@ launch_game_menu() {
 check_game() {
     # Game launch
     if [ -f $sysdir/cmd_to_run.sh ]; then
+        boot_end "Launch game" &
         launch_game
     fi
 }
@@ -512,6 +527,7 @@ get_info_value() {
 
 check_switcher() {
     if [ -f $sysdir/.runGameSwitcher ]; then
+        boot_end "Launch Switcher" &
         launch_switcher
     elif [ -f /tmp/quick_switch ]; then
         # Quick switch
@@ -646,7 +662,7 @@ init_system() {
     
     echo -n "$device_uuid" > /tmp/deviceSN
 
-    create_swap
+    create_swap &
     load_settings
 
     # init_lcd
