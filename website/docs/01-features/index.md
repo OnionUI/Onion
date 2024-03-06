@@ -113,7 +113,7 @@ Themes in Onion are two things: <br />
 Thanks to `Activity Tracker` app you can: 
 - Track your game playtimes
 - View your total playtime in the top bar
-- Share your playtimes by taking a screenshot (press <kbd>MENU</kbd>+<kbd>POWER</kbd> - screenshot is saved in `Screenshots` folder).
+- Share your playtimes by taking a screenshot (press <kbd>MENU</kbd>+<kbd>POWER</kbd> - screenshot is saved in `Screenshots` folder)
 :::
 
 ## <sup><img src={require('./assets/blue-light-filter.webp').default} style={{width: 54}} /></sup>Blue light filter
