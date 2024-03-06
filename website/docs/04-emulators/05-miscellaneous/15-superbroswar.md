@@ -53,7 +53,7 @@ The official website contains many maps and skins: http://smwstuff.net
 :::
 
 :::note
-"Super Cat Wars LITE" contains more assets than "Super Mario War" which are all loaded in memory at start so: it can be long to load and it can potentially crash sometimes due to a lack of memory
+"Super Cat Wars LITE" contains more assets than "Super Mario War" which are all loaded in memory at start, so it can take some time to load and rarely might even crash due to lack of memory
 :::
 
 :::note
