@@ -53,7 +53,7 @@ The existing scripts are a great source of inspiration for your future script. H
 
 *Some useful variables: *
 
-- `require_networking=1` will show this GLO entry only on the MMP which is equipped of WiFi
-- `%LIST%` is the name of the current system (for example GENESIS)
-- `$1` will contain the full path of the selected rom 
-- `$2` will contain the full path of the current emulator
+- `require_networking=1`: will show this GLO entry only on the MMP which is equipped of WiFi
+- `%LIST%`: is the name of the current system (for example GENESIS)
+- `$1`: will contain the full path of the selected rom 
+- `$2`: will contain the full path of the current emulator
