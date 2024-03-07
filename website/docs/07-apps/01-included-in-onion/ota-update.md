@@ -17,7 +17,7 @@ Allows you to select stable or beta channel.
 
 ## Usage
 
-Onion OTA update is available in [Package Manager](package-manager). It will work only with WiFi/Miyoo Mini Plus.
+Onion OTA update is available in [Package Manager](package-manager). It will work only with WiFi/Miyoo Mini+.
 
 Once installed run it from Apps section.
 
@@ -25,7 +25,7 @@ Once installed run it from Apps section.
 
 [Onion OTA update script](https://github.com/OnionUI/Onion/blob/main/static/build/.tmp_update/script/ota_update.sh).
 
-### detailed features
+### Detailed features
 
 - stable or beta channel available (set on beta currently)
 - check and enable WiFi connection if necessary
