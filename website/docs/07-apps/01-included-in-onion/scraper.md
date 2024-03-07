@@ -40,7 +40,7 @@ https://www.youtube.com/watch?v=lOMP0ozb0I0
 Choose the desired kind of media.
 
 
-| name        | preview example                                   |   available on   |
+| Name        | Preview example                                   |   Available on   |
 | ------------------------- | ----------------------------------- | ---------------- |
 | Box Art                   |![](./assets/scraper_2dbox.png)      | SS,LB,RA         |
 | Screenshot - Title Screen |![](./assets/scraper_screentitle.png)| SS,LB,RA         |
