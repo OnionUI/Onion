@@ -5,7 +5,7 @@ description: Update your Onion using WiFi
 
 # Onion OTA update
 
-<sup>Keep your Onion updated, effortlessly!</sup>
+<sup>Keep your Onion up-to-date, effortlessly!</sup>
 
 
 ## Presentation
