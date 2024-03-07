@@ -5,7 +5,7 @@ description: Download your box arts using WiFi
 
 # Scraper
 
-A missing illustration in your game list ? Onion Scraper can solve that !
+A missing illustration in your game list? Onion Scraper can solve that!
 Using WiFi (so Miyoo Mini Plus only), this app allows you to download game covers without even touching your SD card or a computer.  
 
 https://www.youtube.com/watch?v=lOMP0ozb0I0
@@ -14,10 +14,10 @@ https://www.youtube.com/watch?v=lOMP0ozb0I0
 
 - Automatically download covers from 3 different sources (ScreenScraper, Retroarch and Launchbox)
 - Media type selection (Boxart, 3D, Screenshot, Title Screen, Marquee, Mix)
-- Prefered region selection (will give a priority to the covers from your own region)
-- Manage ScreenScraper accounts (less errors and faster when registered / logged in)
-- Download one covers or all the missing covers of the current console
-- Auto converstion and resize of images for the Miyoo Mini
+- Preferred region selection (will give a priority to the covers from your own region)
+- Manage ScreenScraper accounts (less errors and faster when registered/logged in)
+- Download one cover or all the missing covers of the current console
+- Auto conversion and resize of images for the Miyoo Mini
 - Find game match even if your rom is not well named thanks to ScreenScraper CRC search
 
 
@@ -51,25 +51,25 @@ Choose the desired kind of media.
 | Screenscraper Mix V1      |![](./assets/scraper_mix1.png)       | SS               |
 | Screenscraper Mix V2      |![](./assets/scraper_mix2.png)       | SS               |
 
-<sup>SS = Screenscraper, LB = Launchbox, RA = Retroarch</sup>
+<sup>SS = ScreenScraper, LB = LaunchBox, RA = RetroArch</sup>
 
 
 ### Region selection
-Choose your prefered region. If no media is found for your country code, other countries will be searched as fallback.
+Choose your preferred region. If no media is found for your country code, other countries will be searched as fallback.
 
 
 
 ### Scraping source
 Select where the covers will be searched.
-- ScreenScraper is probably the best supplied, it supports all the media types proposed in Scraper and it also allows to search by CRC which provide a lot of additional matches.
-- Launchbox offers a fast alternative to ScreenScraper.
-- Retroarch is quite fast the the match level is low.
+- ScreenScraper is probably the best supplied, it supports all the media types proposed in Scraper and it also allows to search by CRC which provide a lot of additional matches
+- LaunchBox offers a fast alternative to ScreenScraper
+- RetroArch is quite fast but the match level is low.
 
-### Screenscraper: account settings
+### ScreenScraper: account settings
 
-- Screenscraper information: technical information about ScreenScraper (a retrogaming project to support).
-- Username & password: to set your ScreenScraper credentials.
-- Account state and stats: will show your screenscraper account state  (useful to check if your account credentials are well configured and if you don't exceed quotas).
+- ScreenScraper information: technical information about ScreenScraper (a retrogaming project to support)
+- Username & password: to set your ScreenScraper credentials
+- Account state and stats: will show your ScreenScraper account state (useful to check if your account credentials are well configured and if you don't exceed quotas)
 
 ### Toggle background Scraping
 
