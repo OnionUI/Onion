@@ -12,7 +12,7 @@ https://www.youtube.com/watch?v=lOMP0ozb0I0
 
 ## Features
 
-- Automatically download covers from 3 different sources (ScreenScraper, Retroarch and Launchbox)
+- Automatically download covers from 3 different sources (ScreenScraper, RetroArch and LaunchBox)
 - Media type selection (Boxart, 3D, Screenshot, Title Screen, Marquee, Mix)
 - Preferred region selection (will give a priority to the covers from your own region)
 - Manage ScreenScraper accounts (less errors and faster when registered/logged in)
