@@ -17,7 +17,7 @@ Allows you to select stable or beta channel.
 
 ## Usage
 
-Onion OTA update is available in [Package Manager](package-manager). It will work only with Wifi / Miyoo Mini Plus.
+Onion OTA update is available in [Package Manager](package-manager). It will work only with Wifi/Miyoo Mini Plus.
 
 Once installed run it from Apps section.
 
@@ -28,10 +28,10 @@ Once installed run it from Apps section.
 ### detailed features
 
 - stable or beta channel available (set on beta currently)
-- check and enable wifi connection if necessary
-- compare current Onion version vs Last released version on Github
+- check and enable WiFi connection if necessary
+- compare current Onion version vs last released version on Github
 - displays the size of the release before downloading
 - verify the size of the downloaded file before applying
 - check the current space available before applying update (currently 1GB is required)
-- check disk integrity with fsck.fat, important to avoid SD card FAT file system corruption.
+- check disk integrity with fsck.fat, important to avoid SD card FAT file system corruption
 - generate different exit error codes
