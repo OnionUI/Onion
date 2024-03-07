@@ -323,6 +323,23 @@ void turnOffScreen(void)
     suspend_exec(stay_awake ? -1 : timeout);
 }
 
+struct WritingSettingsParams
+{
+    volatile bool needWriteSettings;
+    volatile bool isWritingSettingsThreadActive;
+};
+
+static void *runWritingSettingsThread(void* param)
+{
+    struct WritingSettingsParams *writingSettingsParams = (struct WritingSettingsParams*)param;
+    writingSettingsParams->isWritingSettingsThreadActive = true;
+    settings_shm_write();
+    settings_save();
+    writingSettingsParams->needWriteSettings = false;
+    writingSettingsParams->isWritingSettingsThreadActive = false;
+    return 0;
+}
+
 //
 //    Main
 //
@@ -385,6 +402,9 @@ int main(void)
 
     bool delete_flag = false;
     bool settings_changed = false;
+
+    struct WritingSettingsParams writingSettingsParams = {false, false};
+    pthread_t writingSettingsThread;
 
     time_t fav_last_modified = time(NULL);
 
@@ -736,9 +756,12 @@ int main(void)
             else if (volDown_state == RELEASED && volUp_state == RELEASED)
                 comboKey_volume = false;
 
-            if (settings_changed) {
-                settings_shm_write();
-                settings_save();
+            if (settings_changed || writingSettingsParams.needWriteSettings) {
+                writingSettingsParams.needWriteSettings = true;
+                if (!writingSettingsParams.isWritingSettingsThreadActive)
+                {
+                    pthread_create(&writingSettingsThread, NULL, runWritingSettingsThread, &writingSettingsParams);
+                }
             }
 
             if ((val == PRESSED) && (system_state == MODE_MAIN_UI)) {
