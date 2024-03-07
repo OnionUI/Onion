@@ -6,7 +6,7 @@ description: Download your box arts using WiFi
 # Scraper
 
 A missing illustration in your game list? Onion Scraper can solve that!
-Using WiFi (so Miyoo Mini Plus only), this app allows you to download game covers without even touching your SD card or a computer.  
+Using WiFi (so Miyoo Mini+ only), this app allows you to download game covers without even touching your SD card or a computer.  
 
 https://www.youtube.com/watch?v=lOMP0ozb0I0
 
