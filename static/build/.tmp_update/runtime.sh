@@ -61,11 +61,6 @@ main() {
     if [ -f $sysdir/config/.blfOn ]; then
         /mnt/SDCARD/.tmp_update/script/blue_light.sh enable &
     fi
-    
-    if [ "$DEVICE_ID" -eq $MODEL_MMP ]; then
-        cd $sysdir
-        bootScreen "Boot"
-    fi
 
     # Set filebrowser branding to "Onion" and apply custom theme
     if [ -f "$sysdir/config/filebrowser/first.run" ]; then
@@ -116,6 +111,9 @@ main() {
     for startup_script in $startup_scripts; do
         sh "$startup_script"
     done
+    
+    # clear boot screen
+    # clearFB 
 
     # Auto launch
     if [ ! -f $sysdir/config/.noAutoStart ]; then
@@ -155,7 +153,6 @@ boot_end() {
         boot_end_time=$(cut -d' ' -f1 /proc/uptime)
         boot_start_time=$(cat /tmp/boot_start_time)
         log "Boot ended at $1\n\tBoot time: $(awk "BEGIN {print $boot_end_time - $boot_start_time}")"
-        rm /tmp/boot_start_time
     fi
 }
 
@@ -285,7 +282,7 @@ check_game() {
 }
 
 check_is_game() {
-    echo "$1" | grep -q "retroarch/cores" || echo "$1" | grep -q "/../../Roms/" || echo "$1" | grep -q "/mnt/SDCARD/Roms/"
+    echo "$1" | grep -qE "retroarch\/cores|\/..\/..\/Roms\/|\/mnt\/SDCARD\/Roms\/"
 }
 
 change_resolution() {
@@ -691,6 +688,7 @@ init_system() {
     echo $frequency > /sys/class/pwm/pwmchip0/pwm0/period
     echo $brightness_raw > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
     echo 1 > /sys/class/pwm/pwmchip0/pwm0/enable
+    $sysdir/script/bootscreen.sh &
 
     get_screen_resolution
 }

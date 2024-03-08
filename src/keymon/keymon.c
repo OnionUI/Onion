@@ -79,7 +79,7 @@ int suspend(uint32_t mode)
 
     // terminate retroarch before kill
     if (mode == 2) {
-        screenshot_system();
+        screenshot_system(false);
         terminate_retroarch();
         terminate_drastic();
     }
@@ -175,7 +175,7 @@ void quit(int exitcode)
 void shutdown(void)
 {
     set_system_shutdown();
-    screenshot_system();
+    screenshot_system(true);
     terminate_retroarch();
     terminate_drastic();
     system_clock_get();
@@ -207,7 +207,7 @@ void deepsleep(void)
         if (check_autosave()) {
             short_pulse();
             set_system_shutdown();
-            screenshot_system();
+            screenshot_system(false);
             terminate_retroarch();
         }
     }
@@ -225,7 +225,7 @@ void deepsleep(void)
     else if (system_state == MODE_DRASTIC) {
         short_pulse();
         set_system_shutdown();
-        screenshot_system();
+        screenshot_system(false);
         terminate_drastic();
     }
 
@@ -809,7 +809,7 @@ int main(void)
         // Quit RetroArch / auto-save when battery too low
         if (settings.low_battery_autosave_at && battery_getPercentage() <= settings.low_battery_autosave_at && check_autosave()) {
             temp_flag_set(".lowBat", true);
-            screenshot_system();
+            screenshot_system(true);
             terminate_retroarch();
             terminate_drastic();
         }
