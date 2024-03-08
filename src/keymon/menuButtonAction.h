@@ -149,40 +149,40 @@ void action_MainUI_resumeGame(void)
 
 void action_RA_gameSwitcher(void)
 {
-    screenshot_system(false);
+    screenshot_system();
     set_gameSwitcher();
     terminate_retroarch();
 }
 
 void action_RA_exitToMenu(void)
 {
-    screenshot_system(false);
+    screenshot_system();
     terminate_retroarch();
 }
 
 void action_RA_quickSwitch(void)
 {
-    screenshot_system(false);
+    screenshot_system();
     set_quickSwitch();
     terminate_retroarch();
 }
 
 void action_drastic_gameSwitcher(void)
 {
-    screenshot_system(false);
+    screenshot_system();
     set_gameSwitcher();
     terminate_drastic();
 }
 
 void action_drastic_exitToMenu(void)
 {
-    screenshot_system(false);
+    screenshot_system();
     terminate_drastic();
 }
 
 void action_drastic_quickSwitch(void)
 {
-    screenshot_system(false);
+    screenshot_system();
     set_quickSwitch();
     terminate_drastic();
 }

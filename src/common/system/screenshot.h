@@ -14,12 +14,6 @@
 #include "utils/process.h"
 #include "utils/str.h"
 
-bool __get_path_bootscreen(char *path_out)
-{
-    strcpy(path_out, "/mnt/SDCARD/Saves/CurrentProfile/romScreens/bootScreen.png");
-    return true;
-}
-
 bool __get_path_romscreen(char *path_out)
 {
     char filename[STR_MAX];
@@ -189,13 +183,12 @@ bool screenshot_recent(void)
     return __screenshot_perform(__get_path_recent, get_game_pid());
 }
 
-bool screenshot_system(bool boot_screen)
+bool screenshot_system()
 {
     pid_t p_id = get_game_pid();
-    if (p_id != 0 && __screenshot_perform(__get_path_romscreen, p_id))
-        if (boot_screen &&  __screenshot_perform(__get_path_bootscreen, p_id))
-            return true; // TODO: just copy the first one
-        else return true; // TODO: fix this mess
+    if (p_id != 0) {
+        return __screenshot_perform(__get_path_romscreen, p_id);
+    }
     return false;
 }
 

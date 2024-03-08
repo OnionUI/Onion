@@ -111,7 +111,7 @@ main() {
     for startup_script in $startup_scripts; do
         sh "$startup_script"
     done
-    
+
     # clear boot screen
     # clearFB 
 
