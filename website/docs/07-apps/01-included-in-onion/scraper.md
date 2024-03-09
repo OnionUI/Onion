@@ -48,8 +48,8 @@ Choose the desired kind of media.
 | Box Art - 3D              |![](./assets/scraper_3dbox.png)      | SS,LB            |
 | Wheel                     |![](./assets/scraper_wheel.png)      | SS,LB            |
 | Marquee                   |![](./assets/scraper_marquee.png)    | SS,LB            |
-| Screenscraper Mix V1      |![](./assets/scraper_mix1.png)       | SS               |
-| Screenscraper Mix V2      |![](./assets/scraper_mix2.png)       | SS               |
+| ScreenScraper Mix V1      |![](./assets/scraper_mix1.png)       | SS               |
+| ScreenScraper Mix V2      |![](./assets/scraper_mix2.png)       | SS               |
 
 <sup>SS = ScreenScraper, LB = LaunchBox, RA = RetroArch</sup>
 
