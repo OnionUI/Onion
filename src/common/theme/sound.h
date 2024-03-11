@@ -17,7 +17,7 @@ void sound_change(void)
         return;
 
     if (!_volume_updated) {
-        int volume = (settings.bgm_volume << 7) / 20;
+        int volume = (settings.bgm_volume * 128) / 20;
         printf_debug("Volume set: %d = %d\n", settings.bgm_volume, volume);
         Mix_Volume(-1, volume);
         _volume_updated = true;
