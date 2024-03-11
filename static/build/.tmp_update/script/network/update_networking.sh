@@ -230,7 +230,6 @@ check_sshstate() {
             fi
         else
             if wifi_enabled; then
-                mkdir -p $sysdir/etc/dropbear
                 sync
                 if flag_enabled authsshState; then
                     ssh_authed
