@@ -94,7 +94,7 @@ int tree(const char *directory, const char *prefix, counter_t *counter,
     counter->dirs++;
 
     while ((file_dirent = readdir(dir_handle)) != NULL) {
-        if (file_dirent->d_name[0] == '.') // no hidden files, . or  ..
+        if (strcmp(file_dirent->d_name, ".") == 0 || strcmp(file_dirent->d_name, "..") == 0) // no . or ..
             continue;
 
         if (file_dirent->d_type == DT_DIR &&
