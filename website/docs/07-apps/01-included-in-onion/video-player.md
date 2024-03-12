@@ -16,7 +16,7 @@ A fully featured video player for Onion based on FFplay.
 ## Installation
 
 - Run Package Manager from apps section and install the Video Player
-- Place your videos in `Media/Videos` folder of your SD card, using Subfolders is possible.
+- Place your videos in `Media/Videos` folder of your SD card, using subfolders is possible
 
 
 ## Usage
@@ -81,7 +81,7 @@ Many formats are supported, after a few tests a little everything below 1080p is
 </tr>
 <tr>
 <td><kbd>START</kbd></td>
-<td>Full screen / 16:9</td>
+<td>Full screen/16:9</td>
 </tr>
 <tr>
 <td><kbd>SELECT</kbd></td>
