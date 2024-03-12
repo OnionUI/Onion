@@ -323,6 +323,16 @@ void turnOffScreen(void)
     suspend_exec(stay_awake ? -1 : timeout);
 }
 
+static void *runWritingSettingsThread(void* param)
+{
+    bool *isWritingSettingsThreadActive = (bool*)param;
+    *isWritingSettingsThreadActive = true;
+    settings_shm_write();
+    settings_save();
+    *isWritingSettingsThreadActive = false;
+    return 0;
+}
+
 //
 //    Main
 //
@@ -385,6 +395,10 @@ int main(void)
 
     bool delete_flag = false;
     bool settings_changed = false;
+
+    volatile bool needWriteSettings = false;
+    volatile bool isWritingSettingsThreadActive = false;
+    pthread_t writingSettingsThread;
 
     time_t fav_last_modified = time(NULL);
 
@@ -736,9 +750,13 @@ int main(void)
             else if (volDown_state == RELEASED && volUp_state == RELEASED)
                 comboKey_volume = false;
 
-            if (settings_changed) {
-                settings_shm_write();
-                settings_save();
+            if (settings_changed || needWriteSettings) {
+                needWriteSettings = true;
+                if (!isWritingSettingsThreadActive)
+                {
+                    needWriteSettings = false;
+                    pthread_create(&writingSettingsThread, NULL, runWritingSettingsThread, &isWritingSettingsThreadActive);
+                }
             }
 
             if ((val == PRESSED) && (system_state == MODE_MAIN_UI)) {
