@@ -76,4 +76,4 @@ You'll find some advices to customize overlays and filters [Here](https://github
 
 ### <sub>Overclocking</sub>
 
-Onion's RetroArch includes overclocking features. There's no UI for it currently. This feature is described [in this post](https://github.com/OnionUI/Onion/issues/768#issuecomment-1659968668).
+Onion's RetroArch includes overclocking feature. There's no UI for it currently. This feature is described [in this post](https://github.com/OnionUI/Onion/issues/768#issuecomment-1659968668).
