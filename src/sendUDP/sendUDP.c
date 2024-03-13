@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    printf("Sent %ld bytes to %s:%d\n", bytes_sent, ipAddress, port);
+    printf("Sent %d bytes to %s:%d\n", bytes_sent, ipAddress, port);
 
     close(socket_fd);
 
