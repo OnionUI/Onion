@@ -1,3 +1,5 @@
+#define _LARGEFILE64_SOURCE
+
 #include "file.h"
 
 #include <ctype.h>
@@ -20,26 +22,26 @@
 
 bool exists(const char *file_path)
 {
-    struct stat buffer;
-    return stat(file_path, &buffer) == 0;
+    struct stat64 buffer;
+    return stat64(file_path, &buffer) == 0;
 }
 
 bool is_file(const char *file_path)
 {
-    struct stat buffer;
-    return stat(file_path, &buffer) == 0 && S_ISREG(buffer.st_mode);
+    struct stat64 buffer;
+    return stat64(file_path, &buffer) == 0 && S_ISREG(buffer.st_mode);
 }
 
 bool is_dir(const char *file_path)
 {
-    struct stat buffer;
-    return stat(file_path, &buffer) == 0 && S_ISDIR(buffer.st_mode);
+    struct stat64 buffer;
+    return stat64(file_path, &buffer) == 0 && S_ISDIR(buffer.st_mode);
 }
 
 bool file_isModified(const char *path, time_t *old_mtime)
 {
-    struct stat file_stat;
-    if (stat(path, &file_stat) == 0 && file_stat.st_mtime > *old_mtime) {
+    struct stat64 file_stat;
+    if (stat64(path, &file_stat) == 0 && file_stat.st_mtime > *old_mtime) {
         *old_mtime = file_stat.st_mtime;
         return true;
     }
@@ -342,7 +344,7 @@ bool file_findNewest(const char *dir_path, char *newest_file, size_t buffer_size
 {
     DIR *d;
     struct dirent *dir;
-    struct stat file_stat;
+    struct stat64 file_stat;
     time_t newest_mtime = 0;
 
     d = opendir(dir_path);
@@ -356,7 +358,7 @@ bool file_findNewest(const char *dir_path, char *newest_file, size_t buffer_size
             char full_path[PATH_MAX];
             snprintf(full_path, sizeof(full_path), "%s/%s", dir_path, dir->d_name);
 
-            if (stat(full_path, &file_stat) == 0) {
+            if (stat64(full_path, &file_stat) == 0) {
                 if (!found || file_stat.st_mtime > newest_mtime) {
                     newest_mtime = file_stat.st_mtime;
                     strncpy(newest_file, dir->d_name, buffer_size);
