@@ -215,8 +215,8 @@ launch_main_ui() {
     cd $miyoodir/app
     PATH="$miyoodir/app:$PATH" \
         LD_LIBRARY_PATH="$miyoodir/lib:/config/lib:/lib" \
-        LD_PRELOAD="$miyoodir/lib/libpadsp.so" \
-        ./MainUI 2>&1 > /dev/null
+        LD_PRELOAD="$sysdir/lib/libmainuihooks.so:$miyoodir/lib/libpadsp.so" \
+        ./MainUI
 
     # Merge the last game launched into the recent list
     check_hide_recents
