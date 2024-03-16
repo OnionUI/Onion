@@ -71,49 +71,40 @@ downloadmain(){
 
 }
 
-
 echo "Checking for updates"
 
-#This downloads the latest README and grabs its checksum f1c0835b111e94336679169d1e0b2b07 (29-Feb-2024)
+# This downloads the latest README and grabs its checksum f1c0835b111e94336679169d1e0b2b07 (29-Feb-2024)
 wget -O latest_md https://raw.githubusercontent.com/OnionUI/Themes/main/README.md
-latest_checksum= md5sum 'latest_md' | awk '{print $1}'
-#remove the file once md5sum has been calculated
+latest_checksum=$(md5sum 'latest_md' | awk '{print $1}')
+# Remove the file once md5sum has been calculated
 rm latest_md
 
-#f1c0835b111e94336679169d1e0b2b07
+# f1c0835b111e94336679169d1e0b2b07
 
 if [ -f "current_checksum.txt" ]; then
-    #Checking the checksum of the previous saved checksum
-    current_checksum=$(<"current_checksum.txt")
+    # Checking the checksum of the previously saved checksum
+    current_checksum=$(cat "current_checksum.txt")
 
-    if [ $current_checksum = $latest_checksum ]; then
-        #There is no changes to the README
+    if [ "$current_checksum" == "$latest_checksum" ]; then
+        # There is no changes to the README
         echo "No Updates Found"
-	sleep 5
+        sleep 5
     else 
-        #There is an update found to the README
-        #Download Themes 
+        # There is an update found to the README
+        # Download Themes 
         echo "Update Found"
-		downloadmain
+        downloadmain
 
-		#Saves the new checksum to the txt file
-        echo $latest_checksum > current_checksum.txt
+        # Save the new checksum to the txt file
+        echo "$latest_checksum" > current_checksum.txt
     fi 
 else
-
     echo "First time installation"
-	#Download themes
+    # Download themes
     downloadmain
 
-
-	#Saves the new checksum to the txt file
-    echo $latest_checksum > current_checksum.txt
+    # Save the new checksum to the txt file
+    echo "$latest_checksum" > current_checksum.txt
 fi
-
-
-
-
-
-
 
 
