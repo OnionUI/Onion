@@ -10,12 +10,15 @@
 #include "utils/str.h"
 
 #define MAX_NUM_VALUES 100
+#define SCROLL_ACCELERATION_THRESHOLD 10
+#define SCROLL_ACCELLERATION_MAX_SPEED 4
 
 typedef enum list_type { LIST_SMALL,
                          LIST_LARGE } ListType;
 typedef enum item_type { ACTION,
                          TOGGLE,
-                         MULTIVALUE } ListItemType;
+                         MULTIVALUE,
+                         PLAYACTIVITY } ListItemType;
 
 typedef struct ListItem {
     int _id;
@@ -206,7 +209,23 @@ bool list_scrollTo(List *list, int active_pos)
 
 bool list_keyUp(List *list, bool key_repeat)
 {
+    static int key_hold_duration = 0;
+    static int scroll_speed = 1;
+
+    if (key_repeat && list->active_pos == 0)
+        return false;
+
     int old_pos = list->active_pos;
+
+    if (key_repeat) {
+        key_hold_duration++;
+        if (scroll_speed < SCROLL_ACCELLERATION_MAX_SPEED && key_hold_duration % SCROLL_ACCELERATION_THRESHOLD == 0)
+            printf("scroll_speed: %d\n", ++scroll_speed);
+    }
+    else {
+        key_hold_duration = 0;
+        scroll_speed = 1;
+    }
 
     // Wrap-around (move to bottom)
     if (list->active_pos == 0) {
@@ -215,8 +234,12 @@ bool list_keyUp(List *list, bool key_repeat)
         list->active_pos = list->item_count - 1;
     }
     // Decrease selection (move up)
-    else
-        list->active_pos -= 1;
+    else if (list->active_pos - scroll_speed >= 0) {
+        list->active_pos -= scroll_speed;
+    }
+    else {
+        list->active_pos = 0;
+    }
 
     list_ensureVisible(list, -1);
 
@@ -238,7 +261,19 @@ bool list_keyUp(List *list, bool key_repeat)
 
 bool list_keyDown(List *list, bool key_repeat)
 {
+    static int key_hold_duration = 0;
+    static int scroll_speed = 1;
+
     int old_pos = list->active_pos;
+
+    if (key_repeat) {
+        if (scroll_speed < SCROLL_ACCELLERATION_MAX_SPEED && ++key_hold_duration % SCROLL_ACCELERATION_THRESHOLD == 0)
+            printf("scroll_speed: %d\n", ++scroll_speed);
+    }
+    else {
+        key_hold_duration = 0;
+        scroll_speed = 1;
+    }
 
     // Wrap-around (move to top)
     if (list->active_pos == list->item_count - 1) {
@@ -247,8 +282,12 @@ bool list_keyDown(List *list, bool key_repeat)
         list->active_pos = 0;
     }
     // Increase selection (move down)
-    else
-        list->active_pos += 1;
+    else if (list->active_pos + scroll_speed < list->item_count) {
+        list->active_pos += scroll_speed;
+    }
+    else {
+        list->active_pos = list->item_count - 1;
+    }
 
     list_ensureVisible(list, 1);
 
@@ -412,13 +451,18 @@ void list_getItemValueLabel(ListItem *item, char *out_label)
         sprintf(out_label, "%d", item->value);
 }
 
-void list_free(List *list)
+//
+// Free list resources
+// icon_ptr_keep: pointer to a surface that should not be freed
+// in case of multiple list entries sharing the surface
+//
+void list_free(List *list, SDL_Surface *icon_ptr_keep)
 {
     if (!list->_created)
         return;
     for (int i = 0; i < list->item_count; i++) {
         ListItem *item = &list->items[i];
-        if (item->icon_ptr != NULL)
+        if (item->icon_ptr && item->icon_ptr != icon_ptr_keep)
             SDL_FreeSurface((SDL_Surface *)item->icon_ptr);
         if (item->preview_ptr != NULL)
             SDL_FreeSurface((SDL_Surface *)item->preview_ptr);

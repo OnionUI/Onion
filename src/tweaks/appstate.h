@@ -27,15 +27,15 @@ static List _menu_vnc;
 
 void menu_network_free_all(void)
 {
-    list_free(&_menu_network);
-    list_free(&_menu_wifi);
-    list_free(&_menu_telnet);
-    list_free(&_menu_ftp);
-    list_free(&_menu_wps);
-    list_free(&_menu_http);
-    list_free(&_menu_ssh);
-    list_free(&_menu_smbd);
-    list_free(&_menu_vnc);
+    list_free(&_menu_network, NULL);
+    list_free(&_menu_wifi, NULL);
+    list_free(&_menu_telnet, NULL);
+    list_free(&_menu_ftp, NULL);
+    list_free(&_menu_wps, NULL);
+    list_free(&_menu_http, NULL);
+    list_free(&_menu_ssh, NULL);
+    list_free(&_menu_smbd, NULL);
+    list_free(&_menu_vnc, NULL);
 }
 
 static List _menu_icons;
@@ -47,12 +47,12 @@ static List _menu_temp;
 
 void menu_icons_free_all(void)
 {
-    list_free(&_menu_icons);
-    list_free(&_menu_icon_packs);
-    list_free(&_menu_console_icons);
-    list_free(&_menu_app_icons);
-    list_free(&_menu_expert_icons);
-    list_free(&_menu_temp);
+    list_free(&_menu_icons, NULL);
+    list_free(&_menu_icon_packs, NULL);
+    list_free(&_menu_console_icons, NULL);
+    list_free(&_menu_app_icons, NULL);
+    list_free(&_menu_expert_icons, NULL);
+    list_free(&_menu_temp, NULL);
 }
 
 static List _menu_main;
@@ -77,24 +77,24 @@ static List _menu_user_blue_light;
 
 void menu_free_all(void)
 {
-    list_free(&_menu_main);
-    list_free(&_menu_system);
-    list_free(&_menu_date_time);
-    list_free(&_menu_system_display);
-    list_free(&_menu_system_startup);
-    list_free(&_menu_button_action);
-    list_free(&_menu_button_action_mainui_menu);
-    list_free(&_menu_button_action_ingame_menu);
-    list_free(&_menu_user_interface);
-    list_free(&_menu_theme_overrides);
-    list_free(&_menu_battery_percentage);
-    list_free(&_menu_advanced);
-    list_free(&_menu_reset_settings);
-    list_free(&_menu_tools);
-    list_free(&_menu_tools_m3uGenerator);
-    list_free(&_menu_diagnostics);
-    list_free(&_menu_screen_recorder);
-    list_free(&_menu_user_blue_light);
+    list_free(&_menu_main, NULL);
+    list_free(&_menu_system, NULL);
+    list_free(&_menu_date_time, NULL);
+    list_free(&_menu_system_display, NULL);
+    list_free(&_menu_system_startup, NULL);
+    list_free(&_menu_button_action, NULL);
+    list_free(&_menu_button_action_mainui_menu, NULL);
+    list_free(&_menu_button_action_ingame_menu, NULL);
+    list_free(&_menu_user_interface, NULL);
+    list_free(&_menu_theme_overrides, NULL);
+    list_free(&_menu_battery_percentage, NULL);
+    list_free(&_menu_advanced, NULL);
+    list_free(&_menu_reset_settings, NULL);
+    list_free(&_menu_tools, NULL);
+    list_free(&_menu_tools_m3uGenerator, NULL);
+    list_free(&_menu_diagnostics, NULL);
+    list_free(&_menu_screen_recorder, NULL);
+    list_free(&_menu_user_blue_light, NULL);
 
     menu_icons_free_all();
     menu_network_free_all();

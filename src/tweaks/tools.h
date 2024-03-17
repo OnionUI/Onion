@@ -150,12 +150,16 @@ void tool_generateMiyoogamelists(void *pt)
 
 void tool_sortAppsAZ(void *pt)
 {
-    _runCommandPopup(tools_short_names[3], "/mnt/SDCARD/.tmp_update/script/app_sorter.sh");
+    _runCommandPopup(tools_short_names[5], "/mnt/SDCARD/.tmp_update/script/app_sorter.sh");
 }
 
 void tool_sortAppsZA(void *pt)
 {
-    _runCommandPopup(tools_short_names[4], "/mnt/SDCARD/.tmp_update/script/app_sorter.sh desc");
+    _runCommandPopup(tools_short_names[6], "/mnt/SDCARD/.tmp_update/script/app_sorter.sh desc");
+}
+void tool_restorePlayActivityHiddenEntries(void *pt)
+{
+    _runCommandPopup(tools_short_names[7], "/mnt/SDCARD/.tmp_update/script/restore_deleted_play_activity.sh");
 }
 
 void tool_screenRecorder(void *pt)

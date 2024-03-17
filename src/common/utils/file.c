@@ -171,7 +171,9 @@ char *extractPath(const char *absolutePath)
 
 void file_cleanName(char *name_out, const char *file_name)
 {
-    char *name_without_ext = file_removeExtension(strdup(file_name));
+    char *_dup = strdup(file_name);
+    char *name_without_ext = file_removeExtension(_dup);
+    free(_dup);
     char *no_underscores = str_replace(name_without_ext, "_", " ");
     char *dot_ptr = strstr(no_underscores, ".");
     if (dot_ptr != NULL) {

@@ -177,9 +177,9 @@ void _action_apply_icon_pack(void *_item)
 
         sprintf(message_done, "Applied %d icons", applied);
 
-        list_free(&_menu_console_icons);
-        list_free(&_menu_app_icons);
-        list_free(&_menu_temp);
+        list_free(&_menu_console_icons, NULL);
+        list_free(&_menu_app_icons, NULL);
+        list_free(&_menu_temp, NULL);
 
         SDL_BlitSurface(background_cache, NULL, screen, NULL);
         theme_renderDialog(screen, item->label, message_done, false);
@@ -377,7 +377,7 @@ void _menu_temp_action(void *_item)
 void _menu_change_icon(ListItem *item, IconMode_e mode)
 {
     if (_menu_temp._created)
-        list_free(&_menu_temp);
+        list_free(&_menu_temp, NULL);
 
     _menu_temp = list_create(200, LIST_SMALL);
     strncpy(_menu_temp.title, item->label, STR_MAX - 1);

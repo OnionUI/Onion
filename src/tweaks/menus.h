@@ -903,6 +903,12 @@ void menu_tools(void *_)
                                      .action = tool_sortAppsZA},
                                  "Use this tool to sort your App list\n"
                                  "descending from Z to A.\n");
+        list_addItemWithInfoNote(&_menu_tools,
+                                 (ListItem){
+                                     .label = "Restore all deleted activity tracker entries",
+                                     .action = tool_restorePlayActivityHiddenEntries},
+                                 "Use this tool to restore all previously\n"
+                                 "deleted activitytracker entries.\n");
     }
     menu_stack[++menu_level] = &_menu_tools;
     header_changed = true;

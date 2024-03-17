@@ -281,7 +281,7 @@ int main(int argc, char *argv[])
 #endif
 
     print_debug("Freeing list...");
-    list_free(&list);
+    list_free(&list, NULL);
     printf_debug(LOG_SUCCESS, "freed list");
 
     if (has_message)
