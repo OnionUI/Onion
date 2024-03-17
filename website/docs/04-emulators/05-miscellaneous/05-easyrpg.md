@@ -8,10 +8,10 @@ slug: /emulators/easyrpg
 
 - Emulator: lr-easyrpg
 - Rom Folder: `EASYRPG`
-- Extensions: `.easyrpg`
+- Extensions: `.easyrpg, .zip`
 - Bios: None
  
 
 EasyRPG is a community project to create a free, open source, role playing game creation tool, compatible with RPG Maker 2000/2003 games.
 
-Games must have a `RPG_RT.ini` and `RPG_RT.ldb` inside their respective folders.
+Games must have a `RPG_RT.ini` and `RPG_RT.ldb` inside their respective folders. (.zip folders are preferred in the \roms folder.)
