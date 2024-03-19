@@ -389,8 +389,10 @@ static void *batteryWarning_thread(void *param)
     while (1) {
         if (temp_flag_get("hasBatteryDisplay"))
             break;
-        display_drawBatteryIcon(0x00FF0000, 15, RENDER_HEIGHT - 30, 10,
-                                0x00FF0000); // draw red battery icon
+        if (display_getBrightnessRaw() != 0) {
+            display_drawBatteryIcon(0x00FF0000, 15, RENDER_HEIGHT - 30, 10,
+                                    0x00FF0000); // draw red battery icon
+        }
         usleep(0x4000);
     }
     return 0;
