@@ -186,7 +186,7 @@ bool theme_applyConfig(Theme_s *config, const char *config_path,
     // Time overlay theme settings
 
     json_getBool(json_time, "hidelogo", &config->time.hidelogo);
-    
+
     if (!json_getString(json_time, "font", config->time.font) && use_fallbacks)
         strcpy(config->time.font, config->hint.font);
 
