@@ -117,7 +117,7 @@ int SDL_Flip(SDL_Surface *screen)
 {
     if (!original_SDL_Flip) // we fucked up
         return -1;
-    else if (!time_settings.is_enabled || !mainUI_initialized || !time_settings.font)
+    else if (!time_settings.is_enabled || time_settings.theme.size == 0 || !mainUI_initialized || !time_settings.font)
         return original_SDL_Flip(screen);
 
     char *time_string = getTime();
