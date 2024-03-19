@@ -138,6 +138,9 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/pngScale && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/libgamename && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/gameNameList && BUILD_DIR=$(BIN_DIR) make
+# these need to be rebuilt with -fPIC
+	@rm -f $(ROOT_DIR)/include/cjson/cJSON.o
+	@rm -f $(SRC_DIR)/common/utils/*.o
 	@cd $(SRC_DIR)/libmainuihooks && BUILD_DIR=$(LIB_DIR) make
 # Build dependencies for installer
 	@mkdir -p $(INSTALLER_DIR)/bin

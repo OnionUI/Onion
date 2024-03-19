@@ -110,4 +110,6 @@ void file_delete_line(const char *fileName, int n);
 
 void file_add_line_to_beginning(const char *filename, const char *lineToAdd);
 
+long file_get_size(char *filename);
+
 #endif // UTILS_FILE_H__

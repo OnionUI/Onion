@@ -19,6 +19,15 @@ typedef enum TextAlign {
     RIGHT
 } Theme_TextAlign;
 
+typedef struct Theme_Time {
+    int size;
+    SDL_Color color;
+    int X;
+    int Y;
+    bool hidelogo;
+    char font[STR_MAX];
+} Time_s;
+
 typedef struct Theme_BatteryPercentage {
     bool visible;
     char font[STR_MAX];
@@ -61,6 +70,7 @@ typedef struct Theme {
     char description[STR_MAX];
     HideLabels_s hideLabels;
     BatteryPercentage_s batteryPercentage;
+    Time_s time;
     Frame_s frame;
     FontStyle_s title;
     FontStyle_s hint;
@@ -104,6 +114,7 @@ bool theme_applyConfig(Theme_s *config, const char *config_path,
     cJSON *json_root = cJSON_Parse(json_str);
     cJSON *json_batteryPercentage =
         cJSON_GetObjectItem(json_root, "batteryPercentage");
+    cJSON *json_time = cJSON_GetObjectItem(json_root, "time");
     cJSON *json_hideLabels = cJSON_GetObjectItem(json_root, "hideLabels");
     cJSON *json_frame = cJSON_GetObjectItem(json_root, "frame");
     cJSON *json_title = cJSON_GetObjectItem(json_root, "title");
@@ -171,6 +182,23 @@ bool theme_applyConfig(Theme_s *config, const char *config_path,
     }
 
     json_getBool(json_batteryPercentage, "fixed", &config->batteryPercentage.fixed);
+
+    // Time overlay theme settings
+
+    json_getBool(json_time, "hidelogo", &config->time.hidelogo);
+    
+    if (!json_getString(json_time, "font", config->time.font) && use_fallbacks)
+        strcpy(config->time.font, config->hint.font);
+
+    json_getInt(json_time, "size", &config->time.size);
+
+    if (!json_color(json_time, "color", &config->time.color) && use_fallbacks)
+        config->time.color = config->hint.color;
+
+    json_getInt(json_time, "X", &config->time.X);
+    json_getInt(json_time, "Y", &config->time.Y);
+
+    // Time overlay theme settings end
 
     json_getInt(json_frame, "border-left", &config->frame.border_left);
     json_getInt(json_frame, "border-right", &config->frame.border_right);

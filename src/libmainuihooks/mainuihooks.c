@@ -7,30 +7,42 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "theme/config.h"
+#include "theme/theme.h"
+#include "utils/config.h"
+
 #define LOGGING_FILE "/mnt/SDCARD/.tmp_update/config/.logging"
 #define GET_TIME_SCRIPT "/mnt/SDCARD/.tmp_update/script/get_time.sh"
-#define TIME_FONT_FILE "/customer/app/Exo-2-Bold-Italic.ttf"
 #define DEFAULT_PRELOAD "/mnt/SDCARD/miyoo/lib/libpadsp.so"
+
+bool mainUI_initialized = false;
+bool logging = false;
+char theme_path[STR_MAX];
+Theme_s *theme(void);
+
+typedef struct {
+    bool is_enabled;
+    bool is_12h;
+    SDL_Rect *position;
+    TTF_Font *font;
+    Time_s theme;
+} TimeSettings;
+
+TimeSettings time_settings = {false, false, NULL, NULL};
+SDL_Surface *clock_surface = NULL;
 
 typedef int (*SDL_Flip_ptr)(SDL_Surface *screen);
 SDL_Flip_ptr original_SDL_Flip = NULL;
 typedef int (*printf_ptr)(const char *format, ...);
 printf_ptr original_printf = NULL;
 
-SDL_Surface *clock_surface = NULL;
-TTF_Font *font = NULL;
-SDL_Color white = {255, 255, 255};
-
-bool mainUI_initialized = false;
-bool logging = false;
-
 char *getTime()
 {
-    //TODO: 12/24h?
     FILE *fp;
-    char output[6];
-
-    fp = popen(GET_TIME_SCRIPT, "r");
+    char output[10];
+    char command[strlen(GET_TIME_SCRIPT) + 10];
+    snprintf(command, sizeof(command), time_settings.is_12h ? "%s --12h" : "%s", GET_TIME_SCRIPT);
+    fp = popen(command, "r");
     if (fp == NULL) {
         fprintf(stderr, "Failed to run get_time.sh\n");
         return NULL;
@@ -53,7 +65,6 @@ char *getTime()
 
 //
 // rotate a 32bpp surface's pixels by 180 degrees without allocating new memory
-// only works correctly for surfaces of even height
 //
 void RotateSurface(SDL_Surface *surface)
 {
@@ -70,6 +81,17 @@ void RotateSurface(SDL_Surface *surface)
             uint32_t bottomPixel = pixels[(height - y - 1) * width + (width - x - 1)];
             pixels[y * width + x] = bottomPixel;
             pixels[(height - y - 1) * width + (width - x - 1)] = topPixel;
+        }
+    }
+
+    // If the height is odd, handle the middle row separately
+    if (height % 2 != 0) {
+        int midY = height / 2;
+        for (int x = 0; x < width / 2; x++) {
+            uint32_t leftPixel = pixels[midY * width + x];
+            uint32_t rightPixel = pixels[midY * width + (width - x - 1)];
+            pixels[midY * width + x] = rightPixel;
+            pixels[midY * width + (width - x - 1)] = leftPixel;
         }
     }
 }
@@ -95,18 +117,14 @@ int SDL_Flip(SDL_Surface *screen)
 {
     if (!original_SDL_Flip) // we fucked up
         return -1;
-    else if (!mainUI_initialized || !font)
+    else if (!time_settings.is_enabled || !mainUI_initialized || !time_settings.font)
         return original_SDL_Flip(screen);
 
     char *time_string = getTime();
-    clock_surface = TTF_RenderUTF8_Blended(font, time_string, white);
+    clock_surface = TTF_RenderUTF8_Blended(time_settings.font, time_string, time_settings.theme.color);
     free(time_string);
     RotateSurface(clock_surface);
-
-    // TODO: coords from theme config?
-    SDL_Rect dest = {160, 467 - (clock_surface->h), 0, 0};
-
-    SDL_BlitSurface(clock_surface, NULL, screen, &dest);
+    SDL_BlitSurface(clock_surface, NULL, screen, time_settings.position);
     return original_SDL_Flip(screen);
 }
 
@@ -121,26 +139,30 @@ void __attribute__((constructor)) load(void)
     original_printf = dlsym(RTLD_NEXT, "printf");
     original_SDL_Flip = dlsym(RTLD_NEXT, "SDL_Flip");
 
-    // check if logging is enabled
-    if (access(LOGGING_FILE, F_OK) == 0)
-        logging = true;
+    time_settings.is_12h = config_flag_get(".mainuiTime12h");
+    time_settings.is_enabled = config_flag_get(".mainuiTimeEnabled");
 
-    // load font
+    logging = config_flag_get(".logging");
+
+    // load time overlay theme settings
+    theme_getPath(theme_path);
     TTF_Init();
-
-    // TODO: font size from theme config?
-    font = TTF_OpenFont(TIME_FONT_FILE, 24);
-    if (!font)
-        printf("TTF_OpenFont: %s\n", TTF_GetError());
+    time_settings.theme = theme()->time;
+    SDL_Rect *position = calloc(1, sizeof(SDL_Rect));
+    position->x = time_settings.theme.X;
+    position->y = time_settings.theme.Y;
+    time_settings.position = position;
+    time_settings.font = theme_loadFont(theme_path, time_settings.theme.font, time_settings.theme.size);
 }
 
 void __attribute__((destructor)) unload(void)
 {
-    if (font)
-        TTF_CloseFont(font);
     if (clock_surface)
         SDL_FreeSurface(clock_surface);
+    if (time_settings.position)
+        free(time_settings.position);
     TTF_Quit();
 
+    // restore the logo
     puts(":: Bye from mainuihooks");
 }

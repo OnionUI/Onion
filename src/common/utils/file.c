@@ -474,3 +474,11 @@ void file_add_line_to_beginning(const char *filename, const char *lineToAdd)
     }
     print_debug("Line added to the beginning of the file successfully.\n");
 }
+
+long file_get_size(char *filename)
+{
+    struct stat file_status;
+    if (stat(filename, &file_status) < 0)
+        return -1;
+    return file_status.st_size;
+}
