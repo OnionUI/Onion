@@ -23,7 +23,7 @@
     "maxAcceleration":4.0,
     "incrementModifier":1.0,
     "disableMouseHotkey":0,
-    "disableMouseIcon":1,
+    "disableMouseIcon":0,
     "minx":40,
     "miny":0,
     "maxx":280,
