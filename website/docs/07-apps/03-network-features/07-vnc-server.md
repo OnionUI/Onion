@@ -58,5 +58,5 @@ Once connected, Keybinds need to match what MainUI/SDL is expecting, which is:
 ## Security
 
 :::caution Network security
-VNC server must be used on local private network only as there is no password and no encryption. It is not recommended you use FTP on an insecure Wi-Fi network that is open or public as traffic is unencrypted, for this reason we strongly recommend you toggle VNC off when you're on the move!
+VNC server must be used on local private network only as there is no password and no encryption. It is not recommended you use VNC on an insecure Wi-Fi network that is open or public as traffic is unencrypted, for this reason we strongly recommend you toggle VNC off when you're on the move!
 :::
