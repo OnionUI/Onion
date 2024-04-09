@@ -13,7 +13,7 @@ The Guest profile will have its own save and save states. Guest mode makes the O
 
 ## Usage
 
-Go in Apps section and run "Guest mode", the icon will change to show the current state :
+Go in Apps section and run "Guest Mode", the icon will change to show the current state:
 
 | ![](./assets/guest-mode-off.webp)               | ![](./assets/guest-mode-on.webp)               |
 | ---------------                                 | ---------------                                |
