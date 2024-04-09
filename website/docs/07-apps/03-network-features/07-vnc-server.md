@@ -23,7 +23,7 @@ You'll find it in Tweaks app: [`Network` -› `VNC: Screen share`](/docs/apps/tw
 You can either use the master toggle to turn the VNC Server on with your right/left arrows, or press A to enter the submenu and you'll get 2 options:
 
 1. **Enable** - Activate VNC Server
-2. **Framerate** - Set the framerate of the VNC Server between 1 and 20. The higher the framerate, the more CPU will be use
+2. **Framerate** - Set the framerate of the VNC Server between 1 and 20. The higher the framerate, the more CPU will be used
 
 ## Logging in
 
