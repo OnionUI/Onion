@@ -12,7 +12,7 @@ slug: /apps/advancemenu
 
 ## About
 
-[AdvanceMENU](http://www.advancemame.it/menu-readme) is an awesome frontend which has the ability to display video thumbnails of games. The performances of this frontend are impressive on low CPU devices like the Miyoo Mini. The animated thumbnails require a particular format, `.mng` files, which are a type of animated `.png` file and a separated `.mp3` sound file.
+[AdvanceMENU](http://www.advancemame.it/menu-readme) is an awesome frontend which has the ability to display video thumbnails of games. The performance of this frontend is impressive on low CPU devices like the Miyoo Mini. The animated thumbnails require a particular format, `.mng` files, which are a type of animated `.png` file and a separated `.mp3` sound file.
 
 *This app is included in Onion 4.1.2*
 
