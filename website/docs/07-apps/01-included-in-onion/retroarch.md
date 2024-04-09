@@ -50,7 +50,7 @@ Running from apps section allows you to start RetroArch without immediately load
 
 To display the RetroArch Menu press <kbd>Menu</kbd> + <kbd>Select</kbd>.
 
-Meny additional shortcuts are available for RetroArch, do not forget to check [Onion in-game shortcuts](shortcuts).
+Many additional shortcuts are available for RetroArch, do not forget to check [Onion in-game shortcuts](shortcuts).
 
 
 ## Advanced
