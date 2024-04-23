@@ -43,7 +43,7 @@ Launch the GameSwitcher by pressing the <kbd>MENU</kbd> button.
 The last game played will be resumed in a few seconds, and with the simple press of a button, save your progress and turn off the console.  
 
 
-### Netplay usage demo
+### GameSwitcher usage demo
 <p align="center"><video controls><source src={NetStdHost}/></video></p>
 
 ### Controls
