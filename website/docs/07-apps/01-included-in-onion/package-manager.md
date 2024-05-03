@@ -18,14 +18,14 @@ The "Package Manager" app is a powerful tool that allows users to easily install
 
 Package Manager is a native application of Onion, it is installed by default.
 
-- run Package Manager from Apps section.
+- Run Package Manager from Apps section
 - Packages are divided into three sections:
-  - **Verified:** Contains all verified systems which are fully compatible with Onion and the Game Switcher (see [Emulators](../emulators) for more information).
-  - **Apps:** Contains all the included Onion and third-party apps.
-  - **Expert:** Contains experimental/expert systems. Some are just alternative, some are standalone emulators (not compatible with Game Switcher) and some are just not fully tested. (see [Emulators](../emulators) for more information). 
-- Choose the systems and apps you need and press <kbd>start</kbd>.
-- at the top right of the screen you'll see the number of current modifications <sub><sup>(on the screenshot above we see that 1 item will be insntalled)</sup></sub>
-- Package Manager will display a summary of the modifications, press <kbd>start</kbd> again to confirm and apply the modifications.
+  - **Verified:**: Contains all verified systems which are fully compatible with Onion and the GameSwitcher (see [Emulators](../emulators) for more information)
+  - **Apps:**: Contains all the included Onion and third-party apps
+  - **Expert:**: Contains experimental/expert systems. Some are just alternative, some are standalone emulators (not compatible with GameSwitcher) and some are just not fully tested. (see [Emulators](../emulators) for more information) 
+- Choose the systems and apps you need and press <kbd>start</kbd>
+- At the top right of the screen you'll see the number of current modifications <sub><sup>(on the screenshot above we see that 1 item will be installed)</sup></sub>
+- Package Manager will display a summary of the modifications, press <kbd>start</kbd> again to confirm and apply the modifications
 
 :::note
 Removing an emulator or an app will not remove the associated roms and data.
@@ -44,14 +44,14 @@ Since Onion 4.3.0, Package Manager allows to auto select emulators that has roms
 
 | Button | Function                                                                               |
 | ------ | -------------------                                                                    |
-| <kbd>D-pad</kbd>  | Navigate & Check/uncheck                                                    |
-| <kbd>A</kbd>      | Check/uncheck the current item                                              |
+| <kbd>D-pad</kbd>  | Navigate & Check/Uncheck                                                    |
+| <kbd>A</kbd>      | Check/Uncheck the current item                                              |
 | <kbd>B</kbd>      | Quit                                                                        |
-| <kbd>X</kbd>      | Check  / uncheck everything /check emulators with roms in the current tab   |
+| <kbd>X</kbd>      | Check/Uncheck everything /check emulators with roms in the current tab   |
 | <kbd>Y</kbd>      | Reset all the current modification                                          |
 | <kbd>L1/R1</kbd>  | Previous/Next tab                                                           |
 | <kbd>L2/R2</kbd>  | Previous/Next item page                                                     |
-| <kbd>Start</kbd>  | Install summary / validate the modifications                                |
+| <kbd>Start</kbd>  | Install summary/validate the modifications                                |
 
 
 
