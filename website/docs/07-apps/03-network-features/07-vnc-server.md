@@ -3,27 +3,27 @@ slug: /network/vnc
 ---
 
 
-# VNC server
+# VNC Server
 
 ![](./assets/vnc.webp)
 
-Remote display and remote control of your Miyoo Mini Plus from your computer thanks to VNC.
+Remote display and remote control of your Miyoo Mini+ from your computer thanks to VNC.
 
 
 ## Features
 
-- Remote display of the Miyoo Mini Plus
-- Remote control of the Miyoo Mini Plus
+- Remote display of the Miyoo Mini+
+- Remote control of the Miyoo Mini+
 
 
 ## Enabling VNC access
 
 You'll find it in Tweaks app: [`Network` -› `VNC: Screen share`](/docs/apps/tweaks#vnc-screen-share).
 
-You can either use the master toggle to turn the VNC server on with your Right/Left arrows, or press A to enter the submenu and you'll get 2 options:
+You can either use the master toggle to turn the VNC Server on with your right/left arrows, or press A to enter the submenu and you'll get 2 options:
 
 1. **Enable** - Activate VNC Server
-2. **Framerate** - Set the framerate of the VNC Server between 1 and 20. The higher the framerate, the more CPU will be use.
+2. **Framerate** - Set the framerate of the VNC Server between 1 and 20. The higher the framerate, the more CPU will be use
 
 ## Logging in
 
@@ -33,13 +33,13 @@ You'll need the IP of the device, found below (**Tweaks** › **Network**)
 
 ![](https://github.com/OnionUI/Onion/assets/47260768/23ee6dbf-48c8-4484-b98b-9a8642b8fd49)
 
-Copy it to your VNC client (the default port is used so no need to specify it : 5900).
+Copy it to your VNC client (the default port is used so no need to specify it: 5900).
 
-For example : 
+For example: 
 
 ![](./assets/vnc-client.webp)
 
-Once connected, Keybinds need to match what MainUI/SDL is expecting, which is:
+Once connected, Keybinds need to match what MainUI/SDL is expecting, which are:
 
 ```
 # A = K_SPACE

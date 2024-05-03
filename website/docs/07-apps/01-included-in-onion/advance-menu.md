@@ -12,7 +12,7 @@ slug: /apps/advancemenu
 
 ## About
 
-[AdvanceMENU](http://www.advancemame.it/menu-readme) is an awesome frontend which has the ability to display video thumbnails of games. The performance of this frontend are impressive on low CPU devices like the Miyoo Mini. The animated thumbnails require a particular format, `.mng` files, which are a type of animated `.png` file and a separated `.mp3` sound file.
+[AdvanceMENU](http://www.advancemame.it/menu-readme) is an awesome frontend which has the ability to display video thumbnails of games. The performance of this frontend is impressive on low CPU devices like the Miyoo Mini. The animated thumbnails require a particular format, `.mng` files, which are a type of animated `.png` file and a separated `.mp3` sound file.
 
 *This app is included in Onion 4.1.2*
 
@@ -55,12 +55,12 @@ Furthermore, you can also set AdvanceMENU to be the start application, this is d
 ## Instructions for scraping your ROM collection
 
 1. Download Skraper (https://www.skraper.net/)
-2. Scrape your ROM collection every system at a time and on the media tab select only videos;
-3. On the OnionUI SDCARD find the folder `App\AdvanceMENU\tools\Roms_and_Medias_Management\mp4_to_mng`, copy it to your PC, make a new folder named videos and then copy the video files there, every system at a time, and run the script to convert to mng+mp3 files;
-4. Skraper video files start with 10 frames that are black so I made a script that removes the first 10 frames of every .mng file inside a folder. Download the script, copy it to your mng folder then run it. This step is optional. ([remove10.zip](https://github.com/OnionUI/Onion/files/11100644/remove10.zip));
-5. Copy the mng folder content to the Snaps folder in every systems folder.
+2. Scrape your ROM collection every system at a time and on the media tab select only videos
+3. On the OnionUI SDCARD find the folder `App\AdvanceMENU\tools\Roms_and_Medias_Management\mp4_to_mng`, copy it to your PC, make a new folder named videos and then copy the video files there, every system at a time, and run the script to convert to mng+mp3 files
+4. Skraper video files start with 10 frames that are black so I made a script that removes the first 10 frames of every .mng file inside a folder. Download the script, copy it to your mng folder then run it. This step is optional. ([remove10.zip](https://github.com/OnionUI/Onion/files/11100644/remove10.zip))
+5. Copy the mng folder content to the Snaps folder in every systems folder
 
-This process can take some time and it can be a little bit tricky. Videos scraped with Skraper ar not the best resolution, they are not as sharp as the snap pack for MAME. 
+This process can take some time and it can be a little bit tricky. Videos scraped with Skraper don't have the best resolution, they are not as sharp as the snap pack for MAME. 
 
 
 
