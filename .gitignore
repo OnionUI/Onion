@@ -60,3 +60,4 @@ src/**/axp
 !axp/
 src/**/batteryMonitorUI
 !batteryMonitorUI/
+src/**/libmainuihooks.so

@@ -190,10 +190,34 @@ check_main_ui() {
     fi
 }
 
+toggle_topbar() {
+    theme_path="$(/customer/app/jsonval theme)"
+    config_path="${theme_path%/}/config.json"
+    regular_path="${theme_path%/}/skin/miyoo-topbar.png"
+    hidden_path="${theme_path%/}/skin/miyoo-topbar-hidden.png"
+    invis_path=/mnt/SDCARD/.tmp_update/res/miyoo-topbar-invis.png
+    hide_logo=$(sed -n 's/.*"hidelogo": \([^,}]*\).*/\1/p' "$config_path")
+
+    if [ $hide_logo == "true" ]; then
+        if  [ ! $(xcrc "$regular_path") == $(xcrc "$invis_path") ]; then
+            cp -f "$regular_path" "$hidden_path"
+            cp -f "$invis_path" "$regular_path"
+        fi
+    else
+        if [ -f "$hidden_path" ] && [ $(xcrc "$regular_path") == $(xcrc "$invis_path") ]; then
+            cp -f "$hidden_path" "$regular_path"
+        fi
+    fi
+    sync
+}
+
 launch_main_ui() {
     log "\n:: Launch MainUI"
 
     cd $sysdir
+    
+    # hide or unhide miyoo-topbar
+    toggle_topbar
 
     # Generate battery percentage image
     mainUiBatPerc
@@ -215,8 +239,8 @@ launch_main_ui() {
     cd $miyoodir/app
     PATH="$miyoodir/app:$PATH" \
         LD_LIBRARY_PATH="$miyoodir/lib:/config/lib:/lib" \
-        LD_PRELOAD="$miyoodir/lib/libpadsp.so" \
-        ./MainUI 2>&1 > /dev/null
+        LD_PRELOAD="$sysdir/lib/libmainuihooks.so:$miyoodir/lib/libpadsp.so" \
+        ./MainUI
 
     # Merge the last game launched into the recent list
     check_hide_recents
