@@ -18,9 +18,9 @@ slug: /emulators/superbroswar
 
 Super Mario War / Super Cat Wars is a fan-made multiplayer Super Mario Bros. Very customizable with many mods.
 Onion includes the Retroarch core. The standalone version (which includes the multiplayer mode) will be distributed as a port in the Onion Ports repository.
-The RetroArch core version allows to fight against enemies controled by the computer.
+The RetroArch core version allows you to fight against enemies controlled by the computer.
 
-## 2 main assets  :
+## 2 main assets:
 
 ### Super Mario War
 - Download the last linux version from [the official repo](https://github.com/mmatyas/supermariowar/releases/tag/continuous), "supermariowar_2023-11-23_linux.zip" for example
@@ -49,11 +49,11 @@ The RetroArch core version allows to fight against enemies controled by the comp
 
 
 :::note
-The official website contains many maps and skins : http://smwstuff.net
+The official website contains many maps and skins: http://smwstuff.net
 :::
 
 :::note
-"Super Cat Wars LITE" contains more assets than "Super Mario War" which are all loaded in memory at start so : it can be long to load and it can potentially crash sometimes due to a lack of memory.
+"Super Cat Wars LITE" contains more assets than "Super Mario War" which are all loaded in memory at start, so it can take some time to load and rarely might even crash due to lack of memory
 :::
 
 :::note
