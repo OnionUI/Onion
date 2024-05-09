@@ -8,7 +8,7 @@
 
 #define HIDDEN_ITEM_ALPHA 60
 
-static SDL_Color color_black = {0, 0, 0};
+// static SDL_Color color_black = {0, 0, 0};
 
 void theme_renderListLabel(SDL_Surface *screen, const char *label, SDL_Color fg,
                            int offset_x, int center_y, bool is_active,
@@ -18,17 +18,20 @@ void theme_renderListLabel(SDL_Surface *screen, const char *label, SDL_Color fg,
 
     SDL_Surface *item_label = TTF_RenderUTF8_Blended(list_font, label, fg);
     SDL_Rect item_label_rect = {offset_x, center_y - item_label->h / 2};
-    SDL_Rect item_shadow_rect = {item_label_rect.x + 1, item_label_rect.y + 2};
 
     SDL_Rect label_crop = {0, 0, label_end - 30, item_label->h};
+
+    /* Maybe shadows will be an option in the future
+    SDL_Rect item_shadow_rect = {item_label_rect.x + 1, item_label_rect.y + 2};
 
     if (is_active) {
         SDL_Surface *item_shadow =
             TTF_RenderUTF8_Blended(list_font, label, color_black);
         SDL_BlitSurface(item_shadow, &label_crop, screen, &item_shadow_rect);
         SDL_FreeSurface(item_shadow);
-    }
-    else if (disabled) {
+    }*/
+
+    if (disabled) {
         surfaceSetAlpha(item_label, HIDDEN_ITEM_ALPHA);
     }
 
