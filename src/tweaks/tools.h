@@ -116,7 +116,7 @@ void _displayM3uTotal()
     char message[28];
     snprintf(message, sizeof(message), "%d playlist files created.", value);
 
-    _toolDialog("M3u Generator", message, false);
+    _toolDialog("M3U Generator", message, false);
     if (video != NULL)
         msleep(1200);
 }

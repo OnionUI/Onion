@@ -833,7 +833,7 @@ void menu_screen_recorder(void *pt)
 void menu_tools_m3uGenerator(void *_)
 {
     if (!_menu_tools_m3uGenerator._created) {
-        _menu_tools_m3uGenerator = list_createWithTitle(2, LIST_SMALL, "m3u Generator");
+        _menu_tools_m3uGenerator = list_createWithTitle(2, LIST_SMALL, "M3U Generator");
         list_addItemWithInfoNote(&_menu_tools_m3uGenerator,
                                  (ListItem){
                                      .label = "Multiple directories (.Game_Name)",
@@ -843,7 +843,8 @@ void menu_tools_m3uGenerator(void *_)
                                  (ListItem){
                                      .label = "Single directory (.multi-disc)",
                                      .action = tool_generateM3uFiles_sd},
-                                 "One single directory \".multi-disc\"\nwill contains all multi-disc files");
+                                 "One single directory (\".multi-disc\")\n"
+                                 "will contain all multi-disc files");
     }
     menu_stack[++menu_level] = &_menu_tools_m3uGenerator;
     header_changed = true;
@@ -856,18 +857,18 @@ void menu_tools(void *_)
         strcpy(_menu_tools.title, "Tools");
         list_addItemWithInfoNote(&_menu_tools,
                                  (ListItem){
-                                     .label = "Generate CUE files for PSX games",
+                                     .label = "Generate CUE files for BIN games",
                                      .action = tool_generateCueFiles},
                                  "PSX roms in '.bin' format needs a\n"
                                  "matching '.cue' file. Use this tool\n"
                                  "to automatically generate them.");
         list_addItemWithInfoNote(&_menu_tools,
                                  (ListItem){
-                                     .label = "Generate M3U files for PSX games...",
+                                     .label = "Generate M3U files for multi-disc games",
                                      .action = menu_tools_m3uGenerator},
-                                 "PSX multidisc roms require to create\n"
-                                 "a playslist file (.m3u). It allows to \n"
-                                 "have only one entry for each multidisc\n"
+                                 "PSX multi-disc roms require to create\n"
+                                 "a playlist file (.m3u). It allows to \n"
+                                 "have only one entry for each multi-disc\n"
                                  "game and one unique save file for each game");
         list_addItemWithInfoNote(&_menu_tools,
                                  (ListItem){
