@@ -740,6 +740,16 @@ load_settings() {
             mv -f temp /mnt/SDCARD/system.json
         fi
     fi
+
+    default_volume="${sysdir}/config/.defaultVolume-${device_uuid}"
+    if [ -f "$default_volume" ]; then
+        volume=$(printf '%d' "$(cat "$default_volume")")
+        if [ $? -eq 0 ]; then
+            cat /mnt/SDCARD/system.json |
+                sed 's/^\s*"vol":\s*[0-9][0-9]*/\t"vol":\t'$volume'/g' > temp
+            mv -f temp /mnt/SDCARD/system.json
+        fi
+    fi
 }
 
 save_settings() {
