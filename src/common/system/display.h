@@ -145,6 +145,17 @@ void display_setScreen(bool enabled)
 
 void display_toggle(void) { display_setScreen(!display_enabled); }
 
+uint32_t display_getBrightnessRaw()
+{
+    uint32_t duty_cycle = 0;
+    FILE *fp;
+
+    if (exists(PWM_DIR "pwm0/duty_cycle")) {
+        file_get(fp, PWM_DIR "pwm0/duty_cycle", "%u", &duty_cycle);
+    }
+    return duty_cycle;
+}
+
 //
 //    Set Brightness (Raw)
 //

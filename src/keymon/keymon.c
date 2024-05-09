@@ -11,6 +11,8 @@
 #include <unistd.h>
 
 #include "system/axp.h"
+#include "utils/msleep.h"
+#include "system/display.h"
 #include "system/battery.h"
 #include "system/device_model.h"
 #include "system/keymap_hw.h"
@@ -55,6 +57,8 @@ void takeScreenshot(void)
 {
     super_short_pulse();
     display_setBrightnessRaw(0);
+    display_reset();
+    msleep(10);
     osd_hideBar();
     screenshot_recent();
     settings_setBrightness(settings.brightness, true, false);
