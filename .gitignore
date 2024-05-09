@@ -60,3 +60,7 @@ src/**/axp
 !axp/
 src/**/batteryMonitorUI
 !batteryMonitorUI/
+src/**/tree
+!tree/
+src/**/pippi
+!pippi/
