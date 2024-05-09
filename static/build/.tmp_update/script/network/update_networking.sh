@@ -1,6 +1,8 @@
 #!/bin/sh
 sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo
+confdir=/mnt/SDCARD/.tmp_update/config
+jsonfile="$confdir/.net_service_restart.json"
 filebrowserbin=$sysdir/bin/filebrowser
 filebrowserdb=$sysdir/config/filebrowser/filebrowser.db
 netscript=/mnt/SDCARD/.tmp_update/script/network
@@ -8,10 +10,14 @@ export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/p
 export PATH="$sysdir/bin:$PATH"
 is_booting=$([ -f /tmp/is_booting ] && echo 1 || echo 0)
 
+# add service flags here to be remembered when wifi change is detected
+services="httpState ftpState smbdState sshState authsshState authftpState authhttpState"
+
 logfile=$(basename "$0" .sh)
 . $sysdir/script/log.sh
 
 main() {
+    init_json
     set_tzid
     get_password
     case "$1" in
@@ -23,9 +29,11 @@ main() {
             case "$2" in
                 toggle)
                     check_${service}state &
+                    store_state & # if anything is toggled, store the state
                     ;;
                 authed)
                     ${service}_authed &
+                    store_state & 
                     ;;
                 *)
                     print_usage
@@ -47,6 +55,15 @@ main() {
         disableall)
             disable_all_services
             ;;
+        save) # Save the state before wifi goes down so we can quick restore on re-enabling
+            store_state
+            ;;
+        restore) # Restore the net service state after restarting
+            restore_state
+            ;;
+        full_reset) # Do a full reset of the json file
+            full_reset
+            ;;
         *)
             print_usage
             ;;
@@ -59,13 +76,27 @@ check() {
     if wifi_enabled && [ "$is_booting" -eq 1 ]; then
         bootScreen Boot "Waiting for network..."
     fi
+    
+    # Check to see if mainui has demanded wifi go down
+    local current_main_ui_control=$(get_main_ui_control &)
+    local wifi_status=$(wifi_enabled && echo "1" || echo "0")
+
+    if [ "$wifi_status" != "$current_main_ui_control" ]; then
+        update_main_ui_control "$wifi_status" &
+        if [ "$wifi_status" = "1" ]; then
+            # Being turned on, restore the previous state of net servs
+            if [ $is_booting -eq 0 ]; then
+                restore_state
+            fi
+        fi
+    fi
 
     check_wifi
-    check_ftpstate
-    check_sshstate
-    check_telnetstate
-    check_httpstate
-    check_smbdstate
+    check_ftpstate &
+    check_sshstate &
+    check_telnetstate &
+    check_httpstate &
+    check_smbdstate &
 
     if wifi_enabled && flag_enabled ntpWait && [ $is_booting -eq 1 ]; then
         bootScreen Boot "Syncing time..."
@@ -82,6 +113,7 @@ check() {
         touch /tmp/update_checked
         $sysdir/script/ota_update.sh check &
     fi
+
 }
 
 # Function to help disable and kill off all processes
@@ -104,11 +136,14 @@ disable_all_services() {
 
 # Core function
 check_wifi() {
+    # Fixes lockups entering some apps after enabling wifi (because wpa_supp/udhcpc are preloaded with libpadsp.so)
+    libpadspblocker &
+    
     if is_running hostapd; then
         return
     else
         if wifi_enabled; then
-            if ! ifconfig wlan0 || [ -f /tmp/restart_wifi ]; then
+            if ! ifconfig wlan0 >> /dev/null 2>&1 || [ -f /tmp/restart_wifi ]; then
                 if [ -f /tmp/restart_wifi ]; then
                     pkill -9 wpa_supplicant
                     pkill -9 udhcpc
@@ -120,6 +155,7 @@ check_wifi() {
                 ifconfig wlan0 up
                 $miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
                 udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
+                iw dev wlan0 set power_save off
             fi
         else
             if [ ! -f "/tmp/dont_restart_wifi" ]; then
@@ -364,7 +400,6 @@ start_hotspot() {
     ifconfig wlan1 $hotspot0addr netmask $subnetmask >> /dev/null 2>&1
 
     # Start
-
     $sysdir/bin/dnsmasq --conf-file=$sysdir/config/dnsmasq.conf -u root &
     $sysdir/bin/hostapd -i wlan1 $sysdir/config/hostapd.conf >> /dev/null 2>&1 &
 
@@ -414,7 +449,6 @@ check_hotspotstate() {
 # This is the fallback!
 # We need to check if NTP is enabled and then check the state of tzselect in /.tmp_update/config/tzselect, based on the value we'll pass the TZ via the env var to ntpd and get the time (has to be POSIX)
 # This will work but it will not export the TZ var across all opens shells so you may find the hwclock (and clock app, retroarch time etc) are correct but terminal time is not.
-# It does set TZ on the tty that Main is running in so this is ok
 
 check_ntpstate() {
     ret_val=0
@@ -534,6 +568,94 @@ get_time() { # handles 2 types of network time, instant from an API or longer fr
 
 # Utility functions
 
+# create/pop the json file for remembering states
+init_json() {
+    if [ ! -f "$jsonfile" ]; then
+        echo '{}' > "$jsonfile"
+    fi
+
+    if [ ! -s "$jsonfile" ]; then
+        echo '{}' > "$jsonfile"
+    fi
+
+    if ! grep -q '"main_ui_control":' "$jsonfile"; then
+        sed -i 's/}$/,"main_ui_control": "0"}/' "$jsonfile"
+    fi
+}
+
+# unhook libpadsp.so on the wifi servs
+libpadspblocker() { 
+    wpa_pid=$(ps -e | grep "[w]pa_supplicant" | awk 'NR==1{print $1}')
+    udhcpc_pid=$(ps -e | grep "[u]dhcpc" | awk 'NR==1{print $1}')
+    if [ -n "$wpa_pid" ] && [ -n "$udhcpc_pid" ]; then
+        if grep -q "libpadsp.so" /proc/$wpa_pid/maps || grep -q "libpadsp.so" /proc/$udhcpc_pid/maps; then
+            echo "Network Checker: $wpa_pid(WPA) and $udhcpc_pid(UDHCPC) found preloaded with libpadsp.so"
+            unset LD_PRELOAD
+            killall -9 wpa_supplicant
+            killall -9 udhcpc 
+            $miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf & 
+            udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
+            echo "Network Checker: Removing libpadsp.so preload on wpa_supp/udhcpc"
+        fi
+    fi
+}
+
+# Store the network service state currently
+store_state() {
+    # Make sure main_ui_control gets set at the start
+    local main_ui_control=$(get_main_ui_control)
+    local json_content="{\"main_ui_control\": \"$main_ui_control\""
+
+    for service in $services; do
+        if [ -f "$sysdir/config/.$service" ]; then
+            json_content="$json_content, \"$service\": \"1\""
+        elif [ -f "$sysdir/config/.$service_" ]; then
+            json_content="$json_content, \"$service\": \"0\""
+        fi
+    done
+    
+    # Echo the changes in, jq is too slow for this
+    json_content="$json_content }"
+    echo "$json_content" > "$jsonfile"
+}
+
+# Restore the network service state, don't use jq it's too slow and holds the UI thread until it returns 
+# (you can't background this, you'll miss the checks for net servs as the flags won't be set)
+restore_state() {
+    [ ! -f "$jsonfile" ] && return
+    log "Network Checker: Restoring state from $jsonfile"
+
+    grep -E '"(httpState|ftpState|smbdState|sshState|authsshState|authftpState|authhttpState)":\s*"[01]"' "$jsonfile" | while IFS=":" read -r key value; do
+        key=$(echo "$key" | tr -d ' "{}')
+        value=$(echo "$value" | tr -d ' ",')
+        
+        if echo "$services" | grep -wq "$key"; then
+            if [ "$value" = "1" ]; then
+                enable_flag "$key"
+            elif [ "$value" = "0" ]; then
+                disable_flag "$key"
+            fi
+        fi
+    done
+}
+
+full_reset() {
+    for service in $services; do
+        disable_flag "$service"
+    done
+    rm -f "$jsonfile"
+}
+
+update_main_ui_control() {
+    control_status="$1"
+    sed -i'' -e "/\"main_ui_control\"/s/: \".*\"/: \"$control_status\"/" "$jsonfile"
+}
+
+get_main_ui_control() {
+    value=$(grep '"main_ui_control"' "$jsonfile" | sed -n 's/.*"main_ui_control": "\([^"]*\)".*/\1/p')
+    echo "${value:-0}"
+}
+
 convert_seconds_to_utc_offset() {
     seconds=$(($1))
     if [ $seconds -ne 0 ]; then
@@ -566,7 +688,12 @@ is_noauth_enabled() { # Used to check authMethod val for HTTPFS
 }
 
 print_usage() {
-    echo "Usage: $0 {check|ftp|telnet|http|ssh|ntp|hotspot|smbd|disableall} {toggle|authed} - {ntp|hotspot|telnet} only accept toggle."
+    echo "Usage: $0 {check|ftp|telnet|http|ssh|smbd|disableall|save|restore|full_reset} [toggle|authed]"
+    echo "       - For {ftp|telnet|http|ssh|smbd}, [toggle|authed] can be specified."
+    echo "       - Commands {ntp|hotspot} only accept 'toggle'."
+    echo "       - Commands {save|restore|full_reset} do not require additional args."
+    echo "e.g:"
+    echo "ftp toggle       - Will toggle the current FTP state"
     exit 1
 }
 

@@ -86,7 +86,9 @@ main() {
     HOME=/mnt/SDCARD/RetroArch/
 
     # Disable VNC server flag at boot
-    rm $sysdir/config/.vncServer
+    if [ -f "$sysdir/config/.vncServer" ]; then
+        rm "$sysdir/config/.vncServer"
+    fi
 
     # Detect if MENU button is held
     detectKey 1
@@ -815,7 +817,9 @@ check_networking() {
     if pgrep -f update_networking.sh; then
         log "update_networking already running"
     else
-        rm /tmp/network_changed
+        if [ -f /tmp/network_changed ]; then
+            rm /tmp/network_changed
+        fi
         $sysdir/script/network/update_networking.sh check
     fi
 }
