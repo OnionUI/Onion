@@ -1,8 +1,8 @@
 ###########################################################
 
 TARGET=Onion
-VERSION=4.2.2
-RA_SUBVERSION=1.15.0.6
+VERSION=4.3.0
+RA_SUBVERSION=1.15.0.12
 
 ###########################################################
 
@@ -104,6 +104,8 @@ $(CACHE)/.setup:
 	@$(STATIC_PACKAGES)/common/apply.sh "$(PACKAGES_RAPP_DEST)"
 	@$(STATIC_PACKAGES)/common/auto_advmenu_rc.sh "$(PACKAGES_EMU_DEST)" "$(TEMP_DIR)/configs/BIOS/.advance/advmenu.rc"
 	@$(STATIC_PACKAGES)/common/auto_advmenu_rc.sh "$(PACKAGES_RAPP_DEST)" "$(TEMP_DIR)/configs/BIOS/.advance/advmenu.rc"
+# Create full_resolution files
+	@chmod a+x $(ROOT_DIR)/.github/create_fullres_files.sh && $(ROOT_DIR)/.github/create_fullres_files.sh
 # Set flag: finished setup
 	@touch $(CACHE)/.setup
 
@@ -151,6 +153,8 @@ core: $(CACHE)/.setup
 
 apps: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
+	@cd $(SRC_DIR)/batteryMonitorUI && BUILD_DIR="$(PACKAGES_APP_DEST)/Battery Monitor/App/BatteryMonitorUI" make
+	@find $(SRC_DIR)/batteryMonitorUI -depth -type d -name res -exec cp -r {}/. "$(PACKAGES_APP_DEST)/Battery Monitor/App/BatteryMonitorUI/res/" \;
 	@cd $(SRC_DIR)/playActivityUI && BUILD_DIR="$(PACKAGES_APP_DEST)/Activity Tracker/App/PlayActivity" make
 	@find $(SRC_DIR)/playActivityUI -depth -type d -name res -exec cp -r {}/. "$(PACKAGES_APP_DEST)/Activity Tracker/App/PlayActivity/res/" \;
 	@find $(SRC_DIR)/packageManager -depth -type d -name res -exec cp -r {}/. $(BUILD_DIR)/App/PackageManager/res/ \;
@@ -257,16 +261,15 @@ with-toolchain: $(CACHE)/.docker
 patch:
 	@chmod a+x $(ROOT_DIR)/.github/create_patch.sh && $(ROOT_DIR)/.github/create_patch.sh
 
-lib:
-	@cd $(ROOT_DIR)/include/cJSON && make clean && make
+external-libs:
 	@cd $(ROOT_DIR)/include/SDL && make clean && make
 
-test:
+test: external-libs
 	@mkdir -p $(BUILD_TEST_DIR)/infoPanel_test_data && cd $(TEST_SRC_DIR) && BUILD_DIR=$(BUILD_TEST_DIR)/ make dev
 	@cp -R $(TEST_SRC_DIR)/infoPanel_test_data $(BUILD_TEST_DIR)/
 	cd $(BUILD_TEST_DIR) && ./test
 
-static-analysis:
+static-analysis: external-libs
 	@cd $(ROOT_DIR) && cppcheck -I $(INCLUDE_DIR) --enable=all $(SRC_DIR)
 
 format:

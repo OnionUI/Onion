@@ -8,7 +8,7 @@ slug: /apps/random-game
 
 ## Presentation
 
-Random Game will allow you to discover new games in your collection !
+Random Game will allow you to discover new games in your collection!
 
 
 | <img src={require('./assets/random-game-image.webp').default} style={{width: 320}} />               | <img src={require('./assets/random-game-text.webp').default} style={{width: 320}} />               |
@@ -19,10 +19,10 @@ Random Game will allow you to discover new games in your collection !
 
 Random Game is available in [Package Manager](package-manager).
 
-Once installed you can run it from 3 different ways :
-- From the app section, Random Game will pick a game between all the games available on your Miyoo Mini.
-- From the [GLO Menu](game-list-options), Random Game will pick a game between all the games available on your Miyoo Mini.
-- From a shortcut button (X or Y) configured in [Tweaks app](tweaks)
+Once installed you can run it from 3 different ways:
+- From the app section, Random Game will pick a game between all games available on your device
+- From the [GLO Menu](game-list-options), Random Game will pick a game from the current games list (not limited by subfolder)
+- You can also assign a shortcut button (X or Y) in [Tweaks app](tweaks)
 
 ### Controls
 

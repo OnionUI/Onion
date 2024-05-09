@@ -1,622 +1,627 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Icon Pack Preview</title>
-<style>
-:root {
-    --main-bg-color: #333333;
-    --text-color-rgb: 255, 255, 255;
-    --icon-max-width: 150px;
-    --icon-max-height: 150px;
-}
-
-body.has-theme {
-    --icon-max-width: 155px;
-    --icon-max-height: 170px;
-}
-
-body {
-    background-color: var(--main-bg-color);
-    font-family: sans-serif;
-    color: rgba(var(--text-color-rgb), .75);
-    margin: 16px;
-    margin-top: 10vh;
-    margin-bottom: 50vh;
-    transition: color .3s;
-}
-
-main {
-    margin: 0 auto;
-    max-width: 1395px;
-}
-
-@media only screen and (max-width: 1450px) {
-    main {
-        max-width: 930px;
-    }
-}
-
-.app-icons {
-    margin: 0 auto;
-    max-width: 833px;
-}
-
-.app-icons.has-icons::before {
-    content: attr(data-name);
-    display: block;
-    width: 100%;
-    font-size: large;
-    font-weight: bold;
-    margin: 1.5em 0;
-}
-
-h2 {
-    margin-top: 2em;
-}
-
-.toolbar {
-    display: flex;
-    align-items: center;
-    column-gap: 4px;
-}
-
-.input-color-label {
-    position: relative;
-    padding: 8px 16px;
-    cursor: pointer;
-    border: 1px solid rgba(var(--text-color-rgb),0.25);
-    border-radius: 8px;
-    font-weight: bold;
-    user-select: none;
-    transition: color .3s;
-}
-
-.input-color-label:hover, .input-color-label:focus-within {
-    background-color: rgba(var(--text-color-rgb),0.25);
-    border-color: rgba(var(--text-color-rgb),0.5);
-    color: rgba(var(--text-color-rgb), 1);
-}
-
-.input-color-label input {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    visibility: hidden;
-}
-
-input {
-    background-color: var(--main-bg-color);
-    border: 1px solid rgba(var(--text-color-rgb),0.5);
-    color: rgba(var(--text-color-rgb),1);
-    border-radius: 40px;
-}
-
-input[type="color"]::-webkit-color-swatch {
-    border: none;
-    border-radius: 40px;
-}
-
-input[type="color"]::-moz-color-swatch {
-    border: none;
-    border-radius: 40px;
-}
-
-input[type="color"]::-webkit-color-swatch-wrapper {
-    padding: 0;
-    border-radius: 40px;
-}
-
-label {
-    font-size: .8em;
-}
-
-input[type=checkbox] + label {
-    opacity: .75;
-    user-select: none;
-    cursor: pointer;
-}
-
-input[type=checkbox] + label:hover, input[type=checkbox]:hover + label {
-    opacity: 1;
-}
-
-.icons-container {
-    display: flex;
-    flex-wrap: wrap;
-    margin-top: 20px;
-}
-
-.icon-preview-container {
-    position: relative;
-    width: var(--icon-max-width);
-    height: var(--icon-max-height);
-}
-
-.icon-preview-container .icon-preview.selected {
-    visibility: hidden;
-}
-
-.all-selected .icon-preview-container .icon-preview {
-    visibility: hidden;
-}
-
-.icon-preview-container:hover .icon-preview.selected,
-.all-selected .icon-preview-container .icon-preview.selected {
-    visibility: visible;
-}
-
-.icon-preview-container {
-    position: relative;
-    overflow: hidden;
-    width: var(--icon-max-width);
-    height: var(--icon-max-height);
-    box-sizing: border-box;
-    border: 1px solid rgba(var(--text-color-rgb),0.25);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 2px;
-}
-
-.has-theme .icon-preview-container {
-    border: none;
-    margin: 0;
-}
-
-.show-only-existing .icon-preview-container {
-    display: none;
-}
-
-.icon-preview-container.has-icon, .show-only-existing .icon-preview-container.has-icon {
-    display: flex;
-}
-
-.icon-preview-container:hover {
-    border-color: rgba(var(--text-color-rgb),1);
-    z-index: 1;
-}
-
-.icon-preview-container::after {
-    display: block;
-    position: absolute;
-    content: attr(data-icon);
-    bottom: 10px;
-    opacity: 0.5;
-    font-family: monospace;
-    font-size: 16px;
-}
-
-.has-theme .icon-preview-container::after {
-    bottom: 30px;
-    margin-right: 5px;
-}
-
-.icon-preview {
-    position: absolute;
-    width: var(--icon-max-width);
-    height: var(--icon-max-height);
-    background-color: var(--main-bg-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    image-rendering: pixelated;
-    box-sizing: border-box;
-}
-
-.has-theme .icon-preview {
-    background-image: var(--path-bg-game-item-n), var(--path-background);
-    background-repeat: no-repeat, no-repeat;
-    background-position: 0px 0px, center;
-    padding-bottom: 24px;
-    padding-right: 5px;
-}
-
-.has-theme .app-icons .icon-preview {
-    background: none;
-    overflow: hidden;
-}
-
-.has-theme .app-icons .icon-preview::before {
-    content: "";
-    position: absolute;
-    width: 640px;
-    height: 480px;
-    background-image: var(--path-background);
-    left: 0;
-    top: calc(-60px - var(--line-no) * 90px);
-    z-index: -1;
-    transform: rotate(-180deg);
-}
-
-.has-theme .icon-preview-container:hover .icon-preview,
-.has-theme.all-selected .icon-preview-container .icon-preview {
-    background-image: var(--path-bg-game-item-f), var(--path-background);
-}
-
-.has-theme .app-icons .icon-preview-container:hover .icon-preview,
-.has-theme.all-selected .app-icons .icon-preview-container .icon-preview {
-    background-image: var(--path-bg-list-l), var(--path-background);
-    background-position: 0px 0px, 0px calc(-60px - var(--line-no) * 90px);
-}
-
-.app-icons .icon-preview-container {
-    width: 111px;
-    height: 90px;
-    margin: 0 4px;
-}
-
-.app-icons .icon-preview-container::after {
-    display: none;
-}
-
-.app-icons .icon-preview {
-    position: relative;
-    width: 111px;
-    height: 90px;
-    background-position: 0px, 0;
-    padding-right: 0;
-    padding-bottom: 0;
-}
-
-.all-selected .icon-preview-container .icon-preview {
-    visibility: visible;
-}
-</style>
-</head>
-<body>
-<script>
-const icons = [
-    '32X',
-    '5200',
-    '7800',
-    'amiga',
-    'arcade',
-    'atari',
-    'atarist',
-    'c64',
-    'col',
-    'cpc',
-    'cps1',
-    'cps2',
-    'cps3',
-    'dos',
-    'fairchild',
-    'fc',
-    'fds',
-    'gb',
-    'gba',
-    'gbc',
-    'gg',
-    'gw',
-    'itv',
-    'lynx',
-    'md',
-    'megaduck',
-    'ms',
-    'msx',
-    'neocd',
-    'neogeo',
-    'ngp',
-    'ody',
-    'pce',
-    'pcecd',
-    'pico',
-    'poke',
-    'ports',
-    'ps',
-    'satella',
-    'scummvm',
-    'search',
-    'segacd',
-    'segasgone',
-    'sfc',
-    'sgb',
-    'sgfx',
-    'sufami',
-    'supervision',
-    'tic',
-    'vb',
-    'vdp',
-    'vectrex',
-    'ws',
-    'zxs'
-];
-
-const app_icons = [
-    'activity',
-    'advancemenu',
-    'clock',
-    'commander',
-    'dice',
-    'display',
-    'ereader',
-    'expert',
-    'ffplay',
-    'gallery',
-    'gameswitcher',
-    'guest_off',
-    'guest_on',
-    'logotweak',
-    'manual',
-    'music',
-    'pacman',
-    'pdf',
-    'retroarch',
-    'search',
-    'terminal',
-    'themes',
-    'tweaks',
-    'tweaks_advanced',
-    'tweaks_icons',
-    'tweaks_menu_button',
-    'tweaks_network',
-    'tweaks_system',
-    'tweaks_tools',
-    'tweaks_user_interface'
-];
-
-const dirname = path => path.substring(0, path.lastIndexOf('/'));
-const basename = path => path.substring(path.lastIndexOf('/') + 1);
-
-let main_bg_color = localStorage.getItem('main-bg-color') || "#333333";
-let is_all_selected = sessionStorage.getItem('all-selected') == "on";
-let show_only_existing = sessionStorage.getItem('show-only-existing') != "off";
-let auto_refresh = location.protocol == "file:" ? (sessionStorage.getItem('auto-refresh') == "on") : false;
-let auto_refresh_timer = -1;
-let icon_counts = [];
-
-function incrementIconCount(pack_id, index) {
-    icon_counts[index]++;
-    document.getElementById(`${pack_id}_counter`).textContent = icon_counts[index];
-    document.getElementById(`${pack_id}_percentage`).textContent = Math.round(icon_counts[index] / icons.length * 100);
-}
-
-/**
- * Calculate brightness value by RGB or HEX color.
- * @param color (String) The color value in RGB or HEX (for example: #000000 || #000 || rgb(0,0,0) || rgba(0,0,0,0))
- * @returns (Number) The brightness value (dark) 0 ... 255 (light)
- */
-function brightnessByColor(color) {
-    var color = "" + color, isHEX = color.indexOf("#") == 0, isRGB = color.indexOf("rgb") == 0;
-    if (isHEX) {
-        const hasFullSpec = color.length == 7;
-        var m = color.substr(1).match(hasFullSpec ? /(\S{2})/g : /(\S{1})/g);
-        if (m) var r = parseInt(m[0] + (hasFullSpec ? '' : m[0]), 16), g = parseInt(m[1] + (hasFullSpec ? '' : m[1]), 16), b = parseInt(m[2] + (hasFullSpec ? '' : m[2]), 16);
-    }
-    if (isRGB) {
-        var m = color.match(/(\d+){3}/g);
-        if (m) var r = m[0], g = m[1], b = m[2];
-    }
-    if (typeof r != "undefined")
-        return ((r * 299) + (g * 587) + (b * 114)) / 1000 / 255;
-
-    return -1;
-}
-
-function setBackgroundColor(color, update_input) {
-    const brightness = brightnessByColor(color);
-
-    document.body.style.setProperty('--main-bg-color', color);
-    main_bg_color = color;
-
-    document.body.style.setProperty('--text-color-rgb', brightness < 0.5 ? "255, 255, 255" : "0, 0, 0");
-
-    if (update_input) {
-        const input = document.getElementById("set_bg_color");
-        input.value = color;
-    }
-    else {
-        document.body.classList.remove("has-theme");
-        localStorage.setItem('main-bg-color', color);
-    }
-}
-
-function setAllSelected(enabled) {
-    sessionStorage.setItem('all-selected', enabled ? 'on' : 'off');
-    document.body.classList.toggle('all-selected', enabled);
-    is_all_selected = enabled;
-}
-
-function setShowOnlyExisting(enabled) {
-    sessionStorage.setItem('show-only-existing', enabled ? 'on' : 'off');
-    document.body.classList.toggle('show-only-existing', enabled);
-    show_only_existing = enabled;
-}
-
-function setAutoRefresh(enabled) {
-    sessionStorage.setItem('auto-refresh', enabled ? 'on' : 'off');
-    auto_refresh = enabled;
-    clearTimeout(auto_refresh_timer);
-
-    if (auto_refresh) {
-        auto_refresh_timer = setTimeout(() => {
-            location.reload();
-        }, 10000);
-    }
-}
-
-function loadImage(url) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        let timer;
-
-        img.onload = () => resolve(img);
-        img.onerror = () => {
-            clearTimeout(timer);
-            reject();
+    <style>
+        :root {
+            --main-bg-color: #333333;
+            --text-color-rgb: 255, 255, 255;
+            --icon-max-width: 150px;
+            --icon-max-height: 150px;
         }
 
-        if (location.protocol != "file:")
-            img.crossOrigin = 'anonymous';
-        
-        img.src = url;
-        timer = setTimeout(reject, 5000);
-    });
-}
+        body.has-theme {
+            --icon-max-width: 155px;
+            --icon-max-height: 170px;
+        }
 
-function bgr_to_rgb(color) {
-    return ((color & 0xff0000) >> 16) | (color & 0x00ff00) | ((color & 0x0000ff) << 16);
-}
+        body {
+            background-color: var(--main-bg-color);
+            font-family: sans-serif;
+            color: rgba(var(--text-color-rgb), .75);
+            margin: 16px;
+            margin-top: 10vh;
+            margin-bottom: 50vh;
+            transition: color .3s;
+        }
 
-async function applyMostUsedColor(image_url) {
-    const img = await loadImage(image_url);
-    const ctx = document.createElement('canvas').getContext('2d');
-    
-    ctx.canvas.width = img.width;
-    ctx.canvas.height = img.height;
-    ctx.drawImage(img, 0, 0);
+        main {
+            margin: 0 auto;
+            max-width: 1395px;
+        }
 
-    const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
-    const data = new Uint32Array(imageData.data.buffer);
-    const histogram = new Uint32Array(256 * 256 * 256);
-    
-    for (let i = 0; i < data.length; i++) {
-        ++histogram[data[i] & 0xFFFFFF];
-    }
+        @media only screen and (max-width: 1450px) {
+            main {
+                max-width: 930px;
+            }
+        }
 
-    let largest_count = 0;
-    let most_used_color;
+        .app-icons {
+            margin: 0 auto;
+            max-width: 833px;
+        }
 
-    for (let i = 0; i < histogram.length; i++) {
-        if (histogram[i] <= largest_count)
-            continue;
-        largest_count = histogram[i];
-        most_used_color = i;
-    }
+        .app-icons.has-icons::before {
+            content: attr(data-name);
+            display: block;
+            width: 100%;
+            font-size: large;
+            font-weight: bold;
+            margin: 1.5em 0;
+        }
 
-    const color = "#" + bgr_to_rgb(most_used_color).toString(16).padStart(6, '0');
+        h2 {
+            margin-top: 2em;
+        }
 
-    setBackgroundColor(color, true);
-}
+        .toolbar {
+            display: flex;
+            align-items: center;
+            column-gap: 4px;
+        }
 
-async function main() {
-    let doc_title = basename(dirname(decodeURI(location.href)));
-    let is_theme = false;
+        .input-color-label {
+            position: relative;
+            padding: 8px 16px;
+            cursor: pointer;
+            border: 1px solid rgba(var(--text-color-rgb), 0.25);
+            border-radius: 8px;
+            font-weight: bold;
+            user-select: none;
+            transition: color .3s;
+        }
 
-    if (doc_title == "icons")
-        doc_title = basename(dirname(dirname(decodeURI(location.href))));
+        .input-color-label:hover,
+        .input-color-label:focus-within {
+            background-color: rgba(var(--text-color-rgb), 0.25);
+            border-color: rgba(var(--text-color-rgb), 0.5);
+            color: rgba(var(--text-color-rgb), 1);
+        }
 
-    let icon_packs = [];
+        .input-color-label input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            visibility: hidden;
+        }
 
-    if (location.hash) {
-        let hash = location.hash.substring(1);
+        input {
+            background-color: var(--main-bg-color);
+            border: 1px solid rgba(var(--text-color-rgb), 0.5);
+            color: rgba(var(--text-color-rgb), 1);
+            border-radius: 40px;
+        }
 
-        let has_multi = hash.indexOf(",") != -1;
-        let hash_parts = has_multi ? hash.split(",") : [hash];
-        
-        doc_title = decodeURI(hash_parts[0]);
+        input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 40px;
+        }
 
-        for (let i = 1; i < hash_parts.length; i++) {
-            let [ title, path ] = hash_parts[i].split(":");
+        input[type="color"]::-moz-color-swatch {
+            border: none;
+            border-radius: 40px;
+        }
 
-            if (title == "background") {
-                main_bg_color = path;
-                continue;
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+            border-radius: 40px;
+        }
+
+        label {
+            font-size: .8em;
+        }
+
+        input[type=checkbox]+label {
+            opacity: .75;
+            user-select: none;
+            cursor: pointer;
+        }
+
+        input[type=checkbox]+label:hover,
+        input[type=checkbox]:hover+label {
+            opacity: 1;
+        }
+
+        .icons-container {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .icon-preview-container {
+            position: relative;
+            width: var(--icon-max-width);
+            height: var(--icon-max-height);
+        }
+
+        .icon-preview-container .icon-preview.selected {
+            visibility: hidden;
+        }
+
+        .all-selected .icon-preview-container .icon-preview {
+            visibility: hidden;
+        }
+
+        .icon-preview-container:hover .icon-preview.selected,
+        .all-selected .icon-preview-container .icon-preview.selected {
+            visibility: visible;
+        }
+
+        .icon-preview-container {
+            position: relative;
+            overflow: hidden;
+            width: var(--icon-max-width);
+            height: var(--icon-max-height);
+            box-sizing: border-box;
+            border: 1px solid rgba(var(--text-color-rgb), 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 2px;
+        }
+
+        .has-theme .icon-preview-container {
+            border: none;
+            margin: 0;
+        }
+
+        .show-only-existing .icon-preview-container {
+            display: none;
+        }
+
+        .icon-preview-container.has-icon,
+        .show-only-existing .icon-preview-container.has-icon {
+            display: flex;
+        }
+
+        .icon-preview-container:hover {
+            border-color: rgba(var(--text-color-rgb), 1);
+            z-index: 1;
+        }
+
+        .icon-preview-container::after {
+            display: block;
+            position: absolute;
+            content: attr(data-icon);
+            bottom: 10px;
+            opacity: 0.5;
+            font-family: monospace;
+            font-size: 16px;
+        }
+
+        .has-theme .icon-preview-container::after {
+            bottom: 30px;
+            margin-right: 5px;
+        }
+
+        .icon-preview {
+            position: absolute;
+            width: var(--icon-max-width);
+            height: var(--icon-max-height);
+            background-color: var(--main-bg-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            image-rendering: pixelated;
+            box-sizing: border-box;
+        }
+
+        .has-theme .icon-preview {
+            background-image: var(--path-bg-game-item-n), var(--path-background);
+            background-repeat: no-repeat, no-repeat;
+            background-position: 0px 0px, center;
+            padding-bottom: 24px;
+            padding-right: 5px;
+        }
+
+        .has-theme .app-icons .icon-preview {
+            background: none;
+            overflow: hidden;
+        }
+
+        .has-theme .app-icons .icon-preview::before {
+            content: "";
+            position: absolute;
+            width: 640px;
+            height: 480px;
+            background-image: var(--path-background);
+            left: 0;
+            top: calc(-60px - var(--line-no) * 90px);
+            z-index: -1;
+            transform: rotate(-180deg);
+        }
+
+        .has-theme .icon-preview-container:hover .icon-preview,
+        .has-theme.all-selected .icon-preview-container .icon-preview {
+            background-image: var(--path-bg-game-item-f), var(--path-background);
+        }
+
+        .has-theme .app-icons .icon-preview-container:hover .icon-preview,
+        .has-theme.all-selected .app-icons .icon-preview-container .icon-preview {
+            background-image: var(--path-bg-list-l), var(--path-background);
+            background-position: 0px 0px, 0px calc(-60px - var(--line-no) * 90px);
+        }
+
+        .app-icons .icon-preview-container {
+            width: 111px;
+            height: 90px;
+            margin: 0 4px;
+        }
+
+        .app-icons .icon-preview-container::after {
+            display: none;
+        }
+
+        .app-icons .icon-preview {
+            position: relative;
+            width: 111px;
+            height: 90px;
+            background-position: 0px, 0;
+            padding-right: 0;
+            padding-bottom: 0;
+        }
+
+        .all-selected .icon-preview-container .icon-preview {
+            visibility: visible;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        const icons = [
+            '32X',
+            '5200',
+            '7800',
+            'amiga',
+            'arcade',
+            'atari',
+            'c64',
+            'col',
+            'cpc',
+            'cps1',
+            'cps2',
+            'cps3',
+            'dos',
+            'fairchild',
+            'fc',
+            'fds',
+            'gb',
+            'gba',
+            'gbc',
+            'gg',
+            'gw',
+            'itv',
+            'lynx',
+            'md',
+            'megaduck',
+            'ms',
+            'msx',
+            'nds',
+            'neocd',
+            'neogeo',
+            'ngp',
+            'ody',
+            'pce',
+            'pcecd',
+            'pico',
+            'poke',
+            'ports',
+            'ps',
+            'satella',
+            'scummvm',
+            'search',
+            'segacd',
+            'segasgone',
+            'sfc',
+            'sgb',
+            'sgfx',
+            'sufami',
+            'supervision',
+            'tic',
+            'vb',
+            'vdp',
+            'vectrex',
+            'ws',
+            'zxs'
+        ];
+
+        const app_icons = [
+            'activity',
+            'advancemenu',
+            'clock',
+            'commander',
+            'dice',
+            'display',
+            'ereader',
+            'expert',
+            'ffplay',
+            'gallery',
+            'gameswitcher',
+            'guest_off',
+            'guest_on',
+            'logotweak',
+            'manual',
+            'music',
+            'pacman',
+            'pdf',
+            'retroarch',
+            'search',
+            'terminal',
+            'themes',
+            'tweaks',
+            'tweaks_advanced',
+            'tweaks_menu_button',
+            'tweaks_network',
+            'tweaks_system',
+            'tweaks_tools',
+            'tweaks_user_interface'
+        ];
+
+        const dirname = path => path.substring(0, path.lastIndexOf('/'));
+        const basename = path => path.substring(path.lastIndexOf('/') + 1);
+
+        let main_bg_color = localStorage.getItem('main-bg-color') || "#333333";
+        let is_all_selected = sessionStorage.getItem('all-selected') == "on";
+        let show_only_existing = sessionStorage.getItem('show-only-existing') != "off";
+        let auto_refresh = location.protocol == "file:" ? (sessionStorage.getItem('auto-refresh') == "on") : false;
+        let auto_refresh_timer = -1;
+        let icon_counts = [];
+
+        function incrementIconCount(pack_id, index) {
+            icon_counts[index]++;
+            document.getElementById(`${pack_id}_counter`).textContent = icon_counts[index];
+            document.getElementById(`${pack_id}_percentage`).textContent = Math.round(icon_counts[index] / icons.length * 100);
+        }
+
+        /**
+         * Calculate brightness value by RGB or HEX color.
+         * @param color (String) The color value in RGB or HEX (for example: #000000 || #000 || rgb(0,0,0) || rgba(0,0,0,0))
+         * @returns (Number) The brightness value (dark) 0 ... 255 (light)
+         */
+        function brightnessByColor(color) {
+            var color = "" + color, isHEX = color.indexOf("#") == 0, isRGB = color.indexOf("rgb") == 0;
+            if (isHEX) {
+                const hasFullSpec = color.length == 7;
+                var m = color.substr(1).match(hasFullSpec ? /(\S{2})/g : /(\S{1})/g);
+                if (m) var r = parseInt(m[0] + (hasFullSpec ? '' : m[0]), 16), g = parseInt(m[1] + (hasFullSpec ? '' : m[1]), 16), b = parseInt(m[2] + (hasFullSpec ? '' : m[2]), 16);
+            }
+            if (isRGB) {
+                var m = color.match(/(\d+){3}/g);
+                if (m) var r = m[0], g = m[1], b = m[2];
+            }
+            if (typeof r != "undefined")
+                return ((r * 299) + (g * 587) + (b * 114)) / 1000 / 255;
+
+            return -1;
+        }
+
+        function setBackgroundColor(color, update_input) {
+            const brightness = brightnessByColor(color);
+
+            document.body.style.setProperty('--main-bg-color', color);
+            main_bg_color = color;
+
+            document.body.style.setProperty('--text-color-rgb', brightness < 0.5 ? "255, 255, 255" : "0, 0, 0");
+
+            if (update_input) {
+                const input = document.getElementById("set_bg_color");
+                input.value = color;
+            }
+            else {
+                document.body.classList.remove("has-theme");
+                localStorage.setItem('main-bg-color', color);
+            }
+        }
+
+        function setAllSelected(enabled) {
+            sessionStorage.setItem('all-selected', enabled ? 'on' : 'off');
+            document.body.classList.toggle('all-selected', enabled);
+            is_all_selected = enabled;
+        }
+
+        function setShowOnlyExisting(enabled) {
+            sessionStorage.setItem('show-only-existing', enabled ? 'on' : 'off');
+            document.body.classList.toggle('show-only-existing', enabled);
+            show_only_existing = enabled;
+        }
+
+        function setAutoRefresh(enabled) {
+            sessionStorage.setItem('auto-refresh', enabled ? 'on' : 'off');
+            auto_refresh = enabled;
+            clearTimeout(auto_refresh_timer);
+
+            if (auto_refresh) {
+                auto_refresh_timer = setTimeout(() => {
+                    location.reload();
+                }, 10000);
+            }
+        }
+
+        function loadImage(url) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                let timer;
+
+                img.onload = () => resolve(img);
+                img.onerror = () => {
+                    clearTimeout(timer);
+                    reject();
+                }
+
+                if (location.protocol != "file:")
+                    img.crossOrigin = 'anonymous';
+
+                img.src = url;
+                timer = setTimeout(reject, 5000);
+            });
+        }
+
+        function bgr_to_rgb(color) {
+            return ((color & 0xff0000) >> 16) | (color & 0x00ff00) | ((color & 0x0000ff) << 16);
+        }
+
+        async function applyMostUsedColor(image_url) {
+            const img = await loadImage(image_url);
+            const ctx = document.createElement('canvas').getContext('2d');
+
+            ctx.canvas.width = img.width;
+            ctx.canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+
+            const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+            const data = new Uint32Array(imageData.data.buffer);
+            const histogram = new Uint32Array(256 * 256 * 256);
+
+            for (let i = 0; i < data.length; i++) {
+                ++histogram[data[i] & 0xFFFFFF];
             }
 
-            icon_packs.push({ title, path: `https://raw.githubusercontent.com/OnionUI/Themes/main/${path}/` });
+            let largest_count = 0;
+            let most_used_color;
+
+            for (let i = 0; i < histogram.length; i++) {
+                if (histogram[i] <= largest_count)
+                    continue;
+                largest_count = histogram[i];
+                most_used_color = i;
+            }
+
+            const color = "#" + bgr_to_rgb(most_used_color).toString(16).padStart(6, '0');
+
+            setBackgroundColor(color, true);
         }
 
-        if (icon_packs.length == 0) {
-            icon_packs.push({ title: doc_title, path: `https://raw.githubusercontent.com/OnionUI/Themes/main/icons/${hash_parts[0]}/` });
-        }
-    }
-    else {
-        try {
-            let test_theme = await loadImage("./skin/background.png");
-            is_theme = true;
-            icon_packs.push({ title: doc_title, path: "./icons/" });
-        }
-        catch (e) {
-            icon_packs.push({ title: doc_title, path: "./" });
-        }
-    }
+        async function main() {
+            let doc_title = basename(dirname(decodeURI(location.href)));
+            let is_theme = false;
 
-    setBackgroundColor(main_bg_color);
-    document.body.classList.toggle('all-selected', is_all_selected);
-    document.body.classList.toggle('show-only-existing', show_only_existing);
+            if (doc_title == "icons")
+                doc_title = basename(dirname(dirname(decodeURI(location.href))));
 
-    document.title = "Icon Pack: " + doc_title;
+            let icon_packs = [];
 
-    let html = "<main>";
+            if (location.hash) {
+                let hash = location.hash.substring(1);
 
-    html += `<h1>Icon Pack: ${doc_title}</h1>`;
+                let has_multi = hash.indexOf(",") != -1;
+                let hash_parts = has_multi ? hash.split(",") : [hash];
 
-    html += `<div class="toolbar"><label class="input-color-label" for="set_bg_color"><input type="color" size="10" id="set_bg_color" value="${main_bg_color}" oninput="setBackgroundColor(this.value);">Background color</label>`;
-    html += "&nbsp;&nbsp;";
-    html += `<input type="checkbox"${is_all_selected ? " checked" : ""} id="all_selected_checkbox" onclick="setAllSelected(this.checked)"><label for="all_selected_checkbox"> Show only selected state</label>`;
-    html += "&nbsp;&nbsp;";
-    html += `<input type="checkbox"${show_only_existing ? " checked" : ""} id="show_only_existing_checkbox" onclick="setShowOnlyExisting(this.checked)"><label for="show_only_existing_checkbox"> Hide missing icons</label>`;
+                doc_title = decodeURI(hash_parts[0]);
 
-    if (location.protocol == "file:") {
-        html += "&nbsp;&nbsp;";
-        html += `<input type="checkbox"${auto_refresh ? " checked" : ""} id="auto_refresh_checkbox" onclick="setAutoRefresh(this.checked)"><label for="auto_refresh_checkbox"> Auto refresh (10s)</label>`;
-    }
+                for (let i = 1; i < hash_parts.length; i++) {
+                    let [title, path] = hash_parts[i].split(":");
 
-    html += "</div>";
+                    if (title == "background") {
+                        main_bg_color = path;
+                        continue;
+                    }
 
-    icon_counts = new Array(icon_packs.length).fill(0);
+                    icon_packs.push({ title, path: `https://raw.githubusercontent.com/OnionUI/Themes/main/${path}/` });
+                }
 
-    let bg_loading = false;
+                if (icon_packs.length == 0) {
+                    icon_packs.push({ title: doc_title, path: `https://raw.githubusercontent.com/OnionUI/Themes/main/icons/${hash_parts[0]}/` });
+                }
+            }
+            else {
+                try {
+                    let test_theme = await loadImage("./skin/background.png");
+                    is_theme = true;
+                    icon_packs.push({ title: doc_title, path: "./icons/" });
+                }
+                catch (e) {
+                    icon_packs.push({ title: doc_title, path: "./" });
+                }
+            }
 
-    for (const [index, icon_pack] of icon_packs.entries()) {
-        let icon_pack_id = `icon_pack_${index}`;
-        let theme_path = "";
-        let get_theme_img = name => theme_path ? theme_path + `/skin/${name}.png` : "";
+            setBackgroundColor(main_bg_color);
+            document.body.classList.toggle('all-selected', is_all_selected);
+            document.body.classList.toggle('show-only-existing', show_only_existing);
 
-        if (!is_theme)
-            is_theme = basename(dirname(icon_pack.path)) == "icons";
+            document.title = "Icon Pack: " + doc_title;
 
-        if (is_theme) {
-            theme_path = dirname(dirname(icon_pack.path));
-            document.body.classList.add("has-theme");
-        }
+            let html = "<main>";
 
-        if (!bg_loading && theme_path) {
-            bg_loading = true;
-            applyMostUsedColor(get_theme_img("background"));
-        }
+            html += `<h1>Icon Pack: ${doc_title}</h1>`;
 
-        html += `<div style="--path-background: url(${get_theme_img("background")}); --path-bg-game-item-n: url(${get_theme_img("bg-game-item-n")}); --path-bg-game-item-f: url(${get_theme_img("bg-game-item-f")}); --path-bg-list-l: url(${get_theme_img("bg-list-l")});">`;
+            html += `<div class="toolbar"><label class="input-color-label" for="set_bg_color"><input type="color" size="10" id="set_bg_color" value="${main_bg_color}" oninput="setBackgroundColor(this.value);">Background color</label>`;
+            html += "&nbsp;&nbsp;";
+            html += `<input type="checkbox"${is_all_selected ? " checked" : ""} id="all_selected_checkbox" onclick="setAllSelected(this.checked)"><label for="all_selected_checkbox"> Show only selected state</label>`;
+            html += "&nbsp;&nbsp;";
+            html += `<input type="checkbox"${show_only_existing ? " checked" : ""} id="show_only_existing_checkbox" onclick="setShowOnlyExisting(this.checked)"><label for="show_only_existing_checkbox"> Hide missing icons</label>`;
 
-        html += `<h2>${decodeURI(icon_pack.title)}</h2>`;
-        html += `<div><label><span id="${icon_pack_id}_counter">0</span>/${icons.length} icons (<span id="${icon_pack_id}_percentage">0</span>% complete)</label></div>`;
-        html += `<div class="icons-container" id="${icon_pack_id}">`;
+            if (location.protocol == "file:") {
+                html += "&nbsp;&nbsp;";
+                html += `<input type="checkbox"${auto_refresh ? " checked" : ""} id="auto_refresh_checkbox" onclick="setAutoRefresh(this.checked)"><label for="auto_refresh_checkbox"> Auto refresh (10s)</label>`;
+            }
 
-        for (icon of icons) {
-            html += `<div class="icon-preview-container" data-icon="${icon}" title="${icon}">
+            html += "</div>";
+
+            icon_counts = new Array(icon_packs.length).fill(0);
+
+            let bg_loading = false;
+
+            for (const [index, icon_pack] of icon_packs.entries()) {
+                let icon_pack_id = `icon_pack_${index}`;
+                let theme_path = "";
+                let get_theme_img = name => theme_path ? theme_path + `/skin/${name}.png` : "";
+
+                if (!is_theme)
+                    is_theme = basename(dirname(icon_pack.path)) == "icons";
+
+                if (is_theme) {
+                    theme_path = dirname(dirname(icon_pack.path));
+                    document.body.classList.add("has-theme");
+                }
+
+                if (!bg_loading && theme_path) {
+                    bg_loading = true;
+                    applyMostUsedColor(get_theme_img("background"));
+                }
+
+                html += `<div style="--path-background: url(${get_theme_img("background")}); --path-bg-game-item-n: url(${get_theme_img("bg-game-item-n")}); --path-bg-game-item-f: url(${get_theme_img("bg-game-item-f")}); --path-bg-list-l: url(${get_theme_img("bg-list-l")});">`;
+
+                html += `<h2>${decodeURI(icon_pack.title)}</h2>`;
+                html += `<div><label><span id="${icon_pack_id}_counter">0</span>/${icons.length} icons (<span id="${icon_pack_id}_percentage">0</span>% complete)</label></div>`;
+                html += `<div class="icons-container" id="${icon_pack_id}">`;
+
+                for (icon of icons) {
+                    html += `<div class="icon-preview-container" data-icon="${icon}" title="${icon}">
                 <div class="icon-preview"><img src="${icon_pack.path}${icon}.png" style="display:none;" onerror="this.parentNode.style.display='none'" onload="this.style.display='';this.parentNode.parentNode.classList.add('has-icon');incrementIconCount('${icon_pack_id}', ${index})"></div>
                 <div class="icon-preview selected"><img src="${icon_pack.path}sel/${icon}.png" style="display:none;" onerror="this.parentNode.style.display='none'" onload="this.style.display='';this.parentNode.parentNode.classList.add('has-icon')"></div>
             </div>`;
-        }
+                }
 
-        html += '</div>';
+                html += '</div>';
 
-        html += `<div class="icons-container app-icons" data-name="${decodeURI(icon_pack.title)} - App icons" id="${icon_pack_id}_apps">`;
+                html += `<div class="icons-container app-icons" data-name="${decodeURI(icon_pack.title)} - App icons" id="${icon_pack_id}_apps">`;
 
-        for (const [i, icon] of app_icons.entries()) {
-            let line = Math.floor(i / 7);
-            html += `<div class="icon-preview-container" data-icon="${icon}" title="${icon}">
+                for (const [i, icon] of app_icons.entries()) {
+                    let line = Math.floor(i / 7);
+                    html += `<div class="icon-preview-container" data-icon="${icon}" title="${icon}">
                 <div class="icon-preview" style="--line-no: ${line};"><img src="${icon_pack.path}app/${icon}.png" style="display:none;" onerror="this.parentNode.style.display='none'" onload="this.style.display='';this.parentNode.parentNode.classList.add('has-icon');this.parentNode.parentNode.parentNode.classList.add('has-icons')"></div>
             </div>`;
+                }
+
+                html += '</div>';
+                html += '</div>';
+            }
+
+            html += "</main>";
+
+            document.body.innerHTML = html;
+
+            if (location.protocol == "file:") {
+                setAutoRefresh(auto_refresh);
+            }
         }
 
-        html += '</div>';
-        html += '</div>';
-    }
-
-    html += "</main>";
-
-    document.body.innerHTML = html;
-
-    if (location.protocol == "file:") {
-        setAutoRefresh(auto_refresh);
-    }
-}
-
-document.body.onload = main;
-</script>
+        document.body.onload = main;
+    </script>
 </body>
+
 </html>

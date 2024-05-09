@@ -422,7 +422,8 @@ cleanup() {
 	rm "/tmp/MISSING.srm"
 	rm "/tmp/stop_now"
 	disable_flag hotspotState
-
+	rm "/tmp/dismiss_info_panel"
+	sync
 	log "Cleanup done"
 	exit
 }
@@ -885,11 +886,15 @@ build_infoPanel_and_log() {
 	local message="$2"
 
 	log "Info Panel: \n\tStage: $title\n\tMessage: $message"
-
+	if is_running infoPanel; then
+		killall -9 infoPanel
+	fi
 	infoPanel --title "$title" --message "$message" --persistent &
+	sync
 	touch /tmp/dismiss_info_panel
 	sync
 	sleep 0.5
+	sync
 }
 
 restore_ftp() {

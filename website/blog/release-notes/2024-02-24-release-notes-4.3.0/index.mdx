@@ -1,0 +1,485 @@
+---
+slug: release-notes/4.3.0
+authors: [aemiii91, schmurtz, totofaki, xk, tgecko]
+tags: [release-notes, stable]
+image: ./assets/banner-release-4.3.png
+---
+
+import TOCInline from '@theme/TOCInline';
+import Card from '@site/src/components/Card';
+import ThemeCollection, { ThemeCard } from '@site/src/components/ThemeCollection';
+
+
+# Release notes: Onion V4.3
+
+<img src={assets.image} />
+
+*Official release notes for Onion V4.3.0*
+
+This release includes new systems, such as Nintendo DS and PICO-8, a lot of new and updated apps such as the Battery Monitor and the Blue light filter,
+support for the v4 Miyoo Mini's 560p screen as well as lots of other new features and fixes.
+
+<Truncate />
+
+
+<h2 id="overview">Overview</h2>
+
+<TOCInline toc={toc} maxHeadingLevel={4} />
+
+
+## Features
+
+### Core Onion features & apps
+
+
+<Card>
+
+#### Miyoo Mini v4 560p support
+<sup>
+
+by @tGecko
+
+</sup>
+
+Support for the Miyoo Mini v4 with its 560p screen has been added.  
+The resolution is now automatically and 560p is the default resolution for RetroArch and NDS/Drastic on the Miyoo Mini v4.
+A system to allow ports to use the new resolution is also in place, but has to be added to the ports manually.
+
+</Card>
+
+<Card readMore="../../docs/apps/screen-recorder">
+
+#### Screen recorder
+<sup>
+
+by @XK9274
+
+</sup>
+
+A tool to record the screen, this tool will not offer perfect performance in games, but can be used to record/demonstrate apps and features.
+
+</Card>
+
+<Card readMore="../../docs/network/vnc">
+
+#### VNC server
+<sup>
+
+by @XK9274
+
+</sup>
+
+Remote display and remote control of your Miyoo Mini Plus from your computer thanks to VNC.
+
+</Card>
+
+<Card readMore="../../docs/apps/blue-light-filter">
+
+#### Blue light filter
+<sup>
+
+by @XK9274
+
+</sup>
+
+Control the blue light filter schedule, intensity, or state.
+
+</Card>
+
+<Card readMore="../../docs/apps/tweaks#pwm-frequency">
+
+#### PWM frequency adjustment
+<sup>
+
+by @tGecko
+
+</sup>
+
+Added an option in Tweaks app to control the backlights PWM frequency. This can help reduce the buzzing sound coming from the speaker.
+
+</Card>
+
+<Card readMore="../../docs/apps/battery-tool">
+
+#### Battery Monitor
+<sup>
+
+by @Sichroteph
+
+</sup>
+
+Onion Battery Tool enables to track and monitor historical battery charge while also providing an estimate of the remaining gaming time.
+
+</Card>
+
+<Card readMore="../../docs/faq#what-is-the-optimal-way-to-organize-multi-disk-games">
+
+#### M3U playlist generator
+<sup>
+
+by @schmurtzm
+
+</sup>
+
+This Tweaks app tool will generate automatically the m3u playlist files for multi-disc games.
+
+</Card>
+
+<Card readMore="../../docs/apps/tweaks#sort-applist-a-z">
+
+#### App list sorting tool
+<sup>
+
+by @XK9274
+
+</sup>
+
+This new tool included in Tweaks app will sort your Onion app list A-Z or Z-A.
+
+</Card>
+
+<Card readMore="../../docs/apps/package-manager">
+
+#### Automatic selection of emulators in Package Manager
+<sup>
+
+by @aemiii91
+
+</sup>
+
+Package Manager allows to auto select emulators that has roms present.
+
+</Card>
+
+<Card readMore="../../docs/apps/tweaks#mute-background-music">
+
+#### Mute background music option
+<sup>
+
+by @theUnBurn
+
+</sup>
+
+Mute background music for themes.
+
+</Card>
+
+<Card>
+
+#### Disable automatic time restore
+<sup>
+
+by @tGecko
+
+</sup>
+
+Normally, Onion saves the system time at shutdown and restores it on bootup. This new option disables the restore part.
+To use it, create the file `SD/.tmp_update/config/.noTimeRestore`
+
+</Card>
+
+<Card readMore="https://github.com/OnionUI/Onion/pull/1309">
+
+#### Updated Filebrowser to 2.26
+<sup>
+
+by @edmunek and @XK9274
+
+</sup>
+
+Update Filebrowser to 2.26 to fix CSS issue.
+
+</Card>
+
+<Card readMore="">
+
+#### Profile-specific Themes, Favorites and Recent lists
+<sup>
+
+by @Sichroteph
+
+</sup>
+
+Themes favorites and rencent lists are now associated to the current profile only (This was already the case for saves only). It allows to have your own configuration between your main profile and the guest profile.
+
+</Card>
+
+
+
+<Card>
+
+#### Startup and checkoff scripts
+<sup>
+
+by @dragoonDorise
+
+</sup>
+
+An easy way to run scripts at Onion's startup and just before powering off. 
+
+</Card>
+
+
+### Emulators and cores
+
+
+<Card readMore="../../docs/emulators/nds">
+
+#### Nintendo DS / DraStic (new standalone emulator)
+<sup>
+
+by Steward-Fu, integration by @Sichroteph and @schmurtzm
+
+</sup>
+
+A very awaited emulator, integrated in Onion with attention : we made it compatible with Game Switcher, auto save states, auto resume at boot ...
+
+</Card>
+
+<Card readMore="../../docs/emulators/pico-8-standalone">
+
+#### Pico-8 Wrapper (new standalone emulator)
+<sup>
+
+by @XK9274
+
+</sup>
+
+An awesome port of the official Pico-8 engine. It offers an optimal compatibility and the native Pico-8 online store called "Splore". (In order to use the wrapper, you need to have previously purchased PICO-8)
+
+</Card>
+
+<Card readMore="../../docs/emulators/neogeo#notes-on-gngeo">
+
+#### GnGeo (new standalone emulator)
+<sup>
+
+By bankbank , @schmurtzm
+
+</sup>
+
+GnGeo is an Neo-Geo MVS and Neo-Geo AES standalone emulator. It supports GNO files and has the particularity of starting very quickly with great performances.
+
+</Card>
+
+<Card readMore="../../docs/emulators/scummvm">
+
+#### ScummVM 2.9.0 Standalone (updated version of ScummVM project)
+<sup>
+
+by @XK9274 and @schmurtzm
+
+</sup>
+
+This version of ScummVM 2.9.0 standalone offers awesome performances compared to the RetroArch core performances.
+
+</Card>
+
+<Card readMore="../../docs/emulators/psx#notes-on-duckstationswanstation">
+
+#### DuckStation Xtreme Amped by KMFD (new core)
+<sup>
+
+by @schmurtzm
+
+</sup>
+
+Duckstation is slower than PCSX, however it allows to run some games like [Fromage](https://www.reddit.com/r/MiyooMini/comments/190avun/swanstation_fromage/). Could be interesting on rhythm games too.
+
+</Card>
+
+<Card readMore="../../docs/emulators/superbroswar">
+
+#### Super Bros War / Super Cat Wars core (new core)
+<sup>
+
+by @schmurtzm
+
+</sup>
+
+Super Mario War / Super Cat Wars is a fan-made multiplayer Super Mario Bros. 
+
+</Card>
+
+
+<Card readMore="../../docs/emulators/lowresnx">
+
+#### LowRes NX (new core)
+<sup>
+
+by @schmurtzm
+
+</sup>
+
+A great 2D game engine with many free games available.
+
+</Card>
+
+
+<Card readMore="../../docs/emulators/puzzlescript">
+
+#### PuzzleScript (new core)
+<sup>
+
+by @schmurtzm
+
+</sup>
+
+A great core to run many retro puzzles games. Many puzzles available from the PuzzleScript community !
+
+</Card>
+
+
+<Card readMore="../../docs/emulators/amiga">
+
+#### PUAE Xtreme Amped (New core)
+<sup>
+
+by @schmurtzm
+
+</sup>
+
+A new alternative PUAE core made by KMFD. This Commodore core is Available in Expert section of Package Manager.
+
+</Card>
+
+
+<Card readMore="../../docs/emulators/cpc">
+
+#### Caprice32 (new core)
+<sup>
+
+by @schmurtzm
+
+</sup>
+
+Captice32 is a core for Amstrad CPC, note that it offers better performances and compatibility than crocods core. Available in Expert section of Package Manager.
+
+</Card>
+
+
+<Card readMore="../../docs/emulators/pong">
+
+#### Gong / Pong (new core)
+<sup>
+
+by @schmurtzm
+
+</sup>
+
+Gong is a port of Pong game to libretro. This core is included in Ports section of Onion and doesn't require any bios or any additional rom to work.
+
+</Card>
+
+
+<Card readMore="../../docs/emulators/c64">
+
+#### Frodo (new core)
+<sup>
+
+by @schmurtzm
+
+</sup>
+
+Frodo is an alternative core for Commodore 64.
+
+</Card>
+
+
+<Card readMore="../../docs/emulators/turbografx">
+
+#### Beetle PCE (new core)
+<sup>
+
+by @schmurtzm
+
+</sup>
+
+"Beetle PCE" is a PC Engine core slower than "Beetle PCE Fast" but more accurate.
+
+</Card>
+
+
+<Card readMore="../../docs/emulators/c64">
+
+#### Fix vice x64 loading time
+<sup>
+
+by @schmurtzm
+
+</sup>
+
+If vice x64 was long to load, this fix could help. Note that using .crt files is also recommanded for fast boot.
+
+</Card>
+
+
+<Card readMore="../../docs/emulators/cpc">
+
+#### Update CrocoDS core (f1b4b91) (+keyboard fix)
+<sup>
+
+by @schmurtzm
+
+</sup>
+
+This CPC core has two modifications for Onion :
+- [Fix keyboard to QWERTY](https://github.com/libretro/libretro-crocods/issues/18)
+- [Change default internal config path to BIOS folder instead of Retroarch folder.](https://github.com/libretro/libretro-crocods/blob/f1b4b91291ba1e8e7c0be02269cd0d75c7fa71b9/crocods-core/platform.c#L1399)
+
+</Card>
+
+
+<Card readMore="../../docs/emulators/chailove">
+
+#### Update chailove core (69000df)
+
+<sup>
+
+by @schmurtzm
+
+</sup>
+
+Chailove is a game engine emulator inspired by LÖVE engine. This update improve game compatibility.
+
+</Card>
+
+
+<Card readMore="/docs/emulators/Lutro">
+
+#### Update Lutro core (09a134e)
+
+<sup>
+
+by @schmurtzm
+
+</sup>
+
+Lutro is a game engine emulator . This update fix the compatibility with Tetris.
+
+</Card>
+
+## Fixes and minor improvements
+
+* Fix MainUI's sighandler - *by @tGecko*
+* Fix network check - *by @codeudan*
+* Fix hint no screenshoot images after back from first image - *by @codeudan*
+* OTA: format release date and size info of new version zip - *by @codeudan*
+* Fixed low battery warning overlapping other battery icons - *by @schmurtzm*
+* Fix lockups entering apps or games - *by @XK9274*
+
+
+## Updated/added languages
+
+### Added
+
+* **Magyar** (Hungarian) - *credit: @dszollosinagy*
+* **Norsk** (Norwegian) - *credit: @kasperlosa and @jakobkg*
+* **Română** (Romanian) - *credit: @rcarausu*
+
+### Updated
+
+* **한국어** (Korean) - *credit: @DDinghoya*
+* **Português** (Portuguese) - *credit: @BlueKore*
+* **Français** (French) - *credit: @schmurtzm*
+* **Español** (Spanish) - *credit: @svera*

@@ -1,0 +1,22 @@
+#!/bin/sh
+# Retroarch Ports Script Template
+
+# main configuration :
+GameName="Pong (Port - Gong)"
+Core="gong"
+RomDir=
+RomFile=
+KillAudioserver=0
+PerformanceMode=0
+
+# additional configuration
+KillAudioserver=0
+PerformanceMode=0
+
+# specific to this port :
+Arguments=""
+
+# running command line :
+/mnt/SDCARD/Emu/PORTS/launch_retroarch.sh "$GameName" "$Core" "$RomDir" "$RomFile" "$Arguments" "$KillAudioserver" "$PerformanceMode"
+
+

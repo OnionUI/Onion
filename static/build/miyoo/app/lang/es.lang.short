@@ -11,12 +11,12 @@
 	"97":	"Ranura de guardado %d/%d",
 	"98":	"Vacío",
 	"99":	"No hay imágenes",
-	"100":	"carga fallida",
-	"101":	"guardado fallido",
-	"102":	"ranura %d guardada",
+	"100":	"Carga fallida",
+	"101":	"Guardado fallido",
+	"102":	"Ranura %d guardada",
 	"103":	"Pantalla completa",
-	"104":	"Abre",
-	"105":	"Cierre",
+	"104":	"Activo",
+	"105":	"Inactivo",
 	"106":  "Menú antiguo",
-    "138":  "Netplay"
+    "138":  "Juego en red"
 }

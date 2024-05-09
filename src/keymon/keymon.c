@@ -78,8 +78,11 @@ int suspend(uint32_t mode)
     int ret = 0;
 
     // terminate retroarch before kill
-    if (mode == 2)
-        ret = terminate_retroarch();
+    if (mode == 2) {
+        screenshot_system();
+        terminate_retroarch();
+        terminate_drastic();
+    }
 
     sync();
     procdp = opendir("/proc");
@@ -171,8 +174,10 @@ void quit(int exitcode)
 //
 void shutdown(void)
 {
-    system_shutdown();
+    set_system_shutdown();
+    screenshot_system();
     terminate_retroarch();
+    terminate_drastic();
     system_clock_get();
     system_clock_save();
     sync();
@@ -180,6 +185,54 @@ void shutdown(void)
     while (1)
         pause();
     exit(0);
+}
+
+//
+//    [onion] deepsleep if MainUI/gameSwitcher/retroarch is running
+//
+void deepsleep(void)
+{
+    system_state_update();
+    if (system_state == MODE_MAIN_UI) {
+        short_pulse();
+        set_system_shutdown();
+        kill_mainUI();
+    }
+    else if (system_state == MODE_SWITCHER) {
+        short_pulse();
+        set_system_shutdown();
+        kill(system_state_pid, SIGTERM);
+    }
+    else if (system_state == MODE_GAME) {
+        if (check_autosave()) {
+            short_pulse();
+            set_system_shutdown();
+            screenshot_system();
+            terminate_retroarch();
+        }
+    }
+    else if (system_state == MODE_ADVMENU) {
+        short_pulse();
+        set_system_shutdown();
+        kill(system_state_pid, SIGQUIT);
+    }
+    else if (system_state == MODE_APPS) {
+        short_pulse();
+        remove(CMD_TO_RUN_PATH);
+        set_system_shutdown();
+        suspend(1);
+    }
+    else if (system_state == MODE_DRASTIC) {
+        short_pulse();
+        set_system_shutdown();
+        screenshot_system();
+        terminate_drastic();
+    }
+
+    sleep(10);
+    // catch the resolution change signal on MMV4
+    sleep(20);
+    shutdown();
 }
 
 //
@@ -237,8 +290,8 @@ void suspend_exec(int timeout)
             // shutdown
             system_powersave_off();
             resume();
-            usleep(100000);
-            shutdown();
+            usleep(150000);
+            deepsleep();
         }
     }
 
@@ -246,7 +299,7 @@ void suspend_exec(int timeout)
     system_powersave_off();
     if (killexit) {
         resume();
-        usleep(100000);
+        usleep(150000);
         suspend(2);
         usleep(400000);
     }
@@ -261,42 +314,6 @@ void suspend_exec(int timeout)
     }
 
     keyinput_enable();
-}
-
-//
-//    [onion] deepsleep if MainUI/gameSwitcher/retroarch is running
-//
-void deepsleep(void)
-{
-    system_state_update();
-    if (system_state == MODE_MAIN_UI) {
-        short_pulse();
-        system_shutdown();
-        kill_mainUI();
-    }
-    else if (system_state == MODE_SWITCHER) {
-        short_pulse();
-        system_shutdown();
-        kill(system_state_pid, SIGTERM);
-    }
-    else if (system_state == MODE_GAME) {
-        if (check_autosave()) {
-            short_pulse();
-            system_shutdown();
-            terminate_retroarch();
-        }
-    }
-    else if (system_state == MODE_ADVMENU) {
-        short_pulse();
-        system_shutdown();
-        kill(system_state_pid, SIGQUIT);
-    }
-    else if (system_state == MODE_APPS) {
-        short_pulse();
-        remove(CMD_TO_RUN_PATH);
-        system_shutdown();
-        suspend(1);
-    }
 }
 
 void turnOffScreen(void)
@@ -314,7 +331,7 @@ int main(void)
     // Initialize
     signal(SIGTERM, quit);
     signal(SIGSEGV, quit);
-
+    signal(SIGUSR1, display_getRenderResolution);
     log_setName("keymon");
 
     getDeviceModel();
@@ -356,6 +373,10 @@ int main(void)
     bool comboKey_volume = false;
     bool comboKey_menu = false;
     bool comboKey_select = false;
+    bool menuAndAPressed = false; // screen recorder
+    bool menuAndBPressed = false; // blue light filter
+    int menuAndAPressedTime = 0;
+    int menuAndBPressedTime = 0;
 
     int ticks = getMilliseconds();
     int hibernate_start = ticks;
@@ -547,10 +568,12 @@ int main(void)
                 }
                 break;
             case HW_BTN_MENU:
+
                 if (!temp_flag_get("disable_menu_button")) {
                     system_state_update();
                     comboKey_menu = menuButtonAction(val, comboKey_menu);
                 }
+
                 break;
             case HW_BTN_X:
                 if (val == PRESSED && system_state == MODE_MAIN_UI)
@@ -563,7 +586,26 @@ int main(void)
                     applyExtraButtonShortcut(1);
                 break;
             case HW_BTN_A:
+                if (val == PRESSED) {
+                    if (b_BTN_Menu_Pressed) {
+                        menuAndAPressed = true;
+                        menuAndAPressedTime = getMilliseconds();
+                    }
+                }
+                else if (val == RELEASED) {
+                    menuAndAPressed = false;
+                }
+                break;
             case HW_BTN_B:
+                if (val == PRESSED) {
+                    if (b_BTN_Menu_Pressed) {
+                        menuAndBPressed = true;
+                        menuAndBPressedTime = getMilliseconds();
+                    }
+                }
+                else if (val == RELEASED) {
+                    menuAndBPressed = false;
+                }
                 if (val == PRESSED && system_state == MODE_MAIN_UI)
                     temp_flag_set("launch_alt", false);
                 break;
@@ -595,7 +637,7 @@ int main(void)
                 if (DEVICE_ID == MIYOO283) {
                     if (comboKey_menu) {
                         if (config_flag_get(".altBrightness")) {
-                            // MENU + B DOWN : brightness down
+                            // MENU + BTN DOWN : brightness down
                             if (val != RELEASED && settings.brightness > 0) {
                                 settings_setBrightness(settings.brightness - 1, true,
                                                        false);
@@ -654,6 +696,31 @@ int main(void)
                 break;
             }
 
+            // start screen recording after holding for >2secs
+            if (menuAndAPressed && (getMilliseconds() - menuAndAPressedTime >= 2000)) {
+                if (access("/mnt/SDCARD/.tmp_update/config/.recHotkey", F_OK) != -1) {
+                    system("/mnt/SDCARD/.tmp_update/script/screen_recorder.sh toggle &");
+                }
+
+                menuAndAPressed = false;
+                menuAndAPressedTime = 0;
+            }
+
+            // toggle blue light filter
+            if (menuAndBPressed && (getMilliseconds() - menuAndBPressedTime >= 2000)) {
+                if (access("/tmp/.blfOn", F_OK) != -1) {
+                    system("/mnt/SDCARD/.tmp_update/script/blue_light.sh disable &");
+                    system("touch /tmp/.blfIgnoreSchedule");
+                }
+                else {
+                    system("/mnt/SDCARD/.tmp_update/script/blue_light.sh enable &");
+                    system("touch /tmp/.blfIgnoreSchedule");
+                }
+
+                menuAndBPressed = false;
+                menuAndBPressedTime = 0;
+            }
+
             if (val == PRESSED && !osd_bar_activated) {
                 osd_hideBar();
             }
@@ -706,7 +773,6 @@ int main(void)
         }
 
         // Comes here every CHECK_SEC(def:15) seconds interval
-
         if (delete_flag) {
             if (exists("/tmp/state_changed")) {
                 system_state_update();
@@ -735,10 +801,17 @@ int main(void)
             }
         }
 
+        // Check bluelight filter
+        if (DEVICE_ID == MIYOO354) {
+            system("/mnt/SDCARD/.tmp_update/script/blue_light.sh check");
+        }
+
         // Quit RetroArch / auto-save when battery too low
         if (settings.low_battery_autosave_at && battery_getPercentage() <= settings.low_battery_autosave_at && check_autosave()) {
             temp_flag_set(".lowBat", true);
+            screenshot_system();
             terminate_retroarch();
+            terminate_drastic();
         }
 
         elapsed_sec = 0;

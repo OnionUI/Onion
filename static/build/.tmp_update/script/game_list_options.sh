@@ -4,6 +4,10 @@ radir=/mnt/SDCARD/RetroArch/.retroarch
 ext_cache_path=$radir/cores/cache/core_extensions.cache
 globalscriptdir=/mnt/SDCARD/App/romscripts
 
+recentlist=/mnt/SDCARD/Roms/recentlist.json
+recentlist_hidden=/mnt/SDCARD/Roms/recentlist-hidden.json
+recentlist_temp=/tmp/recentlist-temp.json
+
 UI_TITLE="OPTIONS"
 
 mkdir -p $radir/cores/cache
@@ -50,6 +54,17 @@ main() {
         echo "cmd_to_run.sh not found"
         exit 1
     fi
+
+    # Recent list entry removal
+    if [ ! -f $sysdir/config/.showRecents ]; then
+        currentrecentlist=$recentlist_hidden
+    else
+        currentrecentlist=$recentlist
+    fi
+
+    firstrecententry=$(head -n 1 "$currentrecentlist")
+    sed '1d' $currentrecentlist > $recentlist_temp
+    mv $recentlist_temp $currentrecentlist
 
     if [ $current_tab -eq $TAB_GAMES ]; then
         echo "tab: games"
@@ -221,6 +236,11 @@ check_is_game() {
     echo "$1" | grep -q "retroarch" || echo "$1" | grep -q "/../../Roms/"
 }
 
+add_game_to_recent_list() {
+    echo "$firstrecententry" | cat - "$currentrecentlist" > "$recentlist_temp"
+    mv "$recentlist_temp" "$currentrecentlist"
+}
+
 add_script_files() {
     scriptdir="$1"
     if [ -d "$scriptdir" ]; then
@@ -319,6 +339,7 @@ reset_game() {
     echo ":: reset_game $*"
     echo -e "savestate_auto_load = \"false\"\nconfig_save_on_exit = \"false\"\n" > $sysdir/reset.cfg
     echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v --appendconfig \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+    add_game_to_recent_list
     exit 0
 }
 
@@ -463,6 +484,7 @@ get_core_extensions() {
         ./bin/infoPanel --title "CACHING CORES" --message "Caching core info\n \nThis may take a minute..." --persistent &
         ./script/build_ext_cache.sh "$radir"
         touch /tmp/dismiss_info_panel
+        sync
     fi
 }
 
