@@ -6,7 +6,9 @@ description: Overview of the most important features
 
 # Features
 
-<p align="center">
+<table align="center">
+<tbody>
+<tr>
 <a href="#shortcuts"><img title="Shortcuts" src="https://user-images.githubusercontent.com/44569252/189434056-b1148ff9-393b-43d1-b362-20d97b64b393.png" width="48" /></a>
 <a href="#gameswitcher"><img title="GameSwitcher" src="https://user-images.githubusercontent.com/44569252/179301923-635b60fa-22de-4cf3-894a-2f3c34702d64.png" width="48" /></a>
 <a href="#package-manager"><img title="Package Manager" src="https://user-images.githubusercontent.com/44569252/179315622-e29e0971-87c8-4855-85e6-fc8de4ccd940.png" width="48" /></a>
@@ -14,7 +16,11 @@ description: Overview of the most important features
 <a href="#search"><img title="Search" src="https://user-images.githubusercontent.com/44569252/189498482-2590f31f-cca2-46e9-a316-3af98828446a.png" width="48" /></a>
 <a href="#themes"><img title="Themes" src="https://user-images.githubusercontent.com/44569252/179304061-647e63ff-5113-4a8a-aaa9-4dfda248d54e.png" width="48" /></a>
 <a href="#activity-tracker"><img title="Activity Tracker" src="https://user-images.githubusercontent.com/44569252/179302722-7fa82e4d-d72d-4b1e-bb4d-96a2a52aaa62.png" width="48" /></a>
+<a href="#blue-light-filter"><img title="Blue light filter" src={require('./assets/blue-light-filter.webp').default} style={{width: 48}} /></a>
+<a href="#screen-recorder"><img title="Screen Recorder" src={require('./assets/screen-recorder.webp').default} style={{width: 48}} /></a>
 <a href="#retroarch"><img title="RetroArch" src="https://user-images.githubusercontent.com/44569252/179318731-7e262588-cb92-4ea3-9001-2991c4f8ccbe.png" width="48" /></a>
+</tr>
+<tr>
 <a href="#optimized-emulators"><img title="Optimized Emulators" src={require('./assets/optimized.png').default} style={{width: 48}} /></a>
 <a href="#game-list-options-glo-menu"><img title="GLO Menu" src={require('./assets/icon-glo-menu.png').default} style={{width: 48}} /></a>
 <a href="#guest-mode"><img title="Guest Mode" src="https://user-images.githubusercontent.com/44569252/179304290-8c7e5140-5fb4-4ae1-bd90-faa416f9a37c.png" width="48" /></a>
@@ -25,7 +31,10 @@ description: Overview of the most important features
 <a href="#connected-features"><img title="Connected Features" src={require('./assets/wifi.png').default} style={{width: 48}} /></a>
 <a href="#personal-files-gathered-in-one-place"><img title="Personal files gathered in one place" src="https://user-images.githubusercontent.com/44569252/179305837-59922e34-e18f-45d1-b5fb-89593ee08152.png" width="48" /></a>
 <a href="#mainui-improvements"><img title="MainUI improvements" src="https://user-images.githubusercontent.com/44569252/179305495-2ae1f522-6918-469f-a2eb-63dd30262e17.png" width="48" /></a>
-</p>
+</tr>
+</tbody>
+</table>
+
 
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/189434056-b1148ff9-393b-43d1-b362-20d97b64b393.png" width="54" /></sup>Shortcuts
@@ -107,7 +116,18 @@ Thanks to `Activity Tracker` app you can :
 - Share your playtimes by taking a screenshot (press <kbd>MENU</kbd>+<kbd>POWER</kbd> - screenshot is saved in `Screenshots` folder).
 :::
 
+## <sup><img src={require('./assets/blue-light-filter.webp').default} style={{width: 54}} /></sup>Blue light filter
 
+:::note <a href="apps/blue-light-filter">Blue light filter</a>
+Thanks to `Blue light filter` feature from Tweaks app take care to your eyes !
+It allows you to change the colortemp of the screen to have more eye confort in low-light environments.
+:::
+
+## <sup><img src={require('./assets/screen-recorder.webp').default} style={{width: 54}} /></sup>Screen Recorder
+
+:::note <a href="apps/screen-recorder">Screen Recorder</a>
+Screen Recorder adds screen record ability for demoing apps/content/features/bugs.
+:::
 
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179318731-7e262588-cb92-4ea3-9001-2991c4f8ccbe.png" width="54" /></sup>RetroArch
@@ -202,7 +222,7 @@ For the Miyoo Mini Plus (equiped with wifi) Onion offers many additional possibi
 - [Automatic date/time synchronisation](apps/tweaks#set-automatically-via-the-internet) (NTP, via Tweaks app)
 - [Retroachivements](https://www.retroarch.com/?page=achievements)
 - [Scraper](/docs/apps/scraper) : import game covers directly from your MMP
-- [Network Services](network-features) : [Samba/SMB share](network/samba), [http server](network/http), [SSH](network/ssh), [FTP](network/ftp), [Telnet](network/telnet), [Hotspot](network/hotspot)...
+- [Network Services](network-features) : [Samba/SMB share](network/samba), [http server](network/http), [SSH](network/ssh), [FTP](network/ftp), [Telnet](network/telnet), [Hotspot](network/hotspot), [VNC server](network/vnc)...
 :::
 
 

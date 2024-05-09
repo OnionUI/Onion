@@ -32,12 +32,12 @@ jobs:
         echo "SHA_SHORT=$(git log -n 1 --pretty=format:"%h" origin/main)" >> $GITHUB_ENV
     - name: Print version
       run: |
-        echo "Onion-v${{ env.BUILD_VERSION }}-snapshot-${{ env.SHA_SHORT }}"
+        echo "Onion-v${{ env.BUILD_VERSION }}-${{ env.SHA_SHORT }}"
     - name: Build release
       shell: bash
       run: |
         source /root/.bashrc
-        VERSION_OVERRIDE=${{ env.BUILD_VERSION }}-snapshot-${{ env.SHA_SHORT }} make release
+        VERSION_OVERRIDE=${{ env.BUILD_VERSION }}-${{ env.SHA_SHORT }} make release
     - uses: marvinpinto/action-automatic-releases@latest
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -45,4 +45,4 @@ jobs:
         prerelease: true
         title: "Onion V${{ env.BUILD_VERSION }}"
         files: |
-          release/Onion-v${{ env.BUILD_VERSION }}-snapshot-${{ env.SHA_SHORT }}.zip
+          release/Onion-v${{ env.BUILD_VERSION }}-${{ env.SHA_SHORT }}.zip

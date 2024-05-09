@@ -1,0 +1,95 @@
+---
+slug: /installation/update
+description: Upgrading from stock or Onion
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+
+# Upgrading
+
+
+*When upgrading, your save states, in-game saves, roms, bios files, and
+configs will carry over to the updated system.*
+
+:::note OTA UPDATES (MMP)
+The Miyoo Mini+ (Plus) can update Onion via the Wi-Fi connection using the OTA Update app. If the OTA update fails, simply follow the steps below to perform a manual update.
+:::
+
+
+## Step 1: Copy the installation files
+
+:::caution Save state compatibility
+For some systems, save states won't always work after upgrading,
+please **make sure to create in-game saves** before upgrading.
+:::
+
+<Tabs groupId="os" queryString>
+<TabItem value="win" label="Windows">
+
+1. Right click the `Onion-v4.x.x.zip` file and select **Extract all** › **Extract**
+2. Select and copy the 7 folders to the root of your SD card
+3. Click **Yes** when prompted to overwrite
+
+</TabItem>
+<TabItem value="mac" label="Mac">
+
+1. Unzip (expand) the `Onion-v4.x.x.zip` file: Double-click the `.zip` file.  
+   The unzipped item will appear in the same folder as the `.zip` file.  
+   If you want to, you can delete the `.zip` file.
+2. Select and copy the 7 folders to the root of your SD card  
+   Make sure hidden files are shown (press <kbd>Command</kbd>+<kbd>Shift</kbd>+<kbd>.</kbd> in Finder)
+3. Click **Merge** when prompted about existing folders, and click **Replace** for any files.
+
+</TabItem>
+<TabItem value="linux" label="Linux">
+
+1. Unzip the `Onion-v4.x.x.zip` file using the following command (replace `Onion-v4.2.0` with the filename of the zip you downloaded):
+
+   ```sh
+   unzip Onion-v4.2.0.zip -d Onion-v4.2.0
+   ```
+
+2. Copy the 7 folders to your SD card, using the following command (replace `/run/media/mmcblk0p1` with the path to your SD card):
+
+   ```sh
+   cp -rf Onion-v4.2.0/* /run/media/mmcblk0p1
+   ```
+
+</TabItem>
+<TabItem value="chromeos" label="Chrome OS">
+
+:::tip Recommended method
+Due to limitations in the way the Chrome OS File Manager works, it's recommended to backup your personal files, perform a clean install of Onion OS on the SD card, and then restore your backed up files. The following instructions go through this procedure.
+:::
+
+1. Display the contents of the SD card on the File Manager by double-clicking the drive icon.
+2. Backup your personal files such as the ones under `Roms`, `BIOS`, `Saves` and `Themes` directories.
+3. Perform a [clean install](/docs/installation/fresh) on the SD card.
+4. Restore your files on the newly installed Onion SD card. **Do not move a file to the same location as one with the same name**. This will cause the moved file to be duplicated with a number appended to it, and won't be recognized by Onion OS. 
+
+</TabItem>
+</Tabs>
+
+:::info
+If you're upgrading from v3.9 or below, we recommend you delete the `.tmp_update` folder first.
+:::
+
+
+## Step 2: Boot up your device to begin the installation
+
+1. The installation will begin when you boot up your Miyoo Mini.
+
+2. When the installation is done, press the <kbd>A</kbd> button and the device will turn off (MM) or reboot (MMP).
+
+
+## Step 3: Check that your files are in the correct folders
+
+1. If they're not already in place, transfer your bios files to the `BIOS` folder and your roms in their respective subfolders inside the `Roms` folder (see the *[Emulators](../emulators)* page for more information - here you'll find the [Rom Folders](../emulators/folders) table).
+
+:::info
+Despite its name, the `.tmp_update` folder must stay on your SD card.
+:::
+
+2. Insert your SD card, boot up your Mini and press <kbd>SELECT</kbd> from the `Games` tab in the main menu to refresh roms.

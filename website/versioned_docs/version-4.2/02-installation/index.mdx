@@ -1,0 +1,120 @@
+---
+slug: /installation
+description: Official installation guide
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import DocCardList from '@theme/DocCardList';
+import ReleaseLink from '@site/src/components/ReleaseLink';
+import IconLink from '@site/src/components/IconLink';
+
+
+# Installation
+
+*![](https://user-images.githubusercontent.com/98862735/179318051-39abe99e-79eb-43da-9778-aa9b4f6d1b28.png)*
+
+
+:::tip Windows user?
+Try [Onion Desktop Tools](https://github.com/schmurtzm/Onion-Desktop-Tools/blob/main/README.md) for easy SD card preparation and Onion installation. ODT makes it easy to format the SD card, download, install, update, and configure Onion in a couple of clicks.
+:::
+
+
+## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/189428439-d70d00ac-3b1b-416f-a8fb-b47c8c6cead2.png" width="54" /></sup> Check your firmware
+
+*The firmware is the backend part of the OS, which lives inside your device. Onion on the other hand is a frontend that will stay fresh on your SD card.*
+
+:::caution Risk of bricking
+We can't take responsibility if your device is bricked in the process of upgrading the firmware.
+
+Take a look at the [*firmware upgrade guide*](https://user-images.githubusercontent.com/16885275/170205258-8add4be7-1a1e-4ae5-a8f2-cb13c6703e06.png) - beware, the guide contains an outdated link to lemiyoo.cn, we provide an alternative download link below.
+:::
+
+1. You can check your current version in `Settings` › `Device Info` › `Version`  
+   or if you already have Onion installed: `Settings` › `About device` › `Firmware version`
+2. Select your device in the tabs below, then check that you have the appropriate firmware version.
+
+<Tabs groupId="device" queryString>
+<TabItem value="mm" label="Miyoo Mini (MM)">
+
+
+:::info 'The Boya Incident'
+A bad firmware was found on devices bought in late December (version `20221216****` and `20221224****`).
+Please apply the community patch found below. [Read more](https://docs.google.com/document/d/e/2PACX-1vQCTMHDUz2jJBPx3XbvXGVukRJ0t96JKe1gchuV9i5eo3RqY1mIwFx8H1Ja-3sQtFXcHh3U72O8DNcY/pub)
+:::
+
+3. You need at least firmware version `20220419****` (for Onion v3.10 and above)  
+   *Most devices produced after July 2022 will already have this firmware version.*
+
+   - `2021 12 11 0956` ⚠️
+   - `2022 01 08 2152` ⚠️
+   - `2022 04 19 0828` ✔️
+   - `2022 12 16 0314` ⚠️
+   - `2022 12 24 0121` ⚠️
+   - `2023 01 04 1337` ✔️ (community patch)
+   - `2023 06 11 1426` ✔️
+
+:::note Firmware downloads (MM)
+
+<IconLink href="https://drive.google.com/drive/folders/1VtfcBCoIcpMIBY2FIyAtjV-Dg02JUvhG" icon="cloud_download">Firmware 20220419</IconLink><br/>
+
+<IconLink href="https://www.reddit.com/r/MiyooMini/comments/104qbak/community_firmware_patch_for_new_devices/" icon="description">Community patch</IconLink> (use only on firmware 20221216/24)
+
+:::
+
+</TabItem>
+<TabItem value="mmp" label="Miyoo Mini+ (MMP)">
+
+
+3. You need at least firmware version `20230505****`, if you have an older version please download the recommended firmware linked below.
+
+   - `2023 02 18 1113` ⚠️
+   - `2023 03 02 1817` ⚠️
+   - `2023 03 12 1739` ⚠️
+   - `2023 03 26 2339` ⚠️
+   - `2023 03 29 2051` ⚠️
+   - `2023 05 05 2130` ✔️
+   - `2023 06 09 2122` ✔️
+   - `2023 06 28 2128` ✔️
+
+:::note Firmware downloads (MMP)
+
+<IconLink href="https://app.sugarsync.com/iris/wf/D4978471_09235444_029620" icon="cloud_download">Firmware 20230609</IconLink>
+
+:::
+
+</TabItem>
+</Tabs>
+
+
+## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179302769-4169e57a-860f-4c0e-8792-007e7557ba48.png" width="54" /></sup> Download the installation files
+
+:::info MMP support
+You need to install **Onion V4.2** for MMP, as earlier versions doesn't support the new hardware.
+:::
+
+Download the latest version of Onion:
+
+<div className="release-links">
+    <ReleaseLink showDownloads className="button button--primary button--lg" url="https://api.github.com/repos/OnionUI/Onion/releases/latest" />
+    <ReleaseLink showDownloads className="button button--secondary button--lg" url="https://api.github.com/repos/OnionUI/Onion/releases/tags/latest" />
+</div>
+
+The Onion installation zip is found under **Assets** at the bottom of the release notes.  
+Look for `Onion-v4.x.x.zip` or `Onion-v4.x.x-snapshot-[tag].zip`.
+
+
+## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179306127-e8a2c99c-a078-46b0-9561-47abf5c16208.png" width="54" /></sup> Install or upgrade
+
+Depending on your situation, choose an option below:
+
+<DocCardList/>
+
+:::tip
+If you experience any issues during the install, try copying over the installation
+files again and re-run the installation (you can skip copying the `BIOS`,
+`Icons`, and `Themes` folders).
+
+If you still have issues after trying a reinstall, you may need to reformat
+your SD card (remember to backup the `Roms` and `Saves` folders).
+:::

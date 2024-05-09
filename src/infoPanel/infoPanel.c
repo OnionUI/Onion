@@ -94,21 +94,11 @@ static void drawInfoPanel(SDL_Surface *screen, SDL_Surface *video,
     if (has_message) {
         const char *str = str_replace(message_str, "\\n", "\n");
         message = theme_textboxSurface(str, resource_getFont(TITLE),
-                                       theme()->grid.color, ALIGN_CENTER);
+                                       theme()->list.color, ALIGN_CENTER);
         message_rect.x -= message->w / 2;
         message_rect.y -= message->h / 2;
         SDL_BlitSurface(message, NULL, screen, &message_rect);
         SDL_FreeSurface(message);
-    }
-}
-
-static void drawImage(const char *image_path, SDL_Surface *screen)
-{
-    SDL_Surface *image = IMG_Load(image_path);
-    if (image) {
-        SDL_Rect image_rect = {320 - image->w / 2, 240 - image->h / 2};
-        SDL_BlitSurface(image, NULL, screen, &image_rect);
-        SDL_FreeSurface(image);
     }
 }
 
@@ -127,6 +117,16 @@ const SDL_Rect *getControlsAwareFrame(const SDL_Rect *frame)
     return NULL;
 }
 
+void drawBackground(void)
+{
+    if (g_show_theme_controls) {
+        SDL_BlitSurface(theme_background(), NULL, screen, NULL);
+    }
+    else {
+        SDL_FillRect(screen, NULL, 0);
+    }
+}
+
 int main(int argc, char *argv[])
 {
     char title_str[STR_MAX] = "";
@@ -137,6 +137,7 @@ int main(int argc, char *argv[])
     bool wait_confirm = true;
     bool is_persistent = false;
     bool info_panel_mode = false;
+    bool no_footer = false;
 
     for (int i = 1; i < argc; i++) {
         if (argv[i][0] == '-') {
@@ -154,6 +155,8 @@ int main(int argc, char *argv[])
                 g_show_theme_controls = true;
             else if (strcmp(argv[i], "-a") == 0 || strcmp(argv[i], "--auto") == 0)
                 wait_confirm = false;
+            else if (strcmp(argv[i], "-a") == 0 || strcmp(argv[i], "--no-footer") == 0)
+                no_footer = true;
             else if (strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "--persistent") == 0) {
                 wait_confirm = false;
                 is_persistent = true;
@@ -164,7 +167,7 @@ int main(int argc, char *argv[])
     signal(SIGINT, sigHandler);
     signal(SIGTERM, sigHandler);
 
-    SDL_InitDefault(true);
+    SDL_InitDefault(false);
 
     settings_load();
     lang_load();
@@ -177,20 +180,27 @@ int main(int argc, char *argv[])
 
     bool cache_used = false;
 
-    const SDL_Rect themedFrame = {theme()->frame.border_left, 0, 640 - theme()->frame.border_right, 480};
+    const SDL_Rect themedFrame = {
+        theme()->frame.border_left, 60,
+        640 - theme()->frame.border_left - theme()->frame.border_right, 360};
+
+    SDL_Surface *static_image = NULL;
 
     if (exists(image_path)) {
         g_images_paths_count = 1;
         g_image_index = 0;
-        SDL_BlitSurface(theme_background(), NULL, screen, NULL);
-        drawImage(image_path, screen);
+
+        drawBackground();
+
+        static_image = IMG_Load(image_path);
+        drawImage(static_image, screen, NULL);
     }
     else if (exists(images_json_path)) {
         if (loadImagesPathsFromJson(images_json_path, &g_images_paths,
                                     &g_images_paths_count, &g_images_titles) &&
             g_images_paths_count > 0) {
             g_image_index = 0;
-            SDL_BlitSurface(theme_background(), NULL, screen, NULL);
+            drawBackground();
             drawImageByIndex(0, g_image_index, g_images_paths,
                              g_images_paths_count, screen,
                              getControlsAwareFrame(&themedFrame), &cache_used);
@@ -205,7 +215,7 @@ int main(int argc, char *argv[])
                                    &g_images_paths_count) &&
             g_images_paths_count > 0) {
             g_image_index = 0;
-            SDL_BlitSurface(theme_background(), NULL, screen, NULL);
+            drawBackground();
             drawImageByIndex(0, g_image_index, g_images_paths,
                              g_images_paths_count, screen,
                              getControlsAwareFrame(&themedFrame), &cache_used);
@@ -264,7 +274,7 @@ int main(int argc, char *argv[])
                     break;
                 case SW_BTN_Y:
                     g_show_theme_controls = !g_show_theme_controls;
-                    SDL_BlitSurface(theme_background(), NULL, screen, NULL);
+                    drawBackground();
 
                     if (g_images_paths) {
                         drawImageByIndex(
@@ -272,8 +282,8 @@ int main(int argc, char *argv[])
                             g_images_paths_count, screen,
                             getControlsAwareFrame(&themedFrame), &cache_used);
                     }
-                    else if (exists(image_path)) {
-                        drawImage(image_path, screen);
+                    else if (static_image != NULL) {
+                        drawImage(static_image, screen, NULL);
                     }
                     else {
                         g_show_theme_controls = true;
@@ -309,7 +319,7 @@ int main(int argc, char *argv[])
 
                 const int current_index = g_image_index;
                 navigating_forward ? g_image_index++ : g_image_index--;
-                SDL_BlitSurface(theme_background(), NULL, screen, NULL);
+                drawBackground();
                 drawImageByIndex(g_image_index, current_index, g_images_paths,
                                  g_images_paths_count, screen,
                                  getControlsAwareFrame(&themedFrame),
@@ -359,7 +369,7 @@ int main(int argc, char *argv[])
                         }
                     }
 
-                    if (footer_changed) {
+                    if (footer_changed && !no_footer) {
                         theme_renderFooter(screen);
 
                         const char *a_btn_text = lang_get(LANG_NEXT, LANG_FALLBACK_NEXT);
@@ -432,6 +442,10 @@ int main(int argc, char *argv[])
         msleep(2000);
 
     cleanImagesCache();
+
+    if (static_image != NULL) {
+        SDL_FreeSurface(static_image);
+    }
 
     lang_free();
     resources_free();

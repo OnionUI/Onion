@@ -1,0 +1,13 @@
+{
+"label":"Caprice32",
+"icon":"../../Icons/Default/rapp/caprice32.png",
+"iconsel":"../../Icons/Default/rapp/caprice32.png",
+"launch":"launch.sh",
+"rompath":"../../Roms/CPC",
+"imgpath":"../../Roms/CPC/Imgs",
+"gamelist":"../../Roms/CPC/miyoogamelist.xml",
+"useswap":1,
+"shortname":0,
+"hidebios":1,
+"extlist":"sna|dsk|kcr|bin|zip|7z"
+}

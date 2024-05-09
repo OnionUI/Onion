@@ -142,11 +142,11 @@ void _print_bar(void)
 {
 #ifdef PLATFORM_MIYOOMINI
     uint32_t *ofs = fb_addr;
-    uint32_t i, j, curr, percentage = _bar_max > 0 ? _bar_value * DISPLAY_HEIGHT / _bar_max : 0;
+    uint32_t i, j, curr, percentage = _bar_max > 0 ? _bar_value * RENDER_HEIGHT / _bar_max : 0;
 
-    ofs += DISPLAY_WIDTH - meterWidth;
-    for (i = 0; i < DISPLAY_HEIGHT * 3; i++, ofs += DISPLAY_WIDTH) {
-        curr = (i % DISPLAY_HEIGHT) < percentage ? _bar_color : 0;
+    ofs += RENDER_WIDTH - meterWidth;
+    for (i = 0; i < RENDER_HEIGHT * 3; i++, ofs += RENDER_WIDTH) {
+        curr = (i % RENDER_HEIGHT) < percentage ? _bar_color : 0;
         for (j = 0; j < meterWidth; j++)
             ofs[j] = curr;
     }
@@ -162,9 +162,9 @@ void _bar_restoreBufferBehind(void)
     _print_bar();
     if (_bar_savebuf) {
         uint32_t i, j, *ofs = fb_addr, *ofss = _bar_savebuf;
-        ofs += DISPLAY_WIDTH - meterWidth;
-        ofss += DISPLAY_WIDTH - meterWidth;
-        for (i = 0; i < DISPLAY_HEIGHT; i++, ofs += DISPLAY_WIDTH, ofss += DISPLAY_WIDTH) {
+        ofs += RENDER_WIDTH - meterWidth;
+        ofss += RENDER_WIDTH - meterWidth;
+        for (i = 0; i < RENDER_HEIGHT; i++, ofs += RENDER_WIDTH, ofss += RENDER_WIDTH) {
             for (j = 0; j < meterWidth; j++)
                 ofs[j] = ofss[j];
         }
@@ -178,12 +178,12 @@ void _bar_saveBufferBehind(void)
 {
 #ifdef PLATFORM_MIYOOMINI
     // Save display area and clear
-    if ((_bar_savebuf = (uint32_t *)malloc(DISPLAY_WIDTH * DISPLAY_HEIGHT *
+    if ((_bar_savebuf = (uint32_t *)malloc(RENDER_WIDTH * RENDER_HEIGHT *
                                            sizeof(uint32_t)))) {
         uint32_t i, j, *ofs = fb_addr, *ofss = _bar_savebuf;
-        ofs += DISPLAY_WIDTH - meterWidth;
-        ofss += DISPLAY_WIDTH - meterWidth;
-        for (i = 0; i < DISPLAY_HEIGHT; i++, ofs += DISPLAY_WIDTH, ofss += DISPLAY_WIDTH) {
+        ofs += RENDER_WIDTH - meterWidth;
+        ofss += RENDER_WIDTH - meterWidth;
+        for (i = 0; i < RENDER_HEIGHT; i++, ofs += RENDER_WIDTH, ofss += RENDER_WIDTH) {
             for (j = 0; j < meterWidth; j++)
                 ofss[j] = ofs[j];
         }

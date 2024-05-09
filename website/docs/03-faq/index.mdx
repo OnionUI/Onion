@@ -35,6 +35,33 @@ If you have a regular Mini, or just want to scrape images off-device, follow thi
 
 <details><summary>
 
+### How can I <u>add manuals</u> for my games?
+
+</summary>
+
+Just add a `Manuals` folder containing pdf files named with the same names as the roms.
+
+For example : 
+
+- 📁`Roms/GB/`
+  - 📄`Tetris.gb`
+  - 📁`Manuals/`
+    - 📄`Tetris.pdf` 
+
+1. When inside a game list, select a rom and press <kbd>Y</kbd> to access [GLO menu](/docs/apps/game-list-options)
+2. Scroll down and find the "Game manual" option
+
+It will run Green pdf reader with the manual of the selected rom.
+
+:::note
+The *Game manual* option is not displayed in GLO menu if the pdf file doesn't exist or if it is not wall named (the files names are key sensistive).
+:::
+
+</details>
+
+
+<details><summary>
+
 ### How can I use a `miyoogamelist.xml` to <u>customize game names</u>?
 
 </summary>
@@ -105,23 +132,85 @@ Your first task is to find cheat files for your games (usually provided in `.cht
 
 </summary>
 
-<sup>(Credit: Dwmccoy)</sup>
+<sup>(Credit: Schmurtz)</sup>
 
-My solution for multi-disc games was to store the Roms in a different folder. 
+PSX multidisc roms require to create a playslist file (.m3u). It allows to have only one entry for each multidisc game and one unique save file for each game.
+Since Onion 4.3.0 you can use Tweaks app to generate automatically the m3u playlist files which will group your multidisk games.
 
-**Example:** Driver 2
+The tool is available from `Tweaks` -> `Tools` section.
+By default the script is systematically applied to `PS`, `SEGACD`, `NEOCD`, `PCE`, `PCFX` and `AMIGA` rom folders.
 
-Copy the bin/cue files for the multi-disc game *Driver 2* into the following folder of `Roms/PSX/Driver 2`
+The supported multidisc file names are numerous (not key sensitive and support "disc" or "disk"), for example : 
+ - `MyGame (Disc 1).chd` or `MyGame (disc 1).chd` or `MyGame (DISC 1).chd` or `MyGame (Disk 1).chd`
+ - `MyGame (USA) (Disc 1).bin` + `MyGame (USA) (Disc 1).cue`
+ - `MyGame (USA) (Disc 1) (Rev 1).chd`
+ - `MyGame (Disc 1 of .2).chd`
+...
 
-I had two disc files to copy into the `Roms/PSX/Driver 2` folder `Driver 2 (Disc 1) (v1.1)` and `Driver 2 (Disc 2) (v1.1)`
-I then created an m3u file named `Driver 2 (v1.1).m3u` with the following content and placed it into the /Roms/PS folder
 
-`../../Roms/PSX/Driver 2/Driver 2 (Disc 1) (v1.1).cue`  
-`../../Roms/PSX/Driver 2/Driver 2 (Disc 2) (v1.1).cue`
+When you run multidisc playlist (.m3u) generator from Tweaks app, it will propose you 2 solutions to hide the multidisk roms files (and keep only the playlist visible). 
+- Multiple directories (.Game_Name)  ---> One directory for each game: "`.Game_Name`".
+- Single directory (.multi-disc) ---> One single directory "`.multi-disc`" will contains all multi-disc files.
 
-Launch the PlayStation Emulator and the only file you should see for the "Driver 2" game is the m3u file since the disc(s) for the game reside in a different folder.
+:::note
+This choice has no impact on the daily use experience: it's up to you to choose the file storage that suits you best.
+:::
 
-You can store the files in whatever folder you want as long as the path to the cue file is correct. I created the folder PSX to store the multi-disc images in for simplicity. It's a bit of a hassle but it does work.
+<br /><br />
+
+**Example:** With "Driver 2" and "Metal Gear Solid"
+
+Copy the bin/cue or chd files for the multi-disc games *Driver 2* and *Metal Gear Solid* into the following folder of `Roms/PS`. You'll obtain :
+
+
+<table><td>
+
+- 📁`Roms/PS/`
+  - 📄`Driver 2 (Disc 1) (v1.1).cue`
+  - 📄`Driver 2 (Disc 1) (v1.1).bin`
+  - 📄`Driver 2 (Disc 2) (v1.1).cue`
+  - 📄`Driver 2 (Disc 2) (v1.1).bin`
+  - 📄`Metal Gear Solid (USA) (Disc 1) (Rev 1).chd`
+  - 📄`Metal Gear Solid (USA) (Disc 2) (Rev 1).chd`
+
+</td></table>
+
+Result after running multidisc playlist (.m3u) generator from Tweaks app :
+
+- if you choose *Multiple directories (.Game_Name)*
+
+<table><td>
+
+- 📁`Roms/PS/`
+  - 📄`Driver 2 (v1.1).m3u`
+  - 📄`Metal Gear Solid (USA) (Rev 1).m3u`
+  - 📁`.Driver 2 (v1.1)/`
+    - 📄`Driver 2 (Disc 1) (v1.1).cue` 
+    - 📄`Driver 2 (Disc 1) (v1.1).bin`
+    - 📄`Driver 2 (Disc 2) (v1.1).cue`
+    - 📄`Driver 2 (Disc 2) (v1.1).bin`
+  - 📁`.Metal Gear Solid (USA) (Rev 1)/`
+    - 📄`Metal Gear Solid (USA) (Disc 1) (Rev 1).chd`
+    - 📄`Metal Gear Solid (USA) (Disc 2) (Rev 1).chd`
+
+</td></table>
+
+- if you choose *Single directory (.multi-disc)*
+
+<table><td>
+
+- 📁`Roms/PS/`
+  - 📄`Driver 2 (v1.1).m3u`
+  - 📄`Metal Gear Solid (USA) (Rev 1).m3u`
+  - 📁`.multi-disc/`
+    - 📄`Driver 2 (Disc 1) (v1.1).cue` 
+    - 📄`Driver 2 (Disc 1) (v1.1).bin`
+    - 📄`Driver 2 (Disc 2) (v1.1).cue`
+    - 📄`Driver 2 (Disc 2) (v1.1).bin`
+    - 📄`Metal Gear Solid (USA) (Disc 1) (Rev 1).chd`
+    - 📄`Metal Gear Solid (USA) (Disc 2) (Rev 1).chd`
+
+</td></table>
 
 </details>
 
@@ -579,7 +668,33 @@ After the boot, the first binary launched from the SD card by the firmware is th
 
 </details>
 
+<details><summary>
 
+### How to <u>overclock</u> my Miyoo Mini?
+
+</summary>
+
+Since Onion 4.2.0, overclock is possible. The speed improvement can be very noticable (up to 20%).
+
+For now the overclock feature is manual.
+
+Onion's overclock works with `cpuclock.txt` text files.
+Retroarch will check the presence of this file in the core config folder first, then the RA root folder.
+The content of cpuclock.txt is simply a 4-digit number(MHz).
+
+The max speed overclock speed are :
+
+    For the Miyoo Mini : 1700Mhz (1600 recommended for optimal stability)
+    For the Miyoo Mini Plus : 1900Mhz (1800 recommended for optimal stability)
+
+For example, if you want to improve the PSX speed with PCSX-ReARMed (which can allow to enable *enhanced resolution* on many additional games) you can create a `cpuclock.txt` file in `Saves/CurrentProfile/config/PCSX-ReARMed` folder with the value `1600` inside.
+
+> Notes:  
+> Do not use values above the recommend ones. It could impact the stability of your device or damage your device.
+
+https://youtu.be/2ptdAy3nZ8Y
+
+</details>
 
 
 
