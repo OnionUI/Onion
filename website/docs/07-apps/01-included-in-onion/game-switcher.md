@@ -28,14 +28,14 @@ The GameSwitcher is designed to be the central user interface of Onion. It allow
 
 It also allows you to quickly change games and many other features:
 
-- Quick boot your last played game.
-- Quickly switch games from your history.
-- Full overlay with accurate brightness, battery readings and playtimes.
-- Display playtime (current game playtime / Total games playtime).
+- Quick boot your last played game
+- Quickly switch games from your history
+- Full overlay with accurate brightness, battery readings and playtimes
+- Display playtime (current game playtime/Total games playtime)
 - Minimal view mode: beautiful full screen mode
-- Improved *Sleep Mode* with full game suspension (press <kbd>POWER</kbd>).
-- Low battery indicator: Red frame when <15% (can be adjusted in Tweaks).
-- When the battery goes below 4%, the device will automatically save and exit to prevent losing progress.
+- Improved *Sleep Mode* with full game suspension (press <kbd>POWER</kbd>)
+- Low battery indicator: Red frame when <15% (can be adjusted in Tweaks)
+- When the battery goes below 4%, the device will automatically save and exit to prevent losing progress
 
 ## Usage
 
@@ -43,7 +43,7 @@ Launch the GameSwitcher by pressing the <kbd>MENU</kbd> button.
 The last game played will be resumed in a few seconds, and with the simple press of a button, save your progress and turn off the console.  
 
 
-### Netplay usage demo
+### GameSwitcher usage demo
 <p align="center"><video controls><source src={NetStdHost}/></video></p>
 
 ### Controls
@@ -55,10 +55,10 @@ The last game played will be resumed in a few seconds, and with the simple press
 | <kbd>Left/Right</kbd>             | Navigate between last played games                                           |
 | <kbd>Up/Down</kbd>                | Set brightness                                                               |
 | <kbd>A</kbd> or <kbd>Menu</kbd>   | Resume selected game                                                         |
-| <kbd>B</kbd>                      | quit                                                                         |
-| <kbd>X</kbd>                      | Remove from Game Switcher <br /><sub>(it will keep the save state)</sub>     |
+| <kbd>B</kbd>                      | Quit                                                                         |
+| <kbd>X</kbd>                      | Remove from GameSwitcher <br /><sub>(it will keep the save state)</sub>     |
 | <kbd>Y</kbd>                      | Toggle fullscreen                                                            |
-| <kbd>Select</kbd>                 | toggle playtime display                                                      |
+| <kbd>Select</kbd>                 | Toggle playtime display                                                      |
 
 </p>
 
@@ -70,5 +70,5 @@ In game you can double click on menu button to quickly switch to the previous ga
 
 
 :::info standalone emulators are not compatible
-Game Switcher builds on Retroarch's Save State functionality so it's not compatible with standalone emulators.
+GameSwitcher builds on RetroArch's Save State functionality so it's not compatible with standalone emulators.
 :::

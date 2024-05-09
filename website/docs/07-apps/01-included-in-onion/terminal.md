@@ -22,7 +22,7 @@ A simple terminal emulator with a complete on-screen keyboard for Onion!
 | <kbd>D-pad</kbd>  | Navigate left/right/up/down arrows     |
 | <kbd>A</kbd>      | Press key                              |
 | <kbd>B</kbd>      | Toggle key                             |
-| <kbd>X</kbd>      | Show / hide keyboard                   |
+| <kbd>X</kbd>      | Show/Hide keyboard                     |
 | <kbd>Y</kbd>      | Change keyboard location (top/bottom)  |
 | <kbd>L1</kbd>     | Shift                                  |
 | <kbd>R1</kbd>     | Backspace                              |

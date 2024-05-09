@@ -36,13 +36,13 @@ Gmu supports MPEG audio, Ogg Vorbis and Ogg Opus for internet audio
 
 | Function        | Button                                                    |
 | --------------- | -----------------------------------                       |
-| play            | <kbd>A</kbd>  (in playlist and in filebrowser)            |
-| pause           | <kbd>start</kbd>                                          |
-| seek in track   | <kbd>Left/Right</kbd>                                     |
-| prev/next track | <kbd>L1/R1</kbd>                                          |
+| Play            | <kbd>A</kbd> (In playlist and in filebrowser)            |
+| Pause           | <kbd>Start</kbd>                                          |
+| Seek in track   | <kbd>Left/Right</kbd>                                     |
+| Prev/Next track | <kbd>L1/R1</kbd>                                          |
 | ToggleView      | <kbd>Select</kbd>                                         |
-| exit            | <kbd>Menu</kbd> + <kbd>Select</kbd> (similar to RA menu)  |
-| help            | <kbd>Menu</kbd> + <kbd>Start</kbd>                        |
+| Exit            | <kbd>Menu</kbd> + <kbd>Select</kbd> (similar to RA menu)  |
+| Help            | <kbd>Menu</kbd> + <kbd>Start</kbd>                        |
 
 
 ### Playlist Controls

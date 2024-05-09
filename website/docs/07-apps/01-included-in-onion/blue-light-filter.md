@@ -10,7 +10,7 @@ slug: /apps/blue-light-filter
 
 
 ## Presentation
-Blue Light Filter is a tool included in Tweaks app which allows you to change the colortemp of the screen to have more eye confort in low-light environments.
+Blue Light Filter is a tool included in Tweaks app which allows you to change the colortemp of the screen to have more eye comfort in low-light environments.
 It can be compared to "f.lux", "Night Shift" on IOS or "Night Light" on Windows.
 
 ![](./assets/blue-light-filter.webp)
@@ -19,7 +19,7 @@ It can be compared to "f.lux", "Night Shift" on IOS or "Night Light" on Windows.
 
 - Gradually change of the colortemp of the screen
 - Time scheduling
-- 5 presets available :
+- 5 presets available:
     - Subtle
     - Moderate
     - Balanced
@@ -33,9 +33,9 @@ It can be compared to "f.lux", "Night Shift" on IOS or "Night Light" on Windows.
 
 You'll find it in Tweaks app: [`Appearance` -› `Blue light filter...`](/docs/apps/tweaks#blue-light-filter) and you'll get 5 options:
 
-1. **State** - Shows the current state of Blue Light Filter, can be used too to enable/disable Blue Light Filter now.
-2. **Schedule** - Allow to enable Blue Light Filter automatically during the time interval defined below.
-3. **Strength** - Choose one of the 5 presets available here.
+1. **State** - Shows the current state of Blue Light Filter, can be used too to enable/disable Blue Light Filter now
+2. **Schedule** - Allow to enable Blue Light Filter automatically during the time interval defined below
+3. **Strength** - Choose one of the 5 presets available here
 4. **Time (On)** - Time Blue light filter will be activated
 5. **Time (Off)** - Time Blue light filter will be disabled
 
