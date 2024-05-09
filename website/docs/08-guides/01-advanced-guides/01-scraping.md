@@ -51,7 +51,7 @@ The `Imgs` folder name is case sensitive (must have a capital `I`). Examples wou
 
 
 - Download template from the Retro Game Handhelds Discord:<br/>
-[Skraper_Mix_-_Miyoo_Mini_Big_Zoom_by_AchillesPDX.zip](https://cdn.discordapp.com/attachments/979073647685795880/1061416580380119081/Skraper_Mix_-_Miyoo_Mini_Big_Zoom_by_AchillesPDX.zip) - _Template by: AchillesPDX_
+[Skraper_Mix_-_Miyoo_Mini_Big_Zoom_by_AchillesPDX.zip](https://github.com/OnionUI/Onion/raw/main/files/20240310/Skraper_Mix_-_Miyoo_Mini_Big_Zoom_by_AchillesPDX.zip) - _Template by: AchillesPDX_
 - Extract the _.ZIP_ file into the following _Skraper_ folder: `.\Skraper-#.#.#\Mixes\`
 - Via the "ALL SYSTEMS"selection on the left, go to the "_MEDIA_" tab -> Clear the "_Fetched Media List_" of all but one image type by pressing the "_minus_" button.
 - Change the "_Media type:_" to: "_USER PROVIDED MIX_" and click on the file icon to the right

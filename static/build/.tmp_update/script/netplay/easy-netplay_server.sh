@@ -94,30 +94,33 @@ create_cookie_info() {
 
 # We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
 start_retroarch() {
-	log "RetroArch" "Starting RetroArch..."
-	echo "*****************************************"
-	echo "romfullpath: $cookie_rom_path"
-	echo "platform: ${platform}"
-	echo "netplaycore: $netplaycore"
-	echo "core_config_folder: $core_config_folder"
-	echo "cpuspeed: $cpuspeed"
-	echo "*****************************************"
+    log "RetroArch" "Starting RetroArch..."
+    echo "*****************************************"
+    echo "romfullpath: $cookie_rom_path"
+    echo "platform: ${platform}"
+    echo "netplaycore: $netplaycore"
+    echo "core_config_folder: $core_config_folder"
+    echo "cpuspeed: $cpuspeed"
+    echo "*****************************************"
 
-	# We set core CPU speed for Netplay
-	if [ -n "$cpuspeed" ]; then
-		PreviousCPUspeed=$(cat "/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt")
-		echo -n $cpuspeed >"/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt"
-	fi
+    # Cleanup $cookie_rom_path if it contains "/mnt/SDCARD/Emu/XX(ANYTHINGHERE)/launch.sh:"
+    cookie_rom_path=$(echo "$cookie_rom_path" | sed 's|/mnt/SDCARD/Emu/.*/launch.sh:||')
 
-	cd /mnt/SDCARD/RetroArch
-	# sleep 5
-	HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/easynetplay_override.cfg -H -L "$netplaycore" "$cookie_rom_path"
-	# We restore previous core CPU speed
-	if [ -n "$PreviousCPUspeed" ]; then
-		echo -n $PreviousCPUspeed >"/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt"
-	else
-		rm -f "/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt"
-	fi
+    # We set core CPU speed for Netplay
+    if [ -n "$cpuspeed" ]; then
+        PreviousCPUspeed=$(cat "/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt")
+        echo -n $cpuspeed > "/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt"
+    fi
+
+    cd /mnt/SDCARD/RetroArch
+    # sleep 5
+    HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/easynetplay_override.cfg -H -L "$netplaycore" "$cookie_rom_path"
+    # We restore previous core CPU speed
+    if [ -n "$PreviousCPUspeed" ]; then
+        echo -n $PreviousCPUspeed > "/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt"
+    else
+        rm -f "/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt"
+    fi
 }
 
 cleanup() {

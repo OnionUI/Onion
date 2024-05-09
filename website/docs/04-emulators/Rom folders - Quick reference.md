@@ -41,6 +41,7 @@ For convenience, a list of Rom folder names for all *fully supported* cores is d
 | NEC SuperGrafx                | `SGFX`                      |
 | NEC TurboGrafx   CD           | `PCECD`                     |
 | NEC TurboGrafx-16             | `PCE`                       |
+| Nintendo DS                   | `NDS`                       |
 | Nintendo Entertainment System | `FC`                        |
 | Nintendo Game Boy             | `GB`                        |
 | Nintendo Game Boy Advance     | `GBA`                       |

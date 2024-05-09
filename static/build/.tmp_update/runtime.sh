@@ -86,7 +86,9 @@ main() {
     HOME=/mnt/SDCARD/RetroArch/
 
     # Disable VNC server flag at boot
-    rm $sysdir/config/.vncServer
+    if [ -f "$sysdir/config/.vncServer" ]; then
+        rm "$sysdir/config/.vncServer"
+    fi
 
     # Detect if MENU button is held
     detectKey 1
@@ -742,6 +744,16 @@ load_settings() {
             mv -f temp /mnt/SDCARD/system.json
         fi
     fi
+
+    default_volume="${sysdir}/config/.defaultVolume-${device_uuid}"
+    if [ -f "$default_volume" ]; then
+        volume=$(printf '%d' "$(cat "$default_volume")")
+        if [ $? -eq 0 ]; then
+            cat /mnt/SDCARD/system.json |
+                sed 's/^\s*"vol":\s*[0-9][0-9]*/\t"vol":\t'$volume'/g' > temp
+            mv -f temp /mnt/SDCARD/system.json
+        fi
+    fi
 }
 
 save_settings() {
@@ -819,7 +831,9 @@ check_networking() {
     if pgrep -f update_networking.sh; then
         log "update_networking already running"
     else
-        rm /tmp/network_changed
+        if [ -f /tmp/network_changed ]; then
+            rm /tmp/network_changed
+        fi
         $sysdir/script/network/update_networking.sh check
     fi
 }

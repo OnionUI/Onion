@@ -21,7 +21,13 @@
     "acceleration":4.0,
     "accelerationRate":1.5,
     "maxAcceleration":4.0,
-    "incrementModifier":1.0
+    "incrementModifier":1.0,
+    "disableMouseHotkey":0,
+    "disableMouseIcon":0,
+    "minx":40,
+    "miny":0,
+    "maxx":280,
+    "maxy":236
   },
   "performance":{
     "cpuclock":1500,
@@ -30,7 +36,7 @@
     "mincpu":600
   },
   "bezel":{
-    "current_bezel":1,
+    "current_bezel":0,
     "current_integer_bezel":0,
     "bezel_path":"\/mnt\/SDCARD\/RApp\/PICO-8\/res\/bezel\/standard",
     "digit_path":"\/mnt\/SDCARD\/RApp\/PICO-8\/res\/digit",

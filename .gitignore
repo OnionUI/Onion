@@ -62,3 +62,7 @@ src/**/batteryMonitorUI
 !batteryMonitorUI/
 src/**/sendUDP
 !sendUDP/
+src/**/tree
+!tree/
+src/**/pippi
+!pippi/

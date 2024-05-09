@@ -139,6 +139,8 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/libgamename && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/gameNameList && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/sendUDP && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/tree && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/pippi && BUILD_DIR=$(BIN_DIR) make
 # Build dependencies for installer
 	@mkdir -p $(INSTALLER_DIR)/bin
 	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(INSTALLER_DIR)/bin/ VERSION=$(VERSION) make
