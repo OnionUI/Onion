@@ -543,6 +543,7 @@ launch_switcher() {
 
 check_off_order() {
     if [ -f /tmp/.offOrder ]; then
+        touch /tmp/shutting_down
 
         #EmuDeck - CheckOff scripts
         check_off_scripts=$(find "$sysdir/checkoff" -type f -name "*.sh")
@@ -654,8 +655,8 @@ mute_theme_bgm() {
 }
 
 create_swap() {
-  swapfile="/mnt/SDCARD/cachefile"
-    if [ ! -e "$swapfile" ] ; then
+    swapfile="/mnt/SDCARD/cachefile"
+    if [ ! -e "$swapfile" ]; then
         log "Creating swap file"
         dd if=/dev/zero of="$swapfile" bs=1M count=128
         mkswap "$swapfile"
@@ -663,7 +664,6 @@ create_swap() {
     log "Enabling swap"
     swapon "$swapfile"
 }
-
 
 init_system() {
     log "\n:: Init system"
