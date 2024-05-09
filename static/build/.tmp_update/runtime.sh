@@ -675,6 +675,10 @@ init_system() {
     cat /proc/ls
     sleep 0.25
 
+    # setup loopback interface for RetroArch CMDs
+    ip addr add 127.0.0.1/8 dev lo
+    ifconfig lo up
+
     if [ $DEVICE_ID -eq $MODEL_MMP ] && [ -f $sysdir/config/.lcdvolt ]; then
         $sysdir/script/lcdvolt.sh 2> /dev/null
     fi

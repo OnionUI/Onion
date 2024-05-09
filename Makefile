@@ -2,7 +2,7 @@
 
 TARGET=Onion
 VERSION=4.3.0
-RA_SUBVERSION=1.15.0.12
+RA_SUBVERSION=1.15.0.13
 
 ###########################################################
 
@@ -138,6 +138,7 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/pngScale && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/libgamename && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/gameNameList && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/sendUDP && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/tree && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/pippi && BUILD_DIR=$(BIN_DIR) make
 # Build dependencies for installer
@@ -174,7 +175,7 @@ $(THIRD_PARTY_DIR)/RetroArch/retroarch_miyoo354:
 # RetroArch
 	@$(ECHO) $(COLOR_BLUE)"\n-- Build RetroArch"$(COLOR_NORMAL)
 	@cd $(THIRD_PARTY_DIR)/RetroArch && make clean all
-	@cd $(THIRD_PARTY_DIR)/RetroArch && make clean all ADD_NETWORKING=1 PACKAGE_NAME=retroarch_miyoo354
+	@cd $(THIRD_PARTY_DIR)/RetroArch && make clean all MIYOO354=1 PACKAGE_NAME=retroarch_miyoo354
 
 external: $(CACHE)/.setup $(THIRD_PARTY_DIR)/RetroArch/retroarch_miyoo354
 	@$(ECHO) $(PRINT_RECIPE)
