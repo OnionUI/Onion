@@ -8,13 +8,13 @@
 #include <sys/mman.h>
 #include <sys/reboot.h>
 #include <sys/stat.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "system/axp.h"
-#include "utils/msleep.h"
-#include "system/display.h"
 #include "system/battery.h"
 #include "system/device_model.h"
+#include "system/display.h"
 #include "system/keymap_hw.h"
 #include "system/osd.h"
 #include "system/rumble.h"
@@ -29,6 +29,7 @@
 #include "utils/file.h"
 #include "utils/flags.h"
 #include "utils/log.h"
+#include "utils/msleep.h"
 #include "utils/process.h"
 #include "utils/str.h"
 
@@ -176,7 +177,7 @@ void quit(int exitcode)
 //
 //    Shutdown
 //
-void shutdown(void)
+void force_shutdown(void)
 {
     set_system_shutdown();
     screenshot_system();
@@ -189,6 +190,14 @@ void shutdown(void)
     while (1)
         pause();
     exit(0);
+}
+
+void wait(int seconds)
+{
+    time_t t = time(NULL);
+    while ((time(NULL) - t) < seconds) {
+        sleep(1);
+    }
 }
 
 //
@@ -233,10 +242,11 @@ void deepsleep(void)
         terminate_drastic();
     }
 
-    sleep(10);
-    // catch the resolution change signal on MMV4
-    sleep(20);
-    shutdown();
+    // Wait 30s before forcing a shutdown
+    wait(30);
+    if (!temp_flag_get("shutting_down")) {
+        force_shutdown();
+    }
 }
 
 //
@@ -327,9 +337,9 @@ void turnOffScreen(void)
     suspend_exec(stay_awake ? -1 : timeout);
 }
 
-static void *runWritingSettingsThread(void* param)
+static void *runWritingSettingsThread(void *param)
 {
-    bool *isWritingSettingsThreadActive = (bool*)param;
+    bool *isWritingSettingsThreadActive = (bool *)param;
     *isWritingSettingsThreadActive = true;
     settings_shm_write();
     settings_save();
@@ -469,7 +479,7 @@ int main(void)
                     else if (repeat_power >= REPEAT_SEC(5)) {
                         short_pulse();
                         remove(CMD_TO_RUN_PATH);
-                        shutdown(); // 10sec force shutdown
+                        force_shutdown(); // 10sec force shutdown
                     }
                     break;
                 }
@@ -756,8 +766,7 @@ int main(void)
 
             if (settings_changed || needWriteSettings) {
                 needWriteSettings = true;
-                if (!isWritingSettingsThreadActive)
-                {
+                if (!isWritingSettingsThreadActive) {
                     needWriteSettings = false;
                     pthread_create(&writingSettingsThread, NULL, runWritingSettingsThread, &isWritingSettingsThreadActive);
                 }
