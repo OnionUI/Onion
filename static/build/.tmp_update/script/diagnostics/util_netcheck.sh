@@ -18,6 +18,7 @@ PORTS_TEST_ASSET="https://github.com/OnionUI/Ports-Collection/releases/latest/do
 PICO_BBS_ASSET="https://www.lexaloffle.com/bbs/cpost_lister3.php?cat=7"
 RA_CFG="/mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg"
 RA_URL="https://retroachievements.org"
+LOG_EX_FILE="network_check"
 
 ##################
 ## LOGGING FUNCTION ##
@@ -29,7 +30,7 @@ program=$(basename "$0" .sh)
 
 log_message() {
     local message="$(date +"%Y-%m-%d %H:%M:%S") - $1"
-    echo -e "$message" >> "${LOGDIR}/network_check.log"
+    echo -e "$message" >> "${LOGDIR}/$LOG_EX_NAME.log"
     echo -e "$message" # for console
 }
 
@@ -37,6 +38,12 @@ section_header() {
     local header=$1
     log_message "======== $header ========"
 }
+
+if [ -f "$LOGDIR/$LOG_EX_FILE.log" ]; then
+    rm "$LOGDIR/$LOG_EX_FILE.log"
+else
+    echo "$LOGDIR/$LOG_EX_FILE.log Doesn't exist"
+fi
 
 ##################
 ## CHECKING      ##
