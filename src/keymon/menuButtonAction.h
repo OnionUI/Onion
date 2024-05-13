@@ -11,6 +11,7 @@
 #include "system/state.h"
 #include "system/system_utils.h"
 #include "utils/apps.h"
+#include "utils/flags.h"
 
 #include "../tweaks/tools_defs.h"
 #include "./input_fd.h"
@@ -103,9 +104,16 @@ bool terminate_drastic(void)
     char fname[20];
 
     if (pid) {
-        system("sendkeys 1 1, 18 1");
-        usleep(200000); // 0.2s
-        system("sendkeys 1 0, 18 0");
+        // If swap L<>L2 is on, the off button combo becomes 1 + 15 instead of 1 + 18
+        if(temp_flag_get("drastic_swap_l1l2")) {
+            system("sendkeys 1 1, 15 1");
+            usleep(200000); // 0.2s
+            system("sendkeys 1 0, 15 0");
+        } else {
+            system("sendkeys 1 1, 18 1");
+            usleep(200000); // 0.2s
+            system("sendkeys 1 0, 18 0");
+        };
 
         sprintf(fname, "/proc/%d", pid);
         uint32_t count = 150; // 30s
