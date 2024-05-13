@@ -30,7 +30,7 @@ program=$(basename "$0" .sh)
 
 log_message() {
     local message="$(date +"%Y-%m-%d %H:%M:%S") - $1"
-    echo -e "$message" >> "${LOGDIR}/$LOG_EX_NAME.log"
+    echo -e "$message" >> "${LOGDIR}/$LOG_EX_FILE.log"
     echo -e "$message" # for console
 }
 
