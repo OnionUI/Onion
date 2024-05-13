@@ -114,7 +114,7 @@ test_download() {
 }
 
 test_dns_resolution() {
-    local dns_test_host="google.com"
+    local dns_test_host="google.co.uk"
     if nslookup "$dns_test_host" > /dev/null 2>&1; then
         log_message "DNS resolution test for $dns_test_host successful. \n"
         return 0
@@ -291,9 +291,6 @@ if [ "$#" -gt 0 ]; then
             ;;
         test_download)
             test_download "$2"
-            ;;
-        test_dns_resolution)
-            test_dns_resolution
             ;;
         check_firmware_for_dns_issue)
             check_firmware_for_dns_issue
