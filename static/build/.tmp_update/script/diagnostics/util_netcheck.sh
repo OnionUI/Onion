@@ -41,11 +41,11 @@ section_header() {
 
 section_header_big() {
     local header=$1
-    log_message "================ $header ================"
+    log_message "================================ $header ================================"
 }
 
 if [ -f "$LOGDIR/$LOG_EX_FILE.log" ]; then
-    rm "$LOGDIR/$LOG_EX_FILE.log"
+    rm "$LOGDIR/$LOG_EX_FILE.log" "$LOGDIR/network_info.log" "$LOGDIR/network_dmesg.log"
 else
     echo "$LOGDIR/$LOG_EX_FILE.log Doesn't exist"
 fi
