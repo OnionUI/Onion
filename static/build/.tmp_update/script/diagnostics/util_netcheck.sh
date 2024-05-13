@@ -44,12 +44,6 @@ section_header_big() {
     log_message "================================ $header_big ================================"
 }
 
-if [ -f "$LOGDIR/$LOG_EX_FILE.log" ]; then
-    rm "$LOGDIR/$LOG_EX_FILE.log" "$LOGDIR/network_info.log" "$LOGDIR/network_dmesg.log"
-else
-    echo "$LOGDIR/$LOG_EX_FILE.log Doesn't exist"
-fi
-
 ##################
 ## CHECKING      ##
 ##################
@@ -206,6 +200,17 @@ check_retroachievements_api() {
     esac
 }
 
+check_driver_inserted() {
+    local module=$(lsmod | grep '8188fu')
+    if echo "$module" | grep -q 'Live'; then
+        log_message "8188fu driver is loaded and active."
+        return 0
+    else
+        log_message "8188fu driver is missing or not active. Possible WiFi chip failure - does WiFi work?"
+        return 1
+    fi
+}
+
 check_valid_adaptor() {
     local active_interfaces=$(ifconfig | awk '/^[a-zA-Z0-9]/ {print $1}' | grep -v 'lo' | tr -d ':')
 
@@ -332,11 +337,20 @@ if [ "$#" -gt 0 ]; then
 fi
 
 main() {
+    
+    # we've entered through tweaks, remove old files
+    if [ -f "$LOGDIR/$LOG_EX_FILE.log" ]; then
+        rm "$LOGDIR/$LOG_EX_FILE.log" "$LOGDIR/network_info.log" "$LOGDIR/network_dmesg.log"
+    else
+        echo "$LOGDIR/$LOG_EX_FILE.log Doesn't exist"
+    fi
+
     # initial setup, check wifi, check chip, check driver is inserted
     # check we're connected to a network
     section_header_big "Hardware and config checks"
     
     check_usb_devices
+    check_driver_inserted
 
     # check wifi, obviously
     wifi_setting=$(/customer/app/jsonval wifi)
