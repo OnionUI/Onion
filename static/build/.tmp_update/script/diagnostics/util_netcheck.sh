@@ -219,29 +219,43 @@ check_network_complete() {
     fi
 
     local ip_address=$(ifconfig $interface | grep 'inet addr:' | awk '{print $2}' | cut -d':' -f2)
-
     if [ -z "$ip_address" ]; then
         log_message "$interface does not have an IP address assigned."
         return 1
     fi
 
     local subnet_mask=$(ifconfig $interface | grep 'Mask:' | awk '{print $4}' | cut -d':' -f2)
-
     if [ -z "$subnet_mask" ]; then
         log_message "No subnet mask set for $interface."
         return 1
     fi
 
     local gateway=$(route -n | awk '/^0.0.0.0/ {print $2}' | head -n 1)
-
     if [ -z "$gateway" ]; then
         log_message "No default gateway set for $interface."
         return 1
     fi
 
-    log_message "Network check complete for $interface: IP $ip_address, Subnet Mask $subnet_mask, Gateway $gateway"
+    local dns_resolvers=$(grep 'nameserver' /etc/resolv.conf | awk '{print $2}')
+    if [ -z "$dns_resolvers" ]; then
+        log_message "No DNS resolvers configured."
+        return 1
+    else
+        log_message "DNS Resolvers found: $dns_resolvers"
+        echo $dns_resolvers | tr ' ' '\n' | while read dns_resolver; do
+            if ping -c 1 -W 2 $dns_resolver > /dev/null 2>&1; then
+                log_message "Ping to DNS resolver $dns_resolver successful."
+            else
+                log_message "Ping to DNS resolver $dns_resolver failed."
+                return 1
+            fi
+        done
+    fi
+
+    log_message "Network check complete for $interface: IP $ip_address, Subnet Mask $subnet_mask, Gateway $gateway, DNS Resolvers: $dns_resolvers"
     return 0
 }
+
 
 display_summary() {
     section_header "Summary of Network Checks"
