@@ -39,6 +39,11 @@ section_header() {
     log_message "======== $header ========"
 }
 
+section_header_big() {
+    local header=$1
+    log_message "================ $header ================"
+}
+
 if [ -f "$LOGDIR/$LOG_EX_FILE.log" ]; then
     rm "$LOGDIR/$LOG_EX_FILE.log"
 else
@@ -74,7 +79,6 @@ check_usb_devices() {
 perform_ping() {
     local host=$1
     local service=$2
-    section_header "Ping Test for $service"
     log_message "Starting ping test for $service: $host"
     ping_total=$((ping_total + 1))
     if ping -c 1 -W 2 $host > /dev/null 2>&1; then
@@ -90,7 +94,6 @@ perform_ping() {
 check_website() {
     local url=$1
     website_total=$((website_total + 1))
-    section_header "Website Availability Check"
     log_message "Checking website availability: $url"
     if wget -q --no-check-certificate --spider $url; then
         log_message "Website $url is up.\n"
@@ -259,7 +262,7 @@ check_network_complete() {
         done
     fi
 
-    log_message "Network check complete for $interface: IP $ip_address, Subnet Mask $subnet_mask, Gateway $gateway, DNS Resolvers: $dns_resolvers"
+    log_message "Network check complete for $interface: IP $ip_address, Subnet Mask $subnet_mask, Gateway $gateway, DNS Resolvers: $dns_resolvers \n"
     return 0
 }
 
@@ -353,13 +356,13 @@ main() {
     fi
     
     # generic pings, lets see who we can hit
-    section_header "Network Ping Tests"
+    section_header_big "Network Ping Tests"
     perform_ping "8.8.8.8" "Google DNS"
     perform_ping "1.1.1.1" "Cloudflare DNS"
     perform_ping "208.67.222.222" "OpenDNS"
 
     # website spiders, pings don't give us everything
-    section_header "Service and Game Site Checks"
+    section_header_big "Service and Game Site Checks"
     check_website "https://github.com"
     check_website "https://www.baidu.com" # chinese
     check_website "https://www.naver.com"
@@ -369,7 +372,7 @@ main() {
     check_website "https://www.lexaloffle.com/bbs/cpost_lister3.php?cat=7"
     
     # download tests from some core services
-    section_header "Download Tests"
+    section_header_big "Download Tests"
     test_download $THEME_TEST_ASSET
     test_download $PORTS_TEST_ASSET
     test_download $PICO_BBS_ASSET
@@ -381,7 +384,7 @@ main() {
     check_firmware_for_dns_issue
 
     # pull some interface config and dmesg
-    section_header "System Network Configuration"
+    section_header_big "System Network Configuration"
     log_message "Collecting network configuration information"
     pull_common_logs
     
