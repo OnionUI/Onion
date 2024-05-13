@@ -40,8 +40,8 @@ section_header() {
 }
 
 section_header_big() {
-    local header=$1
-    log_message "================================ $header ================================"
+    local header_big=$1
+    log_message "================================ $header_big ================================"
 }
 
 if [ -f "$LOGDIR/$LOG_EX_FILE.log" ]; then
