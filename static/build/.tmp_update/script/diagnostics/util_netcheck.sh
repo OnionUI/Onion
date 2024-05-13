@@ -135,7 +135,6 @@ test_dns_resolution() {
 }
 
 check_firmware_for_dns_issue() {
-    section_header "Firmware DNS Check"
     local version
     version=$(/etc/fw_printenv miyoo_version)
     if [ "$version" = "202303021817" ]; then
@@ -163,7 +162,6 @@ check_retroachievements_api() {
     local api_key="dummy"
     local api_url="https://retroachievements.org/API/API_GetAchievementOfTheWeek.php?z=$username&y=$api_key"
     
-    section_header "RetroAchievements API Check"
     log_message "Checking RetroAchievements API availability"
 
     local status=$(curl -s -o /dev/null -w "%{http_code}" --insecure "$api_url")
@@ -268,7 +266,6 @@ check_network_complete() {
 
 
 display_summary() {
-    section_header "Summary of Network Checks"
     log_message "Ping Test Results: $ping_success successful out of $ping_total attempts."
     log_message "Website Availability: $website_success successful out of $website_total checks."
     log_message "Download Test Results: $download_success successful out of $download_total attempts."
@@ -337,7 +334,7 @@ fi
 main() {
     # initial setup, check wifi, check chip, check driver is inserted
     # check we're connected to a network
-    section_header "Hardware and config checks"
+    section_header_big "Hardware and config checks"
     
     check_usb_devices
 
@@ -378,9 +375,11 @@ main() {
     test_download $PICO_BBS_ASSET
     
     # check cheevosapi status
+    section_header_big "RetroAchievements API Check"
     check_retroachievements_api
     
     # check if the user is running old firmware that does not support DNS
+    section_header_big "Firmware DNS Check"
     check_firmware_for_dns_issue
 
     # pull some interface config and dmesg
@@ -389,6 +388,7 @@ main() {
     pull_common_logs
     
     # summary gen
+    section_header_big "Summary of Network Checks"
     display_summary
 
     sync
