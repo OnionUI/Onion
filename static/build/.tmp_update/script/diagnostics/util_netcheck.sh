@@ -312,14 +312,8 @@ if [ "$#" -gt 0 ]; then
         check_network_complete)
             check_network_complete
             ;;
-        pull_common_logs)
-            pull_common_logs
-            ;;
         check_retroachievements_api)
             check_retroachievements_api
-            ;;
-        display_summary)
-            display_summary
             ;;
         *)
             echo "Unsupported function or incorrect usage."
