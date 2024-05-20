@@ -77,20 +77,6 @@ check() {
         bootScreen Boot "Waiting for network..."
     fi
     
-    # Check to see if mainui has demanded wifi go down
-    local current_main_ui_control=$(get_main_ui_control &)
-    local wifi_status=$(wifi_enabled && echo "1" || echo "0")
-
-    if [ "$wifi_status" != "$current_main_ui_control" ]; then
-        update_main_ui_control "$wifi_status" &
-        if [ "$wifi_status" = "1" ]; then
-            # Being turned on, restore the previous state of net servs
-            if [ $is_booting -eq 0 ]; then
-                restore_state
-            fi
-        fi
-    fi
-
     check_wifi
     check_ftpstate &
     check_sshstate &
@@ -144,6 +130,7 @@ check_wifi() {
     else
         if wifi_enabled; then
             if ! ifconfig wlan0 >> /dev/null 2>&1 || [ -f /tmp/restart_wifi ]; then
+                restore_state
                 if [ -f /tmp/restart_wifi ]; then
                     pkill -9 wpa_supplicant
                     pkill -9 udhcpc
@@ -159,6 +146,7 @@ check_wifi() {
             fi
         else
             if [ ! -f "/tmp/dont_restart_wifi" ]; then
+                store_state
                 pkill -9 wpa_supplicant
                 pkill -9 udhcpc
                 /customer/app/axp_test wifioff
@@ -577,10 +565,6 @@ init_json() {
     if [ ! -s "$jsonfile" ]; then
         echo '{}' > "$jsonfile"
     fi
-
-    if ! grep -q '"main_ui_control":' "$jsonfile"; then
-        sed -i 's/}$/,"main_ui_control": "0"}/' "$jsonfile"
-    fi
 }
 
 # unhook libpadsp.so on the wifi servs
@@ -602,22 +586,27 @@ libpadspblocker() {
 
 # Store the network service state currently
 store_state() {
-    # Make sure main_ui_control gets set at the start
-    local main_ui_control=$(get_main_ui_control)
-    local json_content="{\"main_ui_control\": \"$main_ui_control\""
+    service_key="{"
+    first_item=true
 
     for service in $services; do
+        if [ "$first_item" = true ]; then
+            first_item=false
+        else
+            service_key="$service_key,"
+        fi
+
         if [ -f "$sysdir/config/.$service" ]; then
-            json_content="$json_content, \"$service\": \"1\""
-        elif [ -f "$sysdir/config/.$service_" ]; then
-            json_content="$json_content, \"$service\": \"0\""
+            service_key="$service_key \"$service\": \"1\""
+        else
+            service_key="$service_key \"$service\": \"0\""
         fi
     done
     
-    # Echo the changes in, jq is too slow for this
-    json_content="$json_content }"
-    echo "$json_content" > "$jsonfile"
+    service_key="$service_key }"
+    echo "$service_key" > "$jsonfile"
 }
+
 
 # Restore the network service state, don't use jq it's too slow and holds the UI thread until it returns 
 # (you can't background this, you'll miss the checks for net servs as the flags won't be set)
@@ -644,16 +633,6 @@ full_reset() {
         disable_flag "$service"
     done
     rm -f "$jsonfile"
-}
-
-update_main_ui_control() {
-    control_status="$1"
-    sed -i'' -e "/\"main_ui_control\"/s/: \".*\"/: \"$control_status\"/" "$jsonfile"
-}
-
-get_main_ui_control() {
-    value=$(grep '"main_ui_control"' "$jsonfile" | sed -n 's/.*"main_ui_control": "\([^"]*\)".*/\1/p')
-    echo "${value:-0}"
 }
 
 convert_seconds_to_utc_offset() {
@@ -717,7 +696,7 @@ enable_flag() {
 
 disable_flag() {
     flag="$1"
-    rm "$sysdir/config/.$flag" /dev/null 2>&1
+    mv "$sysdir/config/.$flag" "$sysdir/config/.$flag_" 
 }
 
 is_running() {
