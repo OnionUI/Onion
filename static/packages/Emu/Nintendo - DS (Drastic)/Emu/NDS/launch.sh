@@ -38,6 +38,14 @@ if [ "$CUST_CPUCLOCK" == "1" ]; then
     cpuclock 1500
 fi
 
+l_triggers_swapped=$(jq ".swap_l1l2" "/mnt/SDCARD/Emu/NDS/resources/settings.json")
+
+if [ $l_triggers_swapped -eq 1 ]; then
+    touch /tmp/drastic_swap_l1l2
+else
+    rm -f /tmp/drastic_swap_l1l2
+fi
+
 ./drastic "$1"
 
 sync
