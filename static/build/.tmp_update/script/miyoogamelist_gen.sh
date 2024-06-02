@@ -81,7 +81,7 @@ EOF
 for system in "$rootdir"/*; do
     if [ -d "$system" ]; then
         # ignore Arcades & Ports since they have their own gamelist already
-        if echo "$system" | grep -qE "(PORTS|FBA2012|FBNEO|MAME2000|ARCADE|NEOGEO|CPS1|CPS1|CPS3)"; then
+        if echo "$system" | grep -qE "(PORTS|FBA2012|FBNEO|MAME2000|ARCADE|NEOGEO|CPS1|CPS2|CPS3)"; then
             continue
         fi
 
