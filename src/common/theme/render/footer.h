@@ -97,15 +97,21 @@ void theme_renderFooterStatus(SDL_Surface *screen, int current_num,
     SDL_Surface *total =
         TTF_RenderUTF8_Blended(font_hint, total_str, theme()->total.color);
 
-    SDL_Rect total_rect = {620 - total->w, 449 - total->h / 2};
-    SDL_Rect current_rect = {total_rect.x - current->w, 449 - current->h / 2};
-    old_status_width = total->w + current->w;
+    if (total) {
+        SDL_Rect current_rect = {0, 0};
+        SDL_Rect total_rect = {620 - total->w, 449 - total->h / 2};
 
-    SDL_BlitSurface(total, NULL, screen, &total_rect);
-    SDL_BlitSurface(current, NULL, screen, &current_rect);
+        SDL_BlitSurface(total, NULL, screen, &total_rect);
+        if (current) {
+            current_rect.x = total_rect.x - current->w;
+            current_rect.y = 449 - current->h / 2;
+            old_status_width = total->w + current->w;
+            SDL_BlitSurface(current, NULL, screen, &current_rect);
+            SDL_FreeSurface(current);
+        }
 
-    SDL_FreeSurface(current);
-    SDL_FreeSurface(total);
+        SDL_FreeSurface(total);
+    }
 }
 
 void theme_renderListFooter(SDL_Surface *screen, int current_num, int total_num,

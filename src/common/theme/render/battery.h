@@ -38,12 +38,19 @@ SDL_Surface *theme_batterySurfaceWithBg(int percentage, SDL_Surface *background)
     // Battery percentage text
     char buffer[5];
     sprintf(buffer, "%d%%", percentage);
-    SDL_Surface *text = TTF_RenderUTF8_Blended(font, buffer, style->color);
-    SDL_SetAlpha(text, 0, SDL_ALPHA_TRANSPARENT); /* important */
 
     // Battery icon
     ThemeImages icon_request = _getBatteryRequest(percentage);
     SDL_Surface *icon = resource_getSurface(icon_request);
+
+    SDL_Surface *image = NULL;
+    SDL_Surface *text = TTF_RenderUTF8_Blended(font, buffer, style->color);
+
+    if (!text) {
+        text = SDL_CreateRGBSurface(0, 1, 1, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
+    }
+
+    SDL_SetAlpha(text, 0, SDL_ALPHA_TRANSPARENT); /* important */
 
     if (icon->w > 640)
         visible = false;
@@ -70,7 +77,7 @@ SDL_Surface *theme_batterySurfaceWithBg(int percentage, SDL_Surface *background)
     if (img_height < 48)
         img_height = 48;
 
-    SDL_Surface *image = SDL_CreateRGBSurface(0, img_width, img_height, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
+    image = SDL_CreateRGBSurface(0, img_width, img_height, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
 
     SDL_Rect rect_icon = {0, (img_height - icon->h) / 2};
     SDL_Rect rect_text = {0, (img_height - text->h) / 2 + offsetY};
@@ -109,7 +116,6 @@ SDL_Surface *theme_batterySurfaceWithBg(int percentage, SDL_Surface *background)
 
     icon = SDL_ConvertSurface(icon, image->format, 0);
     SDL_SetAlpha(icon, 0, SDL_ALPHA_TRANSPARENT); /* important */
-
     SDL_BlitSurface(icon, NULL, image, &rect_icon);
 
     if (visible)

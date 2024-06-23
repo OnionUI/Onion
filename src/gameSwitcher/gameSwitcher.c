@@ -135,7 +135,7 @@ SDL_Surface *loadRomScreen(int index)
 
         // Show artwork
         if (!exists(currPicture))
-           sprintf(currPicture, game->romImagePath);
+            sprintf(currPicture, game->romImagePath);
 
         if (exists(currPicture)) {
             strcpy(game->romImagePath, currPicture);
