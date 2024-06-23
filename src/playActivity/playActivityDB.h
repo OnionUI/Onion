@@ -11,8 +11,8 @@
 #include <sys/stat.h>
 
 #include "utils/file.h"
-#include "utils/str.h"
 #include "utils/log.h"
+#include "utils/str.h"
 
 #include "./cacheDB.h"
 
@@ -48,29 +48,16 @@ struct PlayActivities {
 
 sqlite3 *play_activity_db = NULL;
 
-char * get_rom_image_path(char *rom_file) {
-    
-    if(str_endsWith(rom_file, ".p8") || str_endsWith(rom_file, ".png")) {
-        char * path[STR_MAX];
-        concat(path, "/mnt/SDCARD/Roms/", rom_file);
-        return strdup(path);
-    };
+void get_rom_image_path(char *rom_file, char *out_image_path)
+{
+    if (str_endsWith(rom_file, ".p8") || str_endsWith(rom_file, ".png")) {
+        snprintf(out_image_path, STR_MAX - 1, "/mnt/SDCARD/Roms/%s", rom_file);
+    }
 
     char *clean_rom_name = file_removeExtension(basename(rom_file));
-    char *rom_path = str_replace(rom_file, basename(rom_file), "");
+    char *rom_folder = strtok(rom_file, "/");
 
-    char base_path[STR_MAX];
-    concat(base_path, "/mnt/SDCARD/Roms/",rom_path);
-
-    char img_path[STR_MAX];
-    concat(img_path, base_path, "Imgs/");
-    char png_name[STR_MAX];
-    concat(png_name, clean_rom_name, ".png");
-
-    char ret[STR_MAX];
-    concat(ret, img_path, png_name);
-
-    return is_file(ret) ? strdup(ret) : NULL; 
+    snprintf(out_image_path, STR_MAX - 1, "/mnt/SDCARD/Roms/%s/Imgs/%s.png", rom_folder, clean_rom_name);
 }
 
 void play_activity_db_close()
@@ -205,7 +192,9 @@ PlayActivities *play_activity_find_all(void)
         rom->name = strdup((const char *)sqlite3_column_text(stmt, 2));
         if (sqlite3_column_text(stmt, 3) != NULL) {
             rom->file_path = strdup((const char *)sqlite3_column_text(stmt, 3));
-            rom->image_path = get_rom_image_path(rom->file_path);
+            rom->image_path = malloc(STR_MAX * sizeof(char));
+            memset(rom->image_path, 0, STR_MAX);
+            get_rom_image_path(rom->file_path, rom->image_path);
         }
 
         entry->play_count = sqlite3_column_int(stmt, 4);
