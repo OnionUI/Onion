@@ -12,6 +12,7 @@
 
 #include "utils/file.h"
 #include "utils/log.h"
+#include "utils/str.h"
 
 #include "./cacheDB.h"
 
@@ -46,6 +47,18 @@ struct PlayActivities {
 };
 
 sqlite3 *play_activity_db = NULL;
+
+void get_rom_image_path(char *rom_file, char *out_image_path)
+{
+    if (str_endsWith(rom_file, ".p8") || str_endsWith(rom_file, ".png")) {
+        snprintf(out_image_path, STR_MAX - 1, "/mnt/SDCARD/Roms/%s", rom_file);
+    }
+
+    char *clean_rom_name = file_removeExtension(basename(rom_file));
+    char *rom_folder = strtok(rom_file, "/");
+
+    snprintf(out_image_path, STR_MAX - 1, "/mnt/SDCARD/Roms/%s/Imgs/%s.png", rom_folder, clean_rom_name);
+}
 
 void play_activity_db_close()
 {
@@ -140,7 +153,7 @@ PlayActivities *play_activity_find_all(void)
     PlayActivities *play_activities = NULL;
     char *sql =
         "SELECT * FROM ("
-        "    SELECT rom.id, rom.type, rom.name, rom.file_path, rom.image_path, "
+        "    SELECT rom.id, rom.type, rom.name, rom.file_path, "
         "           COUNT(play_activity.ROWID) AS play_count_total, "
         "           SUM(play_activity.play_time) AS play_time_total, "
         "           SUM(play_activity.play_time)/COUNT(play_activity.ROWID) AS play_time_average, "
@@ -179,19 +192,19 @@ PlayActivities *play_activity_find_all(void)
         rom->name = strdup((const char *)sqlite3_column_text(stmt, 2));
         if (sqlite3_column_text(stmt, 3) != NULL) {
             rom->file_path = strdup((const char *)sqlite3_column_text(stmt, 3));
-        }
-        if (sqlite3_column_text(stmt, 4) != NULL) {
-            rom->image_path = strdup((const char *)sqlite3_column_text(stmt, 4));
+            rom->image_path = malloc(STR_MAX * sizeof(char));
+            memset(rom->image_path, 0, STR_MAX);
+            get_rom_image_path(rom->file_path, rom->image_path);
         }
 
-        entry->play_count = sqlite3_column_int(stmt, 5);
-        entry->play_time_total = sqlite3_column_int(stmt, 6);
-        entry->play_time_average = sqlite3_column_int(stmt, 7);
+        entry->play_count = sqlite3_column_int(stmt, 4);
+        entry->play_time_total = sqlite3_column_int(stmt, 5);
+        entry->play_time_average = sqlite3_column_int(stmt, 6);
         if (sqlite3_column_text(stmt, 8) != NULL) {
-            entry->first_played_at = strdup((const char *)sqlite3_column_text(stmt, 8));
+            entry->first_played_at = strdup((const char *)sqlite3_column_text(stmt, 7));
         }
         if (sqlite3_column_text(stmt, 9) != NULL) {
-            entry->last_played_at = strdup((const char *)sqlite3_column_text(stmt, 9));
+            entry->last_played_at = strdup((const char *)sqlite3_column_text(stmt, 8));
         }
 
         play_activities->play_time_total += entry->play_time_total;
