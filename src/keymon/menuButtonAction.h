@@ -83,7 +83,7 @@ bool terminate_retroarch(void)
         // send signal
         kill(pid, SIGCONT);
         usleep(100000);
-        kill(pid, SIGTERM);
+        system("sendUDP QUIT");
         // wait for terminate
         sprintf(fname, "/proc/%d", pid);
 
@@ -105,11 +105,12 @@ bool terminate_drastic(void)
 
     if (pid) {
         // If swap L<>L2 is on, the off button combo becomes 1 + 15 instead of 1 + 18
-        if(temp_flag_get("drastic_swap_l1l2")) {
+        if (temp_flag_get("drastic_swap_l1l2")) {
             system("sendkeys 1 1, 15 1");
             usleep(200000); // 0.2s
             system("sendkeys 1 0, 15 0");
-        } else {
+        }
+        else {
             system("sendkeys 1 1, 18 1");
             usleep(200000); // 0.2s
             system("sendkeys 1 0, 18 0");
@@ -157,6 +158,7 @@ void action_MainUI_resumeGame(void)
 
 void action_RA_gameSwitcher(void)
 {
+    temp_flag_set(".displaySavingMessage", true);
     screenshot_system();
     set_gameSwitcher();
     terminate_retroarch();
@@ -164,6 +166,7 @@ void action_RA_gameSwitcher(void)
 
 void action_RA_exitToMenu(void)
 {
+    temp_flag_set(".displaySavingMessage", true);
     screenshot_system();
     terminate_retroarch();
 }
@@ -175,8 +178,14 @@ void action_RA_quickSwitch(void)
     terminate_retroarch();
 }
 
+void action_RA_toggleMenu(void)
+{
+    system("sendUDP MENU_TOGGLE");
+}
+
 void action_drastic_gameSwitcher(void)
 {
+    temp_flag_set(".displaySavingMessage", true);
     screenshot_system();
     set_gameSwitcher();
     terminate_drastic();
@@ -184,6 +193,7 @@ void action_drastic_gameSwitcher(void)
 
 void action_drastic_exitToMenu(void)
 {
+    temp_flag_set(".displaySavingMessage", true);
     screenshot_system();
     terminate_drastic();
 }
@@ -221,6 +231,9 @@ void activate_RA_action(int action_id)
     case 3:
         action_RA_quickSwitch();
         break;
+    case 4:
+        action_RA_toggleMenu();
+        break;
     default:
         break;
     }
@@ -250,11 +263,9 @@ void menuButtonEvent_singlePress(void)
         activate_MainUI_action(settings.mainui_single_press);
         break;
     case MODE_GAME:
-        temp_flag_set(".displaySavingMessage", true);
         activate_RA_action(settings.ingame_single_press);
         break;
     case MODE_DRASTIC:
-        temp_flag_set(".displaySavingMessage", true);
         activate_drastic_action(settings.ingame_single_press);
         break;
     default:
@@ -272,13 +283,11 @@ void menuButtonEvent_longPress(void)
     case MODE_GAME:
         if (settings.ingame_long_press != 0)
             short_pulse();
-        temp_flag_set(".displaySavingMessage", true);
         activate_RA_action(settings.ingame_long_press);
         break;
     case MODE_DRASTIC:
         if (settings.ingame_long_press != 0)
             short_pulse();
-        temp_flag_set(".displaySavingMessage", true);
         activate_drastic_action(settings.ingame_long_press);
         break;
     default:
