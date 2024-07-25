@@ -387,7 +387,7 @@ if ! [ -z "$CurrentRom" ]; then
  #   romfilter="-name  '*$CurrentRom_noapostrophe*'"
  #   romfilter="-name  '*$CurrentRom*'"
     #romfilter="-name  '*$CurrentRom*'"
-    romfilter="-name \"*$CurrentRom*\""
+    romfilter="-name \"*$(echo $CurrentRom | sed -e 's_\[_\\\[_g' -e 's_\]_\\\]_g')*\""
 fi
     
 
