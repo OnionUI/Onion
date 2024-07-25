@@ -128,7 +128,7 @@ if ! [ -z "$CurrentRom" ]; then
  #   CurrentRom_noapostrophe=${CurrentRom//\'/\\\'}    # replacing   '   by    \'
  #   romfilter="-name  '*$CurrentRom_noapostrophe*'"
  #   romfilter="-name  '*$CurrentRom*'"
-    romfilter="-name \"*$(echo $CurrentRom | sed -e 's_\[_\\\[_g' -e 's_\]_\\\]_g')*\""
+    romfilter="-name \"*$(echo "$CurrentRom" | sed -e 's_\[_\\\[_g' -e 's_\]_\\\]_g')*\""
     #romfilter="-name  '*$CurrentRom*'"
     
 fi
