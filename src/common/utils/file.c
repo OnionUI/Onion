@@ -456,7 +456,9 @@ void file_add_line_to_beginning(const char *filename, const char *lineToAdd)
         return;
     }
     char tempPath[STR_MAX];
-    sprintf(tempPath, "%s/temp.txt", extractPath(filename));
+    char *path = extractPath(filename);
+    sprintf(tempPath, "%s/temp.txt", path);
+    free(path);
 
     FILE *tempFile = fopen(tempPath, "w");
     if (tempFile == NULL) {

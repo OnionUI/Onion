@@ -392,8 +392,10 @@ void resumeGame(int n)
             if (lineCount > 1) {
                 temp_flag_set("quick_switch", true);
 
-                file_add_line_to_beginning(getMiyooRecentFilePath(), file_read_lineN(getMiyooRecentFilePath(), lineCount));
+                char * line_n = file_read_lineN(getMiyooRecentFilePath(), lineCount);
+                file_add_line_to_beginning(getMiyooRecentFilePath(), line_n);
                 file_delete_line(getMiyooRecentFilePath(), lineCount + 1);
+                free(line_n);
             }
 
             file_put_sync(fp, CMD_TO_RUN_PATH, "%s", LaunchCommand);
