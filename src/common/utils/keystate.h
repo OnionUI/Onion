@@ -25,6 +25,8 @@ bool updateKeystate(KeyState keystate[320], bool *quit_flag, bool enabled,
         switch (keystate_event.type) {
         case SDL_QUIT:
             *quit_flag = true;
+            if (changed_key != NULL)
+                *changed_key = SDLK_UNKNOWN;
             break;
         case SDL_KEYDOWN:
             if (keystate[key] != RELEASED)
@@ -42,6 +44,8 @@ bool updateKeystate(KeyState keystate[320], bool *quit_flag, bool enabled,
             retval = true;
             break;
         default:
+            if (changed_key != NULL)
+                *changed_key = SDLK_UNKNOWN;
             break;
         }
     }

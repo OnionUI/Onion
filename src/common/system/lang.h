@@ -45,8 +45,10 @@ void lang_removeIconLabels(bool remove_icon_labels, bool remove_hints)
         }
     }
 
-    if (!remove_icon_labels && !remove_hints)
+    if (!remove_icon_labels && !remove_hints) {
+        closedir(dp);
         return;
+    }
 
     // backup lang files
     if (!exists(LANG_DIR_BACKUP))

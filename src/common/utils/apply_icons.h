@@ -171,8 +171,10 @@ bool _apply_singleIconFromPack(const char *config_path,
 
     json_forceSetString(config, "icon", icon_path);
 
-    _saveConfigFile(config_path, cJSON_Print(config));
+    char* config_str = cJSON_Print(config);
+    _saveConfigFile(config_path, config_str);
     cJSON_free(config);
+    cJSON_free(config_str);
 
     printf_debug("Applied icon to %s\nicon:    %s\niconsel: %s\n", config_path,
                  icon_path, sel_path);
