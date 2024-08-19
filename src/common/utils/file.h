@@ -76,7 +76,7 @@ bool mkdirs(const char *dir_path);
 
 void file_readLastLine(const char *filename, char *out_str);
 
-const char *file_read(const char *path);
+char *file_read(const char *path);
 
 bool file_write(const char *path, const char *str, uint32_t len);
 

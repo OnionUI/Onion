@@ -100,7 +100,7 @@ void file_readLastLine(const char *filename, char *out_str)
     }
 }
 
-const char *file_read(const char *path)
+char *file_read(const char *path)
 {
     FILE *f = NULL;
     char *buffer = NULL;
