@@ -140,8 +140,7 @@ bool _apply_singleIconFromPack(const char *config_path,
     if (!json_getString(config, "icon", temp_path))
         return false;
 
-    char icon_name[56];
-    strncpy(icon_name, file_removeExtension(basename(temp_path)), 55);
+    char *icon_name = file_removeExtension(basename(temp_path));
     str_split(icon_name, "-");
 
     IconMode_e mode = icons_getIconMode(config_path);
@@ -156,13 +155,16 @@ bool _apply_singleIconFromPack(const char *config_path,
                     icon_name);
         }
 
-        if (!is_file(icon_path))
+        if (!is_file(icon_path)) {
+            free(icon_name);
             return false;
+        }
     }
 
     char sel_path[STR_MAX];
     sprintf(sel_path, icons_getSelectedIconPathFormat(mode), icon_pack_path,
             icon_name);
+    free(icon_name);
 
     if (is_file(sel_path))
         json_forceSetString(config, "iconsel", sel_path);

@@ -48,6 +48,12 @@ bool file_isModified(const char *path, time_t *old_mtime)
     return false;
 }
 
+const char *file_basename(const char *filename)
+{
+    char *p = strrchr(filename, '/');
+    return p ? p + 1 : (char *) filename;
+}
+
 /**
  * @brief Create directories in dir_path using `mkdir -p` command.
  *
@@ -141,7 +147,7 @@ void file_copy(const char *src_path, const char *dest_path)
     system(system_cmd);
 }
 
-char *file_removeExtension(char *myStr)
+char *file_removeExtension(const char *myStr)
 {
     if (myStr == NULL)
         return NULL;
@@ -173,7 +179,7 @@ char *extractPath(const char *absolutePath)
 
 void file_cleanName(char *name_out, const char *file_name)
 {
-    char *name_without_ext = file_removeExtension(strdup(file_name));
+    char *name_without_ext = file_removeExtension(file_name);
     char *no_underscores = str_replace(name_without_ext, "_", " ");
     char *dot_ptr = strstr(no_underscores, ".");
     if (dot_ptr != NULL) {

@@ -128,6 +128,7 @@ int main(int argc, char *argv[])
     if (!renameFile(imgdir, "png", old_name, new_name)) {
         print_debug("No box art found");
     }
+    free(old_name);
 
     // Rename cache entry
 

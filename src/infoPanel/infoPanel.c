@@ -363,10 +363,12 @@ int main(int argc, char *argv[])
                                 g_image_index >= 0) {
                                 current_image_path = g_images_paths[g_image_index];
                             }
+                            char *no_extension = file_removeExtension(basename(current_image_path));
                             theme_renderHeader(
                                 screen,
-                                file_removeExtension(basename(current_image_path)),
+                                no_extension,
                                 false);
+                            free(no_extension);
                         }
                     }
 
