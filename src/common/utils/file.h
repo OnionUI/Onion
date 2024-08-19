@@ -93,15 +93,15 @@ bool mkdirs(const char *dir_path);
 
 void file_readLastLine(const char *filename, char *out_str);
 
-char *file_read(const char *path);
+char *file_read(const char *path) __attribute__((malloc));
 
 bool file_write(const char *path, const char *str, uint32_t len);
 
 void file_copy(const char *src_path, const char *dest_path);
 
-char *file_removeExtension(const char *myStr);
+char *file_removeExtension(const char *myStr) __attribute__((malloc));
 
-char *extractPath(const char *absolutePath);
+char *extractPath(const char *absolutePath) __attribute__((malloc));
 
 char *extractLastDirectory(const char *path);
 
@@ -121,7 +121,7 @@ bool file_findNewest(const char *dir_path, char *newest_file, size_t buffer_size
 
 FILE *file_open_ensure_path(const char *path, const char *mode);
 
-char *file_read_lineN(const char *filename, int n);
+char *file_read_lineN(const char *filename, int n) __attribute__((malloc));
 
 void file_delete_line(const char *fileName, int n);
 
