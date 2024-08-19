@@ -183,7 +183,7 @@ bool _apply_singleIconFromPack(const char *config_path,
 bool apply_singleIcon(const char *config_path)
 {
     char icon_pack_path[STR_MAX];
-    const char *active_icon_pack = file_read(ACTIVE_ICON_PACK);
+    char *active_icon_pack = file_read(ACTIVE_ICON_PACK);
 
     if (active_icon_pack != NULL && is_dir(active_icon_pack))
         strncpy(icon_pack_path, active_icon_pack, STR_MAX - 1);
@@ -199,6 +199,7 @@ bool apply_singleIcon(const char *config_path)
         _apply_singleIconFromPack(GUEST_ON_CONFIG, icon_pack_path, false);
     }
 
+    free(active_icon_pack);
     return _apply_singleIconFromPack(config_path, icon_pack_path, false);
 }
 

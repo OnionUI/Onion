@@ -61,8 +61,9 @@ void lang_removeIconLabels(bool remove_icon_labels, bool remove_hints)
         char file_path[STR_MAX * 2];
         snprintf(file_path, STR_MAX * 2 - 1, LANG_DIR "/%s", ep->d_name);
 
-        const char *json_data = file_read(file_path);
+        char *json_data = file_read(file_path);
         cJSON *root = cJSON_Parse(json_data);
+        free(json_data);
 
         if (!root)
             continue;

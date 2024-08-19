@@ -95,13 +95,14 @@ void json_fontStyle(cJSON *root, FontStyle_s *dest, FontStyle_s *fallback)
 bool theme_applyConfig(Theme_s *config, const char *config_path,
                        bool use_fallbacks)
 {
-    const char *json_str = NULL;
+    char *json_str = NULL;
 
     if (!exists(config_path) || !(json_str = file_read(config_path)))
         return false;
 
     // Get JSON objects
     cJSON *json_root = cJSON_Parse(json_str);
+    free(json_str);
     cJSON *json_batteryPercentage =
         cJSON_GetObjectItem(json_root, "batteryPercentage");
     cJSON *json_hideLabels = cJSON_GetObjectItem(json_root, "hideLabels");

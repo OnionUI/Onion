@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
     SDL_Color color = theme()->total.color;
 
     if (show_version) {
-        const char *version_str = file_read("/mnt/SDCARD/.tmp_update/onionVersion/version.txt");
+        char *version_str = file_read("/mnt/SDCARD/.tmp_update/onionVersion/version.txt");
         if (strlen(version_str) > 0) {
             SDL_Surface *version = TTF_RenderUTF8_Blended(font, version_str, color);
             if (version) {
@@ -75,6 +75,7 @@ int main(int argc, char *argv[])
                 SDL_FreeSurface(version);
             }
         }
+        free(version_str);
     }
 
     if (strlen(message_str) > 0) {

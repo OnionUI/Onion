@@ -30,7 +30,7 @@ static bool loadImagesPathsFromJson(const char *config_path,
                                     int *images_paths_count,
                                     char ***images_titles)
 {
-    const char *json_str = NULL;
+    char *json_str = NULL;
 
     char temp_path[STR_MAX];
     strncpy(temp_path, config_path, STR_MAX - 1);
@@ -42,6 +42,7 @@ static bool loadImagesPathsFromJson(const char *config_path,
 
     // Get JSON objects
     cJSON *json_root = cJSON_Parse(json_str);
+    free(json_str);
     cJSON *json_images_array = cJSON_GetObjectItem(json_root, "images");
     *images_paths_count = cJSON_GetArraySize(json_images_array);
     *images_paths = (char **)malloc(*images_paths_count * sizeof(char *));
