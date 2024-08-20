@@ -41,8 +41,14 @@ ifeq ($(TEST),1)
 CFLAGS := $(CFLAGS) -I../include -I../src/common -I$(GTEST_INCLUDE_DIR)
 endif
 
+ifeq ($(SANITIZE),1)
+CFILES := $(CFILES) ../common/utils/asan.c
+CFLAGS := $(CFLAGS) -fno-omit-frame-pointer -fsanitize=address -static-libasan
+LDFLAGS := -fsanitize=address -static-libasan $(LDFLAGS)
+endif
+
 CXXFLAGS := $(CFLAGS)
-LDFLAGS := -L../../lib -L/usr/local/lib
+LDFLAGS := $(LDFLAGS) -L../../lib -L/usr/local/lib
 
 ifeq ($(PLATFORM),miyoomini)
 CFLAGS := $(CFLAGS) -marm -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7ve -Wl,-rpath=$(LIB)
