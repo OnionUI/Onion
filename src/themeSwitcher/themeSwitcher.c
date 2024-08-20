@@ -429,5 +429,9 @@ int main(int argc, char *argv[])
 
     SDL_Quit();
 
+    TTF_CloseFont(font40);
+    TTF_CloseFont(font21);
+    TTF_CloseFont(font30);
+
     return EXIT_SUCCESS;
 }

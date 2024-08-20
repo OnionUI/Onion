@@ -163,7 +163,12 @@ bool lang_load(void)
     return true;
 }
 
-void lang_free(void) { free(lang_list); }
+void lang_free(void) {
+    for (int i = 0; i < LANG_MAX; i++) {
+        free(lang_list[i]);
+    }
+    free(lang_list); 
+}
 
 const char *lang_get(lang_hash key, const char *fallback)
 {

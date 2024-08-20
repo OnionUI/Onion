@@ -671,15 +671,18 @@ void menu_diagnostics(void *pt)
                 .action = action_runDiagnosticScript,
             };
 
-            const char *prefix = "";
+            const char *prefix;
             if (strncmp(scripts[i].filename, "util", 4) == 0) {
-                prefix = "Util: ";
+                prefix = "Util:%.62s";
             }
             else if (strncmp(scripts[i].filename, "fix", 3) == 0) {
-                prefix = "Fix: ";
+                prefix = "Fix:%.62s";
+            }
+            else {
+                prefix = "%.62s";
             }
 
-            snprintf(diagItem.label, DIAG_MAX_LABEL_LENGTH - 1, "%s%.62s", prefix, scripts[i].label);
+            snprintf(diagItem.label, DIAG_MAX_LABEL_LENGTH - 1, prefix, scripts[i].label);
             strncpy(diagItem.sticky_note, "Idle: Selected script not running", STR_MAX - 1);
 
             char *parsed_Tooltip = diags_parseNewLines(scripts[i].tooltip);
