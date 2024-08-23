@@ -243,6 +243,7 @@ void log_new_percentage(int new_bat_value, int is_charging)
                 const char *delete_sql = "DELETE FROM bat_activity WHERE id = (SELECT MIN(id) FROM bat_activity);";
                 sqlite3_prepare_v2(bat_log_db, delete_sql, -1, &stmt, 0);
                 sqlite3_step(stmt);
+                sqlite3_finalize(stmt);
             }
         }
         close_battery_log_db();
