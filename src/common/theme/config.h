@@ -175,7 +175,7 @@ bool theme_applyConfig(Theme_s *config, const char *config_path,
     json_getInt(json_frame, "border-left", &config->frame.border_left);
     json_getInt(json_frame, "border-right", &config->frame.border_right);
 
-    cJSON_free(json_root);
+    cJSON_Delete(json_root);
 
     return true;
 }
@@ -243,7 +243,7 @@ static bool _theme_overrides_changed = false;
 void theme_freeOverrides(void)
 {
     if (_theme_overrides != NULL)
-        cJSON_free(_theme_overrides);
+        cJSON_Delete(_theme_overrides);
     _theme_overrides = NULL;
 }
 
