@@ -60,13 +60,13 @@ bool loadEmuConfig(char *emupath, char *emuname_out, char *romsdir_out,
     if (romsdir_out != NULL) {
         char romsdir_rel[STR_MAX];
         if (!json_getString(json_root, "rompath", romsdir_rel)) {
-            cJSON_free(json_root);
+            cJSON_Delete(json_root);
             return false;
         }
 
         // Ignore Search results
         if (strncmp(romsdir_rel, "../../App/", 10) == 0) {
-            cJSON_free(json_root);
+            cJSON_Delete(json_root);
             return false;
         }
 
@@ -95,7 +95,7 @@ bool loadEmuConfig(char *emupath, char *emuname_out, char *romsdir_out,
                      imgpath_rel);
     }
 
-    cJSON_free(json_root);
+    cJSON_Delete(json_root);
     return true;
 }
 
@@ -285,7 +285,7 @@ bool addRandomFromJson(char *json_path)
             count++;
         }
 
-        cJSON_free(json_root);
+        cJSON_Delete(json_root);
     }
 
     total_games_count = system_count = count;

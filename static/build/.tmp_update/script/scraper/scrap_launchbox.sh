@@ -235,7 +235,7 @@ set -f
 # =================
 
 if ! [ -z "$CurrentRom" ]; then
-    romfilter="-name \"*$CurrentRom*\""
+    romfilter="-name \"*$(echo "$CurrentRom" | sed -e 's_\[_\\\[_g' -e 's_\]_\\\]_g')*\""
 fi
 
 
