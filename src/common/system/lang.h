@@ -91,7 +91,7 @@ void lang_removeIconLabels(bool remove_icon_labels, bool remove_hints)
         }
 
         json_save(root, file_path);
-        cJSON_free(root);
+        cJSON_Delete(root);
     }
     closedir(dp);
 }
@@ -156,7 +156,7 @@ bool lang_load(void)
         }
     }
 
-    cJSON_free(lang_file);
+    cJSON_Delete(lang_file);
 
     return true;
 }
