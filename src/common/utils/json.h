@@ -85,7 +85,7 @@ bool json_forceSetString(cJSON *object, const char *key, const char *value)
  * @brief Loads and parses a json file.
  *
  * @param file_path
- * @return cJSON* Root json object. Remember to cJSON_free the result.
+ * @return cJSON* Root json object. Remember to cJSON_Delete the result.
  */
 cJSON *json_load(const char *file_path)
 {

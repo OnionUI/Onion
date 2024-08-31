@@ -248,14 +248,14 @@ bool _add_config_icon(const char *path, const char *name,
     cJSON *config = json_load(config_path);
 
     if (!json_getString(config, "icon", icon_path)) {
-        cJSON_free(config);
+        cJSON_Delete(config);
         return false;
     }
 
     if (!json_getString(config, "label", label))
         strncpy(label, name, STR_MAX - 1);
 
-    cJSON_free(config);
+    cJSON_Delete(config);
 
     ListItem item = {.action = action};
 
