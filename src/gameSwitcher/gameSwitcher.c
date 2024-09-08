@@ -898,7 +898,7 @@ int main(int argc, char *argv[])
 #endif
 
     if (json_root != NULL)
-        cJSON_free(json_root);
+        cJSON_Delete(json_root);
 
     SDL_BlitSurface(screen, NULL, video, NULL);
     SDL_Flip(video);

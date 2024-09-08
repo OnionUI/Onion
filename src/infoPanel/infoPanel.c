@@ -75,7 +75,7 @@ static bool loadImagesPathsFromJson(const char *config_path,
         strncpy((*images_titles)[i], image_title, g_title_max_length);
     }
 
-    cJSON_free(json_root);
+    cJSON_Delete(json_root);
 
     return true;
 }
