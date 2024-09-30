@@ -628,7 +628,7 @@ get_screen_resolution() {
         touch /tmp/get_screen_resolution_failed
     fi
 
-    if [ "$screen_resolution" = "752x560" ] && [ "$(/etc/fw_printenv miyoo_version)" = "miyoo_version=202310271401" ]; then
+    if [ "$screen_resolution" = "752x560" ] && [ "$(/etc/fw_printenv miyoo_version | cut -d'=' -f2)" -ge "202310271401" ]; then
         touch /tmp/new_res_available
     else
         # can't use 752x560 without appropriate firmware or screen

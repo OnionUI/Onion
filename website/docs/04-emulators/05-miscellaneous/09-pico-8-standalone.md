@@ -17,7 +17,7 @@ The PICO-8 Native Wrapper allows you to play PICO-8 without the need for emulati
 
 Splore also allows you to navigate through and play local cartridge files.
 
-This is an alternative to the RetroArch `fake-08` core, which has access to all typical RetroArch features such as rewinding, fast forward and save state management, but can have compatibility with a portion of the PICO-8 library, specially recently released games.
+This is an alternative to the RetroArch `fake-08` core, which has access to all typical RetroArch features such as rewinding, fast forward and save state management, but can have compatibility issues with a portion of the PICO-8 library, specially recently released games.
 
 ## How to Enable and Launch
 
