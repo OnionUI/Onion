@@ -25,9 +25,10 @@ static pid_t system_state_pid = 0;
 
 bool check_isRetroArch(void)
 {
+    bool rc = false;
     if (!exists(CMD_TO_RUN_PATH))
         return false;
-    const char *cmd = file_read(CMD_TO_RUN_PATH);
+    char *cmd = file_read(CMD_TO_RUN_PATH);
     if (strstr(cmd, "retroarch") != NULL ||
         strstr(cmd, "/mnt/SDCARD/Emu/") != NULL ||
         strstr(cmd, "/mnt/SDCARD/RApp/") != NULL) {
@@ -35,10 +36,11 @@ bool check_isRetroArch(void)
         if ((pid = process_searchpid("retroarch")) != 0 ||
             (pid = process_searchpid("ra32")) != 0) {
             system_state_pid = pid;
-            return true;
+            rc = true;
         }
     }
-    return false;
+    free(cmd);
+    return rc;
 }
 
 bool check_isMainUI(void)
@@ -390,8 +392,10 @@ void resumeGame(int n)
             if (lineCount > 1) {
                 temp_flag_set("quick_switch", true);
 
-                file_add_line_to_beginning(getMiyooRecentFilePath(), file_read_lineN(getMiyooRecentFilePath(), lineCount));
+                char * line_n = file_read_lineN(getMiyooRecentFilePath(), lineCount);
+                file_add_line_to_beginning(getMiyooRecentFilePath(), line_n);
                 file_delete_line(getMiyooRecentFilePath(), lineCount + 1);
+                free(line_n);
             }
 
             file_put_sync(fp, CMD_TO_RUN_PATH, "%s", LaunchCommand);

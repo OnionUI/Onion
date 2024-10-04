@@ -187,7 +187,9 @@ void getGameName(char *name_out, const char *rom_path)
         free(cache_item);
     }
     else {
-        strcpy(name_out, file_removeExtension(basename(strdup(rom_path))));
+        char *no_extension = file_removeExtension(file_basename(rom_path));
+        strcpy(name_out, no_extension);
+        free(no_extension);
     }
 }
 
