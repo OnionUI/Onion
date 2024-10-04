@@ -8,7 +8,7 @@
 #define MIYOO354 354
 
 static int DEVICE_ID;
-static char DEVICE_SN[12];
+static char DEVICE_SN[13];
 
 /**
  * @brief Get device model

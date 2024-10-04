@@ -102,7 +102,8 @@ int main(int argc, char *argv[])
 
     bool menu_combo_pressed = false;
     bool key_changed = false;
-    SDLKey changed_key;
+    SDLKey changed_key = SDLK_UNKNOWN;
+
 
     bool show_help_tooltip = !config_flag_get(".tweaksHelpCompleted");
 

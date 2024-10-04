@@ -94,6 +94,7 @@ void renderSummary()
                                  0x000000FF, 0xFF000000); /* important */
         SDL_FillRect(surfaceSummary, NULL, 0x000000FF);
         SDL_BlitSurface(surfaceTemp, NULL, surfaceSummary, NULL);
+        SDL_FreeSurface(surfaceTemp);
     }
 
     SDL_BlitSurface(surfaceSummary, &rectSummaryFrame, screen, &rectSummaryPos);

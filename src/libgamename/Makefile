@@ -1,4 +1,5 @@
 INCLUDE_UTILS = 0
+SANITIZE = 0
 include ../common/config.mk
 
 TARGET = libgamename.so
