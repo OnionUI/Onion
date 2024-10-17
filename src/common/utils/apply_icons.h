@@ -82,7 +82,7 @@ bool apply_singleIconByFullPath(const char *config_path, const char *icon_path)
     json_forceSetString(config, "iconsel", sel_path);
 
     _saveConfigFile(config_path, cJSON_Print(config));
-    cJSON_free(config);
+    cJSON_Delete(config);
 
     return true;
 }
@@ -172,7 +172,7 @@ bool _apply_singleIconFromPack(const char *config_path,
     json_forceSetString(config, "icon", icon_path);
 
     _saveConfigFile(config_path, cJSON_Print(config));
-    cJSON_free(config);
+    cJSON_Delete(config);
 
     printf_debug("Applied icon to %s\nicon:    %s\niconsel: %s\n", config_path,
                  icon_path, sel_path);
