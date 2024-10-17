@@ -65,6 +65,7 @@ int get_best_session_time(void)
             }
             sqlite3_finalize(stmt);
         }
+        close_battery_log_db();
     }
     return best_time;
 }

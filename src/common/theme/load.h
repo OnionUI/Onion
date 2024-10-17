@@ -7,6 +7,7 @@
 
 #include "utils/file.h"
 #include "utils/str.h"
+#include "utils/json.h"
 
 #define SYSTEM_CONFIG "/mnt/SDCARD/system.json"
 #define FALLBACK_FONT "/customer/app/Exo-2-Bold-Italic.ttf"
@@ -66,7 +67,9 @@ TTF_Font *theme_loadFont(const char *theme_path, const char *font, int size)
 
 char *theme_getPath(char *theme_path)
 {
-    file_parseKeyValue(SYSTEM_CONFIG, "theme", theme_path, ':', 0);
+    cJSON *j = json_load(SYSTEM_CONFIG);
+    json_getString(j,"theme", theme_path);
+    cJSON_Delete(j);
 
     if (strcmp(theme_path, "./") == 0 || !is_dir(theme_path)) {
         strcpy(theme_path, FALLBACK_THEME_PATH);

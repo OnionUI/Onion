@@ -55,6 +55,7 @@ int main()
         char *output = execute_command(commands[i]);
         if (output != NULL) {
             strcat(serial, output);
+            free(output);
         }
         else {
             fprintf(stderr, "Error executing command: %s\n", commands[i]);

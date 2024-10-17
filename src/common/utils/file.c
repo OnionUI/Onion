@@ -239,6 +239,7 @@ char *file_parseKeyValue(const char *file_path, const char *key_in,
             key[0] = 0;
             val[0] = 0;
         }
+        free(line);
         fclose(fp);
     }
 
