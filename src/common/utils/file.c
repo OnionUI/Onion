@@ -48,6 +48,12 @@ bool file_isModified(const char *path, time_t *old_mtime)
     return false;
 }
 
+const char *file_basename(const char *filename)
+{
+    char *p = strrchr(filename, '/');
+    return p ? p + 1 : (char *) filename;
+}
+
 /**
  * @brief Create directories in dir_path using `mkdir -p` command.
  *
@@ -100,7 +106,7 @@ void file_readLastLine(const char *filename, char *out_str)
     }
 }
 
-const char *file_read(const char *path)
+char *file_read(const char *path)
 {
     FILE *f = NULL;
     char *buffer = NULL;
@@ -141,7 +147,7 @@ void file_copy(const char *src_path, const char *dest_path)
     system(system_cmd);
 }
 
-char *file_removeExtension(char *myStr)
+char *file_removeExtension(const char *myStr)
 {
     if (myStr == NULL)
         return NULL;
@@ -173,7 +179,7 @@ char *extractPath(const char *absolutePath)
 
 void file_cleanName(char *name_out, const char *file_name)
 {
-    char *name_without_ext = file_removeExtension(strdup(file_name));
+    char *name_without_ext = file_removeExtension(file_name);
     char *no_underscores = str_replace(name_without_ext, "_", " ");
     char *dot_ptr = strstr(no_underscores, ".");
     if (dot_ptr != NULL) {
@@ -450,7 +456,9 @@ void file_add_line_to_beginning(const char *filename, const char *lineToAdd)
         return;
     }
     char tempPath[STR_MAX];
-    sprintf(tempPath, "%s/temp.txt", extractPath(filename));
+    char *path = extractPath(filename);
+    sprintf(tempPath, "%s/temp.txt", path);
+    free(path);
 
     FILE *tempFile = fopen(tempPath, "w");
     if (tempFile == NULL) {

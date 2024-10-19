@@ -136,11 +136,14 @@ void migrateDB(void)
 
             while (sqlite3_step(stmt) == SQLITE_ROW && is_found == false) {
                 char *rom_path = (char *)sqlite3_column_text(stmt, 1);
+                char *no_extension = file_removeExtension(rom_path);
 
                 if (strcmp(basename(rom_path), rom_list[i].name) != 0 &&
-                    strcmp(basename(file_removeExtension(rom_path)), rom_list[i].name) != 0) {
+                    strcmp(basename(no_extension), rom_list[i].name) != 0) {
+                    free(no_extension);
                     continue;
                 }
+                free(no_extension);
 
                 is_found = true;
 

@@ -31,6 +31,7 @@ JsonGameEntry JsonGameEntry_fromJson(const char *json_str)
     json_getInt(root, "type", &entry.type);
     json_getString(root, "rompath", entry.rompath);
     json_getString(root, "imgpath", entry.imgpath);
+    cJSON_Delete(root);
 
     strcpy(entry.emupath, entry.rompath);
     str_split(entry.emupath, "/../../");

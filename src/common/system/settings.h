@@ -160,12 +160,13 @@ void _settings_load_keymap(void)
 
 void _settings_load_mainui(void)
 {
-    const char *json_str = NULL;
+    char *json_str = NULL;
 
     if (!(json_str = file_read(MAIN_UI_SETTINGS)))
         return;
 
     cJSON *json_root = cJSON_Parse(json_str);
+    free(json_str);
 
     json_getInt(json_root, "vol", &settings.volume);
     json_getInt(json_root, "bgmvol", &settings.bgm_volume);

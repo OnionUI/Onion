@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "./file.h"
 #include "cjson/cJSON.h"
@@ -88,7 +89,10 @@ bool json_forceSetString(cJSON *object, const char *key, const char *value)
  */
 cJSON *json_load(const char *file_path)
 {
-    return cJSON_Parse(file_read(file_path));
+    char *file_contents = file_read(file_path);
+    cJSON *json_contents = cJSON_Parse(file_contents);
+    free(file_contents);
+    return json_contents;
 }
 
 void json_save(cJSON *object, char *file_path)

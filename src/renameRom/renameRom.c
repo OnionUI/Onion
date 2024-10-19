@@ -116,8 +116,9 @@ int main(int argc, char *argv[])
     if (!is_file(config_path))
         return 0;
 
-    const char *config_str = file_read(config_path);
+    char *config_str = file_read(config_path);
     JsonGameEntry config = JsonGameEntry_fromJson(config_str);
+    free(config_str);
 
     // Rename box art
 
@@ -127,6 +128,7 @@ int main(int argc, char *argv[])
     if (!renameFile(imgdir, "png", old_name, new_name)) {
         print_debug("No box art found");
     }
+    free(old_name);
 
     // Rename cache entry
 

@@ -66,6 +66,23 @@ bool is_dir(const char *file_path);
 bool file_isModified(const char *path, time_t *old_mtime);
 
 /**
+ * @brief returns the filename component of a path
+ * 
+ * This is a copy of the GNU `basename` version and
+ * retains all the quirks that come along with it
+ * 
+ * See 'Versions' here:
+ * https://man7.org/linux/man-pages/man3/basename.3.html
+ * 
+ * Copied from: 
+ * https://sourceware.org/git/?p=glibc.git;a=blob;f=string/basename.c;h=d5b5d4763dd3fa307497cc99788b0bb24c95bcf1;hb=refs/heads/master#l22
+ * 
+ * @param filename The full file path.
+ * @return * char* 
+ */
+const char *file_basename(const char *filename);
+
+/**
  * @brief Create directories in dir_path using `mkdir -p` command.
  *
  * @param dir_path The full directory path.
@@ -76,15 +93,15 @@ bool mkdirs(const char *dir_path);
 
 void file_readLastLine(const char *filename, char *out_str);
 
-const char *file_read(const char *path);
+char *file_read(const char *path) __attribute__((malloc));
 
 bool file_write(const char *path, const char *str, uint32_t len);
 
 void file_copy(const char *src_path, const char *dest_path);
 
-char *file_removeExtension(char *myStr);
+char *file_removeExtension(const char *myStr) __attribute__((malloc));
 
-char *extractPath(const char *absolutePath);
+char *extractPath(const char *absolutePath) __attribute__((malloc));
 
 char *extractLastDirectory(const char *path);
 
@@ -104,7 +121,7 @@ bool file_findNewest(const char *dir_path, char *newest_file, size_t buffer_size
 
 FILE *file_open_ensure_path(const char *path, const char *mode);
 
-char *file_read_lineN(const char *filename, int n);
+char *file_read_lineN(const char *filename, int n) __attribute__((malloc));
 
 void file_delete_line(const char *fileName, int n);
 
