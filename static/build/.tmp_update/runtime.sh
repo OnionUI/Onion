@@ -60,7 +60,9 @@ main() {
     touch /tmp/no_charging_ui
 
     # Check if blf needs enabling
-    if [ -f $sysdir/config/.blfOn ]; then
+    if [ -f $sysdir/config/.blf ]; then
+        /mnt/SDCARD/.tmp_update/script/blue_light.sh check &
+    elif [ -f $sysdir/config/.blfOn ]; then
         /mnt/SDCARD/.tmp_update/script/blue_light.sh enable &
     fi
 
