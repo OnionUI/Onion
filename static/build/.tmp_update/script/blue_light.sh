@@ -68,35 +68,6 @@ set_intensity() {
     rm $lockfile
 }
 
-disable_blue_light_filter() {   
-    sync
-    
-    combinedBGR=$(cat $sysdir/config/display/blueLightRGB)
-    combinedBGR=$(echo "$combinedBGR" | tr -d '[:space:]/#')
-
-    echo $combinedBGR > $sysdir/config/display/blueLightRGBtemp
-
-    lastR=$(( (combinedBGR >> 16) & 0xFF ))
-    lastG=$(( (combinedBGR >> 8) & 0xFF ))
-    lastB=$(( combinedBGR & 0xFF ))
-    
-    # echo "Last BGR: B: $lastB, G: $lastG, R: $lastR"
-    # echo "Target BGR: B: 128, G: 128, R: 128"
-
-    for i in $(seq 0 20); do
-        newR=$(( lastR + (128 - lastR) * i / 20 ))
-        newG=$(( lastG + (128 - lastG) * i / 20 ))
-        newB=$(( lastB + (128 - lastB) * i / 20 ))
-
-        echo "colortemp 0 0 0 0 $newB $newG $newR" > /proc/mi_modules/mi_disp/mi_disp0
-        usleep 50000
-    done
-
-    echo ":: Blue Light Filter: Disabled"
-    rm -f $blf_key_on
-    rm -f $blf_key_on_user
-}
-
 check_disp_init() {
     if [ -z "$sysdir" ] || [ ! -x "$sysdir/bin/disp_init" ]; then
         echo "Error: disp_init not found or not executable"
@@ -192,7 +163,7 @@ disable_blue_light_filter() {
     
     echo ":: Blue Light Filter: Disabled"
     rm -f $blf_key_on
-    rm -f $sysdir/config/.blfOn
+    rm -f $blf_key_on_user
 }
 
 check_blf() {
