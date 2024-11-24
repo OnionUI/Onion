@@ -823,7 +823,9 @@ int main(void)
         }
 
         // Check bluelight filter
-        system("/mnt/SDCARD/.tmp_update/script/blue_light.sh check");
+        if (DEVICE_ID == MIYOO354) {
+            system("/mnt/SDCARD/.tmp_update/script/blue_light.sh check");
+        }
 
         // Quit RetroArch / auto-save when battery too low
         if (settings.low_battery_autosave_at && battery_getPercentage() <= settings.low_battery_autosave_at && check_autosave()) {
