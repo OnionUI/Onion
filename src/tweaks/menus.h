@@ -481,8 +481,8 @@ void menu_themeOverrides(void *_)
 
 void menu_blueLight(void *_)
 {
-    bool schedule_show = (DEVICE_ID == MIYOO354 || settings.noTimeRestore || settings.blue_light_schedule);
-    bool schedule_disable = (!settings.noTimeRestore && !network_state.ntp && !settings.blue_light_schedule);
+    bool schedule_show = (DEVICE_ID == MIYOO354 || settings.no_time_restore || settings.blue_light_schedule);
+    bool schedule_disable = (!settings.no_time_restore && !network_state.ntp && !settings.blue_light_schedule);
     if (!_menu_user_blue_light._created) {
         network_loadState();
         _menu_user_blue_light = list_createWithTitle(6, LIST_SMALL, "Blue light filter");
