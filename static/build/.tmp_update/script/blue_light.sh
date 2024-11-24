@@ -168,9 +168,10 @@ disable_blue_light_filter() {
 
 check_blf() {
     sync
-    if [ ! -f "$ignore_schedule" ]; then
-        if [ ! -f "$sysdir/config/.ntpState" ]; then
-            return
+    if [ -f "$blf_key" ] || [ ! -f "$ignore_schedule" ]; then
+
+        if [ ! -f "$blf_key_on" ] && [ -f "$blf_key_on_user" ]; then
+            rm -f $blf_key_on_user
         fi
         
         blueLightTimeOnFile="$sysdir/config/display/blueLightTime"
@@ -189,30 +190,24 @@ check_blf() {
         blueLightTimeOnMinutes=$(to_minutes_since_midnight "$blueLightTimeOn")
         blueLightTimeOffMinutes=$(to_minutes_since_midnight "$blueLightTimeOff")
 
-        if [ -f "$blf_key" ]; then
-            if [ "$blueLightTimeOffMinutes" -lt "$blueLightTimeOnMinutes" ]; then
-                if [ "$currentTimeMinutes" -ge "$blueLightTimeOnMinutes" ] || [ "$currentTimeMinutes" -lt "$blueLightTimeOffMinutes" ]; then
-                    if [ ! -f $blf_key_on ]; then
-                        enable_blue_light_filter 
-                        touch $blf_key_on
-                    fi
-                else
-                    if [ -f $blf_key_on ]; then
-                        disable_blue_light_filter 
-                        rm $blf_key_on
-                    fi
+        if [ "$blueLightTimeOffMinutes" -lt "$blueLightTimeOnMinutes" ]; then
+            if [ "$currentTimeMinutes" -ge "$blueLightTimeOnMinutes" ] || [ "$currentTimeMinutes" -lt "$blueLightTimeOffMinutes" ]; then
+                if [ ! -f $blf_key_on ]; then
+                    enable_blue_light_filter 
                 fi
             else
-                if [ "$currentTimeMinutes" -ge "$blueLightTimeOnMinutes" ] && [ "$currentTimeMinutes" -lt "$blueLightTimeOffMinutes" ]; then
-                    if [ ! -f $blf_key_on ]; then
-                        enable_blue_light_filter 
-                        touch $blf_key_on
-                    fi
-                else
-                    if [ -f $blf_key_on ]; then
-                        disable_blue_light_filter 
-                        rm $blf_key_on
-                    fi
+                if [ -f $blf_key_on ]; then
+                    disable_blue_light_filter 
+                fi
+            fi
+        else
+            if [ "$currentTimeMinutes" -ge "$blueLightTimeOnMinutes" ] && [ "$currentTimeMinutes" -lt "$blueLightTimeOffMinutes" ]; then
+                if [ ! -f $blf_key_on ]; then
+                    enable_blue_light_filter 
+                fi
+            else
+                if [ -f $blf_key_on ]; then
+                    disable_blue_light_filter 
                 fi
             fi
         fi
