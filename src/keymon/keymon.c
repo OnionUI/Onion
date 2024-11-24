@@ -823,7 +823,7 @@ int main(void)
         }
 
         // Check bluelight filter
-        if (DEVICE_ID == MIYOO354 || settings.noTimeRestore) {
+        if (settings.blue_light_schedule) {
             system("/mnt/SDCARD/.tmp_update/script/blue_light.sh check");
         }
 
