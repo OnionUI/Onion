@@ -206,6 +206,7 @@ void settings_load(void)
     settings.blue_light_schedule = config_flag_get(".blf");
     settings.rec_indicator = config_flag_get(".recIndicator");
     settings.rec_hotkey = config_flag_get(".recHotkey");
+    settings.noTimeRestore = config_flag_get(".noTimeRestore");
 
     if (config_flag_get(".noLowBatteryAutoSave")) // flag is deprecated, but keep compatibility
         settings.low_battery_autosave_at = 0;
