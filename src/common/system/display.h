@@ -156,6 +156,13 @@ uint32_t display_getBrightnessRaw()
     return duty_cycle;
 }
 
+// Get display brightness from raw (0 - 10)
+int display_getBrightnessFromRaw()
+{
+    int value_raw = display_getBrightnessRaw();
+    int value = round((log(value_raw / 3.0) / 0.350656));
+    return value;
+}
 //
 //    Set Brightness (Raw)
 //
