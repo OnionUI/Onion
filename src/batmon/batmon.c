@@ -339,7 +339,7 @@ void saveFakeAxpResult(int current_percentage)
     }
 }
 
-#define HISTORY_SIZE 10 // Number of values to keep in the history
+#define HISTORY_SIZE 5 // Number of values to smooth battery percentage
 
 int updateADCValue(int value)
 {
