@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     best_session_time = get_best_session_time();
 
     FILE *fp;
-    int old_percentage = -1, current_percentage, warn_at = 15, last_logged_percentage = -1;
+    int old_percentage = -1, current_percentage, warn_at = 15;
     int lowest_percentage_after_charge = 500;
     atexit(cleanup);
     signal(SIGINT, sigHandler);
@@ -114,16 +114,12 @@ int main(int argc, char *argv[])
                     "saving percBat: suspended = %d, perc = %d, warn = %d\n",
                     is_suspended, current_percentage, warn_at);
                 old_percentage = current_percentage;
+                // Save battery percentage to file
                 file_put_sync(fp, "/tmp/percBat", "%d", current_percentage);
-
-                if (abs(last_logged_percentage - current_percentage) >= BATTERY_LOG_THRESHOLD) {
-                    // Current battery state duration addition
-                    update_current_duration();
-                    // New battery percentage entry
-                    log_new_percentage(current_percentage, is_charging);
-                    last_logged_percentage = current_percentage;
-                }
-
+                // Current battery state duration addition
+                update_current_duration();
+                // New battery percentage entry
+                log_new_percentage(current_percentage, is_charging);
                 if (DEVICE_ID == MIYOO283) {
                     saveFakeAxpResult(current_percentage);
                 }

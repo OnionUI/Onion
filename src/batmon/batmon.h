@@ -31,7 +31,6 @@
 #define CHECK_BATTERY_TIMEOUT_S 15 // s - check battery percentage every 15s
 
 // Battery logs
-#define BATTERY_LOG_THRESHOLD 2 // Define when a new battery entry is logged
 #define FILO_MIN_SIZE 1000
 #define MAX_DURATION_BEFORE_UPDATE 600
 
