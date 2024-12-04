@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 
     FILE *fp;
     int old_percentage = -1, current_percentage, warn_at = 15, last_logged_percentage = -1;
-    int lowest_percentage_after_charge = 100;
+    int lowest_percentage_after_charge = 500;
     atexit(cleanup);
     signal(SIGINT, sigHandler);
     signal(SIGTERM, sigHandler);
@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
         if (battery_isCharging()) {
             if (!is_charging) {
                 // Charging just started
-                lowest_percentage_after_charge = 100; // Reset lowest percentage before charge
+                lowest_percentage_after_charge = 500; // Reset lowest percentage before charge
                 is_charging = true;
                 if (DEVICE_ID == MIYOO354) {
                     current_percentage = getBatPercMMP();
@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
         else if (is_charging) {
             // Charging just stopped
             is_charging = false;
-            lowest_percentage_after_charge = 100; // Reset lowest percentage after charge
+            lowest_percentage_after_charge = 500; // Reset lowest percentage after charge
 
             printf_debug(
                 "Charging stopped: suspended = %d, perc = %d, warn = %d\n",
