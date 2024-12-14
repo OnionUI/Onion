@@ -38,7 +38,7 @@ You'll need the IP of the device, found below (**Tweaks** › **Network**)
 
 ## Authentication
 
-We've made the choice to remove authentication on Telnet as it is unsecure and will transmit the password in plain text - Telnet is now disabled by default.
+We've made the choice to remove authentication on Telnet as it is insecure and will transmit the password in plain text - Telnet is now disabled by default.
 
 
 ## Security

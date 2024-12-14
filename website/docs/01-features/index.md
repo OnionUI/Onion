@@ -136,7 +136,7 @@ It allows you to change the color temperature of the screen to have more eye com
 
 
 :::note <a href="apps/retroarch">RetroArch overview</a>
-A full **RetroArch** in a such tiny device! **RetroArch** is regularly updated from the offcial repository. Onion benefits to dedicated drivers created by [Eggs](https://discordapp.com/users/778867980096241715) for precision and performance.
+A full **RetroArch** in a such tiny device! **RetroArch** is regularly updated from the official repository. Onion benefits to dedicated drivers created by [Eggs](https://discordapp.com/users/778867980096241715) for precision and performance.
 Dedicated customizations are also included: All the cores are configured with attention to detail, [custom overlays and custom filters](apps/retroarch#customized-overlays-and-filters) made specially for the Miyoo Mini screen. 
 :::
 
@@ -215,7 +215,7 @@ Check the <a href="included-apps">included apps</a> documentation for more infor
 <img title="Included apps" src={require('./assets/network-features.gif').default} style={{width: 320}} />
 
 :::note <a href="network-features">Network Features</a>
-For the Miyoo Mini Plus (equiped with wifi) Onion offers many additional possibilites :<br />
+For the Miyoo Mini Plus (equipped with wifi) Onion offers many additional possibilities :<br />
 - [Multiplayer/Netplay](multiplayer): play in multiplayer over internet or on you lcoal network to your favorite retro games:
 - [Easy Netplay](multiplayer/easynetplay): play multiplayer games anywhere (compatible with GBC/GBC Pokemon trading!)
 - [OTA (Over The Air) updates](apps/ota-update): update Onion directly from your MMP

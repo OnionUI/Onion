@@ -34,7 +34,7 @@ Search also allows to filter a game list to include only games containing a spec
 - You can start search using the `X` button by default. You can change this keybinding in Tweaks
 - When a search is active, the results will be shown under `Games` › `Search`, you can remove the search again by choosing "Clear search"
 - "Missing caches" lists all systems which haven't been cached yet, and thereby haven't been included in the search
-  - *Reason:* All game caches are cleared everytime you "Refresh all roms"
+  - *Reason:* All game caches are cleared every time you "Refresh all roms"
   - *Solution:* Go into each system you want included in the search
 
 
@@ -44,7 +44,7 @@ Search also allows to filter a game list to include only games containing a spec
   - **Filter:** Will prompt you to enter a keyword for filtering the selected game list
   - In your filtered game list you will find 3 new options:
     - **~Clear filter:** Will remove the current filter to display your full game list again
-    - **~Filter: "keyword":** Run filter app again to quickly modify your keywork
+    - **~Filter: "keyword":** Run filter app again to quickly modify your keyword
     - **~Refresh roms:** Will refresh roms only for the current filtered game list
 - *Note: If you're using a `miyoogamelist.xml` you will need to add an entry for `~Filter.miyoocmd` and `~Refresh roms.miyoocmd`*
 
