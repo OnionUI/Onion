@@ -1,6 +1,6 @@
 $(TARGET): $(OFILES)
 	@$(CXX) $(OFILES) -o "$@" $(LDFLAGS)	
-	@if test -z "$(DEBUG)"; then \
+	@if test -z "$(DEBUG)" && test -z "$(SANITIZE)"; then \
 		$(STRIP) "$@"; \
 	fi
 	@-mv -f $(TARGET) "$(BUILD_DIR)/$(TARGET)"

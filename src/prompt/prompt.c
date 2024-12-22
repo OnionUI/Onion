@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
     bool footer_changed = true;
     bool battery_changed = true;
 
-    SDLKey changed_key;
+    SDLKey changed_key = SDLK_UNKNOWN;
     bool key_changed = false;
 
 #ifdef PLATFORM_MIYOOMINI

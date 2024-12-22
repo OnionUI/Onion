@@ -1,8 +1,8 @@
 ###########################################################
 
 TARGET=Onion
-VERSION=4.3.1-1
-RA_SUBVERSION=1.15.0.13
+VERSION=4.4.0
+RA_SUBVERSION=1.19.1-0
 
 ###########################################################
 
@@ -170,18 +170,16 @@ apps: $(CACHE)/.setup
 	@cp -a "$(PACKAGES_APP_DEST)/Tweaks/." $(BUILD_DIR)/
 	@cp -a "$(PACKAGES_APP_DEST)/ThemeSwitcher/." $(BUILD_DIR)/
 
-$(THIRD_PARTY_DIR)/RetroArch/retroarch_miyoo354:
+$(THIRD_PARTY_DIR)/RetroArch-patch/bin/retroarch_miyoo354:
 	@$(ECHO) $(PRINT_RECIPE)
 # RetroArch
 	@$(ECHO) $(COLOR_BLUE)"\n-- Build RetroArch"$(COLOR_NORMAL)
-	@cd $(THIRD_PARTY_DIR)/RetroArch && make clean all
-	@cd $(THIRD_PARTY_DIR)/RetroArch && make clean all MIYOO354=1 PACKAGE_NAME=retroarch_miyoo354
+	@cd $(THIRD_PARTY_DIR)/RetroArch-patch && make
 
-external: $(CACHE)/.setup $(THIRD_PARTY_DIR)/RetroArch/retroarch_miyoo354
+external: $(CACHE)/.setup $(THIRD_PARTY_DIR)/RetroArch-patch/bin/retroarch_miyoo354
 	@$(ECHO) $(PRINT_RECIPE)
 # Add RetroArch
-	@cp $(THIRD_PARTY_DIR)/RetroArch/retroarch $(BUILD_DIR)/RetroArch/
-	@cp $(THIRD_PARTY_DIR)/RetroArch/retroarch_miyoo354 $(BUILD_DIR)/RetroArch/
+	@cp $(THIRD_PARTY_DIR)/RetroArch-patch/bin/* $(BUILD_DIR)/RetroArch/
 	@echo $(RA_SUBVERSION) > $(BUILD_DIR)/RetroArch/onion_ra_version.txt
 	@$(BUILD_DIR)/.tmp_update/script/build_ext_cache.sh $(BUILD_DIR)/RetroArch/.retroarch
 # SearchFilter
@@ -232,8 +230,7 @@ clean:
 
 deepclean: clean
 	@rm -rf $(CACHE)
-	@rm -f $(THIRD_PARTY_DIR)/RetroArch/retroarch_miyoo354
-	@cd $(THIRD_PARTY_DIR)/RetroArch && make clean
+	@cd $(THIRD_PARTY_DIR)/RetroArch-patch && make clean
 	@cd $(THIRD_PARTY_DIR)/SearchFilter && make clean
 	@cd $(THIRD_PARTY_DIR)/Terminal && make clean
 	@cd $(THIRD_PARTY_DIR)/DinguxCommander && make clean

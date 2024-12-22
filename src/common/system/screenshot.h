@@ -33,7 +33,7 @@ bool __get_path_romscreen(char *path_out)
 
 bool __get_path_recent(char *path_out)
 {
-    char *fnptr;
+    char *fnptr, *no_extension;
     uint32_t i;
 
     strcpy(path_out, "/mnt/SDCARD/Screenshots/");
@@ -43,8 +43,11 @@ bool __get_path_recent(char *path_out)
 
     if (system_state == MODE_GAME && (process_searchpid("retroarch") != 0 || process_searchpid("ra32") != 0)) {
         char file_path[STR_MAX];
-        if (history_getRecentPath(file_path) != NULL)
-            strcat(path_out, file_removeExtension(basename(file_path)));
+        if (history_getRecentPath(file_path) != NULL) {
+            no_extension = file_removeExtension(basename(file_path));
+            strcat(path_out, no_extension);
+            free(no_extension);
+        }
     }
     else if (system_state == MODE_SWITCHER)
         strcat(path_out, "GameSwitcher");
@@ -61,7 +64,9 @@ bool __get_path_recent(char *path_out)
         if (strstr(cmd, "; chmod") != NULL)
             state_getAppName(app_name, cmd);
         else {
-            strcpy(app_name, file_removeExtension(basename(cmd)));
+            no_extension = file_removeExtension(basename(cmd));
+            strcpy(app_name, no_extension);
+            free(no_extension);
         }
         printf_debug("app: '%s'\n", app_name);
 

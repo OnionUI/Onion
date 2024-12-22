@@ -272,7 +272,7 @@ void menu_buttonActionInGameMenu(void *_)
                                  (ListItem){
                                      .label = "Single press",
                                      .item_type = MULTIVALUE,
-                                     .value_max = 3,
+                                     .value_max = 4,
                                      .value_labels = BUTTON_INGAME_LABELS,
                                      .value = settings.ingame_single_press,
                                      .action_id = 3,
@@ -283,7 +283,7 @@ void menu_buttonActionInGameMenu(void *_)
                                  (ListItem){
                                      .label = "Long press",
                                      .item_type = MULTIVALUE,
-                                     .value_max = 3,
+                                     .value_max = 4,
                                      .value_labels = BUTTON_INGAME_LABELS,
                                      .value = settings.ingame_long_press,
                                      .action_id = 4,
@@ -294,7 +294,7 @@ void menu_buttonActionInGameMenu(void *_)
                                  (ListItem){
                                      .label = "Double press",
                                      .item_type = MULTIVALUE,
-                                     .value_max = 3,
+                                     .value_max = 4,
                                      .value_labels = BUTTON_INGAME_LABELS,
                                      .value = settings.ingame_double_press,
                                      .action_id = 5,
@@ -481,10 +481,12 @@ void menu_themeOverrides(void *_)
 
 void menu_blueLight(void *_)
 {
+    bool schedule_show = (DEVICE_ID == MIYOO354 || settings.no_time_restore || settings.blue_light_schedule);
+    bool schedule_disable = (!settings.no_time_restore && !network_state.ntp && !settings.blue_light_schedule);
     if (!_menu_user_blue_light._created) {
         network_loadState();
         _menu_user_blue_light = list_createWithTitle(6, LIST_SMALL, "Blue light filter");
-        if (DEVICE_ID == MIYOO354) {
+        if (schedule_show) {
             list_addItem(&_menu_user_blue_light,
                          (ListItem){
                              .label = "[DATESTRING]",
@@ -500,11 +502,11 @@ void menu_blueLight(void *_)
                                      .value = (int)settings.blue_light_state || exists("/tmp/.blfOn"),
                                      .action = action_blueLight},
                                  "Set the selected strength now\n");
-        if (DEVICE_ID == MIYOO354) {
+        if (schedule_show) {
             list_addItemWithInfoNote(&_menu_user_blue_light,
                                      (ListItem){
                                          .label = "",
-                                         .disabled = !network_state.ntp,
+                                         .disabled = schedule_disable,
                                          .item_type = TOGGLE,
                                          .value = (int)settings.blue_light_schedule,
                                          .action = action_blueLightSchedule},
@@ -522,11 +524,11 @@ void menu_blueLight(void *_)
                                      .value = value_blueLightLevel()},
                                  "Change the strength of the \n"
                                  "Blue light filter");
-        if (DEVICE_ID == MIYOO354) {
+        if (schedule_show) {
             list_addItemWithInfoNote(&_menu_user_blue_light,
                                      (ListItem){
                                          .label = "Time (On)",
-                                         .disabled = !network_state.ntp,
+                                         .disabled = schedule_disable,
                                          .item_type = MULTIVALUE,
                                          .value_max = 95,
                                          .value_formatter = formatter_Time,
@@ -536,7 +538,7 @@ void menu_blueLight(void *_)
             list_addItemWithInfoNote(&_menu_user_blue_light,
                                      (ListItem){
                                          .label = "Time (Off)",
-                                         .disabled = !network_state.ntp,
+                                         .disabled = schedule_disable,
                                          .item_type = MULTIVALUE,
                                          .value_max = 95,
                                          .value_formatter = formatter_Time,
@@ -545,7 +547,7 @@ void menu_blueLight(void *_)
                                      "Time schedule for the bluelight filter");
         }
     }
-    if (DEVICE_ID == MIYOO354) {
+    if (schedule_show) {
         _writeDateString(_menu_user_blue_light.items[0].label);
         char scheduleToggleLabel[100];
         strcpy(scheduleToggleLabel, exists("/tmp/.blfIgnoreSchedule") ? "Schedule (ignored)" : "Schedule");
@@ -671,15 +673,18 @@ void menu_diagnostics(void *pt)
                 .action = action_runDiagnosticScript,
             };
 
-            const char *prefix = "";
+            const char *prefix;
             if (strncmp(scripts[i].filename, "util", 4) == 0) {
-                prefix = "Util: ";
+                prefix = "Util:%.62s";
             }
             else if (strncmp(scripts[i].filename, "fix", 3) == 0) {
-                prefix = "Fix: ";
+                prefix = "Fix:%.62s";
+            }
+            else {
+                prefix = "%.62s";
             }
 
-            snprintf(diagItem.label, DIAG_MAX_LABEL_LENGTH - 1, "%s%.62s", prefix, scripts[i].label);
+            snprintf(diagItem.label, DIAG_MAX_LABEL_LENGTH - 1, prefix, scripts[i].label);
             strncpy(diagItem.sticky_note, "Idle: Selected script not running", STR_MAX - 1);
 
             char *parsed_Tooltip = diags_parseNewLines(scripts[i].tooltip);

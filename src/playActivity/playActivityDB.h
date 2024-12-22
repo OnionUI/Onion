@@ -58,6 +58,7 @@ void get_rom_image_path(char *rom_file, char *out_image_path)
     char *rom_folder = strtok(rom_file, "/");
 
     snprintf(out_image_path, STR_MAX - 1, "/mnt/SDCARD/Roms/%s/Imgs/%s.png", rom_folder, clean_rom_name);
+    free(clean_rom_name);
 }
 
 void play_activity_db_close()
@@ -186,6 +187,8 @@ PlayActivities *play_activity_find_all(void)
 
         PlayActivity *entry = play_activities->play_activity[i] = (PlayActivity *)malloc(sizeof(PlayActivity));
         ROM *rom = play_activities->play_activity[i]->rom = (ROM *)malloc(sizeof(ROM));
+        entry->first_played_at = NULL;
+        entry->last_played_at = NULL;
 
         rom->id = sqlite3_column_int(stmt, 0);
         rom->type = strdup((const char *)sqlite3_column_text(stmt, 1));
@@ -219,6 +222,8 @@ PlayActivities *play_activity_find_all(void)
 void free_play_activities(PlayActivities *pa_ptr)
 {
     for (int i = 0; i < pa_ptr->count; i++) {
+        free(pa_ptr->play_activity[i]->first_played_at);
+        free(pa_ptr->play_activity[i]->last_played_at);
         free(pa_ptr->play_activity[i]->rom);
         free(pa_ptr->play_activity[i]);
     }
@@ -283,12 +288,15 @@ void __db_update_rom_from_cache(int rom_id, CacheDBItem *cache_db_item)
 int __db_get_orphan_rom_id(const char *rom_path)
 {
     int rom_id = ROM_NOT_FOUND;
-    char *file_name = basename(strdup(rom_path));
+    char *_file_name = strdup(rom_path);
+    char *file_name = basename(_file_name);
     char *rom_name = file_removeExtension(file_name);
 
     char *sql = sqlite3_mprintf("SELECT id FROM rom WHERE (name=%Q OR name=%Q) AND type='ORPHAN' LIMIT 1;", rom_name, file_name);
     sqlite3_stmt *stmt = play_activity_db_prepare(sql);
     sqlite3_free(sql);
+    free(rom_name);
+    free(_file_name);
 
     if (sqlite3_step(stmt) == SQLITE_ROW) {
         rom_id = sqlite3_column_int(stmt, 0);
@@ -348,8 +356,9 @@ int __db_rom_find_by_file_path(const char *rom_path, bool create_or_update)
             free(cache_db_item);
         }
         else {
-            const char *rom_name = file_removeExtension(basename(strdup(rom_path)));
+            char *rom_name = file_removeExtension(file_basename(rom_path));
             __db_update_rom(rom_id, "", rom_name, rom_path, "");
+            free(rom_name);
         }
     }
     else if (rom_id == ROM_NOT_FOUND && create_or_update) {
@@ -360,8 +369,9 @@ int __db_rom_find_by_file_path(const char *rom_path, bool create_or_update)
             free(cache_db_item);
         }
         else {
-            const char *rom_name = file_removeExtension(basename(strdup(rom_path)));
+            char *rom_name = file_removeExtension(file_basename(rom_path));
             rom_id = __db_insert_rom("", rom_name, rom_path, "");
+            free(rom_name);
         }
     }
 
@@ -455,7 +465,9 @@ void play_activity_start(char *rom_file_path)
     if (rom_id == ROM_NOT_FOUND) {
         exit(1);
     }
-    play_activity_db_execute(sqlite3_mprintf("INSERT INTO play_activity(rom_id) VALUES(%d);", rom_id));
+    char *sql = sqlite3_mprintf("INSERT INTO play_activity(rom_id) VALUES(%d);", rom_id);
+    play_activity_db_execute(sql);
+    sqlite3_free(sql);
 }
 
 void play_activity_resume(void)
@@ -466,7 +478,9 @@ void play_activity_resume(void)
         printf("Error: no active rom\n");
         exit(1);
     }
-    play_activity_db_execute(sqlite3_mprintf("INSERT INTO play_activity(rom_id) VALUES(%d);", rom_id));
+    char *sql = sqlite3_mprintf("INSERT INTO play_activity(rom_id) VALUES(%d);", rom_id);
+    play_activity_db_execute(sql);
+    sqlite3_free(sql);
 }
 
 void play_activity_stop(char *rom_file_path)
@@ -476,7 +490,9 @@ void play_activity_stop(char *rom_file_path)
     if (rom_id == ROM_NOT_FOUND) {
         exit(1);
     }
-    play_activity_db_execute(sqlite3_mprintf("UPDATE play_activity SET play_time = (strftime('%%s', 'now')) - created_at, updated_at = (strftime('%%s', 'now')) WHERE rom_id = %d AND play_time IS NULL;", rom_id));
+    char *sql = sqlite3_mprintf("UPDATE play_activity SET play_time = (strftime('%%s', 'now')) - created_at, updated_at = (strftime('%%s', 'now')) WHERE rom_id = %d AND play_time IS NULL;", rom_id);
+    play_activity_db_execute(sql);
+    sqlite3_free(sql);
 }
 
 void play_activity_stop_all(void)

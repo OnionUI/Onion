@@ -45,8 +45,10 @@ void lang_removeIconLabels(bool remove_icon_labels, bool remove_hints)
         }
     }
 
-    if (!remove_icon_labels && !remove_hints)
+    if (!remove_icon_labels && !remove_hints) {
+        closedir(dp);
         return;
+    }
 
     // backup lang files
     if (!exists(LANG_DIR_BACKUP))
@@ -61,8 +63,9 @@ void lang_removeIconLabels(bool remove_icon_labels, bool remove_hints)
         char file_path[STR_MAX * 2];
         snprintf(file_path, STR_MAX * 2 - 1, LANG_DIR "/%s", ep->d_name);
 
-        const char *json_data = file_read(file_path);
+        char *json_data = file_read(file_path);
         cJSON *root = cJSON_Parse(json_data);
+        free(json_data);
 
         if (!root)
             continue;
@@ -161,7 +164,12 @@ bool lang_load(void)
     return true;
 }
 
-void lang_free(void) { free(lang_list); }
+void lang_free(void) {
+    for (int i = 0; i < LANG_MAX; i++) {
+        free(lang_list[i]);
+    }
+    free(lang_list); 
+}
 
 const char *lang_get(lang_hash key, const char *fallback)
 {

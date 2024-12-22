@@ -238,7 +238,7 @@ void value_setFrameThrottle(void)
 
 int value_getSwapTriggers(void)
 {
-    int l_btn, r_btn, l2_btn, r2_btn;
+    int l_btn = 0, r_btn = 0, l2_btn = 0, r2_btn = 0;
     char value[STR_MAX];
 
     if (file_parseKeyValue(RETROARCH_CONFIG, "input_player1_l_btn", value, '=',

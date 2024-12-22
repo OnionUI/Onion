@@ -103,21 +103,25 @@ CacheDBItem *cache_db_find(const char *path_or_name)
     CacheDBItem *cache_db_item = NULL;
     char cache_db_file_path[STR_MAX];
     char cache_type[STR_MAX];
+    char *_path_or_name = strdup(path_or_name);
 
     char rel_path[PATH_MAX];
     if (!file_path_relative_to(rel_path, "/mnt/SDCARD/Roms", path_or_name)) {
         if (strstr(path_or_name, "../../Roms/") != NULL) {
-            strcpy(rel_path, str_split(strdup((const char *)path_or_name), "../../Roms/"));
+            strcpy(rel_path, str_split(_path_or_name, "../../Roms/"));
         }
         else {
-            strcpy(rel_path, str_replace(strdup((const char *)path_or_name), "/mnt/SDCARD/Roms/", ""));
+            char *tunc_path_or_name = str_replace(_path_or_name, "/mnt/SDCARD/Roms/", "");
+            strcpy(rel_path, tunc_path_or_name);
+            free(tunc_path_or_name);
         }
     }
 
     char *sql;
     int cache_version = cache_get_path(cache_db_file_path, cache_type, path_or_name);
 
-    char *game_name = file_removeExtension(basename(strdup(path_or_name)));
+    char *game_name = file_removeExtension(file_basename(_path_or_name));
+    free(_path_or_name);
 
     if (cache_version == 2) {
         sql = sqlite3_mprintf("SELECT disp, path, imgpath FROM %q_roms WHERE path LIKE '%%%q' OR disp = %Q LIMIT 1;", cache_type, rel_path, game_name);
@@ -129,6 +133,7 @@ CacheDBItem *cache_db_find(const char *path_or_name)
         printf("No cache db found\n");
         return NULL;
     }
+    free(game_name);
 
     sqlite3_stmt *stmt = cache_db_prepare(cache_db_file_path, sql);
     sqlite3_free(sql);

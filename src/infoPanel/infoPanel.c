@@ -30,7 +30,7 @@ static bool loadImagesPathsFromJson(const char *config_path,
                                     int *images_paths_count,
                                     char ***images_titles)
 {
-    const char *json_str = NULL;
+    char *json_str = NULL;
 
     char temp_path[STR_MAX];
     strncpy(temp_path, config_path, STR_MAX - 1);
@@ -42,6 +42,7 @@ static bool loadImagesPathsFromJson(const char *config_path,
 
     // Get JSON objects
     cJSON *json_root = cJSON_Parse(json_str);
+    free(json_str);
     cJSON *json_images_array = cJSON_GetObjectItem(json_root, "images");
     *images_paths_count = cJSON_GetArraySize(json_images_array);
     *images_paths = (char **)malloc(*images_paths_count * sizeof(char *));
@@ -92,13 +93,14 @@ static void drawInfoPanel(SDL_Surface *screen, SDL_Surface *video,
     theme_renderHeader(screen, has_title ? title_str : NULL, !has_title);
 
     if (has_message) {
-        const char *str = str_replace(message_str, "\\n", "\n");
+        char *str = str_replace(message_str, "\\n", "\n");
         message = theme_textboxSurface(str, resource_getFont(TITLE),
                                        theme()->list.color, ALIGN_CENTER);
         message_rect.x -= message->w / 2;
         message_rect.y -= message->h / 2;
         SDL_BlitSurface(message, NULL, screen, &message_rect);
         SDL_FreeSurface(message);
+        free(str);
     }
 }
 
@@ -362,10 +364,12 @@ int main(int argc, char *argv[])
                                 g_image_index >= 0) {
                                 current_image_path = g_images_paths[g_image_index];
                             }
+                            char *no_extension = file_removeExtension(basename(current_image_path));
                             theme_renderHeader(
                                 screen,
-                                file_removeExtension(basename(current_image_path)),
+                                no_extension,
                                 false);
+                            free(no_extension);
                         }
                     }
 

@@ -225,7 +225,10 @@ bool addRandomFromJson(char *json_path)
 
     while (fgets(line, sizeof(line), fp)) {
         json_root = cJSON_Parse(line);
-        json_getInt(json_root, "type", (int *)&type);
+        if(!json_getInt(json_root, "type", (int *)&type)) {
+            print_debug("Malformed json; Skipping\n");
+            continue;
+        }
 
         if (type == TYPE_GAME || type == TYPE_EXPERT) {
             GameEntry *game = &random_games[count];
@@ -278,8 +281,10 @@ bool addRandomFromJson(char *json_path)
                 continue;
 
             if (strlen(game->img_path) == 0) {
+                char *no_extension = file_removeExtension(basename(game->path));
                 snprintf(game->img_path, STR_MAX * 3 + 2, "%s/%s.png", imgsdir,
-                         file_removeExtension(basename(game->path)));
+                         no_extension);
+                free(no_extension);
             }
 
             count++;

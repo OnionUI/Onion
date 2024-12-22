@@ -33,7 +33,7 @@ int _add_icon_alts(const char *pack_dir, const char *pack_name,
 {
     DIR *dp;
     struct dirent *ep;
-    char icon_name[STR_MAX];
+    char *icon_name;
     char alt_name[STR_MAX];
     char preview_path[STR_MAX * 2 + 1];
     int count = 0;
@@ -48,9 +48,10 @@ int _add_icon_alts(const char *pack_dir, const char *pack_name,
 
             snprintf(preview_path, STR_MAX * 2, "%s/%s", pack_dir, ep->d_name);
 
-            strncpy(icon_name, ep->d_name, STR_MAX - 1);
-            snprintf(alt_name, STR_MAX - 1, "%s - %s", pack_name,
-                     file_removeExtension(str_split(icon_name, "-")));
+            icon_name = file_removeExtension(ep->d_name);
+            str_split(icon_name, "-");
+            snprintf(alt_name, STR_MAX - 1, "%s - %s", pack_name, icon_name);
+            free(icon_name);
 
             ListItem item = {.action = action};
             strncpy(item.label, alt_name, STR_MAX - 1);
@@ -236,7 +237,7 @@ bool _add_config_icon(const char *path, const char *name,
                       void (*action)(void *))
 {
     char label[STR_MAX];
-    char icon_name[56];
+    char *icon_name;
     char icon_path[STR_MAX];
     char preview_path[STR_MAX * 2 + 32];
     IconMode_e mode = icons_getIconMode(config_path);
@@ -267,12 +268,12 @@ bool _add_config_icon(const char *path, const char *name,
     char abs_path[STR_MAX - 56];
     realpath(preview_path, abs_path);
 
-    strncpy(icon_name, file_removeExtension(basename(icon_path)), 55);
+    icon_name = file_removeExtension(basename(icon_path));
     str_split(icon_name, "-");
 
     char short_label[56];
     str_trim(short_label, 55, label, false);
-    short_label[56] = 0;
+    short_label[55] = 0;
 
     if (mode != ICON_MODE_APP)
         snprintf(item.label, STR_MAX - 1, "%s (%s)", short_label, icon_name);
@@ -293,6 +294,7 @@ bool _add_config_icon(const char *path, const char *name,
         item.icon_ptr = (void *)IMG_Load(preview_path);
 
     list_addItem(list, item);
+    free(icon_name);
 
     return true;
 }

@@ -60,7 +60,9 @@ main() {
     touch /tmp/no_charging_ui
 
     # Check if blf needs enabling
-    if [ -f $sysdir/config/.blfOn ]; then
+    if [ -f $sysdir/config/.blf ]; then
+        /mnt/SDCARD/.tmp_update/script/blue_light.sh check &
+    elif [ -f $sysdir/config/.blfOn ]; then
         /mnt/SDCARD/.tmp_update/script/blue_light.sh enable &
     fi
 
@@ -763,14 +765,22 @@ save_settings() {
 }
 
 update_time() {
-    # Give hardware modders an option to disable time restore
-    if [ -f $sysdir/config/.noTimeRestore ]; then
+    # Detect RTC, if available, do not restore time
+    rtc_treshold=15 # usually around 3-5 at this point
+    current_time=$(date +%s)
+
+    if [ "$current_time" -gt "$rtc_treshold" ]; then
+        log "RTC available, not restoring time. Current time: $current_time"
         return
+    else
+        log "RTC not available, restoring time. Current time: $current_time"
     fi
+
     timepath=/mnt/SDCARD/Saves/CurrentProfile/saves/currentTime.txt
     currentTime=0
     # Load current time
     if [ -f $timepath ]; then
+        log "Restoring time"
         currentTime=$(cat $timepath)
     fi
     date +%s -s @$currentTime
