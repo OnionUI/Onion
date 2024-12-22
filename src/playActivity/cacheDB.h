@@ -120,7 +120,7 @@ CacheDBItem *cache_db_find(const char *path_or_name)
     char *sql;
     int cache_version = cache_get_path(cache_db_file_path, cache_type, path_or_name);
 
-    char *game_name = file_removeExtension(basename(_path_or_name));
+    char *game_name = file_removeExtension(file_basename(_path_or_name));
     free(_path_or_name);
 
     if (cache_version == 2) {
@@ -133,6 +133,7 @@ CacheDBItem *cache_db_find(const char *path_or_name)
         printf("No cache db found\n");
         return NULL;
     }
+    free(game_name);
 
     sqlite3_stmt *stmt = cache_db_prepare(cache_db_file_path, sql);
     sqlite3_free(sql);

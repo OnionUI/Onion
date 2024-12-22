@@ -39,6 +39,7 @@ SOFTWARE.
 #define MAX_SECOND 59
 #define MAX_MINUTE MAX_SECOND
 #define MAX_HOUR 23
+#define MS_TO_US(ms)  ms * 1000 
 
 SDL_Surface *sdl_screen, *screen;
 
@@ -207,9 +208,10 @@ int main(int argc, char *argv[])
                           &hour_selected, &minute_selected, &seconds_selected);
 
     SDL_EnableKeyRepeat(500, 50);
-
+    int dirty = 1; // first draw
     while (!quit) {
         while (SDL_PollEvent(&event)) {
+            dirty = 1;
             switch (event.type) {
             case SDL_KEYUP:
                 switch (event.key.keysym.sym) {
@@ -296,6 +298,11 @@ int main(int argc, char *argv[])
             }
         }
 
+        if (dirty != 1) {
+            usleep(MS_TO_US(100));
+            continue;
+        }
+
         Check_leap_year();
         Dont_go_over_days();
         Dont_go_over_hour();
@@ -330,6 +337,8 @@ int main(int argc, char *argv[])
 
         /* Flip the screen so it gets displayed*/
         GFX_Flip(screen);
+
+        dirty = 0;
     }
 
     /* Make sure to clean up the allocated surfaces before exiting.

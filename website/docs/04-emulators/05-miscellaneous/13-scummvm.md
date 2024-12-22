@@ -21,7 +21,7 @@ For more details about ScummVM, the [official FAQ](https://docs.scummvm.org/en/l
 No need to create your shortcuts manually anymore, Onion will import your games automatically ! 
 Just put your games folders in `Roms/SCUMMVM/[Game folder]/` and then run `~Import games` in ScummVM section. 
 
-ScummVM documentation offers great ressources to learn how to add games to ScummVM : This article "[Where to get the games](https://wiki.scummvm.org/index.php?title=Where_to_get_the_games)" and the [list of supported games](https://wiki.scummvm.org/index.php?title=Category:Supported_Games) will help you to know which files to copy from your original game to get it working properly on ScummVM.
+ScummVM documentation offers great resources to learn how to add games to ScummVM : This article "[Where to get the games](https://wiki.scummvm.org/index.php?title=Where_to_get_the_games)" and the [list of supported games](https://wiki.scummvm.org/index.php?title=Category:Supported_Games) will help you to know which files to copy from your original game to get it working properly on ScummVM.
 
 The import script will ask you if you want to use ScummVM database names or the names specified on your own folders. 
 As ScummVM games names are often long (with details about version and language as `Full Throttle (Version A, English)`) you can also choose to remove parens.

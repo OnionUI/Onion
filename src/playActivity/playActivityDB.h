@@ -58,6 +58,7 @@ void get_rom_image_path(char *rom_file, char *out_image_path)
     char *rom_folder = strtok(rom_file, "/");
 
     snprintf(out_image_path, STR_MAX - 1, "/mnt/SDCARD/Roms/%s/Imgs/%s.png", rom_folder, clean_rom_name);
+    free(clean_rom_name);
 }
 
 void play_activity_db_close()
@@ -287,12 +288,15 @@ void __db_update_rom_from_cache(int rom_id, CacheDBItem *cache_db_item)
 int __db_get_orphan_rom_id(const char *rom_path)
 {
     int rom_id = ROM_NOT_FOUND;
-    char *file_name = basename(strdup(rom_path));
+    char *_file_name = strdup(rom_path);
+    char *file_name = basename(_file_name);
     char *rom_name = file_removeExtension(file_name);
 
     char *sql = sqlite3_mprintf("SELECT id FROM rom WHERE (name=%Q OR name=%Q) AND type='ORPHAN' LIMIT 1;", rom_name, file_name);
     sqlite3_stmt *stmt = play_activity_db_prepare(sql);
     sqlite3_free(sql);
+    free(rom_name);
+    free(_file_name);
 
     if (sqlite3_step(stmt) == SQLITE_ROW) {
         rom_id = sqlite3_column_int(stmt, 0);
@@ -352,8 +356,9 @@ int __db_rom_find_by_file_path(const char *rom_path, bool create_or_update)
             free(cache_db_item);
         }
         else {
-            const char *rom_name = file_removeExtension(basename(strdup(rom_path)));
+            char *rom_name = file_removeExtension(file_basename(rom_path));
             __db_update_rom(rom_id, "", rom_name, rom_path, "");
+            free(rom_name);
         }
     }
     else if (rom_id == ROM_NOT_FOUND && create_or_update) {
@@ -364,8 +369,9 @@ int __db_rom_find_by_file_path(const char *rom_path, bool create_or_update)
             free(cache_db_item);
         }
         else {
-            const char *rom_name = file_removeExtension(basename(strdup(rom_path)));
+            char *rom_name = file_removeExtension(file_basename(rom_path));
             rom_id = __db_insert_rom("", rom_name, rom_path, "");
+            free(rom_name);
         }
     }
 

@@ -140,8 +140,7 @@ bool _apply_singleIconFromPack(const char *config_path,
     if (!json_getString(config, "icon", temp_path))
         return false;
 
-    char icon_name[56];
-    strncpy(icon_name, file_removeExtension(basename(temp_path)), 55);
+    char *icon_name = file_removeExtension(basename(temp_path));
     str_split(icon_name, "-");
 
     IconMode_e mode = icons_getIconMode(config_path);
@@ -156,13 +155,16 @@ bool _apply_singleIconFromPack(const char *config_path,
                     icon_name);
         }
 
-        if (!is_file(icon_path))
+        if (!is_file(icon_path)) {
+            free(icon_name);
             return false;
+        }
     }
 
     char sel_path[STR_MAX];
     sprintf(sel_path, icons_getSelectedIconPathFormat(mode), icon_pack_path,
             icon_name);
+    free(icon_name);
 
     if (is_file(sel_path))
         json_forceSetString(config, "iconsel", sel_path);
@@ -185,7 +187,7 @@ bool _apply_singleIconFromPack(const char *config_path,
 bool apply_singleIcon(const char *config_path)
 {
     char icon_pack_path[STR_MAX];
-    const char *active_icon_pack = file_read(ACTIVE_ICON_PACK);
+    char *active_icon_pack = file_read(ACTIVE_ICON_PACK);
 
     if (active_icon_pack != NULL && is_dir(active_icon_pack))
         strncpy(icon_pack_path, active_icon_pack, STR_MAX - 1);
@@ -201,6 +203,7 @@ bool apply_singleIcon(const char *config_path)
         _apply_singleIconFromPack(GUEST_ON_CONFIG, icon_pack_path, false);
     }
 
+    free(active_icon_pack);
     return _apply_singleIconFromPack(config_path, icon_pack_path, false);
 }
 
