@@ -37,7 +37,7 @@ You'll currently find the quick join feature in GLO. GLO can be opened by browsi
 
 2. Press <kbd>Y</kbd> to open GLO
 
-3. Choose `Netplay` -> `Host` -> `Easy Netplay (Play anywhere, local only)`
+3. Choose `Netplay` -> `Host a session...` -> `Easy Netplay (Play anywhere, local only)`
  
 Onion should now take over and setup a session on the built in personal hotspot.
 
@@ -50,7 +50,7 @@ To join a host, it's a little easier. Currently you'll start the hotspot client 
 
 2. Press <kbd>Y</kbd> to open GLO
 
-3. Choose  `Netplay` -> `Join` -> `Easy Netplay (Play anywhere, local only)`
+3. Choose  `Netplay` -> `Join a session...` -> `Easy Netplay (Play anywhere, local only)`
  
 Onion will now take over and join the hotspot, pull the information from the host and connect! 
 
