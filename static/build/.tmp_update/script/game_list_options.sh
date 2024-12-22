@@ -91,11 +91,11 @@ main() {
     else
         rompath=$(echo "$cmd" | awk '{ st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3) }')
 
-        export cookie_rom_path="$rompath"
-
         if echo "$rompath" | grep -q ":"; then
             rompath=$(echo "$rompath" | awk '{st = index($0,":"); print substr($0,st+1)}')
         fi
+
+        export cookie_rom_path="$rompath"
 
         if check_is_game "$rompath"; then
             romtype=$ROM_TYPE_GAME
