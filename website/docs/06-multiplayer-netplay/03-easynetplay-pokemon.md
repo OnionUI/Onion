@@ -61,7 +61,7 @@ Setting up the host is as easy as:
 
 2. Press <kbd>Y</kbd> to open GLO
 
-3. Choose `Netplay` -> `Host` -> `Easy Netplay - Pokemon Trade/Battle`
+3. Choose `Netplay` -> `Host a session...` -> `Easy Netplay - Pokemon Trade/Battle`
  
 Onion will now take over and setup a session on the built in personal hotspot.
 
@@ -76,7 +76,7 @@ As with the host, getting connected as a client is just as simple:
 
 2. Press <kbd>Y</kbd> to open GLO
 
-3. Choose `Netplay` -> `Join` -> `Easy Netplay - Pokemon Trade/Battle`
+3. Choose `Netplay` -> `Join a session...` -> `Easy Netplay - Pokemon Trade/Battle`
  
 Onion will now take over and join the hotspot, pull the information from the host and connect! 
 
