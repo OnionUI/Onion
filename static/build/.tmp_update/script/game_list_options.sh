@@ -8,7 +8,7 @@ recentlist=/mnt/SDCARD/Roms/recentlist.json
 recentlist_hidden=/mnt/SDCARD/Roms/recentlist-hidden.json
 recentlist_temp=/tmp/recentlist-temp.json
 
-UI_TITLE="OPTIONS"
+UI_TITLE="GLO"
 
 mkdir -p $radir/cores/cache
 
@@ -231,7 +231,6 @@ main() {
     exit 1
 }
 
-
 check_is_game() {
     echo "$1" | grep -q "retroarch" || echo "$1" | grep -q "/../../Roms/"
 }
@@ -261,19 +260,19 @@ add_script_files() {
 
             if [ "$scriptlabel" == "" ]; then
                 scriptlabel=$(basename "$entry" .sh)
-			elif [ "$scriptlabel" == "DynamicLabel" ]; then
-				# We run the script with "DynamicLabel" in third parameter to generate the name
-				"$entry" "$rompath" "$emupath" "DynamicLabel" "$emulabel" "$retroarch_core" "$romdirname" "$romext"
-				scriptlabel=$(cat /tmp/DynamicLabel.tmp)
-				rm /tmp/DynamicLabel.tmp
+            elif [ "$scriptlabel" == "DynamicLabel" ]; then
+                # We run the script with "DynamicLabel" in third parameter to generate the name
+                "$entry" "$rompath" "$emupath" "DynamicLabel" "$emulabel" "$retroarch_core" "$romdirname" "$romext"
+                scriptlabel=$(cat /tmp/DynamicLabel.tmp)
+                rm /tmp/DynamicLabel.tmp
             fi
 
             scriptlabel=$(echo "$scriptlabel" | sed "s/%LIST%/$emulabel/g")
-			
-			if [ "$scriptlabel" != "none" ]; then
-				echo "adding romscript: $scriptlabel"
-				add_menu_option run_script "$scriptlabel" "$entry"
-			fi
+
+            if [ "$scriptlabel" != "none" ]; then
+                echo "adding romscript: $scriptlabel"
+                add_menu_option run_script "$scriptlabel" "$entry"
+            fi
         done
     fi
 }
@@ -312,7 +311,11 @@ get_core_info() {
         retroarch_core=$(get_info_value "$romcfg" core)
     fi
 
-    default_core=$(cat "$launch_path" | grep ".retroarch/cores/" | awk '{st = index($0,".retroarch/cores/"); s = substr($0,st+17); st2 = index(s,".so"); print substr(s,0,st2-1)}' | xargs)
+    if grep -q "default_core=" "$launch_path"; then
+        default_core="$(cat "$launch_path" | grep "default_core=" | head -1 | awk '{split($0,a,"="); print a[2]}' | xargs)_libretro"
+    else
+        default_core=$(cat "$launch_path" | grep ".retroarch/cores/" | awk '{st = index($0,".retroarch/cores/"); s = substr($0,st+17); st2 = index(s,".so"); print substr(s,0,st2-1)}' | xargs)
+    fi
 
     if [ "$retroarch_core" == "" ]; then
         retroarch_core="$default_core"
