@@ -252,8 +252,10 @@ void readHistory()
 
         sscanf(strstr(jsonContent, "\"type\":") + 7, "%d", &type);
 
-        if ((type != 5) && (type != 17))
+        if ((type != 5) && (type != 17)) {
+            free(jsonContent);
             continue;
+        }
 
         print_debug("type 5");
 
@@ -450,7 +452,8 @@ int main(int argc, char *argv[])
     bool show_time = config_flag_get("gameSwitcher/showTime");
     bool show_total = !config_flag_get("gameSwitcher/hideTotal");
     bool show_legend = !config_flag_get("gameSwitcher/hideLegend");
-    int view_mode = view_min ? VIEW_MINIMAL : VIEW_NORMAL, view_restore;
+    int view_mode = view_min ? VIEW_MINIMAL : VIEW_NORMAL;
+    int view_restore = view_mode;
 
     SDLKey changed_key = SDLK_UNKNOWN;
     int button_y_repeat = 0;

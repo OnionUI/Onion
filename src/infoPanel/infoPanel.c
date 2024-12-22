@@ -93,13 +93,14 @@ static void drawInfoPanel(SDL_Surface *screen, SDL_Surface *video,
     theme_renderHeader(screen, has_title ? title_str : NULL, !has_title);
 
     if (has_message) {
-        const char *str = str_replace(message_str, "\\n", "\n");
+        char *str = str_replace(message_str, "\\n", "\n");
         message = theme_textboxSurface(str, resource_getFont(TITLE),
                                        theme()->list.color, ALIGN_CENTER);
         message_rect.x -= message->w / 2;
         message_rect.y -= message->h / 2;
         SDL_BlitSurface(message, NULL, screen, &message_rect);
         SDL_FreeSurface(message);
+        free(str);
     }
 }
 

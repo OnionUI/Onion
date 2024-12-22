@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     best_session_time = get_best_session_time();
 
     FILE *fp;
-    int old_percentage = -1, current_percentage, warn_at = 15, last_logged_percentage = -1;
+    int old_percentage = -1, current_percentage = 0, warn_at = 15, last_logged_percentage = -1;
 
     atexit(cleanup);
     signal(SIGINT, sigHandler);

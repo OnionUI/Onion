@@ -187,6 +187,8 @@ PlayActivities *play_activity_find_all(void)
 
         PlayActivity *entry = play_activities->play_activity[i] = (PlayActivity *)malloc(sizeof(PlayActivity));
         ROM *rom = play_activities->play_activity[i]->rom = (ROM *)malloc(sizeof(ROM));
+        entry->first_played_at = NULL;
+        entry->last_played_at = NULL;
 
         rom->id = sqlite3_column_int(stmt, 0);
         rom->type = strdup((const char *)sqlite3_column_text(stmt, 1));
@@ -220,6 +222,8 @@ PlayActivities *play_activity_find_all(void)
 void free_play_activities(PlayActivities *pa_ptr)
 {
     for (int i = 0; i < pa_ptr->count; i++) {
+        free(pa_ptr->play_activity[i]->first_played_at);
+        free(pa_ptr->play_activity[i]->last_played_at);
         free(pa_ptr->play_activity[i]->rom);
         free(pa_ptr->play_activity[i]);
     }
@@ -461,7 +465,9 @@ void play_activity_start(char *rom_file_path)
     if (rom_id == ROM_NOT_FOUND) {
         exit(1);
     }
-    play_activity_db_execute(sqlite3_mprintf("INSERT INTO play_activity(rom_id) VALUES(%d);", rom_id));
+    char *sql = sqlite3_mprintf("INSERT INTO play_activity(rom_id) VALUES(%d);", rom_id);
+    play_activity_db_execute(sql);
+    sqlite3_free(sql);
 }
 
 void play_activity_resume(void)
@@ -472,7 +478,9 @@ void play_activity_resume(void)
         printf("Error: no active rom\n");
         exit(1);
     }
-    play_activity_db_execute(sqlite3_mprintf("INSERT INTO play_activity(rom_id) VALUES(%d);", rom_id));
+    char *sql = sqlite3_mprintf("INSERT INTO play_activity(rom_id) VALUES(%d);", rom_id);
+    play_activity_db_execute(sql);
+    sqlite3_free(sql);
 }
 
 void play_activity_stop(char *rom_file_path)
@@ -482,7 +490,9 @@ void play_activity_stop(char *rom_file_path)
     if (rom_id == ROM_NOT_FOUND) {
         exit(1);
     }
-    play_activity_db_execute(sqlite3_mprintf("UPDATE play_activity SET play_time = (strftime('%%s', 'now')) - created_at, updated_at = (strftime('%%s', 'now')) WHERE rom_id = %d AND play_time IS NULL;", rom_id));
+    char *sql = sqlite3_mprintf("UPDATE play_activity SET play_time = (strftime('%%s', 'now')) - created_at, updated_at = (strftime('%%s', 'now')) WHERE rom_id = %d AND play_time IS NULL;", rom_id);
+    play_activity_db_execute(sql);
+    sqlite3_free(sql);
 }
 
 void play_activity_stop_all(void)

@@ -24,9 +24,10 @@ void log_debug(const char *file_path, int line, const char *format_str, ...)
     vsprintf(log_message + strlen(log_message), format_str, valist);
     va_end(valist);
 
-    snprintf(cmd, 1023, "echo -n \"%s\" >/dev/stderr",
-             str_replace(log_message, "\"", "\\\""));
+    char *no_underscore = str_replace(log_message, "\"", "\\\"");
+    snprintf(cmd, 1023, "echo -n \"%s\" >/dev/stderr", no_underscore);
     system(cmd);
+    free(no_underscore);
 
     if (strlen(_log_path) == 0)
         return;

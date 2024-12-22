@@ -47,8 +47,10 @@ bool checkAppInstalled(const char *basePath, int base_len, int level, bool compl
             else if (dp->d_type == DT_DIR)
                 is_installed = checkAppInstalled(path, base_len, level + 1, complete);
 
-            if (!complete && level >= 2 && exists(pathInstalledApp))
+            if (!complete && level >= 2 && exists(pathInstalledApp)) {
+                closedir(dir);
                 return true;
+            }
 
             if ((complete || level < 2) && !is_installed)
                 run = 0;
@@ -81,11 +83,13 @@ bool getConfigPath(char *config_path, const char *data_path, const char *base_di
             continue;
         sprintf(config_path, "%s/%s/config.json", base_dir, dp->d_name);
         if (!is_file(config_path)) {
+            closedir(dir);
             return false;
         }
         break;
     }
 
+    closedir(dir);
     return true;
 }
 
@@ -131,6 +135,7 @@ bool checkRomDir(const char *rom_dir, const char *extlist, int level)
                 char subdir[PATH_MAX];
                 snprintf(subdir, PATH_MAX - 1, "%s/%s", rom_dir, dp->d_name);
                 if (checkRomDir(subdir, extlist, level + 1)) {
+                    closedir(dir);
                     return true;
                 }
             }
@@ -141,10 +146,12 @@ bool checkRomDir(const char *rom_dir, const char *extlist, int level)
             if (!hasExtension(dp->d_name, extlist))
                 continue;
 
+            closedir(dir);
             return true;
         }
     }
 
+    closedir(dir);
     return false;
 }
 
@@ -279,9 +286,11 @@ bool getPackageMainPath(char *out_path, const char *data_path,
         if (dp->d_type != DT_DIR)
             continue;
         sprintf(out_path, "/mnt/SDCARD/%s/%s", base_dir, dp->d_name);
+        closedir(dir);
         return is_dir(out_path);
     }
 
+    closedir(dir);
     return false;
 }
 

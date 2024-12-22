@@ -48,7 +48,10 @@ static int nTab = 0;
 static int changes_installs[] = {0, 0, 0, 0};
 static int changes_removals[] = {0, 0, 0, 0};
 
-static SDL_Surface *video = NULL, *screen = NULL, *surfaceBackground = NULL,
+// Memory is free-ed by SDL_Quit
+static SDL_Surface *video = NULL;
+
+static SDL_Surface *screen = NULL, *surfaceBackground = NULL,
                    *surfaceSelection = NULL, *surfaceTableau = NULL,
                    *surfaceScroller = NULL, *surfaceMarker = NULL,
                    *surfaceCheck = NULL, *surfaceCross = NULL,
@@ -107,6 +110,8 @@ void freeResources(void)
     TTF_CloseFont(font35);
     TTF_Quit();
 
+    SDL_FreeSurface(screen);
+    SDL_FreeSurface(surfaceSummary);
     SDL_FreeSurface(surfaceCheck);
     SDL_FreeSurface(surfaceCross);
     SDL_FreeSurface(surfaceBackground);
