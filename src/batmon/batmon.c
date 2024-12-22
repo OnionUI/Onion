@@ -16,8 +16,8 @@ int main(int argc, char *argv[])
     best_session_time = get_best_session_time();
 
     FILE *fp;
-    int old_percentage = -1, current_percentage = 0, warn_at = 15, last_logged_percentage = -1;
-
+    int old_percentage = -1, current_percentage = 0, warn_at = 15;
+    int lowest_percentage_after_charge = 500;
     atexit(cleanup);
     signal(SIGINT, sigHandler);
     signal(SIGTERM, sigHandler);
@@ -34,6 +34,7 @@ int main(int argc, char *argv[])
         if (battery_isCharging()) {
             if (!is_charging) {
                 // Charging just started
+                lowest_percentage_after_charge = 500; // Reset lowest percentage before charge
                 is_charging = true;
                 if (DEVICE_ID == MIYOO354) {
                     current_percentage = getBatPercMMP();
@@ -60,6 +61,7 @@ int main(int argc, char *argv[])
         else if (is_charging) {
             // Charging just stopped
             is_charging = false;
+            lowest_percentage_after_charge = 500; // Reset lowest percentage after charge
 
             printf_debug(
                 "Charging stopped: suspended = %d, perc = %d, warn = %d\n",
@@ -84,6 +86,14 @@ int main(int argc, char *argv[])
                 if (DEVICE_ID == MIYOO283) {
                     adc_value_g = updateADCValue(adc_value_g);
                     current_percentage = batteryPercentage(adc_value_g);
+                    // Avvoid battery increasing from tiny voltage changes, assume lowest until it drops below it.
+                    // This is better than assuming the max cpu and screen power consumption and trying to calculate the battery drain.
+                    if (current_percentage < lowest_percentage_after_charge) {
+                        lowest_percentage_after_charge = current_percentage;
+                    }
+                    else {
+                        current_percentage = lowest_percentage_after_charge;
+                    }
                 }
                 else if (DEVICE_ID == MIYOO354) {
                     current_percentage = getBatPercMMP();
@@ -104,16 +114,12 @@ int main(int argc, char *argv[])
                     "saving percBat: suspended = %d, perc = %d, warn = %d\n",
                     is_suspended, current_percentage, warn_at);
                 old_percentage = current_percentage;
+                // Save battery percentage to file
                 file_put_sync(fp, "/tmp/percBat", "%d", current_percentage);
-
-                if (abs(last_logged_percentage - current_percentage) >= BATTERY_LOG_THRESHOLD) {
-                    // Current battery state duration addition
-                    update_current_duration();
-                    // New battery percentage entry
-                    log_new_percentage(current_percentage, is_charging);
-                    last_logged_percentage = current_percentage;
-                }
-
+                // Current battery state duration addition
+                update_current_duration();
+                // New battery percentage entry
+                log_new_percentage(current_percentage, is_charging);
                 if (DEVICE_ID == MIYOO283) {
                     saveFakeAxpResult(current_percentage);
                 }
@@ -333,6 +339,8 @@ void saveFakeAxpResult(int current_percentage)
     }
 }
 
+#define HISTORY_SIZE 5 // Number of values to smooth battery percentage
+
 int updateADCValue(int value)
 {
     if (battery_isCharging())
@@ -344,16 +352,27 @@ int updateADCValue(int value)
     }
 
     static SAR_ADC_CONFIG_READ adcConfig;
+    static int history[HISTORY_SIZE] = {0}; // Array to store history
+    static int historyIndex = 0;            // Current index in the history
+    static int historyCount = 0;            // Number of valid entries in history
+
     ioctl(sar_fd, IOCTL_SAR_SET_CHANNEL_READ_VALUE, &adcConfig);
 
-    if (value <= 100)
-        value = adcConfig.adc_value;
-    else if (adcConfig.adc_value > value)
-        value++;
-    else if (adcConfig.adc_value < value)
-        value--;
+    // Update history buffer
+    history[historyIndex] = adcConfig.adc_value;
+    historyIndex = (historyIndex + 1) % HISTORY_SIZE; // Wrap around
+    if (historyCount < HISTORY_SIZE) {
+        historyCount++;
+    }
 
-    return value;
+    // Calculate the average of the history
+    int sum = 0;
+    for (int i = 0; i < historyCount; i++) {
+        sum += history[i];
+    }
+    int smoothedValue = sum / historyCount;
+
+    return smoothedValue;
 }
 
 int getBatPercMMP(void)
@@ -370,19 +389,78 @@ int getBatPercMMP(void)
     return battery_number;
 }
 
-int batteryPercentage(int value)
+typedef struct {
+    float voltage;
+    float percentage;
+} VoltagePercentMapping;
+
+VoltagePercentMapping VoltageCurveMapping_liion[] = {
+    {4.20, 100.0}, // super accurate fresh miyoom mini battery curve mapping data.
+    {4.13, 95.0},
+    {4.06, 90.0},
+    {4.02, 85.0},
+    {3.99, 80.0},
+    {3.95, 75.0},
+    {3.92, 70.0},
+    {3.88, 65.0},
+    {3.85, 60.0},
+    {3.81, 55.0},
+    {3.78, 50.0},
+    {3.74, 45.0},
+    {3.71, 40.0},
+    {3.67, 35.0},
+    {3.64, 30.0},
+    {3.56, 25.0},
+    {3.49, 20.0},
+    {3.42, 15.0},
+    {3.30, 10.0},
+    {3.14, 5.0},
+    {3.00, 0.0}};
+
+float adcToVoltage(int adcValue)
 {
-    if (value == 100)
-        return 500;
-    if (value >= 578)
+    return (adcValue - 148) * 0.01;
+}
+
+float interpolatePercentage(float voltage)
+{
+    // Lookup table size
+    int table_size = sizeof(VoltageCurveMapping_liion) / sizeof(VoltageCurveMapping_liion[0]);
+
+    // Interpolation logic
+    for (int i = 0; i < table_size - 1; i++) {
+        if (voltage <= VoltageCurveMapping_liion[i].voltage && voltage > VoltageCurveMapping_liion[i + 1].voltage) {
+            // Perform linear interpolation
+            float voltage_diff = VoltageCurveMapping_liion[i].voltage - VoltageCurveMapping_liion[i + 1].voltage;
+            float percentage_diff = VoltageCurveMapping_liion[i].percentage - VoltageCurveMapping_liion[i + 1].percentage;
+            float voltage_offset = voltage - VoltageCurveMapping_liion[i + 1].voltage;
+            return VoltageCurveMapping_liion[i + 1].percentage + (voltage_offset / voltage_diff) * percentage_diff;
+        }
+    }
+    // If voltage is outside the lookup table, see if it's above or below
+    if (voltage >= VoltageCurveMapping_liion[0].voltage)
         return 100;
-    if (value >= 528)
-        return value - 478;
-    if (value >= 512)
-        return (int)(value * 2.125 - 1068);
-    if (value >= 480)
-        return (int)(value * 0.51613 - 243.742);
-    return 0;
+    if (voltage <= VoltageCurveMapping_liion[table_size - 1].voltage)
+        return 0;
+}
+
+int batteryPercentage(int adcValue)
+{
+    if (adcValue == 100) // Charging
+        return 500;
+
+    // Convert ADC value to voltage
+    float voltage = adcToVoltage(adcValue);
+
+    // unfinished but un-needed screen brightness vdrop adjustment, keeping incase needed
+    // float screen_voltage_drop = 0.06;                        // 0.06 drop when screen is on max brightness
+    // float brightness = display_getBrightnessFromRaw() * 10; // 0 - 100
+    // voltage -= screen_voltage_drop * (brightness / 100);    // Adjust voltage for screen brightness, linear drop
+
+    // Interpolate battery percentage from voltage
+    float percentage = interpolatePercentage(voltage);
+
+    return (int)percentage; //display direct for now
 }
 
 static void *batteryWarning_thread(void *param)
