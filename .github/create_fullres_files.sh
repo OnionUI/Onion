@@ -10,3 +10,6 @@ packages="./build/App/PackageManager/data"
 
 # DraStic
 touch "$packages/Emu/Nintendo - DS (Drastic)/Emu/NDS/full_resolution"
+
+# GnGeo
+touch "$packages/RApp/SNK - Neo Geo (GnGeo)/RApp/gngeo/full_resolution"
