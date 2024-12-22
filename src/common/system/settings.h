@@ -66,6 +66,7 @@ typedef struct settings_s {
     int blue_light_rgb;
     char blue_light_time[16];
     char blue_light_time_off[16];
+    bool no_time_restore;
 
     char mainui_button_x[JSON_STRING_LEN];
     char mainui_button_y[JSON_STRING_LEN];
@@ -103,6 +104,7 @@ static settings_s __default_settings = (settings_s){
     .vibration = 2,
     .startup_tab = 0,
     .startup_application = 0,
+    .no_time_restore = false,
     // Menu button actions
     .mainui_single_press = 1,
     .mainui_long_press = 0,
@@ -207,6 +209,7 @@ void settings_load(void)
     settings.blue_light_schedule = config_flag_get(".blf");
     settings.rec_indicator = config_flag_get(".recIndicator");
     settings.rec_hotkey = config_flag_get(".recHotkey");
+    settings.no_time_restore = config_flag_get(".noTimeRestore");
 
     if (config_flag_get(".noLowBatteryAutoSave")) // flag is deprecated, but keep compatibility
         settings.low_battery_autosave_at = 0;
