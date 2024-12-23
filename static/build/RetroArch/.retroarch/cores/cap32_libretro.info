@@ -1,5 +1,5 @@
 # Software Information
-display_name = "Amstrad - CPC (Caprice32)"
+display_name = "Amstrad - CPC/GX4000 (Caprice32)"
 authors = "Ulrich Doewich|dantoine"
 supported_extensions = "dsk|sna|zip|tap|cdt|voc|cpr|m3u"
 corename = "Caprice32"
@@ -10,11 +10,11 @@ categories = "Emulator"
 
 # Hardware Information
 manufacturer = "Amstrad"
-systemname = "CPC"
+systemname = "CPC/GX4000"
 systemid = "cpc"
 
 # Libretro Features
-database = "Amstrad - CPC"
+database = "Amstrad - CPC|Amstrad - GX4000"
 supports_no_game = "true"
 savestate = "true"
 savestate_features = "serialized"
