@@ -388,7 +388,8 @@ launch_game() {
             $sysdir/bin/freemma
 
             # GAME LAUNCH
-            cd /mnt/SDCARD/RetroArch/
+            cd /mnt/SDCARD/RetroArch
+            force_retroarch_cfg
 
             # make the cmd_to_run shell env aware of the new timezone
             TZ="$TZ_VALUE" $sysdir/cmd_to_run.sh
@@ -419,6 +420,17 @@ launch_game() {
     fi
 
     launch_game_postprocess $is_game "$cmd" "$rompath"
+}
+
+force_retroarch_cfg() {
+    # Enable network commands in RetroArch
+    cat > /tmp/onion_ra_patch.cfg <<- EOM
+network_cmd_enable = "true"
+EOM
+
+    $sysdir/script/patch_ra_cfg.sh /tmp/onion_ra_patch.cfg
+
+    rm /tmp/onion_ra_patch.cfg
 }
 
 override_game_core() {
