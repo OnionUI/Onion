@@ -449,6 +449,17 @@ int batteryPercentage(int adcValue)
     if (adcValue == 100) // Charging
         return 500;
 
+    if (config_flag_get("battery/.isLegacyType")) {
+        if (adcValue >= 578)
+            return 100;
+        if (adcValue >= 528)
+            return adcValue - 478;
+        if (adcValue >= 512)
+            return (int)(adcValue * 2.125 - 1068);
+        if (adcValue >= 480)
+            return (int)(adcValue * 0.51613 - 243.742);
+    }
+
     // Convert ADC value to voltage
     float voltage = adcToVoltage(adcValue);
 
