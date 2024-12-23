@@ -783,11 +783,10 @@ update_time() {
 
     if [ "$current_time" -gt "$rtc_treshold" ]; then
         log "RTC available, not restoring time. Current time: $current_time"
-        touch "$sysdir/config/.noTimeRestore"
+        touch /tmp/rtc_available
         return
     else
         log "RTC not available, restoring time. Current time: $current_time"
-        rm -f "$sysdir/config/.noTimeRestore" > /dev/null 2>&1
     fi
 
     timepath=/mnt/SDCARD/Saves/CurrentProfile/saves/currentTime.txt
