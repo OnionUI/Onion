@@ -852,12 +852,14 @@ start_networking() {
 }
 
 check_networking() {
+    if [ ! -f /tmp/network_changed ]; then
+        return
+    fi
+
     if pgrep -f update_networking.sh; then
         log "update_networking already running"
     else
-        if [ -f /tmp/network_changed ]; then
-            rm /tmp/network_changed
-        fi
+        rm /tmp/network_changed
         $sysdir/script/network/update_networking.sh check
     fi
 }

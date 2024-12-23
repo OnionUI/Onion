@@ -19,6 +19,7 @@
 #include "utils/json.h"
 #include "utils/keystate.h"
 #include "utils/netinfo.h"
+#include "utils/process.h"
 
 #include "./appstate.h"
 
@@ -43,6 +44,7 @@ static struct network_s {
     bool keep_alive;
     bool vncserv;
     bool loaded;
+    bool force_wifi_on_startup;
     int vncfps;
 } network_state = {
     .vncfps = 20,
@@ -61,6 +63,7 @@ void network_loadState(void)
     network_state.hotspot = config_flag_get(".hotspotState");
     network_state.ntp = config_flag_get(".ntpState");
     network_state.ntp_wait = config_flag_get(".ntpWait");
+    network_state.force_wifi_on_startup = config_flag_get(".ntpForce");
     network_state.auth_ftp = config_flag_get(".authftpState");
     network_state.auth_http = config_flag_get(".authhttpState");
     network_state.auth_ssh = config_flag_get(".authsshState");
@@ -286,6 +289,11 @@ void network_setNtpState(void *pt)
     network_execServiceState("ntp", true);
     reset_menus = true;
     all_changed = true;
+}
+
+void network_setNtpForceState(void *pt)
+{
+    network_setState(&network_state.force_wifi_on_startup, ".ntpForce", ((ListItem *)pt)->value);
 }
 
 void network_setNtpWaitState(void *pt)

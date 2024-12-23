@@ -33,7 +33,7 @@ main() {
                     ;;
                 authed)
                     ${service}_authed &
-                    store_state & 
+                    store_state &
                     ;;
                 *)
                     print_usage
@@ -73,10 +73,21 @@ main() {
 # Standard check from runtime for startup.
 check() {
     log "Network Checker: Update networking"
-    if wifi_enabled && [ "$is_booting" -eq 1 ]; then
-        bootScreen Boot "Waiting for network..."
+    local force_wifi_on_startup=$([ -f $sysdir/config/.ntpForce ] && echo 1 || echo 0)
+    local has_wifi=$(wifi_enabled && echo 1 || echo 0)
+
+    if [ "$is_booting" -eq 1 ]; then
+        if [ "$has_wifi" -eq 0 ]; then
+            if [ "$force_wifi_on_startup" -eq 1 ]; then
+                bootScreen Boot "Turning on Wi-Fi..."
+                wifi_on
+                has_wifi=1
+            fi
+        else
+            bootScreen Boot "Waiting for network..."
+        fi
     fi
-    
+
     check_wifi
     check_ftpstate &
     check_sshstate &
@@ -84,7 +95,7 @@ check() {
     check_httpstate &
     check_smbdstate &
 
-    if wifi_enabled && flag_enabled ntpWait && [ $is_booting -eq 1 ]; then
+    if [ "$has_wifi" -eq 1 ] && flag_enabled ntpWait && [ $is_booting -eq 1 ]; then
         bootScreen Boot "Syncing time..."
         check_ntpstate && bootScreen Boot "Time synced: $(date +"%H:%M")" || bootScreen Boot "Time sync failed"
         sleep 1
@@ -95,11 +106,15 @@ check() {
     if [ -f "$sysdir/.updateAvailable" ] && [ $is_booting -eq 1 ]; then
         bootScreen Boot "Update available!"
         sleep 1
-    elif wifi_enabled && [ ! -f /tmp/update_checked ]; then
+    elif [ "$has_wifi" -eq 1 ] && [ ! -f /tmp/update_checked ]; then
         touch /tmp/update_checked
         $sysdir/script/ota_update.sh check &
     fi
 
+    if [ "$is_booting" -eq 1 ] && [ "$force_wifi_on_startup" -eq 1 ]; then
+        bootScreen Boot "Turning off Wi-Fi..."
+        wifi_off
+    fi
 }
 
 # Function to help disable and kill off all processes
@@ -124,7 +139,7 @@ disable_all_services() {
 check_wifi() {
     # Fixes lockups entering some apps after enabling wifi (because wpa_supp/udhcpc are preloaded with libpadsp.so)
     libpadspblocker &
-    
+
     if is_running hostapd; then
         return
     else
@@ -136,23 +151,32 @@ check_wifi() {
                     pkill -9 udhcpc
                     rm /tmp/restart_wifi
                 fi
-                log "Network Checker: Initializing wifi..."
-                /customer/app/axp_test wifion
-                sleep 2
-                ifconfig wlan0 up
-                $miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
-                udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
-                iw dev wlan0 set power_save off
+                wifi_on
             fi
         else
             if [ ! -f "/tmp/dont_restart_wifi" ]; then
                 store_state
-                pkill -9 wpa_supplicant
-                pkill -9 udhcpc
-                /customer/app/axp_test wifioff
+                wifi_off
             fi
         fi
     fi
+}
+
+wifi_on() {
+    log "Network Checker: Turning on Wi-Fi..."
+    /customer/app/axp_test wifion
+    sleep 2
+    ifconfig wlan0 up
+    $miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
+    udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
+    iw dev wlan0 set power_save off
+}
+
+wifi_off() {
+    log "Network Checker: Turning off Wi-Fi..."
+    pkill -9 wpa_supplicant
+    pkill -9 udhcpc
+    /customer/app/axp_test wifioff
 }
 
 # Starts the samba daemon if the toggle is set to on
@@ -568,7 +592,7 @@ init_json() {
 }
 
 # unhook libpadsp.so on the wifi servs
-libpadspblocker() { 
+libpadspblocker() {
     wpa_pid=$(ps -e | grep "[w]pa_supplicant" | awk 'NR==1{print $1}')
     udhcpc_pid=$(ps -e | grep "[u]dhcpc" | awk 'NR==1{print $1}')
     if [ -n "$wpa_pid" ] && [ -n "$udhcpc_pid" ]; then
@@ -576,8 +600,8 @@ libpadspblocker() {
             echo "Network Checker: $wpa_pid(WPA) and $udhcpc_pid(UDHCPC) found preloaded with libpadsp.so"
             unset LD_PRELOAD
             killall -9 wpa_supplicant
-            killall -9 udhcpc 
-            $miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf & 
+            killall -9 udhcpc
+            $miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf &
             udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
             echo "Network Checker: Removing libpadsp.so preload on wpa_supp/udhcpc"
         fi
@@ -602,13 +626,12 @@ store_state() {
             service_key="$service_key \"$service\": \"0\""
         fi
     done
-    
+
     service_key="$service_key }"
     echo "$service_key" > "$jsonfile"
 }
 
-
-# Restore the network service state, don't use jq it's too slow and holds the UI thread until it returns 
+# Restore the network service state, don't use jq it's too slow and holds the UI thread until it returns
 # (you can't background this, you'll miss the checks for net servs as the flags won't be set)
 restore_state() {
     [ ! -f "$jsonfile" ] && return
@@ -617,7 +640,7 @@ restore_state() {
     grep -E '"(httpState|ftpState|smbdState|sshState|authsshState|authftpState|authhttpState)":\s*"[01]"' "$jsonfile" | while IFS=":" read -r key value; do
         key=$(echo "$key" | tr -d ' "{}')
         value=$(echo "$value" | tr -d ' ",')
-        
+
         if echo "$services" | grep -wq "$key"; then
             if [ "$value" = "1" ]; then
                 enable_flag "$key"
@@ -696,7 +719,7 @@ enable_flag() {
 
 disable_flag() {
     flag="$1"
-    mv "$sysdir/config/.$flag" "$sysdir/config/.$flag_" 
+    mv "$sysdir/config/.$flag" "$sysdir/config/.$flag_"
 }
 
 is_running() {
@@ -719,4 +742,3 @@ if [ -f $sysdir/config/.logging ]; then
 else
     main "$@" 2>&1 > /dev/null
 fi
-
