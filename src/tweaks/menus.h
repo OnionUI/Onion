@@ -92,7 +92,7 @@ bool _writeDateString(char *label_out)
 void menu_datetime(void *_)
 {
     if (!_menu_date_time._created) {
-        _menu_date_time = list_create(6, LIST_SMALL);
+        _menu_date_time = list_create(7, LIST_SMALL);
         strcpy(_menu_date_time.title, "Date and time");
         list_addItem(&_menu_date_time,
                      (ListItem){
@@ -125,6 +125,16 @@ void menu_datetime(void *_)
                                      " \n"
                                      "Ensures that time is synced before a game\n"
                                      "is launched.");
+            list_addItemWithInfoNote(&_menu_date_time,
+                                     (ListItem){
+                                         .label = "Enable Wi-Fi temporarily",
+                                         .item_type = TOGGLE,
+                                         .disabled = !network_state.ntp,
+                                         .value = (int)network_state.force_wifi_on_startup,
+                                         .action = network_setNtpForceState},
+                                     "Enables Wi-Fi temporarily at startup\n"
+                                     "to sync the time. It will be turned off\n"
+                                     "again after the sync (if it was off).");
             list_addItemWithInfoNote(&_menu_date_time,
                                      (ListItem){
                                          .label = "Get time zone via IP address",
