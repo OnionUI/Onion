@@ -111,7 +111,7 @@ check() {
         $sysdir/script/ota_update.sh check &
     fi
 
-    if [ "$is_booting" -eq 1 ] && [ "$force_wifi_on_startup" -eq 1 ]; then
+    if [ "$is_booting" -eq 1 ] && [ "$force_wifi_on_startup" -eq 1 ] && wifi_disabled; then
         bootScreen Boot "Turning off Wi-Fi..."
         wifi_off
     fi
