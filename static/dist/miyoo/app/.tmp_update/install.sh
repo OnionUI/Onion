@@ -20,7 +20,7 @@ MODEL_MMP=354
 install_ra=1
 
 version() {
-    echo "$@" | awk -F. '{ f=$1; if (substr(f,2,1) == "v") f = substr(f,3); printf("%d%03d%03d%03d\n", f,$2,$3,$4); }'
+    echo "$@" | tr -d [:alpha:] | awk -F'[.-]' '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'
 }
 
 # globals
@@ -280,7 +280,7 @@ run_installation() {
     install_configs $reset_configs
 
     run_migration_scripts
-    
+
     if [ -d "/mnt/SDCARD/Emu/drastic" ]; then
         echo "Migrating drastic ..."
         cd /mnt/SDCARD/.tmp_update/script
