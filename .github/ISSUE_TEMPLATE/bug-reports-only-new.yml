@@ -62,14 +62,3 @@ body:
       placeholder: 
     validations:
       required: true
-  - type: markdown
-    attributes:
-      value: |
-        **If possible, please also provide us with a log snapshot. This will greatly aid us in finding the root cause of your issue.**
-        
-        1. Navigate to **Apps > Tweaks > Advanced > Diagnostics** and enable logging.
-        2. Restart the device.
-        3. Replicate the issue you're experiencing.
-        4. Create a log snapshot by going to **Apps > Tweaks > Advanced > Diagnostics**.
-        5. Locate the `log_export.7z` file in the root directory of your SD card.
-        6. Upload the `log_export.7z` file as a comment on your issue.
