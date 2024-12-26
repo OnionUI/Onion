@@ -22,6 +22,7 @@ static struct fb_var_screeninfo vinfo;
 static uint32_t stride, bpp;
 static uint8_t *savebuf;
 static bool display_enabled = true;
+static bool display_init_done = false;
 static int DISPLAY_WIDTH = 640; // physical screen resolution
 static int DISPLAY_HEIGHT = 480;
 int RENDER_WIDTH = 640; // render resolution
@@ -58,6 +59,8 @@ void display_getResolution()
 
 void display_init(void)
 {
+    if (display_init_done)
+        return;
     // Open and mmap FB
     fb_fd = open("/dev/fb0", O_RDWR);
     ioctl(fb_fd, FBIOGET_FSCREENINFO, &finfo);
@@ -65,6 +68,7 @@ void display_init(void)
                                MAP_SHARED, fb_fd, 0);
     display_getResolution();
     display_getRenderResolution();
+    display_init_done = true;
 }
 
 //

@@ -1,6 +1,7 @@
 #ifndef SYSTEM_OSD_H__
 #define SYSTEM_OSD_H__
 
+#include <SDL/SDL.h>
 #include <pthread.h>
 
 #include "utils/config.h"
@@ -25,6 +26,220 @@
 
 static bool osd_thread_active = false;
 static pthread_t osd_pt;
+
+typedef struct {
+    SDL_Surface *surface;
+    int destX;
+    int destY;
+    int duration_ms;
+    bool rotate;
+    struct fb_var_screeninfo vinfo;
+    struct fb_fix_screeninfo finfo;
+    int fb_fd;
+    unsigned char *fbmem;
+    long screensize;
+    int numBuffers;
+    int fbWidth;
+    int fbHeight;
+    bool abort_requested;
+    pthread_t thread_id;
+} overlay_thread_data;
+
+static overlay_thread_data *g_overlay_data = NULL;
+static pthread_mutex_t g_overlay_data_lock = PTHREAD_MUTEX_INITIALIZER;
+
+/**
+ * @brief Cancels the overlay and cleans up resources.
+ *
+ * Called by overlay_surface() if there is an existing overlay, or manually by
+ * the user to cancel an overlay. (future use - gameswitcher :))
+ */
+void cancel_overlay()
+{
+    // Mark abort
+    g_overlay_data->abort_requested = true;
+
+    // Unlock and wait for thread to exit
+    pthread_mutex_unlock(&g_overlay_data_lock);
+    pthread_join(g_overlay_data->thread_id, NULL);
+
+    // Re-lock after join to safely free
+    pthread_mutex_lock(&g_overlay_data_lock);
+
+    if (g_overlay_data->fbmem && g_overlay_data->fbmem != MAP_FAILED) {
+        munmap(g_overlay_data->fbmem, g_overlay_data->screensize);
+    }
+    SDL_FreeSurface(g_overlay_data->surface);
+    free(g_overlay_data);
+    g_overlay_data = NULL;
+    pthread_mutex_unlock(&g_overlay_data_lock);
+}
+
+static void *_overlay_draw_thread(void *arg)
+{
+    overlay_thread_data *data = (overlay_thread_data *)arg;
+
+    struct timespec start, now;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    long elapsed_ms = 0;
+    int draw_count = 0;
+
+    unsigned int *overlayData = (unsigned int *)data->surface->pixels;
+
+    // Continuously blit to each buffer until abort
+    while (true) {
+        clock_gettime(CLOCK_MONOTONIC, &now);
+        elapsed_ms =
+            (long)(now.tv_sec - start.tv_sec) * 1000L +
+            (long)(now.tv_nsec - start.tv_nsec) / 1000000L;
+
+        // Timeout
+        if (data->duration_ms > 0 && elapsed_ms >= data->duration_ms)
+            break;
+
+        // Abort
+        pthread_mutex_lock(&g_overlay_data_lock);
+        bool local_abort = data->abort_requested;
+        pthread_mutex_unlock(&g_overlay_data_lock);
+        if (local_abort)
+            break;
+
+        // Draw to each buffer
+        for (int b = 0; b < data->numBuffers; b++) {
+            draw_count++;
+            int bufferTop = b * data->fbHeight;
+
+            // Iterate over surface and draw in reverse
+            for (int oy = 0; oy < data->surface->h; oy++) {
+                for (int ox = 0; ox < data->surface->w; ox++) {
+                    unsigned int color = overlayData[oy * data->surface->w + ox];
+
+                    // Where we'd draw if no flipping
+                    int logicalX = data->destX + ox;
+                    int logicalY = bufferTop + data->destY + oy;
+
+                    // localY in the buffer
+                    int localY = logicalY - bufferTop;
+                    if (localY < 0 || localY >= data->fbHeight)
+                        continue;
+
+                    // Flip Y (vertical)
+                    int flippedLocalY = (data->fbHeight - 1) - localY;
+                    int flippedY = bufferTop + flippedLocalY;
+
+                    // Flip X (horizontal)
+                    int flippedX = (data->fbWidth - 1) - logicalX;
+
+                    // Range check
+                    if (flippedX < 0 || flippedX >= data->fbWidth)
+                        continue;
+                    if (flippedY < 0 || flippedY >= (bufferTop + data->fbHeight))
+                        continue;
+
+                    // Calculate offset into fb and write
+                    long offset = (long)flippedY * finfo.line_length +
+                                  (long)flippedX * 4;
+                    *((unsigned int *)(data->fbmem + offset)) = color;
+                }
+            }
+        }
+
+        // TODO: sleep or not?
+        // usleep(4000);
+    }
+    printf("Draw count: %d\n", draw_count);
+    printf("draw speed: %f\n", (float)draw_count / (float)elapsed_ms * 1000.0f);
+    pthread_exit(NULL);
+}
+
+/**
+ * @brief Overlays an SDL_Surface onto the framebuffer at a specified position and duration.
+ *
+ * Flickering is minimized by drawing to all buffers in the framebuffer.
+ * Should work regardless of the count of buffers (double, triple, etc. buffering).
+ * TODO: How does Alpha work if at all? Performance hit on bigger surfaces?
+ * 
+ * @param surface The SDL_Surface to overlay. The surface will be freed by this function.
+ * @param destX The X coordinate on the screen where the overlay should be placed.
+ * @param destY The Y coordinate on the screen where the overlay should be placed.
+ * @param duration_ms The duration in milliseconds for which the overlay should be displayed. 0 for indefinite.
+ * @param rotate Should the overlay be rotated 180 degrees? 
+ * @return int Returns 0 on success, -1 on failure.
+ */
+int overlay_surface(SDL_Surface *surface, int destX, int destY, int duration_ms, bool rotate)
+{
+    display_init();
+
+    pthread_mutex_lock(&g_overlay_data_lock);
+
+    // If there's an existing thread, abort it
+    if (g_overlay_data != NULL) {
+        cancel_overlay();
+    }
+
+    // Query FB info
+    struct fb_var_screeninfo vinfo;
+    if (ioctl(fb_fd, FBIOGET_VSCREENINFO, &vinfo) == -1) {
+        perror("Error reading variable screen info");
+        pthread_mutex_unlock(&g_overlay_data_lock);
+        return -1;
+    }
+
+    if (vinfo.bits_per_pixel != 32) {
+        perror("Only 32bpp is supported for now\n");
+        pthread_mutex_unlock(&g_overlay_data_lock);
+        return -1;
+    }
+
+    // Data for thread
+    overlay_thread_data *data = (overlay_thread_data *)calloc(1, sizeof(overlay_thread_data));
+    if (!data) {
+        perror("Failed to allocate overlay_thread_data\n");
+        pthread_mutex_unlock(&g_overlay_data_lock);
+        return -1;
+    }
+    data->surface = surface;
+    data->destX = destX;
+    data->destY = destY;
+    data->duration_ms = duration_ms;
+    data->rotate = rotate;
+    data->fb_fd = fb_fd;
+    data->vinfo = vinfo;
+    data->finfo = finfo;
+    data->fbWidth = vinfo.xres;
+    data->fbHeight = vinfo.yres;
+    data->numBuffers = vinfo.yres_virtual / vinfo.yres;
+
+    printf_debug("Detected Buffers: %d\n", data->numBuffers);
+
+    // Need to map every time in case of buffer changes
+    data->screensize = (long)finfo.line_length * (long)vinfo.yres_virtual;
+    data->fbmem = mmap(NULL, data->screensize,
+                       PROT_READ | PROT_WRITE,
+                       MAP_SHARED,
+                       fb_fd,
+                       0);
+    if (data->fbmem == MAP_FAILED) {
+        perror("Failed to mmap framebuffer");
+        free(data);
+        pthread_mutex_unlock(&g_overlay_data_lock);
+        return 1;
+    }
+
+    // Create the thread
+    int rc = pthread_create(&data->thread_id, NULL, _overlay_draw_thread, data);
+    if (rc != 0) {
+        fprintf(stderr, "Failed to create overlay drawing thread\n");
+        munmap(data->fbmem, data->screensize);
+        free(data);
+        pthread_mutex_unlock(&g_overlay_data_lock);
+        return -1;
+    }
+    g_overlay_data = data;
+    pthread_mutex_unlock(&g_overlay_data_lock);
+
+    return 0;
+}
 
 //
 //	Print digit
