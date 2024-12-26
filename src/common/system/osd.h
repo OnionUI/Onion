@@ -56,26 +56,15 @@ static pthread_mutex_t g_overlay_data_lock = PTHREAD_MUTEX_INITIALIZER;
  */
 void cancel_overlay()
 {
+    if (!g_overlay_data)
+        return;
+
     // Mark abort
-    g_overlay_data->abort_requested = true;
-
-    // Unlock and wait for thread to exit
-    pthread_mutex_unlock(&g_overlay_data_lock);
-    pthread_join(g_overlay_data->thread_id, NULL);
-
-    // Re-lock after join to safely free
     pthread_mutex_lock(&g_overlay_data_lock);
-
-    if (g_overlay_data->fbmem && g_overlay_data->fbmem != MAP_FAILED) {
-        munmap(g_overlay_data->fbmem, g_overlay_data->screensize);
-    }
-    if (g_overlay_data->surface) {
-        SDL_FreeSurface(g_overlay_data->surface);
-        g_overlay_data->surface = NULL;
-    }
-    free(g_overlay_data);
-    g_overlay_data = NULL;
+    pthread_t thread_to_join = g_overlay_data->thread_id;
+    g_overlay_data->abort_requested = true;
     pthread_mutex_unlock(&g_overlay_data_lock);
+    pthread_join(thread_to_join, NULL);
 }
 
 static void *_overlay_draw_thread(void *arg)
@@ -89,7 +78,7 @@ static void *_overlay_draw_thread(void *arg)
 
     unsigned int *overlayData = (unsigned int *)data->surface->pixels;
 
-    // Continuously blit to each buffer until abort
+    // Continuously blit to each buffer
     while (true) {
         clock_gettime(CLOCK_MONOTONIC, &now);
         elapsed_ms =
@@ -110,6 +99,7 @@ static void *_overlay_draw_thread(void *arg)
         // Draw to each buffer
         for (int b = 0; b < data->numBuffers; b++) {
             draw_count++;
+            // Beginning of current buffer
             int bufferTop = b * data->fbHeight;
 
             // Iterate over surface and draw in reverse
@@ -154,11 +144,20 @@ static void *_overlay_draw_thread(void *arg)
     printf_debug("Draw count: %d\n", draw_count);
     printf_debug("Draw speed: %f\n", (float)draw_count / (float)elapsed_ms * 1000.0f);
 
-    // Cleanup
-    if (data->surface) {
-        SDL_FreeSurface(data->surface);
-        data->surface = NULL;
+    // Clean up
+    pthread_mutex_lock(&g_overlay_data_lock);
+    if (g_overlay_data && g_overlay_data->fbmem && g_overlay_data->fbmem != MAP_FAILED) {
+        void *fbmem = g_overlay_data->fbmem;
+        size_t screensize = g_overlay_data->screensize;
+        SDL_Surface *surface = g_overlay_data->surface;
+
+        munmap(fbmem, screensize);
+        SDL_FreeSurface(surface);
+
+        free(g_overlay_data);
+        g_overlay_data = NULL;
     }
+    pthread_mutex_unlock(&g_overlay_data_lock);
 
     pthread_exit(NULL);
 }
@@ -181,12 +180,11 @@ int overlay_surface(SDL_Surface *surface, int destX, int destY, int duration_ms,
 {
     display_init();
 
-    pthread_mutex_lock(&g_overlay_data_lock);
-
     // If there's an existing thread, abort it
     if (g_overlay_data != NULL) {
         cancel_overlay();
     }
+    pthread_mutex_lock(&g_overlay_data_lock);
 
     // Query FB info
     struct fb_var_screeninfo vinfo;
