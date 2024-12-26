@@ -416,11 +416,10 @@ void cpuClockHotkey(int adjust)
 
     // Bounds check
     if (cpuclock < min_cpu_clock || cpuclock > max_cpu_clock) {
-        char *osd_txt = "CPU clock out of range";
-        SDL_Color fg = {255, 255, 255, 255};
-        SDL_Color bg = {0, 0, 0, 0};
-        SDL_Surface *surface = createTextSurface(osd_txt, fg, bg, 10);
-        overlay_surface(surface, 10, 10, 1000, true);
+        SDL_Surface *surface = createTextSurface("CPU clock out of range", (SDL_Color){255, 255, 255, 255}, (SDL_Color){0, 0, 0, 0}, 10);
+        if (surface && overlay_surface(surface, 10, 10, 1000, true) != 0) {
+            SDL_FreeSurface(surface);
+        }
         short_pulse();
         return;
     }
@@ -433,10 +432,10 @@ void cpuClockHotkey(int adjust)
         printf_debug("cpuclock: %s\n", cpuclockstr);
         char osd_txt[STR_MAX];
         snprintf(osd_txt, STR_MAX, "CPU clock set to %s MHz", cpuclockstr);
-        SDL_Color fg = {255, 255, 255, 255};
-        SDL_Color bg = {0, 0, 0, 0};
-        SDL_Surface *surface = createTextSurface(osd_txt, fg, bg, 10);
-        overlay_surface(surface, 10, 10, 1000, true);
+        SDL_Surface *surface = createTextSurface(osd_txt, (SDL_Color){255, 255, 255, 255}, (SDL_Color){0, 0, 0, 0}, 10);
+        if (surface && overlay_surface(surface, 10, 10, 1000, true) != 0) {
+            SDL_FreeSurface(surface);
+        }
     }
 }
 

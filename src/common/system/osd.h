@@ -69,7 +69,10 @@ void cancel_overlay()
     if (g_overlay_data->fbmem && g_overlay_data->fbmem != MAP_FAILED) {
         munmap(g_overlay_data->fbmem, g_overlay_data->screensize);
     }
-    SDL_FreeSurface(g_overlay_data->surface);
+    if (g_overlay_data->surface) {
+        SDL_FreeSurface(g_overlay_data->surface);
+        g_overlay_data->surface = NULL;
+    }
     free(g_overlay_data);
     g_overlay_data = NULL;
     pthread_mutex_unlock(&g_overlay_data_lock);
@@ -147,8 +150,16 @@ static void *_overlay_draw_thread(void *arg)
         // TODO: sleep or not?
         // usleep(4000);
     }
-    printf("Draw count: %d\n", draw_count);
-    printf("draw speed: %f\n", (float)draw_count / (float)elapsed_ms * 1000.0f);
+
+    printf_debug("Draw count: %d\n", draw_count);
+    printf_debug("Draw speed: %f\n", (float)draw_count / (float)elapsed_ms * 1000.0f);
+
+    // Cleanup
+    if (data->surface) {
+        SDL_FreeSurface(data->surface);
+        data->surface = NULL;
+    }
+
     pthread_exit(NULL);
 }
 
@@ -223,7 +234,7 @@ int overlay_surface(SDL_Surface *surface, int destX, int destY, int duration_ms,
         perror("Failed to mmap framebuffer");
         free(data);
         pthread_mutex_unlock(&g_overlay_data_lock);
-        return 1;
+        return -1;
     }
 
     // Create the thread
@@ -413,7 +424,7 @@ static void *_osd_thread(void *_)
 {
     while (getMilliseconds() - _bar_timer < 2000) {
         _print_bar();
-        msleep(1);
+        usleep(100);
     }
     _bar_restoreBufferBehind();
     osd_thread_active = false;
