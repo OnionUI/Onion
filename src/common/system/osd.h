@@ -149,10 +149,11 @@ static void *_overlay_draw_thread(void *arg)
     if (g_overlay_data && g_overlay_data->fbmem && g_overlay_data->fbmem != MAP_FAILED) {
         void *fbmem = g_overlay_data->fbmem;
         size_t screensize = g_overlay_data->screensize;
-        SDL_Surface *surface = g_overlay_data->surface;
-
         munmap(fbmem, screensize);
-        SDL_FreeSurface(surface);
+        if (g_overlay_data->surface) {
+            SDL_FreeSurface(g_overlay_data->surface);
+            g_overlay_data->surface = NULL;
+        }
 
         free(g_overlay_data);
         g_overlay_data = NULL;
