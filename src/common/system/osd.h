@@ -56,15 +56,18 @@ static pthread_mutex_t g_overlay_data_lock = PTHREAD_MUTEX_INITIALIZER;
  */
 void cancel_overlay()
 {
-    if (!g_overlay_data)
+    if (!g_overlay_data) {
+        print_debug("No overlay to cancel\n");
         return;
-
+    }
     // Mark abort
     pthread_mutex_lock(&g_overlay_data_lock);
     pthread_t thread_to_join = g_overlay_data->thread_id;
+    printf_debug("Cancelling overlay thread ID %ld\n", thread_to_join);
     g_overlay_data->abort_requested = true;
     pthread_mutex_unlock(&g_overlay_data_lock);
     pthread_join(thread_to_join, NULL);
+    printf_debug("Cancelled overlay thread ID %ld\n", thread_to_join);
 }
 
 static void *_overlay_draw_thread(void *arg)
@@ -179,10 +182,13 @@ static void *_overlay_draw_thread(void *arg)
  */
 int overlay_surface(SDL_Surface *surface, int destX, int destY, int duration_ms, bool rotate)
 {
+    printf_debug("Overlaying surface at %d, %d, size %dx%d, duration %d\n, rotate %d\n",
+                 destX, destY, surface->w, surface->h, duration_ms, rotate);
     display_init();
 
     // If there's an existing thread, abort it
     if (g_overlay_data != NULL) {
+        print_debug("Cancelling existing overlay\n");
         cancel_overlay();
     }
     pthread_mutex_lock(&g_overlay_data_lock);
@@ -237,6 +243,7 @@ int overlay_surface(SDL_Surface *surface, int destX, int destY, int duration_ms,
     }
 
     // Create the thread
+    print_debug("Creating overlay drawing thread\n");
     int rc = pthread_create(&data->thread_id, NULL, _overlay_draw_thread, data);
     if (rc != 0) {
         fprintf(stderr, "Failed to create overlay drawing thread\n");
@@ -245,6 +252,7 @@ int overlay_surface(SDL_Surface *surface, int destX, int destY, int duration_ms,
         pthread_mutex_unlock(&g_overlay_data_lock);
         return -1;
     }
+    printf_debug("Thread ID %ld created\n", data->thread_id);
     g_overlay_data = data;
     pthread_mutex_unlock(&g_overlay_data_lock);
 

@@ -394,6 +394,7 @@ SDL_Surface *createTextSurface(const char *text, SDL_Color fg, SDL_Color bg, int
  */
 void cpuClockHotkey(int adjust)
 {
+    printf_debug("cpuClockHotkey: %d\n", adjust);
     int min_cpu_clock = 500; // ?
     int max_cpu_clock;
     switch (DEVICE_ID) {
@@ -412,10 +413,12 @@ void cpuClockHotkey(int adjust)
     // Read current CPU clock
     int ret = process_start_read_return("cpuclock", cpuclockstr);
     int cpuclock = atoi(cpuclockstr);
+    printf_debug("Current CPU clock: %d\n", cpuclock);
     cpuclock += adjust;
-
+    printf_debug("Desired CPU clock: %d\n", cpuclock);
     // Bounds check
     if (cpuclock < min_cpu_clock || cpuclock > max_cpu_clock) {
+        printf_debug("Desired CPU clock %d out of range (%d, %d)\n", cpuclock, min_cpu_clock, max_cpu_clock);
         SDL_Surface *surface = createTextSurface("CPU clock out of range", (SDL_Color){255, 255, 255, 255}, (SDL_Color){0, 0, 0, 0}, 10);
         if (surface && overlay_surface(surface, 10, 10, 1000, true) != 0) {
             SDL_FreeSurface(surface);
@@ -429,7 +432,7 @@ void cpuClockHotkey(int adjust)
     snprintf(cmd, STR_MAX, "cpuclock %d", cpuclock);
     ret = process_start_read_return(cmd, cpuclockstr);
     if (ret == 0) {
-        printf_debug("cpuclock: %s\n", cpuclockstr);
+        printf_debug("Updated CPU clock: %s\n", cpuclockstr);
         char osd_txt[STR_MAX];
         snprintf(osd_txt, STR_MAX, "CPU clock set to %s MHz", cpuclockstr);
         SDL_Surface *surface = createTextSurface(osd_txt, (SDL_Color){255, 255, 255, 255}, (SDL_Color){0, 0, 0, 0}, 10);
