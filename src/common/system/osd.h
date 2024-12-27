@@ -7,6 +7,7 @@
 #include "utils/config.h"
 #include "utils/log.h"
 #include "utils/msleep.h"
+#include "utils/timer.h"
 
 #include "./clock.h"
 #include "./display.h"
@@ -48,6 +49,74 @@ typedef struct {
 static overlay_thread_data *g_overlay_data = NULL;
 static pthread_mutex_t g_overlay_data_lock = PTHREAD_MUTEX_INITIALIZER;
 
+typedef enum {
+    OP_BACKUP,
+    OP_DRAW,
+    OP_RESTORE
+} BufferOperation;
+
+void _process_buffer(
+    overlay_thread_data *data,
+    unsigned int **originalPixels,
+    unsigned int *overlayData,
+    int b,
+    BufferOperation op,
+    struct fb_fix_screeninfo finfo)
+{
+    // Beginning of current buffer
+    int bufferTop = b * data->fbHeight;
+
+    for (int oy = 0; oy < data->surface->h; oy++) {
+        for (int ox = 0; ox < data->surface->w; ox++) {
+            // Location in current buffer
+            int logicalX = data->destX + ox;
+            int logicalY = bufferTop + data->destY + oy;
+
+            int finalX = logicalX;
+            int finalY = logicalY;
+
+            if (data->rotate) {
+                // localY in the buffer
+                int localY = logicalY - bufferTop;
+                if (localY < 0 || localY >= data->fbHeight)
+                    continue;
+
+                // Flip Y (vertical)
+                int flippedLocalY = (data->fbHeight - 1) - localY;
+                finalY = bufferTop + flippedLocalY;
+
+                // Flip X (horizontal)
+                finalX = (data->fbWidth - 1) - logicalX;
+            }
+
+            // Range check
+            if (finalX < 0 || finalX >= data->fbWidth ||
+                finalY < bufferTop || finalY >= (bufferTop + data->fbHeight))
+                continue;
+
+            // Calculate offset into fb
+            long offset = (long)finalY * finfo.line_length + (long)finalX * 4;
+
+            if (op == OP_BACKUP || op == OP_RESTORE) {
+                // Calculate index based on oy and ox
+                int index = oy * data->surface->w + ox;
+                if (op == OP_BACKUP) {
+                    // Backup: Read from framebuffer to originalPixels
+                    originalPixels[b][index] = *((unsigned int *)(data->fbmem + offset));
+                }
+                else {
+                    // Restore: Write from originalPixels to framebuffer
+                    *((unsigned int *)(data->fbmem + offset)) = originalPixels[b][index];
+                }
+            }
+            else if (op == OP_DRAW) {
+                // Draw: Write from overlayData to framebuffer
+                *((unsigned int *)(data->fbmem + offset)) = overlayData[oy * data->surface->w + ox];
+            }
+        }
+    }
+}
+
 /**
  * @brief Cancels the overlay and cleans up resources.
  *
@@ -73,15 +142,38 @@ void cancel_overlay()
 static void *_overlay_draw_thread(void *arg)
 {
     overlay_thread_data *data = (overlay_thread_data *)arg;
+    unsigned int *overlayData = (unsigned int *)data->surface->pixels;
+
+    // Backup original fb content
+    START_TIMER(framebuffer_backup);
+    unsigned int **originalPixels = malloc(data->numBuffers * sizeof(unsigned int *));
+    if (!originalPixels) {
+        return NULL;
+    }
+    for (int b = 0; b < data->numBuffers; b++) {
+        originalPixels[b] = malloc(data->surface->w * data->surface->h * sizeof(unsigned int));
+        if (!originalPixels[b]) {
+            for (int i = 0; i < b; i++) {
+                free(originalPixels[i]);
+            }
+            free(originalPixels);
+            return NULL;
+        }
+    }
+
+    for (int b = 0; b < data->numBuffers; b++) {
+        _process_buffer(data, originalPixels, overlayData, b, OP_BACKUP, finfo);
+    }
+    END_TIMER(framebuffer_backup);
+    printf("Backup buffer total size: %d KiB\n",
+           (data->numBuffers * data->surface->w * data->surface->h * sizeof(unsigned int)) / 1024);
 
     struct timespec start, now;
     clock_gettime(CLOCK_MONOTONIC, &start);
     long elapsed_ms = 0;
     int draw_count = 0;
 
-    unsigned int *overlayData = (unsigned int *)data->surface->pixels;
-
-    // Continuously blit to each buffer
+    // Continuously blit the overlay to each buffer
     while (true) {
         clock_gettime(CLOCK_MONOTONIC, &now);
         elapsed_ms =
@@ -102,55 +194,31 @@ static void *_overlay_draw_thread(void *arg)
         // Draw to each buffer
         for (int b = 0; b < data->numBuffers; b++) {
             draw_count++;
-            // Beginning of current buffer
-            int bufferTop = b * data->fbHeight;
-
-            // Iterate over surface and draw in reverse
-            for (int oy = 0; oy < data->surface->h; oy++) {
-                for (int ox = 0; ox < data->surface->w; ox++) {
-                    unsigned int color = overlayData[oy * data->surface->w + ox];
-
-                    // Location in current buffer
-                    int logicalX = data->destX + ox;
-                    int logicalY = bufferTop + data->destY + oy;
-
-                    int finalX = logicalX;
-                    int finalY = logicalY;
-
-                    if (data->rotate) {
-                        // localY in the buffer
-                        int localY = logicalY - bufferTop;
-                        if (localY < 0 || localY >= data->fbHeight)
-                            continue;
-
-                        // Flip Y (vertical)
-                        int flippedLocalY = (data->fbHeight - 1) - localY;
-                        finalY = bufferTop + flippedLocalY;
-
-                        // Flip X (horizontal)
-                        finalX = (data->fbWidth - 1) - logicalX;
-                    }
-
-                    // Range check
-                    if (finalX < 0 || finalX >= data->fbWidth)
-                        continue;
-                    if (finalY < bufferTop || finalY >= (bufferTop + data->fbHeight))
-                        continue;
-
-                    // Calculate offset into fb and write
-                    long offset = (long)finalY * finfo.line_length +
-                                  (long)finalX * 4;
-                    *((unsigned int *)(data->fbmem + offset)) = color;
-                }
-            }
+            _process_buffer(data, originalPixels, overlayData, b, OP_DRAW, finfo);
         }
 
-        // TODO: sleep or not?
+        // TODO: sleep or not? atm i'd say no
         // usleep(4000);
     }
 
-    printf_debug("Draw count: %d\n", draw_count);
-    printf_debug("Draw speed: %f\n", (float)draw_count / (float)elapsed_ms * 1000.0f);
+    printf("Draw count: %d\n", draw_count);
+    printf("Draw speed: %f\n", (float)draw_count / (float)elapsed_ms * 1000.0f);
+
+    // Restore original framebuffer content after overlay
+    // TODO: If the content "behind" the overlay has changed, this will not restore it correctly, causing a 1 frame glitch. How to fix? Only backup if the overlay is (partially) outside the game screen?
+    // TODO: Theoretically the backup/restore is only needed if the position of the overlay is outside the game screen because that part of the screen is not updated by the game.
+
+    START_TIMER(framebuffer_restore);
+    for (int b = 0; b < data->numBuffers; b++) {
+        _process_buffer(data, originalPixels, overlayData, b, OP_RESTORE, finfo);
+    }
+
+    // Free allocated storage
+    for (int b = 0; b < data->numBuffers; b++) {
+        free(originalPixels[b]);
+    }
+    free(originalPixels);
+    END_TIMER(framebuffer_restore);
 
     // Clean up
     pthread_mutex_lock(&g_overlay_data_lock);
@@ -176,7 +244,6 @@ static void *_overlay_draw_thread(void *arg)
  *
  * Flickering is minimized by drawing to all buffers in the framebuffer.
  * Should work regardless of the count of buffers (double, triple, etc. buffering).
- * TODO: How does Alpha work if at all? Performance hit on bigger surfaces?
  * 
  * @param surface The SDL_Surface to overlay. The surface will be freed by this function.
  * @param destX The X coordinate on the screen where the overlay should be placed.
