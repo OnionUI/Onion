@@ -97,7 +97,11 @@ void _process_buffer(
             // Calculate offset into fb
             long offset = (long)finalY * finfo.line_length + (long)finalX * 4;
 
-            if (op == OP_BACKUP || op == OP_RESTORE) {
+            if (op == OP_DRAW) {
+                // Draw: Write from overlayData to framebuffer
+                *((unsigned int *)(data->fbmem + offset)) = overlayData[oy * data->surface->w + ox];
+            }
+            else {
                 // Calculate index based on oy and ox
                 int index = oy * data->surface->w + ox;
                 if (op == OP_BACKUP) {
@@ -108,10 +112,6 @@ void _process_buffer(
                     // Restore: Write from originalPixels to framebuffer
                     *((unsigned int *)(data->fbmem + offset)) = originalPixels[b][index];
                 }
-            }
-            else if (op == OP_DRAW) {
-                // Draw: Write from overlayData to framebuffer
-                *((unsigned int *)(data->fbmem + offset)) = overlayData[oy * data->surface->w + ox];
             }
         }
     }
@@ -213,14 +213,14 @@ static void *_overlay_draw_thread(void *arg)
         _process_buffer(data, originalPixels, overlayData, b, OP_RESTORE, finfo);
     }
 
-    // Free allocated storage
+    // Free buffer backups
     for (int b = 0; b < data->numBuffers; b++) {
         free(originalPixels[b]);
     }
     free(originalPixels);
     END_TIMER(framebuffer_restore);
 
-    // Clean up
+    // Clean up thread data
     pthread_mutex_lock(&g_overlay_data_lock);
     if (g_overlay_data && g_overlay_data->fbmem && g_overlay_data->fbmem != MAP_FAILED) {
         void *fbmem = g_overlay_data->fbmem;
