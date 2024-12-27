@@ -110,31 +110,36 @@ static void *_overlay_draw_thread(void *arg)
                 for (int ox = 0; ox < data->surface->w; ox++) {
                     unsigned int color = overlayData[oy * data->surface->w + ox];
 
-                    // Where we'd draw if no flipping
+                    // Location in current buffer
                     int logicalX = data->destX + ox;
                     int logicalY = bufferTop + data->destY + oy;
 
-                    // localY in the buffer
-                    int localY = logicalY - bufferTop;
-                    if (localY < 0 || localY >= data->fbHeight)
-                        continue;
+                    int finalX = logicalX;
+                    int finalY = logicalY;
 
-                    // Flip Y (vertical)
-                    int flippedLocalY = (data->fbHeight - 1) - localY;
-                    int flippedY = bufferTop + flippedLocalY;
+                    if (data->rotate) {
+                        // localY in the buffer
+                        int localY = logicalY - bufferTop;
+                        if (localY < 0 || localY >= data->fbHeight)
+                            continue;
 
-                    // Flip X (horizontal)
-                    int flippedX = (data->fbWidth - 1) - logicalX;
+                        // Flip Y (vertical)
+                        int flippedLocalY = (data->fbHeight - 1) - localY;
+                        finalY = bufferTop + flippedLocalY;
+
+                        // Flip X (horizontal)
+                        finalX = (data->fbWidth - 1) - logicalX;
+                    }
 
                     // Range check
-                    if (flippedX < 0 || flippedX >= data->fbWidth)
+                    if (finalX < 0 || finalX >= data->fbWidth)
                         continue;
-                    if (flippedY < 0 || flippedY >= (bufferTop + data->fbHeight))
+                    if (finalY < bufferTop || finalY >= (bufferTop + data->fbHeight))
                         continue;
 
                     // Calculate offset into fb and write
-                    long offset = (long)flippedY * finfo.line_length +
-                                  (long)flippedX * 4;
+                    long offset = (long)finalY * finfo.line_length +
+                                  (long)finalX * 4;
                     *((unsigned int *)(data->fbmem + offset)) = color;
                 }
             }
