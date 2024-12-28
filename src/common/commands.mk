@@ -30,6 +30,7 @@ COLOR_REP = sed \
 	-e 's/\(make\[[0-9]\+\]: Entering directory.*\)/\\\e[1;30m\1\\\e[0m/g' \
 	-e 's/\(make\[[0-9]\+\]: Leaving directory.*\)/\\\e[1;30m\1\\\e[0m/g'
 MAKE_DEV = DEBUG=1 COLORS=1 make --no-print-directory
+MAKE_ASAN = DEBUG=1 SANITIZE=1 COLORS=1 make --no-print-directory
 
 ifeq (1,$(COLORS))
 COLOR_BLUE = "\e[1;34m"
