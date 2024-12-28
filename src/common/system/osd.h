@@ -36,86 +36,15 @@ typedef struct {
     bool rotate;
     struct fb_var_screeninfo vinfo;
     struct fb_fix_screeninfo finfo;
-    int fb_fd;
     unsigned char *fbmem;
     long screensize;
     int numBuffers;
-    int fbWidth;
-    int fbHeight;
     bool abort_requested;
     pthread_t thread_id;
 } overlay_thread_data;
 
 static overlay_thread_data *g_overlay_data = NULL;
 static pthread_mutex_t g_overlay_data_lock = PTHREAD_MUTEX_INITIALIZER;
-
-typedef enum {
-    OP_BACKUP,
-    OP_DRAW,
-    OP_RESTORE
-} BufferOperation;
-
-void _process_buffer(
-    overlay_thread_data *data,
-    unsigned int **originalPixels,
-    unsigned int *overlayData,
-    int b,
-    BufferOperation op,
-    struct fb_fix_screeninfo finfo)
-{
-    // Beginning of current buffer
-    int bufferTop = b * data->fbHeight;
-
-    for (int oy = 0; oy < data->surface->h; oy++) {
-        for (int ox = 0; ox < data->surface->w; ox++) {
-            // Location in current buffer
-            int logicalX = data->destX + ox;
-            int logicalY = bufferTop + data->destY + oy;
-
-            int finalX = logicalX;
-            int finalY = logicalY;
-
-            if (data->rotate) {
-                // localY in the buffer
-                int localY = logicalY - bufferTop;
-                if (localY < 0 || localY >= data->fbHeight)
-                    continue;
-
-                // Flip Y (vertical)
-                int flippedLocalY = (data->fbHeight - 1) - localY;
-                finalY = bufferTop + flippedLocalY;
-
-                // Flip X (horizontal)
-                finalX = (data->fbWidth - 1) - logicalX;
-            }
-
-            // Range check
-            if (finalX < 0 || finalX >= data->fbWidth ||
-                finalY < bufferTop || finalY >= (bufferTop + data->fbHeight))
-                continue;
-
-            // Calculate offset into fb
-            long offset = (long)finalY * finfo.line_length + (long)finalX * 4;
-
-            if (op == OP_DRAW) {
-                // Draw: Write from overlayData to framebuffer
-                *((unsigned int *)(data->fbmem + offset)) = overlayData[oy * data->surface->w + ox];
-            }
-            else {
-                // Calculate index based on oy and ox
-                int index = oy * data->surface->w + ox;
-                if (op == OP_BACKUP) {
-                    // Backup: Read from framebuffer to originalPixels
-                    originalPixels[b][index] = *((unsigned int *)(data->fbmem + offset));
-                }
-                else {
-                    // Restore: Write from originalPixels to framebuffer
-                    *((unsigned int *)(data->fbmem + offset)) = originalPixels[b][index];
-                }
-            }
-        }
-    }
-}
 
 /**
  * @brief Cancels the overlay and cleans up resources.
@@ -142,7 +71,9 @@ void cancel_overlay()
 static void *_overlay_draw_thread(void *arg)
 {
     overlay_thread_data *data = (overlay_thread_data *)arg;
-    unsigned int *overlayData = (unsigned int *)data->surface->pixels;
+    vinfo = data->vinfo;
+    finfo = data->finfo;
+    fb_addr = (uint32_t *)data->fbmem;
 
     // Backup original fb content
     START_TIMER(framebuffer_backup);
@@ -161,9 +92,9 @@ static void *_overlay_draw_thread(void *arg)
         }
     }
 
-    for (int b = 0; b < data->numBuffers; b++) {
-        _process_buffer(data, originalPixels, overlayData, b, OP_BACKUP, finfo);
-    }
+    rect_t rect = {data->destX, data->destY, data->surface->w, data->surface->h};
+
+    display_readOrWriteBuffers(originalPixels, rect, data->rotate, false);
     END_TIMER(framebuffer_backup);
     printf("Backup buffer total size: %d KiB\n",
            (data->numBuffers * data->surface->w * data->surface->h * sizeof(unsigned int)) / 1024);
@@ -194,7 +125,8 @@ static void *_overlay_draw_thread(void *arg)
         // Draw to each buffer
         for (int b = 0; b < data->numBuffers; b++) {
             draw_count++;
-            _process_buffer(data, originalPixels, overlayData, b, OP_DRAW, finfo);
+            int bufferPos = b * data->vinfo.yres;
+            display_readOrWriteBuffer(data->surface->pixels, rect, bufferPos, data->rotate, true);
         }
 
         // TODO: sleep or not? atm i'd say no
@@ -209,9 +141,7 @@ static void *_overlay_draw_thread(void *arg)
     // TODO: Theoretically the backup/restore is only needed if the position of the overlay is outside the game screen because that part of the screen is not updated by the game.
 
     START_TIMER(framebuffer_restore);
-    for (int b = 0; b < data->numBuffers; b++) {
-        _process_buffer(data, originalPixels, overlayData, b, OP_RESTORE, finfo);
-    }
+    display_readOrWriteBuffers(originalPixels, rect, data->rotate, true);
 
     // Free buffer backups
     for (int b = 0; b < data->numBuffers; b++) {
@@ -291,22 +221,15 @@ int overlay_surface(SDL_Surface *surface, int destX, int destY, int duration_ms,
     data->destY = destY;
     data->duration_ms = duration_ms;
     data->rotate = rotate;
-    data->fb_fd = fb_fd;
     data->vinfo = vinfo;
     data->finfo = finfo;
-    data->fbWidth = vinfo.xres;
-    data->fbHeight = vinfo.yres;
     data->numBuffers = vinfo.yres_virtual / vinfo.yres;
 
     printf_debug("Detected Buffers: %d\n", data->numBuffers);
 
     // Need to map every time in case of buffer changes
     data->screensize = (long)finfo.line_length * (long)vinfo.yres_virtual;
-    data->fbmem = mmap(NULL, data->screensize,
-                       PROT_READ | PROT_WRITE,
-                       MAP_SHARED,
-                       fb_fd,
-                       0);
+    data->fbmem = mmap(NULL, data->screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fb_fd, 0);
     if (data->fbmem == MAP_FAILED) {
         perror("Failed to mmap framebuffer");
         free(data);

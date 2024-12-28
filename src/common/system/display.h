@@ -29,6 +29,13 @@ int RENDER_WIDTH = 640; // render resolution
 int RENDER_HEIGHT = 480;
 struct timeval start_time, end_time;
 
+typedef struct Rect {
+    int x;
+    int y;
+    int w;
+    int h;
+} rect_t;
+
 //
 //    Get render resolution
 //
@@ -187,6 +194,71 @@ void display_setBrightness(uint32_t value)
     int value_raw = round(3.0 * exp(0.350656 * value));
 
     display_setBrightnessRaw(value_raw);
+}
+
+/**
+ * @brief Read from or write to a framebuffer buffer.
+ *
+ * This function reads from or writes to a specific buffer in the framebuffer.
+ * It supports optional rotation of the buffer content.
+ *
+ * @param pixels Pointer to the pixel data.
+ * @param rect The rectangle area to read/write.
+ * @param bufferPos The starting position of the buffer.
+ * @param rotate Whether to rotate the buffer content.
+ * @param write Whether to write to the buffer (true) or read from it (false).
+ */
+void display_readOrWriteBuffer(uint32_t *pixels, rect_t rect, int bufferPos, bool rotate, bool write)
+{
+    for (int oy = 0; oy < rect.h; oy++) {
+        int y = rect.y + oy;
+
+        if (y < 0 || y >= vinfo.yres)
+            continue;
+
+        int virtualY = bufferPos + (rotate ? (vinfo.yres - 1) - y : y);
+        long baseOffset = (long)virtualY * vinfo.xres;
+        int baseIndex = oy * rect.w;
+
+        for (int ox = 0; ox < rect.w; ox++) {
+            int x = rect.x + ox;
+
+            if (rotate) {
+                x = (vinfo.xres - 1) - x;
+            }
+
+            if (x < 0 || x >= vinfo.xres)
+                continue;
+
+            long offset = baseOffset + (long)x;
+            int index = baseIndex + ox;
+            if (write)
+                fb_addr[offset] = pixels[index];
+            else
+                pixels[index] = fb_addr[offset];
+        }
+    }
+}
+
+/**
+ * @brief Read from or write to multiple framebuffer buffers.
+ *
+ * This function reads from or writes to multiple buffers in the framebuffer.
+ * It supports optional rotation of the buffer content.
+ *
+ * @param pixels Array of pointers to the pixel data for each buffer.
+ * @param rect The rectangle area to read/write.
+ * @param rotate Whether to rotate the buffer content.
+ * @param write Whether to write to the buffers (true) or read from them (false).
+ */
+void display_readOrWriteBuffers(uint32_t **pixels, rect_t rect, bool rotate, bool write)
+{
+    int numBuffers = vinfo.yres_virtual / vinfo.yres;
+
+    for (int b = 0; b < numBuffers; b++) {
+        int bufferPos = b * vinfo.yres;
+        display_readOrWriteBuffer(pixels[b], rect, bufferPos, rotate, write);
+    }
 }
 
 //
