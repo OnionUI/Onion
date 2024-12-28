@@ -24,3 +24,6 @@ install:
 
 dev: clean
 	@$(MAKE_DEV)
+
+asan: clean
+	@$(MAKE_ASAN)

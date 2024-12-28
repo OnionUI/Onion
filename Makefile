@@ -238,6 +238,9 @@ deepclean: clean
 dev: clean
 	@$(MAKE_DEV)
 
+asan: clean
+	@$(MAKE_ASAN)
+	
 git-clean:
 	@git clean -xfd -e .vscode
 
