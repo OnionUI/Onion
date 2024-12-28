@@ -181,7 +181,7 @@ static void sigHandler(int sig)
 void cleanup(void)
 {
     remove("/tmp/percBat");
-    display_free();
+    display_close();
     close(sar_fd);
 }
 
@@ -442,6 +442,8 @@ float interpolatePercentage(float voltage)
         return 100;
     if (voltage <= VoltageCurveMapping_liion[table_size - 1].voltage)
         return 0;
+
+    return -1; // Error
 }
 
 int batteryPercentage(int adcValue)

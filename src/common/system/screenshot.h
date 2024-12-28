@@ -91,8 +91,8 @@ uint32_t *__screenshot_buffer(void)
     size_t buffer_size = DISPLAY_WIDTH * DISPLAY_HEIGHT * sizeof(uint32_t);
     uint32_t *buffer = (uint32_t *)malloc(buffer_size);
 
-    ioctl(fb_fd, FBIOGET_VSCREENINFO, &vinfo);
-    memcpy(buffer, fb_addr + DISPLAY_WIDTH * vinfo.yoffset, buffer_size);
+    ioctl(fb_fd, FBIOGET_VSCREENINFO, &g_display.vinfo);
+    memcpy(buffer, g_display.fb_addr + DISPLAY_WIDTH * g_display.vinfo.yoffset, buffer_size);
 
     return buffer;
 }

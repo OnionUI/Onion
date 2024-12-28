@@ -34,17 +34,16 @@ typedef struct {
     int destY;
     int duration_ms;
     bool rotate;
-    struct fb_var_screeninfo vinfo;
-    struct fb_fix_screeninfo finfo;
-    unsigned char *fbmem;
-    long screensize;
-    int numBuffers;
-    bool abort_requested;
-    pthread_t thread_id;
+    display_t display;
 } overlay_thread_data;
 
-static overlay_thread_data *g_overlay_data = NULL;
-static pthread_mutex_t g_overlay_data_lock = PTHREAD_MUTEX_INITIALIZER;
+typedef struct {
+    bool cancelled;
+    pthread_t thread_id;
+    pthread_mutex_t lock;
+} task_t;
+
+static task_t g_overlay_task = {true, 0, PTHREAD_MUTEX_INITIALIZER};
 
 /**
  * @brief Cancels the overlay and cleans up resources.
@@ -54,34 +53,44 @@ static pthread_mutex_t g_overlay_data_lock = PTHREAD_MUTEX_INITIALIZER;
  */
 void cancel_overlay()
 {
-    if (!g_overlay_data) {
+    if (g_overlay_task.thread_id == 0) {
         print_debug("No overlay to cancel\n");
         return;
     }
     // Mark abort
-    pthread_mutex_lock(&g_overlay_data_lock);
-    pthread_t thread_to_join = g_overlay_data->thread_id;
+    pthread_mutex_lock(&g_overlay_task.lock);
+    pthread_t thread_to_join = g_overlay_task.thread_id;
     printf_debug("Cancelling overlay thread ID %ld\n", thread_to_join);
-    g_overlay_data->abort_requested = true;
-    pthread_mutex_unlock(&g_overlay_data_lock);
+    g_overlay_task.cancelled = true;
+    pthread_mutex_unlock(&g_overlay_task.lock);
+
     pthread_join(thread_to_join, NULL);
+
     printf_debug("Cancelled overlay thread ID %ld\n", thread_to_join);
+}
+
+static void free_overlay_data(overlay_thread_data *data)
+{
+    if (data->surface) {
+        SDL_FreeSurface(data->surface);
+        data->surface = NULL;
+    }
+    display_free(&data->display);
+    free(data);
 }
 
 static void *_overlay_draw_thread(void *arg)
 {
     overlay_thread_data *data = (overlay_thread_data *)arg;
-    vinfo = data->vinfo;
-    finfo = data->finfo;
-    fb_addr = (uint32_t *)data->fbmem;
 
     // Backup original fb content
     START_TIMER(framebuffer_backup);
-    unsigned int **originalPixels = malloc(data->numBuffers * sizeof(unsigned int *));
+    int numBuffers = data->display.vinfo.yres_virtual / data->display.vinfo.yres;
+    unsigned int **originalPixels = malloc(numBuffers * sizeof(unsigned int *));
     if (!originalPixels) {
         return NULL;
     }
-    for (int b = 0; b < data->numBuffers; b++) {
+    for (int b = 0; b < numBuffers; b++) {
         originalPixels[b] = malloc(data->surface->w * data->surface->h * sizeof(unsigned int));
         if (!originalPixels[b]) {
             for (int i = 0; i < b; i++) {
@@ -94,14 +103,14 @@ static void *_overlay_draw_thread(void *arg)
 
     rect_t rect = {data->destX, data->destY, data->surface->w, data->surface->h};
 
-    display_readOrWriteBuffers(originalPixels, rect, data->rotate, false);
+    display_readOrWriteBuffers(&data->display, originalPixels, rect, data->rotate, false);
     END_TIMER(framebuffer_backup);
-    printf("Backup buffer total size: %d KiB\n",
-           (data->numBuffers * data->surface->w * data->surface->h * sizeof(unsigned int)) / 1024);
+    printf_debug("Backup buffer total size: %d KiB\n",
+                 (numBuffers * data->surface->w * data->surface->h * sizeof(unsigned int)) / 1024);
 
     struct timespec start, now;
     clock_gettime(CLOCK_MONOTONIC, &start);
-    long elapsed_ms = 0;
+    long elapsed_ms = -1;
     int draw_count = 0;
 
     // Continuously blit the overlay to each buffer
@@ -116,17 +125,18 @@ static void *_overlay_draw_thread(void *arg)
             break;
 
         // Abort
-        pthread_mutex_lock(&g_overlay_data_lock);
-        bool local_abort = data->abort_requested;
-        pthread_mutex_unlock(&g_overlay_data_lock);
+        pthread_mutex_lock(&g_overlay_task.lock);
+        bool local_abort = g_overlay_task.cancelled;
+        pthread_mutex_unlock(&g_overlay_task.lock);
         if (local_abort)
             break;
 
         // Draw to each buffer
-        for (int b = 0; b < data->numBuffers; b++) {
+        numBuffers = data->display.vinfo.yres_virtual / data->display.vinfo.yres;
+        for (int b = 0; b < numBuffers; b++) {
             draw_count++;
-            int bufferPos = b * data->vinfo.yres;
-            display_readOrWriteBuffer(data->surface->pixels, rect, bufferPos, data->rotate, true);
+            int bufferPos = b * data->display.vinfo.yres;
+            display_readOrWriteBuffer(&data->display, data->surface->pixels, rect, bufferPos, data->rotate, true);
         }
 
         // TODO: sleep or not? atm i'd say no
@@ -141,30 +151,23 @@ static void *_overlay_draw_thread(void *arg)
     // TODO: Theoretically the backup/restore is only needed if the position of the overlay is outside the game screen because that part of the screen is not updated by the game.
 
     START_TIMER(framebuffer_restore);
-    display_readOrWriteBuffers(originalPixels, rect, data->rotate, true);
+    display_readOrWriteBuffers(&data->display, originalPixels, rect, data->rotate, true);
 
     // Free buffer backups
-    for (int b = 0; b < data->numBuffers; b++) {
+    numBuffers = data->display.vinfo.yres_virtual / data->display.vinfo.yres;
+    for (int b = 0; b < numBuffers; b++) {
         free(originalPixels[b]);
     }
     free(originalPixels);
     END_TIMER(framebuffer_restore);
 
-    // Clean up thread data
-    pthread_mutex_lock(&g_overlay_data_lock);
-    if (g_overlay_data && g_overlay_data->fbmem && g_overlay_data->fbmem != MAP_FAILED) {
-        void *fbmem = g_overlay_data->fbmem;
-        size_t screensize = g_overlay_data->screensize;
-        munmap(fbmem, screensize);
-        if (g_overlay_data->surface) {
-            SDL_FreeSurface(g_overlay_data->surface);
-            g_overlay_data->surface = NULL;
-        }
+    free_overlay_data(data);
 
-        free(g_overlay_data);
-        g_overlay_data = NULL;
-    }
-    pthread_mutex_unlock(&g_overlay_data_lock);
+    // Clean up thread data
+    pthread_mutex_lock(&g_overlay_task.lock);
+    g_overlay_task.cancelled = true;
+    g_overlay_task.thread_id = 0;
+    pthread_mutex_unlock(&g_overlay_task.lock);
 
     pthread_exit(NULL);
 }
@@ -189,171 +192,63 @@ int overlay_surface(SDL_Surface *surface, int destX, int destY, int duration_ms,
     display_init();
 
     // If there's an existing thread, abort it
-    if (g_overlay_data != NULL) {
+    if (g_overlay_task.thread_id != 0) {
         print_debug("Cancelling existing overlay\n");
         cancel_overlay();
-    }
-    pthread_mutex_lock(&g_overlay_data_lock);
-
-    // Query FB info
-    struct fb_var_screeninfo vinfo;
-    if (ioctl(fb_fd, FBIOGET_VSCREENINFO, &vinfo) == -1) {
-        perror("Error reading variable screen info");
-        pthread_mutex_unlock(&g_overlay_data_lock);
-        return -1;
-    }
-
-    if (vinfo.bits_per_pixel != 32) {
-        perror("Only 32bpp is supported for now\n");
-        pthread_mutex_unlock(&g_overlay_data_lock);
-        return -1;
     }
 
     // Data for thread
     overlay_thread_data *data = (overlay_thread_data *)calloc(1, sizeof(overlay_thread_data));
     if (!data) {
         perror("Failed to allocate overlay_thread_data\n");
-        pthread_mutex_unlock(&g_overlay_data_lock);
         return -1;
     }
+
+    display_t *display = &data->display;
+    display->finfo = g_display.finfo;
+
+    // Query FB info
+    if (ioctl(fb_fd, FBIOGET_VSCREENINFO, &display->vinfo) == -1) {
+        perror("Error reading variable screen info");
+        return -1;
+    }
+
+    if (display->vinfo.bits_per_pixel != 32) {
+        perror("Only 32bpp is supported for now\n");
+        return -1;
+    }
+
     data->surface = surface;
     data->destX = destX;
     data->destY = destY;
     data->duration_ms = duration_ms;
     data->rotate = rotate;
-    data->vinfo = vinfo;
-    data->finfo = finfo;
-    data->numBuffers = vinfo.yres_virtual / vinfo.yres;
-
-    printf_debug("Detected Buffers: %d\n", data->numBuffers);
 
     // Need to map every time in case of buffer changes
-    data->screensize = (long)finfo.line_length * (long)vinfo.yres_virtual;
-    data->fbmem = mmap(NULL, data->screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fb_fd, 0);
-    if (data->fbmem == MAP_FAILED) {
+    display->fb_size = (long)g_display.finfo.line_length * (long)display->vinfo.yres_virtual;
+    display->fb_addr = mmap(NULL, display->fb_size, PROT_READ | PROT_WRITE, MAP_SHARED, fb_fd, 0);
+    if (display->fb_addr == MAP_FAILED) {
         perror("Failed to mmap framebuffer");
-        free(data);
-        pthread_mutex_unlock(&g_overlay_data_lock);
+        free_overlay_data(data);
         return -1;
     }
 
     // Create the thread
     print_debug("Creating overlay drawing thread\n");
-    int rc = pthread_create(&data->thread_id, NULL, _overlay_draw_thread, data);
+    pthread_mutex_lock(&g_overlay_task.lock);
+    g_overlay_task.cancelled = false;
+    int rc = pthread_create(&g_overlay_task.thread_id, NULL, _overlay_draw_thread, data);
     if (rc != 0) {
         fprintf(stderr, "Failed to create overlay drawing thread\n");
-        munmap(data->fbmem, data->screensize);
-        free(data);
-        pthread_mutex_unlock(&g_overlay_data_lock);
+        free_overlay_data(data);
+        pthread_mutex_unlock(&g_overlay_task.lock);
         return -1;
     }
-    printf_debug("Thread ID %ld created\n", data->thread_id);
-    g_overlay_data = data;
-    pthread_mutex_unlock(&g_overlay_data_lock);
+
+    printf_debug("Thread ID %ld created\n", g_overlay_task.thread_id);
+    pthread_mutex_unlock(&g_overlay_task.lock);
 
     return 0;
-}
-
-//
-//	Print digit
-//
-void print_digit(uint8_t num, uint32_t x, uint32_t color)
-{
-    const uint16_t pix[13] = {0b000000000000000,  // space
-                              0b000001010100000,  // /
-                              0b111101101101111,  // 0
-                              0b001001001001001,  // 1
-                              0b111001111100111,  // 2
-                              0b111001111001111,  // 3
-                              0b101101111001001,  // 4
-                              0b111100111001111,  // 5
-                              0b111100111101111,  // 6
-                              0b111001001001001,  // 7
-                              0b111101111101111,  // 8
-                              0b111101111001111,  // 9
-                              0b000010000010000}; // :
-    uint32_t c32, i, y;
-    uint16_t number_pixel, c16;
-    uint8_t *ofs;
-    uint16_t *ofs16;
-    uint32_t *ofs32;
-    uint32_t s16 = stride / 2;
-    uint32_t s32 = stride / 4;
-
-    if (num == ' ')
-        num = 0;
-    else
-        num -= 0x2e;
-    if ((num > 12) || (x > 18))
-        return;
-    number_pixel = pix[num];
-    ofs = fbofs + ((18 - x) * CHR_WIDTH * bpp);
-
-    printf_debug("printing %d\n", num);
-
-    for (y = 5; y > 0; y--, ofs += stride * 4) {
-        if (bpp == 4) {
-            ofs32 = (uint32_t *)ofs;
-            for (i = 3; i > 0; i--, number_pixel >>= 1, ofs32 += 4) {
-                c32 = (number_pixel & 1) ? color : 0;
-                ofs32[0] = c32;
-                ofs32[1] = c32;
-                ofs32[2] = c32;
-                ofs32[3] = c32;
-                ofs32[s32 + 0] = c32;
-                ofs32[s32 + 1] = c32;
-                ofs32[s32 + 2] = c32;
-                ofs32[s32 + 3] = c32;
-                ofs32[s32 * 2 + 0] = c32;
-                ofs32[s32 * 2 + 1] = c32;
-                ofs32[s32 * 2 + 2] = c32;
-                ofs32[s32 * 2 + 3] = c32;
-                ofs32[s32 * 3 + 0] = c32;
-                ofs32[s32 * 3 + 1] = c32;
-                ofs32[s32 * 3 + 2] = c32;
-                ofs32[s32 * 3 + 3] = c32;
-            }
-        }
-        else {
-            ofs16 = (uint16_t *)ofs;
-            for (i = 3; i > 0; i--, number_pixel >>= 1, ofs16 += 4) {
-                c16 = (number_pixel & 1) ? (color & 0xffff) : 0;
-                ofs16[0] = c16;
-                ofs16[1] = c16;
-                ofs16[2] = c16;
-                ofs16[3] = c16;
-                ofs16[s16 + 0] = c16;
-                ofs16[s16 + 1] = c16;
-                ofs16[s16 + 2] = c16;
-                ofs16[s16 + 3] = c16;
-                ofs16[s16 * 2 + 0] = c16;
-                ofs16[s16 * 2 + 1] = c16;
-                ofs16[s16 * 2 + 2] = c16;
-                ofs16[s16 * 2 + 3] = c16;
-                ofs16[s16 * 3 + 0] = c16;
-                ofs16[s16 * 3 + 1] = c16;
-                ofs16[s16 * 3 + 2] = c16;
-                ofs16[s16 * 3 + 3] = c16;
-            }
-        }
-    }
-}
-
-//
-//	Print number value
-//
-//  Color: white=0x00FFFFFF, red=0x00FF0000
-//
-void print_value(uint32_t value, uint32_t color)
-{
-    char str[20];
-    sprintf(str, "%d", value);
-
-    printf_debug("osd: %s\n", str);
-
-    for (uint32_t x = 0; x < 19; x++) {
-        print_digit(str[x], x, color);
-    }
 }
 
 static int meterWidth = 4;
@@ -369,7 +264,7 @@ static uint32_t *_bar_savebuf;
 void _print_bar(void)
 {
 #ifdef PLATFORM_MIYOOMINI
-    uint32_t *ofs = fb_addr;
+    uint32_t *ofs = g_display.fb_addr;
     uint32_t i, j, curr, percentage = _bar_max > 0 ? _bar_value * RENDER_HEIGHT / _bar_max : 0;
 
     ofs += RENDER_WIDTH - meterWidth;
@@ -389,7 +284,7 @@ void _bar_restoreBufferBehind(void)
     _bar_color = 0;
     _print_bar();
     if (_bar_savebuf) {
-        uint32_t i, j, *ofs = fb_addr, *ofss = _bar_savebuf;
+        uint32_t i, j, *ofs = g_display.fb_addr, *ofss = _bar_savebuf;
         ofs += RENDER_WIDTH - meterWidth;
         ofss += RENDER_WIDTH - meterWidth;
         for (i = 0; i < RENDER_HEIGHT; i++, ofs += RENDER_WIDTH, ofss += RENDER_WIDTH) {
@@ -408,7 +303,7 @@ void _bar_saveBufferBehind(void)
     // Save display area and clear
     if ((_bar_savebuf = (uint32_t *)malloc(RENDER_WIDTH * RENDER_HEIGHT *
                                            sizeof(uint32_t)))) {
-        uint32_t i, j, *ofs = fb_addr, *ofss = _bar_savebuf;
+        uint32_t i, j, *ofs = g_display.fb_addr, *ofss = _bar_savebuf;
         ofs += RENDER_WIDTH - meterWidth;
         ofss += RENDER_WIDTH - meterWidth;
         for (i = 0; i < RENDER_HEIGHT; i++, ofs += RENDER_WIDTH, ofss += RENDER_WIDTH) {

@@ -167,7 +167,7 @@ void resume(void)
 //
 void quit(int exitcode)
 {
-    display_free();
+    display_close();
     if (input_fd > 0)
         close(input_fd);
     system_clock_get();
