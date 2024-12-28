@@ -232,14 +232,17 @@ void display_setBrightness(uint32_t value)
  * This function reads from or writes to a specific buffer in the framebuffer.
  * It supports optional rotation of the buffer content.
  *
+ * @param index The index of the buffer to read/write.
  * @param pixels Pointer to the pixel data.
  * @param rect The rectangle area to read/write.
- * @param bufferPos The starting position of the buffer.
  * @param rotate Whether to rotate the buffer content.
  * @param write Whether to write to the buffer (true) or read from it (false).
+ * @param mask Whether to use a mask when writing to the buffer.
  */
-void display_readOrWriteBuffer(display_t *display, uint32_t *pixels, rect_t rect, int bufferPos, bool rotate, bool write)
+void display_readOrWriteBuffer(int index, display_t *display, uint32_t *pixels, rect_t rect, bool rotate, bool mask, bool write)
 {
+    int bufferPos = index * display->vinfo.yres;
+
     for (int oy = 0; oy < rect.h; oy++) {
         int y = rect.y + oy;
 
@@ -262,12 +265,60 @@ void display_readOrWriteBuffer(display_t *display, uint32_t *pixels, rect_t rect
 
             long offset = baseOffset + (long)x;
             int index = baseIndex + ox;
-            if (write)
-                display->fb_addr[offset] = pixels[index];
-            else
-                pixels[index] = display->fb_addr[offset];
+            if (write) {
+                if (mask) {
+                    if (pixels[index] != 0) {
+                        display->fb_addr[offset] = 0;
+                    }
+                }
+                else {
+                    display->fb_addr[offset] = pixels[index];
+                }
+            }
+            else {
+                if (mask) {
+                    pixels[index] = display->fb_addr[offset] == 0 ? 1 : 0;
+                }
+                else {
+                    pixels[index] = display->fb_addr[offset];
+                }
+            }
         }
     }
+}
+
+/** 
+ * @brief Read from a framebuffer buffer.
+ *
+ * This function reads from a specific buffer in the framebuffer.
+ * It supports optional rotation of the buffer content.
+ *
+ * @param pixels Pointer to the pixel data.
+ * @param rect The rectangle area to read/write.
+ * @param bufferPos The starting position of the buffer.
+ * @param rotate Whether to rotate the buffer content.
+ * @param mask Whether to use a mask when writing to the buffer.
+ */
+void display_readBuffer(int bufferPos, display_t *display, uint32_t *pixels, rect_t rect, bool rotate, bool mask)
+{
+    display_readOrWriteBuffer(bufferPos, display, pixels, rect, rotate, mask, false);
+}
+
+/** 
+ * @brief Write to a framebuffer buffer.
+ *
+ * This function writes to a specific buffer in the framebuffer.
+ * It supports optional rotation of the buffer content.
+ *
+ * @param pixels Pointer to the pixel data.
+ * @param rect The rectangle area to read/write.
+ * @param bufferPos The starting position of the buffer.
+ * @param rotate Whether to rotate the buffer content.
+ * @param mask Whether to use a mask when writing to the buffer.
+ */
+void display_writeBuffer(int bufferPos, display_t *display, uint32_t *pixels, rect_t rect, bool rotate, bool mask)
+{
+    display_readOrWriteBuffer(bufferPos, display, pixels, rect, rotate, mask, true);
 }
 
 /**
@@ -280,15 +331,47 @@ void display_readOrWriteBuffer(display_t *display, uint32_t *pixels, rect_t rect
  * @param rect The rectangle area to read/write.
  * @param rotate Whether to rotate the buffer content.
  * @param write Whether to write to the buffers (true) or read from them (false).
+ * @param mask Whether to use a mask when writing to the buffers.
  */
-void display_readOrWriteBuffers(display_t *display, uint32_t **pixels, rect_t rect, bool rotate, bool write)
+void display_readOrWriteBuffers(display_t *display, uint32_t **pixels, rect_t rect, bool rotate, bool mask, bool write)
 {
     int numBuffers = display->vinfo.yres_virtual / display->vinfo.yres;
 
     for (int b = 0; b < numBuffers; b++) {
-        int bufferPos = b * display->vinfo.yres;
-        display_readOrWriteBuffer(display, pixels[b], rect, bufferPos, rotate, write);
+        display_readOrWriteBuffer(b, display, pixels[b], rect, rotate, mask, write);
     }
+}
+
+/** 
+ * @brief Read from multiple framebuffer buffers.
+ *
+ * This function reads from multiple buffers in the framebuffer.
+ * It supports optional rotation of the buffer content.
+ *
+ * @param pixels Array of pointers to the pixel data for each buffer.
+ * @param rect The rectangle area to read/write.
+ * @param rotate Whether to rotate the buffer content.
+ * @param mask Whether to use a mask when writing to the buffers.
+ */
+void display_readBuffers(display_t *display, uint32_t **pixels, rect_t rect, bool rotate, bool mask)
+{
+    display_readOrWriteBuffers(display, pixels, rect, rotate, mask, false);
+}
+
+/** 
+ * @brief Write to multiple framebuffer buffers.
+ *
+ * This function writes to multiple buffers in the framebuffer.
+ * It supports optional rotation of the buffer content.
+ *
+ * @param pixels Array of pointers to the pixel data for each buffer.
+ * @param rect The rectangle area to read/write.
+ * @param rotate Whether to rotate the buffer content.
+ * @param mask Whether to use a mask when writing to the buffers.
+ */
+void display_writeBuffers(display_t *display, uint32_t **pixels, rect_t rect, bool rotate, bool mask)
+{
+    display_readOrWriteBuffers(display, pixels, rect, rotate, mask, true);
 }
 
 //

@@ -460,6 +460,7 @@ int batteryPercentage(int adcValue)
             return (int)(adcValue * 2.125 - 1068);
         if (adcValue >= 480)
             return (int)(adcValue * 0.51613 - 243.742);
+        return 0;
     }
 
     // Convert ADC value to voltage

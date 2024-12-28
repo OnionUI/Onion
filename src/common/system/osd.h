@@ -25,6 +25,10 @@
 #define OSD_VOLUME_COLOR OSD_COLOR_GREEN
 #define OSD_MUTE_ON_COLOR OSD_COLOR_RED
 
+#ifndef CLOCK_MONOTONIC
+#define CLOCK_MONOTONIC 1
+#endif
+
 static bool osd_thread_active = false;
 static pthread_t osd_pt;
 
@@ -34,6 +38,7 @@ typedef struct {
     int destY;
     int duration_ms;
     bool rotate;
+    bool useMask;
     display_t display;
 } overlay_thread_data;
 
@@ -103,7 +108,7 @@ static void *_overlay_draw_thread(void *arg)
 
     rect_t rect = {data->destX, data->destY, data->surface->w, data->surface->h};
 
-    display_readOrWriteBuffers(&data->display, originalPixels, rect, data->rotate, false);
+    display_readBuffers(&data->display, originalPixels, rect, data->rotate, data->useMask);
     END_TIMER(framebuffer_backup);
     printf_debug("Backup buffer total size: %d KiB\n",
                  (numBuffers * data->surface->w * data->surface->h * sizeof(unsigned int)) / 1024);
@@ -135,8 +140,7 @@ static void *_overlay_draw_thread(void *arg)
         numBuffers = data->display.vinfo.yres_virtual / data->display.vinfo.yres;
         for (int b = 0; b < numBuffers; b++) {
             draw_count++;
-            int bufferPos = b * data->display.vinfo.yres;
-            display_readOrWriteBuffer(&data->display, data->surface->pixels, rect, bufferPos, data->rotate, true);
+            display_writeBuffer(b, &data->display, data->surface->pixels, rect, data->rotate, false);
         }
 
         // TODO: sleep or not? atm i'd say no
@@ -151,7 +155,7 @@ static void *_overlay_draw_thread(void *arg)
     // TODO: Theoretically the backup/restore is only needed if the position of the overlay is outside the game screen because that part of the screen is not updated by the game.
 
     START_TIMER(framebuffer_restore);
-    display_readOrWriteBuffers(&data->display, originalPixels, rect, data->rotate, true);
+    display_writeBuffers(&data->display, originalPixels, rect, data->rotate, data->useMask);
 
     // Free buffer backups
     numBuffers = data->display.vinfo.yres_virtual / data->display.vinfo.yres;
@@ -223,6 +227,7 @@ int overlay_surface(SDL_Surface *surface, int destX, int destY, int duration_ms,
     data->destY = destY;
     data->duration_ms = duration_ms;
     data->rotate = rotate;
+    data->useMask = false; // TODO: Use mask dependent on running application
 
     // Need to map every time in case of buffer changes
     display->fb_size = (long)g_display.finfo.line_length * (long)display->vinfo.yres_virtual;
