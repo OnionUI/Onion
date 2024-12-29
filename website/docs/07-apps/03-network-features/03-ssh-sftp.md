@@ -66,6 +66,17 @@ You'll need the IP of the device, found below (**Tweaks** › **Network**).
 ![](https://github.com/OnionUI/Onion/assets/47260768/b7d5bc34-4032-4f38-81a4-79e069cfd2ac)
 
 
+### For developers
+
+The ultimate `ssh` command for developers (replace `[IP_ADDRESS]` with your device's IP):
+
+```sh
+ssh -o MACs=hmac-sha1 onion@[IP_ADDRESS] -t "cd /mnt/SDCARD; source .tmp_update/script/init_env.sh; ash"
+```
+
+This will initialize the environment, giving direct access to binaries located in `.tmp_update/bin` (see [init_env.sh](https://github.com/OnionUI/Onion/blob/main/static/build/.tmp_update/script/init_env.sh)).
+
+
 ## Disabling authentication
 
 Although this is not recommended on other peoples Wi-Fi, when you're at home on your own Wi-Fi this is absolutely fine (or any other secure Wi-Fi!)
