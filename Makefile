@@ -2,7 +2,7 @@
 
 TARGET=Onion
 VERSION=4.4.0
-RA_SUBVERSION=1.19.1-1
+RA_SUBVERSION=1.19.1-2
 
 ###########################################################
 
@@ -238,6 +238,9 @@ deepclean: clean
 dev: clean
 	@$(MAKE_DEV)
 
+asan: clean
+	@$(MAKE_ASAN)
+	
 git-clean:
 	@git clean -xfd -e .vscode
 
