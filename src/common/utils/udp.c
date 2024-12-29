@@ -4,8 +4,8 @@
 #include <string.h>
 #include <unistd.h>
 
-static const char *UDP_DEFAULT_IP = "127.0.0.1"; // localhost
-static const int UDP_DEFAULT_PORT = 55355;       // default RetroArch CMD port
+static const char *LOCALHOST_IP = "127.0.0.1";
+static const int RETROARCH_CMD_UDP_PORT = 55355;
 
 static int _init_socket(const char *ipAddress, int port, int *socket_fd, struct sockaddr_in *server_address)
 {
@@ -76,12 +76,12 @@ int udp_send_receive(const char *ipAddress, int port, const char *message, char 
 
 int retroarch_cmd(const char *cmd)
 {
-    return udp_send(UDP_DEFAULT_IP, UDP_DEFAULT_PORT, cmd);
+    return udp_send(LOCALHOST_IP, RETROARCH_CMD_UDP_PORT, cmd);
 }
 
 int retroarch_get(const char *cmd, char *response, size_t response_size)
 {
-    return udp_send_receive(UDP_DEFAULT_IP, UDP_DEFAULT_PORT, cmd, response, response_size);
+    return udp_send_receive(LOCALHOST_IP, RETROARCH_CMD_UDP_PORT, cmd, response, response_size);
 }
 
 int retroarch_quit(void)
