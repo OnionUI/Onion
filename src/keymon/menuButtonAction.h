@@ -15,6 +15,7 @@
 
 #include "../tweaks/tools_defs.h"
 #include "./input_fd.h"
+#include "utils/udp.h"
 
 static SystemState menu_last_state = MODE_UNKNOWN;
 static int menu_last_pressed = 0;
@@ -83,7 +84,7 @@ bool terminate_retroarch(void)
         // send signal
         kill(pid, SIGCONT);
         usleep(100000);
-        system("sendUDP QUIT");
+        retroarch_quit();
         // wait for terminate
         sprintf(fname, "/proc/%d", pid);
 
@@ -180,7 +181,7 @@ void action_RA_quickSwitch(void)
 
 void action_RA_toggleMenu(void)
 {
-    system("sendUDP MENU_TOGGLE");
+    retroarch_toggleMenu();
 }
 
 void action_drastic_gameSwitcher(void)
