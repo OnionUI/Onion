@@ -15,7 +15,7 @@
 
 #include "../tweaks/tools_defs.h"
 #include "./input_fd.h"
-#include "utils/udp.h"
+#include "utils/retroarch_cmd.h"
 
 static SystemState menu_last_state = MODE_UNKNOWN;
 static int menu_last_pressed = 0;

@@ -1,11 +1,16 @@
 #include "udp.h"
 
+#include <arpa/inet.h>
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/time.h>
 #include <unistd.h>
 
-static const char *LOCALHOST_IP = "127.0.0.1";
-static const int RETROARCH_CMD_UDP_PORT = 55355;
+static const int PING_TIMEOUT_MS = 100;
+static const int MAX_RETRIES = 3;
+static const int RETRY_DELAY_MS = 500;
+static const int RECV_TIMEOUT_MS = 60000;
 
 static int _init_socket(const char *ipAddress, int port, int *socket_fd, struct sockaddr_in *server_address)
 {
@@ -27,12 +32,52 @@ static int _init_socket(const char *ipAddress, int port, int *socket_fd, struct 
     return 0;
 }
 
-int udp_send(const char *ipAddress, int port, const char *message)
+static int _ping_socket(int socket_fd, struct sockaddr_in *server_address)
+{
+    const char *ping_message = "VERSION";
+    char response[32];
+    struct timeval timeout;
+    timeout.tv_sec = PING_TIMEOUT_MS / 1000;
+    timeout.tv_usec = (PING_TIMEOUT_MS % 1000) * 1000;
+
+    // Set receive timeout
+    if (setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) {
+        perror("Failed to set socket receive timeout");
+        return -1;
+    }
+
+    // Send ping message
+    if (sendto(socket_fd, ping_message, strlen(ping_message), 0, (struct sockaddr *)server_address, sizeof(*server_address)) == -1) {
+        perror("Failed to send ping");
+        return -1;
+    }
+
+    // Wait for response
+    ssize_t bytes_received = recvfrom(socket_fd, response, sizeof(response), 0, NULL, NULL);
+    if (bytes_received == -1) {
+        if (errno == EWOULDBLOCK || errno == EAGAIN) {
+            fprintf(stderr, "Ping timeout\n");
+        }
+        else {
+            perror("Failed to receive ping response");
+        }
+        return -1;
+    }
+
+    return 0;
+}
+
+static int _udp_send(const char *ipAddress, int port, const char *message)
 {
     int socket_fd;
     struct sockaddr_in server_address;
 
     if (_init_socket(ipAddress, port, &socket_fd, &server_address) == -1) {
+        return -1;
+    }
+
+    if (_ping_socket(socket_fd, &server_address) == -1) {
+        close(socket_fd);
         return -1;
     }
 
@@ -46,7 +91,7 @@ int udp_send(const char *ipAddress, int port, const char *message)
     return 0;
 }
 
-int udp_send_receive(const char *ipAddress, int port, const char *message, char *response, size_t response_size)
+static int _udp_send_receive(const char *ipAddress, int port, const char *message, char *response, size_t response_size)
 {
     int socket_fd;
     struct sockaddr_in server_address;
@@ -55,8 +100,24 @@ int udp_send_receive(const char *ipAddress, int port, const char *message, char 
         return -1;
     }
 
+    if (_ping_socket(socket_fd, &server_address) == -1) {
+        close(socket_fd);
+        return -1;
+    }
+
     if (sendto(socket_fd, message, strlen(message), 0, (struct sockaddr *)&server_address, sizeof(server_address)) == -1) {
         perror("Failed to send data");
+        close(socket_fd);
+        return -1;
+    }
+
+    // Set a longer timeout for receiving the response
+    struct timeval timeout;
+    timeout.tv_sec = RECV_TIMEOUT_MS / 1000;
+    timeout.tv_usec = (RECV_TIMEOUT_MS % 1000) * 1000;
+
+    if (setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) {
+        perror("Failed to set socket receive timeout");
         close(socket_fd);
         return -1;
     }
@@ -74,41 +135,24 @@ int udp_send_receive(const char *ipAddress, int port, const char *message, char 
     return 0;
 }
 
-int retroarch_cmd(const char *cmd)
+int udp_send(const char *ipAddress, int port, const char *message)
 {
-    return udp_send(LOCALHOST_IP, RETROARCH_CMD_UDP_PORT, cmd);
-}
-
-int retroarch_get(const char *cmd, char *response, size_t response_size)
-{
-    return udp_send_receive(LOCALHOST_IP, RETROARCH_CMD_UDP_PORT, cmd, response, response_size);
-}
-
-int retroarch_quit(void)
-{
-    return retroarch_cmd("QUIT");
-}
-
-int retroarch_toggleMenu(void)
-{
-    return retroarch_cmd("MENU_TOGGLE");
-}
-
-int retroarch_getInfo(RetroArchInfo_t *info)
-{
-    char response[128];
-    if (retroarch_get("GET_INFO", response, sizeof(response)) == -1) {
-        return -1;
+    for (int attempt = 0; attempt < MAX_RETRIES; attempt++) {
+        if (_udp_send(ipAddress, port, message) == 0) {
+            return 0; // Success
+        }
+        usleep(RETRY_DELAY_MS * 1000); // Delay before retrying
     }
+    return -1; // Failed after retries
+}
 
-    // Parse response "GET_INFO %d %d NO" or "GET_INFO %d %d %d"
-    int parsed = sscanf(response, "GET_INFO %u %u %d", &info->max_disk_slots, &info->disk_slot, &info->state_slot);
-
-    if (parsed < 2) {
-        return -1;
+int udp_send_receive(const char *ipAddress, int port, const char *message, char *response, size_t response_size)
+{
+    for (int attempt = 0; attempt < MAX_RETRIES; attempt++) {
+        if (_udp_send_receive(ipAddress, port, message, response, response_size) == 0) {
+            return 0; // Success
+        }
+        usleep(RETRY_DELAY_MS * 1000); // Delay before retrying
     }
-
-    info->has_state_slot = parsed == 3;
-
-    return 0;
+    return -1; // Failed after retries
 }
