@@ -104,7 +104,6 @@ int main(int argc, char *argv[])
     bool key_changed = false;
     SDLKey changed_key = SDLK_UNKNOWN;
 
-
     bool show_help_tooltip = !config_flag_get(".tweaksHelpCompleted");
 
     while (!quit) {
@@ -283,7 +282,7 @@ int main(int argc, char *argv[])
     network_freeSmbShares();
     diags_freeEntries();
 
-    display_free();
+    display_close();
 
     lang_free();
     menu_free_all();

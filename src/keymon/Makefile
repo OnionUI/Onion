@@ -8,7 +8,7 @@ CFILES := $(CFILES) \
 
 TARGET = keymon
 CFLAGS := $(CFLAGS) -Os -ffunction-sections -fdata-sections
-LDFLAGS := $(LDFLAGS) -lpthread -lpng -Wl,--gc-sections
+LDFLAGS := $(LDFLAGS) -lpthread -lpng -Wl,--gc-sections -lSDL -lSDL_ttf 
 
 include ../common/commands.mk
 include ../common/recipes.mk

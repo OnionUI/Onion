@@ -66,3 +66,5 @@ src/**/tree
 !tree/
 src/**/pippi
 !pippi/
+src/**/cpuclock
+!cpuclock/

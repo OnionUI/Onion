@@ -181,7 +181,7 @@ static void sigHandler(int sig)
 void cleanup(void)
 {
     remove("/tmp/percBat");
-    display_free();
+    display_close();
     close(sar_fd);
 }
 
@@ -442,6 +442,8 @@ float interpolatePercentage(float voltage)
         return 100;
     if (voltage <= VoltageCurveMapping_liion[table_size - 1].voltage)
         return 0;
+
+    return -1; // Error
 }
 
 int batteryPercentage(int adcValue)
@@ -458,6 +460,7 @@ int batteryPercentage(int adcValue)
             return (int)(adcValue * 2.125 - 1068);
         if (adcValue >= 480)
             return (int)(adcValue * 0.51613 - 243.742);
+        return 0;
     }
 
     // Convert ADC value to voltage
