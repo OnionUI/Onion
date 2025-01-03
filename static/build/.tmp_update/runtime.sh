@@ -387,6 +387,12 @@ launch_game() {
             # Free memory
             $sysdir/bin/freemma
 
+            if [ $is_game -eq 1 ]; then
+                infoPanel --title " " --message "LOADING" --persistent --no-footer &
+                touch /tmp/dismiss_info_panel
+                sync
+            fi
+
             # GAME LAUNCH
             cd /mnt/SDCARD/RetroArch
             force_retroarch_cfg
@@ -402,7 +408,7 @@ launch_game() {
 
             if [ $is_game -eq 1 ] && [ ! -f /tmp/.offOrder ] && [ -f /tmp/.displaySavingMessage ]; then
                 rm /tmp/.displaySavingMessage
-                infoPanel --title " " --message "Saving ..." --persistent --no-footer &
+                infoPanel --title " " --message "SAVING" --persistent --no-footer &
                 touch /tmp/dismiss_info_panel
                 sync
             fi
@@ -415,7 +421,7 @@ launch_game() {
 
     if [ $retval -eq 404 ]; then
         infoPanel --title "File not found" --message "The requested file was not found." --auto
-    elif [ $retval -ge 128 ] && [ $retval -ne 143 ] && [ $retval -ne 255 ]; then
+    elif [ $retval -ge 128 ] && [ $retval -ne 143 ] && [ $retval -ne 255 ] && [ ! -f /tmp/.forceKillRetroarch ]; then
         infoPanel --title "Fatal error occurred" --message "The program exited unexpectedly.\n(Error code: $retval)" --auto
     fi
 

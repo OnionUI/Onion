@@ -233,6 +233,7 @@ void display_setBrightness(uint32_t value)
  * It supports optional rotation of the buffer content.
  *
  * @param index The index of the buffer to read/write.
+ * @param display The display structure.
  * @param pixels Pointer to the pixel data.
  * @param rect The rectangle area to read/write.
  * @param rotate Whether to rotate the buffer content.
@@ -287,21 +288,40 @@ void display_readOrWriteBuffer(int index, display_t *display, uint32_t *pixels, 
     }
 }
 
+/**
+ * @brief Read from the current framebuffer buffer.
+ * 
+ * This function reads from the current buffer in the framebuffer.
+ * It supports optional rotation of the buffer content.
+ * 
+ * @param display The display structure.
+ * @param pixels Pointer to the pixel data.
+ * @param rect The rectangle area to read/write.
+ * @param rotate Whether to rotate the buffer content.
+ * @param mask Whether to use a mask when writing to the buffer.
+ */
+void display_readCurrentBuffer(display_t *display, uint32_t *pixels, rect_t rect, bool rotate, bool mask)
+{
+    int index = display->vinfo.yoffset / display->vinfo.yres;
+    display_readOrWriteBuffer(index, display, pixels, rect, rotate, mask, false);
+}
+
 /** 
  * @brief Read from a framebuffer buffer.
  *
  * This function reads from a specific buffer in the framebuffer.
  * It supports optional rotation of the buffer content.
  *
+ * @param index The index of the buffer to read.
+ * @param display The display structure.
  * @param pixels Pointer to the pixel data.
  * @param rect The rectangle area to read/write.
- * @param bufferPos The starting position of the buffer.
  * @param rotate Whether to rotate the buffer content.
  * @param mask Whether to use a mask when writing to the buffer.
  */
-void display_readBuffer(int bufferPos, display_t *display, uint32_t *pixels, rect_t rect, bool rotate, bool mask)
+void display_readBuffer(int index, display_t *display, uint32_t *pixels, rect_t rect, bool rotate, bool mask)
 {
-    display_readOrWriteBuffer(bufferPos, display, pixels, rect, rotate, mask, false);
+    display_readOrWriteBuffer(index, display, pixels, rect, rotate, mask, false);
 }
 
 /** 
@@ -310,15 +330,16 @@ void display_readBuffer(int bufferPos, display_t *display, uint32_t *pixels, rec
  * This function writes to a specific buffer in the framebuffer.
  * It supports optional rotation of the buffer content.
  *
+ * @param index The index of the buffer to write.
+ * @param display The display structure.
  * @param pixels Pointer to the pixel data.
  * @param rect The rectangle area to read/write.
- * @param bufferPos The starting position of the buffer.
  * @param rotate Whether to rotate the buffer content.
  * @param mask Whether to use a mask when writing to the buffer.
  */
-void display_writeBuffer(int bufferPos, display_t *display, uint32_t *pixels, rect_t rect, bool rotate, bool mask)
+void display_writeBuffer(int index, display_t *display, uint32_t *pixels, rect_t rect, bool rotate, bool mask)
 {
-    display_readOrWriteBuffer(bufferPos, display, pixels, rect, rotate, mask, true);
+    display_readOrWriteBuffer(index, display, pixels, rect, rotate, mask, true);
 }
 
 /**
@@ -327,6 +348,7 @@ void display_writeBuffer(int bufferPos, display_t *display, uint32_t *pixels, re
  * This function reads from or writes to multiple buffers in the framebuffer.
  * It supports optional rotation of the buffer content.
  *
+ * @param display The display structure.
  * @param pixels Array of pointers to the pixel data for each buffer.
  * @param rect The rectangle area to read/write.
  * @param rotate Whether to rotate the buffer content.
@@ -348,6 +370,7 @@ void display_readOrWriteBuffers(display_t *display, uint32_t **pixels, rect_t re
  * This function reads from multiple buffers in the framebuffer.
  * It supports optional rotation of the buffer content.
  *
+ * @param display The display structure.
  * @param pixels Array of pointers to the pixel data for each buffer.
  * @param rect The rectangle area to read/write.
  * @param rotate Whether to rotate the buffer content.
@@ -364,6 +387,7 @@ void display_readBuffers(display_t *display, uint32_t **pixels, rect_t rect, boo
  * This function writes to multiple buffers in the framebuffer.
  * It supports optional rotation of the buffer content.
  *
+ * @param display The display structure.
  * @param pixels Array of pointers to the pixel data for each buffer.
  * @param rect The rectangle area to read/write.
  * @param rotate Whether to rotate the buffer content.

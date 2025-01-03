@@ -105,7 +105,7 @@ uint32_t *__screenshot_buffer(void)
  * @return true Screenshot was saved
  * @return false Screenshot was not saved
  */
-bool __screenshot_save(const uint32_t *buffer, const char *screenshot_path)
+bool screenshot_save(const uint32_t *buffer, const char *screenshot_path, bool rotate180)
 {
     uint32_t *src;
     uint32_t line_buffer[RENDER_WIDTH], x, y, pix;
@@ -130,11 +130,14 @@ bool __screenshot_save(const uint32_t *buffer, const char *screenshot_path)
                  PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
     png_write_info(png_ptr, info_ptr);
 
-    src = (uint32_t *)buffer + RENDER_WIDTH * RENDER_HEIGHT;
+    src = (uint32_t *)buffer;
+    if (rotate180) {
+        src += RENDER_WIDTH * RENDER_HEIGHT;
+    }
 
     for (y = 0; y < RENDER_HEIGHT; y++) {
         for (x = 0; x < RENDER_WIDTH; x++) {
-            pix = *--src;
+            pix = rotate180 ? *(--src) : *(src++);
             line_buffer[x] = 0xFF000000 | (pix & 0x0000FF00) | (pix & 0x00FF0000) >> 16 | (pix & 0x000000FF) << 16;
         }
         png_write_row(png_ptr, (png_bytep)line_buffer);
@@ -167,7 +170,7 @@ bool __screenshot_perform(bool(get_path)(char *), pid_t p_id)
     }
 
     if (get_path(path)) {
-        retval = __screenshot_save(buffer, path);
+        retval = screenshot_save(buffer, path, true);
     }
 
     free(buffer);

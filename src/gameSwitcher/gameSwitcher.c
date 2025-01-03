@@ -4,7 +4,6 @@
 #include <fcntl.h>
 #include <libgen.h>
 #include <linux/fb.h>
-#include <linux/input.h>
 #include <pthread.h>
 #include <signal.h>
 #include <sqlite3/sqlite3.h>
@@ -19,7 +18,6 @@
 #include "png/png.h"
 
 #include "system/battery.h"
-#include "system/keymap_sw.h"
 #include "system/lang.h"
 #include "system/settings.h"
 #include "system/state.h"
@@ -27,35 +25,14 @@
 #include "theme/sound.h"
 #include "theme/theme.h"
 #include "utils/config.h"
-#include "utils/file.h"
-#include "utils/hash.h"
-#include "utils/json.h"
-#include "utils/keystate.h"
-#include "utils/log.h"
 #include "utils/msleep.h"
-#include "utils/sdl_init.h"
-#include "utils/str.h"
+#include "utils/retroarch_cmd.h"
+#include "utils/sdl_direct_fb.h"
 #include "utils/surfaceSetAlpha.h"
 
-#include "../playActivity/cacheDB.h"
 #include "../playActivity/playActivityDB.h"
 
-#define MAXHISTORY 100
-#define MAXHROMNAMESIZE 250
-#define MAXHROMPATHSIZE 150
-
-#define ROM_SCREENS_DIR "/mnt/SDCARD/Saves/CurrentProfile/romScreens"
-
-#define MAXFILENAMESIZE 250
-#define MAXSYSPATHSIZE 80
-
-#define LOWBATRUMBLE 10
-
-// Max number of records in the DB
-#define MAXVALUES 1000
-
-#define GPIO_DIR1 "/sys/class/gpio/"
-#define GPIO_DIR2 "/sys/devices/gpiochip0/gpio/"
+#include "history.h"
 
 #define VIEW_NORMAL 0
 #define VIEW_MINIMAL 1
@@ -63,8 +40,6 @@
 
 static bool quit = false;
 static bool exit_to_menu = false;
-
-static pthread_t thread_pt;
 
 static void sigHandler(int sig)
 {
@@ -81,21 +56,6 @@ static void sigHandler(int sig)
 
 static char sTotalTimePlayed[50] = "";
 
-// Game history list
-typedef struct {
-    char name[MAXHROMNAMESIZE * 2];
-    char shortname[STR_MAX * 2];
-    char LaunchCommand[STR_MAX * 3 + 80];
-    char totalTime[100];
-    int gameIndex;
-    int lineNumber;
-    SDL_Surface *romScreen;
-    char romImagePath[STR_MAX * 4];
-    char path[PATH_MAX * 2];
-} Game_s;
-static Game_s game_list[MAXHISTORY];
-
-static int game_list_len = 0;
 static int current_game = 0;
 
 static SDL_Surface *surfaceGameName = NULL;
@@ -104,290 +64,31 @@ static int gameNameScrollSpeed = 10;
 static int gameNameScrollStart = 20;
 static int gameNameScrollEnd = 20;
 
-static cJSON *json_root = NULL;
-
-static bool __initial_romscreens_loaded = false;
-
-void unloadRomScreen(int index)
-{
-    if (index < 0 || index >= game_list_len)
-        return;
-    Game_s *game = &game_list[index];
-
-    if (game->romScreen != NULL) {
-        SDL_FreeSurface(game->romScreen);
-        game->romScreen = NULL;
-    }
-}
-
-SDL_Surface *loadRomScreen(int index)
-{
-    if (index < 0 || index >= game_list_len)
-        return NULL;
-
-    Game_s *game = &game_list[index];
-
-    if (game->romScreen == NULL) {
-        char currPicture[STR_MAX * 2];
-        uint32_t hash;
-        hash = FNV1A_Pippip_Yurii(game->path, strlen(game->path));
-        sprintf(currPicture, ROM_SCREENS_DIR "/%" PRIu32 ".png", hash);
-
-        // Show artwork
-        if (!exists(currPicture))
-            sprintf(currPicture, game->romImagePath);
-
-        if (exists(currPicture)) {
-            strcpy(game->romImagePath, currPicture);
-            game->romScreen = IMG_Load(currPicture);
-        }
-    }
-
-    if (__initial_romscreens_loaded) {
-        unloadRomScreen(index + 5);
-        if (index > 5) {
-            unloadRomScreen(index - 5);
-        }
-    }
-
-    return game->romScreen;
-}
-
-void freeRomScreens()
-{
-    for (int i = 0; i < game_list_len; i++) {
-        Game_s *game = &game_list[i];
-
-        if (game->romScreen != NULL) {
-            SDL_FreeSurface(game->romScreen);
-            game->romScreen = NULL;
-        }
-    }
-}
-
-static void *_loadRomScreensThread(void *_)
-{
-    for (int i = 0; i < 10 && i < game_list_len; i++) {
-        Game_s *game = &game_list[i];
-
-        if (game->romScreen == NULL)
-            loadRomScreen(i);
-    }
-
-    __initial_romscreens_loaded = true;
-
-    return NULL;
-}
-
-void getGameName(char *name_out, const char *rom_path)
-{
-    CacheDBItem *cache_item = cache_db_find(rom_path);
-    if (cache_item != NULL) {
-        strcpy(name_out, cache_item->name);
-        free(cache_item);
-    }
-    else {
-        char *no_extension = file_removeExtension(file_basename(rom_path));
-        strcpy(name_out, no_extension);
-        free(no_extension);
-    }
-}
-
-/**
- * @brief For debugging
- *
- */
-void printHistory()
-{
-    print_debug("---------------------------\n");
-    print_debug("---------------------------\n");
-    for (int i = 0; i < game_list_len; i++) {
-        printf_debug("name: %s\n", game_list[i].name);
-        printf_debug("shortname: %s\n", game_list[i].shortname);
-        printf_debug("LaunchCommand: %s\n", game_list[i].LaunchCommand);
-        printf_debug("totalTime: %i\n", game_list[i].totalTime);
-        printf_debug("gameIndex: %i\n", game_list[i].gameIndex);
-        printf_debug("lineNumber: %i\n", game_list[i].lineNumber);
-        printf_debug("romImagePath: %s\n", game_list[i].romImagePath);
-        printf_debug("path: %s\n", game_list[i].path);
-        print_debug("\n\n");
-    }
-}
-
-/**
- * @brief History extraction
- *
- */
-void readHistory()
-{
-    FILE *file;
-    char line[STR_MAX * 3];
-    char *jsonContent;
-    int nbGame = 0;
-    int lineCounter = 0;
-    file = fopen(getMiyooRecentFilePath(), "r");
-
-    if (file == NULL) {
-        print_debug("Error opening file");
-        return;
-    }
-
-    while ((fgets(line, STR_MAX * 6, file) != NULL) && (nbGame < MAXHISTORY)) {
-        char label[STR_MAX * 2];
-        char rompath[STR_MAX * 2];
-        char imgpath[STR_MAX * 2];
-        char launch[STR_MAX * 2];
-        int type;
-        lineCounter++;
-
-        jsonContent = (char *)malloc(strlen(line) + 1);
-        if (jsonContent == NULL) {
-            print_debug("Memory allocation error");
-            fclose(file);
-            return;
-        }
-
-        strcpy(jsonContent, line);
-        printf_debug("jsonContent: %s\n", jsonContent);
-
-        sscanf(strstr(jsonContent, "\"type\":") + 7, "%d", &type);
-
-        if ((type != 5) && (type != 17)) {
-            free(jsonContent);
-            continue;
-        }
-
-        print_debug("type 5");
-
-        const char *labelStart = strstr(jsonContent, "\"label\":\"");
-        if (labelStart != NULL) {
-            labelStart += 9;
-            const char *labelEnd = strchr(labelStart, '\"');
-            strncpy(label, labelStart, labelEnd - labelStart);
-            label[labelEnd - labelStart] = '\0';
-        }
-        printf_debug("label: %s\n", label);
-        const char *rompathStart = strstr(jsonContent, "\"rompath\":\"");
-        if (rompathStart != NULL) {
-            rompathStart += 11;
-            const char *rompathEnd = strchr(rompathStart, '\"');
-            strncpy(rompath, rompathStart, rompathEnd - rompathStart);
-            rompath[rompathEnd - rompathStart] = '\0';
-        }
-        printf_debug("rompath: %s\n", rompath);
-        const char *imgpathStart = strstr(jsonContent, "\"imgpath\":\"");
-        if (imgpathStart != NULL) {
-            imgpathStart += 11;
-            const char *imgpathEnd = strchr(imgpathStart, '\"');
-            strncpy(imgpath, imgpathStart, imgpathEnd - imgpathStart);
-            imgpath[imgpathEnd - imgpathStart] = '\0';
-        }
-        printf_debug("imgpath: %s\n", imgpath);
-
-        char *colonPosition = strchr(rompath, ':');
-        if (colonPosition != NULL) {
-
-            int position = (int)(colonPosition - rompath);
-
-            char firstPart[position + 1];
-            strncpy(firstPart, rompath, position);
-            firstPart[position] = '\0';
-
-            char secondPart[strlen(rompath) - position];
-            strcpy(secondPart, colonPosition + 1);
-
-            strcpy(launch, firstPart);
-            strcpy(rompath, secondPart);
-            printf_debug("launch cutted: %s\n", launch);
-            printf_debug("rompath cutted: %s\n", rompath);
-        }
-        else {
-            const char *launchStart = strstr(jsonContent, "\"launch\":\"");
-            if (launchStart != NULL) {
-                launchStart += 10;
-                const char *launchEnd = strchr(launchStart, '\"');
-                strncpy(launch, launchStart, launchEnd - launchStart);
-                launch[launchEnd - launchStart] = '\0';
-            }
-        }
-
-        printf_debug("launch: %s\n", launch);
-        free(jsonContent);
-
-        if (!exists(rompath) || !exists(launch))
-            continue;
-
-        // Search for duplicates
-        bool bGameExists = false;
-        for (int i = 0; i < nbGame; i++) {
-            if (strcmp(rompath, game_list[i].path) == 0) {
-                bGameExists = true;
-                break;
-            }
-        }
-        if (bGameExists) {
-            // recentlist line deletion
-            file_delete_line(getMiyooRecentFilePath(), lineCounter);
-            lineCounter--;
-            continue;
-        }
-
-        Game_s *game = &game_list[nbGame];
-
-        game->lineNumber = lineCounter;
-        game->romScreen = NULL;
-        game->totalTime[0] = '\0';
-
-        sprintf(game->LaunchCommand, "LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so \"%s\" \"%s\"", launch, rompath);
-
-        getGameName(game->name, rompath);
-        strcpy(game->path, rompath);
-        strcpy(game->romImagePath, imgpath);
-        file_cleanName(game->shortname, game->name);
-        game->gameIndex = nbGame + 1;
-        game = &game_list[nbGame];
-
-        nbGame++;
-
-        printf_debug("name: %s\n", game->name);
-        printf_debug("shortname: %s\n", game->shortname);
-        printf_debug("LaunchCommand: %s\n", game->LaunchCommand);
-        printf_debug("totalTime: %i\n", game->totalTime);
-        printf_debug("gameIndex: %i\n", game->gameIndex);
-        printf_debug("lineNumber: %i\n", game->lineNumber);
-        printf_debug("romImagePath: %s\n", game->romImagePath);
-        printf_debug("path: %s\n", game->path);
-    }
-
-    game_list_len = nbGame;
-    pthread_create(&thread_pt, NULL, _loadRomScreensThread, NULL);
-}
-
 void removeCurrentItem()
 {
     Game_s *game = &game_list[current_game];
 
     printf_debug("removing: %s\n", game->name);
-    printf_debug("linenumber: %i\n", game->lineNumber);
+    printf_debug("linenumber: %i\n", game->recentItem.lineNo);
 
     if (game->romScreen != NULL) {
         SDL_FreeSurface(game->romScreen);
         game->romScreen = NULL;
     }
 
-    file_delete_line(getMiyooRecentFilePath(), game->lineNumber);
+    file_delete_line(getMiyooRecentFilePath(), game->recentItem.lineNo);
 
-    if (strlen(game->romImagePath) > 0 && is_file(game->romImagePath)) {
-        if (strncmp(game->romImagePath, ROM_SCREENS_DIR, strlen(ROM_SCREENS_DIR)) == 0) {
-            remove(game->romImagePath);
+    if (strlen(game->recentItem.imgpath) > 0 && is_file(game->recentItem.imgpath)) {
+        if (strncmp(game->recentItem.imgpath, ROM_SCREENS_DIR, strlen(ROM_SCREENS_DIR)) == 0) {
+            remove(game->recentItem.imgpath);
         }
     }
 
     // Copy next element value to current element
     for (int i = current_game; i < game_list_len - 1; i++) {
         game_list[i] = game_list[i + 1];
-        game_list[i].lineNumber -= 1;
-        game_list[i].gameIndex -= 1;
+        game_list[i].recentItem.lineNo -= 1;
+        game_list[i].index -= 1;
     }
 
     game_list_len--;
@@ -403,22 +104,125 @@ int checkQuitAction(void)
     return 0;
 }
 
+void renderCentered(SDL_Surface *image, int view_mode, SDL_Rect *overrideSrcRect, SDL_Rect *overrideDestRect)
+{
+    int offSetX = (int)(640 - image->w) / 2;
+    int offSetY = (int)(480 - image->h) / 2;
+
+    SDL_Rect image_size = {0, 0, 640, 480};
+    SDL_Rect image_pos = {offSetX, offSetY};
+
+    if (view_mode == VIEW_NORMAL) {
+        image_size.x = theme()->frame.border_left;
+        image_size.w -= theme()->frame.border_left + theme()->frame.border_right;
+        image_pos.x += theme()->frame.border_left;
+    }
+
+    if (overrideSrcRect != NULL) {
+        image_size = *overrideSrcRect;
+        image_size.x -= offSetX;
+        image_size.y -= offSetY;
+    }
+
+    if (overrideDestRect != NULL) {
+        image_pos = *overrideDestRect;
+    }
+
+    SDL_BlitSurface(image, &image_size, screen, &image_pos);
+}
+
+void exitOverlay(const bool is_overlay, pthread_t autosave_thread_pt)
+{
+    if (is_overlay) {
+        // wait for autosave thread to finish
+        pthread_join(autosave_thread_pt, NULL);
+
+        // force kill retroarch
+        temp_flag_set(".forceKillRetroarch", true);
+        system("killall -9 retroarch");
+    }
+}
+
+void setFbAsFirstRomScreen(void)
+{
+    if (game_list_len == 0)
+        return;
+
+    Game_s *game = &game_list[0];
+
+    if (game->romScreen != NULL) {
+        SDL_FreeSurface(game->romScreen);
+        game->romScreen = NULL;
+    }
+
+    SDL_Surface *fb = SDL_CreateRGBSurface(SDL_SWSURFACE, RENDER_WIDTH, RENDER_HEIGHT, 32, 0, 0, 0, 0);
+    display_readCurrentBuffer(&g_display, (uint32_t *)fb->pixels, (rect_t){0, 0, RENDER_WIDTH, RENDER_HEIGHT}, true, false);
+
+    game->romScreen = zoomSurface(fb, 640.0 / g_display.width, 480.0 / g_display.height, SMOOTHING_OFF);
+    SDL_FreeSurface(fb);
+
+    if (game->romScreen == NULL) {
+        print_debug("Error creating fb surface\n");
+    }
+}
+
+static void *_saveRomScreenAndStateThread(void *arg)
+{
+    msleep(200);
+
+    RetroArchStatus_s status;
+
+    if (retroarch_getStatus(&status) == -1) {
+        print_debug("Error getting RetroArch status\n");
+        return NULL;
+    }
+
+    if (status.status == RETROARCH_STATE_CONTENTLESS || status.status == RETROARCH_STATE_UNKNOWN) {
+        print_debug("RetroArch is not running\n");
+        return NULL;
+    }
+
+    if (status.status == RETROARCH_STATE_PLAYING) {
+        retroarch_pause();
+    }
+
+    Game_s *game = &game_list[current_game];
+
+    if (game->romScreen != NULL) {
+        char romScreenPath[STR_MAX];
+        uint32_t hash = FNV1A_Pippip_Yurii(game->recentItem.rompath, strlen(game->recentItem.rompath));
+        snprintf(romScreenPath, sizeof(romScreenPath), ROM_SCREENS_DIR "/%" PRIu32 ".png", hash);
+        screenshot_save((uint32_t *)game->romScreen->pixels, romScreenPath, false);
+        printf_debug("Saved rom screen: %s\n", romScreenPath);
+    }
+
+    retroarch_autosave();
+
+    return NULL;
+}
+
 int main(int argc, char *argv[])
 {
+    const bool is_overlay = argc > 1 && strcmp(argv[1], "--overlay") == 0;
+
     log_setName("gameSwitcher");
     print_debug("\n\nDebug logging enabled");
 
     signal(SIGINT, sigHandler);
     signal(SIGTERM, sigHandler);
 
-    SDL_InitDefault(true);
+    init();
 
-    SDL_BlitSurface(theme_background(), NULL, screen, NULL);
-    SDL_BlitSurface(screen, NULL, video, NULL);
-    SDL_Flip(video);
+    readFirstEntry();
 
-    readHistory();
-    //printHistory();
+    pthread_t autosave_thread_pt;
+    if (is_overlay) {
+        retroarch_pause();
+        setFbAsFirstRomScreen();
+        pthread_create(&autosave_thread_pt, NULL, _saveRomScreenAndStateThread, NULL);
+    }
+
+    loadRomScreens();
 
     settings_load();
     lang_load();
@@ -441,6 +245,7 @@ int main(int argc, char *argv[])
     bool brightness_changed = false;
 
     KeyState keystate[320] = {(KeyState)0};
+    bool btn_a_pressed = false;
     bool menu_pressed = false;
     bool combo_key = false;
     bool select_pressed = false;
@@ -480,6 +285,9 @@ int main(int argc, char *argv[])
         footer_height = 0;
 
     SDL_Surface *current_bg = NULL;
+    bool first_render = true;
+
+    print_debug("gameSwitcher started\n");
 
     while (!quit) {
         uint32_t ticks = SDL_GetTicks();
@@ -498,7 +306,7 @@ int main(int argc, char *argv[])
             changed = true;
         }
 
-        if (updateKeystate(keystate, &quit, true, &changed_key)) {
+        if (_updateKeystate(keystate, &quit, true, &changed_key)) {
             if (menu_pressed && changed_key != SW_BTN_MENU)
                 combo_key = true;
             if (select_pressed && changed_key != SW_BTN_SELECT)
@@ -537,8 +345,13 @@ int main(int argc, char *argv[])
                 break;
             }
 
-            if (keystate[SW_BTN_A] == PRESSED)
+            if (keystate[SW_BTN_A] == PRESSED) {
+                btn_a_pressed = true;
+            }
+            else if (keystate[SW_BTN_A] == RELEASED && btn_a_pressed) {
+                btn_a_pressed = false;
                 break;
+            }
 
             if (keystate[SW_BTN_B] == PRESSED) {
                 exit_to_menu = true;
@@ -622,12 +435,11 @@ int main(int argc, char *argv[])
                         screen, "Remove from history",
                         "Are you sure you want to\nremove game from history?",
                         true);
-                    SDL_BlitSurface(screen, NULL, video, NULL);
-                    SDL_Flip(video);
+                    render();
                     sound_change();
 
                     while (!quit) {
-                        if (updateKeystate(keystate, &quit, true, NULL)) {
+                        if (_updateKeystate(keystate, &quit, true, NULL)) {
                             if (keystate[SW_BTN_A] == PRESSED) {
                                 removeCurrentItem();
                                 if (current_game > 0)
@@ -668,8 +480,11 @@ int main(int argc, char *argv[])
             if (!changed && !brightness_changed && (surfaceGameName == NULL || surfaceGameName->w <= game_name_max_width))
                 continue;
 
+            Game_s *game = &game_list[current_game];
+            processItem(game);
+
             if (changed) {
-                SDL_BlitSurface(theme_background(), NULL, screen, NULL);
+                SDL_FillRect(screen, NULL, 0);
 
                 if (game_list_len == 0) {
                     current_bg = NULL;
@@ -682,40 +497,16 @@ int main(int argc, char *argv[])
                     current_bg = loadRomScreen(current_game);
 
                     if (current_bg != NULL) {
-
-                        if (current_bg->w > 640 || current_bg->h > 480) {
-                            printf_debug("Scaling screenshot from %dx%d to 640x480\n", current_bg->w, current_bg->h);
-                            SDL_Rect dest_rect = {0, 0, 640, 480};
-                            SDL_SoftStretch(current_bg, NULL, current_bg, &dest_rect);
-                            current_bg->w = 640;
-                            current_bg->h = 480;
-                        }
-
-                        int offSetX = (int)(640 - current_bg->w) / 2;
-                        int offSetY = (int)(480 - current_bg->h) / 2;
-
-                        SDL_Rect game_name_bg_size = {0, 0, 640, 480};
-                        SDL_Rect game_name_bg_pos = {offSetX, offSetY};
-
-                        SDL_Rect frame = {theme()->frame.border_left, 0, 640 - theme()->frame.border_left - theme()->frame.border_right, 480};
-                        SDL_Rect frame_pos = {offSetX + theme()->frame.border_left, offSetY};
-
-                        if (view_mode == VIEW_NORMAL)
-                            SDL_BlitSurface(current_bg, &frame, screen, &frame_pos);
-                        else
-                            SDL_BlitSurface(current_bg, &game_name_bg_size, screen, &game_name_bg_pos);
+                        renderCentered(current_bg, view_mode, NULL, NULL);
                     }
                 }
             }
-
-            Game_s *game = &game_list[current_game];
 
             if (view_mode != VIEW_FULLSCREEN && game_list_len > 0) {
                 SDL_Rect game_name_bg_size = {0, 0, 640, 60};
                 SDL_Rect game_name_bg_pos = {0, 360};
 
                 if (view_mode == VIEW_NORMAL) {
-
                     game_name_bg_size.x = game_name_bg_pos.x =
                         theme()->frame.border_left;
                     game_name_bg_size.w -= theme()->frame.border_left +
@@ -725,10 +516,16 @@ int main(int argc, char *argv[])
                 game_name_bg_size.y = game_name_bg_pos.y =
                     view_mode == VIEW_NORMAL ? (480 - footer_height - 60) : 420;
 
-                SDL_BlitSurface(current_bg, &game_name_bg_size, screen,
-                                &game_name_bg_pos);
-                SDL_BlitSurface(transparent_bg, &game_name_bg_size, screen,
-                                &game_name_bg_pos);
+                game_name_bg_pos.w = game_name_bg_size.w;
+                game_name_bg_pos.h = game_name_bg_size.h;
+
+                SDL_FillRect(screen, &game_name_bg_pos, 0);
+
+                if (current_bg != NULL) {
+                    renderCentered(current_bg, view_mode, &game_name_bg_size, &game_name_bg_pos);
+                }
+
+                SDL_BlitSurface(transparent_bg, &game_name_bg_size, screen, &game_name_bg_pos);
 
                 if (current_game > 0) {
                     SDL_Rect arrow_left_rect = {theme()->frame.border_left + 10,
@@ -787,8 +584,7 @@ int main(int argc, char *argv[])
             }
 
             if (!changed) {
-                SDL_BlitSurface(screen, NULL, video, NULL);
-                SDL_Flip(video);
+                render();
                 continue;
             }
 
@@ -803,11 +599,13 @@ int main(int argc, char *argv[])
                 else {
                     theme_renderFooter(screen);
                     theme_renderStandardHint(
-                        screen, lang_get(LANG_RESUME, LANG_FALLBACK_RESUME),
+                        screen, lang_get(LANG_RESUME_UC, LANG_FALLBACK_RESUME_UC),
                         lang_get(LANG_BACK, LANG_FALLBACK_BACK));
-                    theme_renderFooterStatus(
-                        screen, game_list_len > 0 ? current_game + 1 : 0,
-                        game_list_len);
+                    if (!first_render) {
+                        theme_renderFooterStatus(
+                            screen, game_list_len > 0 ? current_game + 1 : 0,
+                            game_list_len);
+                    }
                 }
             }
 
@@ -815,7 +613,7 @@ int main(int argc, char *argv[])
                 char title_str[STR_MAX] = "GameSwitcher";
                 if (show_time && game_list_len > 0) {
                     if (strlen(game->totalTime) == 0) {
-                        str_serializeTime(game->totalTime, play_activity_get_play_time(game->path));
+                        str_serializeTime(game->totalTime, play_activity_get_play_time(game->recentItem.rompath));
                     }
                     strcpy(title_str, game->totalTime);
 
@@ -874,36 +672,45 @@ int main(int argc, char *argv[])
                 SDL_BlitSurface(brightness, NULL, screen, &brightness_rect);
             }
 
-            SDL_BlitSurface(screen, NULL, video, NULL);
-            SDL_Flip(video);
+            render();
 
-            changed = false;
-            current_game_changed = false;
+            if (first_render) {
+                first_render = false;
+                readHistory();
+                loadRomScreens();
+            }
+            else {
+                changed = false;
+                current_game_changed = false;
+            }
         }
     }
-
-    screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
 
     if (exit_to_menu) {
         print_debug("Exiting to menu");
         remove("/mnt/SDCARD/.tmp_update/.runGameSwitcher");
         remove("/mnt/SDCARD/.tmp_update/cmd_to_run.sh");
+        exitOverlay(is_overlay, autosave_thread_pt);
     }
-
+    else if (is_overlay && current_game == 0) {
+        if (current_bg != NULL) {
+            SDL_FillRect(screen, NULL, 0);
+            renderCentered(current_bg, VIEW_FULLSCREEN, NULL, NULL);
+            render();
+        }
+        retroarch_unpause();
+        msleep(200);
+        remove("/mnt/SDCARD/.tmp_update/.runGameSwitcher");
+    }
     else {
-        printf_debug("Resuming game - current_game : %i - gameIndex: %i", current_game, game_list[current_game].gameIndex);
-        resumeGame(game_list[current_game].gameIndex);
+        printf_debug("Resuming game - current_game : %i - index: %i", current_game, game_list[current_game].index);
+        resumeGame(game_list[current_game].index);
+        exitOverlay(is_overlay, autosave_thread_pt);
     }
 
 #ifndef PLATFORM_MIYOOMINI
     msleep(200);
 #endif
-
-    if (json_root != NULL)
-        cJSON_Delete(json_root);
-
-    SDL_BlitSurface(screen, NULL, video, NULL);
-    SDL_Flip(video);
 
     if (custom_header != NULL)
         SDL_FreeSurface(custom_header);
@@ -916,12 +723,9 @@ int main(int argc, char *argv[])
     SDL_FreeSurface(transparent_bg);
 
     freeRomScreens();
+    freeRetroArchHistory();
 
-    SDL_FreeSurface(screen);
-    SDL_FreeSurface(video);
-
-    TTF_Quit();
-    SDL_Quit();
+    deinit();
 
     return EXIT_SUCCESS;
 }

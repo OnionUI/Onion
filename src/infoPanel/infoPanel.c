@@ -13,8 +13,9 @@
 #include "theme/theme.h"
 #include "utils/file.h"
 #include "utils/json.h"
+#include "utils/log.h"
 #include "utils/msleep.h"
-#include "utils/sdl_init.h"
+#include "utils/sdl_direct_fb.h"
 #include "utils/str.h"
 
 #define FRAMES_PER_SECOND 60
@@ -81,34 +82,26 @@ static bool loadImagesPathsFromJson(const char *config_path,
     return true;
 }
 
-static void drawInfoPanel(SDL_Surface *screen, SDL_Surface *video,
-                          const char *title_str, char *message_str)
+static void drawInfoPanel(SDL_Surface *screen, const char *title_str, char *message_str)
 {
-    bool has_title = strlen(title_str) > 0;
-    bool has_message = strlen(message_str) > 0;
-
-    SDL_Surface *message = NULL;
-    SDL_Rect message_rect = {320, 240};
+    bool has_title = title_str != NULL && strlen(title_str) > 0;
+    bool has_message = message_str != NULL && strlen(message_str) > 0;
 
     theme_renderHeader(screen, has_title ? title_str : NULL, !has_title);
 
     if (has_message) {
+        SDL_Surface *message = NULL;
         char *str = str_replace(message_str, "\\n", "\n");
-        message = theme_textboxSurface(str, resource_getFont(TITLE),
-                                       theme()->list.color, ALIGN_CENTER);
-        message_rect.x -= message->w / 2;
-        message_rect.y -= message->h / 2;
-        SDL_BlitSurface(message, NULL, screen, &message_rect);
-        SDL_FreeSurface(message);
+        message = theme_textboxSurface(str, resource_getFont(TITLE), theme()->list.color, ALIGN_CENTER);
+        if (message) {
+            SDL_Rect message_rect = {320, 240};
+            message_rect.x -= message->w / 2;
+            message_rect.y -= message->h / 2;
+            SDL_BlitSurface(message, NULL, screen, &message_rect);
+            SDL_FreeSurface(message);
+        }
         free(str);
     }
-}
-
-static void sdlQuit(SDL_Surface *screen, SDL_Surface *video)
-{
-    SDL_FreeSurface(screen);
-    SDL_FreeSurface(video);
-    SDL_Quit();
 }
 
 const SDL_Rect *getControlsAwareFrame(const SDL_Rect *frame)
@@ -169,7 +162,7 @@ int main(int argc, char *argv[])
     signal(SIGINT, sigHandler);
     signal(SIGTERM, sigHandler);
 
-    SDL_InitDefault(false);
+    init();
 
     settings_load();
     lang_load();
@@ -198,8 +191,7 @@ int main(int argc, char *argv[])
         drawImage(static_image, screen, NULL);
     }
     else if (exists(images_json_path)) {
-        if (loadImagesPathsFromJson(images_json_path, &g_images_paths,
-                                    &g_images_paths_count, &g_images_titles) &&
+        if (loadImagesPathsFromJson(images_json_path, &g_images_paths, &g_images_paths_count, &g_images_titles) &&
             g_images_paths_count > 0) {
             g_image_index = 0;
             drawBackground();
@@ -208,7 +200,7 @@ int main(int argc, char *argv[])
                              getControlsAwareFrame(&themedFrame), &cache_used);
         }
         else {
-            sdlQuit(screen, video);
+            deinit();
             return EXIT_FAILURE;
         }
     }
@@ -223,7 +215,7 @@ int main(int argc, char *argv[])
                              getControlsAwareFrame(&themedFrame), &cache_used);
         }
         else {
-            sdlQuit(screen, video);
+            deinit();
             return EXIT_FAILURE;
         }
     }
@@ -232,22 +224,19 @@ int main(int argc, char *argv[])
         g_show_theme_controls = true;
     }
     else if (is_persistent) {
-        // Clear the screen when exiting
-        SDL_FillRect(video, NULL, 0);
-        SDL_Flip(video);
         while (!temp_flag_get("dismiss_info_panel")) {
             msleep(15);
         }
         temp_flag_set("dismiss_info_panel", false);
-        sdlQuit(screen, video);
+        deinit();
         return EXIT_SUCCESS;
     }
     else {
-        sdlQuit(screen, video);
+        deinit();
         return EXIT_FAILURE;
     }
 
-    SDL_Event event;
+    KeyState keystate[320] = {(KeyState)0};
     bool canceled = false;
 
     while (!quit) {
@@ -255,13 +244,13 @@ int main(int argc, char *argv[])
         acc_ticks += ticks - last_ticks;
         last_ticks = ticks;
 
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_KEYDOWN) {
+        SDLKey changed_key = SDLK_UNKNOWN;
+        if (_updateKeystate(keystate, &quit, true, &changed_key)) {
+            if (keystate[changed_key] == PRESSED) {
                 bool navigation_pressed = true;
                 bool navigating_forward = true;
-                const SDLKey key_pressed = event.key.keysym.sym;
 
-                switch (key_pressed) {
+                switch (changed_key) {
                 case SW_BTN_A:
                 case SW_BTN_RIGHT:
                     navigating_forward = true;
@@ -303,9 +292,9 @@ int main(int argc, char *argv[])
                     continue;
                 }
 
-                if ((navigating_forward && key_pressed == SW_BTN_RIGHT && g_image_index == g_images_paths_count - 1) ||
-                    (!navigating_forward && key_pressed == SW_BTN_LEFT && g_image_index == 0) ||
-                    (info_panel_mode && (key_pressed == SW_BTN_RIGHT || key_pressed == SW_BTN_LEFT))) {
+                if ((navigating_forward && changed_key == SW_BTN_RIGHT && g_image_index == g_images_paths_count - 1) ||
+                    (!navigating_forward && changed_key == SW_BTN_LEFT && g_image_index == 0) ||
+                    (info_panel_mode && (changed_key == SW_BTN_RIGHT || changed_key == SW_BTN_LEFT))) {
                     continue;
                 }
 
@@ -313,7 +302,7 @@ int main(int argc, char *argv[])
                     || (navigating_forward && g_image_index == g_images_paths_count - 1) // exit after last image
                     || (!navigating_forward && g_image_index == 0))                      // or when navigating backwards from the first image
                 {
-                    if (key_pressed == SW_BTN_B || key_pressed == SW_BTN_MENU)
+                    if (changed_key == SW_BTN_B || changed_key == SW_BTN_MENU)
                         canceled = true;
                     quit = true;
                     continue;
@@ -322,10 +311,8 @@ int main(int argc, char *argv[])
                 const int current_index = g_image_index;
                 navigating_forward ? g_image_index++ : g_image_index--;
                 drawBackground();
-                drawImageByIndex(g_image_index, current_index, g_images_paths,
-                                 g_images_paths_count, screen,
-                                 getControlsAwareFrame(&themedFrame),
-                                 &cache_used);
+                drawImageByIndex(g_image_index, current_index, g_images_paths, g_images_paths_count, screen,
+                                 getControlsAwareFrame(&themedFrame), &cache_used);
 
                 all_changed = true;
             }
@@ -352,7 +339,7 @@ int main(int argc, char *argv[])
                 if (g_show_theme_controls) {
                     if (header_changed || battery_changed) {
                         if (strlen(title_str) > 0) {
-                            drawInfoPanel(screen, video, title_str, message_str);
+                            drawInfoPanel(screen, title_str, message_str);
                         }
                         else if (g_images_titles) {
                             const char *title = g_images_titles[g_image_index];
@@ -360,15 +347,11 @@ int main(int argc, char *argv[])
                         }
                         else {
                             char *current_image_path = image_path;
-                            if (g_images_paths_count > 0 && g_images_paths &&
-                                g_image_index >= 0) {
+                            if (g_images_paths_count > 0 && g_images_paths && g_image_index >= 0) {
                                 current_image_path = g_images_paths[g_image_index];
                             }
                             char *no_extension = file_removeExtension(basename(current_image_path));
-                            theme_renderHeader(
-                                screen,
-                                no_extension,
-                                false);
+                            theme_renderHeader(screen, no_extension, false);
                             free(no_extension);
                         }
                     }
@@ -394,21 +377,18 @@ int main(int argc, char *argv[])
                             theme_renderStandardHint(screen, a_btn_text, b_btn_text);
                     }
 
-                    if (footer_changed && !info_panel_mode &&
-                        g_images_paths_count > 1)
+                    if (footer_changed && !info_panel_mode && g_images_paths_count > 1)
                         theme_renderFooterStatus(screen, g_image_index + 1, g_images_paths_count);
 
                     if (header_changed || battery_changed)
                         theme_renderHeaderBattery(screen, battery_percentage);
 
                     if (header_changed || footer_changed || battery_changed) {
-                        SDL_BlitSurface(screen, NULL, video, NULL);
-                        SDL_Flip(video);
+                        render();
                     }
                 }
                 else {
-                    SDL_BlitSurface(screen, NULL, video, NULL);
-                    SDL_Flip(video);
+                    render();
                 }
 
                 header_changed = false;
@@ -453,14 +433,12 @@ int main(int argc, char *argv[])
 
     lang_free();
     resources_free();
-    SDL_FreeSurface(screen);
-    SDL_FreeSurface(video);
 
 #ifndef PLATFORM_MIYOOMINI
     msleep(200); // to clear SDL input on quit
 #endif
 
-    SDL_Quit();
+    deinit();
 
     return canceled ? 255 : EXIT_SUCCESS;
 }

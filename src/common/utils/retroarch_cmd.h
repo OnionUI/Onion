@@ -4,18 +4,36 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+typedef enum RetroArchState {
+    RETROARCH_STATE_UNKNOWN,
+    RETROARCH_STATE_PLAYING,
+    RETROARCH_STATE_PAUSED,
+    RETROARCH_STATE_CONTENTLESS
+} RetroArchState_e;
+
+typedef struct RetroArchStatus {
+    char content_name[256];
+    char system_id[64];
+    char content_crc32[64];
+    RetroArchState_e status;
+} RetroArchStatus_s;
+
 typedef struct RetroArchInfo {
     unsigned int max_disk_slots;
     unsigned int disk_slot;
     int state_slot;
     bool has_state_slot;
-} RetroArchInfo_t;
+} RetroArchInfo_s;
 
 int retroarch_cmd(const char *cmd);                                       // Send RetroArch UDP command
 int retroarch_get(const char *cmd, char *response, size_t response_size); // Get RetroArch UDP command response
 
-int retroarch_quit(void);                     // RetroArch QUIT
-int retroarch_toggleMenu(void);               // RetroArch MENU_TOGGLE
-int retroarch_getInfo(RetroArchInfo_t *info); // Get RetroArch info
+int retroarch_quit(void);                           // RetroArch QUIT
+int retroarch_toggleMenu(void);                     // RetroArch MENU_TOGGLE
+int retroarch_pause(void);                          // RetroArch PAUSE
+int retroarch_unpause(void);                        // RetroArch UNPAUSE
+int retroarch_autosave(void);                       // RetroArch SAVE_STATE_SLOT -1
+int retroarch_getStatus(RetroArchStatus_s *status); // Get RetroArch status
+int retroarch_getInfo(RetroArchInfo_s *info);       // Get RetroArch info
 
 #endif // UTILS_RETROARCH_CMD_H__

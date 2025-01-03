@@ -1,6 +1,7 @@
 #include "retroarch_cmd.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #include "udp.h"
 
@@ -27,7 +28,55 @@ int retroarch_toggleMenu(void)
     return retroarch_cmd("MENU_TOGGLE");
 }
 
-int retroarch_getInfo(RetroArchInfo_t *info)
+int retroarch_pause(void)
+{
+    return retroarch_cmd("PAUSE");
+}
+
+int retroarch_unpause(void)
+{
+    return retroarch_cmd("UNPAUSE");
+}
+
+int retroarch_autosave(void)
+{
+    return retroarch_cmd("SAVE_STATE_SLOT -1");
+}
+
+int retroarch_getStatus(RetroArchStatus_s *status)
+{
+    char response[512];
+    if (retroarch_get("GET_STATUS", response, sizeof(response)) == -1) {
+        return -1;
+    }
+
+    char status_str[32];
+
+    // Parse response "GET_STATUS PLAYING game_boy_advance,The name of the game,crc32=53a4d853"
+    int parsed = sscanf(response, "GET_STATUS %s %s,%s,crc32=%s", status_str, status->system_id, status->content_name, status->content_crc32);
+
+    if (parsed < 4)
+        strcpy(status->content_crc32, "");
+    if (parsed < 3)
+        strcpy(status->content_name, "");
+    if (parsed < 2)
+        strcpy(status->system_id, "");
+    if (parsed < 1)
+        return -1;
+
+    if (strcmp(status_str, "PLAYING") == 0)
+        status->status = RETROARCH_STATE_PLAYING;
+    else if (strcmp(status_str, "PAUSED") == 0)
+        status->status = RETROARCH_STATE_PAUSED;
+    else if (strcmp(status_str, "CONTENTLESS") == 0)
+        status->status = RETROARCH_STATE_CONTENTLESS;
+    else
+        status->status = RETROARCH_STATE_UNKNOWN;
+
+    return 0;
+}
+
+int retroarch_getInfo(RetroArchInfo_s *info)
 {
     char response[128];
     if (retroarch_get("GET_INFO", response, sizeof(response)) == -1) {

@@ -246,7 +246,7 @@ char *history_getRecentPath(char *rom_path)
     file = fopen(getMiyooRecentFilePath(), "r");
 
     if (file == NULL) {
-        return NULL; 
+        return NULL;
     }
 
     while (fgets(line, STR_MAX * 3, file) != NULL) {
@@ -257,7 +257,7 @@ char *history_getRecentPath(char *rom_path)
         strcpy(jsonContent, line);
         sscanf(strstr(jsonContent, "\"type\":") + 7, "%d", &type);
 
-        if ((type != 5)&&(type != 17)) {
+        if ((type != 5) && (type != 17)) {
             free(jsonContent);
             continue;
         }
@@ -295,7 +295,7 @@ char *history_getRecentPath(char *rom_path)
     return NULL;
 }
 
-void resumeGame(int n)
+void resumeGame(int index)
 {
     FILE *file = fopen(getMiyooRecentFilePath(), "r");
 
@@ -307,7 +307,7 @@ void resumeGame(int n)
     }
 
     char jsonContent[STR_MAX * 4];
-    int validGameCount = 0;
+    int validGameCount = -1;
     int lineCount = 0;
 
     while (fgets(jsonContent, sizeof(jsonContent), file) != NULL) {
@@ -319,7 +319,7 @@ void resumeGame(int n)
 
         sscanf(strstr(jsonContent, "\"type\":") + 7, "%d", &type);
 
-        if ((type != 5)&&(type != 17))
+        if ((type != 5) && (type != 17))
             continue;
 
         const char *labelStart = strstr(jsonContent, "\"label\":\"");
@@ -376,9 +376,9 @@ void resumeGame(int n)
         if (!exists(rompath) || !exists(launch))
             continue;
 
-        validGameCount++;
+        ++validGameCount;
 
-        if (validGameCount == n) {
+        if (validGameCount == index) {
 
             FILE *fp;
             char LaunchCommand[STR_MAX * 3];
@@ -392,7 +392,7 @@ void resumeGame(int n)
             if (lineCount > 1) {
                 temp_flag_set("quick_switch", true);
 
-                char * line_n = file_read_lineN(getMiyooRecentFilePath(), lineCount);
+                char *line_n = file_read_lineN(getMiyooRecentFilePath(), lineCount);
                 file_add_line_to_beginning(getMiyooRecentFilePath(), line_n);
                 file_delete_line(getMiyooRecentFilePath(), lineCount + 1);
                 free(line_n);
@@ -409,12 +409,12 @@ void resumeGame(int n)
 
 void set_resumeGame(void)
 {
-    resumeGame(1);
+    resumeGame(0);
 }
 
 void set_quickSwitch(void)
 {
-    resumeGame(2);
+    resumeGame(1);
 }
 
 #endif // SYSTEM_STATE_H__

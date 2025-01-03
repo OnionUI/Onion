@@ -4,6 +4,8 @@
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_rotozoom.h>
 
+#include "utils/log.h"
+
 static SDL_Surface *g_image_cache_prev = NULL;
 static SDL_Surface *g_image_cache_current = NULL;
 static SDL_Surface *g_image_cache_next = NULL;
@@ -18,43 +20,75 @@ static SDL_Surface *g_image_cache_next = NULL;
 
 #define MIN(a, b) (a < b) ? (a) : (b)
 
-void drawImage(SDL_Surface *image, SDL_Surface *screen,
-               const SDL_Rect *frame)
+SDL_Surface *scaleImageIfNecessary(SDL_Surface *image, SDL_Rect target)
+{
+    if (image->w > target.w || image->h > target.h) {
+        double ratio_x = (double)target.w / image->w;
+        double ratio_y = (double)target.h / image->h;
+        double scale = MIN(ratio_x, ratio_y);
+
+        SDL_Surface *scaledImage = zoomSurface(image, scale, scale, SMOOTHING_OFF);
+
+        if (scaledImage) {
+            printf_debug("scaled image from %dx%d to %dx%d\n", image->w, image->h, scaledImage->w, scaledImage->h);
+            return scaledImage;
+        }
+        else {
+            printf("zoomSurface failed: %s\n", SDL_GetError());
+        }
+    }
+
+    return NULL;
+}
+
+SDL_Surface *loadImage(const char *image_path, SDL_Surface *screen)
+{
+    SDL_Surface *image = IMG_Load(image_path);
+
+    if (!image) {
+        printf("Error loading image: %s\n", image_path);
+        return NULL;
+    }
+
+    SDL_Surface *scaledImage = scaleImageIfNecessary(image, screen->clip_rect);
+    if (scaledImage) {
+        SDL_FreeSurface(image);
+        return scaledImage;
+    }
+
+    return image;
+}
+
+SDL_Rect getCenterPos(SDL_Surface *image, SDL_Rect target)
+{
+    SDL_Rect image_pos = {
+        target.x + (target.w - image->w) / 2,
+        target.y + (target.h - image->h) / 2};
+
+    return image_pos;
+}
+
+void drawImage(SDL_Surface *image, SDL_Surface *screen, const SDL_Rect *frame)
 {
     if (!image)
         return;
 
-    SDL_Surface *scaled_image = NULL;
     SDL_Rect target = {0, 0, screen->w, screen->h};
 
     if (frame != NULL) {
         target = *frame;
     }
 
-    // scale image to 640x480 only if bigger (v4 752x560)
-    if (image->w > target.w || image->h > target.h) {
-        double ratio_x = (double)target.w / image->w;
-        double ratio_y = (double)target.h / image->h;
-        double scale = MIN(ratio_x, ratio_y);
-        scaled_image = rotozoomSurface(image, 0.0, scale, true);
-
-        if (scaled_image == NULL) {
-            printf("rotozoomSurface failed: %s\n", SDL_GetError());
-        }
-        else {
-            image = scaled_image;
-        }
+    SDL_Surface *scaledImage = scaleImageIfNecessary(image, target);
+    if (scaledImage) {
+        SDL_Rect image_pos = getCenterPos(scaledImage, target);
+        SDL_BlitSurface(scaledImage, NULL, screen, &image_pos);
+        SDL_FreeSurface(scaledImage);
+        return;
     }
 
-    SDL_Rect image_pos = {
-        target.x + (target.w - image->w) / 2,
-        target.y + (target.h - image->h) / 2};
-
+    SDL_Rect image_pos = getCenterPos(image, target);
     SDL_BlitSurface(image, NULL, screen, &image_pos);
-
-    if (scaled_image != NULL) {
-        SDL_FreeSurface(scaled_image);
-    }
 }
 
 char *drawImageByIndex(const int new_image_index, const int image_index,
@@ -77,12 +111,12 @@ char *drawImageByIndex(const int new_image_index, const int image_index,
             g_image_cache_prev =
                 new_image_index == 0
                     ? NULL
-                    : IMG_Load(images_paths[new_image_index - 1]);
-            g_image_cache_current = IMG_Load(images_paths[new_image_index]);
+                    : loadImage(images_paths[new_image_index - 1], screen);
+            g_image_cache_current = loadImage(images_paths[new_image_index], screen);
             g_image_cache_next =
                 new_image_index == images_paths_count - 1
                     ? NULL
-                    : IMG_Load(images_paths[new_image_index + 1]);
+                    : loadImage(images_paths[new_image_index + 1], screen);
 
             drawImage(g_image_cache_current, screen, frame);
 
@@ -111,7 +145,7 @@ char *drawImageByIndex(const int new_image_index, const int image_index,
             char *image_path_to_load = images_paths[next_image_index];
             DEBUG_PRINT(("preloading next image '%s' for index #%d\n",
                          image_path_to_load, next_image_index));
-            g_image_cache_next = IMG_Load(image_path_to_load);
+            g_image_cache_next = loadImage(image_path_to_load, screen);
         }
         *cache_used = true;
     }
@@ -130,7 +164,7 @@ char *drawImageByIndex(const int new_image_index, const int image_index,
             char *image_path_to_load = images_paths[prev_image_index];
             DEBUG_PRINT(("preloading prev image '%s' for index #%d\n",
                          image_path_to_load, prev_image_index));
-            g_image_cache_prev = IMG_Load(image_path_to_load);
+            g_image_cache_prev = loadImage(image_path_to_load, screen);
         }
 
         *cache_used = true;
