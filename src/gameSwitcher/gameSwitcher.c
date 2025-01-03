@@ -64,6 +64,21 @@ static int gameNameScrollSpeed = 10;
 static int gameNameScrollStart = 20;
 static int gameNameScrollEnd = 20;
 
+SDL_Surface *resource_getSurfaceScaled(ThemeImages request)
+{
+    SDL_Surface *surface = resource_getSurface(request);
+    if (surface == NULL)
+        return NULL;
+
+    if (g_scale == 1.0)
+        return surface;
+
+    SDL_Surface *scaled = zoomSurface(surface, g_scale, g_scale, SMOOTHING_OFF);
+    SDL_FreeSurface(surface);
+
+    return scaled;
+}
+
 void removeCurrentItem()
 {
     Game_s *game = &game_list[current_game];
@@ -106,10 +121,10 @@ int checkQuitAction(void)
 
 void renderCentered(SDL_Surface *image, int view_mode, SDL_Rect *overrideSrcRect, SDL_Rect *overrideDestRect)
 {
-    int offSetX = (int)(640 - image->w) / 2;
-    int offSetY = (int)(480 - image->h) / 2;
+    int offSetX = (int)(g_display.width - image->w) / 2;
+    int offSetY = (int)(g_display.height - image->h) / 2;
 
-    SDL_Rect image_size = {0, 0, 640, 480};
+    SDL_Rect image_size = {0, 0, g_display.width, g_display.height};
     SDL_Rect image_pos = {offSetX, offSetY};
 
     if (view_mode == VIEW_NORMAL) {
@@ -155,11 +170,8 @@ void setFbAsFirstRomScreen(void)
         game->romScreen = NULL;
     }
 
-    SDL_Surface *fb = SDL_CreateRGBSurface(SDL_SWSURFACE, RENDER_WIDTH, RENDER_HEIGHT, 32, 0, 0, 0, 0);
-    display_readCurrentBuffer(&g_display, (uint32_t *)fb->pixels, (rect_t){0, 0, RENDER_WIDTH, RENDER_HEIGHT}, true, false);
-
-    game->romScreen = zoomSurface(fb, 640.0 / g_display.width, 480.0 / g_display.height, SMOOTHING_OFF);
-    SDL_FreeSurface(fb);
+    game->romScreen = SDL_CreateRGBSurface(SDL_SWSURFACE, g_display.width, g_display.height, 32, 0, 0, 0, 0);
+    display_readCurrentBuffer(&g_display, (uint32_t *)game->romScreen->pixels, (rect_t){0, 0, g_display.width, g_display.height}, true, false);
 
     if (game->romScreen == NULL) {
         print_debug("Error creating fb surface\n");
@@ -201,6 +213,21 @@ static void *_saveRomScreenAndStateThread(void *arg)
     return NULL;
 }
 
+SDL_Surface *loadOptionalImage(const char *resourceName)
+{
+    char image_path[STR_MAX];
+    if (theme_getImagePath(theme()->path, resourceName, image_path)) {
+        return theme_loadImage(theme()->path, resourceName);
+    }
+    return NULL;
+}
+
+int getHeightOrDefault(SDL_Surface *surface, int default_height)
+{
+    int height = surface ? surface->h : default_height;
+    return height > 1 ? height : 0;
+}
+
 int main(int argc, char *argv[])
 {
     const bool is_overlay = argc > 1 && strcmp(argv[1], "--overlay") == 0;
@@ -211,13 +238,17 @@ int main(int argc, char *argv[])
     signal(SIGINT, sigHandler);
     signal(SIGTERM, sigHandler);
 
-    init();
+    init(INIT_ALL);
+
+    g_scale = (double)g_display.width / 640.0;
+    scaleSurfaceFunc = zoomSurface;
 
     readFirstEntry();
 
     pthread_t autosave_thread_pt;
     if (is_overlay) {
         retroarch_pause();
+        system("playActivity stop_all &");
         setFbAsFirstRomScreen();
         pthread_create(&autosave_thread_pt, NULL, _saveRomScreenAndStateThread, NULL);
     }
@@ -228,14 +259,13 @@ int main(int argc, char *argv[])
     lang_load();
 
     SDL_Color color_white = {255, 255, 255};
-    SDL_Surface *transparent_bg = SDL_CreateRGBSurface(
-        0, 640, 480, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
+    SDL_Surface *transparent_bg = SDL_CreateRGBSurface(0, g_display.width, g_display.height, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
     SDL_FillRect(transparent_bg, NULL, 0xBE000000);
 
     SDL_Surface *arrow_left = resource_getSurface(LEFT_ARROW_WB);
     SDL_Surface *arrow_right = resource_getSurface(RIGHT_ARROW_WB);
     int game_name_padding = arrow_left->w + 20;
-    int game_name_max_width = 640 - 2 * game_name_padding;
+    int game_name_max_width = g_display.width - 2 * game_name_padding;
     SDL_Rect game_name_size = {0, 0};
 
     int battery_percentage = battery_getPercentage();
@@ -271,18 +301,11 @@ int main(int argc, char *argv[])
     uint32_t brightness_start = last_ticks;
     uint32_t brightness_timeout = 2000;
 
-    char header_path[STR_MAX], footer_path[STR_MAX];
-    bool use_custom_header = theme_getImagePath(theme()->path, "extra/gs-top-bar", header_path);
-    bool use_custom_footer = theme_getImagePath(theme()->path, "extra/gs-bottom-bar", footer_path);
-    SDL_Surface *custom_header = use_custom_header ? IMG_Load(header_path) : NULL;
-    SDL_Surface *custom_footer = use_custom_footer ? IMG_Load(footer_path) : NULL;
+    SDL_Surface *custom_header = loadOptionalImage("extra/gs-top-bar");
+    SDL_Surface *custom_footer = loadOptionalImage("extra/gs-bottom-bar");
 
-    int header_height = use_custom_header ? custom_header->h : 60;
-    if (header_height == 1)
-        header_height = 0;
-    int footer_height = use_custom_footer ? custom_footer->h : 60;
-    if (footer_height == 1)
-        footer_height = 0;
+    int header_height = getHeightOrDefault(custom_header, 60.0 * g_scale);
+    int footer_height = getHeightOrDefault(custom_footer, 60.0 * g_scale);
 
     SDL_Surface *current_bg = NULL;
     bool first_render = true;
@@ -488,9 +511,8 @@ int main(int argc, char *argv[])
 
                 if (game_list_len == 0) {
                     current_bg = NULL;
-                    SDL_Surface *empty = resource_getSurface(EMPTY_BG);
-                    SDL_Rect empty_rect = {320 - empty->w / 2,
-                                           240 - empty->h / 2};
+                    SDL_Surface *empty = resource_getSurfaceScaled(EMPTY_BG);
+                    SDL_Rect empty_rect = {(g_display.width - empty->w) / 2, (g_display.height - empty->h) / 2};
                     SDL_BlitSurface(empty, NULL, screen, &empty_rect);
                 }
                 else {
@@ -503,8 +525,8 @@ int main(int argc, char *argv[])
             }
 
             if (view_mode != VIEW_FULLSCREEN && game_list_len > 0) {
-                SDL_Rect game_name_bg_size = {0, 0, 640, 60};
-                SDL_Rect game_name_bg_pos = {0, 360};
+                SDL_Rect game_name_bg_size = theme_scaleRect((SDL_Rect){0, 0, 640, 60});
+                SDL_Rect game_name_bg_pos = theme_scaleRect((SDL_Rect){0, 360});
 
                 if (view_mode == VIEW_NORMAL) {
                     game_name_bg_size.x = game_name_bg_pos.x =
@@ -513,8 +535,11 @@ int main(int argc, char *argv[])
                                            theme()->frame.border_right;
                 }
 
-                game_name_bg_size.y = game_name_bg_pos.y =
-                    view_mode == VIEW_NORMAL ? (480 - footer_height - 60) : 420;
+                int name_pos = g_display.height - 60.0 * g_scale;
+                if (view_mode == VIEW_NORMAL) {
+                    name_pos -= footer_height;
+                }
+                game_name_bg_size.y = game_name_bg_pos.y = name_pos;
 
                 game_name_bg_pos.w = game_name_bg_size.w;
                 game_name_bg_pos.h = game_name_bg_size.h;
@@ -528,18 +553,17 @@ int main(int argc, char *argv[])
                 SDL_BlitSurface(transparent_bg, &game_name_bg_size, screen, &game_name_bg_pos);
 
                 if (current_game > 0) {
-                    SDL_Rect arrow_left_rect = {theme()->frame.border_left + 10,
-                                                game_name_bg_pos.y + 30 -
-                                                    arrow_left->h / 2};
+                    SDL_Rect arrow_left_rect = {(double)(theme()->frame.border_left + 10) * g_scale, 30.0 * g_scale - arrow_left->h / 2};
+                    arrow_left_rect.y += game_name_bg_pos.y;
                     SDL_BlitSurface(arrow_left, NULL, screen, &arrow_left_rect);
                 }
 
                 if (current_game < game_list_len - 1) {
                     SDL_Rect arrow_right_rect = {
-                        630 - theme()->frame.border_right - arrow_right->w,
-                        game_name_bg_pos.y + 30 - arrow_right->h / 2};
-                    SDL_BlitSurface(arrow_right, NULL, screen,
-                                    &arrow_right_rect);
+                        (double)(630 - theme()->frame.border_right) * g_scale - arrow_right->w,
+                        30.0 * g_scale - arrow_right->h / 2};
+                    arrow_right_rect.y += game_name_bg_pos.y;
+                    SDL_BlitSurface(arrow_right, NULL, screen, &arrow_right_rect);
                 }
 
                 char game_name_str[STR_MAX * 2 + 4];
@@ -548,19 +572,14 @@ int main(int argc, char *argv[])
                 if (current_game_changed) {
                     if (surfaceGameName != NULL)
                         SDL_FreeSurface(surfaceGameName);
-                    surfaceGameName = TTF_RenderUTF8_Blended(
-                        resource_getFont(TITLE), game_name_str, color_white);
-                    game_name_size.w = surfaceGameName->w < game_name_max_width
-                                           ? surfaceGameName->w
-                                           : game_name_max_width;
+                    surfaceGameName = TTF_RenderUTF8_Blended(resource_getFont(TITLE), game_name_str, color_white);
+                    game_name_size.w = surfaceGameName->w < game_name_max_width ? surfaceGameName->w : game_name_max_width;
                     game_name_size.h = surfaceGameName->h;
-                    gameNameScrollX =
-                        -gameNameScrollStart * gameNameScrollSpeed;
+                    gameNameScrollX = -gameNameScrollStart * gameNameScrollSpeed;
                 }
 
-                SDL_Rect game_name_rect = {320 - surfaceGameName->w / 2,
-                                           game_name_bg_pos.y + 30 -
-                                               surfaceGameName->h / 2};
+                SDL_Rect game_name_rect = {(g_display.width - surfaceGameName->w) / 2,
+                                           game_name_bg_pos.y + 30.0 * g_scale - surfaceGameName->h / 2};
                 if (game_name_rect.x < game_name_padding)
                     game_name_rect.x = game_name_padding;
 
@@ -569,17 +588,13 @@ int main(int argc, char *argv[])
                         ? (gameNameScrollX > 0 ? gameNameScrollX : 0)
                         : surfaceGameName->w - game_name_size.w;
 
-                SDL_BlitSurface(surfaceGameName, &game_name_size, screen,
-                                &game_name_rect);
+                SDL_BlitSurface(surfaceGameName, &game_name_size, screen, &game_name_rect);
 
                 if (surfaceGameName->w > game_name_max_width) {
                     gameNameScrollX += gameNameScrollSpeed;
 
-                    if (gameNameScrollX >
-                        (surfaceGameName->w - game_name_size.w +
-                         gameNameScrollEnd * gameNameScrollSpeed))
-                        gameNameScrollX =
-                            -gameNameScrollStart * gameNameScrollSpeed;
+                    if (gameNameScrollX > (surfaceGameName->w - game_name_size.w + gameNameScrollEnd * gameNameScrollSpeed))
+                        gameNameScrollX = -gameNameScrollStart * gameNameScrollSpeed;
                 }
             }
 
@@ -591,20 +606,19 @@ int main(int argc, char *argv[])
             if (view_mode == VIEW_NORMAL) {
                 if (custom_footer) {
                     if (footer_height > 0) {
-                        SDL_Rect footer_rect = {0, 480 - custom_footer->h};
-                        SDL_BlitSurface(custom_footer, NULL, screen,
-                                        &footer_rect);
+                        SDL_Rect footer_rect = {0, g_display.height - custom_footer->h};
+                        SDL_BlitSurface(custom_footer, NULL, screen, &footer_rect);
                     }
                 }
                 else {
                     theme_renderFooter(screen);
-                    theme_renderStandardHint(
-                        screen, lang_get(LANG_RESUME_UC, LANG_FALLBACK_RESUME_UC),
-                        lang_get(LANG_BACK, LANG_FALLBACK_BACK));
+                    theme_renderStandardHint(screen,
+                                             lang_get(LANG_RESUME_UC, LANG_FALLBACK_RESUME_UC),
+                                             lang_get(LANG_BACK, LANG_FALLBACK_BACK));
                     if (!first_render) {
-                        theme_renderFooterStatus(
-                            screen, game_list_len > 0 ? current_game + 1 : 0,
-                            game_list_len);
+                        theme_renderFooterStatus(screen,
+                                                 game_list_len > 0 ? current_game + 1 : 0,
+                                                 game_list_len);
                     }
                 }
             }
@@ -632,14 +646,12 @@ int main(int argc, char *argv[])
                             resource_getFont(TITLE), title_str,
                             theme()->title.color);
                         if (title) {
-                            SDL_Rect title_rect = {320 - title->w / 2,
-                                                   (header_height - title->h) /
-                                                       2};
+                            SDL_Rect title_rect = {(g_display.width - title->w) / 2,
+                                                   (header_height - title->h) / 2};
                             SDL_BlitSurface(title, NULL, screen, &title_rect);
                             SDL_FreeSurface(title);
                         }
-                        theme_renderHeaderBatteryCustom(
-                            screen, battery_percentage, header_height);
+                        theme_renderHeaderBatteryCustom(screen, battery_percentage, header_height);
                     }
                 }
                 else {
@@ -650,24 +662,23 @@ int main(int argc, char *argv[])
 
             if (show_legend && view_mode != VIEW_FULLSCREEN) {
                 SDL_Surface *legend = resource_getSurface(LEGEND_GAMESWITCHER);
-                SDL_Rect legend_rect = {640 - legend->w,
-                                        view_mode == VIEW_NORMAL ? header_height
-                                                                 : 0};
-                SDL_BlitSurface(legend, NULL, screen, &legend_rect);
+                if (legend) {
+                    printf_debug("Legend size: %i x %i\n", legend->w, legend->h);
+                    SDL_Rect legend_rect = {g_display.width - legend->w,
+                                            view_mode == VIEW_NORMAL ? header_height : 0};
+                    printf_debug("Displaying legend at %i, %i\n", legend_rect.x, legend_rect.y);
+                    SDL_BlitSurface(legend, NULL, screen, &legend_rect);
+                }
             }
 
             if (brightness_changed) {
                 // Display luminosity slider
-                SDL_Surface *brightness =
-                    resource_getBrightness(settings.brightness);
+                SDL_Surface *brightness = resource_getBrightness(settings.brightness);
                 bool vertical = brightness->h > brightness->w;
-                SDL_Rect brightness_rect = {
-                    0,
-                    (view_mode == VIEW_NORMAL ? 240 : 210) - brightness->h / 2};
+                SDL_Rect brightness_rect = {0, (double)(view_mode == VIEW_NORMAL ? 240 : 210) * g_scale - brightness->h / 2};
                 if (!vertical) {
-                    brightness_rect.x = 320 - brightness->w / 2;
-                    brightness_rect.y =
-                        view_mode == VIEW_NORMAL ? header_height : 0;
+                    brightness_rect.x = (g_display.width - brightness->w) / 2;
+                    brightness_rect.y = view_mode == VIEW_NORMAL ? header_height : 0;
                 }
                 SDL_BlitSurface(brightness, NULL, screen, &brightness_rect);
             }
@@ -699,6 +710,7 @@ int main(int argc, char *argv[])
             render();
         }
         retroarch_unpause();
+        system("playActivity resume &");
         msleep(200);
         remove("/mnt/SDCARD/.tmp_update/.runGameSwitcher");
     }

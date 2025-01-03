@@ -283,8 +283,8 @@ void scaleRomScreen(Game_s *game, ScalingMode_s mode)
     }
 
     // Scale the image to fit application window
-    zx *= 640.0 / (double)(DISPLAY_WIDTH);
-    zy *= 480.0 / (double)(DISPLAY_HEIGHT);
+    zx *= (double)g_display.width / (double)(DISPLAY_WIDTH);
+    zy *= (double)g_display.height / (double)(DISPLAY_HEIGHT);
 
     if (mode.keepAspect) {
         if (zx < zy)
@@ -378,7 +378,7 @@ SDL_Surface *loadRomScreen(int index)
             else if (romScreenType == ROM_SCREEN_STATE) {
                 scaleRomScreen(game, getDynamicScalingMode(game));
             }
-            else if (romScreenType == ROM_SCREEN_ARTWORK && (game->romScreen->w > 640 || game->romScreen->h > 480)) {
+            else if (game->romScreen->w > g_display.width || game->romScreen->h > g_display.height) {
                 scaleRomScreen(game, (ScalingMode_s){true, false});
             }
         }

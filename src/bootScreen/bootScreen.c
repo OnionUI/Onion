@@ -13,6 +13,7 @@
 #include "utils/file.h"
 #include "utils/flags.h"
 #include "utils/log.h"
+#include "utils/sdl_direct_fb.h"
 
 int main(int argc, char *argv[])
 {
@@ -20,13 +21,16 @@ int main(int argc, char *argv[])
     // End_Save : Ending screen with save
     // End : Ending screen without save
 
-    SDL_Init(SDL_INIT_VIDEO);
+    init(INIT_PNG);
+
+    if (argc > 1 && strcmp(argv[1], "clear") == 0) {
+        SDL_FillRect(screen, NULL, 0);
+        render();
+        return EXIT_SUCCESS;
+    }
 
     char theme_path[STR_MAX];
     theme_getPath(theme_path);
-
-    SDL_Surface *video = SDL_SetVideoMode(640, 480, 32, SDL_HWSURFACE);
-    SDL_Surface *screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
 
     SDL_Surface *background;
     bool show_battery = false;
@@ -95,10 +99,8 @@ int main(int argc, char *argv[])
     }
 
     // Blit twice, to clear the video buffer
-    SDL_BlitSurface(screen, NULL, video, NULL);
-    SDL_Flip(video);
-    SDL_BlitSurface(screen, NULL, video, NULL);
-    SDL_Flip(video);
+    render();
+    render();
 
     if (argc > 1 && strcmp(argv[1], "Boot") != 0)
         temp_flag_set(".offOrder", false);
@@ -108,9 +110,9 @@ int main(int argc, char *argv[])
 #endif
 
     TTF_CloseFont(font);
-    SDL_FreeSurface(screen);
-    SDL_FreeSurface(video);
-    SDL_Quit();
+    TTF_Quit();
+
+    deinit();
 
     return EXIT_SUCCESS;
 }

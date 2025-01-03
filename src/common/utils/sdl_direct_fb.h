@@ -21,26 +21,35 @@ static const char *INPUT_DEVICE = "/dev/input/event0";
 static int _input_fd = -1;
 static struct pollfd _fds[1];
 
-void init()
+#define INIT_PNG 1
+#define INIT_TTF 2
+#define INIT_INPUT 4
+#define INIT_AUDIO 8
+#define INIT_ALL (INIT_PNG | INIT_TTF | INIT_INPUT | INIT_AUDIO)
+
+void init(int flags)
 {
+    display_init(_render_direct_to_fb);
+
     if (_render_direct_to_fb) {
-        display_init();
-        screen = SDL_CreateRGBSurface(SDL_SWSURFACE, RENDER_WIDTH, RENDER_HEIGHT, 32, 0, 0, 0, 0);
-        TTF_Init();
-
-        _input_fd = open(INPUT_DEVICE, O_RDONLY);
-
-        if (_input_fd == -1) {
-            perror("Failed to open input device");
-            exit(1);
+        screen = SDL_CreateRGBSurface(SDL_SWSURFACE, g_display.width, g_display.height, 32, 0, 0, 0, 0);
+        if (flags & INIT_PNG)
+            IMG_Init(IMG_INIT_PNG);
+        if (flags & INIT_TTF)
+            TTF_Init();
+        if (flags & INIT_INPUT) {
+            _input_fd = open(INPUT_DEVICE, O_RDONLY);
+            if (_input_fd == -1) {
+                perror("Failed to open input device");
+                exit(1);
+            }
+            memset(&_fds, 0, sizeof(_fds));
+            _fds[0].fd = _input_fd;
+            _fds[0].events = POLLIN;
         }
-
-        memset(&_fds, 0, sizeof(_fds));
-        _fds[0].fd = _input_fd;
-        _fds[0].events = POLLIN;
     }
     else {
-        SDL_InitDefault(true);
+        SDL_InitDefault(flags & INIT_AUDIO);
     }
 }
 
@@ -64,18 +73,19 @@ void deinit(void)
         SDL_FreeSurface(screen);
     }
     TTF_Quit();
+    IMG_Quit();
 
     if (_render_direct_to_fb) {
         if (_input_fd != -1) {
             close(_input_fd);
         }
-
-        display_close();
     }
     else {
         SDL_FreeSurface(video);
         SDL_Quit();
     }
+
+    display_close();
 }
 
 SDLKey _translate_input(int key)

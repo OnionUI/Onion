@@ -193,7 +193,7 @@ int overlay_surface(SDL_Surface *surface, int destX, int destY, int duration_ms,
 {
     printf_debug("Overlaying surface at %d, %d, size %dx%d, duration %d\n, rotate %d\n",
                  destX, destY, surface->w, surface->h, duration_ms, rotate);
-    display_init();
+    display_init(false);
 
     // If there's an existing thread, abort it
     if (g_overlay_task.thread_id != 0) {
@@ -270,11 +270,11 @@ void _print_bar(void)
 {
 #ifdef PLATFORM_MIYOOMINI
     uint32_t *ofs = g_display.fb_addr;
-    uint32_t i, j, curr, percentage = _bar_max > 0 ? _bar_value * RENDER_HEIGHT / _bar_max : 0;
+    uint32_t i, j, curr, percentage = _bar_max > 0 ? _bar_value * g_display.height / _bar_max : 0;
 
-    ofs += RENDER_WIDTH - meterWidth;
-    for (i = 0; i < RENDER_HEIGHT * 3; i++, ofs += RENDER_WIDTH) {
-        curr = (i % RENDER_HEIGHT) < percentage ? _bar_color : 0;
+    ofs += g_display.width - meterWidth;
+    for (i = 0; i < g_display.height * 3; i++, ofs += g_display.width) {
+        curr = (i % g_display.height) < percentage ? _bar_color : 0;
         for (j = 0; j < meterWidth; j++)
             ofs[j] = curr;
     }
@@ -290,9 +290,9 @@ void _bar_restoreBufferBehind(void)
     _print_bar();
     if (_bar_savebuf) {
         uint32_t i, j, *ofs = g_display.fb_addr, *ofss = _bar_savebuf;
-        ofs += RENDER_WIDTH - meterWidth;
-        ofss += RENDER_WIDTH - meterWidth;
-        for (i = 0; i < RENDER_HEIGHT; i++, ofs += RENDER_WIDTH, ofss += RENDER_WIDTH) {
+        ofs += g_display.width - meterWidth;
+        ofss += g_display.width - meterWidth;
+        for (i = 0; i < g_display.height; i++, ofs += g_display.width, ofss += g_display.width) {
             for (j = 0; j < meterWidth; j++)
                 ofs[j] = ofss[j];
         }
@@ -306,12 +306,12 @@ void _bar_saveBufferBehind(void)
 {
 #ifdef PLATFORM_MIYOOMINI
     // Save display area and clear
-    if ((_bar_savebuf = (uint32_t *)malloc(RENDER_WIDTH * RENDER_HEIGHT *
+    if ((_bar_savebuf = (uint32_t *)malloc(g_display.width * g_display.height *
                                            sizeof(uint32_t)))) {
         uint32_t i, j, *ofs = g_display.fb_addr, *ofss = _bar_savebuf;
-        ofs += RENDER_WIDTH - meterWidth;
-        ofss += RENDER_WIDTH - meterWidth;
-        for (i = 0; i < RENDER_HEIGHT; i++, ofs += RENDER_WIDTH, ofss += RENDER_WIDTH) {
+        ofs += g_display.width - meterWidth;
+        ofss += g_display.width - meterWidth;
+        for (i = 0; i < g_display.height; i++, ofs += g_display.width, ofss += g_display.width) {
             for (j = 0; j < meterWidth; j++)
                 ofss[j] = ofs[j];
         }

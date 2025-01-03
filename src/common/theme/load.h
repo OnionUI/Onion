@@ -6,8 +6,8 @@
 #include <SDL/SDL_ttf.h>
 
 #include "utils/file.h"
-#include "utils/str.h"
 #include "utils/json.h"
+#include "utils/str.h"
 
 #define SYSTEM_CONFIG "/mnt/SDCARD/system.json"
 #define FALLBACK_FONT "/customer/app/Exo-2-Bold-Italic.ttf"
@@ -15,6 +15,20 @@
 #define SYSTEM_RESOURCES "/mnt/SDCARD/.tmp_update/res/"
 #define THEME_OVERRIDES "/mnt/SDCARD/Saves/CurrentProfile/theme"
 #define FALLBACK_THEME_PATH "/mnt/SDCARD/miyoo/app/"
+
+static SDL_Surface *(*scaleSurfaceFunc)(SDL_Surface *surface, double xScale, double yScale, int smoothing) = NULL;
+static double g_scale = 1.0;
+
+SDL_Rect theme_scaleRect(SDL_Rect rect)
+{
+    if (g_scale == 1.0)
+        return rect;
+    rect.x *= g_scale;
+    rect.y *= g_scale;
+    rect.w *= g_scale;
+    rect.h *= g_scale;
+    return rect;
+}
 
 int theme_getImagePath(const char *theme_path, const char *name, char *out_path)
 {
@@ -52,7 +66,18 @@ SDL_Surface *theme_loadImage(const char *theme_path, const char *name)
 {
     char image_path[512];
     theme_getImagePath(theme_path, name, image_path);
-    return IMG_Load(image_path);
+
+    printf_debug("Loading image: %s\n", image_path);
+
+    SDL_Surface *image = IMG_Load(image_path);
+
+    if (image && g_scale != 1.0 && scaleSurfaceFunc) {
+        SDL_Surface *scaled = scaleSurfaceFunc(image, g_scale, g_scale, 1);
+        SDL_FreeSurface(image);
+        image = scaled;
+    }
+
+    return image;
 }
 
 TTF_Font *theme_loadFont(const char *theme_path, const char *font, int size)
@@ -68,7 +93,7 @@ TTF_Font *theme_loadFont(const char *theme_path, const char *font, int size)
 char *theme_getPath(char *theme_path)
 {
     cJSON *j = json_load(SYSTEM_CONFIG);
-    json_getString(j,"theme", theme_path);
+    json_getString(j, "theme", theme_path);
     cJSON_Delete(j);
 
     if (strcmp(theme_path, "./") == 0 || !is_dir(theme_path)) {

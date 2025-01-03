@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
     signal(SIGINT, sigHandler);
     signal(SIGTERM, sigHandler);
 
-    init();
+    init(INIT_ALL);
 
     settings_load();
     lang_load();

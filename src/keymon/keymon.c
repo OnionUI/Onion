@@ -468,7 +468,7 @@ int main(void)
     printf_debug("Settings loaded. Brightness set to: %d\n",
                  settings.brightness);
 
-    display_init();
+    display_init(true);
 
     // Prepare for Poll button input
     input_fd = open("/dev/input/event0", O_RDONLY);

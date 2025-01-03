@@ -142,15 +142,6 @@ void enableSavingMessage(void)
     temp_flag_set(".displaySavingMessage", true);
 }
 
-void displaySavingMessage(void)
-{
-    if (temp_flag_get(".displaySavingMessage")) {
-        temp_flag_set(".displaySavingMessage", false);
-        system("infoPanel --title \" \" --message \"SAVING\" --persistent --no-footer &");
-        temp_flag_set("dismiss_info_panel", true);
-    }
-}
-
 void action_MainUI_contextMenu(void)
 {
     print_debug("Sending keys (contextMenu)");
@@ -176,7 +167,6 @@ static void _saveAndQuitRetroArch(void)
     enableSavingMessage();
     retroarch_pause();
     screenshot_system();
-    displaySavingMessage();
     terminate_retroarch();
 }
 

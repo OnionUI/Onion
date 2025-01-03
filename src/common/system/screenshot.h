@@ -108,7 +108,7 @@ uint32_t *__screenshot_buffer(void)
 bool screenshot_save(const uint32_t *buffer, const char *screenshot_path, bool rotate180)
 {
     uint32_t *src;
-    uint32_t line_buffer[RENDER_WIDTH], x, y, pix;
+    uint32_t line_buffer[g_display.width], x, y, pix;
 
     FILE *fp;
     png_structp png_ptr;
@@ -125,18 +125,18 @@ bool screenshot_save(const uint32_t *buffer, const char *screenshot_path, bool r
     info_ptr = png_create_info_struct(png_ptr);
 
     png_init_io(png_ptr, fp);
-    png_set_IHDR(png_ptr, info_ptr, RENDER_WIDTH, RENDER_HEIGHT, 8,
+    png_set_IHDR(png_ptr, info_ptr, g_display.width, g_display.height, 8,
                  PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE,
                  PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
     png_write_info(png_ptr, info_ptr);
 
     src = (uint32_t *)buffer;
     if (rotate180) {
-        src += RENDER_WIDTH * RENDER_HEIGHT;
+        src += g_display.width * g_display.height;
     }
 
-    for (y = 0; y < RENDER_HEIGHT; y++) {
-        for (x = 0; x < RENDER_WIDTH; x++) {
+    for (y = 0; y < g_display.height; y++) {
+        for (x = 0; x < g_display.width; x++) {
             pix = rotate180 ? *(--src) : *(src++);
             line_buffer[x] = 0xFF000000 | (pix & 0x0000FF00) | (pix & 0x00FF0000) >> 16 | (pix & 0x000000FF) << 16;
         }

@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     signal(SIGCONT, sigHandler);
     signal(SIGUSR1, sigHandler);
 
-    display_init();
+    display_init(true);
     int ticks = CHECK_BATTERY_TIMEOUT_S;
 
     bool is_charging = false;
@@ -483,7 +483,7 @@ static void *batteryWarning_thread(void *param)
         if (temp_flag_get("hasBatteryDisplay"))
             break;
         if (display_getBrightnessRaw() != 0) {
-            display_drawBatteryIcon(0x00FF0000, 15, RENDER_HEIGHT - 30, 10,
+            display_drawBatteryIcon(0x00FF0000, 15, g_display.height - 30, 10,
                                     0x00FF0000); // draw red battery icon
         }
         usleep(0x4000);

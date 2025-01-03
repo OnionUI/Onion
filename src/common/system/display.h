@@ -15,10 +15,8 @@
 #define display_off() display_setScreen(false)
 
 static int fb_fd;
-static int DISPLAY_WIDTH = 640; // physical screen resolution
-static int DISPLAY_HEIGHT = 480;
-int RENDER_WIDTH = 640; // render resolution
-int RENDER_HEIGHT = 480;
+static int DISPLAY_WIDTH = 752; // physical screen resolution
+static int DISPLAY_HEIGHT = 560;
 struct timeval start_time, end_time;
 
 typedef struct Display {
@@ -37,8 +35,8 @@ typedef struct Display {
 } display_t;
 
 static display_t g_display = {
-    .width = 640,
-    .height = 480,
+    .width = 752,
+    .height = 560,
     .bpp = 32,
     .stride = 0,
     .fb_size = 0,
@@ -60,12 +58,13 @@ typedef struct Rect {
 //
 void display_getRenderResolution()
 {
-    print_debug("Getting render resolution\n");
     if (fb_fd < 0)
         fb_fd = open("/dev/fb0", O_RDWR);
-    ioctl(fb_fd, FBIOGET_VSCREENINFO, &g_display.vinfo);
-    RENDER_WIDTH = g_display.vinfo.xres;
-    RENDER_HEIGHT = g_display.vinfo.yres;
+    if (ioctl(fb_fd, FBIOGET_VSCREENINFO, &g_display.vinfo) == 0) {
+        g_display.width = g_display.vinfo.xres;
+        g_display.height = g_display.vinfo.yres;
+    }
+    printf_debug("Render resolution: %dx%d\n", g_display.width, g_display.height);
 }
 
 //
@@ -83,16 +82,26 @@ void display_getResolution()
     fclose(file);
 }
 
-void display_init(void)
+void display_init(bool map_fb)
 {
     if (g_display.init_done)
         return;
+
     // Open and mmap FB
     fb_fd = open("/dev/fb0", O_RDWR);
     ioctl(fb_fd, FBIOGET_FSCREENINFO, &g_display.finfo);
-    g_display.fb_addr = (uint32_t *)mmap(0, g_display.finfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fb_fd, 0);
+
+    if (map_fb) {
+        g_display.fb_size = g_display.finfo.smem_len;
+        g_display.fb_addr = (uint32_t *)mmap(0, g_display.fb_size, PROT_READ | PROT_WRITE, MAP_SHARED, fb_fd, 0);
+    }
+    else {
+        g_display.fb_addr = NULL;
+    }
+
     display_getResolution();
     display_getRenderResolution();
+
     g_display.init_done = true;
 }
 
@@ -438,26 +447,26 @@ void display_drawBatteryIcon(uint32_t color, int x, int y, int level,
 
     // Draw battery body wireframe
     for (i = x; i < x + 30; i++) {
-        ofs[i + y * RENDER_WIDTH] = color;        // Top border
-        ofs[i + (y + 14) * RENDER_WIDTH] = color; // Bottom border
+        ofs[i + y * g_display.width] = color;        // Top border
+        ofs[i + (y + 14) * g_display.width] = color; // Bottom border
     }
     for (j = y; j < y + 15; j++) {
-        ofs[x + j * RENDER_WIDTH] = color;      // Left border
-        ofs[x + 29 + j * RENDER_WIDTH] = color; // Right border
+        ofs[x + j * g_display.width] = color;      // Left border
+        ofs[x + 29 + j * g_display.width] = color; // Right border
     }
 
     // Draw battery charge level
     int levelWidth = (level * 26) / 100;
     for (i = x + 3 + 26 - levelWidth; i < x + 1 + 26; i++) {
         for (j = y + 3; j < y + 12; j++) {
-            ofs[i + j * RENDER_WIDTH] = fillColor;
+            ofs[i + j * g_display.width] = fillColor;
         }
     }
 
     // Draw battery head wireframe
     for (i = x - 4; i < x; i++) {
         for (j = y + 2; j < y + 13; j++) {
-            ofs[i + j * RENDER_WIDTH] = color;
+            ofs[i + j * g_display.width] = color;
         }
     }
 }

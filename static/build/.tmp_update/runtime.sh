@@ -289,6 +289,8 @@ change_resolution() {
     fi
     log "Changing resolution to $res_x x $res_y"
 
+    bootScreen clear
+
     fbset -g "$res_x" "$res_y" "$res_x" "$((res_y * 2))" 32
     # inform batmon and keymon of resolution change
     killall -SIGUSR1 batmon
@@ -387,7 +389,7 @@ launch_game() {
             # Free memory
             $sysdir/bin/freemma
 
-            if [ $is_game -eq 1 ]; then
+            if [ ! -f /tmp/new_res_available ] && [ $is_game -eq 1 ]; then
                 infoPanel --title " " --message "LOADING" --persistent --no-footer &
                 touch /tmp/dismiss_info_panel
                 sync
