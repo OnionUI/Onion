@@ -12,10 +12,8 @@ typedef enum RetroArchState {
 } RetroArchState_e;
 
 typedef struct RetroArchStatus {
-    char content_name[256];
-    char system_id[64];
-    char content_crc32[64];
-    RetroArchState_e status;
+    char content_info[1024];
+    RetroArchState_e state;
 } RetroArchStatus_s;
 
 typedef struct RetroArchInfo {

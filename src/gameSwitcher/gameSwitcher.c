@@ -32,7 +32,8 @@
 
 #include "../playActivity/playActivityDB.h"
 
-#include "history.h"
+#include "gs_history.h"
+#include "gs_overlay.h"
 
 #define VIEW_NORMAL 0
 #define VIEW_MINIMAL 1
@@ -63,21 +64,6 @@ static int gameNameScrollX = 0;
 static int gameNameScrollSpeed = 10;
 static int gameNameScrollStart = 20;
 static int gameNameScrollEnd = 20;
-
-SDL_Surface *resource_getSurfaceScaled(ThemeImages request)
-{
-    SDL_Surface *surface = resource_getSurface(request);
-    if (surface == NULL)
-        return NULL;
-
-    if (g_scale == 1.0)
-        return surface;
-
-    SDL_Surface *scaled = zoomSurface(surface, g_scale, g_scale, SMOOTHING_OFF);
-    SDL_FreeSurface(surface);
-
-    return scaled;
-}
 
 void removeCurrentItem()
 {
@@ -146,73 +132,6 @@ void renderCentered(SDL_Surface *image, int view_mode, SDL_Rect *overrideSrcRect
     SDL_BlitSurface(image, &image_size, screen, &image_pos);
 }
 
-void exitOverlay(const bool is_overlay, pthread_t autosave_thread_pt)
-{
-    if (is_overlay) {
-        // wait for autosave thread to finish
-        pthread_join(autosave_thread_pt, NULL);
-
-        // force kill retroarch
-        temp_flag_set(".forceKillRetroarch", true);
-        system("killall -9 retroarch");
-    }
-}
-
-void setFbAsFirstRomScreen(void)
-{
-    if (game_list_len == 0)
-        return;
-
-    Game_s *game = &game_list[0];
-
-    if (game->romScreen != NULL) {
-        SDL_FreeSurface(game->romScreen);
-        game->romScreen = NULL;
-    }
-
-    game->romScreen = SDL_CreateRGBSurface(SDL_SWSURFACE, g_display.width, g_display.height, 32, 0, 0, 0, 0);
-    display_readCurrentBuffer(&g_display, (uint32_t *)game->romScreen->pixels, (rect_t){0, 0, g_display.width, g_display.height}, true, false);
-
-    if (game->romScreen == NULL) {
-        print_debug("Error creating fb surface\n");
-    }
-}
-
-static void *_saveRomScreenAndStateThread(void *arg)
-{
-    msleep(200);
-
-    RetroArchStatus_s status;
-
-    if (retroarch_getStatus(&status) == -1) {
-        print_debug("Error getting RetroArch status\n");
-        return NULL;
-    }
-
-    if (status.status == RETROARCH_STATE_CONTENTLESS || status.status == RETROARCH_STATE_UNKNOWN) {
-        print_debug("RetroArch is not running\n");
-        return NULL;
-    }
-
-    if (status.status == RETROARCH_STATE_PLAYING) {
-        retroarch_pause();
-    }
-
-    Game_s *game = &game_list[current_game];
-
-    if (game->romScreen != NULL) {
-        char romScreenPath[STR_MAX];
-        uint32_t hash = FNV1A_Pippip_Yurii(game->recentItem.rompath, strlen(game->recentItem.rompath));
-        snprintf(romScreenPath, sizeof(romScreenPath), ROM_SCREENS_DIR "/%" PRIu32 ".png", hash);
-        screenshot_save((uint32_t *)game->romScreen->pixels, romScreenPath, false);
-        printf_debug("Saved rom screen: %s\n", romScreenPath);
-    }
-
-    retroarch_autosave();
-
-    return NULL;
-}
-
 SDL_Surface *loadOptionalImage(const char *resourceName)
 {
     char image_path[STR_MAX];
@@ -245,13 +164,7 @@ int main(int argc, char *argv[])
 
     readFirstEntry();
 
-    pthread_t autosave_thread_pt;
-    if (is_overlay) {
-        retroarch_pause();
-        system("playActivity stop_all &");
-        setFbAsFirstRomScreen();
-        pthread_create(&autosave_thread_pt, NULL, _saveRomScreenAndStateThread, NULL);
-    }
+    overlay_init(is_overlay);
 
     loadRomScreens();
 
@@ -511,7 +424,7 @@ int main(int argc, char *argv[])
 
                 if (game_list_len == 0) {
                     current_bg = NULL;
-                    SDL_Surface *empty = resource_getSurfaceScaled(EMPTY_BG);
+                    SDL_Surface *empty = resource_getSurface(EMPTY_BG);
                     SDL_Rect empty_rect = {(g_display.width - empty->w) / 2, (g_display.height - empty->h) / 2};
                     SDL_BlitSurface(empty, NULL, screen, &empty_rect);
                 }
@@ -526,16 +439,14 @@ int main(int argc, char *argv[])
 
             if (view_mode != VIEW_FULLSCREEN && game_list_len > 0) {
                 SDL_Rect game_name_bg_size = theme_scaleRect((SDL_Rect){0, 0, 640, 60});
-                SDL_Rect game_name_bg_pos = theme_scaleRect((SDL_Rect){0, 360});
+                SDL_Rect game_name_bg_pos = {0, 0};
 
                 if (view_mode == VIEW_NORMAL) {
-                    game_name_bg_size.x = game_name_bg_pos.x =
-                        theme()->frame.border_left;
-                    game_name_bg_size.w -= theme()->frame.border_left +
-                                           theme()->frame.border_right;
+                    game_name_bg_size.x = game_name_bg_pos.x = theme()->frame.border_left;
+                    game_name_bg_size.w -= theme()->frame.border_left + theme()->frame.border_right;
                 }
 
-                int name_pos = g_display.height - 60.0 * g_scale;
+                int name_pos = g_display.height - game_name_bg_size.h;
                 if (view_mode == VIEW_NORMAL) {
                     name_pos -= footer_height;
                 }
@@ -701,7 +612,7 @@ int main(int argc, char *argv[])
         print_debug("Exiting to menu");
         remove("/mnt/SDCARD/.tmp_update/.runGameSwitcher");
         remove("/mnt/SDCARD/.tmp_update/cmd_to_run.sh");
-        exitOverlay(is_overlay, autosave_thread_pt);
+        overlay_exit();
     }
     else if (is_overlay && current_game == 0) {
         if (current_bg != NULL) {
@@ -709,15 +620,12 @@ int main(int argc, char *argv[])
             renderCentered(current_bg, VIEW_FULLSCREEN, NULL, NULL);
             render();
         }
-        retroarch_unpause();
-        system("playActivity resume &");
-        msleep(200);
-        remove("/mnt/SDCARD/.tmp_update/.runGameSwitcher");
+        overlay_resume();
     }
     else {
         printf_debug("Resuming game - current_game : %i - index: %i", current_game, game_list[current_game].index);
         resumeGame(game_list[current_game].index);
-        exitOverlay(is_overlay, autosave_thread_pt);
+        overlay_exit();
     }
 
 #ifndef PLATFORM_MIYOOMINI
@@ -735,7 +643,7 @@ int main(int argc, char *argv[])
     SDL_FreeSurface(transparent_bg);
 
     freeRomScreens();
-    freeRetroArchHistory();
+    ra_freeHistory();
 
     deinit();
 

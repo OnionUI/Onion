@@ -52,26 +52,22 @@ int retroarch_getStatus(RetroArchStatus_s *status)
 
     char status_str[32];
 
-    // Parse response "GET_STATUS PLAYING game_boy_advance,The name of the game,crc32=53a4d853"
-    int parsed = sscanf(response, "GET_STATUS %s %s,%s,crc32=%s", status_str, status->system_id, status->content_name, status->content_crc32);
+    // Parse response "GET_STATUS PAUSED game_boy_advance,Advance Wars (U) (V1.1) [!],crc32=26fd0fc9"
+    int parsed = sscanf(response, "GET_STATUS %31s %[^\n]", status_str, status->content_info);
 
-    if (parsed < 4)
-        strcpy(status->content_crc32, "");
-    if (parsed < 3)
-        strcpy(status->content_name, "");
     if (parsed < 2)
-        strcpy(status->system_id, "");
+        strcpy(status->content_info, "");
     if (parsed < 1)
         return -1;
 
     if (strcmp(status_str, "PLAYING") == 0)
-        status->status = RETROARCH_STATE_PLAYING;
+        status->state = RETROARCH_STATE_PLAYING;
     else if (strcmp(status_str, "PAUSED") == 0)
-        status->status = RETROARCH_STATE_PAUSED;
+        status->state = RETROARCH_STATE_PAUSED;
     else if (strcmp(status_str, "CONTENTLESS") == 0)
-        status->status = RETROARCH_STATE_CONTENTLESS;
+        status->state = RETROARCH_STATE_CONTENTLESS;
     else
-        status->status = RETROARCH_STATE_UNKNOWN;
+        status->state = RETROARCH_STATE_UNKNOWN;
 
     return 0;
 }

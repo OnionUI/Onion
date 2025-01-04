@@ -589,7 +589,7 @@ void menu_userInterface(void *_)
                                      .action = action_setShowExpert},
                                  "Toggle the visibility of the expert tab\n"
                                  "in the main menu.");
-        display_init(false);
+        display_init(true);
         list_addItemWithInfoNote(&_menu_user_interface,
                                  (ListItem){
                                      .label = "OSD bar size",

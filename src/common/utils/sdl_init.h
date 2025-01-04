@@ -14,7 +14,7 @@ static bool sdl_has_audio = false;
 
 bool SDL_InitDefault(bool include_audio)
 {
-    display_init(false);
+    display_getRenderResolution();
 
     SDL_Init(include_audio ? (SDL_INIT_VIDEO | SDL_INIT_AUDIO)
                            : SDL_INIT_VIDEO);

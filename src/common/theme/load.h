@@ -87,6 +87,8 @@ TTF_Font *theme_loadFont(const char *theme_path, const char *font, int size)
         strncpy(font_path, font, STR_MAX * 2 - 1);
     else
         snprintf(font_path, STR_MAX * 2, "%s%s", theme_path, font);
+    if (g_scale != 1.0)
+        size = (int)(size * g_scale);
     return TTF_OpenFont(exists(font_path) ? font_path : FALLBACK_FONT, size);
 }
 

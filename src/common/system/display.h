@@ -11,12 +11,20 @@
 #include "utils/file.h"
 #include "utils/log.h"
 
+#ifdef PLATFORM_MIYOOMINI
+#define DEFAULT_WIDTH 640
+#define DEFAULT_HEIGHT 480
+#else
+#define DEFAULT_WIDTH 752
+#define DEFAULT_HEIGHT 560
+#endif
+
 #define display_on() display_setScreen(true)
 #define display_off() display_setScreen(false)
 
 static int fb_fd;
-static int DISPLAY_WIDTH = 752; // physical screen resolution
-static int DISPLAY_HEIGHT = 560;
+static int DISPLAY_WIDTH = DEFAULT_WIDTH; // physical screen resolution
+static int DISPLAY_HEIGHT = DEFAULT_HEIGHT;
 struct timeval start_time, end_time;
 
 typedef struct Display {
@@ -35,8 +43,8 @@ typedef struct Display {
 } display_t;
 
 static display_t g_display = {
-    .width = 752,
-    .height = 560,
+    .width = DEFAULT_WIDTH,
+    .height = DEFAULT_HEIGHT,
     .bpp = 32,
     .stride = 0,
     .fb_size = 0,
@@ -110,19 +118,19 @@ void display_init(bool map_fb)
 //
 void display_save(void)
 {
-    g_display.stride = g_display.finfo.line_length;
     ioctl(fb_fd, FBIOGET_VSCREENINFO, &g_display.vinfo);
     g_display.bpp = g_display.vinfo.bits_per_pixel / 8; // byte per pixel
+    g_display.stride = g_display.vinfo.xres_virtual * g_display.bpp;
     g_display.fb_ofs = (uint8_t *)g_display.fb_addr + (g_display.vinfo.yoffset * g_display.stride);
 
     // Save display area and clear
-    if ((g_display.savebuf = (uint8_t *)malloc(DISPLAY_WIDTH * g_display.bpp * DISPLAY_HEIGHT))) {
+    if ((g_display.savebuf = (uint8_t *)malloc(g_display.width * g_display.bpp * g_display.height))) {
         uint32_t i, ofss, ofsd;
         ofss = ofsd = 0;
-        for (i = DISPLAY_HEIGHT; i > 0;
-             i--, ofss += g_display.stride, ofsd += DISPLAY_WIDTH * g_display.bpp) {
-            memcpy(g_display.savebuf + ofsd, g_display.fb_ofs + ofss, DISPLAY_WIDTH * g_display.bpp);
-            memset(g_display.fb_ofs + ofss, 0, DISPLAY_WIDTH * g_display.bpp);
+        for (i = g_display.height; i > 0;
+             i--, ofss += g_display.stride, ofsd += g_display.width * g_display.bpp) {
+            memcpy(g_display.savebuf + ofsd, g_display.fb_ofs + ofss, g_display.width * g_display.bpp);
+            memset(g_display.fb_ofs + ofss, 0, g_display.width * g_display.bpp);
         }
     }
 }
@@ -136,9 +144,9 @@ void display_restore(void)
     if (g_display.savebuf) {
         uint32_t i, ofss, ofsd;
         ofss = ofsd = 0;
-        for (i = DISPLAY_HEIGHT; i > 0;
-             i--, ofsd += g_display.stride, ofss += DISPLAY_WIDTH * g_display.bpp) {
-            memcpy(g_display.fb_ofs + ofsd, g_display.savebuf + ofss, DISPLAY_WIDTH * g_display.bpp);
+        for (i = g_display.height; i > 0;
+             i--, ofsd += g_display.stride, ofss += g_display.width * g_display.bpp) {
+            memcpy(g_display.fb_ofs + ofsd, g_display.savebuf + ofss, g_display.width * g_display.bpp);
         }
         free(g_display.savebuf);
         g_display.savebuf = NULL;
