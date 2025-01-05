@@ -7,6 +7,8 @@
 
 #include "SDL/SDL_rotozoom.h"
 #include "system/display.h"
+#include "utils/retroarch_cmd.h"
+#include "utils/sdl_direct_fb.h"
 #include "utils/str.h"
 
 #define MAX_HISTORY 100

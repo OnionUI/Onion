@@ -9,14 +9,15 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "system/battery.h"
 #include "system/screenshot.h"
 #include "utils/msleep.h"
-#include "utils/retroarch_cmd.h"
 #include "utils/str.h"
 
 #include "gs_model.h"
 
 static pthread_t autosave_thread_pt;
+static bool autosave_thread_running = false;
 static bool overlay_enabled = false;
 
 void setFbAsFirstRomScreen(void)
@@ -56,6 +57,7 @@ static void *_saveRomScreenAndStateThread(void *arg)
 
     if (retroarch_getStatus(&status) == -1) {
         print_debug("Error getting RetroArch status");
+        autosave_thread_running = false;
         return NULL;
     }
 
@@ -64,6 +66,7 @@ static void *_saveRomScreenAndStateThread(void *arg)
 
     if (status.state == RETROARCH_STATE_CONTENTLESS || status.state == RETROARCH_STATE_UNKNOWN) {
         print_debug("RetroArch is not running a game");
+        autosave_thread_running = false;
         return NULL;
     }
 
@@ -83,7 +86,31 @@ static void *_saveRomScreenAndStateThread(void *arg)
 
     retroarch_autosave();
 
+    autosave_thread_running = false;
     return NULL;
+}
+
+// Show overlay message, white text on black translucent background
+static void _showMessage(const char *message)
+{
+    SDL_Surface *messageSurface = theme_createTextOverlay(message, (SDL_Color){255, 255, 255}, (SDL_Color){0, 0, 0}, 0.7, 10);
+    if (messageSurface == NULL) {
+        print_debug("Error creating message surface\n");
+        return;
+    }
+
+    SDL_Rect messageRect = {10, 10};
+    SDL_BlitSurface(messageSurface, NULL, screen, &messageRect);
+    SDL_FreeSurface(messageSurface);
+    render();
+}
+
+static void _showFullscreenMessage(const char *message)
+{
+    SDL_BlitSurface(theme_background(), NULL, screen, NULL);
+    theme_renderInfoPanel(screen, " ", message);
+    theme_renderHeaderBattery(screen, battery_getPercentage());
+    render();
 }
 
 void overlay_init(bool enabled)
@@ -93,6 +120,9 @@ void overlay_init(bool enabled)
         retroarch_pause();
         system("playActivity stop_all &");
         setFbAsFirstRomScreen();
+
+        // start autosave thread
+        autosave_thread_running = true;
         pthread_create(&autosave_thread_pt, NULL, _saveRomScreenAndStateThread, NULL);
     }
 }
@@ -100,9 +130,27 @@ void overlay_init(bool enabled)
 void overlay_resume(void)
 {
     if (overlay_enabled) {
+        if (autosave_thread_running) {
+            // backup screen SDL_Surface
+            SDL_Surface *screen_backup = SDL_CreateRGBSurface(SDL_SWSURFACE, screen->w, screen->h, 32, 0, 0, 0, 0);
+            SDL_BlitSurface(screen, NULL, screen_backup, NULL);
+
+            _showMessage("Saving...");
+
+            // wait for autosave thread to finish
+            pthread_join(autosave_thread_pt, NULL);
+
+            SDL_BlitSurface(screen_backup, NULL, screen, NULL);
+            SDL_FreeSurface(screen_backup);
+        }
+
+        render();
+
         retroarch_unpause();
         system("playActivity resume &");
+
         msleep(200);
+
         remove("/mnt/SDCARD/.tmp_update/.runGameSwitcher");
     }
 }
@@ -110,8 +158,12 @@ void overlay_resume(void)
 void overlay_exit(void)
 {
     if (overlay_enabled) {
-        // wait for autosave thread to finish
-        pthread_join(autosave_thread_pt, NULL);
+        if (autosave_thread_running) {
+            _showFullscreenMessage("SAVING");
+
+            // wait for autosave thread to finish
+            pthread_join(autosave_thread_pt, NULL);
+        }
 
         // force kill retroarch
         temp_flag_set(".forceKillRetroarch", true);

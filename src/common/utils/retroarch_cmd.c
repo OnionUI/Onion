@@ -40,7 +40,8 @@ int retroarch_unpause(void)
 
 int retroarch_autosave(void)
 {
-    return retroarch_cmd("SAVE_STATE_SLOT -1");
+    char response[128]; // Response is not used, but it is required by udp_send_receive
+    return retroarch_get("SAVE_STATE_SLOT -1", response, sizeof(response));
 }
 
 int retroarch_getStatus(RetroArchStatus_s *status)

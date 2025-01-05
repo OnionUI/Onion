@@ -4,6 +4,8 @@
 #include "theme/config.h"
 #include "theme/resources.h"
 
+#include "header.h"
+
 typedef enum { ALIGN_LEFT,
                ALIGN_CENTER,
                ALIGN_RIGHT } text_alignment_e;
@@ -57,6 +59,68 @@ SDL_Surface *theme_textboxSurface(const char *message, TTF_Font *font,
     }
 
     return textbox;
+}
+
+void theme_renderInfoPanel(SDL_Surface *screen, const char *title_str, const char *message_str)
+{
+    bool has_title = title_str != NULL && strlen(title_str) > 0;
+    bool has_message = message_str != NULL && strlen(message_str) > 0;
+
+    theme_renderHeader(screen, has_title ? title_str : NULL, !has_title);
+
+    if (has_message) {
+        SDL_Surface *message = NULL;
+        char message_newline[4096];
+        strcpy(message_newline, message_str);
+        char *str = str_replace(message_newline, "\\n", "\n");
+        message = theme_textboxSurface(str, resource_getFont(TITLE), theme()->list.color, ALIGN_CENTER);
+        if (message) {
+            SDL_Rect message_rect = {320, 240};
+            message_rect.x -= message->w / 2;
+            message_rect.y -= message->h / 2;
+            SDL_BlitSurface(message, NULL, screen, &message_rect);
+            SDL_FreeSurface(message);
+        }
+        free(str);
+    }
+}
+
+/**
+ * @brief Creates an SDL_Surface containing text with a solid background color
+ *
+ * @param text The text to be rendered.
+ * @param fg The foreground color (text color).
+ * @param bg The background color.
+ * @param padding The padding around the text relative to background.
+ * @return SDL_Surface* The created surface containing the rendered text with margin.
+ *                       Returns NULL if the text rendering fails.
+ */
+SDL_Surface *theme_createTextOverlay(const char *text, SDL_Color fg, SDL_Color bg, double bgAlpha, int padding)
+{
+    TTF_Init();
+    TTF_Font *font = theme_loadFont(theme()->path, theme()->list.font, (int)(18.0 * g_scale));
+
+    SDL_Surface *text_surface = TTF_RenderUTF8_Blended(font, text, fg);
+    if (!text_surface) {
+        fprintf(stderr, "TTF_RenderUTF8 failed: %s\n", TTF_GetError());
+        return 0;
+    }
+
+    TTF_CloseFont(font);
+
+    padding = (int)(padding * g_scale);
+
+    int overlayW = text_surface->w + 2 * padding;
+    int overlayH = text_surface->h + 2 * padding;
+
+    SDL_Surface *overlay_surface = SDL_CreateRGBSurface(SDL_SWSURFACE, overlayW, overlayH, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
+    SDL_FillRect(overlay_surface, NULL, SDL_MapRGBA(overlay_surface->format, bg.r, bg.g, bg.b, (Uint8)(bgAlpha * 255.0)));
+
+    SDL_Rect dest = {padding, padding};
+    SDL_BlitSurface(text_surface, NULL, overlay_surface, &dest);
+
+    SDL_FreeSurface(text_surface);
+    return overlay_surface;
 }
 
 #endif // RENDER_TEXTBOX_H__

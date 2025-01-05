@@ -82,28 +82,6 @@ static bool loadImagesPathsFromJson(const char *config_path,
     return true;
 }
 
-static void drawInfoPanel(SDL_Surface *screen, const char *title_str, char *message_str)
-{
-    bool has_title = title_str != NULL && strlen(title_str) > 0;
-    bool has_message = message_str != NULL && strlen(message_str) > 0;
-
-    theme_renderHeader(screen, has_title ? title_str : NULL, !has_title);
-
-    if (has_message) {
-        SDL_Surface *message = NULL;
-        char *str = str_replace(message_str, "\\n", "\n");
-        message = theme_textboxSurface(str, resource_getFont(TITLE), theme()->list.color, ALIGN_CENTER);
-        if (message) {
-            SDL_Rect message_rect = {320, 240};
-            message_rect.x -= message->w / 2;
-            message_rect.y -= message->h / 2;
-            SDL_BlitSurface(message, NULL, screen, &message_rect);
-            SDL_FreeSurface(message);
-        }
-        free(str);
-    }
-}
-
 const SDL_Rect *getControlsAwareFrame(const SDL_Rect *frame)
 {
     if (g_show_theme_controls) {
@@ -339,7 +317,7 @@ int main(int argc, char *argv[])
                 if (g_show_theme_controls) {
                     if (header_changed || battery_changed) {
                         if (strlen(title_str) > 0) {
-                            drawInfoPanel(screen, title_str, message_str);
+                            theme_renderInfoPanel(screen, title_str, message_str);
                         }
                         else if (g_images_titles) {
                             const char *title = g_images_titles[g_image_index];

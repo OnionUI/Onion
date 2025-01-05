@@ -26,8 +26,6 @@
 #include "theme/theme.h"
 #include "utils/config.h"
 #include "utils/msleep.h"
-#include "utils/retroarch_cmd.h"
-#include "utils/sdl_direct_fb.h"
 #include "utils/surfaceSetAlpha.h"
 
 #include "../playActivity/playActivityDB.h"
@@ -618,7 +616,6 @@ int main(int argc, char *argv[])
         if (current_bg != NULL) {
             SDL_FillRect(screen, NULL, 0);
             renderCentered(current_bg, VIEW_FULLSCREEN, NULL, NULL);
-            render();
         }
         overlay_resume();
     }
