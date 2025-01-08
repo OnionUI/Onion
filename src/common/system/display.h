@@ -157,7 +157,7 @@ void display_reset(void)
 {
     ioctl(fb_fd, FBIOGET_VSCREENINFO, &g_display.vinfo);
     g_display.vinfo.yoffset = 0;
-    memset(g_display.fb_addr, 0, g_display.finfo.smem_len);
+    memset(g_display.fb_addr, 0, g_display.fb_size);
     ioctl(fb_fd, FBIOPUT_VSCREENINFO, &g_display.vinfo);
 }
 
@@ -481,7 +481,11 @@ void display_drawBatteryIcon(uint32_t color, int x, int y, int level,
 
 void display_close(void)
 {
+    if (fb_fd > 0)
+        display_reset();
+
     display_free(&g_display);
+
     if (fb_fd > 0)
         close(fb_fd);
 }
