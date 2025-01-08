@@ -157,13 +157,8 @@ int main(int argc, char *argv[])
 
     init(INIT_ALL);
 
-    g_scale = (double)g_display.width / 640.0;
-    scaleSurfaceFunc = zoomSurface;
-
     readFirstEntry();
-
     overlay_init(is_overlay);
-
     loadRomScreens();
 
     settings_load();

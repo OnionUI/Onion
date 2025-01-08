@@ -6,7 +6,7 @@ CFILES := $(CFILES) \
 	../common/utils/retroarch_cmd.c
 
 TARGET = gameSwitcher
-LDFLAGS := $(LDFLAGS) -lSDL -lSDL_ttf -lSDL_image -lSDL_mixer -lSDL_rotozoom -lpng -lsqlite3 -pthread
+LDFLAGS := $(LDFLAGS) -lSDL -lSDL_ttf -lSDL_image -lSDL_rotozoom -lpng -lsqlite3 -pthread
 
 include ../common/commands.mk
 include ../common/recipes.mk

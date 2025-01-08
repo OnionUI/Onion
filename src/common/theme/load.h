@@ -16,8 +16,16 @@
 #define THEME_OVERRIDES "/mnt/SDCARD/Saves/CurrentProfile/theme"
 #define FALLBACK_THEME_PATH "/mnt/SDCARD/miyoo/app/"
 
-static SDL_Surface *(*scaleSurfaceFunc)(SDL_Surface *surface, double xScale, double yScale, int smoothing) = NULL;
+typedef SDL_Surface *(*ScaleSurfaceFunc)(SDL_Surface *surface, double xScale, double yScale, int smoothing);
+
+static ScaleSurfaceFunc scaleSurfaceFunc = NULL;
 static double g_scale = 1.0;
+
+void theme_initScaling(double scale, ScaleSurfaceFunc scaleSurface)
+{
+    g_scale = scale;
+    scaleSurfaceFunc = scaleSurface;
+}
 
 SDL_Rect theme_scaleRect(SDL_Rect rect)
 {

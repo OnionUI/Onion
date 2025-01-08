@@ -3,21 +3,26 @@
 
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
-#include <SDL/SDL_mixer.h>
 #include <SDL/SDL_ttf.h>
+
+#ifdef HAS_AUDIO
+#include <SDL/SDL_mixer.h>
+#endif
 
 #include "system/display.h"
 
 static SDL_Surface *video;
 static SDL_Surface *screen;
-static bool sdl_has_audio = false;
 
-bool SDL_InitDefault(bool include_audio)
+bool SDL_InitDefault(void)
 {
     display_getRenderResolution();
 
-    SDL_Init(include_audio ? (SDL_INIT_VIDEO | SDL_INIT_AUDIO)
-                           : SDL_INIT_VIDEO);
+#ifdef HAS_AUDIO
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
+#else
+    SDL_Init(SDL_INIT_VIDEO);
+#endif
     SDL_ShowCursor(SDL_DISABLE);
     SDL_EnableKeyRepeat(300, 50);
     TTF_Init();
@@ -25,10 +30,10 @@ bool SDL_InitDefault(bool include_audio)
     video = SDL_SetVideoMode(g_display.width, g_display.height, 32, SDL_HWSURFACE);
     screen = SDL_CreateRGBSurface(SDL_HWSURFACE, g_display.width, g_display.height, 32, 0, 0, 0, 0);
 
-    if (!include_audio || Mix_OpenAudio(48000, 32784, 2, 4096) < 0)
+#ifdef HAS_AUDIO
+    if (Mix_OpenAudio(48000, 32784, 2, 4096) < 0)
         return false;
-
-    sdl_has_audio = include_audio;
+#endif
 
     return true;
 }

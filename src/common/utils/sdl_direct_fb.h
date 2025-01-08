@@ -2,12 +2,14 @@
 #define UTILS_SDL_DIRECT_FB_H
 
 #include <SDL/SDL.h>
+#include <SDL/SDL_rotozoom.h>
 #include <linux/input.h>
 #include <sys/poll.h>
 
 #include "system/display.h"
 #include "system/keymap_hw.h"
 #include "system/keymap_sw.h"
+#include "theme/load.h"
 #include "utils/keystate.h"
 #include "utils/log.h"
 #include "utils/sdl_init.h"
@@ -30,6 +32,7 @@ static struct pollfd _fds[1];
 void init(int flags)
 {
     display_init(_render_direct_to_fb);
+    theme_initScaling((double)g_display.width / 640.0, zoomSurface);
 
     if (_render_direct_to_fb) {
         screen = SDL_CreateRGBSurface(SDL_SWSURFACE, g_display.width, g_display.height, 32, 0, 0, 0, 0);
@@ -49,7 +52,7 @@ void init(int flags)
         }
     }
     else {
-        SDL_InitDefault(flags & INIT_AUDIO);
+        SDL_InitDefault();
     }
 }
 

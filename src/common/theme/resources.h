@@ -2,9 +2,15 @@
 #define THEME_RESOURCES_H__
 
 #include <SDL/SDL.h>
-#include <SDL/SDL_mixer.h>
 #include <SDL/SDL_ttf.h>
 #include <stdbool.h>
+
+#ifdef HAS_AUDIO
+#include <SDL/SDL_mixer.h>
+#else
+#define Mix_Music void
+#define Mix_Chunk void
+#endif
 
 #include "system/lang.h"
 #include "utils/flags.h"
@@ -254,6 +260,7 @@ void resource_reloadFont(ThemeFonts request)
 
 Mix_Chunk *resource_getSoundChange(void)
 {
+#ifdef HAS_AUDIO
     if (resources.sound_change == NULL) {
         char sound_path[STR_MAX * 2];
         snprintf(sound_path, STR_MAX * 2 - 1, "%ssound/change.wav",
@@ -264,10 +271,14 @@ Mix_Chunk *resource_getSoundChange(void)
             resources.sound_change = Mix_LoadWAV(sound_path);
     }
     return resources.sound_change;
+#else
+    return NULL;
+#endif
 }
 
 Mix_Music *resource_getBGM(void)
 {
+#ifdef HAS_AUDIO
     if (resources.bgm == NULL) {
         char sound_path[STR_MAX * 2];
         snprintf(sound_path, STR_MAX * 2 - 1, "%ssound/bgm.mp3", theme()->path);
@@ -277,6 +288,9 @@ Mix_Music *resource_getBGM(void)
             resources.bgm = Mix_LoadMUS(sound_path);
     }
     return resources.bgm;
+#else
+    return NULL;
+#endif
 }
 
 SDL_Surface *resource_getBrightness(int brightness)
@@ -325,11 +339,13 @@ void resources_free()
     if (resources._background_loaded)
         SDL_FreeSurface(resources.background);
 
+#ifdef HAS_AUDIO
     if (resources.sound_change != NULL)
         Mix_FreeChunk(resources.sound_change);
 
     if (resources.bgm != NULL)
         Mix_FreeMusic(resources.bgm);
+#endif
 
     if (_theme_overrides_changed) {
         bool hide_labels_icons = resources.theme_back.hideLabels.icons,

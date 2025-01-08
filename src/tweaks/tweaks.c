@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
     signal(SIGTERM, sigHandler);
 
     if (use_display || strlen(apply_tool) == 0)
-        SDL_InitDefault(true);
+        SDL_InitDefault();
 
     settings_load();
 
