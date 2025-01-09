@@ -1,0 +1,97 @@
+#ifndef GAME_SWITCHER_APP_STATE_H__
+#define GAME_SWITCHER_APP_STATE_H__
+
+#include <SDL/SDL.h>
+#include <signal.h>
+
+#define VIEW_NORMAL 0
+#define VIEW_MINIMAL 1
+#define VIEW_FULLSCREEN -1
+
+typedef struct {
+    bool quit;
+    bool exit_to_menu;
+    bool changed;
+    bool current_game_changed;
+    bool brightness_changed;
+    bool pop_menu_open;
+    bool show_time;
+    bool show_total;
+    bool show_legend;
+    int view_mode;
+    int view_restore;
+    uint32_t acc_ticks;
+    uint32_t last_ticks;
+    uint32_t time_step;
+    uint32_t legend_start;
+    uint32_t legend_timeout;
+    uint32_t brightness_start;
+    uint32_t brightness_timeout;
+    SDL_Surface *custom_header;
+    SDL_Surface *custom_footer;
+    int header_height;
+    int footer_height;
+    SDL_Surface *current_bg;
+    SDL_Surface *transparent_bg;
+    bool first_render;
+    int current_game;
+    SDL_Surface *surfaceGameName;
+    SDL_Rect game_name_size;
+    int game_name_max_width;
+    int gameNameScrollX;
+    int gameNameScrollSpeed;
+    int gameNameScrollStart;
+    int gameNameScrollEnd;
+} AppState;
+
+static AppState appState = {
+    .quit = false,
+    .exit_to_menu = false,
+    .changed = true,
+    .current_game_changed = true,
+    .brightness_changed = false,
+    .pop_menu_open = true,
+    .show_time = false,
+    .show_total = true,
+    .show_legend = true,
+    .view_mode = VIEW_NORMAL,
+    .view_restore = VIEW_NORMAL,
+    .acc_ticks = 0,
+    .last_ticks = 0,
+    .time_step = 1000 / 30,
+    .legend_start = 0,
+    .legend_timeout = 5000,
+    .brightness_start = 0,
+    .brightness_timeout = 2000,
+    .custom_header = NULL,
+    .custom_footer = NULL,
+    .header_height = 0,
+    .footer_height = 0,
+    .current_bg = NULL,
+    .transparent_bg = NULL,
+    .first_render = true,
+    .current_game = 0,
+    .surfaceGameName = NULL,
+    .game_name_size = {0, 0},
+    .game_name_max_width = 0,
+    .gameNameScrollX = 0,
+    .gameNameScrollSpeed = 10,
+    .gameNameScrollStart = 20,
+    .gameNameScrollEnd = 20};
+
+static void sigHandler(int sig)
+{
+    switch (sig) {
+    case SIGINT:
+    case SIGTERM:
+        appState.exit_to_menu = true;
+        appState.quit = true;
+        break;
+    default:
+        break;
+    }
+}
+
+static char sTotalTimePlayed[50] = "";
+
+#endif // GAME_SWITCHER_APP_STATE_H__

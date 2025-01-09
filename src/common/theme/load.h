@@ -79,7 +79,19 @@ SDL_Surface *theme_loadImage(const char *theme_path, const char *name)
 
     SDL_Surface *image = IMG_Load(image_path);
 
-    if (image && g_scale != 1.0 && scaleSurfaceFunc) {
+    if (!image) {
+        printf_debug("Failed to load image: %s\n", image_path);
+        return NULL;
+    }
+
+    if (image->format->BitsPerPixel != 32) {
+        SDL_Surface *converted = SDL_CreateRGBSurface(SDL_SWSURFACE, image->w, image->h, 32, 0, 0, 0, 0);
+        SDL_BlitSurface(image, NULL, converted, NULL);
+        SDL_FreeSurface(image);
+        image = converted;
+    }
+
+    if (g_scale != 1.0 && scaleSurfaceFunc) {
         SDL_Surface *scaled = scaleSurfaceFunc(image, g_scale, g_scale, 1);
         SDL_FreeSurface(image);
         image = scaled;

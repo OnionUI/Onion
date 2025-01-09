@@ -58,6 +58,12 @@ typedef enum theme_images {
     BRIGHTNESS_9,
     BRIGHTNESS_10,
     LEGEND_GAMESWITCHER,
+    BG_POP_MENU_1,
+    BG_POP_MENU_2,
+    BG_POP_MENU_3,
+    BG_POP_MENU_4,
+    DOT_ACTIVE,
+    DOT_NEUTRAL,
     images_count
 } ThemeImages;
 
@@ -192,6 +198,18 @@ SDL_Surface *_loadImage(ThemeImages request)
         return theme_loadImage(t->path, "extra/lum10");
     case LEGEND_GAMESWITCHER:
         return theme_loadImage(t->path, "extra/gs-legend");
+    case BG_POP_MENU_1:
+        return theme_loadImage(t->path, "bg-pop-menu-1");
+    case BG_POP_MENU_2:
+        return theme_loadImage(t->path, "bg-pop-menu-2");
+    case BG_POP_MENU_3:
+        return theme_loadImage(t->path, "bg-pop-menu-3");
+    case BG_POP_MENU_4:
+        return theme_loadImage(t->path, "bg-pop-menu-4");
+    case DOT_ACTIVE:
+        return theme_loadImage(t->path, "dot-a");
+    case DOT_NEUTRAL:
+        return theme_loadImage(t->path, "dot-n");
     default:
         break;
     }
@@ -291,6 +309,24 @@ Mix_Music *resource_getBGM(void)
 #else
     return NULL;
 #endif
+}
+
+SDL_Surface *resource_getPopMenuBg(int size)
+{
+    switch (size) {
+    case 1:
+        return resource_getSurface(BG_POP_MENU_1);
+    case 2:
+        return resource_getSurface(BG_POP_MENU_2);
+    case 3:
+        return resource_getSurface(BG_POP_MENU_3);
+    case 4:
+        return resource_getSurface(BG_POP_MENU_4);
+    default:
+        break;
+    }
+    printf_debug("Invalid pop menu size: %i\n", size);
+    return NULL;
 }
 
 SDL_Surface *resource_getBrightness(int brightness)
