@@ -14,11 +14,11 @@
 #include "utils/msleep.h"
 #include "utils/str.h"
 
+#include "gs_appState.h"
 #include "gs_model.h"
 
 static pthread_t autosave_thread_pt;
 static bool autosave_thread_running = false;
-static bool overlay_enabled = false;
 
 void setFbAsFirstRomScreen(void)
 {
@@ -113,10 +113,9 @@ static void _showFullscreenMessage(const char *message)
     render();
 }
 
-void overlay_init(bool enabled)
+void overlay_init()
 {
-    overlay_enabled = enabled;
-    if (overlay_enabled) {
+    if (appState.is_overlay) {
         retroarch_pause();
         system("playActivity stop_all &");
         setFbAsFirstRomScreen();
@@ -129,7 +128,7 @@ void overlay_init(bool enabled)
 
 void overlay_resume(void)
 {
-    if (overlay_enabled) {
+    if (appState.is_overlay) {
         if (autosave_thread_running) {
             // backup screen SDL_Surface
             SDL_Surface *screen_backup = SDL_CreateRGBSurface(SDL_SWSURFACE, screen->w, screen->h, 32, 0, 0, 0, 0);
@@ -157,7 +156,7 @@ void overlay_resume(void)
 
 void overlay_exit(void)
 {
-    if (overlay_enabled) {
+    if (appState.is_overlay) {
         if (autosave_thread_running) {
             _showFullscreenMessage("SAVING");
 

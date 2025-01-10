@@ -7,6 +7,7 @@
 #include <string.h>
 #include <strings.h>
 
+#include "system/lang.h"
 #include "utils/str.h"
 
 #define MAX_NUM_VALUES 100
@@ -152,6 +153,14 @@ ListItem *list_addItemWithInfoNote(List *list, ListItem item, const char *info_n
 {
     ListItem *_item = list_addItem(list, item);
     strcpy(_item->info_note, info_note);
+    return _item;
+}
+
+ListItem *list_addItemWithLang(List *list, ListItem item, const lang_hash key)
+{
+    ListItem *_item = list_addItem(list, item);
+    if (lang_list && lang_list[key])
+        strcpy(_item->label, lang_list[key]);
     return _item;
 }
 

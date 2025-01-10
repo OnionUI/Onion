@@ -4,12 +4,14 @@
 #include <SDL/SDL.h>
 
 #include "system/display.h"
+#include "system/lang.h"
 #include "theme/theme.h"
 
 #include "../playActivity/playActivityDB.h"
 
 #include "gs_appState.h"
 #include "gs_model.h"
+#include "gs_popMenu.h"
 
 void renderCentered(SDL_Surface *image, int view_mode, SDL_Rect *overrideSrcRect, SDL_Rect *overrideDestRect)
 {
@@ -225,13 +227,6 @@ void renderBrightness(AppState *state)
             brightness_rect.y = state->view_mode == VIEW_NORMAL ? state->header_height : 0;
         }
         SDL_BlitSurface(brightness, NULL, screen, &brightness_rect);
-    }
-}
-
-void renderPopMenu(AppState *state)
-{
-    if (state->pop_menu_open) {
-        theme_renderPopMenu(screen, state->view_mode == VIEW_NORMAL ? state->header_height : 0, 4);
     }
 }
 

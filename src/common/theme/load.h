@@ -31,10 +31,10 @@ SDL_Rect theme_scaleRect(SDL_Rect rect)
 {
     if (g_scale == 1.0)
         return rect;
-    rect.x *= g_scale;
-    rect.y *= g_scale;
-    rect.w *= g_scale;
-    rect.h *= g_scale;
+    rect.x = (double)rect.x * g_scale;
+    rect.y = (double)rect.y * g_scale;
+    rect.w = (double)rect.w * g_scale;
+    rect.h = (double)rect.h * g_scale;
     return rect;
 }
 
@@ -85,7 +85,9 @@ SDL_Surface *theme_loadImage(const char *theme_path, const char *name)
     }
 
     if (image->format->BitsPerPixel != 32) {
-        SDL_Surface *converted = SDL_CreateRGBSurface(SDL_SWSURFACE, image->w, image->h, 32, 0, 0, 0, 0);
+        // Normalize to 32-bit surface with alpha channel
+        SDL_Surface *converted = SDL_CreateRGBSurface(SDL_SWSURFACE, image->w, image->h, 32,
+                                                      0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
         SDL_BlitSurface(image, NULL, converted, NULL);
         SDL_FreeSurface(image);
         image = converted;

@@ -62,7 +62,8 @@ void theme_renderStandardHint(SDL_Surface *screen, const char *btn_a_str,
 
 void theme_renderFooter(SDL_Surface *screen)
 {
-    SDL_Rect footer_rect = theme_scaleRect((SDL_Rect){0, 420, 640, 60});
+    int footer_height = 60.0 * g_scale;
+    SDL_Rect footer_rect = {0, g_display.height - footer_height, g_display.width, footer_height};
     SDL_BlitSurface(theme_background(), &footer_rect, screen, &footer_rect);
     SDL_BlitSurface(resource_getSurface(BG_FOOTER), NULL, screen, &footer_rect);
 }
@@ -98,12 +99,12 @@ void theme_renderFooterStatus(SDL_Surface *screen, int current_num,
 
     if (total) {
         SDL_Rect current_rect = {0, 0};
-        SDL_Rect total_rect = {620.0 * g_scale - total->w, 449.0 * g_scale - total->h / 2};
+        SDL_Rect total_rect = {(int)(620.0 * g_scale) - total->w, (int)(449.0 * g_scale) - total->h / 2};
 
         SDL_BlitSurface(total, NULL, screen, &total_rect);
         if (current) {
             current_rect.x = total_rect.x - current->w;
-            current_rect.y = 449.0 * g_scale - current->h / 2;
+            current_rect.y = (int)(449.0 * g_scale) - current->h / 2;
             old_status_width = total->w + current->w;
             SDL_BlitSurface(current, NULL, screen, &current_rect);
             SDL_FreeSurface(current);

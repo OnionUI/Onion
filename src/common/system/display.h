@@ -61,6 +61,16 @@ typedef struct Rect {
     int h;
 } rect_t;
 
+void display_reset(void)
+{
+    if (fb_fd < 0)
+        fb_fd = open("/dev/fb0", O_RDWR);
+    ioctl(fb_fd, FBIOGET_VSCREENINFO, &g_display.vinfo);
+    g_display.vinfo.yoffset = 0;
+    memset(g_display.fb_addr, 0, g_display.fb_size);
+    ioctl(fb_fd, FBIOPUT_VSCREENINFO, &g_display.vinfo);
+}
+
 //
 //    Get render resolution
 //
@@ -98,6 +108,8 @@ void display_init(bool map_fb)
     // Open and mmap FB
     fb_fd = open("/dev/fb0", O_RDWR);
     ioctl(fb_fd, FBIOGET_FSCREENINFO, &g_display.finfo);
+
+    display_reset();
 
     if (map_fb) {
         g_display.fb_size = g_display.finfo.smem_len;
@@ -151,14 +163,6 @@ void display_restore(void)
         free(g_display.savebuf);
         g_display.savebuf = NULL;
     }
-}
-
-void display_reset(void)
-{
-    ioctl(fb_fd, FBIOGET_VSCREENINFO, &g_display.vinfo);
-    g_display.vinfo.yoffset = 0;
-    memset(g_display.fb_addr, 0, g_display.fb_size);
-    ioctl(fb_fd, FBIOPUT_VSCREENINFO, &g_display.vinfo);
 }
 
 void display_free(display_t *display)
@@ -481,9 +485,6 @@ void display_drawBatteryIcon(uint32_t color, int x, int y, int level,
 
 void display_close(void)
 {
-    if (fb_fd > 0)
-        display_reset();
-
     display_free(&g_display);
 
     if (fb_fd > 0)

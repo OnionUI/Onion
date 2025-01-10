@@ -9,6 +9,7 @@
 #define VIEW_FULLSCREEN -1
 
 typedef struct {
+    List pop_menu_list;
     bool quit;
     bool exit_to_menu;
     bool changed;
@@ -18,8 +19,10 @@ typedef struct {
     bool show_time;
     bool show_total;
     bool show_legend;
+    bool is_overlay;
     int view_mode;
     int view_restore;
+    int pop_menu_game_index;
     uint32_t acc_ticks;
     uint32_t last_ticks;
     uint32_t time_step;
@@ -45,17 +48,20 @@ typedef struct {
 } AppState;
 
 static AppState appState = {
+    .pop_menu_list = {{0}},
     .quit = false,
     .exit_to_menu = false,
     .changed = true,
     .current_game_changed = true,
     .brightness_changed = false,
-    .pop_menu_open = true,
+    .pop_menu_open = false,
     .show_time = false,
     .show_total = true,
     .show_legend = true,
+    .is_overlay = false,
     .view_mode = VIEW_NORMAL,
     .view_restore = VIEW_NORMAL,
+    .pop_menu_game_index = 0,
     .acc_ticks = 0,
     .last_ticks = 0,
     .time_step = 1000 / 30,

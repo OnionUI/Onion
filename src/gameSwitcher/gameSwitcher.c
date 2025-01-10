@@ -35,7 +35,7 @@
 
 int main(int argc, char *argv[])
 {
-    const bool is_overlay = argc > 1 && strcmp(argv[1], "--overlay") == 0;
+    appState.is_overlay = argc > 1 && strcmp(argv[1], "--overlay") == 0;
 
     log_setName("gameSwitcher");
     print_debug("\n\nDebug logging enabled");
@@ -46,13 +46,17 @@ int main(int argc, char *argv[])
     init(INIT_ALL);
 
     readFirstEntry();
-    overlay_init(is_overlay);
+    overlay_init();
     loadRomScreens();
 
     settings_load();
     lang_load();
 
     mkdirs("/mnt/SDCARD/.tmp_update/config/gameSwitcher");
+
+    if (appState.is_overlay) {
+        appState.pop_menu_open = true;
+    }
 
     appState.show_time = config_flag_get("gameSwitcher/showTime");
     appState.show_total = !config_flag_get("gameSwitcher/hideTotal");
@@ -124,7 +128,7 @@ int main(int argc, char *argv[])
                 }
             }
 
-            if (appState.view_mode != VIEW_FULLSCREEN && game_list_len > 0) {
+            if (appState.view_mode != VIEW_FULLSCREEN && game_list_len > 0 && !appState.pop_menu_open) {
                 renderGameName(&appState);
             }
 
@@ -133,7 +137,7 @@ int main(int argc, char *argv[])
                 continue;
             }
 
-            if (appState.view_mode == VIEW_NORMAL) {
+            if (appState.view_mode == VIEW_NORMAL && !appState.pop_menu_open) {
                 renderFooter(&appState);
             }
 
@@ -164,7 +168,7 @@ int main(int argc, char *argv[])
         remove("/mnt/SDCARD/.tmp_update/cmd_to_run.sh");
         overlay_exit();
     }
-    else if (is_overlay && appState.current_game == 0) {
+    else if (appState.is_overlay && appState.current_game == 0) {
         if (appState.current_bg != NULL) {
             SDL_FillRect(screen, NULL, 0);
             renderCentered(appState.current_bg, VIEW_FULLSCREEN, NULL, NULL);

@@ -32,7 +32,10 @@ static struct pollfd _fds[1];
 void init(int flags)
 {
     display_init(_render_direct_to_fb);
-    theme_initScaling((double)g_display.width / 640.0, zoomSurface);
+
+    if (g_display.width != 640 || g_display.height != 480) {
+        theme_initScaling((double)g_display.width / 640.0, zoomSurface);
+    }
 
     if (_render_direct_to_fb) {
         screen = SDL_CreateRGBSurface(SDL_SWSURFACE, g_display.width, g_display.height, 32, 0, 0, 0, 0);

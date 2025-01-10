@@ -1,6 +1,7 @@
 #ifndef GAME_SWITCHER_KEY_STATE_H__
 #define GAME_SWITCHER_KEY_STATE_H__
 
+#include "components/list.h"
 #include "system/keymap_sw.h"
 #include "system/settings.h"
 #include "theme/render/dialog.h"
@@ -9,6 +10,7 @@
 
 #include "gs_appState.h"
 #include "gs_model.h"
+#include "gs_popMenu.h"
 #include "gs_romscreen.h"
 
 typedef struct {
@@ -196,6 +198,10 @@ void handleUpdateKeystateMain(AppState *state)
             }
         }
     }
+
+    if (state->current_game_changed) {
+        popMenu_destroy();
+    }
 }
 
 void handleUpdateKeystatePopMenu(AppState *state)
@@ -205,6 +211,24 @@ void handleUpdateKeystatePopMenu(AppState *state)
     if (keystate[SW_BTN_B] == PRESSED) {
         state->pop_menu_open = false;
         state->changed = true;
+    }
+
+    if (keystate[SW_BTN_A] == PRESSED) {
+        _gs_keystate.btn_a_pressed = true;
+    }
+    else if (keystate[SW_BTN_A] == RELEASED && _gs_keystate.btn_a_pressed) {
+        _gs_keystate.btn_a_pressed = false;
+        ListItem *item = &state->pop_menu_list.items[state->pop_menu_list.active_pos];
+        item->action(NULL);
+    }
+
+    if (keystate[SW_BTN_DOWN] >= PRESSED) {
+        if (list_keyDown(&state->pop_menu_list, keystate[SW_BTN_DOWN] == REPEATING))
+            state->changed = true;
+    }
+    else if (keystate[SW_BTN_UP] >= PRESSED) {
+        if (list_keyUp(&state->pop_menu_list, keystate[SW_BTN_UP] == REPEATING))
+            state->changed = true;
     }
 }
 

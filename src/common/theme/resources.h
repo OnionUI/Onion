@@ -15,9 +15,11 @@
 #include "system/lang.h"
 #include "utils/flags.h"
 #include "utils/log.h"
+#include "utils/surfaceSetAlpha.h"
 
 #include "./config.h"
 
+#define HIDDEN_ITEM_ALPHA 60
 #define RES_MAX_REQUESTS 200
 
 typedef enum theme_images {
@@ -95,6 +97,15 @@ static Resources_s resources = {._theme_loaded = false,
                                 ._background_loaded = false,
                                 .bgm = NULL,
                                 .sound_change = NULL};
+
+typedef struct {
+    SDL_Surface *toggle_off;
+    SDL_Surface *toggle_on;
+    SDL_Surface *arrow_left;
+    SDL_Surface *arrow_right;
+} HiddenItems_s;
+
+static HiddenItems_s g_hidden_items;
 
 Theme_s *theme(void)
 {
@@ -262,6 +273,34 @@ SDL_Surface *resource_getSurfaceCopy(ThemeImages request)
     return _loadImage(request);
 }
 
+static void _loadHiddenItem(SDL_Surface **surface, ThemeImages request)
+{
+    if (!*surface) {
+        *surface = resource_getSurfaceCopy(request);
+        surfaceSetAlpha(*surface, HIDDEN_ITEM_ALPHA);
+    }
+}
+
+void theme_loadHiddenItems()
+{
+    _loadHiddenItem(&g_hidden_items.toggle_off, TOGGLE_OFF);
+    _loadHiddenItem(&g_hidden_items.toggle_on, TOGGLE_ON);
+    _loadHiddenItem(&g_hidden_items.arrow_left, LEFT_ARROW);
+    _loadHiddenItem(&g_hidden_items.arrow_right, RIGHT_ARROW);
+}
+
+static void _freeHiddenItems(HiddenItems_s *hidden)
+{
+    if (hidden->toggle_off)
+        SDL_FreeSurface(hidden->toggle_off);
+    if (hidden->toggle_on)
+        SDL_FreeSurface(hidden->toggle_on);
+    if (hidden->arrow_left)
+        SDL_FreeSurface(hidden->arrow_left);
+    if (hidden->arrow_right)
+        SDL_FreeSurface(hidden->arrow_right);
+}
+
 TTF_Font *resource_getFont(ThemeFonts request)
 {
     if (resources.fonts[request] == NULL)
@@ -374,6 +413,8 @@ void resources_free()
 
     if (resources._background_loaded)
         SDL_FreeSurface(resources.background);
+
+    _freeHiddenItems(&g_hidden_items);
 
 #ifdef HAS_AUDIO
     if (resources.sound_change != NULL)
