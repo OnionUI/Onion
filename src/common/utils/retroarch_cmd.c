@@ -38,10 +38,42 @@ int retroarch_unpause(void)
     return retroarch_cmd("UNPAUSE");
 }
 
+int retroarch_getStateSlot(int *slot)
+{
+    char response[128];
+    if (retroarch_get("GET_STATE_SLOT", response, sizeof(response)) == -1) {
+        return -1;
+    }
+
+    // Parse response "GET_STATE_SLOT %d"
+    return sscanf(response, "GET_STATE_SLOT %d", slot);
+}
+
+int retroarch_setStateSlot(int slot)
+{
+    char cmd[32];
+    snprintf(cmd, sizeof(cmd), "SET_STATE_SLOT %d", slot);
+    return retroarch_cmd(cmd);
+}
+
 int retroarch_autosave(void)
 {
     char response[128]; // Response is not used, but it is required by udp_send_receive
     return retroarch_get("SAVE_STATE_SLOT -1", response, sizeof(response));
+}
+
+int retroarch_save(int slot)
+{
+    char cmd[32];
+    snprintf(cmd, sizeof(cmd), "SAVE_STATE_SLOT %d", slot);
+    return retroarch_cmd(cmd);
+}
+
+int retroarch_load(int slot)
+{
+    char cmd[32];
+    snprintf(cmd, sizeof(cmd), "LOAD_STATE_SLOT %d", slot);
+    return retroarch_cmd(cmd);
 }
 
 int retroarch_getStatus(RetroArchStatus_s *status)

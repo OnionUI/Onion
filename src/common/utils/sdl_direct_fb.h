@@ -22,6 +22,7 @@ static bool _render_direct_to_fb = false;
 static const char *INPUT_DEVICE = "/dev/input/event0";
 static int _input_fd = -1;
 static struct pollfd _fds[1];
+static bool keyinput_disabled = false;
 
 #define INIT_PNG 1
 #define INIT_TTF 2
@@ -92,6 +93,36 @@ void deinit(void)
     }
 
     display_close();
+}
+
+/**
+ * @brief stop input event for other processes
+ *
+ */
+void keyinput_disable(void)
+{
+    if (keyinput_disabled || _input_fd == -1)
+        return;
+    while (ioctl(_input_fd, EVIOCGRAB, 1) < 0) {
+        usleep(100000);
+    }
+    keyinput_disabled = true;
+    print_debug("Keyinput disabled");
+}
+
+/**
+ * @brief restart input event for other processes
+ *
+ */
+void keyinput_enable(void)
+{
+    if (!keyinput_disabled || _input_fd == -1)
+        return;
+    while (ioctl(_input_fd, EVIOCGRAB, 0) < 0) {
+        usleep(100000);
+    }
+    keyinput_disabled = false;
+    print_debug("Keyinput enabled");
 }
 
 SDLKey _translate_input(int key)

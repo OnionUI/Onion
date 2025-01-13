@@ -32,7 +32,7 @@ int __get_font_size()
 void theme_renderDialog(SDL_Surface *screen, const char *title_str, const char *message_str, bool show_hint)
 {
     SDL_Surface *transparent_bg = SDL_CreateRGBSurface(0, g_display.width, g_display.height, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
-    SDL_FillRect(transparent_bg, NULL, 0xBE000000);
+    SDL_FillRect(transparent_bg, NULL, /* 33.3% transparent black */ 0x55000000);
     SDL_BlitSurface(transparent_bg, NULL, screen, NULL);
     SDL_FreeSurface(transparent_bg);
 

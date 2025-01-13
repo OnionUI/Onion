@@ -41,7 +41,7 @@ typedef struct ListItem {
     int _reset_value;
     void *icon_ptr;
     void *preview_ptr;
-    char preview_path[STR_MAX];
+    char preview_path[4096];
     char sticky_note[STR_MAX];
     char info_note[STR_MAX];
 } ListItem;

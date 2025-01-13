@@ -64,6 +64,7 @@ bool exists(const char *file_path);
 bool is_file(const char *file_path);
 bool is_dir(const char *file_path);
 bool file_isModified(const char *path, time_t *old_mtime);
+bool file_isLocked(const char *path);
 
 /**
  * @brief returns the filename component of a path

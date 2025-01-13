@@ -75,6 +75,53 @@ int checkQuitAction(void)
     return 0;
 }
 
+void action_confirmRemove(AppState *state)
+{
+    theme_renderDialog(
+        screen, "Remove from history",
+        "Are you sure you want to\nremove game from history?",
+        true);
+    render();
+
+    KeyState *keystate = _gs_keystate.keystate;
+
+    while (!state->quit) {
+        if (_updateKeystate(keystate, &state->quit, true, NULL)) {
+            if (keystate[SW_BTN_A] == PRESSED) {
+                removeCurrentItem();
+                if (state->current_game > 0)
+                    state->current_game--;
+                state->current_game_changed = true;
+                loadRomScreen(state->current_game);
+                state->changed = true;
+                break;
+            }
+            if (keystate[SW_BTN_B] == PRESSED) {
+                state->changed = true;
+                break;
+            }
+        }
+    }
+}
+
+void action_toggleHeader(AppState *state)
+{
+    state->show_legend = true;
+    state->legend_start = state->last_ticks;
+
+    if (!state->show_time && !state->show_total)
+        state->show_time = true, state->show_total = false;
+    else if (state->show_time && !state->show_total)
+        state->show_time = true, state->show_total = true;
+    else
+        state->show_time = false, state->show_total = false;
+
+    config_flag_set("gameSwitcher/showTime", state->show_time);
+    config_flag_set("gameSwitcher/hideTotal", !state->show_total);
+
+    state->changed = true;
+}
+
 void handleUpdateKeystateMain(AppState *state)
 {
     KeyState *keystate = _gs_keystate.keystate;
@@ -93,23 +140,6 @@ void handleUpdateKeystateMain(AppState *state)
             state->current_game_changed = true;
             state->changed = true;
         }
-    }
-
-    if (keystate[SW_BTN_START] == PRESSED) {
-        state->show_legend = true;
-        state->legend_start = state->last_ticks;
-
-        if (!state->show_time && !state->show_total)
-            state->show_time = true, state->show_total = false;
-        else if (state->show_time && !state->show_total)
-            state->show_time = true, state->show_total = true;
-        else
-            state->show_time = false, state->show_total = false;
-
-        config_flag_set("gameSwitcher/showTime", state->show_time);
-        config_flag_set("gameSwitcher/hideTotal", !state->show_total);
-
-        state->changed = true;
     }
 
     if (keystate[SW_BTN_A] == PRESSED) {
@@ -162,10 +192,8 @@ void handleUpdateKeystateMain(AppState *state)
 
     if (_gs_keystate.changed_key == SW_BTN_Y && keystate[SW_BTN_Y] == RELEASED) {
         if (_gs_keystate.button_y_repeat < 75) {
-            state->view_mode = state->view_mode == VIEW_FULLSCREEN ? state->view_restore
-                                                                   : !state->view_mode;
-            config_flag_set("gameSwitcher/minimal",
-                            state->view_mode == VIEW_MINIMAL);
+            state->view_mode = state->view_mode == VIEW_FULLSCREEN ? state->view_restore : !state->view_mode;
+            config_flag_set("gameSwitcher/minimal", state->view_mode == VIEW_MINIMAL);
             state->changed = true;
         }
         _gs_keystate.button_y_repeat = 0;
@@ -173,29 +201,7 @@ void handleUpdateKeystateMain(AppState *state)
 
     if (keystate[SW_BTN_X] == PRESSED) {
         if (game_list_len != 0) {
-            theme_renderDialog(
-                screen, "Remove from history",
-                "Are you sure you want to\nremove game from history?",
-                true);
-            render();
-
-            while (!state->quit) {
-                if (_updateKeystate(keystate, &state->quit, true, NULL)) {
-                    if (keystate[SW_BTN_A] == PRESSED) {
-                        removeCurrentItem();
-                        if (state->current_game > 0)
-                            state->current_game--;
-                        state->current_game_changed = true;
-                        loadRomScreen(state->current_game);
-                        state->changed = true;
-                        break;
-                    }
-                    if (keystate[SW_BTN_B] == PRESSED) {
-                        state->changed = true;
-                        break;
-                    }
-                }
-            }
+            action_confirmRemove(state);
         }
     }
 
@@ -207,6 +213,7 @@ void handleUpdateKeystateMain(AppState *state)
 void handleUpdateKeystatePopMenu(AppState *state)
 {
     KeyState *keystate = _gs_keystate.keystate;
+    ListItem *item = list_currentItem(&state->pop_menu_list);
 
     if (keystate[SW_BTN_B] == PRESSED) {
         state->pop_menu_open = false;
@@ -218,8 +225,7 @@ void handleUpdateKeystatePopMenu(AppState *state)
     }
     else if (keystate[SW_BTN_A] == RELEASED && _gs_keystate.btn_a_pressed) {
         _gs_keystate.btn_a_pressed = false;
-        ListItem *item = &state->pop_menu_list.items[state->pop_menu_list.active_pos];
-        item->action(NULL);
+        list_activateItem(&state->pop_menu_list);
     }
 
     if (keystate[SW_BTN_DOWN] >= PRESSED) {
@@ -229,6 +235,23 @@ void handleUpdateKeystatePopMenu(AppState *state)
     else if (keystate[SW_BTN_UP] >= PRESSED) {
         if (list_keyUp(&state->pop_menu_list, keystate[SW_BTN_UP] == REPEATING))
             state->changed = true;
+    }
+
+    if (item != NULL && item->action_id == POP_MENU_ACTION_LOAD) {
+        if (keystate[SW_BTN_LEFT] >= PRESSED) {
+            if (g_save_state_info.selected_slot > 0) {
+                g_save_state_info.selected_slot--;
+                setLoadPreview();
+                state->changed = true;
+            }
+        }
+        else if (keystate[SW_BTN_RIGHT] >= PRESSED) {
+            if (g_save_state_info.selected_slot < g_save_state_info.slot_count - 1) {
+                g_save_state_info.selected_slot++;
+                setLoadPreview();
+                state->changed = true;
+            }
+        }
     }
 }
 
@@ -259,12 +282,16 @@ void handleKeystate(AppState *state)
                 _gs_keystate.select_pressed = true;
             if (keystate[SW_BTN_SELECT] == RELEASED) {
                 if (!_gs_keystate.select_combo_key) {
-                    state->pop_menu_open = !state->pop_menu_open;
-                    state->changed = true;
+                    action_toggleHeader(state);
                 }
                 _gs_keystate.select_pressed = false;
                 _gs_keystate.select_combo_key = false;
             }
+        }
+
+        if (keystate[SW_BTN_START] == PRESSED) {
+            state->pop_menu_open = !state->pop_menu_open;
+            state->changed = true;
         }
 
         if (state->pop_menu_open) {

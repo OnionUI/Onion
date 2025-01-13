@@ -48,6 +48,15 @@ bool file_isModified(const char *path, time_t *old_mtime)
     return false;
 }
 
+bool file_isLocked(const char *path)
+{
+    int fd = open(path, O_RDONLY | O_CREAT, 0666);
+    if (fd == -1)
+        return true;
+    close(fd);
+    return false;
+}
+
 const char *file_basename(const char *filename)
 {
     char *p = strrchr(filename, '/');
@@ -142,8 +151,8 @@ bool file_write(const char *path, const char *str, uint32_t len)
 
 void file_copy(const char *src_path, const char *dest_path)
 {
-    char system_cmd[512];
-    snprintf(system_cmd, 511, "cp -f \"%s\" \"%s\"", src_path, dest_path);
+    char system_cmd[4128];
+    snprintf(system_cmd, sizeof(system_cmd), "cp -f \"%s\" \"%s\"", src_path, dest_path);
     system(system_cmd);
 }
 

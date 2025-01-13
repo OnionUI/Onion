@@ -116,6 +116,7 @@ static void _showFullscreenMessage(const char *message)
 void overlay_init()
 {
     if (appState.is_overlay) {
+        keyinput_disable();
         retroarch_pause();
         system("playActivity stop_all &");
         setFbAsFirstRomScreen();
@@ -145,6 +146,7 @@ void overlay_resume(void)
 
         render();
 
+        keyinput_enable();
         retroarch_unpause();
         system("playActivity resume &");
 

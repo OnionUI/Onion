@@ -206,10 +206,8 @@ void renderLegend(AppState *state)
     if (state->show_legend && state->view_mode != VIEW_FULLSCREEN) {
         SDL_Surface *legend = resource_getSurface(LEGEND_GAMESWITCHER);
         if (legend) {
-            printf_debug("Legend size: %i x %i\n", legend->w, legend->h);
             SDL_Rect legend_rect = {g_display.width - legend->w,
                                     state->view_mode == VIEW_NORMAL ? state->header_height : 0};
-            printf_debug("Displaying legend at %i, %i\n", legend_rect.x, legend_rect.y);
             SDL_BlitSurface(legend, NULL, screen, &legend_rect);
         }
     }

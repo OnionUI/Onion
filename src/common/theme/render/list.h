@@ -17,7 +17,7 @@ void theme_renderListLabel(SDL_Surface *screen, const char *label, SDL_Color fg,
     SDL_Surface *item_label = TTF_RenderUTF8_Blended(list_font, label, fg);
     SDL_Rect item_label_rect = {offset_x, center_y - item_label->h / 2};
 
-    SDL_Rect label_crop = {0, 0, label_end - 30, item_label->h};
+    SDL_Rect label_crop = {0, 0, label_end - 30 * g_scale, item_label->h};
 
     /* Maybe shadows will be an option in the future
     SDL_Rect item_shadow_rect = {item_label_rect.x + 1, item_label_rect.y + 2};
@@ -43,6 +43,10 @@ typedef struct {
     SDL_Rect pos;
     bool show_dividers;
     bool stretch_y;
+    bool preview_bg;
+    bool preview_stretch;
+    int preview_width;
+    bool preview_smoothing;
 } ListRenderParams_s;
 
 void theme_renderListCustom(SDL_Surface *screen, List *list, ListRenderParams_s params)
@@ -92,7 +96,7 @@ void theme_renderListCustom(SDL_Surface *screen, List *list, ListRenderParams_s 
         ListItem *active_item = &list->items[list->active_pos];
         if (params.show_dividers)
             SDL_BlitSurface(resource_getSurface(HORIZONTAL_DIVIDER), &item_div_size, screen, &item_bg_rect);
-        theme_renderListLabel(screen, active_item->sticky_note, theme()->list.color, 20, item_bg_rect.y + label_y, false, 640, true);
+        theme_renderListLabel(screen, active_item->sticky_note, theme()->list.color, 20 * g_scale, item_bg_rect.y + label_y, false, 640 * g_scale, true);
     }
 
     for (int i = list->scroll_pos; i < last_item; i++) {
@@ -112,8 +116,7 @@ void theme_renderListCustom(SDL_Surface *screen, List *list, ListRenderParams_s 
         if (i == list->active_pos) {
             SDL_BlitSurface(item_bg, &item_bg_size, screen, &item_bg_rect);
 
-            if (item->preview_ptr == NULL && strlen(item->preview_path) > 0 &&
-                is_file(item->preview_path)) {
+            if (item->preview_ptr == NULL && strlen(item->preview_path) > 0 && is_file(item->preview_path)) {
                 item->preview_ptr = (void *)IMG_Load(item->preview_path);
             }
 
@@ -121,23 +124,23 @@ void theme_renderListCustom(SDL_Surface *screen, List *list, ListRenderParams_s 
                 active_preview = item;
         }
 
-        int item_center_y = item_bg_rect.y + item_bg_size.h / 2;
-        static int multivalue_width = 226;
-        int label_end = 640;
-        int offset_x = 20;
+        const int item_center_y = item_bg_rect.y + item_bg_size.h / 2;
+        const int multivalue_width = 226 * g_scale;
+        int label_end = 640 * g_scale;
+        int offset_x = 20 * g_scale;
 
         if (item->icon_ptr != NULL) {
             SDL_Surface *icon = (SDL_Surface *)item->icon_ptr;
             if (icon->w > 1) {
                 SDL_Rect icon_rect = {offset_x, item_center_y - icon->h / 2};
                 SDL_BlitSurface(icon, NULL, screen, &icon_rect);
-                offset_x += icon->w + 17;
+                offset_x += icon->w + 17 * g_scale;
             }
         }
 
         if (item->item_type == TOGGLE) {
             SDL_Surface *toggle = show_disabled ? (item->value == 1 ? g_hidden_items.toggle_on : g_hidden_items.toggle_off) : (resource_getSurface(item->value == 1 ? TOGGLE_ON : TOGGLE_OFF));
-            toggle_rect.x = 620 - toggle->w;
+            toggle_rect.x = 620 * g_scale - toggle->w;
             toggle_rect.y = item_center_y - toggle->h / 2;
             label_end = toggle_rect.x;
             SDL_BlitSurface(toggle, NULL, screen, &toggle_rect);
@@ -146,10 +149,10 @@ void theme_renderListCustom(SDL_Surface *screen, List *list, ListRenderParams_s 
             SDL_Surface *arrow_left = show_disabled ? g_hidden_items.arrow_left : resource_getSurface(LEFT_ARROW);
             SDL_Surface *arrow_right = show_disabled ? g_hidden_items.arrow_right : resource_getSurface(RIGHT_ARROW);
             SDL_Rect arrow_left_pos = {
-                640 - 20 - arrow_right->w - multivalue_width - arrow_left->w,
+                640 * g_scale - 20 * g_scale - arrow_right->w - multivalue_width - arrow_left->w,
                 item_center_y - arrow_left->h / 2};
             SDL_Rect arrow_right_pos = {
-                640 - 20 - arrow_right->w,
+                640 * g_scale - 20 * g_scale - arrow_right->w,
                 item_center_y - arrow_right->h / 2};
             SDL_BlitSurface(arrow_left, NULL, screen, &arrow_left_pos);
             SDL_BlitSurface(arrow_right, NULL, screen, &arrow_right_pos);
@@ -164,7 +167,7 @@ void theme_renderListCustom(SDL_Surface *screen, List *list, ListRenderParams_s 
             SDL_Rect value_size = {0, 0, multivalue_width, value_label->h};
             int label_width = value_label->w > value_size.w ? value_size.w : value_label->w;
             SDL_Rect value_pos = {
-                640 - 20 - arrow_right->w - multivalue_width / 2 - label_width / 2,
+                640 * g_scale - 20 * g_scale - arrow_right->w - multivalue_width / 2 - label_width / 2,
                 item_center_y - value_size.h / 2};
             SDL_BlitSurface(value_label, &value_size, screen, &value_pos);
         }
@@ -176,30 +179,41 @@ void theme_renderListCustom(SDL_Surface *screen, List *list, ListRenderParams_s 
         if (!list_small && strlen(item->description)) {
             theme_renderListLabel(
                 screen, item->description, theme()->grid.color, offset_x,
-                item_bg_rect.y + 62, list->active_pos == i, label_end, show_disabled);
+                item_bg_rect.y + 62 * g_scale, list->active_pos == i, label_end, show_disabled);
         }
     }
 
     if (active_preview != NULL) {
-        SDL_Surface *preview_bg = resource_getSurface(PREVIEW_BG);
-        SDL_Rect preview_bg_rect = {640 - preview_bg->w, 60};
-        SDL_BlitSurface(preview_bg, NULL, screen, &preview_bg_rect);
+        int preview_width = (double)params.preview_width * g_scale;
+        int preview_x = 640.0 * g_scale;
 
-        SDL_Surface *preview = (SDL_Surface *)active_preview->preview_ptr;
-        bool free_after = false;
-
-        if (preview->w > 250) {
-            preview =
-                rotozoomSurface(preview, 0.0, 250.0 / (double)preview->w, 0);
-            free_after = true;
+        if (params.preview_bg) {
+            SDL_Surface *preview_bg = resource_getSurface(PREVIEW_BG);
+            SDL_Rect preview_bg_rect = {640 * g_scale - preview_bg->w, 60 * g_scale};
+            SDL_BlitSurface(preview_bg, NULL, screen, &preview_bg_rect);
+            preview_x -= preview_bg->w;
+        }
+        else {
+            preview_x -= preview_width;
         }
 
-        SDL_Rect preview_rect = {640 - preview_bg->w + 125 - preview->w / 2,
-                                 240 - preview->h / 2};
-        SDL_BlitSurface(preview, NULL, screen, &preview_rect);
+        SDL_Surface *preview = (SDL_Surface *)active_preview->preview_ptr;
+        if (preview) {
+            bool free_after = false;
 
-        if (free_after)
-            SDL_FreeSurface(preview);
+            if (preview->w > preview_width || (params.preview_stretch && preview->w < preview_width)) {
+                double scale = (double)preview_width / (double)preview->w;
+                preview = zoomSurface(preview, scale, scale, params.preview_smoothing ? SMOOTHING_ON : SMOOTHING_OFF);
+                free_after = true;
+            }
+
+            SDL_Rect preview_rect = {preview_x + (preview_width - preview->w) / 2,
+                                     240 * g_scale - preview->h / 2};
+            SDL_BlitSurface(preview, NULL, screen, &preview_rect);
+
+            if (free_after)
+                SDL_FreeSurface(preview);
+        }
     }
 }
 
@@ -207,10 +221,14 @@ void theme_renderList(SDL_Surface *screen, List *list)
 {
     ListRenderParams_s params = {
         .background = theme_background(),
-        .dim = {0, 60, 640, 360},
-        .pos = {0, 60},
+        .dim = {0, 60 * g_scale, 640 * g_scale, 360 * g_scale},
+        .pos = {0, 60 * g_scale},
         .show_dividers = true,
         .stretch_y = false,
+        .preview_bg = true,
+        .preview_stretch = false,
+        .preview_width = 250,
+        .preview_smoothing = false,
     };
 
     theme_renderListCustom(screen, list, params);

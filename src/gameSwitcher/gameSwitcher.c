@@ -54,10 +54,6 @@ int main(int argc, char *argv[])
 
     mkdirs("/mnt/SDCARD/.tmp_update/config/gameSwitcher");
 
-    if (appState.is_overlay) {
-        appState.pop_menu_open = true;
-    }
-
     appState.show_time = config_flag_get("gameSwitcher/showTime");
     appState.show_total = !config_flag_get("gameSwitcher/hideTotal");
     appState.show_legend = !config_flag_get("gameSwitcher/hideLegend");
@@ -147,7 +143,10 @@ int main(int argc, char *argv[])
 
             renderLegend(&appState);
             renderBrightness(&appState);
-            renderPopMenu(&appState);
+
+            if (!appState.first_render) {
+                renderPopMenu(&appState);
+            }
 
             render();
 

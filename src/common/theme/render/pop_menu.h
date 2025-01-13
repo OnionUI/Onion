@@ -7,19 +7,28 @@
 #include "components/list.h"
 #include "utils/log.h"
 
+#include "footer.h"
 #include "list.h"
 
-void theme_renderPopMenu(SDL_Surface *screen, int y_pos, List *list)
+void theme_renderPopMenu(SDL_Surface *screen, int y_pos, List *list, SDL_Surface *transparent_bg)
 {
     int size = list->scroll_height < 4 ? list->scroll_height : 4;
     SDL_Surface *bg = resource_getPopMenuBg(size);
 
-    if (bg) {
-        if (bg->h > g_display.height - y_pos) {
-            y_pos = 0;
-        }
+    if (bg && bg->h > (g_display.height - y_pos - 60.0 * g_scale)) {
+        y_pos = 0;
+    }
 
-        SDL_Rect bg_rect = {0, y_pos, g_display.width, g_display.height - y_pos};
+    SDL_Rect bg_rect = {0, y_pos, g_display.width, g_display.height - y_pos};
+
+    if (transparent_bg) {
+        SDL_BlitSurface(transparent_bg, NULL, screen, &bg_rect);
+    }
+
+    theme_renderFooter(screen);
+    theme_renderStandardHint(screen, lang_get(LANG_SELECT, LANG_FALLBACK_SELECT), lang_get(LANG_BACK, LANG_FALLBACK_BACK));
+
+    if (bg) {
         SDL_BlitSurface(bg, NULL, screen, &bg_rect);
     }
 
@@ -29,6 +38,10 @@ void theme_renderPopMenu(SDL_Surface *screen, int y_pos, List *list)
         .pos = {0, y_pos},
         .show_dividers = false,
         .stretch_y = true,
+        .preview_bg = false,
+        .preview_stretch = true,
+        .preview_width = 320,
+        .preview_smoothing = false,
     };
 
     if (bg) {
