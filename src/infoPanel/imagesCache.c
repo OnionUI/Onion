@@ -20,9 +20,9 @@ static SDL_Surface *g_image_cache_next = NULL;
 
 #define MIN(a, b) (a < b) ? (a) : (b)
 
-SDL_Surface *scaleImageIfNecessary(SDL_Surface *image, SDL_Rect target)
+SDL_Surface *scaleImageIfNecessary(SDL_Surface *image, SDL_Rect target, bool stretch)
 {
-    if (image->w > target.w || image->h > target.h) {
+    if (image->w > target.w || image->h > target.h || (stretch && (image->w < target.w || image->h < target.h))) {
         double ratio_x = (double)target.w / image->w;
         double ratio_y = (double)target.h / image->h;
         double scale = MIN(ratio_x, ratio_y);
@@ -50,7 +50,7 @@ SDL_Surface *loadImage(const char *image_path, SDL_Surface *screen)
         return NULL;
     }
 
-    SDL_Surface *scaledImage = scaleImageIfNecessary(image, screen->clip_rect);
+    SDL_Surface *scaledImage = scaleImageIfNecessary(image, screen->clip_rect, false);
     if (scaledImage) {
         SDL_FreeSurface(image);
         return scaledImage;
@@ -79,7 +79,7 @@ void drawImage(SDL_Surface *image, SDL_Surface *screen, const SDL_Rect *frame)
         target = *frame;
     }
 
-    SDL_Surface *scaledImage = scaleImageIfNecessary(image, target);
+    SDL_Surface *scaledImage = scaleImageIfNecessary(image, target, false);
     if (scaledImage) {
         SDL_Rect image_pos = getCenterPos(scaledImage, target);
         SDL_BlitSurface(scaledImage, NULL, screen, &image_pos);

@@ -1,3 +1,5 @@
+#ifndef UTILS_HASH_H__
+#define UTILS_HASH_H__
 // Dedicated to Pippip, the main character in the 'Das Totenschiff' roman,
 // actually the B.Traven himself, his real name was Hermann Albert Otto
 // Maksymilian Feige. CAUTION: Add 8 more bytes to the buffer being hashed,
@@ -68,3 +70,4 @@ mov     rdx, rax shr     rdx, 32                                 shr     rdx, 32
         imul    rax, rax, 591798841                     imul    rax, rax,
 591798841 jmp     .L4                                     jmp     .L3
 */
+#endif // UTILS_HASH_H__

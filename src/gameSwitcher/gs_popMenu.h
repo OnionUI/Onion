@@ -29,6 +29,11 @@ static pthread_t g_scan_thread_pt;
 static bool g_save_thread_running = false;
 static bool g_save_thread_success = false;
 
+void popMenu_destroy(void)
+{
+    list_free(&appState.pop_menu_list);
+}
+
 static bool _hasSaveStates(Game_s *game)
 {
     char stateDirPath[4096];
@@ -90,6 +95,9 @@ static bool _scanSaveStates(Game_s *game, SaveStateInfo_s *info)
                 }
                 else if (slotStr[6] != '\0') {
                     slot = atoi(slotStr + 6);
+                    if (slot == 0) {
+                        continue; // '.state0' is not a valid slot (should be '.state')
+                    }
                 }
 
                 if (info->slot_count < 10) {
@@ -137,6 +145,9 @@ static bool createSaveStatePath(Game_s *game, int slot, char *out_path, size_t o
     if (slot == -1) {
         snprintf(out_path, out_path_size, STATES_DIR "/%s/%s.state.auto", game->core_name, game->rom_name);
     }
+    else if (slot == 0) {
+        snprintf(out_path, out_path_size, STATES_DIR "/%s/%s.state", game->core_name, game->rom_name);
+    }
     else {
         snprintf(out_path, out_path_size, STATES_DIR "/%s/%s.state%d", game->core_name, game->rom_name, slot);
     }
@@ -154,13 +165,18 @@ static void setLoadPreview()
         }
     }
 
-    if (item != NULL && g_save_state_info.selected_slot >= 0 && g_save_state_info.selected_slot < g_save_state_info.slot_count) {
-        const int real_slot = g_save_state_info.slots[g_save_state_info.selected_slot];
-        Game_s *game = &game_list[appState.current_game];
-        char stateFilePath[2048];
+    if (item != NULL) {
+        if (g_save_state_info.selected_slot >= 0 && g_save_state_info.selected_slot < g_save_state_info.slot_count) {
+            const int real_slot = g_save_state_info.slots[g_save_state_info.selected_slot];
+            Game_s *game = &game_list[appState.current_game];
+            char stateFilePath[2048];
 
-        if (createSaveStatePath(game, real_slot, stateFilePath, sizeof(stateFilePath))) {
-            snprintf(item->preview_path, sizeof(item->preview_path), "%s.png", stateFilePath);
+            if (createSaveStatePath(game, real_slot, stateFilePath, sizeof(stateFilePath))) {
+                snprintf(item->preview_path, sizeof(item->preview_path), "%s.png", stateFilePath);
+            }
+        }
+        else {
+            item->preview_path[0] = '\0';
         }
 
         if (item->preview_ptr != NULL) {
@@ -180,7 +196,7 @@ static void *_save_thread(void *_)
         return NULL;
     }
 
-    int slot = g_save_state_info.slot_count > 0 ? g_save_state_info.slots[0] + 1 : 0;
+    int slot = g_save_state_info.slot_count > 0 ? g_save_state_info.slots[0] + 1 : 1;
     printf_debug("Saving state to slot %d\n", slot);
 
     char stateFilePath[4096];
@@ -280,9 +296,7 @@ void action_saveGame(void *_)
     SDL_FreeSurface(bg);
     msleep(1000);
 
-    Game_s *game = &game_list[0];
-    _scanSaveStates(game, &g_save_state_info);
-    setLoadPreview();
+    popMenu_destroy();
 
     appState.changed = true;
 }
@@ -313,6 +327,59 @@ void action_loadGame(void *_)
     appState.exit_to_menu = false;
     appState.quit = true;
     appState.pop_menu_open = false;
+}
+
+void popMenu_deleteSaveState(void)
+{
+    int selected_slot = g_save_state_info.selected_slot;
+
+    if (selected_slot < 0 || selected_slot >= g_save_state_info.slot_count) {
+        return;
+    }
+
+    const int real_slot = g_save_state_info.slots[selected_slot];
+    Game_s *game = &game_list[appState.current_game];
+    char stateFilePath[2048];
+    char imageFilePath[2056];
+
+    if (createSaveStatePath(game, real_slot, stateFilePath, sizeof(stateFilePath))) {
+        theme_renderDialog(
+            screen, "Delete save state",
+            "Are you sure you want to\ndelete this save state?",
+            true);
+        render();
+
+        KeyState keystate[320] = {0};
+
+        while (!appState.quit) {
+            if (_updateKeystate(keystate, &appState.quit, true, NULL)) {
+                if (keystate[SW_BTN_B] == PRESSED) {
+                    break;
+                }
+                else if (keystate[SW_BTN_A] == PRESSED) {
+                    printf_debug("Deleting save state %s\n", stateFilePath);
+                    remove(stateFilePath);
+                    snprintf(imageFilePath, sizeof(imageFilePath), "%s.png", stateFilePath);
+                    printf_debug("Deleting save state image %s\n", imageFilePath);
+                    remove(imageFilePath);
+                    sync();
+                    _scanSaveStates(game, &g_save_state_info);
+                    if (g_save_state_info.slot_count > 0) {
+                        g_save_state_info.selected_slot = selected_slot < g_save_state_info.slot_count
+                                                              ? selected_slot
+                                                              : (g_save_state_info.slot_count - 1);
+                        setLoadPreview();
+                    }
+                    else {
+                        popMenu_destroy();
+                    }
+                    break;
+                }
+            }
+        }
+
+        appState.changed = true;
+    }
 }
 
 void action_exitToMenu(void *_)
@@ -353,11 +420,6 @@ void popMenu_create(void)
 
         appState.pop_menu_list.scroll_height = appState.pop_menu_list.item_count;
     }
-}
-
-void popMenu_destroy(void)
-{
-    list_free(&appState.pop_menu_list);
 }
 
 void renderPopMenu(AppState *state)

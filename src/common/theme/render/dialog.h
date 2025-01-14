@@ -1,10 +1,11 @@
 #ifndef THEME_RENDER_DIALOG_H__
 #define THEME_RENDER_DIALOG_H__
 
-#include "./textbox.h"
 #include "theme/config.h"
 #include "theme/resources.h"
 #include "utils/surfaceSetAlpha.h"
+
+#include "./textbox.h"
 
 #define DIALOG_WIDTH 450
 #define DIALOG_LINE_HEIGHT 30
@@ -124,5 +125,34 @@ void theme_renderDialogProgress(SDL_Surface *screen, const char *title_str,
 }
 
 void theme_clearDialogProgress(void) { dialog_progress = 0; }
+
+void theme_renderInfoPanel(SDL_Surface *screen, const char *title_str, const char *message_str, bool use_dialog)
+{
+    bool has_title = title_str != NULL && strlen(title_str) > 0;
+    bool has_message = message_str != NULL && strlen(message_str) > 0;
+
+    if (use_dialog) {
+        theme_renderDialog(screen, has_title ? title_str : " ", has_message ? message_str : " ", false);
+        return;
+    }
+
+    theme_renderHeader(screen, has_title ? title_str : NULL, false);
+
+    if (has_message) {
+        SDL_Surface *message = NULL;
+        char message_newline[4096];
+        strcpy(message_newline, message_str);
+        char *str = str_replace(message_newline, "\\n", "\n");
+        message = theme_textboxSurface(str, resource_getFont(TITLE), theme()->list.color, ALIGN_CENTER);
+        if (message) {
+            SDL_Rect message_rect = {320, 240};
+            message_rect.x -= message->w / 2;
+            message_rect.y -= message->h / 2;
+            SDL_BlitSurface(message, NULL, screen, &message_rect);
+            SDL_FreeSurface(message);
+        }
+        free(str);
+    }
+}
 
 #endif // THEME_RENDER_DIALOG_H__

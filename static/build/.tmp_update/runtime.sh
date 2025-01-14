@@ -389,8 +389,8 @@ launch_game() {
             # Free memory
             $sysdir/bin/freemma
 
-            if [ ! -f /tmp/new_res_available ] && [ $is_game -eq 1 ]; then
-                infoPanel --title " " --message "LOADING" --persistent --no-footer &
+            if [ $is_game -eq 1 ] && [ ! -f /tmp/new_res_available ]; then
+                infoPanel --message "LOADING" --persistent --romscreen &
                 touch /tmp/dismiss_info_panel
                 sync
             fi
@@ -410,7 +410,7 @@ launch_game() {
 
             if [ $is_game -eq 1 ] && [ ! -f /tmp/.offOrder ] && [ -f /tmp/.displaySavingMessage ]; then
                 rm /tmp/.displaySavingMessage
-                infoPanel --title " " --message "SAVING" --persistent --no-footer &
+                infoPanel --message "SAVING" --persistent --romscreen &
                 touch /tmp/dismiss_info_panel
                 sync
             fi

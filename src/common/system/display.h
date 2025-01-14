@@ -61,13 +61,12 @@ typedef struct Rect {
     int h;
 } rect_t;
 
-void display_reset(void)
+void display_reset()
 {
     if (fb_fd < 0)
         fb_fd = open("/dev/fb0", O_RDWR);
     ioctl(fb_fd, FBIOGET_VSCREENINFO, &g_display.vinfo);
     g_display.vinfo.yoffset = 0;
-    memset(g_display.fb_addr, 0, g_display.fb_size);
     ioctl(fb_fd, FBIOPUT_VSCREENINFO, &g_display.vinfo);
 }
 
@@ -485,6 +484,7 @@ void display_drawBatteryIcon(uint32_t color, int x, int y, int level,
 
 void display_close(void)
 {
+    display_reset();
     display_free(&g_display);
 
     if (fb_fd > 0)

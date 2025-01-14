@@ -9,6 +9,7 @@
 #include "system/keymap_sw.h"
 #include "system/lang.h"
 #include "system/settings.h"
+#include "system/state.h"
 #include "theme/background.h"
 #include "theme/theme.h"
 #include "utils/file.h"
@@ -111,6 +112,7 @@ int main(int argc, char *argv[])
     bool is_persistent = false;
     bool info_panel_mode = false;
     bool no_footer = false;
+    bool show_romscreen = false;
 
     for (int i = 1; i < argc; i++) {
         if (argv[i][0] == '-') {
@@ -128,8 +130,10 @@ int main(int argc, char *argv[])
                 g_show_theme_controls = true;
             else if (strcmp(argv[i], "-a") == 0 || strcmp(argv[i], "--auto") == 0)
                 wait_confirm = false;
-            else if (strcmp(argv[i], "-a") == 0 || strcmp(argv[i], "--no-footer") == 0)
+            else if (strcmp(argv[i], "-a") == 0 || strcmp(argv[i], "--romscreen") == 0) {
                 no_footer = true;
+                show_romscreen = true;
+            }
             else if (strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "--persistent") == 0) {
                 wait_confirm = false;
                 is_persistent = true;
@@ -197,7 +201,7 @@ int main(int argc, char *argv[])
             return EXIT_FAILURE;
         }
     }
-    else if (strlen(title_str) > 0 && strlen(message_str) > 0) {
+    else if (strlen(title_str) > 0 || strlen(message_str) > 0) {
         info_panel_mode = true;
         g_show_theme_controls = true;
     }
@@ -212,6 +216,23 @@ int main(int argc, char *argv[])
     else {
         deinit();
         return EXIT_FAILURE;
+    }
+
+    SDL_Surface *romscreen = NULL;
+    if (show_romscreen) {
+        char romscreen_path[STR_MAX];
+        if (history_getRomscreenPath(romscreen_path)) {
+            romscreen = IMG_Load(romscreen_path);
+            if (romscreen) {
+                SDL_Surface *scaled_romscreen = scaleImageIfNecessary(romscreen, screen->clip_rect, true);
+                if (scaled_romscreen) {
+                    SDL_FreeSurface(romscreen);
+                    romscreen = scaled_romscreen;
+                }
+
+                drawImage(romscreen, screen, NULL);
+            }
+        }
     }
 
     KeyState keystate[320] = {(KeyState)0};
@@ -301,7 +322,7 @@ int main(int argc, char *argv[])
             footer_changed = true;
             battery_changed = true;
 
-            if (strlen(message_str) > 0) {
+            if (strlen(message_str) > 0 && !romscreen) {
                 SDL_BlitSurface(theme_background(), NULL, screen, NULL);
             }
         }
@@ -316,8 +337,8 @@ int main(int argc, char *argv[])
             if (all_changed || header_changed || footer_changed || battery_changed) {
                 if (g_show_theme_controls) {
                     if (header_changed || battery_changed) {
-                        if (strlen(title_str) > 0) {
-                            theme_renderInfoPanel(screen, title_str, message_str);
+                        if (strlen(message_str) > 0) {
+                            theme_renderInfoPanel(screen, title_str, message_str, show_romscreen);
                         }
                         else if (g_images_titles) {
                             const char *title = g_images_titles[g_image_index];
@@ -358,7 +379,7 @@ int main(int argc, char *argv[])
                     if (footer_changed && !info_panel_mode && g_images_paths_count > 1)
                         theme_renderFooterStatus(screen, g_image_index + 1, g_images_paths_count);
 
-                    if (header_changed || battery_changed)
+                    if ((header_changed || battery_changed) && !show_romscreen)
                         theme_renderHeaderBattery(screen, battery_percentage);
 
                     if (header_changed || footer_changed || battery_changed) {

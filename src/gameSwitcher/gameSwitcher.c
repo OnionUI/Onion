@@ -166,6 +166,8 @@ int main(int argc, char *argv[])
         remove("/mnt/SDCARD/.tmp_update/.runGameSwitcher");
         remove("/mnt/SDCARD/.tmp_update/cmd_to_run.sh");
         overlay_exit();
+        SDL_FillRect(screen, NULL, 0);
+        render();
     }
     else if (appState.is_overlay && appState.current_game == 0) {
         if (appState.current_bg != NULL) {

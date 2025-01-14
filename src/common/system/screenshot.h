@@ -14,23 +14,6 @@
 #include "utils/process.h"
 #include "utils/str.h"
 
-bool __get_path_romscreen(char *path_out)
-{
-    char filename[STR_MAX];
-    char file_path[STR_MAX];
-
-    if (history_getRecentPath(file_path) != NULL) {
-        sprintf(filename, "%" PRIu32, FNV1A_Pippip_Yurii(file_path, strlen(file_path)));
-    }
-    print_debug(file_path);
-    if (strlen(filename) > 0) {
-        sprintf(path_out, "/mnt/SDCARD/Saves/CurrentProfile/romScreens/%s.png", filename);
-        return true;
-    }
-
-    return false;
-}
-
 bool __get_path_recent(char *path_out)
 {
     char *fnptr, *no_extension;
@@ -195,7 +178,7 @@ bool screenshot_system(void)
 {
     pid_t p_id = get_game_pid();
     if (p_id != 0) {
-        return __screenshot_perform(__get_path_romscreen, p_id);
+        return __screenshot_perform(history_getRomscreenPath, p_id);
     }
     return false;
 }

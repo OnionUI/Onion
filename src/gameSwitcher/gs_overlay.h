@@ -90,33 +90,15 @@ static void *_saveRomScreenAndStateThread(void *arg)
     return NULL;
 }
 
-// Show overlay message, white text on black translucent background
-static void _showMessage(const char *message)
-{
-    SDL_Surface *messageSurface = theme_createTextOverlay(message, (SDL_Color){255, 255, 255}, (SDL_Color){0, 0, 0}, 0.7, 10);
-    if (messageSurface == NULL) {
-        print_debug("Error creating message surface\n");
-        return;
-    }
-
-    SDL_Rect messageRect = {10, 10};
-    SDL_BlitSurface(messageSurface, NULL, screen, &messageRect);
-    SDL_FreeSurface(messageSurface);
-    render();
-}
-
 static void _showFullscreenMessage(const char *message)
 {
-    SDL_BlitSurface(theme_background(), NULL, screen, NULL);
-    theme_renderInfoPanel(screen, " ", message);
-    theme_renderHeaderBattery(screen, battery_getPercentage());
+    theme_renderInfoPanel(screen, NULL, message, true);
     render();
 }
 
 void overlay_init()
 {
     if (appState.is_overlay) {
-        keyinput_disable();
         retroarch_pause();
         system("playActivity stop_all &");
         setFbAsFirstRomScreen();
@@ -135,7 +117,7 @@ void overlay_resume(void)
             SDL_Surface *screen_backup = SDL_CreateRGBSurface(SDL_SWSURFACE, screen->w, screen->h, 32, 0, 0, 0, 0);
             SDL_BlitSurface(screen, NULL, screen_backup, NULL);
 
-            _showMessage("Saving...");
+            _showFullscreenMessage("SAVING");
 
             // wait for autosave thread to finish
             pthread_join(autosave_thread_pt, NULL);
@@ -146,7 +128,6 @@ void overlay_resume(void)
 
         render();
 
-        keyinput_enable();
         retroarch_unpause();
         system("playActivity resume &");
 

@@ -252,6 +252,10 @@ void handleUpdateKeystatePopMenu(AppState *state)
                 state->changed = true;
             }
         }
+        else if (keystate[SW_BTN_X] == PRESSED) {
+            popMenu_deleteSaveState();
+            keystate[SW_BTN_X] = RELEASED;
+        }
     }
 }
 

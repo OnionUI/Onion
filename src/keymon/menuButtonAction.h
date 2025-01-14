@@ -144,9 +144,9 @@ void enableSavingMessage(void)
 
 void displaySavingMessage(void)
 {
-    if (temp_flag_get(".displaySavingMessage") && !temp_flag_get("new_res_available")) {
+    if (temp_flag_get(".displaySavingMessage")) {
         temp_flag_set(".displaySavingMessage", false);
-        system("infoPanel --title \" \" --message \"SAVING\" --persistent --no-footer &");
+        system("infoPanel --message \"SAVING\" --persistent --romscreen &");
         temp_flag_set("dismiss_info_panel", true);
     }
 }
@@ -171,12 +171,14 @@ void action_MainUI_resumeGame(void)
     kill_mainUI();
 }
 
-static void _saveAndQuitRetroArch(void)
+static void _saveAndQuitRetroArch(bool quickSwitch)
 {
     enableSavingMessage();
     retroarch_pause();
     screenshot_system();
     displaySavingMessage();
+    if (quickSwitch)
+        set_quickSwitch();
     terminate_retroarch();
 }
 
@@ -192,13 +194,12 @@ void action_RA_gameSwitcher(void)
 
 void action_RA_exitToMenu(void)
 {
-    _saveAndQuitRetroArch();
+    _saveAndQuitRetroArch(false);
 }
 
 void action_RA_quickSwitch(void)
 {
-    set_quickSwitch();
-    _saveAndQuitRetroArch();
+    _saveAndQuitRetroArch(true);
 }
 
 void action_RA_toggleMenu(void)

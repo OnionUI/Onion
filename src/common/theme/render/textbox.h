@@ -61,30 +61,6 @@ SDL_Surface *theme_textboxSurface(const char *message, TTF_Font *font,
     return textbox;
 }
 
-void theme_renderInfoPanel(SDL_Surface *screen, const char *title_str, const char *message_str)
-{
-    bool has_title = title_str != NULL && strlen(title_str) > 0;
-    bool has_message = message_str != NULL && strlen(message_str) > 0;
-
-    theme_renderHeader(screen, has_title ? title_str : NULL, !has_title);
-
-    if (has_message) {
-        SDL_Surface *message = NULL;
-        char message_newline[4096];
-        strcpy(message_newline, message_str);
-        char *str = str_replace(message_newline, "\\n", "\n");
-        message = theme_textboxSurface(str, resource_getFont(TITLE), theme()->list.color, ALIGN_CENTER);
-        if (message) {
-            SDL_Rect message_rect = {320, 240};
-            message_rect.x -= message->w / 2;
-            message_rect.y -= message->h / 2;
-            SDL_BlitSurface(message, NULL, screen, &message_rect);
-            SDL_FreeSurface(message);
-        }
-        free(str);
-    }
-}
-
 /**
  * @brief Creates an SDL_Surface containing text with a solid background color
  *
@@ -99,6 +75,7 @@ SDL_Surface *theme_createTextOverlay(const char *text, SDL_Color fg, SDL_Color b
 {
     TTF_Init();
     TTF_Font *font = theme_loadFont(theme()->path, theme()->list.font, (int)(18.0 * g_scale));
+    TTF_SetFontStyle(font, TTF_STYLE_BOLD);
 
     SDL_Surface *text_surface = TTF_RenderUTF8_Blended(font, text, fg);
     if (!text_surface) {

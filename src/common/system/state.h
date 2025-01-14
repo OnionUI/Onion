@@ -5,6 +5,8 @@
 
 #include "utils/file.h"
 #include "utils/flags.h"
+#include "utils/hash.h"
+#include "utils/log.h"
 #include "utils/process.h"
 #include "utils/str.h"
 
@@ -259,7 +261,8 @@ char *history_getRecentPath(char *rom_path)
 
         if ((type != 5) && (type != 17)) {
             free(jsonContent);
-            continue;
+            fclose(file);
+            return NULL;
         }
 
         const char *rompathStart = strstr(jsonContent, "\"rompath\":\"") + 11;
@@ -282,8 +285,10 @@ char *history_getRecentPath(char *rom_path)
 
         printf_debug("romPathSearch : %s\n", romPathSearch);
 
-        if (!exists(romPathSearch))
-            continue;
+        if (!exists(romPathSearch)) {
+            fclose(file);
+            return NULL;
+        }
 
         strcpy(rom_path, romPathSearch);
 
@@ -293,6 +298,23 @@ char *history_getRecentPath(char *rom_path)
 
     fclose(file);
     return NULL;
+}
+
+bool history_getRomscreenPath(char *path_out)
+{
+    char filename[STR_MAX];
+    char file_path[STR_MAX];
+
+    if (history_getRecentPath(file_path) != NULL) {
+        sprintf(filename, "%" PRIu32, FNV1A_Pippip_Yurii(file_path, strlen(file_path)));
+    }
+    print_debug(file_path);
+    if (strlen(filename) > 0) {
+        sprintf(path_out, "/mnt/SDCARD/Saves/CurrentProfile/romScreens/%s.png", filename);
+        return true;
+    }
+
+    return false;
 }
 
 void resumeGame(int index)
