@@ -76,8 +76,7 @@ void updatePreviews()
     sync();
 }
 
-int listAllThemes(char themes_out[NUMBER_OF_THEMES][STR_MAX],
-                  const char *installed_theme, int *installed_page)
+int listAllThemes(char themes_out[NUMBER_OF_THEMES][STR_MAX], const char *installed_theme, int *installed_page)
 {
     int count = 0;
 
