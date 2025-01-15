@@ -66,6 +66,10 @@ typedef enum theme_images {
     BG_POP_MENU_4,
     DOT_ACTIVE,
     DOT_NEUTRAL,
+    BOOT_SCREEN,
+    SCREEN_OFF,
+    SCREEN_OFF_SAVE,
+    LOW_BAT,
     images_count
 } ThemeImages;
 
@@ -221,6 +225,14 @@ SDL_Surface *_loadImage(ThemeImages request)
         return theme_loadImage(t->path, "dot-a");
     case DOT_NEUTRAL:
         return theme_loadImage(t->path, "dot-n");
+    case BOOT_SCREEN:
+        return theme_loadImage(t->path, "extra/bootScreen");
+    case SCREEN_OFF:
+        return theme_loadImage(t->path, "extra/Screen_Off");
+    case SCREEN_OFF_SAVE:
+        return theme_loadImage(t->path, "extra/Screen_Off_Save");
+    case LOW_BAT:
+        return theme_loadImage(t->path, "extra/lowBat");
     default:
         break;
     }

@@ -8,7 +8,7 @@
 #include "system/battery.h"
 #include "system/settings.h"
 #include "theme/config.h"
-#include "theme/render/battery.h"
+#include "theme/render/bootScreen.h"
 #include "theme/resources.h"
 #include "utils/file.h"
 #include "utils/flags.h"
@@ -32,27 +32,24 @@ int main(int argc, char *argv[])
     char theme_path[STR_MAX];
     theme_getPath(theme_path);
 
-    SDL_Surface *background;
+    ThemeImages background = BOOT_SCREEN;
     bool show_battery = false;
     bool show_version = true;
 
     if (argc > 1 && strcmp(argv[1], "End_Save") == 0) {
-        background = theme_loadImage(theme_path, "extra/Screen_Off_Save");
+        background = SCREEN_OFF_SAVE;
         show_battery = true;
     }
     else if (argc > 1 && strcmp(argv[1], "End") == 0) {
-        background = theme_loadImage(theme_path, "extra/Screen_Off");
+        background = SCREEN_OFF;
         show_battery = true;
     }
     else if (argc > 1 && strcmp(argv[1], "lowBat") == 0) {
-        background = theme_loadImage(theme_path, "extra/lowBat");
+        background = LOW_BAT;
         if (!background) {
             show_battery = true;
         }
         show_version = false;
-    }
-    else {
-        background = theme_loadImage(theme_path, "extra/bootScreen");
     }
 
     char message_str[STR_MAX] = "";
@@ -60,56 +57,29 @@ int main(int argc, char *argv[])
         strncpy(message_str, argv[2], STR_MAX - 1);
     }
 
-    if (background) {
-        SDL_BlitSurface(background, NULL, screen, NULL);
-        SDL_FreeSurface(background);
-    }
-
     TTF_Init();
 
-    TTF_Font *font = theme_loadFont(theme_path, theme()->hint.font, 18);
-    SDL_Color color = theme()->total.color;
-
+    char version_str[STR_MAX] = "";
     if (show_version) {
-        char *version_str = file_read("/mnt/SDCARD/.tmp_update/onionVersion/version.txt");
-        if (strlen(version_str) > 0) {
-            SDL_Surface *version = TTF_RenderUTF8_Blended(font, version_str, color);
-            if (version) {
-                SDL_BlitSurface(version, NULL, screen, &(SDL_Rect){20, 450 - version->h / 2});
-                SDL_FreeSurface(version);
-            }
+        char *version = file_read("/mnt/SDCARD/.tmp_update/onionVersion/version.txt");
+        if (strlen(version) > 0) {
+            strncpy(version_str, version, STR_MAX - 1);
         }
-        free(version_str);
+        free(version);
     }
 
-    if (strlen(message_str) > 0) {
-        SDL_Surface *message = TTF_RenderUTF8_Blended(font, message_str, color);
-        if (message) {
-            SDL_BlitSurface(message, NULL, screen, &(SDL_Rect){620 - message->w, 450 - message->h / 2});
-            SDL_FreeSurface(message);
-        }
-    }
-
-    if (show_battery) {
-        SDL_Surface *battery = theme_batterySurface(battery_getPercentage());
-        SDL_Rect battery_rect = {596 - battery->w / 2, 30 - battery->h / 2};
-        SDL_BlitSurface(battery, NULL, screen, &battery_rect);
-        SDL_FreeSurface(battery);
-        resources_free();
-    }
+    theme_renderBootScreen(screen, background, version_str, message_str, show_battery ? battery_getPercentage() : -1);
 
     // Blit twice, to clear the video buffer
     render();
     render();
 
-    if (argc > 1 && strcmp(argv[1], "Boot") != 0)
-        temp_flag_set(".offOrder", false);
+    resources_free();
 
 #ifndef PLATFORM_MIYOOMINI
     sleep(4); // for debugging purposes
 #endif
 
-    TTF_CloseFont(font);
     TTF_Quit();
 
     deinit();

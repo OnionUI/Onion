@@ -2,6 +2,7 @@
 #define THEME_RENDER_H__
 
 #include "./render/battery.h"
+#include "./render/bootScreen.h"
 #include "./render/dialog.h"
 #include "./render/footer.h"
 #include "./render/header.h"
