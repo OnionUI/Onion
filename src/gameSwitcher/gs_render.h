@@ -40,6 +40,16 @@ void renderCentered(SDL_Surface *image, int view_mode, SDL_Rect *overrideSrcRect
     SDL_BlitSurface(image, &image_size, screen, &image_pos);
 }
 
+void render_showFullscreenMessage(const char *message, bool draw_bg)
+{
+    if (draw_bg && appState.current_bg != NULL) {
+        SDL_FillRect(screen, NULL, 0);
+        renderCentered(appState.current_bg, VIEW_FULLSCREEN, NULL, NULL);
+    }
+    theme_renderInfoPanel(screen, NULL, message, true);
+    render();
+}
+
 SDL_Surface *loadOptionalImage(const char *resourceName)
 {
     char image_path[STR_MAX];

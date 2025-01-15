@@ -180,6 +180,7 @@ int main(int argc, char *argv[])
         printf_debug("Resuming game - current_game : %i - index: %i", appState.current_game, game_list[appState.current_game].index);
         resumeGame(game_list[appState.current_game].index);
         overlay_exit();
+        render_showFullscreenMessage("LOADING", true);
     }
 
 #ifndef PLATFORM_MIYOOMINI

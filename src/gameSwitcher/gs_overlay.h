@@ -90,12 +90,6 @@ static void *_saveRomScreenAndStateThread(void *arg)
     return NULL;
 }
 
-static void _showFullscreenMessage(const char *message)
-{
-    theme_renderInfoPanel(screen, NULL, message, true);
-    render();
-}
-
 void overlay_init()
 {
     if (appState.is_overlay) {
@@ -117,7 +111,7 @@ void overlay_resume(void)
             SDL_Surface *screen_backup = SDL_CreateRGBSurface(SDL_SWSURFACE, screen->w, screen->h, 32, 0, 0, 0, 0);
             SDL_BlitSurface(screen, NULL, screen_backup, NULL);
 
-            _showFullscreenMessage("SAVING");
+            render_showFullscreenMessage("SAVING", false);
 
             // wait for autosave thread to finish
             pthread_join(autosave_thread_pt, NULL);
@@ -141,7 +135,7 @@ void overlay_exit(void)
 {
     if (appState.is_overlay) {
         if (autosave_thread_running) {
-            _showFullscreenMessage("SAVING");
+            render_showFullscreenMessage("SAVING", false);
 
             // wait for autosave thread to finish
             pthread_join(autosave_thread_pt, NULL);
