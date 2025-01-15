@@ -16,6 +16,7 @@
 
 #include "gs_appState.h"
 #include "gs_model.h"
+#include "gs_render.h"
 
 static pthread_t autosave_thread_pt;
 static bool autosave_thread_running = false;
