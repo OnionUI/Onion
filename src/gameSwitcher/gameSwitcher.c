@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
                 renderGameName(&appState);
             }
 
-            if (!appState.changed) {
+            if (!appState.changed && !appState.brightness_changed) {
                 render();
                 continue;
             }
