@@ -128,14 +128,14 @@ get_release_info() {
 
 	Release_url=$(echo $Release_asset | jq '.browser_download_url' | tr -d '"')
 	Release_FullVersion=$(echo $Release_asset | jq '.name' | tr -d "\"" | sed 's/^Onion-v//g' | sed 's/\.zip$//g')
-	Release_Version=$(echo $Release_FullVersion | sed 's/-dev.*$//g')
+	Release_Version=$(echo $Release_FullVersion | sed 's/-.*$//g')
 	Release_size=$(echo $Release_asset | jq -r '.size')
 	Release_size_MB=$(echo "$(($Release_size / 1024 / 1024))MB")
 	Release_Date=$(echo $Release_asset | jq -r '.created_at')
 	Release_info=$(echo $Release_assets_info | jq '.body')
 
 	Current_FullVersion=$(installUI --version)
-	Current_Version=$(echo $Current_FullVersion | sed 's/-dev.*$//g')
+	Current_Version=$(echo $Current_FullVersion | sed 's/-.*$//g')
 
 	echo -e "${GREEN}DONE${NC}"
 
