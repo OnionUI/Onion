@@ -7,6 +7,7 @@
 #include <string.h>
 #include <strings.h>
 
+#include "system/lang.h"
 #include "utils/str.h"
 
 #define MAX_NUM_VALUES 100
@@ -40,7 +41,7 @@ typedef struct ListItem {
     int _reset_value;
     void *icon_ptr;
     void *preview_ptr;
-    char preview_path[STR_MAX];
+    char preview_path[4096];
     char sticky_note[STR_MAX];
     char info_note[STR_MAX];
 } ListItem;
@@ -152,6 +153,14 @@ ListItem *list_addItemWithInfoNote(List *list, ListItem item, const char *info_n
 {
     ListItem *_item = list_addItem(list, item);
     strcpy(_item->info_note, info_note);
+    return _item;
+}
+
+ListItem *list_addItemWithLang(List *list, ListItem item, const lang_hash key)
+{
+    ListItem *_item = list_addItem(list, item);
+    if (lang_list && lang_list[key])
+        strcpy(_item->label, lang_list[key]);
     return _item;
 }
 

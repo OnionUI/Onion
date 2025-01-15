@@ -7,7 +7,7 @@
 
 #define IMAGECACHE_MAXSIZE 50
 
-static pthread_t thread_pt;
+static pthread_t romscreen_thread_pt;
 static bool thread_active = false;
 
 static const int image_cache_len = IMAGECACHE_MAXSIZE;
@@ -61,7 +61,7 @@ void imageCache_load(int *offset, SDL_Surface *(*_load_image)(int), int total)
     thread_active = true;
     load_image = _load_image;
     images_total = total;
-    pthread_create(&thread_pt, NULL, _imageCacheThread, offset);
+    pthread_create(&romscreen_thread_pt, NULL, _imageCacheThread, offset);
 }
 
 void imageCache_removeItem(int image_index)

@@ -15,7 +15,7 @@
 #include "./appstate.h"
 #include "./tools_defs.h"
 
-static pthread_t thread_pt;
+static pthread_t romscreen_thread_pt;
 static bool thread_active = false;
 static bool thread_success = false;
 static SDL_Surface *_tool_bg_cache = NULL;
@@ -65,7 +65,7 @@ void _runCommandPopup(const char *tool_name, const char *_cmd)
     char cmd[STR_MAX];
     strncpy(cmd, _cmd, STR_MAX - 1);
     thread_active = true;
-    pthread_create(&thread_pt, NULL, _runCommandThread, cmd);
+    pthread_create(&romscreen_thread_pt, NULL, _runCommandThread, cmd);
 
     theme_clearDialogProgress();
 

@@ -27,6 +27,7 @@
 #include "system/system_utils.h"
 #include "system/volume.h"
 #include "theme/config.h"
+#include "theme/render.h"
 #include "theme/resources.h"
 #include "utils/config.h"
 #include "utils/file.h"
@@ -340,46 +341,6 @@ void turnOffScreen(void)
 }
 
 /**
- * @brief Creates an SDL_Surface containing text with a solid background color
- *
- * @param text The text to be rendered.
- * @param fg The foreground color (text color).
- * @param bg The background color.
- * @param margin The margin around the text relative to background.
- * @return SDL_Surface* The created surface containing the rendered text with margin.
- *                       Returns NULL if the text rendering fails.
- */
-SDL_Surface *createTextSurface(const char *text, SDL_Color fg, SDL_Color bg, int margin)
-{
-    TTF_Init();
-    char theme_path[STR_MAX];
-    theme_getPath(theme_path);
-    TTF_Font *font = theme_loadFont(theme_path, theme()->hint.font, 14);
-
-    SDL_Surface *text_surface = TTF_RenderUTF8(font, text, fg, bg);
-    if (!text_surface) {
-        fprintf(stderr, "TTF_RenderUTF8 failed: %s\n", TTF_GetError());
-        return 0;
-    }
-    int overlayW = text_surface->w + margin;
-    int overlayH = text_surface->h + margin;
-
-    SDL_Surface *overlay_surface = SDL_CreateRGBSurface(
-        SDL_SWSURFACE, overlayW, overlayH, 32,
-        0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
-    SDL_Rect dest;
-    dest.x = margin / 2;
-    dest.y = margin / 2;
-    dest.w = 0;
-    dest.h = 0;
-    SDL_BlitSurface(text_surface, NULL, overlay_surface, &dest);
-    TTF_CloseFont(font);
-
-    SDL_FreeSurface(text_surface);
-    return overlay_surface;
-}
-
-/**
  * @brief Adjusts the CPU clock speed based on the given adjustment value and triggers an OSD message
  *
  * This function reads the current CPU clock speed, adjusts it by the specified
@@ -419,7 +380,7 @@ void cpuClockHotkey(int adjust)
     // Bounds check
     if (cpuclock < min_cpu_clock || cpuclock > max_cpu_clock) {
         printf_debug("Desired CPU clock %d out of range (%d, %d)\n", cpuclock, min_cpu_clock, max_cpu_clock);
-        SDL_Surface *surface = createTextSurface("CPU clock out of range", (SDL_Color){255, 255, 255, 255}, (SDL_Color){0, 0, 0, 0}, 10);
+        SDL_Surface *surface = theme_createTextOverlay("CPU clock out of range", (SDL_Color){255, 255, 255}, (SDL_Color){0, 0, 0}, 1.0, 10);
         if (surface && overlay_surface(surface, 10, 10, 1000, true) != 0) {
             SDL_FreeSurface(surface);
         }
@@ -435,7 +396,7 @@ void cpuClockHotkey(int adjust)
         printf_debug("Updated CPU clock: %s\n", cpuclockstr);
         char osd_txt[STR_MAX];
         snprintf(osd_txt, STR_MAX, "CPU clock set to %s MHz", cpuclockstr);
-        SDL_Surface *surface = createTextSurface(osd_txt, (SDL_Color){255, 255, 255, 255}, (SDL_Color){0, 0, 0, 0}, 10);
+        SDL_Surface *surface = theme_createTextOverlay(osd_txt, (SDL_Color){255, 255, 255}, (SDL_Color){0, 0, 0}, 1.0, 10);
         if (surface && overlay_surface(surface, 10, 10, 1000, true) != 0) {
             SDL_FreeSurface(surface);
         }
@@ -468,7 +429,7 @@ int main(void)
     printf_debug("Settings loaded. Brightness set to: %d\n",
                  settings.brightness);
 
-    display_init();
+    display_init(true);
 
     // Prepare for Poll button input
     input_fd = open("/dev/input/event0", O_RDONLY);

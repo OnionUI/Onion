@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 {
     printf("%s", "\n --------EASTER LAUNCH---------------- \n");
     // Initialize SDL
-    SDL_InitDefault(true);
+    SDL_InitDefault();
 
     // Load the icons
     SDL_Surface *logo1 = IMG_Load("/mnt/SDCARD/.tmp_update/res/easter1.png");

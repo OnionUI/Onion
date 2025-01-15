@@ -73,7 +73,7 @@ main() {
 # Standard check from runtime for startup.
 check() {
     log "Network Checker: Update networking"
-    local force_wifi_on_startup=$([ -f $sysdir/config/.ntpForce ] && echo 1 || echo 0)
+    local force_wifi_on_startup=$([ -f /customer/app/axp_test ] && [ -f $sysdir/config/.ntpForce ] && echo 1 || echo 0)
     local has_wifi=$(wifi_enabled && echo 1 || echo 0)
 
     if [ "$is_booting" -eq 1 ]; then

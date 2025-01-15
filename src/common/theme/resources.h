@@ -2,16 +2,24 @@
 #define THEME_RESOURCES_H__
 
 #include <SDL/SDL.h>
-#include <SDL/SDL_mixer.h>
 #include <SDL/SDL_ttf.h>
 #include <stdbool.h>
+
+#ifdef HAS_AUDIO
+#include <SDL/SDL_mixer.h>
+#else
+#define Mix_Music void
+#define Mix_Chunk void
+#endif
 
 #include "system/lang.h"
 #include "utils/flags.h"
 #include "utils/log.h"
+#include "utils/surfaceSetAlpha.h"
 
 #include "./config.h"
 
+#define HIDDEN_ITEM_ALPHA 60
 #define RES_MAX_REQUESTS 200
 
 typedef enum theme_images {
@@ -52,6 +60,12 @@ typedef enum theme_images {
     BRIGHTNESS_9,
     BRIGHTNESS_10,
     LEGEND_GAMESWITCHER,
+    BG_POP_MENU_1,
+    BG_POP_MENU_2,
+    BG_POP_MENU_3,
+    BG_POP_MENU_4,
+    DOT_ACTIVE,
+    DOT_NEUTRAL,
     images_count
 } ThemeImages;
 
@@ -83,6 +97,15 @@ static Resources_s resources = {._theme_loaded = false,
                                 ._background_loaded = false,
                                 .bgm = NULL,
                                 .sound_change = NULL};
+
+typedef struct {
+    SDL_Surface *toggle_off;
+    SDL_Surface *toggle_on;
+    SDL_Surface *arrow_left;
+    SDL_Surface *arrow_right;
+} HiddenItems_s;
+
+static HiddenItems_s g_hidden_items;
 
 Theme_s *theme(void)
 {
@@ -186,6 +209,18 @@ SDL_Surface *_loadImage(ThemeImages request)
         return theme_loadImage(t->path, "extra/lum10");
     case LEGEND_GAMESWITCHER:
         return theme_loadImage(t->path, "extra/gs-legend");
+    case BG_POP_MENU_1:
+        return theme_loadImage(t->path, "bg-pop-menu-1");
+    case BG_POP_MENU_2:
+        return theme_loadImage(t->path, "bg-pop-menu-2");
+    case BG_POP_MENU_3:
+        return theme_loadImage(t->path, "bg-pop-menu-3");
+    case BG_POP_MENU_4:
+        return theme_loadImage(t->path, "bg-pop-menu-4");
+    case DOT_ACTIVE:
+        return theme_loadImage(t->path, "dot-a");
+    case DOT_NEUTRAL:
+        return theme_loadImage(t->path, "dot-n");
     default:
         break;
     }
@@ -238,6 +273,34 @@ SDL_Surface *resource_getSurfaceCopy(ThemeImages request)
     return _loadImage(request);
 }
 
+static void _loadHiddenItem(SDL_Surface **surface, ThemeImages request)
+{
+    if (!*surface) {
+        *surface = resource_getSurfaceCopy(request);
+        surfaceSetAlpha(*surface, HIDDEN_ITEM_ALPHA);
+    }
+}
+
+void theme_loadHiddenItems()
+{
+    _loadHiddenItem(&g_hidden_items.toggle_off, TOGGLE_OFF);
+    _loadHiddenItem(&g_hidden_items.toggle_on, TOGGLE_ON);
+    _loadHiddenItem(&g_hidden_items.arrow_left, LEFT_ARROW);
+    _loadHiddenItem(&g_hidden_items.arrow_right, RIGHT_ARROW);
+}
+
+static void _freeHiddenItems(HiddenItems_s *hidden)
+{
+    if (hidden->toggle_off)
+        SDL_FreeSurface(hidden->toggle_off);
+    if (hidden->toggle_on)
+        SDL_FreeSurface(hidden->toggle_on);
+    if (hidden->arrow_left)
+        SDL_FreeSurface(hidden->arrow_left);
+    if (hidden->arrow_right)
+        SDL_FreeSurface(hidden->arrow_right);
+}
+
 TTF_Font *resource_getFont(ThemeFonts request)
 {
     if (resources.fonts[request] == NULL)
@@ -254,6 +317,7 @@ void resource_reloadFont(ThemeFonts request)
 
 Mix_Chunk *resource_getSoundChange(void)
 {
+#ifdef HAS_AUDIO
     if (resources.sound_change == NULL) {
         char sound_path[STR_MAX * 2];
         snprintf(sound_path, STR_MAX * 2 - 1, "%ssound/change.wav",
@@ -264,10 +328,14 @@ Mix_Chunk *resource_getSoundChange(void)
             resources.sound_change = Mix_LoadWAV(sound_path);
     }
     return resources.sound_change;
+#else
+    return NULL;
+#endif
 }
 
 Mix_Music *resource_getBGM(void)
 {
+#ifdef HAS_AUDIO
     if (resources.bgm == NULL) {
         char sound_path[STR_MAX * 2];
         snprintf(sound_path, STR_MAX * 2 - 1, "%ssound/bgm.mp3", theme()->path);
@@ -277,6 +345,27 @@ Mix_Music *resource_getBGM(void)
             resources.bgm = Mix_LoadMUS(sound_path);
     }
     return resources.bgm;
+#else
+    return NULL;
+#endif
+}
+
+SDL_Surface *resource_getPopMenuBg(int size)
+{
+    switch (size) {
+    case 1:
+        return resource_getSurface(BG_POP_MENU_1);
+    case 2:
+        return resource_getSurface(BG_POP_MENU_2);
+    case 3:
+        return resource_getSurface(BG_POP_MENU_3);
+    case 4:
+        return resource_getSurface(BG_POP_MENU_4);
+    default:
+        break;
+    }
+    printf_debug("Invalid pop menu size: %i\n", size);
+    return NULL;
 }
 
 SDL_Surface *resource_getBrightness(int brightness)
@@ -325,11 +414,15 @@ void resources_free()
     if (resources._background_loaded)
         SDL_FreeSurface(resources.background);
 
+    _freeHiddenItems(&g_hidden_items);
+
+#ifdef HAS_AUDIO
     if (resources.sound_change != NULL)
         Mix_FreeChunk(resources.sound_change);
 
     if (resources.bgm != NULL)
         Mix_FreeMusic(resources.bgm);
+#endif
 
     if (_theme_overrides_changed) {
         bool hide_labels_icons = resources.theme_back.hideLabels.icons,

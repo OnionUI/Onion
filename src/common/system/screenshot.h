@@ -14,23 +14,6 @@
 #include "utils/process.h"
 #include "utils/str.h"
 
-bool __get_path_romscreen(char *path_out)
-{
-    char filename[STR_MAX];
-    char file_path[STR_MAX];
-
-    if (history_getRecentPath(file_path) != NULL) {
-        sprintf(filename, "%" PRIu32, FNV1A_Pippip_Yurii(file_path, strlen(file_path)));
-    }
-    print_debug(file_path);
-    if (strlen(filename) > 0) {
-        sprintf(path_out, "/mnt/SDCARD/Saves/CurrentProfile/romScreens/%s.png", filename);
-        return true;
-    }
-
-    return false;
-}
-
 bool __get_path_recent(char *path_out)
 {
     char *fnptr, *no_extension;
@@ -105,10 +88,10 @@ uint32_t *__screenshot_buffer(void)
  * @return true Screenshot was saved
  * @return false Screenshot was not saved
  */
-bool __screenshot_save(const uint32_t *buffer, const char *screenshot_path)
+bool screenshot_save(const uint32_t *buffer, const char *screenshot_path, bool rotate180)
 {
     uint32_t *src;
-    uint32_t line_buffer[RENDER_WIDTH], x, y, pix;
+    uint32_t line_buffer[g_display.width], x, y, pix;
 
     FILE *fp;
     png_structp png_ptr;
@@ -125,16 +108,19 @@ bool __screenshot_save(const uint32_t *buffer, const char *screenshot_path)
     info_ptr = png_create_info_struct(png_ptr);
 
     png_init_io(png_ptr, fp);
-    png_set_IHDR(png_ptr, info_ptr, RENDER_WIDTH, RENDER_HEIGHT, 8,
+    png_set_IHDR(png_ptr, info_ptr, g_display.width, g_display.height, 8,
                  PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE,
                  PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
     png_write_info(png_ptr, info_ptr);
 
-    src = (uint32_t *)buffer + RENDER_WIDTH * RENDER_HEIGHT;
+    src = (uint32_t *)buffer;
+    if (rotate180) {
+        src += g_display.width * g_display.height;
+    }
 
-    for (y = 0; y < RENDER_HEIGHT; y++) {
-        for (x = 0; x < RENDER_WIDTH; x++) {
-            pix = *--src;
+    for (y = 0; y < g_display.height; y++) {
+        for (x = 0; x < g_display.width; x++) {
+            pix = rotate180 ? *(--src) : *(src++);
             line_buffer[x] = 0xFF000000 | (pix & 0x0000FF00) | (pix & 0x00FF0000) >> 16 | (pix & 0x000000FF) << 16;
         }
         png_write_row(png_ptr, (png_bytep)line_buffer);
@@ -167,7 +153,7 @@ bool __screenshot_perform(bool(get_path)(char *), pid_t p_id)
     }
 
     if (get_path(path)) {
-        retval = __screenshot_save(buffer, path);
+        retval = screenshot_save(buffer, path, true);
     }
 
     free(buffer);
@@ -192,7 +178,7 @@ bool screenshot_system(void)
 {
     pid_t p_id = get_game_pid();
     if (p_id != 0) {
-        return __screenshot_perform(__get_path_romscreen, p_id);
+        return __screenshot_perform(history_getRomscreenPath, p_id);
     }
     return false;
 }

@@ -64,6 +64,7 @@ bool exists(const char *file_path);
 bool is_file(const char *file_path);
 bool is_dir(const char *file_path);
 bool file_isModified(const char *path, time_t *old_mtime);
+bool file_isLocked(const char *path);
 
 /**
  * @brief returns the filename component of a path
@@ -101,9 +102,7 @@ void file_copy(const char *src_path, const char *dest_path);
 
 char *file_removeExtension(const char *myStr) __attribute__((malloc));
 
-char *extractPath(const char *absolutePath) __attribute__((malloc));
-
-char *extractLastDirectory(const char *path);
+char *file_dirname(const char *absolutePath) __attribute__((malloc));
 
 void file_cleanName(char *name_out, const char *file_name);
 
@@ -126,5 +125,13 @@ char *file_read_lineN(const char *filename, int n) __attribute__((malloc));
 void file_delete_line(const char *fileName, int n);
 
 void file_add_line_to_beginning(const char *filename, const char *lineToAdd);
+
+/**
+ * @brief Resolve a path to an absolute path
+ * 
+ * "/mnt/SDCARD/Emu/GBA/../../Roms/GBA/game.gba" -> "/mnt/SDCARD/Roms/GBA/game.gba"
+ *
+ */
+char *file_resolvePath(const char *path) __attribute__((malloc));
 
 #endif // UTILS_FILE_H__

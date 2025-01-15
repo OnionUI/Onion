@@ -17,7 +17,7 @@
 #include "./input_fd.h"
 #include "utils/retroarch_cmd.h"
 
-static SystemState menu_last_state = MODE_UNKNOWN;
+static SystemState menu_pressed_state = MODE_UNKNOWN;
 static int menu_last_pressed = 0;
 static int menu_long_press_timeout = 700;
 static bool menu_ignore_next = false;
@@ -137,6 +137,20 @@ void quietMainUI(void)
     }
 }
 
+void enableSavingMessage(void)
+{
+    temp_flag_set(".displaySavingMessage", true);
+}
+
+void displaySavingMessage(void)
+{
+    if (temp_flag_get(".displaySavingMessage")) {
+        temp_flag_set(".displaySavingMessage", false);
+        system("infoPanel --message \"SAVING\" --persistent --romscreen &");
+        temp_flag_set("dismiss_info_panel", true);
+    }
+}
+
 void action_MainUI_contextMenu(void)
 {
     print_debug("Sending keys (contextMenu)");
@@ -157,26 +171,35 @@ void action_MainUI_resumeGame(void)
     kill_mainUI();
 }
 
+static void _saveAndQuitRetroArch(bool quickSwitch)
+{
+    enableSavingMessage();
+    retroarch_pause();
+    screenshot_system();
+    displaySavingMessage();
+    if (quickSwitch)
+        set_quickSwitch();
+    terminate_retroarch();
+}
+
 void action_RA_gameSwitcher(void)
 {
-    temp_flag_set(".displaySavingMessage", true);
-    screenshot_system();
+    if (exists("/mnt/SDCARD/.tmp_update/.runGameSwitcher"))
+        return;
     set_gameSwitcher();
-    terminate_retroarch();
+    system("(gameSwitcher --overlay && touch /tmp/state_changed) &");
+    retroarch_pause();
+    system_state_update();
 }
 
 void action_RA_exitToMenu(void)
 {
-    temp_flag_set(".displaySavingMessage", true);
-    screenshot_system();
-    terminate_retroarch();
+    _saveAndQuitRetroArch(false);
 }
 
 void action_RA_quickSwitch(void)
 {
-    screenshot_system();
-    set_quickSwitch();
-    terminate_retroarch();
+    _saveAndQuitRetroArch(true);
 }
 
 void action_RA_toggleMenu(void)
@@ -186,7 +209,7 @@ void action_RA_toggleMenu(void)
 
 void action_drastic_gameSwitcher(void)
 {
-    temp_flag_set(".displaySavingMessage", true);
+    enableSavingMessage();
     screenshot_system();
     set_gameSwitcher();
     terminate_drastic();
@@ -194,7 +217,7 @@ void action_drastic_gameSwitcher(void)
 
 void action_drastic_exitToMenu(void)
 {
-    temp_flag_set(".displaySavingMessage", true);
+    enableSavingMessage();
     screenshot_system();
     terminate_drastic();
 }
@@ -259,7 +282,7 @@ void activate_drastic_action(int action_id)
 
 void menuButtonEvent_singlePress(void)
 {
-    switch (system_state) {
+    switch (menu_pressed_state) {
     case MODE_MAIN_UI:
         activate_MainUI_action(settings.mainui_single_press);
         break;
@@ -276,7 +299,7 @@ void menuButtonEvent_singlePress(void)
 
 void menuButtonEvent_longPress(void)
 {
-    switch (system_state) {
+    switch (menu_pressed_state) {
     case MODE_MAIN_UI:
         short_pulse();
         activate_MainUI_action(settings.mainui_long_press);
@@ -298,7 +321,7 @@ void menuButtonEvent_longPress(void)
 
 void menuButtonEvent_doublePress(void)
 {
-    switch (system_state) {
+    switch (menu_pressed_state) {
     case MODE_MAIN_UI:
         activate_MainUI_action(settings.mainui_double_press);
         break;
@@ -315,7 +338,7 @@ void menuButtonEvent_doublePress(void)
 
 bool _hapticSinglePress(void)
 {
-    switch (system_state) {
+    switch (menu_pressed_state) {
     case MODE_MAIN_UI:
         return settings.mainui_single_press != 0;
     case MODE_GAME:
@@ -332,7 +355,7 @@ bool _hapticDoublePress(void)
 {
     if (_hapticSinglePress())
         return false;
-    switch (system_state) {
+    switch (menu_pressed_state) {
     case MODE_MAIN_UI:
         return true;
     case MODE_GAME:
@@ -363,7 +386,7 @@ bool menuButtonAction(uint32_t val, bool comboKey)
             menu_long_press_timeout = 700;
         }
         menu_last_pressed = getMilliseconds();
-        menu_last_state = system_state;
+        menu_pressed_state = system_state;
     }
     else if (val == REPEAT) {
         if (getMilliseconds() - menu_last_pressed >= menu_long_press_timeout) {

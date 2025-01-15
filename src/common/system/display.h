@@ -11,14 +11,20 @@
 #include "utils/file.h"
 #include "utils/log.h"
 
+#ifdef PLATFORM_MIYOOMINI
+#define DEFAULT_WIDTH 640
+#define DEFAULT_HEIGHT 480
+#else
+#define DEFAULT_WIDTH 752
+#define DEFAULT_HEIGHT 560
+#endif
+
 #define display_on() display_setScreen(true)
 #define display_off() display_setScreen(false)
 
 static int fb_fd;
-static int DISPLAY_WIDTH = 640; // physical screen resolution
-static int DISPLAY_HEIGHT = 480;
-int RENDER_WIDTH = 640; // render resolution
-int RENDER_HEIGHT = 480;
+static int DISPLAY_WIDTH = DEFAULT_WIDTH; // physical screen resolution
+static int DISPLAY_HEIGHT = DEFAULT_HEIGHT;
 struct timeval start_time, end_time;
 
 typedef struct Display {
@@ -37,8 +43,8 @@ typedef struct Display {
 } display_t;
 
 static display_t g_display = {
-    .width = 640,
-    .height = 480,
+    .width = DEFAULT_WIDTH,
+    .height = DEFAULT_HEIGHT,
     .bpp = 32,
     .stride = 0,
     .fb_size = 0,
@@ -55,17 +61,27 @@ typedef struct Rect {
     int h;
 } rect_t;
 
+void display_reset()
+{
+    if (fb_fd < 0)
+        fb_fd = open("/dev/fb0", O_RDWR);
+    ioctl(fb_fd, FBIOGET_VSCREENINFO, &g_display.vinfo);
+    g_display.vinfo.yoffset = 0;
+    ioctl(fb_fd, FBIOPUT_VSCREENINFO, &g_display.vinfo);
+}
+
 //
 //    Get render resolution
 //
 void display_getRenderResolution()
 {
-    print_debug("Getting render resolution\n");
     if (fb_fd < 0)
         fb_fd = open("/dev/fb0", O_RDWR);
-    ioctl(fb_fd, FBIOGET_VSCREENINFO, &g_display.vinfo);
-    RENDER_WIDTH = g_display.vinfo.xres;
-    RENDER_HEIGHT = g_display.vinfo.yres;
+    if (ioctl(fb_fd, FBIOGET_VSCREENINFO, &g_display.vinfo) == 0) {
+        g_display.width = g_display.vinfo.xres;
+        g_display.height = g_display.vinfo.yres;
+    }
+    printf_debug("Render resolution: %dx%d\n", g_display.width, g_display.height);
 }
 
 //
@@ -83,16 +99,28 @@ void display_getResolution()
     fclose(file);
 }
 
-void display_init(void)
+void display_init(bool map_fb)
 {
     if (g_display.init_done)
         return;
+
     // Open and mmap FB
     fb_fd = open("/dev/fb0", O_RDWR);
     ioctl(fb_fd, FBIOGET_FSCREENINFO, &g_display.finfo);
-    g_display.fb_addr = (uint32_t *)mmap(0, g_display.finfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fb_fd, 0);
+
+    display_reset();
+
+    if (map_fb) {
+        g_display.fb_size = g_display.finfo.smem_len;
+        g_display.fb_addr = (uint32_t *)mmap(0, g_display.fb_size, PROT_READ | PROT_WRITE, MAP_SHARED, fb_fd, 0);
+    }
+    else {
+        g_display.fb_addr = NULL;
+    }
+
     display_getResolution();
     display_getRenderResolution();
+
     g_display.init_done = true;
 }
 
@@ -101,19 +129,19 @@ void display_init(void)
 //
 void display_save(void)
 {
-    g_display.stride = g_display.finfo.line_length;
     ioctl(fb_fd, FBIOGET_VSCREENINFO, &g_display.vinfo);
     g_display.bpp = g_display.vinfo.bits_per_pixel / 8; // byte per pixel
+    g_display.stride = g_display.vinfo.xres_virtual * g_display.bpp;
     g_display.fb_ofs = (uint8_t *)g_display.fb_addr + (g_display.vinfo.yoffset * g_display.stride);
 
     // Save display area and clear
-    if ((g_display.savebuf = (uint8_t *)malloc(DISPLAY_WIDTH * g_display.bpp * DISPLAY_HEIGHT))) {
+    if ((g_display.savebuf = (uint8_t *)malloc(g_display.width * g_display.bpp * g_display.height))) {
         uint32_t i, ofss, ofsd;
         ofss = ofsd = 0;
-        for (i = DISPLAY_HEIGHT; i > 0;
-             i--, ofss += g_display.stride, ofsd += DISPLAY_WIDTH * g_display.bpp) {
-            memcpy(g_display.savebuf + ofsd, g_display.fb_ofs + ofss, DISPLAY_WIDTH * g_display.bpp);
-            memset(g_display.fb_ofs + ofss, 0, DISPLAY_WIDTH * g_display.bpp);
+        for (i = g_display.height; i > 0;
+             i--, ofss += g_display.stride, ofsd += g_display.width * g_display.bpp) {
+            memcpy(g_display.savebuf + ofsd, g_display.fb_ofs + ofss, g_display.width * g_display.bpp);
+            memset(g_display.fb_ofs + ofss, 0, g_display.width * g_display.bpp);
         }
     }
 }
@@ -127,21 +155,13 @@ void display_restore(void)
     if (g_display.savebuf) {
         uint32_t i, ofss, ofsd;
         ofss = ofsd = 0;
-        for (i = DISPLAY_HEIGHT; i > 0;
-             i--, ofsd += g_display.stride, ofss += DISPLAY_WIDTH * g_display.bpp) {
-            memcpy(g_display.fb_ofs + ofsd, g_display.savebuf + ofss, DISPLAY_WIDTH * g_display.bpp);
+        for (i = g_display.height; i > 0;
+             i--, ofsd += g_display.stride, ofss += g_display.width * g_display.bpp) {
+            memcpy(g_display.fb_ofs + ofsd, g_display.savebuf + ofss, g_display.width * g_display.bpp);
         }
         free(g_display.savebuf);
         g_display.savebuf = NULL;
     }
-}
-
-void display_reset(void)
-{
-    ioctl(fb_fd, FBIOGET_VSCREENINFO, &g_display.vinfo);
-    g_display.vinfo.yoffset = 0;
-    memset(g_display.fb_addr, 0, g_display.finfo.smem_len);
-    ioctl(fb_fd, FBIOPUT_VSCREENINFO, &g_display.vinfo);
 }
 
 void display_free(display_t *display)
@@ -233,6 +253,7 @@ void display_setBrightness(uint32_t value)
  * It supports optional rotation of the buffer content.
  *
  * @param index The index of the buffer to read/write.
+ * @param display The display structure.
  * @param pixels Pointer to the pixel data.
  * @param rect The rectangle area to read/write.
  * @param rotate Whether to rotate the buffer content.
@@ -287,21 +308,40 @@ void display_readOrWriteBuffer(int index, display_t *display, uint32_t *pixels, 
     }
 }
 
+/**
+ * @brief Read from the current framebuffer buffer.
+ * 
+ * This function reads from the current buffer in the framebuffer.
+ * It supports optional rotation of the buffer content.
+ * 
+ * @param display The display structure.
+ * @param pixels Pointer to the pixel data.
+ * @param rect The rectangle area to read/write.
+ * @param rotate Whether to rotate the buffer content.
+ * @param mask Whether to use a mask when writing to the buffer.
+ */
+void display_readCurrentBuffer(display_t *display, uint32_t *pixels, rect_t rect, bool rotate, bool mask)
+{
+    int index = display->vinfo.yoffset / display->vinfo.yres;
+    display_readOrWriteBuffer(index, display, pixels, rect, rotate, mask, false);
+}
+
 /** 
  * @brief Read from a framebuffer buffer.
  *
  * This function reads from a specific buffer in the framebuffer.
  * It supports optional rotation of the buffer content.
  *
+ * @param index The index of the buffer to read.
+ * @param display The display structure.
  * @param pixels Pointer to the pixel data.
  * @param rect The rectangle area to read/write.
- * @param bufferPos The starting position of the buffer.
  * @param rotate Whether to rotate the buffer content.
  * @param mask Whether to use a mask when writing to the buffer.
  */
-void display_readBuffer(int bufferPos, display_t *display, uint32_t *pixels, rect_t rect, bool rotate, bool mask)
+void display_readBuffer(int index, display_t *display, uint32_t *pixels, rect_t rect, bool rotate, bool mask)
 {
-    display_readOrWriteBuffer(bufferPos, display, pixels, rect, rotate, mask, false);
+    display_readOrWriteBuffer(index, display, pixels, rect, rotate, mask, false);
 }
 
 /** 
@@ -310,15 +350,16 @@ void display_readBuffer(int bufferPos, display_t *display, uint32_t *pixels, rec
  * This function writes to a specific buffer in the framebuffer.
  * It supports optional rotation of the buffer content.
  *
+ * @param index The index of the buffer to write.
+ * @param display The display structure.
  * @param pixels Pointer to the pixel data.
  * @param rect The rectangle area to read/write.
- * @param bufferPos The starting position of the buffer.
  * @param rotate Whether to rotate the buffer content.
  * @param mask Whether to use a mask when writing to the buffer.
  */
-void display_writeBuffer(int bufferPos, display_t *display, uint32_t *pixels, rect_t rect, bool rotate, bool mask)
+void display_writeBuffer(int index, display_t *display, uint32_t *pixels, rect_t rect, bool rotate, bool mask)
 {
-    display_readOrWriteBuffer(bufferPos, display, pixels, rect, rotate, mask, true);
+    display_readOrWriteBuffer(index, display, pixels, rect, rotate, mask, true);
 }
 
 /**
@@ -327,6 +368,7 @@ void display_writeBuffer(int bufferPos, display_t *display, uint32_t *pixels, re
  * This function reads from or writes to multiple buffers in the framebuffer.
  * It supports optional rotation of the buffer content.
  *
+ * @param display The display structure.
  * @param pixels Array of pointers to the pixel data for each buffer.
  * @param rect The rectangle area to read/write.
  * @param rotate Whether to rotate the buffer content.
@@ -348,6 +390,7 @@ void display_readOrWriteBuffers(display_t *display, uint32_t **pixels, rect_t re
  * This function reads from multiple buffers in the framebuffer.
  * It supports optional rotation of the buffer content.
  *
+ * @param display The display structure.
  * @param pixels Array of pointers to the pixel data for each buffer.
  * @param rect The rectangle area to read/write.
  * @param rotate Whether to rotate the buffer content.
@@ -364,6 +407,7 @@ void display_readBuffers(display_t *display, uint32_t **pixels, rect_t rect, boo
  * This function writes to multiple buffers in the framebuffer.
  * It supports optional rotation of the buffer content.
  *
+ * @param display The display structure.
  * @param pixels Array of pointers to the pixel data for each buffer.
  * @param rect The rectangle area to read/write.
  * @param rotate Whether to rotate the buffer content.
@@ -414,33 +458,35 @@ void display_drawBatteryIcon(uint32_t color, int x, int y, int level,
 
     // Draw battery body wireframe
     for (i = x; i < x + 30; i++) {
-        ofs[i + y * RENDER_WIDTH] = color;        // Top border
-        ofs[i + (y + 14) * RENDER_WIDTH] = color; // Bottom border
+        ofs[i + y * g_display.width] = color;        // Top border
+        ofs[i + (y + 14) * g_display.width] = color; // Bottom border
     }
     for (j = y; j < y + 15; j++) {
-        ofs[x + j * RENDER_WIDTH] = color;      // Left border
-        ofs[x + 29 + j * RENDER_WIDTH] = color; // Right border
+        ofs[x + j * g_display.width] = color;      // Left border
+        ofs[x + 29 + j * g_display.width] = color; // Right border
     }
 
     // Draw battery charge level
     int levelWidth = (level * 26) / 100;
     for (i = x + 3 + 26 - levelWidth; i < x + 1 + 26; i++) {
         for (j = y + 3; j < y + 12; j++) {
-            ofs[i + j * RENDER_WIDTH] = fillColor;
+            ofs[i + j * g_display.width] = fillColor;
         }
     }
 
     // Draw battery head wireframe
     for (i = x - 4; i < x; i++) {
         for (j = y + 2; j < y + 13; j++) {
-            ofs[i + j * RENDER_WIDTH] = color;
+            ofs[i + j * g_display.width] = color;
         }
     }
 }
 
 void display_close(void)
 {
+    display_reset();
     display_free(&g_display);
+
     if (fb_fd > 0)
         close(fb_fd);
 }

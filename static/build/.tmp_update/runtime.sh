@@ -289,6 +289,8 @@ change_resolution() {
     fi
     log "Changing resolution to $res_x x $res_y"
 
+    bootScreen clear
+
     fbset -g "$res_x" "$res_y" "$res_x" "$((res_y * 2))" 32
     # inform batmon and keymon of resolution change
     killall -SIGUSR1 batmon
@@ -387,6 +389,12 @@ launch_game() {
             # Free memory
             $sysdir/bin/freemma
 
+            if [ $is_game -eq 1 ] && [ ! -f /tmp/new_res_available ]; then
+                infoPanel --message "LOADING" --persistent --romscreen &
+                touch /tmp/dismiss_info_panel
+                sync
+            fi
+
             # GAME LAUNCH
             cd /mnt/SDCARD/RetroArch
             force_retroarch_cfg
@@ -402,7 +410,7 @@ launch_game() {
 
             if [ $is_game -eq 1 ] && [ ! -f /tmp/.offOrder ] && [ -f /tmp/.displaySavingMessage ]; then
                 rm /tmp/.displaySavingMessage
-                infoPanel --title " " --message "Saving ..." --persistent --no-footer &
+                infoPanel --message "SAVING" --persistent --romscreen &
                 touch /tmp/dismiss_info_panel
                 sync
             fi
@@ -415,7 +423,7 @@ launch_game() {
 
     if [ $retval -eq 404 ]; then
         infoPanel --title "File not found" --message "The requested file was not found." --auto
-    elif [ $retval -ge 128 ] && [ $retval -ne 143 ] && [ $retval -ne 255 ]; then
+    elif [ $retval -ge 128 ] && [ $retval -ne 143 ] && [ $retval -ne 255 ] && [ ! -f /tmp/.forceKillRetroarch ]; then
         infoPanel --title "Fatal error occurred" --message "The program exited unexpectedly.\n(Error code: $retval)" --auto
     fi
 

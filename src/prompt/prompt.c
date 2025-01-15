@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 
     printf_debug(LOG_SUCCESS, "parsed command line arguments");
 
-    SDL_InitDefault(true);
+    SDL_InitDefault();
 
     settings_load();
     lang_load();
