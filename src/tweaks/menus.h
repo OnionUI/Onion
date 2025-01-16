@@ -711,6 +711,16 @@ void menu_advanced(void *_)
 {
     if (!_menu_advanced._created) {
         _menu_advanced = list_createWithTitle(8, LIST_SMALL, "Advanced");
+        if (exists(RESET_CONFIGS_PAK)) {
+            list_addItem(&_menu_advanced,
+                         (ListItem){
+                             .label = "Reset settings...",
+                             .action = menu_resetSettings});
+        }
+        list_addItem(&_menu_advanced,
+                     (ListItem){
+                         .label = "Diagnostics...",
+                         .action = menu_diagnostics});
         list_addItemWithInfoNote(&_menu_advanced,
                                  (ListItem){
                                      .label = "Swap triggers (L<>L2, R<>R2)",
@@ -771,16 +781,6 @@ void menu_advanced(void *_)
                                      "Use this option if you're seeing\n"
                                      "small artifacts on the display.");
         }
-        if (exists(RESET_CONFIGS_PAK)) {
-            list_addItem(&_menu_advanced,
-                         (ListItem){
-                             .label = "Reset settings...",
-                             .action = menu_resetSettings});
-        }
-        list_addItem(&_menu_advanced,
-                     (ListItem){
-                         .label = "Diagnostics...",
-                         .action = menu_diagnostics});
     }
     menu_stack[++menu_level] = &_menu_advanced;
     header_changed = true;
