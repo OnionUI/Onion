@@ -358,15 +358,18 @@ void turnOffScreen(void)
  */
 void cpuClockHotkey(int adjust)
 {
+    if (config_flag_get(".cpuClockHotkey") == 0) {
+        return;
+    }
     printf_debug("cpuClockHotkey: %d\n", adjust);
     int min_cpu_clock = 500; // ?
     int max_cpu_clock;
     switch (DEVICE_ID) {
     case MIYOO354:
-        max_cpu_clock = 1900;
+        max_cpu_clock = 1800;
         break;
     case MIYOO283:
-        max_cpu_clock = 1700;
+        max_cpu_clock = 1600;
         break;
     default:
         // Unknown device

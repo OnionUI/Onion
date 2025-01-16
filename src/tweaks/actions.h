@@ -382,6 +382,11 @@ void action_advancedSetSwapTriggers(void *pt)
     stored_value_swap_triggers_changed = true;
 }
 
+void action_setCpuClockHotkey(void *pt)
+{
+    config_flag_set(".cpuClockHotkey", ((ListItem *)pt)->value);
+}
+
 void action_setAltBrightness(void *pt)
 {
     config_flag_set(".altBrightness", ((ListItem *)pt)->value);

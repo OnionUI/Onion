@@ -710,7 +710,7 @@ void menu_diagnostics(void *pt)
 void menu_advanced(void *_)
 {
     if (!_menu_advanced._created) {
-        _menu_advanced = list_createWithTitle(7, LIST_SMALL, "Advanced");
+        _menu_advanced = list_createWithTitle(8, LIST_SMALL, "Advanced");
         list_addItemWithInfoNote(&_menu_advanced,
                                  (ListItem){
                                      .label = "Swap triggers (L<>L2, R<>R2)",
@@ -719,6 +719,14 @@ void menu_advanced(void *_)
                                      .action = action_advancedSetSwapTriggers},
                                  "Swap the function of L<>L2 and R<>R2\n"
                                  "(only affects in-game actions).");
+        list_addItemWithInfoNote(&_menu_advanced,
+                                 (ListItem){
+                                     .label = "OC hotkeys (SELECT+START+L/R)",
+                                     .item_type = TOGGLE,
+                                     .value = config_flag_get(".cpuClockHotkey"),
+                                     .action = action_setCpuClockHotkey},
+                                 "Enable the global hotkeys for\n"
+                                 "overclocking the CPU.");
         if (DEVICE_ID == MIYOO283) {
             list_addItemWithInfoNote(&_menu_advanced,
                                      (ListItem){
