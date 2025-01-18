@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
         SDL_FillRect(screen, NULL, 0);
         render();
     }
-    else if (appState.is_overlay && appState.current_game == 0) {
+    else if (currentGame()->is_running) {
         if (appState.current_bg != NULL) {
             SDL_FillRect(screen, NULL, 0);
             renderCentered(appState.current_bg, VIEW_FULLSCREEN, NULL, NULL);

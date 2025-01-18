@@ -4,6 +4,8 @@
 #include <SDL/SDL.h>
 #include <signal.h>
 
+#include "gs_model.h"
+
 #define VIEW_NORMAL 0
 #define VIEW_MINIMAL 1
 #define VIEW_FULLSCREEN -1
@@ -99,5 +101,10 @@ static void sigHandler(int sig)
 }
 
 static char sTotalTimePlayed[50] = "";
+
+Game_s *currentGame(void)
+{
+    return &game_list[appState.current_game];
+}
 
 #endif // GAME_SWITCHER_APP_STATE_H__

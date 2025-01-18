@@ -52,36 +52,15 @@ static bool _isContentNameInInfo(const char *content_info, const char *content_n
 
 static void *_saveRomScreenAndStateThread(void *arg)
 {
-    msleep(200);
-
-    RetroArchStatus_s status;
-
-    if (retroarch_getStatus(&status) == -1) {
-        print_debug("Error getting RetroArch status");
-        autosave_thread_running = false;
-        return NULL;
-    }
-
-    printf_debug("RetroArch status: %d\n", status.state);
-    printf_debug("Content info: %s\n", status.content_info);
-
-    if (status.state == RETROARCH_STATE_CONTENTLESS || status.state == RETROARCH_STATE_UNKNOWN) {
-        print_debug("RetroArch is not running a game");
-        autosave_thread_running = false;
-        return NULL;
-    }
-
-    if (status.state == RETROARCH_STATE_PLAYING) {
-        retroarch_pause();
-    }
-
     Game_s *game = &game_list[0];
 
-    if (game->romScreen != NULL && _isContentNameInInfo(status.content_info, game->rom_name)) {
+    if (game->romScreen != NULL && game->is_running) {
         char romScreenPath[STR_MAX];
         uint32_t hash = FNV1A_Pippip_Yurii(game->recentItem.rompath, strlen(game->recentItem.rompath));
         snprintf(romScreenPath, sizeof(romScreenPath), ROM_SCREENS_DIR "/%" PRIu32 ".png", hash);
+
         screenshot_save((uint32_t *)game->romScreen->pixels, romScreenPath, false);
+
         printf_debug("Saved rom screen: %s\n", romScreenPath);
     }
 
@@ -93,15 +72,39 @@ static void *_saveRomScreenAndStateThread(void *arg)
 
 void overlay_init()
 {
-    if (appState.is_overlay) {
-        retroarch_pause();
-        system("playActivity stop_all &");
-        setFbAsFirstRomScreen();
-
-        // start autosave thread
-        autosave_thread_running = true;
-        pthread_create(&autosave_thread_pt, NULL, _saveRomScreenAndStateThread, NULL);
+    if (!appState.is_overlay) {
+        return;
     }
+
+    retroarch_pause();
+    system("playActivity stop_all &");
+    setFbAsFirstRomScreen();
+
+    RetroArchStatus_s status;
+    if (retroarch_getStatus(&status) == -1) {
+        print_debug("Error getting RetroArch status");
+        return;
+    }
+
+    printf_debug("RetroArch status: %d\n", status.state);
+    printf_debug("Content info: %s\n", status.content_info);
+
+    if (status.state == RETROARCH_STATE_CONTENTLESS || status.state == RETROARCH_STATE_UNKNOWN) {
+        print_debug("RetroArch is not running a game");
+        return;
+    }
+
+    if (status.state == RETROARCH_STATE_PLAYING) {
+        retroarch_pause();
+    }
+
+    Game_s *game = &game_list[0];
+    game->is_running = _isContentNameInInfo(status.content_info, game->rom_name);
+    printf_debug("Game is running: %d\n", game->is_running);
+
+    // start autosave thread
+    autosave_thread_running = true;
+    pthread_create(&autosave_thread_pt, NULL, _saveRomScreenAndStateThread, NULL);
 }
 
 void overlay_resume(void)

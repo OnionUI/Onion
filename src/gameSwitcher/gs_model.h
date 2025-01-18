@@ -42,6 +42,7 @@ typedef struct {
     char totalTime[100];
     int index;
     bool processed;
+    bool is_running;
 } Game_s;
 
 static Game_s game_list[MAX_HISTORY];

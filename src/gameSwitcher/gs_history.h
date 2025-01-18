@@ -79,47 +79,13 @@ void setEntryDefaultValues(Game_s *game, int index)
     game->romScreen = NULL;
     game->totalTime[0] = '\0';
     game->processed = false;
+    game->is_running = false;
 
     strcpy(game->name, "");
     strcpy(game->shortname, "");
     strcpy(game->core_name, "");
     strcpy(game->core_path, "");
     game->index = index;
-}
-
-/**
- * @brief Read the first entry from the history file
- *
- */
-void readFirstEntry()
-{
-    FILE *file;
-    char line[STR_MAX * 6];
-
-    file = fopen(getMiyooRecentFilePath(), "r");
-    if (file == NULL) {
-        print_debug("Error opening file");
-        return;
-    }
-
-    int lineNo = -1;
-    bool found = false;
-
-    while (fgets(line, sizeof(line), file) != NULL) {
-        ++lineNo;
-
-        if (parseJsonToRecentItem(line, &game_list[0].recentItem, lineNo)) {
-            found = true;
-            break;
-        }
-    }
-
-    if (found) {
-        setEntryDefaultValues(&game_list[0], 0);
-        game_list_len = 1;
-    }
-
-    fclose(file);
 }
 
 /**
@@ -215,6 +181,43 @@ void processItem(Game_s *game)
     if (game->romScreen == NULL) {
         game->romScreen = loadRomScreen(game->index);
     }
+}
+
+/**
+ * @brief Read the first entry from the history file
+ *
+ */
+void readFirstEntry()
+{
+    FILE *file;
+    char line[STR_MAX * 6];
+
+    file = fopen(getMiyooRecentFilePath(), "r");
+    if (file == NULL) {
+        print_debug("Error opening file");
+        return;
+    }
+
+    int lineNo = -1;
+    bool found = false;
+
+    while (fgets(line, sizeof(line), file) != NULL) {
+        ++lineNo;
+
+        if (parseJsonToRecentItem(line, &game_list[0].recentItem, lineNo)) {
+            found = true;
+            break;
+        }
+    }
+
+    if (found) {
+        Game_s *game = &game_list[0];
+        setEntryDefaultValues(game, 0);
+        processItem(game);
+        game_list_len = 1;
+    }
+
+    fclose(file);
 }
 
 void getLaunchCommand(Game_s *game, char *launchCommand)

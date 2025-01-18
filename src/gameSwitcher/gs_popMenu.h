@@ -245,7 +245,7 @@ static void *_scan_thread(void *_)
 
 static bool _isSaveEnabled(void)
 {
-    return appState.is_overlay && appState.current_game == 0;
+    return currentGame()->is_running;
 }
 
 static bool _isLoadEnabled(void)
@@ -309,7 +309,7 @@ void action_loadGame(void *_)
 
     const int real_slot = g_save_state_info.slots[g_save_state_info.selected_slot];
 
-    if (appState.is_overlay && appState.current_game == 0) {
+    if (currentGame()->is_running) {
         retroarch_load(real_slot);
     }
     else {
