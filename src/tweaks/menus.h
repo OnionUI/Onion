@@ -710,7 +710,17 @@ void menu_diagnostics(void *pt)
 void menu_advanced(void *_)
 {
     if (!_menu_advanced._created) {
-        _menu_advanced = list_createWithTitle(7, LIST_SMALL, "Advanced");
+        _menu_advanced = list_createWithTitle(8, LIST_SMALL, "Advanced");
+        if (exists(RESET_CONFIGS_PAK)) {
+            list_addItem(&_menu_advanced,
+                         (ListItem){
+                             .label = "Reset settings...",
+                             .action = menu_resetSettings});
+        }
+        list_addItem(&_menu_advanced,
+                     (ListItem){
+                         .label = "Diagnostics...",
+                         .action = menu_diagnostics});
         list_addItemWithInfoNote(&_menu_advanced,
                                  (ListItem){
                                      .label = "Swap triggers (L<>L2, R<>R2)",
@@ -719,6 +729,14 @@ void menu_advanced(void *_)
                                      .action = action_advancedSetSwapTriggers},
                                  "Swap the function of L<>L2 and R<>R2\n"
                                  "(only affects in-game actions).");
+        list_addItemWithInfoNote(&_menu_advanced,
+                                 (ListItem){
+                                     .label = "OC hotkeys (SELECT+START+L/R)",
+                                     .item_type = TOGGLE,
+                                     .value = config_flag_get(".cpuClockHotkey"),
+                                     .action = action_setCpuClockHotkey},
+                                 "Enable the global hotkeys for\n"
+                                 "overclocking the CPU.");
         if (DEVICE_ID == MIYOO283) {
             list_addItemWithInfoNote(&_menu_advanced,
                                      (ListItem){
@@ -763,16 +781,6 @@ void menu_advanced(void *_)
                                      "Use this option if you're seeing\n"
                                      "small artifacts on the display.");
         }
-        if (exists(RESET_CONFIGS_PAK)) {
-            list_addItem(&_menu_advanced,
-                         (ListItem){
-                             .label = "Reset settings...",
-                             .action = menu_resetSettings});
-        }
-        list_addItem(&_menu_advanced,
-                     (ListItem){
-                         .label = "Diagnostics...",
-                         .action = menu_diagnostics});
     }
     menu_stack[++menu_level] = &_menu_advanced;
     header_changed = true;
