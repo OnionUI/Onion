@@ -61,7 +61,14 @@ typedef struct Rect {
     int h;
 } rect_t;
 
-void display_reset()
+void display_clear(void)
+{
+    if (g_display.fb_addr) {
+        memset(g_display.fb_addr, 0, g_display.fb_size);
+    }
+}
+
+void display_reset(void)
 {
     if (fb_fd < 0)
         fb_fd = open("/dev/fb0", O_RDWR);
@@ -87,7 +94,7 @@ void display_getRenderResolution()
 //
 //    Get physical screen resolution
 //
-void display_getResolution()
+void display_getResolution(void)
 {
     FILE *file = fopen("/tmp/screen_resolution", "r");
     if (file == NULL) {

@@ -308,6 +308,7 @@ launch_game() {
     romcfgpath=""
     retroarch_core=""
     full_resolution_path=""
+    launch_script=""
 
     start_audioserver
     save_settings
@@ -316,9 +317,9 @@ launch_game() {
         rompath=$(echo "$cmd" | awk '{ st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3)}')
 
         if echo "$rompath" | grep -q ":"; then
-            launch=$(echo "$rompath" | awk '{split($0,a,":"); print a[1]}')
+            launch_script=$(echo "$rompath" | awk '{split($0,a,":"); print a[1]}')
             rompath=$(echo "$rompath" | awk '{split($0,a,":"); print a[2]}')
-            echo "LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so \"$launch\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+            echo "LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so \"$launch_script\" \"$rompath\"" > $sysdir/cmd_to_run.sh
         fi
 
         orig_path="$rompath"
@@ -342,9 +343,13 @@ launch_game() {
 
     full_resolution_path="$(get_full_resolution_path)"
 
+    if [ -z "$launch_script" ]; then
+        launch_script=$(echo "$cmd" | awk -F'"' '{print $2}')
+    fi
+
     if [ $is_game -eq 1 ]; then
-        if [ -f "$romcfgpath" ]; then
-            override_game_core "$romcfgpath"
+        if [ -f "$launch_script" ] && cat "$launch_script" | grep -q '.retroarch/cores'; then
+            override_game_core "$romcfgpath" "$launch_script"
         fi
 
         # Handle dollar sign
@@ -367,6 +372,7 @@ launch_game() {
 
     # Prevent quick switch loop
     rm -f /tmp/quick_switch 2> /dev/null
+    rm -f /tmp/force_auto_load_state 2> /dev/null
 
     log "----- COMMAND:"
     log "$(cat $sysdir/cmd_to_run.sh)"
@@ -440,15 +446,31 @@ EOM
 
 override_game_core() {
     romcfgpath="$1"
-    romcfg=$(cat "$romcfgpath")
-    retroarch_core=$(get_info_value "$romcfg" core)
+    launch_path="$2"
+
+    if [ -f "$romcfgpath" ]; then
+        romcfg=$(cat "$romcfgpath")
+        retroarch_core=$(get_info_value "$romcfg" core)
+    fi
+
+    if grep -q "default_core=" "$launch_path"; then
+        default_core="$(cat "$launch_path" | grep "default_core=" | head -1 | awk '{split($0,a,"="); print a[2]}' | xargs)_libretro"
+    else
+        default_core=$(cat "$launch_path" | grep ".retroarch/cores/" | awk '{st = index($0,".retroarch/cores/"); s = substr($0,st+17); st2 = index(s,".so"); print substr(s,0,st2-1)}' | xargs)
+    fi
+
+    if [ "$retroarch_core" == "" ]; then
+        retroarch_core="$default_core"
+    fi
+
     corepath=".retroarch/cores/$retroarch_core.so"
 
-    log "per game core: $retroarch_core" >> $sysdir/logs/game_list_options.log
-
     if [ -f "/mnt/SDCARD/RetroArch/$corepath" ] && echo "$cmd" | grep -qv "retroarch/cores"; then # Do not override game core when launching from GS
-        if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
-            echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v --appendconfig \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+        if echo "$cmd" | grep -q "/tmp/reset.cfg"; then
+            echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v --appendconfig \"/tmp/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+        elif [ -f /tmp/force_auto_load_state ]; then
+            echo -e "savestate_auto_load = \"true\"\nconfig_save_on_exit = \"false\"\n" > /tmp/auto_load_state.cfg
+            echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v --appendconfig \"/tmp/auto_load_state.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
         else
             echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
         fi
@@ -468,12 +490,14 @@ launch_game_postprocess() {
 
     # TIMER END + SHUTDOWN CHECK
     if [ $is_game -eq 1 ]; then
-        if echo "$cmd" | grep -q "$sysdir/reset.cfg"; then
-            echo "$cmd" | sed 's/ --appendconfig \"\/mnt\/SDCARD\/.tmp_update\/reset.cfg\"//g' > $sysdir/cmd_to_run.sh
-        fi
-
         cd $sysdir
         playActivity stop "$rompath"
+
+        if echo "$cmd" | grep -q "/tmp/reset.cfg"; then
+            echo "$cmd" | sed 's/ --appendconfig \"\/tmp\/reset.cfg\"//g' > $sysdir/cmd_to_run.sh
+        elif echo "$cmd" | grep -q "/tmp/auto_load_state.cfg"; then
+            echo "$cmd" | sed 's/ --appendconfig \"\/tmp\/auto_load_state.cfg\"//g' > $sysdir/cmd_to_run.sh
+        fi
 
         if [ -f /tmp/.lowBat ]; then
             bootScreen lowBat
