@@ -173,10 +173,15 @@ void action_MainUI_resumeGame(void)
 
 static void _saveAndQuitRetroArch(bool quickSwitch)
 {
-    enableSavingMessage();
-    retroarch_pause();
-    screenshot_system();
-    displaySavingMessage();
+    if (check_autosave()) {
+        enableSavingMessage();
+        retroarch_pause();
+        screenshot_system();
+        displaySavingMessage();
+    }
+    else {
+        display_clear();
+    }
     if (quickSwitch)
         set_quickSwitch();
     terminate_retroarch();
@@ -187,8 +192,8 @@ void action_RA_gameSwitcher(void)
     if (exists("/mnt/SDCARD/.tmp_update/.runGameSwitcher"))
         return;
     set_gameSwitcher();
-    system("(gameSwitcher --overlay && touch /tmp/state_changed) &");
     retroarch_pause();
+    system("(gameSwitcher --overlay && touch /tmp/state_changed) &");
     system_state_update();
 }
 

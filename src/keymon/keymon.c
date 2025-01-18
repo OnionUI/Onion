@@ -406,6 +406,11 @@ void cpuClockHotkey(int adjust)
     }
 }
 
+static void signal_refresh(int sig)
+{
+    display_getRenderResolution();
+}
+
 //
 //    Main
 //
@@ -414,7 +419,7 @@ int main(void)
     // Initialize
     signal(SIGTERM, quit);
     signal(SIGSEGV, quit);
-    signal(SIGUSR1, display_getRenderResolution);
+    signal(SIGUSR1, signal_refresh);
     log_setName("keymon");
 
     getDeviceModel();

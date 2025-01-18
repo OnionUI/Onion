@@ -10,7 +10,7 @@
 //    [onion] Check retroarch running & savestate_auto_save in retroarch.cfg is
 //    true
 //
-int check_autosave(void)
+bool check_autosave(void)
 {
     char value[STR_MAX];
     file_parseKeyValue(RETROARCH_CONFIG, "savestate_auto_save", value, '=', 0);

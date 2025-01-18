@@ -340,8 +340,8 @@ get_json_value() {
 
 reset_game() {
     echo ":: reset_game $*"
-    echo -e "savestate_auto_load = \"false\"\nconfig_save_on_exit = \"false\"\n" > $sysdir/reset.cfg
-    echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v --appendconfig \"$sysdir/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+    echo -e "savestate_auto_load = \"false\"\nconfig_save_on_exit = \"false\"\n" > /tmp/reset.cfg
+    echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v --appendconfig \"/tmp/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
     add_game_to_recent_list
     exit 0
 }

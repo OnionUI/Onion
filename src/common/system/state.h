@@ -422,6 +422,8 @@ void resumeGame(int index)
 
             file_put_sync(fp, CMD_TO_RUN_PATH, "%s", LaunchCommand);
 
+            temp_flag_set("force_auto_load_state", true);
+
             sync();
             return;
         }
