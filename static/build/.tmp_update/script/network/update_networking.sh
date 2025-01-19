@@ -76,6 +76,13 @@ check() {
     local force_wifi_on_startup=$([ -f /customer/app/axp_test ] && [ -f $sysdir/config/.ntpForce ] && echo 1 || echo 0)
     local has_wifi=$(wifi_enabled && echo 1 || echo 0)
 
+    check_wifi
+    check_ftpstate &
+    check_sshstate &
+    check_telnetstate &
+    check_httpstate &
+    check_smbdstate &
+
     if [ "$is_booting" -eq 1 ]; then
         if [ "$has_wifi" -eq 0 ]; then
             if [ "$force_wifi_on_startup" -eq 1 ]; then
@@ -88,18 +95,11 @@ check() {
         fi
     fi
 
-    check_wifi
-    check_ftpstate &
-    check_sshstate &
-    check_telnetstate &
-    check_httpstate &
-    check_smbdstate &
-
     if [ "$has_wifi" -eq 1 ] && flag_enabled ntpWait && [ $is_booting -eq 1 ]; then
         bootScreen Boot "Syncing time..."
         check_ntpstate && bootScreen Boot "Time synced: $(date +"%H:%M")" || bootScreen Boot "Time sync failed"
         sleep 1
-    else
+    elif wifi_enabled; then
         check_ntpstate &
     fi
 
@@ -464,7 +464,7 @@ check_hotspotstate() {
 
 check_ntpstate() {
     ret_val=0
-    if flag_enabled ntpState && wifi_enabled && [ ! -f "$sysdir/config/.hotspotState" ]; then
+    if flag_enabled ntpState && [ ! -f "$sysdir/config/.hotspotState" ]; then
         set_tzid
         [ -f /tmp/ntp_synced ] && return 0
 
