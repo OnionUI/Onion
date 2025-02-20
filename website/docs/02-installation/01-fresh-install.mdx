@@ -94,7 +94,7 @@ Chrome already has a tool to format an SD card. Insert the card into your Chrome
 2. Copy the 7 folders to your SD card, using the following command (replace `/run/media/mmcblk0p1` with the path to your SD card):
 
    ```sh
-   cp -r Onion-v4.2.0/* /run/media/mmcblk0p1
+   cp -r Onion-v4.2.0/. /run/media/mmcblk0p1
    ```
 
 </TabItem>
@@ -125,10 +125,10 @@ Themes/
 6. When the installation is done, press the <kbd>A</kbd> button and the device will turn off (MM) or reboot (MMP).
 
 
-## Step 3: Copy over your bios and rom files
+## Step 3: Copy over your ROM and BIOS files
 
-1. Copy your bios files to the `BIOS` folder (stock bios files are available at `RetroArch/.retroarch/system` on the stock SD card).  
-2. Copy your roms into their respective subfolders in `Roms` (see the *[Emulators](../emulators)* page for more information - here you'll find the [Rom Folders](../emulators/folders) table).
+1. Copy your ROM files into their respective subfolders in `Roms`. See the *[Emulators](../emulators)* page for more information - there you'll find the [Rom Folders](../emulators/folders) table.
+2. If required by your installed emulators, copy the BIOS files into the `BIOS` folder. See Libretro's *[core specific BIOS information](https://docs.libretro.com/library/bios/#links-to-the-core-specific-bios-information)* for more details.
 
 :::info Part of the system
 Despite its name, the `.tmp_update` folder must stay on your SD card.
