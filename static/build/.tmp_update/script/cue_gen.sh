@@ -1,5 +1,7 @@
 #!/bin/sh
-rootdir="/mnt/SDCARD/Roms"
+if [ -z "rootdir" ]; then
+    rootdir="/mnt/SDCARD/Roms"
+fi
 
 if [ $# -gt 0 ]; then
     targets="$1"
