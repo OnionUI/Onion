@@ -12,19 +12,27 @@ cd "$rootdir"
 find $targets -maxdepth 3 -name "*.bin" -type f 2>/dev/null | sort | (
     count=0
 
-    while read target_platform; do
-        dir_path=$(dirname "$target_platform")
-        target_name=$(basename "$target_platform")
+    while read target; do
+        dir_path=$(dirname "$target")
+        target_name=$(basename "$target")
         target_base="${target_name%.*}"
-        cue_path="$dir_path/$target_base.cue"
-
-        # skip if cue already exists - may be better than generated
-        if [ -f "$cue_path" ]; then
-            continue
-        fi
 
         # strip filename of () and trim
         game_name=$(echo "$target_name" | sed -E 's/\(.*\)//g' | sed 's/\..*$//' | sed 's/[[:space:]]*$//')
+        cue_path="$dir_path/$previous_game_name.cue"
+
+        # write cue if next game
+        if ! echo "$game_name" | grep -q "$previous_game_name"; then
+            echo "GAME \"$dir_path/$previous_game_name\""
+            echo "$cue"
+            echo "$cue" >"$cue_path"
+            count=$((count + 1))
+        fi
+
+        # skip if cue already exists - may be better than generated
+        if [ -f "$game_name.cue" ]; then
+            continue
+        fi
 
         # Extract track number if present
         track_number=$(echo "$target_base" | sed -E 's/.*(Track|Disc|Disk) ([0-9]+).*/\2/;t;d')
@@ -41,18 +49,30 @@ find $targets -maxdepth 3 -name "*.bin" -type f 2>/dev/null | sort | (
 
         # skip for non first tracks
         if echo "$track_number" | grep -q '01'; then
-            # rewrite cue
-            cue="FILE \"$game_name\" BINARY
+            # rewrite cue - track 01
+            cue="FILE \"$target\" BINARY
     TRACK $track_number MODE1/2352
         INDEX 01 00:00:00"
-            echo "$cue"
-            echo "$cue" >"$cue_path"
-
-            count=$((count + 1))
+        else
+            # append cue - audio
+            cue="$cue
+FILE \"$target\" BINARY
+    TRACK $track_number AUDIO
+        INDEX 00 00:00:00
+        INDEX 01 00:02:00"
         fi
+
+        previous_game_name="$game_name"
     done
 
-    echo "$count cue $([ $count -eq 1 ] && echo "file" || echo "files") created for $target_platform"
+    # write last cue
+    echo "GAME \"$dir_path/$previous_game_name\""
+    echo "$cue"
+    echo "$cue" >"$cue_path"
+    count=$((count + 1))
+
+    # print totals
+    echo "$count cue $([ $count -eq 1 ] && echo "file" || echo "files") created"
 )
 
 find $targets -maxdepth 1 -type f -name "*_cache6.db" -exec rm -f {} \;
