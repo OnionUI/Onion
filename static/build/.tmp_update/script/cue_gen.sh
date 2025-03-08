@@ -1,5 +1,5 @@
 #!/bin/sh
-if [ -z "rootdir" ]; then
+if [ -z "$rootdir" ]; then
     rootdir="/mnt/SDCARD/Roms"
 fi
 
@@ -21,20 +21,6 @@ find $targets -maxdepth 3 -name "*.bin" -type f 2>/dev/null | sort | (
 
         # strip filename of () and trim
         game_name=$(echo "$target_name" | sed -E 's/\(.*\)//g' | sed 's/\..*$//' | sed 's/[[:space:]]*$//')
-        cue_path="$dir_path/$previous_game_name.cue"
-
-        # write cue if next game
-        if ! echo "$game_name" | grep -q "^$previous_game_name$"; then
-            echo "GAME \"$dir_path/$previous_game_name\""
-            echo "$cue"
-            echo "$cue" >"$cue_path"
-            count=$((count + 1))
-        fi
-
-        # skip if cue already exists - may be better than generated
-        if [ -f "$game_name.cue" ]; then
-            continue
-        fi
 
         # Extract track number if present
         track_number=$(echo "$target_base" | sed -E 's/.*(Track|Disc|Disk) ([0-9]+).*/\2/;t;d')
@@ -49,12 +35,36 @@ find $targets -maxdepth 3 -name "*.bin" -type f 2>/dev/null | sort | (
             track_number="0$track_number"
         fi
 
-        # skip for non first tracks
+        # write cue if next game
+        if ! echo "$game_name" | grep -q "^$previous_game_name$"; then
+            # empty cue
+            if echo "$cue" | grep -q '^$'; then
+                # rewrite cue - track 01
+                cue="FILE \"$previous_target\" BINARY
+    TRACK $track_number MODE1/2352
+        INDEX 01 00:00:00"
+            fi
+
+            cue_path="$dir_path/$previous_game_name.cue"
+
+            echo "GAME \"$dir_path/$previous_game_name\""
+            echo "$cue"
+            echo "$cue" >"$cue_path"
+
+            cue=""
+            count=$((count + 1))
+        fi
+
+        previous_track_number="$track_number"
+        previous_target="$target"
+
+        # for first tracks
         if echo "$track_number" | grep -q '01'; then
             # rewrite cue - track 01
             cue="FILE \"$target\" BINARY
     TRACK $track_number MODE1/2352
         INDEX 01 00:00:00"
+        # for non first tracks
         else
             # append cue - audio
             cue="$cue
@@ -65,12 +75,15 @@ FILE \"$target\" BINARY
         fi
 
         previous_game_name="$game_name"
+
     done
 
-    # write last cue
-    echo "GAME \"$dir_path/$previous_game_name\""
+    cue_path="$dir_path/$previous_game_name.cue"
+
+    echo "GAME y \"$dir_path/$game_name\""
     echo "$cue"
     echo "$cue" >"$cue_path"
+
     count=$((count + 1))
 
     # print totals
