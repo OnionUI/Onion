@@ -18,6 +18,11 @@ find $targets -maxdepth 3 -name "*.bin" -type f 2>/dev/null | sort | (
         target_base="${target_name%.*}"
         cue_path="$dir_path/$target_base.cue"
 
+        # skip if cue already exists - may be better than generated
+        if [ -f "$cue_path" ]; then
+            continue
+        fi
+
         # strip filename of () and trim
         game_name=$(echo "$target_name" | sed -E 's/\(.*\)//g' | sed 's/\..*$//' | sed 's/[[:space:]]*$//')
 
