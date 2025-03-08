@@ -22,7 +22,7 @@ find $targets -maxdepth 3 -name "*.bin" -type f 2>/dev/null | sort | (
         cue_path="$dir_path/$previous_game_name.cue"
 
         # write cue if next game
-        if ! echo "$game_name" | grep -q "$previous_game_name"; then
+        if ! echo "$game_name" | grep -q "^$previous_game_name$"; then
             echo "GAME \"$dir_path/$previous_game_name\""
             echo "$cue"
             echo "$cue" >"$cue_path"
