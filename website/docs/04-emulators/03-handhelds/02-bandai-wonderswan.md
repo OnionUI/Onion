@@ -8,5 +8,5 @@ slug: /emulators/wonderswan
 
 - Emulator: **lr-mednafen-wswan**
 - Rom Folder: `WS`
-- Extensions: `.ws` `.pc2` `.zip` `.7z`
+- Extensions: `.ws` `.wsc` `.pc2` `.zip` `.7z`
 - Bios: None
