@@ -13,7 +13,8 @@ if [ "$1" == "skip_scan" ]; then
 fi
 
 main() {
-    prompt -t "$ui_title" -m "Choose naming scheme" \
+    LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so /mnt/SDCARD/.tmp_update/bin/prompt \
+    -t "$ui_title" -m "Choose naming scheme" \
         "Use database name" \
         "Use database name (no parens)" \
         "Use directory name" \

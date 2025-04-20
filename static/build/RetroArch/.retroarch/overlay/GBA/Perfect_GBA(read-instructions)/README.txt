@@ -17,4 +17,6 @@ The recommended Retroarch settings:
 
     Video Filter > GBA > Filter for overlays > GBAOffset.filt
 
+    (Video filter is not required for Perfect_GBA-Centered)
+
 Thank you to u/1playerinsertcoin and u/mugwomp_93 on Reddit!
