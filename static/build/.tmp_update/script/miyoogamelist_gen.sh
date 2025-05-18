@@ -1,7 +1,6 @@
 #!/bin/sh
 
 rootdir="/mnt/SDCARD/Emu"
-out='miyoogamelist.xml'
 
 clean_name() {
     name="$1"
@@ -37,19 +36,21 @@ clean_name() {
 }
 
 generate_miyoogamelist() {
-    rompath=$1
-    imgpath=$2
-    extlist=$3
+    basepath=$1
+    gamelistpath="$basepath/miyoogamelist.xml"
+    rompath=$2
+    imgpath=$3
+    extlist=$4
 
-    cd "$rompath"
+    cd "$basepath/$rompath"
 
     # create backup of previous miyoogamelist.xml
-    if [ -f "$out" ]; then
-        mv "$out" "$out.bak"
+    if [ -f "$gamelistpath" ]; then
+        mv "$gamelistpath" "$gamelistpath.bak"
     fi
 
-    echo '<?xml version="1.0"?>' >$out
-    echo '<gameList>' >>$out
+    echo '<?xml version="1.0"?>' >"$gamelistpath"
+    echo '<gameList>' >>"$gamelistpath"
 
     for rom in *; do
         # ignore subfolders because miyoogamelist don't work with them
@@ -66,16 +67,16 @@ generate_miyoogamelist() {
         filename="${rom%.*}"
         digest=$(clean_name "$rom" "$extlist")
 
-        cat <<EOF >>$out
+        cat <<EOF >>"$gamelistpath"
     <game>
-        <path>./$rom</path>
+        <path>$rompath/$rom</path>
         <name>$digest</name>
         <image>$imgpath/$filename.png</image>
     </game>
 EOF
     done
 
-    echo '</gameList>' >>$out
+    echo '</gameList>' >>"$gamelistpath"
 }
 
 for system in "$rootdir"/*; do
@@ -91,8 +92,12 @@ for system in "$rootdir"/*; do
         rompath=$(grep -E '"rompath":' config.json | sed -e 's/^.*:\s*"\(.*\)",*/\1/')
         extlist=$(grep -E '"extlist":' config.json | sed -e 's/^.*:\s*"\(.*\)",*/\1/')
         imgpath=$(grep -E '"imgpath":' config.json | sed -e 's/^.*:\s*"\(.*\)",*/\1/')
-        imgpath=".${imgpath#$rompath}"
+        gamelist=$(grep -E '"gamelist":' config.json | sed -e 's/^.*:\s*"\(.*\)",*/\1/')
 
-        generate_miyoogamelist "$rompath" "$imgpath" "$extlist"
+        basepath="${gamelist%/miyoogamelist.xml}"
+        imgpath=".${imgpath#$basepath}"
+        rompath=".${rompath#$basepath}"
+
+        generate_miyoogamelist "$basepath" "$rompath" "$imgpath" "$extlist"
     fi
 done
