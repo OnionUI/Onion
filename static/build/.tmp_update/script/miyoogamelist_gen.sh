@@ -42,8 +42,6 @@ generate_miyoogamelist() {
     imgpath=$3
     extlist=$4
 
-    cd "$basepath/$rompath"
-
     # create backup of previous miyoogamelist.xml
     if [ -f "$gamelistpath" ]; then
         mv "$gamelistpath" "$gamelistpath.bak"
@@ -52,7 +50,7 @@ generate_miyoogamelist() {
     echo '<?xml version="1.0"?>' >"$gamelistpath"
     echo '<gameList>' >>"$gamelistpath"
 
-    for rom in *; do
+    for rom in $basepath/$rompath/*; do
         # ignore subfolders because miyoogamelist don't work with them
         # also ignores Imgs folder, nice
         if [ -d "$rom" ]; then
@@ -64,6 +62,7 @@ generate_miyoogamelist() {
             continue
         fi
 
+        rom="${rom##*/}"
         filename="${rom%.*}"
         digest=$(clean_name "$rom" "$extlist")
 
@@ -89,14 +88,20 @@ for system in "$rootdir"/*; do
         cd "$system"
 
         # read info from config.json
-        rompath=$(grep -E '"rompath":' config.json | sed -e 's/^.*:\s*"\(.*\)",*/\1/')
-        extlist=$(grep -E '"extlist":' config.json | sed -e 's/^.*:\s*"\(.*\)",*/\1/')
-        imgpath=$(grep -E '"imgpath":' config.json | sed -e 's/^.*:\s*"\(.*\)",*/\1/')
         gamelist=$(grep -E '"gamelist":' config.json | sed -e 's/^.*:\s*"\(.*\)",*/\1/')
+        rompath=$(grep -E '"rompath":' config.json | sed -e 's/^.*:\s*"\(.*\)",*/\1/')
+        imgpath=$(grep -E '"imgpath":' config.json | sed -e 's/^.*:\s*"\(.*\)",*/\1/')
+        extlist=$(grep -E '"extlist":' config.json | sed -e 's/^.*:\s*"\(.*\)",*/\1/')
+
+        # some Emu configs do not have the gamelist key, fallback to rompath
+        if [ -z "$gamelist" ]; then
+            gamelist="$rompath"
+        fi
 
         basepath="${gamelist%/miyoogamelist.xml}"
-        imgpath=".${imgpath#$basepath}"
+        # ensure rompath/imgpath are relative to basepath
         rompath=".${rompath#$basepath}"
+        imgpath=".${imgpath#$basepath}"
 
         generate_miyoogamelist "$basepath" "$rompath" "$imgpath" "$extlist"
     fi
