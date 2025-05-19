@@ -145,9 +145,23 @@ void overlay_exit(void)
             pthread_join(autosave_thread_pt, NULL);
         }
 
-        // force kill retroarch
-        temp_flag_set(".forceKillRetroarch", true);
-        system("killall -9 retroarch");
+        // try graceful shutdown first
+        system("killall -TERM retroarch");
+
+        // wait up to 5 seconds for RetroArch to exit
+        for (int i = 0; i < 10; i++) {
+            msleep(500);  // 0.5s x 10 = 5s
+            if (system("pidof retroarch > /dev/null") != 0) {
+                break;  // retroarch is gone
+            }
+        }
+
+        // if still running, force kill
+        if (system("pidof retroarch > /dev/null") == 0) {
+            print_debug("RetroArch still running, force killing...");
+            temp_flag_set(".forceKillRetroarch", true);
+            system("killall -9 retroarch");
+        }
     }
 }
 
