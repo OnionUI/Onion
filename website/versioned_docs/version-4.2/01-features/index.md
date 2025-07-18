@@ -35,7 +35,7 @@ description: Overview of the most important features
 <p align="center"><a href="./apps/shortcuts"><img src={require('../07-apps/01-included-in-onion/assets/shortcuts.webp').default} style={{width: 320}} /></a></p>
 
 :::note <a href="./apps/shortcuts">Shortcuts overview</a>
-The Onion shortcuts are very powerful it allows you quick actions like rewind, fast forward, screenshots, volume boost... 
+The Onion shortcuts are very powerful it allows you quick actions like rewind, fast forward, screenshots, volume boost...
 :::
 
 
@@ -58,7 +58,7 @@ It also allows you to quickly change games and many other features.
 :::note <a href="apps/package-manager">Package Manager overview</a>
 The "Package Manager" app is a powerful tool that allows users to easily install or uninstall emulators and apps.
 :::
- 
+
 
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/189439761-e03a9684-ade4-4dcc-8fdd-c006a1663c05.png" width="54" /></sup>Tweaks
@@ -90,7 +90,7 @@ Search also allows to filter a game list to include only games containing a spec
 
 :::note <a href="apps/theme-switcher">Theme-switcher overview</a>
 Onion loves themes. In Onion themes allow to customize the background, the entry categories, console icons, music bacground, fonts... And best of all, the chosen theme impacts all Onion's internal applications!<br />
-Themes in Onion are two things : <br /> 
+Themes in Onion are two things : <br />
 - [A fabulous theme repository](https://github.com/OnionUI/Themes/blob/main/README.md) with a very active participation from Onion community <sup><sub>❤️</sub></sup>
 - An application called <a href="apps/theme-switcher">Theme-switcher</a> included in Onion which allows to preview and change themes.
 :::
@@ -101,7 +101,7 @@ Themes in Onion are two things : <br />
 <p align="center"><img src={require('./assets/activity-tracker.webp').default} style={{width: 320}} /></p>
 
 :::note <a href="apps/activity-tracker">Activity Tracker overview</a>
-Thanks to `Activity Tracker` app you can : 
+Thanks to `Activity Tracker` app you can :
 - Track your game playtimes.
 - View your total playtime in the top bar.
 - Share your playtimes by taking a screenshot (press <kbd>MENU</kbd>+<kbd>POWER</kbd> - screenshot is saved in `Screenshots` folder).
@@ -117,7 +117,7 @@ Thanks to `Activity Tracker` app you can :
 
 :::note <a href="apps/retroarch">Retroarch overview</a>
 A full Retroarch in a such tiny device ! Retroarch is regularly updated from the offcial repository. Onion benefits to dedicated drivers created by [Eggs](https://discordapp.com/users/778867980096241715) for precision and performance.
-Dedicated customations are also included : all the core are configured with attention to detail, [custom overlays and custom filters](apps/retroarch#customized-overlays-and-filters) made specially for the Miyoo Mini screen. 
+Dedicated customations are also included : all the core are configured with attention to detail, [custom overlays and custom filters](apps/retroarch#customized-overlays-and-filters) made specially for the Miyoo Mini screen.
 :::
 
 ## <sup><img src={require('./assets/optimized.png').default} style={{width: 54}} /></sup>Optimized emulators
@@ -196,7 +196,7 @@ Check the <a href="included-apps">included apps</a> documentation for more infor
 
 :::note <a href="network-features">Network Features</a>
 For the Miyoo Mini Plus (equiped with wifi) Onion offers many additional possibilites :<br />
-- [Multiplayer / Netplay](multiplayer) : play in multiplayer over internet or on you lcoal network to your favorite retro games:
+- [Multiplayer / Netplay](multiplayer) : play in multiplayer over internet or on you local network to your favorite retro games:
 - [Easy Netplay](multiplayer/easynetplay): play multiplayer games anywhere (compatible with GBC/GBC Pokemon trading !)
 - [OTA (Over The Air) updates](apps/ota-update) : update Onion directly from your MMP
 - [Automatic date/time synchronisation](apps/tweaks#set-automatically-via-the-internet) (NTP, via Tweaks app)
@@ -210,7 +210,7 @@ For the Miyoo Mini Plus (equiped with wifi) Onion offers many additional possibi
 
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179305837-59922e34-e18f-45d1-b5fb-89593ee08152.png" width="54" /></sup>Personal files gathered in one place
 
-:::note Personal files 
+:::note Personal files
 Your saves and most of your preferences are now in `/Saves` (Example: `D:/Saves/`).
 This also includes your secondary profile, your config files, RetroArch lists and play activity database.
 Simply copy this folder when you want to backup your data.
@@ -222,16 +222,16 @@ Simply copy this folder when you want to backup your data.
 :::note MainUI improvements
 MainUI is the main interface of Onion provided by Miyoo and modified by Onion Team with these improvements :
 
-- Battery percentage is shown in the top bar  
+- Battery percentage is shown in the top bar
   > You can configure the battery percentage visibility and color in the theme configuration file. It is also possible to make a theme that only shows the percentage text.
-- No more audio lag  
+- No more audio lag
   <sup>Credit: Eggs</sup>
-- New default theme inspired by the Lilla theme by Evolve  
+- New default theme inspired by the Lilla theme by Evolve
   <sup>Credit: DiMo</sup>
 - OnionOS icon by Evolve
-- Textures are compressed for faster results  
+- Textures are compressed for faster results
   <sup>Credit: DiMo</sup>
-- Box art size fix in the included themes  
+- Box art size fix in the included themes
   <sup>Credit: DiMo</sup>
 
 :::
@@ -240,7 +240,7 @@ MainUI is the main interface of Onion provided by Miyoo and modified by Onion Te
 
 ## Others
 - Many additional systems supported
-- Experimental Arduboy support 
+- Experimental Arduboy support
   <sup>Credit: JMARoeder</sup>
 - Boxart moved to `/Roms/[SYSTEM]/Imgs` for easier scraping
 - Various bug fixes and optimizations
