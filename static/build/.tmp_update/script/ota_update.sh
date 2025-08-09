@@ -1,4 +1,4 @@
-#!/bin/sh
+ #!/bin/sh
 # OTA updates for Onion.
 cmd=$1
 sysdir=/mnt/SDCARD/.tmp_update
