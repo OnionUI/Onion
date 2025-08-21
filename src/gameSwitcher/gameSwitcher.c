@@ -87,11 +87,13 @@ static bool isAutoResumedFirstLaunch(void)
 // Handle the autoresume scenario by exiting RetroArch and restarting fresh
 static void handleAutoResumeScenario(void)
 {
-    print_debug("Detected autoresume scenario - performing clean restart");
-    
     // Show a message to the user
     render_showFullscreenMessage("RESTARTING", true);
     msleep(500);
+    
+    // Stop any playActivity first to prevent conflicts
+    system("playActivity stop_all &");
+    msleep(100);
     
     // Gracefully shutdown RetroArch
     system("killall -TERM retroarch");
@@ -106,27 +108,75 @@ static void handleAutoResumeScenario(void)
     
     // Force kill if still running
     if (system("pidof retroarch > /dev/null") == 0) {
-        print_debug("RetroArch still running, force killing...");
+        temp_flag_set(".forceKillRetroarch", true);
         system("killall -9 retroarch");
         msleep(200);
     }
     
-    // Clear any resume flags
+    // Clear any resume flags and command scripts
     remove("/mnt/SDCARD/.tmp_update/.runGameSwitcher");
     remove("/mnt/SDCARD/.tmp_update/cmd_to_run.sh");
     
-    // Set flag to indicate we want to go to menu
-    appState.exit_to_menu = true;
-    appState.quit = true;
-    appState.is_overlay = false;  // Treat as non-overlay mode now
+    // Write a state file to indicate we came from mainui
+    FILE *fp = fopen("/tmp/prev_state", "w");
+    if (fp) {
+        fprintf(fp, "mainui\n");
+        fclose(fp);
+    }
     
-    // Clear the screen
+    // Wait a bit for system to stabilize
+    msleep(500);
+    
+    // Set flag to indicate normal OS mode
+    appState.exit_to_menu = false;  // Don't exit to menu since we're already "from" menu
+    appState.quit = false;           // Don't quit yet
+    appState.is_overlay = false;     // Treat as non-overlay mode now
+    appState.changed = true;
+    appState.first_render = true;    // Force a fresh render cycle
+    
+    // Clear and refresh the screen
     SDL_FillRect(screen, NULL, 0);
     render();
+    
+    // Give the system time to fully release resources
+    msleep(200);
 }
 
 int main(int argc, char *argv[])
 {
+    // Check if another instance is already running
+    FILE *pid_file = fopen("/tmp/gameswitcher.pid", "r");
+    if (pid_file) {
+        int existing_pid;
+        if (fscanf(pid_file, "%d", &existing_pid) == 1) {
+            fclose(pid_file);
+            // Check if the process is actually running
+            char proc_path[256];
+            snprintf(proc_path, sizeof(proc_path), "/proc/%d", existing_pid);
+            if (access(proc_path, F_OK) == 0) {
+                // If launched from OS (no overlay flag), kill the existing instance
+                if (!(argc > 1 && strcmp(argv[1], "--overlay") == 0)) {
+                    kill(existing_pid, SIGTERM);
+                    msleep(500);
+                }
+                else {
+                    // Overlay mode but another instance exists - just exit
+                    return EXIT_SUCCESS;
+                }
+            }
+        }
+        else {
+            fclose(pid_file);
+        }
+    }
+    
+    // Write our PID
+    pid_file = fopen("/tmp/gameswitcher.pid", "w");
+    if (pid_file) {
+        fprintf(pid_file, "%d", getpid());
+        fclose(pid_file);
+    }
+    
     appState.is_overlay = argc > 1 && strcmp(argv[1], "--overlay") == 0;
 
     log_setName("gameSwitcher");
@@ -138,18 +188,19 @@ int main(int argc, char *argv[])
     init(INIT_ALL);
 
     // Check for autoresume scenario BEFORE any game processing
-    if (isAutoResumedFirstLaunch()) {
+    bool was_autoresumed = isAutoResumedFirstLaunch();
+    if (was_autoresumed) {
         handleAutoResumeScenario();
-        
-        // Re-initialize as if launched from OS
-        appState.is_overlay = false;
-        appState.exit_to_menu = false;
-        appState.quit = false;
-        appState.changed = true;
+        // Don't call overlay_init() since we've already cleaned up RetroArch
     }
 
     readFirstEntry();
-    overlay_init();
+    
+    // Only init overlay if NOT from autoresume scenario
+    if (!was_autoresumed) {
+        overlay_init();
+    }
+    
     loadRomScreens();
 
     settings_load();
@@ -303,6 +354,9 @@ int main(int argc, char *argv[])
 
     freeRomScreens();
     ra_freeHistory();
+    
+    // Clean up PID file
+    remove("/tmp/gameswitcher.pid");
 
     deinit();
 
