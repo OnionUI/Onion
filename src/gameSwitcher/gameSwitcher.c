@@ -33,6 +33,98 @@
 #include "gs_overlay.h"
 #include "gs_render.h"
 
+// Check if this is the first GameSwitcher launch after boot with an autoresumed game
+static bool isAutoResumedFirstLaunch(void)
+{
+    // Check for a marker file that indicates GameSwitcher has been launched this session
+    const char *marker_file = "/tmp/.gameswitcher_launched";
+    
+    // Check if we're in overlay mode (launched from a game)
+    if (!appState.is_overlay) {
+        // Not launched from a game, so not an autoresume scenario
+        // Create the marker file for this session
+        FILE *fp = fopen(marker_file, "w");
+        if (fp) {
+            fclose(fp);
+        }
+        return false;
+    }
+    
+    // We're in overlay mode, check if marker exists
+    if (access(marker_file, F_OK) == 0) {
+        // Marker exists, so GameSwitcher was already launched this session
+        // This is a normal game-to-game switch
+        return false;
+    }
+    
+    // We're in overlay mode and no marker exists
+    // This means we're being launched from an autoresumed game after boot
+    
+    // Additional check: verify RetroArch is actually running with content
+    RetroArchStatus_s status;
+    if (retroarch_getStatus(&status) == 0 && 
+        status.state != RETROARCH_STATE_CONTENTLESS && 
+        status.state != RETROARCH_STATE_UNKNOWN) {
+        
+        // Create the marker file now
+        FILE *fp = fopen(marker_file, "w");
+        if (fp) {
+            fclose(fp);
+        }
+        
+        return true;
+    }
+    
+    // Create the marker file anyway
+    FILE *fp = fopen(marker_file, "w");
+    if (fp) {
+        fclose(fp);
+    }
+    
+    return false;
+}
+
+// Handle the autoresume scenario by exiting RetroArch and restarting fresh
+static void handleAutoResumeScenario(void)
+{
+    print_debug("Detected autoresume scenario - performing clean restart");
+    
+    // Show a message to the user
+    render_showFullscreenMessage("RESTARTING", true);
+    msleep(500);
+    
+    // Gracefully shutdown RetroArch
+    system("killall -TERM retroarch");
+    
+    // Wait for RetroArch to exit (up to 5 seconds)
+    for (int i = 0; i < 10; i++) {
+        msleep(500);
+        if (system("pidof retroarch > /dev/null") != 0) {
+            break;  // RetroArch has exited
+        }
+    }
+    
+    // Force kill if still running
+    if (system("pidof retroarch > /dev/null") == 0) {
+        print_debug("RetroArch still running, force killing...");
+        system("killall -9 retroarch");
+        msleep(200);
+    }
+    
+    // Clear any resume flags
+    remove("/mnt/SDCARD/.tmp_update/.runGameSwitcher");
+    remove("/mnt/SDCARD/.tmp_update/cmd_to_run.sh");
+    
+    // Set flag to indicate we want to go to menu
+    appState.exit_to_menu = true;
+    appState.quit = true;
+    appState.is_overlay = false;  // Treat as non-overlay mode now
+    
+    // Clear the screen
+    SDL_FillRect(screen, NULL, 0);
+    render();
+}
+
 int main(int argc, char *argv[])
 {
     appState.is_overlay = argc > 1 && strcmp(argv[1], "--overlay") == 0;
@@ -44,6 +136,17 @@ int main(int argc, char *argv[])
     signal(SIGTERM, sigHandler);
 
     init(INIT_ALL);
+
+    // Check for autoresume scenario BEFORE any game processing
+    if (isAutoResumedFirstLaunch()) {
+        handleAutoResumeScenario();
+        
+        // Re-initialize as if launched from OS
+        appState.is_overlay = false;
+        appState.exit_to_menu = false;
+        appState.quit = false;
+        appState.changed = true;
+    }
 
     readFirstEntry();
     overlay_init();
