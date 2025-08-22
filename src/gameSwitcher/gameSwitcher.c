@@ -87,30 +87,57 @@ static bool isAutoResumedFirstLaunch(void)
 // Handle the autoresume scenario by exiting RetroArch and restarting fresh
 static void handleAutoResumeScenario(void)
 {
-    // Show a message to the user
+    // Stop playActivity immediately to prevent artificial time logging
+    system("playActivity stop_all &");
+    
+    // The screenshot has already been captured and saved before this function was called
+    
+    // Now show the message to the user
     render_showFullscreenMessage("RESTARTING", true);
     msleep(500);
     
-    // Stop any playActivity first to prevent conflicts
-    system("playActivity stop_all &");
-    msleep(100);
+    // Pause retroarch to stop it from updating the display
+    retroarch_pause();
+    msleep(200);  // Give pause time to take effect
     
     // Gracefully shutdown RetroArch
     system("killall -TERM retroarch");
     
-    // Wait for RetroArch to exit (up to 5 seconds)
-    for (int i = 0; i < 10; i++) {
-        msleep(500);
+    // Adaptive wait time - check more frequently at first, then slow down
+    // This handles both fast and slow cores better
+    int wait_count = 0;
+    bool retroarch_exited = false;
+    
+    // First 5 seconds - check every 250ms (fast cores)
+    for (int i = 0; i < 20 && !retroarch_exited; i++) {
+        msleep(250);
         if (system("pidof retroarch > /dev/null") != 0) {
-            break;  // RetroArch has exited
+            retroarch_exited = true;
+            break;
+        }
+        wait_count++;
+    }
+    
+    // Next 5 seconds - check every 500ms (slower cores)
+    if (!retroarch_exited) {
+        for (int i = 0; i < 10; i++) {
+            msleep(500);
+            if (system("pidof retroarch > /dev/null") != 0) {
+                retroarch_exited = true;
+                break;
+            }
+            wait_count++;
         }
     }
     
     // Force kill if still running
-    if (system("pidof retroarch > /dev/null") == 0) {
+    if (!retroarch_exited) {
         temp_flag_set(".forceKillRetroarch", true);
         system("killall -9 retroarch");
-        msleep(200);
+        msleep(1500);  // Extra time after force kill for cleanup
+    } else {
+        // Even if it exited gracefully, give it time to clean up
+        msleep(1000 + (wait_count * 50));  // More wait time for slower cores
     }
     
     // Clear any resume flags and command scripts
@@ -124,22 +151,44 @@ static void handleAutoResumeScenario(void)
         fclose(fp);
     }
     
-    // Wait a bit for system to stabilize
-    msleep(500);
+    // Additional wait to ensure system is fully stabilized
+    // Longer for cases where we had to wait longer for RetroArch
+    msleep(1500 + (wait_count * 100));
+    
+    // Clear any stale input events that accumulated during shutdown
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        // Discard all pending events
+    }
+    
+    // Flush any remaining system messages
+    sync();
     
     // Set flag to indicate normal OS mode
-    appState.exit_to_menu = false;  // Don't exit to menu since we're already "from" menu
-    appState.quit = false;           // Don't quit yet
+    appState.exit_to_menu = false;  // Stay in GameSwitcher
+    appState.quit = false;           // Don't quit
     appState.is_overlay = false;     // Treat as non-overlay mode now
     appState.changed = true;
     appState.first_render = true;    // Force a fresh render cycle
     
-    // Clear and refresh the screen
-    SDL_FillRect(screen, NULL, 0);
-    render();
+    // Reset the game list position
+    appState.current_game = 0;
+    appState.current_game_changed = true;
     
-    // Give the system time to fully release resources
-    msleep(200);
+    // Update the current background to use the fresh screenshot
+    if (game_list_len > 0 && game_list[0].romScreen != NULL) {
+        appState.current_bg = game_list[0].romScreen;
+    }
+    
+    // Clear and refresh the screen multiple times to ensure display sync
+    for (int i = 0; i < 3; i++) {
+        SDL_FillRect(screen, NULL, 0);
+        SDL_Flip(screen);
+        msleep(100);
+    }
+    
+    // Final stabilization delay
+    msleep(500);
 }
 
 int main(int argc, char *argv[])
@@ -189,15 +238,37 @@ int main(int argc, char *argv[])
 
     // Check for autoresume scenario BEFORE any game processing
     bool was_autoresumed = isAutoResumedFirstLaunch();
+    
+    readFirstEntry();
+    
     if (was_autoresumed) {
+        // Capture fresh screenshot BEFORE overlay_init takes the stale one
+        if (game_list_len > 0) {
+            Game_s *game = &game_list[0];
+            
+            // Capture current framebuffer
+            SDL_Surface *fresh_screenshot = SDL_CreateRGBSurface(SDL_SWSURFACE, g_display.width, g_display.height, 32, 0, 0, 0, 0);
+            display_readCurrentBuffer(&g_display, (uint32_t *)fresh_screenshot->pixels, 
+                                    (rect_t){0, 0, g_display.width, g_display.height}, true, false);
+            
+            // Save it immediately
+            char romScreenPath[STR_MAX];
+            uint32_t hash = FNV1A_Pippip_Yurii(game->recentItem.rompath, strlen(game->recentItem.rompath));
+            snprintf(romScreenPath, sizeof(romScreenPath), ROM_SCREENS_DIR "/%" PRIu32 ".png", hash);
+            screenshot_save((uint32_t *)fresh_screenshot->pixels, romScreenPath, false);
+            
+            // Set it as the game's screenshot
+            if (game->romScreen != NULL) {
+                SDL_FreeSurface(game->romScreen);
+            }
+            game->romScreen = fresh_screenshot;
+        }
+        
         handleAutoResumeScenario();
         // Don't call overlay_init() since we've already cleaned up RetroArch
     }
-
-    readFirstEntry();
-    
-    // Only init overlay if NOT from autoresume scenario
-    if (!was_autoresumed) {
+    else {
+        // Normal case - call overlay_init
         overlay_init();
     }
     
