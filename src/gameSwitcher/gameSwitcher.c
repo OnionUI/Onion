@@ -36,50 +36,62 @@
 // Check if this is the first GameSwitcher launch after boot with an autoresumed game
 static bool isAutoResumedFirstLaunch(void)
 {
-    // Check for a marker file that indicates GameSwitcher has been launched this session
-    const char *marker_file = "/tmp/.gameswitcher_launched";
+    // Check for our autoresume marker that indicates system shut down with a game running
+    const char *autoresume_marker = "/mnt/SDCARD/.tmp_update/.autoresume_pending";
+    // Session marker in /tmp
+    const char *session_marker = "/tmp/.gameswitcher_launched";
     
     // Check if we're in overlay mode (launched from a game)
     if (!appState.is_overlay) {
         // Not launched from a game, so not an autoresume scenario
-        // Create the marker file for this session
-        FILE *fp = fopen(marker_file, "w");
+        // Create the session marker
+        FILE *fp = fopen(session_marker, "w");
         if (fp) {
             fclose(fp);
         }
+        // Clean up autoresume marker since we're starting fresh from OS
+        remove(autoresume_marker);
         return false;
     }
     
-    // We're in overlay mode, check if marker exists
-    if (access(marker_file, F_OK) == 0) {
-        // Marker exists, so GameSwitcher was already launched this session
+    // We're in overlay mode, check if this session already launched GameSwitcher
+    if (access(session_marker, F_OK) == 0) {
+        // GameSwitcher was already launched this session
         // This is a normal game-to-game switch
         return false;
     }
     
-    // We're in overlay mode and no marker exists
-    // This means we're being launched from an autoresumed game after boot
+    // First launch from a game this session
+    // Check if we have the autoresume marker
+    bool is_autoresume = (access(autoresume_marker, F_OK) == 0);
     
-    // Additional check: verify RetroArch is actually running with content
-    RetroArchStatus_s status;
-    if (retroarch_getStatus(&status) == 0 && 
-        status.state != RETROARCH_STATE_CONTENTLESS && 
-        status.state != RETROARCH_STATE_UNKNOWN) {
-        
-        // Create the marker file now
-        FILE *fp = fopen(marker_file, "w");
-        if (fp) {
-            fclose(fp);
+    if (is_autoresume) {
+        // Verify RetroArch is actually running with content
+        RetroArchStatus_s status;
+        if (retroarch_getStatus(&status) == 0 && 
+            status.state != RETROARCH_STATE_CONTENTLESS && 
+            status.state != RETROARCH_STATE_UNKNOWN) {
+            
+            // This is a true autoresume scenario
+            // Create the session marker and remove the autoresume marker
+            FILE *fp = fopen(session_marker, "w");
+            if (fp) {
+                fclose(fp);
+            }
+            remove(autoresume_marker);
+            
+            return true;
         }
-        
-        return true;
     }
     
-    // Create the marker file anyway
-    FILE *fp = fopen(marker_file, "w");
+    // Not an autoresume - just a manual game launch
+    // Create the session marker
+    FILE *fp = fopen(session_marker, "w");
     if (fp) {
         fclose(fp);
     }
+    // Clean up autoresume marker if it somehow exists
+    remove(autoresume_marker);
     
     return false;
 }
@@ -390,6 +402,8 @@ int main(int argc, char *argv[])
         print_debug("Exiting to menu");
         remove("/mnt/SDCARD/.tmp_update/.runGameSwitcher");
         remove("/mnt/SDCARD/.tmp_update/cmd_to_run.sh");
+        // Remove autoresume marker since we're exiting to menu (not to a game)
+        remove("/mnt/SDCARD/.tmp_update/.autoresume_pending");
         overlay_exit();
         SDL_FillRect(screen, NULL, 0);
         render();
@@ -399,11 +413,27 @@ int main(int argc, char *argv[])
             SDL_FillRect(screen, NULL, 0);
             renderCentered(appState.current_bg, VIEW_FULLSCREEN, NULL, NULL);
         }
+        
+        // Create autoresume marker since we're going back to a game
+        // If the system shuts down now, it will autoresume this game
+        FILE *fp = fopen("/mnt/SDCARD/.tmp_update/.autoresume_pending", "w");
+        if (fp) {
+            fclose(fp);
+        }
+        
         overlay_resume();
     }
     else {
         printf_debug("Resuming game - current_game : %i - index: %i", appState.current_game, game_list[appState.current_game].index);
         resumeGame(game_list[appState.current_game].index);
+        
+        // Create autoresume marker since we're launching a game
+        // If the system shuts down now, it will autoresume this game
+        FILE *fp = fopen("/mnt/SDCARD/.tmp_update/.autoresume_pending", "w");
+        if (fp) {
+            fclose(fp);
+        }
+        
         overlay_exit();
         render_showFullscreenMessage("LOADING", true);
     }
