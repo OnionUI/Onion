@@ -2,7 +2,7 @@
 
 TARGET=Onion
 VERSION=4.4.0-beta2
-RA_SUBVERSION=1.20.0
+RA_SUBVERSION=1.21.0
 
 ###########################################################
 
