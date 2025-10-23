@@ -216,6 +216,20 @@ void menu_system(void *_)
                                      .action = action_setLowBatteryAutoSave},
                                  "Set the battery percentage at which the\n"
                                  "system should save and exit RetroArch.");
+        // Flip-specific: Lid close action
+        if (DEVICE_ID == MIYOO285) {
+            list_addItemWithInfoNote(&_menu_system,
+                                     (ListItem){
+                                         .label = "Lid close action",
+                                         .item_type = MULTIVALUE,
+                                         .value_max = 2,
+                                         .value_labels = {"Suspend", "Shutdown", "Nothing"},
+                                         .value = settings.lid_close_action,
+                                         .action = action_setLidCloseAction},
+                                     "Choose what happens when \n"
+                                     "you close the lid."
+                                     );
+        }
         list_addItemWithInfoNote(&_menu_system,
                                  (ListItem){
                                      .label = "Vibration intensity",

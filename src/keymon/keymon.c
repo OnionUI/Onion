@@ -1010,13 +1010,26 @@ int main(void)
                     current_lid_state != last_lid_state) {
                     
                     if (current_lid_state == 0) {
-                        // Lid closed - trigger suspend
-                        print_debug("Lid closed detected, suspending...");
-                        if (settings.disable_standby) {
-                            deepsleep();
-                        }
-                        else {
-                            turnOffScreen();
+                        // Lid closed - perform action based on settings
+                        printf_debug("Lid closed detected, action: %d", settings.lid_close_action);
+                        
+                        switch (settings.lid_close_action) {
+                            case 0: // Suspend
+                                if (settings.disable_standby) {
+                                    deepsleep();
+                                }
+                                else {
+                                    turnOffScreen();
+                                }
+                                break;
+                            case 1:
+                                sync();
+                                print_debug("Shutting down due to lid close");
+                                system("shutdown");
+                                break;
+                            case 2:
+                                print_debug("Lid close action: Nothing");
+                                break;
                         }
                     }
                     else {
