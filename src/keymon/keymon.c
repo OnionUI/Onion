@@ -58,6 +58,9 @@ const int KONAMI_CODE[] = {HW_BTN_UP, HW_BTN_UP, HW_BTN_DOWN, HW_BTN_DOWN,
                            HW_BTN_B, HW_BTN_A};
 const int KONAMI_CODE_LENGTH = sizeof(KONAMI_CODE) / sizeof(KONAMI_CODE[0]);
 
+// Forward declarations
+int read_lid_state(void);
+
 void takeScreenshot(void)
 {
     super_short_pulse();
@@ -273,11 +276,21 @@ void suspend_exec(int timeout)
     }
     rumble(0);
     display_setBrightnessRaw(0);
-    display_off();
+    
+    // Use hardware screen blanking for better power saving on flip devices
+    if (DEVICE_ID == MIYOO285) {
+        display_blank();
+    }
+    else {
+        display_off();
+    }
+    
     system_powersave_on();
 
     uint32_t repeat_power = 0;
     uint32_t killexit = 0;
+    int lid_check_counter = 0;
+    int suspend_lid_state = read_lid_state(); // Store initial lid state
 
     while (1) {
         int ready = poll(fds, 1, timeout);
@@ -310,11 +323,28 @@ void suspend_exec(int timeout)
             }
         }
         else if (!ready && !battery_isCharging()) {
-            // shutdown
-            system_powersave_off();
-            resume();
-            usleep(150000);
-            deepsleep();
+            // Check lid state on flip devices before shutdown
+            if (DEVICE_ID == MIYOO285) {
+                lid_check_counter++;
+                if (lid_check_counter >= 5) { // Check every ~2.5 seconds
+                    lid_check_counter = 0;
+                    int current_lid = read_lid_state();
+                    if (current_lid == 1 && suspend_lid_state == 0) {
+                        printf_debug("Lid opened during suspend, waking up\n");
+                        break;
+                    }
+                    suspend_lid_state = current_lid;
+                }
+            }
+            
+            // Original timeout shutdown behavior
+            if (!ready && !battery_isCharging()) {
+                // shutdown
+                system_powersave_off();
+                resume();
+                usleep(150000);
+                deepsleep();
+            }
         }
     }
 
@@ -326,9 +356,25 @@ void suspend_exec(int timeout)
         suspend(2);
         usleep(400000);
     }
-    display_on();
+    
+    // Restore display with proper unblanking on flip devices
+    if (DEVICE_ID == MIYOO285) {
+        display_unblank();
+    }
+    else {
+        display_on();
+    }
+    
     display_setBrightness(settings.brightness);
     setVolume(settings.mute ? 0 : settings.volume);
+    
+    // Clear input buffer to prevent buffered keypresses from affecting menu
+    // This fixes the bug where menu wouldn't work after suspend
+    struct input_event flush_ev;
+    while (read(input_fd, &flush_ev, sizeof(flush_ev)) > 0) {
+        // Drain any pending events
+    }
+    
     if (!killexit) {
         // resume processes
         resume();
@@ -419,6 +465,32 @@ static void signal_refresh(int sig)
 }
 
 //
+//    Read lid state for Miyoo Mini Flip
+//    Returns: 1 if lid is open, 0 if lid is closed, -1 on error
+//
+int read_lid_state(void)
+{
+    if (DEVICE_ID != MIYOO285) {
+        return -1; // Not a flip device
+    }
+    
+    FILE *fp = fopen("/sys/devices/soc0/soc/soc:hall-mh248/hallvalue", "r");
+    if (!fp) {
+        return -1; // Error reading lid state
+    }
+    
+    char buf[2];
+    size_t read_bytes = fread(buf, 1, 1, fp);
+    fclose(fp);
+    
+    if (read_bytes != 1) {
+        return -1;
+    }
+    
+    return (buf[0] == '1') ? 1 : 0;  // '1' = open, '0' = closed
+}
+
+//
 //    Main
 //
 int main(void)
@@ -477,6 +549,12 @@ int main(void)
     int hibernate_start = ticks;
     int hibernate_time;
     int elapsed_sec = 0;
+
+    // Lid state tracking for Miyoo Mini Flip
+    int last_lid_state = -1;
+    int current_lid_state = -1;
+    int lid_poll_counter = 0;
+    const int LID_POLL_INTERVAL = 10; // Poll lid every ~500ms (CHECK_SEC/30 intervals)
 
     bool delete_flag = false;
     bool settings_changed = false;
@@ -918,6 +996,37 @@ int main(void)
         // Check bluelight filter
         if (settings.blue_light_schedule) {
             system("/mnt/SDCARD/.tmp_update/script/blue_light.sh check");
+        }
+
+        // Check lid state for Miyoo Mini Flip
+        if (DEVICE_ID == MIYOO285) {
+            lid_poll_counter++;
+            if (lid_poll_counter >= LID_POLL_INTERVAL) {
+                lid_poll_counter = 0;
+                current_lid_state = read_lid_state();
+                
+                // Detect lid state change
+                if (current_lid_state != -1 && last_lid_state != -1 && 
+                    current_lid_state != last_lid_state) {
+                    
+                    if (current_lid_state == 0) {
+                        // Lid closed - trigger suspend
+                        printf_debug("Lid closed detected, suspending...\n");
+                        if (settings.disable_standby) {
+                            deepsleep();
+                        }
+                        else {
+                            turnOffScreen();
+                        }
+                    }
+                    else {
+                        // Lid opened - resume handled by suspend_exec
+                        printf_debug("Lid opened detected\n");
+                    }
+                }
+                
+                last_lid_state = current_lid_state;
+            }
         }
 
         // Quit RetroArch / auto-save when battery too low
