@@ -68,3 +68,5 @@ src/**/pippi
 !pippi/
 src/**/cpuclock
 !cpuclock/
+
+plan.md

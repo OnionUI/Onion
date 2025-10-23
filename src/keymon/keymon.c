@@ -368,6 +368,7 @@ void cpuClockHotkey(int adjust)
     int min_cpu_clock = 500; // ?
     int max_cpu_clock;
     switch (DEVICE_ID) {
+    case MIYOO285:
     case MIYOO354:
         max_cpu_clock = 1800;
         break;
@@ -430,7 +431,7 @@ int main(void)
 
     getDeviceModel();
 
-    if (DEVICE_ID == MIYOO354) {
+    if (DEVICE_ID == MIYOO285 || DEVICE_ID == MIYOO354) {
         // set hardware poweroff time to 10s
         axp_write(0x36, axp_read(0x36) | 3);
     }
@@ -618,8 +619,8 @@ int main(void)
                             setVolumeRaw(0, -3);
                         break;
                     case SELECT:
-                        if (DEVICE_ID == MIYOO354)
-                            break; // disable this shortcut for MMP
+                        if (DEVICE_ID == MIYOO285 || DEVICE_ID == MIYOO354)
+                            break; // disable this shortcut for MMP/MMF
                         // SELECT + L2 : brightness down
                         if (config_flag_get(".altBrightness"))
                             break;
@@ -656,8 +657,8 @@ int main(void)
                             setVolumeRaw(0, +3);
                         break;
                     case SELECT:
-                        if (DEVICE_ID == MIYOO354)
-                            break; // disable this shortcut for MMP
+                        if (DEVICE_ID == MIYOO285 || DEVICE_ID == MIYOO354)
+                            break; // disable this shortcut for MMP/MMF
                         // SELECT + R2 : brightness up
                         if (config_flag_get(".altBrightness"))
                             break;

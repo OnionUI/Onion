@@ -108,7 +108,7 @@ void action_resetMainUI(void *pt)
     sprintf(cmd_str, "cp /mnt/SDCARD/.tmp_update/res/miyoo%d_system.json /mnt/SDCARD/system.json", DEVICE_ID);
     system(cmd_str);
 
-    if (DEVICE_ID == MIYOO354) {
+    if (DEVICE_ID == MIYOO285 || DEVICE_ID == MIYOO354) {
         system("rm -f /appconfigs/wpa_supplicant.conf");
         system("cp /mnt/SDCARD/.tmp_update/res/wpa_supplicant.reset /appconfigs/wpa_supplicant.conf");
     }

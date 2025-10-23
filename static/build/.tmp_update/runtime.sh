@@ -8,13 +8,20 @@ logfile=$(basename "$0" .sh)
 . $sysdir/script/log.sh
 
 MODEL_MM=283
+MODEL_MMF=285
 MODEL_MMP=354
 screen_resolution="640x480"
 
 main() {
-    # Set model ID
-    axp 0 > /dev/null
-    export DEVICE_ID=$([ $? -eq 0 ] && echo $MODEL_MMP || echo $MODEL_MM)
+    # Set model ID based on hardware detection
+    # Priority: MMF (285) -> MMP (354) -> MM (283)
+    if [ -e /dev/input/event1 ]; then
+        export DEVICE_ID=$MODEL_MMF
+    elif axp 0 > /dev/null 2>&1; then
+        export DEVICE_ID=$MODEL_MMP
+    else
+        export DEVICE_ID=$MODEL_MM
+    fi
     echo -n "$DEVICE_ID" > /tmp/deviceModel
 
     SERIAL_NUMBER=$(read_uuid)
@@ -45,7 +52,7 @@ main() {
     # Check is charging
     if [ $DEVICE_ID -eq $MODEL_MM ]; then
         is_charging=$(cat /sys/devices/gpiochip0/gpio/gpio59/value)
-    elif [ $DEVICE_ID -eq $MODEL_MMP ]; then
+    elif [ $DEVICE_ID -eq $MODEL_MMF ] || [ $DEVICE_ID -eq $MODEL_MMP ]; then
         axp_status="0x$(axp 0 | cut -d':' -f2)"
         is_charging=$([ $(($axp_status & 0x4)) -eq 4 ] && echo 1 || echo 0)
     fi
@@ -100,9 +107,11 @@ main() {
         rm -f "$sysdir/cmd_to_run.sh" 2> /dev/null
     fi
 
-    if [ $DEVICE_ID -eq $MODEL_MMP ] && [ -f /mnt/SDCARD/RetroArch/retroarch_miyoo354 ]; then
-        # Mount miyoo354 RA version
-        mount -o bind /mnt/SDCARD/RetroArch/retroarch_miyoo354 /mnt/SDCARD/RetroArch/retroarch
+    if [ $DEVICE_ID -eq $MODEL_MMF ] || [ $DEVICE_ID -eq $MODEL_MMP ]; then
+        if [ -f /mnt/SDCARD/RetroArch/retroarch_miyoo354 ]; then
+            # Mount miyoo354 RA version
+            mount -o bind /mnt/SDCARD/RetroArch/retroarch_miyoo354 /mnt/SDCARD/RetroArch/retroarch
+        fi
     fi
 
     # Bind arcade name library to customer path
@@ -722,8 +731,10 @@ init_system() {
     ip addr add 127.0.0.1/8 dev lo
     ifconfig lo up
 
-    if [ $DEVICE_ID -eq $MODEL_MMP ] && [ -f $sysdir/config/.lcdvolt ]; then
-        $sysdir/script/lcdvolt.sh 2> /dev/null
+    if [ $DEVICE_ID -eq $MODEL_MMF ] || [ $DEVICE_ID -eq $MODEL_MMP ]; then
+        if [ -f $sysdir/config/.lcdvolt ]; then
+            $sysdir/script/lcdvolt.sh 2> /dev/null
+        fi
     fi
 
     start_audioserver

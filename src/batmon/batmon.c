@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
                 // Charging just started
                 lowest_percentage_after_charge = 500; // Reset lowest percentage before charge
                 is_charging = true;
-                if (DEVICE_ID == MIYOO354) {
+                if (DEVICE_ID == MIYOO285 || DEVICE_ID == MIYOO354) {
                     current_percentage = getBatPercMMP();
                     // To solve : Sometimes getBatPercMMP returns 1735289191
                     current_percentage = (current_percentage > 100) ? old_percentage : current_percentage;
@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
                 current_percentage = batteryPercentage(adc_value_g);
                 saveFakeAxpResult(current_percentage);
             }
-            else if (DEVICE_ID == MIYOO354) {
+            else if (DEVICE_ID == MIYOO285 || DEVICE_ID == MIYOO354) {
                 current_percentage = getBatPercMMP();
             }
             update_current_duration();
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
                         current_percentage = lowest_percentage_after_charge;
                     }
                 }
-                else if (DEVICE_ID == MIYOO354) {
+                else if (DEVICE_ID == MIYOO285 || DEVICE_ID == MIYOO354) {
                     current_percentage = getBatPercMMP();
                     // To solve : Sometimes getBatPercMMP returns 1735289191
                     current_percentage = (current_percentage > 100) ? old_percentage : current_percentage;
