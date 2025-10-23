@@ -502,6 +502,8 @@ int main(void)
     log_setName("keymon");
 
     getDeviceModel();
+    
+    printf_debug("Device detected: DEVICE_ID=%d (283=MM, 285=Flip, 354=Plus)", DEVICE_ID);
 
     if (DEVICE_ID == MIYOO285 || DEVICE_ID == MIYOO354) {
         // set hardware poweroff time to 10s
@@ -554,7 +556,20 @@ int main(void)
     int last_lid_state = -1;
     int current_lid_state = -1;
     int lid_poll_counter = 0;
-    const int LID_POLL_INTERVAL = 10; // Poll lid every ~500ms (CHECK_SEC/30 intervals)
+    const int LID_POLL_INTERVAL = 10;
+
+    if (DEVICE_ID == MIYOO285) {
+        last_lid_state = read_lid_state();
+        current_lid_state = last_lid_state;
+        if (last_lid_state == -1) {
+            // Fallback: assume open if read fails
+            print_debug("Warning: Unable to read lid state, assuming open");
+            last_lid_state = 1;
+            current_lid_state = 1;
+        } else {
+            printf_debug("Initial lid state: %s", last_lid_state == 1 ? "open" : "closed");
+        }
+    }
 
     bool delete_flag = false;
     bool settings_changed = false;
@@ -1005,12 +1020,14 @@ int main(void)
                 lid_poll_counter = 0;
                 current_lid_state = read_lid_state();
                 
-                // Detect lid state change
+                if (current_lid_state != last_lid_state) {
+                    printf_debug("Lid state change: %d -> %d", last_lid_state, current_lid_state);
+                }
+                
                 if (current_lid_state != -1 && last_lid_state != -1 && 
                     current_lid_state != last_lid_state) {
                     
                     if (current_lid_state == 0) {
-                        // Lid closed - perform action based on settings
                         printf_debug("Lid closed detected, action: %d", settings.lid_close_action);
                         
                         switch (settings.lid_close_action) {
@@ -1022,12 +1039,12 @@ int main(void)
                                     turnOffScreen();
                                 }
                                 break;
-                            case 1:
+                            case 1: // Shutdown
                                 sync();
                                 print_debug("Shutting down due to lid close");
                                 system("shutdown");
                                 break;
-                            case 2:
+                            case 2: // Nothing
                                 print_debug("Lid close action: Nothing");
                                 break;
                         }

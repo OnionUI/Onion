@@ -15,14 +15,23 @@ screen_resolution="640x480"
 main() {
     # Set model ID based on hardware detection
     # Priority: MMF (285) -> MMP (354) -> MM (283)
-    if [ -e /dev/input/event1 ]; then
+    # Check for hall sensor (more reliable than event1) OR event1
+    log "Device detection: checking for Flip..."
+    if [ -e /sys/devices/soc0/soc/soc:hall-mh248/hallvalue ]; then
+        log "Found hall sensor - Miyoo Mini Flip (285)"
+        export DEVICE_ID=$MODEL_MMF
+    elif [ -e /dev/input/event1 ]; then
+        log "Found event1 - Miyoo Mini Flip (285)"
         export DEVICE_ID=$MODEL_MMF
     elif axp 0 > /dev/null 2>&1; then
+        log "Found axp - Miyoo Mini Plus (354)"
         export DEVICE_ID=$MODEL_MMP
     else
+        log "No special hardware - Miyoo Mini original (283)"
         export DEVICE_ID=$MODEL_MM
     fi
     echo -n "$DEVICE_ID" > /tmp/deviceModel
+    log "Device ID set to: $DEVICE_ID"
 
     SERIAL_NUMBER=$(read_uuid)
     echo -n "$SERIAL_NUMBER" > /tmp/deviceSN

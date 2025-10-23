@@ -143,7 +143,8 @@ cleanup() {
 DEVICE_ID=0
 
 check_device_model() {
-    if [ -e /dev/input/event1 ]; then
+    # Check for hall sensor (more reliable) OR event1 for Flip detection
+    if [ -e /sys/devices/soc0/soc/soc:hall-mh248/hallvalue ] || [ -e /dev/input/event1 ]; then
         DEVICE_ID=$MODEL_MMF
     elif [ -f /customer/app/axp_test ]; then
         DEVICE_ID=$MODEL_MMP
