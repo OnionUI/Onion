@@ -508,7 +508,7 @@ void display_blank(void)
     if (fp) {
         fprintf(fp, "GUI_SHOW 0 off");
         fclose(fp);
-        printf_debug("Screen blanked via mi_fb0\n");
+        print_debug("Screen blanked via mi_fb0");
     }
     else {
         // Fallback to standard display_off if mi_fb not available
@@ -522,7 +522,7 @@ void display_unblank(void)
     if (fp) {
         fprintf(fp, "GUI_SHOW 0 on");
         fclose(fp);
-        printf_debug("Screen unblanked via mi_fb0\n");
+        print_debug("Screen unblanked via mi_fb0");
     }
     else {
         // Fallback to standard display_on if mi_fb not available

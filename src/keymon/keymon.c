@@ -330,7 +330,7 @@ void suspend_exec(int timeout)
                     lid_check_counter = 0;
                     int current_lid = read_lid_state();
                     if (current_lid == 1 && suspend_lid_state == 0) {
-                        printf_debug("Lid opened during suspend, waking up\n");
+                        print_debug("Lid opened during suspend, waking up");
                         break;
                     }
                     suspend_lid_state = current_lid;
@@ -1011,7 +1011,7 @@ int main(void)
                     
                     if (current_lid_state == 0) {
                         // Lid closed - trigger suspend
-                        printf_debug("Lid closed detected, suspending...\n");
+                        print_debug("Lid closed detected, suspending...");
                         if (settings.disable_standby) {
                             deepsleep();
                         }
@@ -1021,7 +1021,7 @@ int main(void)
                     }
                     else {
                         // Lid opened - resume handled by suspend_exec
-                        printf_debug("Lid opened detected\n");
+                        print_debug("Lid opened detected");
                     }
                 }
                 
