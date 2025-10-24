@@ -335,16 +335,14 @@ void suspend_exec(int timeout)
                     }
                     suspend_lid_state = current_lid;
                 }
+                continue;
             }
             
-            // Original timeout shutdown behavior
-            if (!ready && !battery_isCharging()) {
-                // shutdown
-                system_powersave_off();
-                resume();
-                usleep(150000);
-                deepsleep();
-            }
+            // Original timeout shutdown behavior (non-flip devices)
+            system_powersave_off();
+            resume();
+            usleep(150000);
+            deepsleep();
         }
     }
 

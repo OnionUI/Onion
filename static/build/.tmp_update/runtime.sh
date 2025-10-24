@@ -8,13 +8,13 @@ logfile=$(basename "$0" .sh)
 . $sysdir/script/log.sh
 
 MODEL_MM=283
+MODEL_MMF=285
 MODEL_MMP=354
 screen_resolution="640x480"
 
 main() {
     # Set model ID based on hardware detection
-    # Priority: MMF (285) -> MMP (354) -> MM (283)
-    if [ -e /dev/input/event1 ]; then
+    if [ -e /sys/devices/soc0/soc/soc:hall-mh248/hallvalue ] || [ -e /dev/input/event1 ]; then
         export DEVICE_ID=$MODEL_MMF
     elif axp 0 > /dev/null 2>&1; then
         export DEVICE_ID=$MODEL_MMP
