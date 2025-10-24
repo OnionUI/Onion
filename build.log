@@ -1,4 +1,0 @@
-docker run --rm -v "/home/kurt/Onion":/root/workspace aemiii91/miyoomini-toolchain:latest /bin/bash -c "source /root/.bashrc; make dev"
-
-:: Onion -> clean
-[1;34m:: Onion -> /root/workspace/cache/.setup[0m

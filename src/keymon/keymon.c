@@ -326,7 +326,7 @@ void suspend_exec(int timeout)
             // Check lid state on flip devices before shutdown
             if (DEVICE_ID == MIYOO285) {
                 lid_check_counter++;
-                if (lid_check_counter >= 5) { // Check every ~2.5 seconds
+                if (lid_check_counter >= 5) {
                     lid_check_counter = 0;
                     int current_lid = read_lid_state();
                     if (current_lid == 1 && suspend_lid_state == 0) {
@@ -369,16 +369,13 @@ void suspend_exec(int timeout)
     setVolume(settings.mute ? 0 : settings.volume);
     
     // Clear input buffer to prevent buffered keypresses from affecting menu
-    // This fixes the bug where menu wouldn't work after suspend
     struct input_event flush_ev;
     while (read(input_fd, &flush_ev, sizeof(flush_ev)) > 0) {
         // Drain any pending events
     }
     
     if (!killexit) {
-        // resume processes
         resume();
-        // resume playActivity
         system("playActivity resume");
     }
 
@@ -471,7 +468,7 @@ static void signal_refresh(int sig)
 int read_lid_state(void)
 {
     if (DEVICE_ID != MIYOO285) {
-        return -1; // Not a flip device
+        return -1; // Not a flip
     }
     
     FILE *fp = fopen("/sys/devices/soc0/soc/soc:hall-mh248/hallvalue", "r");
