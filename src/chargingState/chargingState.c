@@ -199,7 +199,7 @@ int main(void)
 
         if (!suspended) {
             if (ticks - display_timer >= DISPLAY_TIMEOUT) {
-                if (DEVICE_ID == MIYOO354) {
+                if (DEVICE_ID == MIYOO285 || DEVICE_ID == MIYOO354) {
                     quit = true;
                     turn_off = true;
                     break;

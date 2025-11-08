@@ -1,0 +1,17 @@
+{
+	"vol":	10,
+	"keymap":	"L2,L,R2,R,X,A,B,Y",
+	"mute":	0,
+	"bgmvol":	20,
+	"brightness":	7,
+	"language":	"en.lang",
+	"hibernate":	5,
+	"lumination":	10,
+	"hue":	10,
+	"saturation":	10,
+	"contrast":	10,
+	"theme":	"/mnt/SDCARD/Themes/Silky by DiMo/",
+	"fontsize":	24,
+	"audiofix":	1,
+	"wifi":	0
+}
