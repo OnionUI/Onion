@@ -57,7 +57,14 @@ cores_configurator() {
 
 romdirname=$(echo "$1" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
 if [ "$romdirname" == "GB" ] || [ "$romdirname" == "GBC" ]; then
-	EasyNetplayPokemon="Easy Netplay - Pokemon Trade/Battle"
+	EasyNetplayPokemon="Easy Netplay - Pokemon Trade/Battle GB/GBC"
+	EasyNetplayPokemonScriptHost="$sysdir/script/netplay/easy-netplay_server_pokemon.sh"
+	EasyNetplayPokemonClientHost="$sysdir/script/netplay/easy-netplay_client_pokemon.sh"
+fi
+if [ "$romdirname" == "GBA" ]; then
+	EasyNetplayPokemon="Easy Netplay - Pokemon Trade/Battle GBA"
+	EasyNetplayPokemonScriptHost="$sysdir/script/netplay/easy-netplay_server_pokemon_GBA.sh"
+	EasyNetplayPokemonClientHost="$sysdir/script/netplay/easy-netplay_client_pokemon_GBA.sh"
 fi
 # Netplay mode main script:
 cd $sysdir
@@ -86,7 +93,7 @@ if [ $retcode -eq 0 ]; then
 	elif [ $retcode -eq 1 ]; then
 		/bin/sh "$sysdir/script/netplay/easy-netplay_server.sh"
 	elif [ $retcode -eq 2 ]; then
-		/bin/sh "$sysdir/script/netplay/easy-netplay_server_pokemon.sh"
+		/bin/sh "$EasyNetplayPokemonScriptHost"
 	elif [ $retcode -eq 255 ]; then
 		exit
 	fi
@@ -104,7 +111,7 @@ elif [ $retcode -eq 1 ]; then
 	elif [ $retcode -eq 1 ]; then
 		/bin/sh "$sysdir/script/netplay/easy-netplay_client.sh"
 	elif [ $retcode -eq 2 ]; then
-		/bin/sh "$sysdir/script/netplay/easy-netplay_client_pokemon.sh"
+		/bin/sh "$EasyNetplayPokemonClientHost"
 	elif [ $retcode -eq 255 ]; then
 		exit
 	fi
