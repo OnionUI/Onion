@@ -1,0 +1,22 @@
+{
+	"88":	"SELECCIONAR",
+	"89":	"TORNAR",
+	"90":	"NAVEGAR",
+	"91":	"MENÚ",
+	"92":	"Contunhar",
+	"93":	"Salvar",
+	"94":	"Cargar",
+	"95":	"Volum",
+	"96":	"Quitar lo menú",
+	"97":	"Estat %d/%d",
+	"98":	"Void",
+	"99":	"Cap de miniatura",
+	"100":	"Fracàs del cargament",
+	"101":	"Fracàs de la salvagarda",
+	"102":	"Emplaçament %d salvat",
+	"103":  "Ecran complèt",
+	"104":  "Actiu",
+	"105":  "Inactiu",
+	"106":  "Avançat",
+  "138":  "Jòc en ret"	
+}
