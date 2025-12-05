@@ -40,6 +40,8 @@ static bool isAutoResumedFirstLaunch(void)
     const char *autoresume_marker = "/mnt/SDCARD/.tmp_update/.autoresume_pending";
     // Session marker in /tmp
     const char *session_marker = "/tmp/.gameswitcher_launched";
+    // Reset marker created by reset_game function
+    const char *reset_marker = "/mnt/SDCARD/.tmp_update/reset_marker";
     
     // Check if we're in overlay mode (launched from a game)
     if (!appState.is_overlay) {
@@ -51,6 +53,7 @@ static bool isAutoResumedFirstLaunch(void)
         }
         // Clean up autoresume marker since we're starting fresh from OS
         remove(autoresume_marker);
+        remove(reset_marker);
         return false;
     }
     
@@ -58,11 +61,11 @@ static bool isAutoResumedFirstLaunch(void)
     if (access(session_marker, F_OK) == 0) {
         // GameSwitcher was already launched this session
         // BUT check if this is a reset game scenario
-        // The reset.cfg file indicates a game was reset
-        if (access("/tmp/reset.cfg", F_OK) == 0) {
+        // The reset_marker file indicates a game was reset
+        if (access(reset_marker, F_OK) == 0) {
             // This is a reset game scenario - treat like autoresume
-            // Remove the reset config so we don't trigger again
-            remove("/tmp/reset.cfg");
+            // Remove the reset marker so we don't trigger again
+            remove(reset_marker);
             return true;
         }
         
@@ -73,7 +76,7 @@ static bool isAutoResumedFirstLaunch(void)
     // First launch from a game this session
     // Check if we have the autoresume marker OR if this is a reset scenario
     bool is_autoresume = (access(autoresume_marker, F_OK) == 0);
-    bool is_reset = (access("/tmp/reset.cfg", F_OK) == 0);
+    bool is_reset = (access(reset_marker, F_OK) == 0);
     
     if (is_autoresume || is_reset) {
         // Verify RetroArch is actually running with content
@@ -89,7 +92,7 @@ static bool isAutoResumedFirstLaunch(void)
                 fclose(fp);
             }
             remove(autoresume_marker);
-            remove("/tmp/reset.cfg");
+            remove(reset_marker);
             
             return true;
         }
@@ -103,7 +106,7 @@ static bool isAutoResumedFirstLaunch(void)
     }
     // Clean up markers if they somehow exist
     remove(autoresume_marker);
-    remove("/tmp/reset.cfg");
+    remove(reset_marker);
     
     return false;
 }
@@ -439,24 +442,11 @@ int main(int argc, char *argv[])
         printf_debug("Resuming game - current_game : %i - index: %i", appState.current_game, game_list[appState.current_game].index);
         resumeGame(game_list[appState.current_game].index);
         
-        // Create autoresume marker if we're in overlay mode (reset game scenario)
-        // OR if we're launching any game (normal scenario)
-        // This handles both regular launches and "Reset game" launches
-        if (appState.is_overlay) {
-            // We're resetting/restarting a game from within a game
-            // This needs the autoresume handling
-            FILE *fp = fopen("/mnt/SDCARD/.tmp_update/.autoresume_pending", "w");
-            if (fp) {
-                fclose(fp);
-            }
-        }
-        else {
-            // Normal game launch from GameSwitcher (not from OS)
-            // Also create marker for consistency
-            FILE *fp = fopen("/mnt/SDCARD/.tmp_update/.autoresume_pending", "w");
-            if (fp) {
-                fclose(fp);
-            }
+        // Create autoresume marker since we're launching a game
+        // If the system shuts down now, it will autoresume this game
+        FILE *fp = fopen("/mnt/SDCARD/.tmp_update/.autoresume_pending", "w");
+        if (fp) {
+            fclose(fp);
         }
         
         overlay_exit();
