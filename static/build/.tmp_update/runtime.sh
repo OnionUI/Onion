@@ -636,8 +636,14 @@ check_hide_recents() {
 mainui_target=$miyoodir/app/MainUI
 
 mount_main_ui() {
+    # Flip uses 354 MainUI binaries for 640x480 theme compatibility
+    mainui_model=$DEVICE_ID
+    if [ $DEVICE_ID -eq $MODEL_MMF ]; then
+        mainui_model=$MODEL_MMP
+    fi
+    
     mainui_mode=$([ -f $sysdir/config/.showExpert ] && echo "expert" || echo "clean")
-    mainui_srcname="MainUI-$DEVICE_ID-$mainui_mode"
+    mainui_srcname="MainUI-$mainui_model-$mainui_mode"
     mainui_mount=$(basename "$(cat /proc/self/mountinfo | grep $mainui_target | cut -d' ' -f4)")
 
     if [ "$mainui_mount" != "$mainui_srcname" ]; then
