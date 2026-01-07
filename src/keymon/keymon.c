@@ -961,45 +961,6 @@ int main(void)
             hibernate_start = getMilliseconds();
         }
         
-        // Update elapsed time regardless of whether we got a key event or just a poll timeout
-        elapsed_sec = (getMilliseconds() - ticks) / 1000;
-        if (elapsed_sec < CHECK_SEC)
-            continue;
-
-        // Comes here every CHECK_SEC(def:15) seconds interval
-        if (delete_flag) {
-            if (exists("/tmp/state_changed")) {
-                system_state_update();
-                remove("/tmp/state_changed");
-                sync();
-            }
-            delete_flag = false;
-        }
-        else {
-            delete_flag = true;
-        }
-
-        // Update ticks
-        ticks = getMilliseconds();
-
-        // Check Hibernate
-        if (battery_isCharging())
-            hibernate_time = 0;
-        else
-            hibernate_time = settings.sleep_timer;
-
-        if (hibernate_time && !temp_flag_get("stay_awake")) {
-            if (ticks - hibernate_start > hibernate_time * 60 * 1000) {
-                suspend_exec(SHUTDOWN_MIN * 60000);
-                hibernate_start = ticks;
-            }
-        }
-
-        // Check bluelight filter
-        if (settings.blue_light_schedule) {
-            system("/mnt/SDCARD/.tmp_update/script/blue_light.sh check");
-        }
-
         // Check lid state for Miyoo Mini Flip - poll every iteration (500ms)
         if (DEVICE_ID == MIYOO285) {
             current_lid_state = read_lid_state();
@@ -1041,6 +1002,43 @@ int main(void)
             else if (current_lid_state != -1 && last_lid_state == -1) {
                 last_lid_state = current_lid_state;
             }
+        }
+        
+        elapsed_sec = (getMilliseconds() - ticks) / 1000;
+        if (elapsed_sec < CHECK_SEC)
+            continue;
+
+        if (delete_flag) {
+            if (exists("/tmp/state_changed")) {
+                system_state_update();
+                remove("/tmp/state_changed");
+                sync();
+            }
+            delete_flag = false;
+        }
+        else {
+            delete_flag = true;
+        }
+
+        // Update ticks
+        ticks = getMilliseconds();
+
+        // Check Hibernate
+        if (battery_isCharging())
+            hibernate_time = 0;
+        else
+            hibernate_time = settings.sleep_timer;
+
+        if (hibernate_time && !temp_flag_get("stay_awake")) {
+            if (ticks - hibernate_start > hibernate_time * 60 * 1000) {
+                suspend_exec(SHUTDOWN_MIN * 60000);
+                hibernate_start = ticks;
+            }
+        }
+
+        // Check bluelight filter
+        if (settings.blue_light_schedule) {
+            system("/mnt/SDCARD/.tmp_update/script/blue_light.sh check");
         }
 
         // Quit RetroArch / auto-save when battery too low
