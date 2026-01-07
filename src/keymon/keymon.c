@@ -264,7 +264,6 @@ void deepsleep(void)
 void suspend_exec(int timeout)
 {
     bool stay_awake = timeout == -1;
-    keyinput_disable();
 
     // pause playActivity
     system("playActivity stop_all");
@@ -289,11 +288,13 @@ void suspend_exec(int timeout)
 
     uint32_t repeat_power = 0;
     uint32_t killexit = 0;
-    int lid_check_counter = 0;
     int suspend_lid_state = read_lid_state(); // Store initial lid state
+    
+    // Use shorter poll timeout for lid detection on flip devices
+    int poll_timeout = (DEVICE_ID == MIYOO285) ? 500 : timeout;
 
     while (1) {
-        int ready = poll(fds, 1, timeout);
+        int ready = poll(fds, 1, poll_timeout);
 
         if (ready > 0) {
             read(input_fd, &ev, sizeof(ev));
@@ -325,16 +326,12 @@ void suspend_exec(int timeout)
         else if (!ready && !battery_isCharging()) {
             // Check lid state on flip devices before shutdown
             if (DEVICE_ID == MIYOO285) {
-                lid_check_counter++;
-                if (lid_check_counter >= 5) {
-                    lid_check_counter = 0;
-                    int current_lid = read_lid_state();
-                    if (current_lid == 1 && suspend_lid_state == 0) {
-                        print_debug("Lid opened during suspend, waking up");
-                        break;
-                    }
-                    suspend_lid_state = current_lid;
+                int current_lid = read_lid_state();
+                if (current_lid == 1 && suspend_lid_state == 0) {
+                    print_debug("Lid opened during suspend, waking up");
+                    break;
                 }
+                suspend_lid_state = current_lid;
                 continue;
             }
             
@@ -348,6 +345,7 @@ void suspend_exec(int timeout)
 
     // resume
     system_powersave_off();
+    
     if (killexit) {
         resume();
         usleep(150000);
@@ -365,19 +363,10 @@ void suspend_exec(int timeout)
     
     display_setBrightness(settings.brightness);
     setVolume(settings.mute ? 0 : settings.volume);
-    
-    // Clear input buffer to prevent buffered keypresses from affecting menu
-    struct input_event flush_ev;
-    while (read(input_fd, &flush_ev, sizeof(flush_ev)) > 0) {
-        // Drain any pending events
-    }
-    
     if (!killexit) {
         resume();
         system("playActivity resume");
     }
-
-    keyinput_enable();
 }
 
 void turnOffScreen(void)
@@ -550,8 +539,6 @@ int main(void)
     // Lid state tracking for Miyoo Mini Flip
     int last_lid_state = -1;
     int current_lid_state = -1;
-    int lid_poll_counter = 0;
-    const int LID_POLL_INTERVAL = 10;
 
     if (DEVICE_ID == MIYOO285) {
         last_lid_state = read_lid_state();
@@ -575,7 +562,10 @@ int main(void)
     time_t fav_last_modified = time(NULL);
 
     while (1) {
-        if (poll(fds, 1, (CHECK_SEC - elapsed_sec) * 1000) > 0) {
+        int poll_timeout_ms = (DEVICE_ID == MIYOO285) ? 500 : ((CHECK_SEC - elapsed_sec) * 1000);
+        int poll_result = poll(fds, 1, poll_timeout_ms);
+        
+        if (poll_result > 0) {
             if (!keyinput_isValid())
                 continue;
             val = ev.value;
@@ -969,10 +959,12 @@ int main(void)
             }
 
             hibernate_start = getMilliseconds();
-            elapsed_sec = (hibernate_start - ticks) / 1000;
-            if (elapsed_sec < CHECK_SEC)
-                continue;
         }
+        
+        // Update elapsed time regardless of whether we got a key event or just a poll timeout
+        elapsed_sec = (getMilliseconds() - ticks) / 1000;
+        if (elapsed_sec < CHECK_SEC)
+            continue;
 
         // Comes here every CHECK_SEC(def:15) seconds interval
         if (delete_flag) {
@@ -1008,48 +1000,45 @@ int main(void)
             system("/mnt/SDCARD/.tmp_update/script/blue_light.sh check");
         }
 
-        // Check lid state for Miyoo Mini Flip
+        // Check lid state for Miyoo Mini Flip - poll every iteration (500ms)
         if (DEVICE_ID == MIYOO285) {
-            lid_poll_counter++;
-            if (lid_poll_counter >= LID_POLL_INTERVAL) {
-                lid_poll_counter = 0;
-                current_lid_state = read_lid_state();
+            current_lid_state = read_lid_state();
+            
+            if (current_lid_state != -1 && last_lid_state != -1 && 
+                current_lid_state != last_lid_state) {
                 
-                if (current_lid_state != last_lid_state) {
-                    printf_debug("Lid state change: %d -> %d", last_lid_state, current_lid_state);
-                }
+                printf_debug("Lid state change: %d -> %d", last_lid_state, current_lid_state);
                 
-                if (current_lid_state != -1 && last_lid_state != -1 && 
-                    current_lid_state != last_lid_state) {
+                if (current_lid_state == 0) {
+                    printf_debug("Lid closed detected, action: %d", settings.lid_close_action);
                     
-                    if (current_lid_state == 0) {
-                        printf_debug("Lid closed detected, action: %d", settings.lid_close_action);
-                        
-                        switch (settings.lid_close_action) {
-                            case 0: // Suspend
-                                if (settings.disable_standby) {
-                                    deepsleep();
-                                }
-                                else {
-                                    turnOffScreen();
-                                }
-                                break;
-                            case 1: // Shutdown
-                                sync();
-                                print_debug("Shutting down due to lid close");
-                                system("shutdown");
-                                break;
-                            case 2: // Nothing
-                                print_debug("Lid close action: Nothing");
-                                break;
-                        }
-                    }
-                    else {
-                        // Lid opened - resume handled by suspend_exec
-                        print_debug("Lid opened detected");
+                    switch (settings.lid_close_action) {
+                        case 0: // Suspend
+                            if (settings.disable_standby) {
+                                deepsleep();
+                            }
+                            else {
+                                turnOffScreen();
+                            }
+                            break;
+                        case 1: // Shutdown
+                            sync();
+                            print_debug("Shutting down due to lid close");
+                            system("shutdown");
+                            break;
+                        case 2: // Nothing
+                            print_debug("Lid close action: Nothing");
+                            break;
                     }
                 }
+                else {
+                    print_debug("Lid opened detected");
+                }
                 
+                last_lid_state = current_lid_state;
+            }
+            // Update last_lid_state even if it hasn't changed to handle initial -1 case
+            else if (current_lid_state != -1 && last_lid_state == -1) {
                 last_lid_state = current_lid_state;
             }
         }
