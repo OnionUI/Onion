@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
                         list_changed = true;
                     }
                 }
-                if (DEVICE_ID == MIYOO285 || DEVICE_ID == MIYOO354) {
+                if (IS_MIYOO_PLUS_OR_FLIP()) {
                     if (isMenu(&_menu_user_blue_light)) {
                         if (_writeDateString(_menu_user_blue_light.items[0].label)) {
                             list_changed = true;
@@ -272,7 +272,7 @@ int main(int argc, char *argv[])
     value_setFrameThrottle();
     value_setSwapTriggers();
 
-    if (DEVICE_ID == MIYOO285 || DEVICE_ID == MIYOO354) {
+    if (IS_MIYOO_PLUS_OR_FLIP()) {
         value_setLcdVoltage();
         check_networkChanged();
     }

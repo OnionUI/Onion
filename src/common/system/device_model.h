@@ -8,6 +8,8 @@
 #define MIYOO285 285
 #define MIYOO354 354
 
+#define IS_MIYOO_PLUS_OR_FLIP() (DEVICE_ID == MIYOO285 || DEVICE_ID == MIYOO354)
+
 static int DEVICE_ID;
 static char DEVICE_SN[13];
 

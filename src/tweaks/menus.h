@@ -505,7 +505,7 @@ void menu_themeOverrides(void *_)
 
 void menu_blueLight(void *_)
 {
-    bool schedule_show = (DEVICE_ID == MIYOO285 || DEVICE_ID == MIYOO354 || settings.rtc_available || settings.blue_light_schedule);
+    bool schedule_show = (IS_MIYOO_PLUS_OR_FLIP() || settings.rtc_available || settings.blue_light_schedule);
     bool schedule_disable = (!settings.rtc_available && !network_state.ntp && !settings.blue_light_schedule);
     if (!_menu_user_blue_light._created) {
         network_loadState();

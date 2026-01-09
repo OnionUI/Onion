@@ -264,6 +264,7 @@ void deepsleep(void)
 void suspend_exec(int timeout)
 {
     bool stay_awake = timeout == -1;
+    keyinput_disable();
 
     // pause playActivity
     system("playActivity stop_all");
@@ -351,6 +352,8 @@ void suspend_exec(int timeout)
         resume();
         system("playActivity resume");
     }
+
+    keyinput_enable();
 }
 
 void turnOffScreen(void)
@@ -473,7 +476,7 @@ int main(void)
     
     printf_debug("Device detected: DEVICE_ID=%d (283=MM, 285=Flip, 354=Plus)", DEVICE_ID);
 
-    if (DEVICE_ID == MIYOO285 || DEVICE_ID == MIYOO354) {
+    if (IS_MIYOO_PLUS_OR_FLIP()) {
         // set hardware poweroff time to 10s
         axp_write(0x36, axp_read(0x36) | 3);
     }
