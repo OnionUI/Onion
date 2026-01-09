@@ -967,6 +967,7 @@ int main(void)
                             }
                             else {
                                 turnOffScreen();
+                                hibernate_start = getMilliseconds();
                             }
                             break;
                         case 1: // Shutdown
