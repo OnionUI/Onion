@@ -983,9 +983,8 @@ int main(void)
                             }
                             break;
                         case 1: // Shutdown
-                            sync();
                             print_debug("Shutting down due to lid close");
-                            system("shutdown");
+                            deepsleep();
                             break;
                         case 2: // Nothing
                             print_debug("Lid close action: Nothing");
