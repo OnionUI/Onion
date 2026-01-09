@@ -275,15 +275,7 @@ void suspend_exec(int timeout)
     }
     rumble(0);
     display_setBrightnessRaw(0);
-    
-    // Use hardware screen blanking for better power saving on flip devices
-    if (DEVICE_ID == MIYOO285) {
-        display_blank();
-    }
-    else {
-        display_off();
-    }
-    
+    display_off();
     system_powersave_on();
 
     uint32_t repeat_power = 0;
@@ -352,15 +344,7 @@ void suspend_exec(int timeout)
         suspend(2);
         usleep(400000);
     }
-    
-    // Restore display with proper unblanking on flip devices
-    if (DEVICE_ID == MIYOO285) {
-        display_unblank();
-    }
-    else {
-        display_on();
-    }
-    
+    display_on();
     display_setBrightness(settings.brightness);
     setVolume(settings.mute ? 0 : settings.volume);
     if (!killexit) {

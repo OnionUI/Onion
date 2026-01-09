@@ -498,36 +498,4 @@ void display_close(void)
         close(fb_fd);
 }
 
-//
-//    Screen Blank/Unblank (Better power saving for Flip)
-//    Uses hardware screen blanking via mi_fb module
-//
-void display_blank(void)
-{
-    FILE *fp = fopen("/proc/mi_modules/fb/mi_fb0", "w");
-    if (fp) {
-        fprintf(fp, "GUI_SHOW 0 off");
-        fclose(fp);
-        print_debug("Screen blanked via mi_fb0");
-    }
-    else {
-        // Fallback to standard display_off if mi_fb not available
-        display_off();
-    }
-}
-
-void display_unblank(void)
-{
-    FILE *fp = fopen("/proc/mi_modules/fb/mi_fb0", "w");
-    if (fp) {
-        fprintf(fp, "GUI_SHOW 0 on");
-        fclose(fp);
-        print_debug("Screen unblanked via mi_fb0");
-    }
-    else {
-        // Fallback to standard display_on if mi_fb not available
-        display_on();
-    }
-}
-
 #endif // DISPLAY_H__
