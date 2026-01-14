@@ -312,18 +312,46 @@ launch_game() {
 
     start_audioserver
     save_settings
+    
 
     if check_is_game "$cmd"; then
         rompath=$(echo "$cmd" | awk '{ st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3)}')
+        
+        romext=$(echo "$(basename "$rompath")" | awk -F. '{print tolower($NF)}')
+        
+        if [ "$romext" == "zip" ]; then
+            rom_real_path=$(realpath "$rompath")
+            temp_folder=$sysdir/.tmp/
 
+            mkdir -p "$temp_folder"
+            unzip -o "$rom_real_path" -d "$temp_folder" > /dev/null
+            
+            romname=$(basename "$rompath" ".zip")
+            rompath=$(find "$temp_folder" -type f -name "$romname*" | head -1)
+        else
+            if [ "$romext" == "7z" ]; then
+                rom_real_path=$(realpath "$rompath")
+                temp_folder=$sysdir/.tmp/
+    
+                mkdir -p "$temp_folder"
+                7z x "$rom_real_path" -o"$temp_folder" -y > /dev/null
+                
+                romname=$(basename "$rompath" ".7z")
+                rompath=$(find "$temp_folder" -type f -name "$romname*" | head -1)
+            fi
+        fi
+
+        
         if echo "$rompath" | grep -q ":"; then
             launch_script=$(echo "$rompath" | awk '{split($0,a,":"); print a[1]}')
             rompath=$(echo "$rompath" | awk '{split($0,a,":"); print a[2]}')
             echo "LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so \"$launch_script\" \"$rompath\"" > $sysdir/cmd_to_run.sh
         fi
 
-        orig_path="$rompath"
         romext=$(echo "$(basename "$rompath")" | awk -F. '{print tolower($NF)}')
+        
+        orig_path="$rompath"
+
 
         if [ "$romext" != "miyoocmd" ]; then
             if [ -f "$rompath" ]; then
