@@ -562,6 +562,9 @@ int main(void)
                             if (settings.disable_standby) {
                                 deepsleep();
                             }
+                            else if (settings.sleep_timer == 0) {
+                                suspend_exec(SHUTDOWN_MIN * 60000);
+                            }
                             else {
                                 turnOffScreen();
                             }
