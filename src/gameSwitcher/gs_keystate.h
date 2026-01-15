@@ -35,6 +35,32 @@ static AppKeyState_s _gs_keystate = {
     .button_y_repeat = 0,
 };
 
+void removeTemporaryFile(char *game_name)
+{
+
+    DIR *temp_rom_dir = opendir(ROM_TEMP_DIR);
+    if (temp_rom_dir) {
+        struct dirent *entry;
+        while ((entry = readdir(temp_rom_dir)) != NULL) {
+            if (strstr(entry->d_name, game_name)) {
+                char *temp_file;
+                if (asprintf(&temp_file, "%s/%s", ROM_TEMP_DIR, entry->d_name) < 0) {
+                    print_debug("Unable to allocate string for the path of the temporary rom\n");
+                }
+                else {
+                    remove(temp_file);
+                    free(temp_file);
+                }
+                break;
+            }
+        }
+        closedir(temp_rom_dir);
+    }
+    else {
+        print_debug("Unable to open temporary rom folder\n");
+    }
+}
+
 void removeCurrentItem()
 {
     Game_s *game = &game_list[appState.current_game];
@@ -53,6 +79,11 @@ void removeCurrentItem()
         if (strncmp(game->recentItem.imgpath, ROM_SCREENS_DIR, strlen(ROM_SCREENS_DIR)) == 0) {
             remove(game->recentItem.imgpath);
         }
+    }
+
+    const char *ext = file_getExtension(game->recentItem.rompath);
+    if (!strcmp(ext, "zip") || !strcmp(ext, "7z")) {
+        removeTemporaryFile(game->name);
     }
 
     // Copy next element value to current element

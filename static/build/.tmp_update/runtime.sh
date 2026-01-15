@@ -313,6 +313,7 @@ launch_game() {
     start_audioserver
     save_settings
     
+    temp_folder=$sysdir/.tmp/
     mkdir -p "$temp_folder"
     
 
@@ -324,7 +325,6 @@ launch_game() {
         if [ "$romext" == "zip" ]; then
             rom_real_path=$(realpath "$rompath")
             romname=$(basename "$rompath" ".zip")
-            temp_folder=$sysdir/.tmp/
                 
             if [ ! -f "$temp_folder$romname".* ]; then
                 unzip -o "$rom_real_path" -d "$temp_folder" > /dev/null
@@ -334,7 +334,6 @@ launch_game() {
         else
             if [ "$romext" == "7z" ]; then
                 rom_real_path=$(realpath "$rompath")
-                temp_folder=$sysdir/.tmp/
                 romname=$(basename "$rompath" ".7z")
                 
                 if [ ! -f "$temp_folder$romname".* ]; then
