@@ -35,30 +35,53 @@ static AppKeyState_s _gs_keystate = {
     .button_y_repeat = 0,
 };
 
-void removeTemporaryFile(char *game_name)
+void removeTemporaryRom(char *game_name)
 {
 
-    DIR *temp_rom_dir = opendir(ROM_TEMP_DIR);
-    if (temp_rom_dir) {
-        struct dirent *entry;
-        while ((entry = readdir(temp_rom_dir)) != NULL) {
-            if (strstr(entry->d_name, game_name)) {
+    DIR *rom_dir = opendir(ROM_DIR);
+    if (!rom_dir) {
+        print_debug("Unable to open rom folder\n");
+        return;
+    }
+
+    struct dirent *entry;
+    while ((entry = readdir(rom_dir)) != NULL) {
+        char *temp_folder;
+        if (asprintf(&temp_folder, "%s/%s/.tmp", ROM_DIR, entry->d_name) < 0) {
+            print_debug("Unable to allocate string for the path of the temporary roms\n");
+            continue;
+        }
+
+        DIR *temp_rom_dir = opendir(temp_folder);
+        if (ENONET == errno) {
+            continue;
+        }
+        else if (!temp_rom_dir) {
+            print_debug("Opening temporary rom folder failed for an unknown reason\n");
+            continue;
+        }
+
+        struct dirent *file;
+        int shouldReturn = 0;
+        while ((file = readdir(temp_rom_dir)) != NULL) {
+            if (strstr(file->d_name, game_name)) {
+                shouldReturn = 1;
                 char *temp_file;
-                if (asprintf(&temp_file, "%s/%s", ROM_TEMP_DIR, entry->d_name) < 0) {
+                if (asprintf(&temp_file, "%s/%s", temp_folder, file->d_name) < 0) {
                     print_debug("Unable to allocate string for the path of the temporary rom\n");
                 }
                 else {
                     remove(temp_file);
                     free(temp_file);
                 }
-                break;
             }
         }
         closedir(temp_rom_dir);
+        free(temp_folder);
+        if (shouldReturn)
+            break;
     }
-    else {
-        print_debug("Unable to open temporary rom folder\n");
-    }
+    closedir(rom_dir);
 }
 
 void removeCurrentItem()
@@ -83,7 +106,7 @@ void removeCurrentItem()
 
     const char *ext = file_getExtension(game->recentItem.rompath);
     if (!strcmp(ext, "zip") || !strcmp(ext, "7z")) {
-        removeTemporaryFile(game->name);
+        removeTemporaryRom(game->name);
     }
 
     // Copy next element value to current element

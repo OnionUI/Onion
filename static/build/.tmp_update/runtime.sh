@@ -6,6 +6,7 @@ export PATH="$sysdir/bin:$PATH"
 
 logfile=$(basename "$0" .sh)
 . $sysdir/script/log.sh
+. $sysdir/script/handle_zip_roms.sh
 
 MODEL_MM=283
 MODEL_MMP=354
@@ -313,37 +314,16 @@ launch_game() {
     start_audioserver
     save_settings
     
-    temp_folder=$sysdir/.tmp/
-    mkdir -p "$temp_folder"
-    
-
     if check_is_game "$cmd"; then
         rompath=$(echo "$cmd" | awk '{ st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3)}')
-       
         romext=$(echo "$(basename "$rompath")" | awk -F. '{print tolower($NF)}')
-        
-        if [ "$romext" == "zip" ]; then
-            rom_real_path=$(realpath "$rompath")
-            romname=$(basename "$rompath" ".zip")
-                
-            if [ ! -f "$temp_folder$romname".* ]; then
-                unzip -o "$rom_real_path" -d "$temp_folder" > /dev/null
-            fi
-            
-            rompath=$(find "$temp_folder" -type f -name "$romname*" | head -1)
-        else
-            if [ "$romext" == "7z" ]; then
-                rom_real_path=$(realpath "$rompath")
-                romname=$(basename "$rompath" ".7z")
-                
-                if [ ! -f "$temp_folder$romname".* ]; then
-                    7z x "$rom_real_path" -o"$temp_folder" -y > /dev/null
-                fi
-                
-                rompath=$(find "$temp_folder" -type f -name "$romname*" | head -1)
-            fi
-        fi
 
+        if [ "$romext" == "zip" ] || [ "$romext" == "7z" ];then
+            handle_compressed_roms "$rompath"
+            rom_temp_folder="$(realpath "$(dirname "$rompath")")/.tmp/"
+            rompath=$(find "$rom_temp_folder" -type f -name "$romname*" | head -1)
+        fi
+       
         
         if echo "$rompath" | grep -q ":"; then
             launch_script=$(echo "$rompath" | awk '{split($0,a,":"); print a[1]}')
