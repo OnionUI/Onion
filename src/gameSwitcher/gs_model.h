@@ -13,7 +13,6 @@
 
 #define MAX_HISTORY 100
 
-#define ROM_DIR "/mnt/SDCARD/Roms"
 #define ROM_SCREENS_DIR "/mnt/SDCARD/Saves/CurrentProfile/romScreens"
 #define HISTORY_PATH "/mnt/SDCARD/Saves/CurrentProfile/lists/content_history.lpl"
 #define CONFIG_DIR "/mnt/SDCARD/Saves/CurrentProfile/config"

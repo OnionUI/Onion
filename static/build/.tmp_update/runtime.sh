@@ -320,8 +320,7 @@ launch_game() {
 
         if [ "$romext" == "zip" ] || [ "$romext" == "7z" ];then
             handle_compressed_roms "$rompath"
-            rom_temp_folder="$(realpath "$(dirname "$rompath")")/.tmp/"
-            rompath=$(find "$rom_temp_folder" -type f -name "$romname*" | head -1)
+            rompath="$absolute_rom_path"
         fi
        
         

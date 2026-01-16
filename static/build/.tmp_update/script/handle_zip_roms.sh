@@ -4,20 +4,31 @@ sysdir=/mnt/SDCARD/.tmp_update
 logfile=$(basename "$0" .sh)
 . $sysdir/script/log.sh
 
+absolute_rom_path=""
+
 handle_compressed_roms() {
-
-
   log "::Handle zip files"
 
   if [ $# -ne 1 ]; then
     log "You should only pass the rom path\n"
-    exit 1
+    return 1
+  fi
+
+  rompath="$1"
+
+  parent_folder="$(basename "$(dirname "$rompath")")"
+
+  if [ "$parent_folder" != "GBA" ] && [ "$parent_folder" != "GG" ];then # List of all emulators that do not handle correctly compressed roms
+                                                                        # This also allow us to add an option in the future for the user to be able to add a core 
+                                                                        # So that all roms pertaining to it can be handled this way, making bootthis way, making boots faster
+                                                                        
+    absolute_rom_path="$rompath" # In the case of the emulators that handle everything correctly we can just pass to retroarch to handle it
+    return 0
   fi
 
   temp_folder=$sysdir/.tmp/
   mkdir -p "$temp_folder"
 
-  rompath="$1"
   romext=$(echo "$(basename "$rompath")" | awk -F. '{print tolower($NF)}')
   rom_temp_folder="$(realpath "$(dirname "$rompath")")/.tmp/"
   mkdir -p "$rom_temp_folder"
@@ -64,4 +75,8 @@ handle_compressed_roms() {
   rm -rf "$temp_folder"
 
   log "All files processed successfully.\n"
+
+  ret=$(find "$rom_temp_folder" -type f -name "$romname*" | head -1)
+  absolute_rom_path="$ret"
 }
+
