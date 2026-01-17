@@ -1,27 +1,33 @@
 #!/bin/sh
 sysdir=/mnt/SDCARD/.tmp_update
 
-logfile=$(basename "$0" .sh)
-. $sysdir/script/log.sh
-
 absolute_rom_path=""
 
 handle_compressed_roms() {
-  log "::Handle zip files"
+  log "\n::Handle zip files"
 
   if [ $# -ne 1 ]; then
-    log "You should only pass the rom path\n"
+    echo "You should only pass the rom path"
     return 1
   fi
 
   rompath="$1"
 
   parent_folder="$(basename "$(dirname "$rompath")")"
+  
+  fz_file="$(realpath "$(dirname "$rompath")")"/.fz
+  log "Rom path:$rompath"
+  log "Parent folder path:$parent_folder"
+  log "Fz File: $fz_file"
 
-  if [ "$parent_folder" != "GBA" ] && [ "$parent_folder" != "GG" ];then # List of all emulators that do not handle correctly compressed roms
-                                                                        # This also allow us to add an option in the future for the user to be able to add a core 
-                                                                        # So that all roms pertaining to it can be handled this way, making bootthis way, making boots faster
-                                                                        
+  if [ "$parent_folder" == "PS" ] || [ "$parent_folder" == "ARCADE" ];then
+    absolute_rom_path="$rompath" # These emulators are multi-disc / Rom games and aren't compatible with the way we do this
+    return 0
+  fi
+
+  if [ "$parent_folder" != "GBA" ] && [ "$parent_folder" != "GG" ] && [ ! -f "$fz_file" ];then # List of all emulators that do not handle correctly compressed roms
+                                                                                               # Also checks if the user defined to use this script via the fz_file (Fast zip)
+                                                                       
     absolute_rom_path="$rompath" # In the case of the emulators that handle everything correctly we can just pass to retroarch to handle it
     return 0
   fi
@@ -48,7 +54,7 @@ handle_compressed_roms() {
   fi
 
 
-  log "Processing files in $temp_folder \n"
+  log "Processing files in $temp_folder"
 
   for f in "$temp_folder"*; do
     [ -f "$f" ] || continue  
@@ -69,12 +75,12 @@ handle_compressed_roms() {
     fi
 
     mv "$f" "$target"
-    log "Moved $f -> $target \n"
+    log "Moved $f -> $target"
   done
 
   rm -rf "$temp_folder"
 
-  log "All files processed successfully.\n"
+  log "All files processed successfully."
 
   ret=$(find "$rom_temp_folder" -type f -name "$romname*" | head -1)
   absolute_rom_path="$ret"

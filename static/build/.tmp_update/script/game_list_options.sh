@@ -48,8 +48,10 @@ manpath=""
 menu_options=""
 menu_option_labels=""
 menu_option_args=""
+menu_option_info=""
 
 main() {
+    
     if [ ! -f ./cmd_to_run.sh ]; then
         echo "cmd_to_run.sh not found"
         exit 1
@@ -159,7 +161,7 @@ main() {
                 add_reset_core=1
             fi
 
-            add_menu_option reset_game "Reset game"
+            add_menu_option reset_game "Reset game" "Resets the game"
         fi
 
         romdirname=$(echo "$rompath" | sed "s/^.*Roms\///g" | cut -d "/" -f1)
@@ -169,28 +171,37 @@ main() {
         echo "manpath: $manpath"
 
         if [ -f "$manpath" ]; then
-            add_menu_option open_manual "Game manual"
+            add_menu_option open_manual "Game manual" "Opens the Game Manual"
         fi
 
-        add_menu_option change_core "$game_core_label"
+        add_menu_option change_core "$game_core_label" "Change the core for this game" 
 
         if [ $add_reset_core -eq 1 ]; then
-            add_menu_option reset_core "Restore default core"
+            add_menu_option reset_core "Restore default core" "Restores the default core for this rom"
         fi
     fi # skip_game_options
 
     if [ $current_tab -eq $TAB_GAMES ]; then
         if [ -f "$emupath/active_filter" ]; then
             filter_kw=$(cat "$emupath/active_filter")
-            add_menu_option clear_filter "Clear filter"
-            add_menu_option filter_roms "Filter: $filter_kw"
+            add_menu_option clear_filter "Clear filter" "Clears the filter"
+            add_menu_option filter_roms "Filter: $filter_kw" "Define a filter"
         else
-            add_menu_option filter_roms "Filter list"
+            add_menu_option filter_roms "Filter list" "Define a filter"
         fi
     fi
 
     if [ $current_tab -eq $TAB_GAMES ] || [ $current_tab -eq $TAB_EXPERT ]; then
-        add_menu_option refresh_roms "Refresh list"
+        add_menu_option refresh_roms "Refresh list" "Refresh the rom list"
+
+        fz_file="$(realpath "$(dirname "$rompath")")"/.fz
+        extract_roms_state=""
+        if [ -f "$fz_file" ];then
+          extract_roms_state="(On)"
+        else
+          extract_roms_state="(Off)"
+        fi
+        add_menu_option extract_roms "Fast compressed roms: $extract_roms_state" "Extracts zip roms for faster loads while in GameSwitcher"
     fi
 
     add_script_files "$globalscriptdir"
@@ -210,7 +221,7 @@ main() {
     fi
 
     # Show GLO menu
-    runcmd="LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so prompt -t \"$UI_TITLE\" $(list_args "$menu_option_labels")"
+    runcmd="LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so prompt -t \"$UI_TITLE\" -g $(list_args "$menu_option_labels" "$menu_option_info")"
     echo -e "\n\n=================================================================================================="
     echo -e "> $runcmd\n\n"
     eval $runcmd
@@ -271,7 +282,7 @@ add_script_files() {
 
             if [ "$scriptlabel" != "none" ]; then
                 echo "adding romscript: $scriptlabel"
-                add_menu_option run_script "$scriptlabel" "$entry"
+                add_menu_option run_script "$scriptlabel" "Runs the script: $scriptlabel" "$entry"
             fi
         done
     fi
@@ -280,20 +291,24 @@ add_script_files() {
 add_menu_option() {
     action="$1"
     label="$2"
-    args="$3"
+    info="$3"
+    args="$4"
+
     if [ "$menu_options" == "" ]; then
         menu_options="$action"
         menu_option_labels="$label"
         menu_option_args="\"$args\""
+        menu_option_info="$info"
     else
         menu_options=$(echo -e "$menu_options\n$action")
         menu_option_labels=$(echo -e "$menu_option_labels\n$label")
         menu_option_args=$(echo -e "$menu_option_args\n\"$args\"")
+        menu_option_info=$(echo -e "$menu_option_info\n$info")
     fi
 }
 
 list_args() {
-    echo "$1" | awk '{print "\\\""$0"\\\""}' | xargs echo
+  echo -e "$1\n$2" | awk '{print "\\\""$0"\\\""}' | xargs echo
 }
 
 get_item() {
@@ -534,6 +549,17 @@ refresh_roms() {
     filter refresh "$emupath"
     ./script/reset_list.sh "$romroot"
 }
+
+extract_roms() {
+  echo ":: extract_roms $*"
+  fz_file="$(realpath $(dirname "$rompath"))"/.fz
+  if [ -f "$fz_file" ];then
+    rm -f "$fz_file"
+  else
+    touch "$fz_file"
+  fi
+}
+
 
 run_script() {
     echo ":: run_script $*"
