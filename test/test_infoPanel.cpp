@@ -19,7 +19,8 @@ TEST(test_infoPanel, cacheTest)
 {
     char **images_paths = NULL;
     int images_paths_count = 5;
-    SDL_Surface *screen = NULL;
+    SDL_Surface *screen = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
+    ASSERT_NE(screen, (SDL_Surface*)NULL);
 
     const int test_data_count = 11;
     TestItem test_data[test_data_count];
@@ -35,11 +36,11 @@ TEST(test_infoPanel, cacheTest)
     test_data[9] = { 3, 4, true, "./infoPanel_test_data/page4.png" };
     test_data[10] = { 4, 5, false, "" };
 
-    images_paths = (char**)malloc(images_paths_count * sizeof(char*));
+    images_paths = new char*[images_paths_count];
 
 	for (int i = 0; i < images_paths_count; i++)
 	{
-		images_paths[i] = (char*)malloc(STR_MAX * sizeof(char));
+		images_paths[i] = new char[STR_MAX];
 
 		strcat(images_paths[i], "./infoPanel_test_data/page");
         char index_str[10];
@@ -68,4 +69,10 @@ TEST(test_infoPanel, cacheTest)
         
         ASSERT_EQ(cache_used, test_item.cache_used);
     }
+
+    for (int i = 0; i < images_paths_count; i++)
+    {
+        delete[] images_paths[i];
+    }
+    delete[] images_paths;
 }
