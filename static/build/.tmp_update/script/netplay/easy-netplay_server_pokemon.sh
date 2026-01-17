@@ -5,11 +5,15 @@
 sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo
 LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
+INFOPANEL_SLEEP=0.5
 
 logfile=pokemon_link
 # Source scripts
 . $sysdir/script/log.sh
+# netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, check_wifi, start_ftp
 . $sysdir/script/netplay/netplay_common.sh
+# netplay_signalling.sh: wait_for_client, ready_up, notify_peer, check_stop, notify_stop
+. $sysdir/script/netplay/netplay_signalling.sh
 program=$(basename "$0" .sh)
 
 rm /tmp/stop_now
@@ -26,29 +30,6 @@ log "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* Easy Netplay Pokemon Host -*-*-*-*
 ##########
 
 # We'll need wifi up for this. Lets try and start it..
-check_wifi() {
-	if ifconfig wlan0 &>/dev/null; then
-		build_infoPanel_and_log "WIFI" "Wifi up"
-	else
-		build_infoPanel_and_log "WIFI" "Wifi disabled, starting..."
-
-		/customer/app/axp_test wifion
-		sleep 2
-		ifconfig wlan0 up
-		sleep 1
-		$miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
-		udhcpc_control
-
-		if is_running wpa_supplicant && ifconfig wlan0 >/dev/null 2>&1; then
-			build_infoPanel_and_log "WIFI" "Wifi started."
-		else
-			build_infoPanel_and_log "WIFI" "Unable to start WiFi\n unable to continue."
-			notify_stop
-		fi
-
-		sleep 2
-	fi
-}
 
 # We'll need hotspot to host the local connection
 start_hotspot() {
@@ -65,19 +46,6 @@ start_hotspot() {
 }
 
 # We'll need FTP to host the cookie to the client - use the built in FTP, it allows us to curl (errors on bftpd re: path)
-start_ftp() {
-	check_stop
-	if is_running bftpd; then
-		log "FTP already running, killing to rebind"
-		bftpd_p=$(ps | grep bftpd | grep -v grep | awk '{for(i=4;i<=NF;++i) printf $i" "}')
-		killall -9 bftpd
-		killall -9 tcpsvd
-		tcpsvd -E 0.0.0.0 21 ftpd -w / &
-	else
-		tcpsvd -E 0.0.0.0 21 ftpd -w / &
-		log "Starting FTP server"
-	fi
-}
 
 # Create a cookie with all the required info for the client. (client will use this cookie)
 create_cookie_info() {
@@ -119,7 +87,8 @@ create_cookie_info() {
 # Backup the save we're going to use before we do anythign else
 host_save_backup() {
 
-	check_stop
+	# check_stop: client reported a setup/join issue
+	check_stop "The client has had a problem joining the session."
 	mkdir -p "/mnt/SDCARD/Saves/CurrentProfile/saves/TGB Dual"
 	save_gambatte="/mnt/SDCARD/Saves/CurrentProfile/saves/Gambatte/$host_rom_filename_NoExt.srm"
 	save_tgbdual="/mnt/SDCARD/Saves/CurrentProfile/saves/TGB Dual/$host_rom_filename_NoExt.srm"
@@ -147,7 +116,8 @@ host_save_backup() {
 
 # The client will send us a save file, we'll pull the name from this, find it on the host and call duplicate_rename_rom - send to tmp
 client_save_get() {
-	check_stop
+	# check_stop: client reported a setup/join issue
+	check_stop "The client has had a problem joining the session."
 	build_infoPanel_and_log "Setting up" "Setting up session \n Waiting for save files."
 
 	client_save_file=""
@@ -180,7 +150,8 @@ client_save_get() {
 
 # Prep the clients save file
 client_save_rename() {
-	check_stop
+	# check_stop: client reported a setup/join issue
+	check_stop "The client has had a problem joining the session."
 	if [ ! -z "$client_save_file" ]; then
 		save_base_name=$(basename "$client_save_file" .srm)
 		save_new_name="${save_base_name}_client.srm"
@@ -241,7 +212,8 @@ client_read_cookie() {
 
 # Duplicate the rom to spoof the save loaded in on the host
 client_rom_rename() {
-	check_stop
+	# check_stop: client reported a setup/join issue
+	check_stop "The client has had a problem joining the session."
 
 	rom_extension="${client_rom##*.}"
 	client_rom_clone="${client_rom%.*}_client.$rom_extension"
@@ -273,7 +245,8 @@ start_retroarch() {
 
 	cd /mnt/SDCARD/RetroArch
 	log "Starting RetroArch loaded with $host_rom and $client_rom_clone"
-	(sleep 2 && notify_peer "host_ready" &) &
+	# notify_peer: signal host ready to client
+	(sleep 2 && notify_peer "$client_ip" "host_ready" &) &
 	HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/easynetplay_override.cfg -H -v -L .retroarch/cores/tgbdual_libretro.so --subsystem "gb_link_2p" "$host_rom" "$client_rom_clone"
 
 	if [ -n "$PreviousCPUspeed" ]; then
@@ -299,11 +272,13 @@ host_save_overwrite() {
 
 # Go into a waiting state for the client to be ready to accept the save
 client_wait_for_save_return() {
-	check_stop
+	# check_stop: client reported a setup/join issue
+	check_stop "The client has had a problem joining the session."
 	local counter=0
 
 	build_infoPanel_and_log "Syncing" "Waiting for client to be ready for save sync"
-	notify_peer "ready_to_send"
+	# notify_peer: signal ready to send save
+	notify_peer "$client_ip" "ready_to_send"
 	sync
 
 	while true; do
@@ -328,7 +303,8 @@ client_wait_for_save_return() {
 
 # Push the clients save file back
 client_save_send() {
-	check_stop
+	# check_stop: client reported a setup/join issue
+	check_stop "The client has had a problem joining the session."
 	build_infoPanel_and_log "Syncing" "Returning client save..."
 	received_save="tmp/$(basename "${save_new_path/_client/}")"
 	encoded_path=$(url_encode "${received_save}")
@@ -378,27 +354,7 @@ cleanup() {
 # Use the safe word
 
 # Check stop, if the client tells us to stop we will.
-check_stop() {
-	sync
-	if [ -e "/tmp/stop_now" ]; then
-		build_infoPanel_and_log "Message from client" "The client has had a problem joining the session."
-		sleep 2
-		cleanup
-	fi
-}
 
-notify_peer() {
-	local notify_file="/tmp/$1"
-	touch "$notify_file"
-	sync
-	curl -T "$notify_file" "ftp://${client_ip}/${notify_file}" >/dev/null 2>&1 # the first / after the IP must be not encoded
-
-	if [ $? -eq 0 ]; then
-		log "Successfully transferred $notify_file to ftp://${client_ip}/${notify_file}"
-	else
-		log "Failed to transfer $notify_file to ftp://${client_ip}/${notify_file}"
-	fi
-}
 
 # Rename the new save back to the original one ready to be re-transferred
 remove_client_save_suffix() {
@@ -702,7 +658,8 @@ sync_file() {
 			fi
 			sleep 2
 			if [ "$file_mandatory" = "-m" ]; then
-				notify_peer "stop_now"
+			# notify_peer: signal stop to client
+			notify_peer "$client_ip" "stop_now"
 				cleanup
 			fi
 		fi
@@ -744,21 +701,6 @@ unpack_rom() {
 	fi
 }
 
-build_infoPanel_and_log() {
-	local title="$1"
-	local message="$2"
-
-	log "Info Panel: \n\tStage: $title\n\tMessage: $message"
-	if is_running infoPanel; then
-		killall -9 infoPanel
-	fi
-	infoPanel --title "$title" --message "$message" --persistent &
-	sync
-	touch /tmp/dismiss_info_panel
-	sync
-	sleep 0.5
-	sync
-}
 
 
 
@@ -770,27 +712,65 @@ build_infoPanel_and_log() {
 #########
 
 lets_go() {
+	# Allow user to abort via menu while setup runs
 	pressMenu2Kill $(basename $0) &
+
+	# Ensure WiFi is up (udhcpc, hard fail, keep wlan1)
+	# check_wifi: use udhcpc, hard fail, keep wlan1
+	check_wifi 1 1 0
+
+	# Write cookie with host metadata
 	create_cookie_info
+
+	# Create hotspot for client
 	. "$sysdir/script/network/hotspot_create.sh"
-	start_ftp
+
+	# Start FTP with preflight stop check
+	# start_ftp: preflight check_stop for client join issues
+	start_ftp "The client has had a problem joining the session."
+
+	# Wait for client connection
 	wait_for_client
-	sync_file "Cookie" "/mnt/SDCARD/RetroArch/retroarch.cookie" 0 0 -f -m # will be downloaded as retroarch.cookie.client !
+
+	# Send cookie to client (downloaded as retroarch.cookie.client)
+	sync_file "Cookie" "/mnt/SDCARD/RetroArch/retroarch.cookie" 0 0 -f -m
+
+	# Read client cookie for display and params
 	client_read_cookie
+
+	# Backup host save and fetch client save
 	host_save_backup
 	client_save_get
 	client_save_rename
+
+	# Sync client ROM and prepare local clone
 	sync_file "Rom" "$client_rom" 1 "$romchecksum" -b -m
 	client_rom_rename
+
+	# Signal client that host is ready
 	ready_up
+
+	# Sync client image for confirmation display
 	sync_file "Img" "$client_Img_path" 0 0 -o
+
+	# Build display names for confirmation prompt
 	stripped_game_names
+
+	# Confirm host start with host/client info
 	confirm_join_panel "Host now?" "$host_game_name \n $client_game_name"
+
+	# Stop menu watcher before launch
 	pkill -9 pressMenu2Kill
+
+	# Launch RetroArch host session
 	start_retroarch
+
+	# Restore saves and send back to client
 	host_save_overwrite
 	client_wait_for_save_return
 	client_save_send
+
+	# Cleanup and restore state
 	cleanup
 }
 

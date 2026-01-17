@@ -12,10 +12,12 @@ sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo
 export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 export hostip="192.168.100.100" # This should be the default unless the user has changed it..
+peer_ip="$hostip"
 
 logfile=easy_netplay
 # Source scripts
 . $sysdir/script/log.sh
+# netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, check_wifi, start_ftp
 . $sysdir/script/netplay/netplay_common.sh
 program=$(basename "$0" .sh)
 
@@ -382,21 +384,6 @@ wifi_disabled() {
 	[ $(/customer/app/jsonval wifi) -eq 0 ]
 }
 
-build_infoPanel_and_log() {
-	local title="$1"
-	local message="$2"
-
-	log "Info Panel: \n\tStage: $title\n\tMessage: $message"
-	if is_running infoPanel; then
-		killall -9 infoPanel
-	fi
-	infoPanel --title "$title" --message "$message" --persistent &
-	sync
-	touch /tmp/dismiss_info_panel
-	sync
-	sleep 0.3
-	sync
-}
 
 confirm_join_panel() {
 	local title="$1"
@@ -451,18 +438,36 @@ cleanup() {
 #########
 
 lets_go() {
-
+	# Allow user to abort via menu while setup runs
 	pressMenu2Kill $(basename $0) &
+
+	# Join host hotspot
 	. "$sysdir/script/network/hotspot_join.sh"
+
+	# Fetch cookie from host
 	sync_file "Cookie" "/mnt/SDCARD/RetroArch/retroarch.cookie" 0 0 -f -m
+
+	# Read host cookie and parse paths/checksums
 	read_cookie
+
+	# Sync required core, rom, and image
 	sync_file "Core" "$core" 1 "$corechecksum" -b -m
 	sync_file "Rom" "$rom" 1 "$romchecksum" -b -m
 	sync_file "Img" "$Img_path" 0 0 -o
+
+	# Build display name for confirmation prompt
 	stripped_game_name
+
+	# Stop menu watcher before launch
 	pkill -9 pressMenu2Kill
+
+	# Confirm join with host info
 	confirm_join_panel "Join now?" "$game_name"
+
+	# Launch RetroArch client session
 	start_retroarch
+
+	# Cleanup and restore state
 	cleanup
 }
 

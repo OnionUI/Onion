@@ -1,5 +1,8 @@
 # Shared netplay helpers
 
+# checksize_func
+# - uses: file_check_size, file_path, remote_file_checksum
+# - sets: same_size
 checksize_func() {
     if [ "$file_check_size" -eq 1 ]; then
         if [ -e "$file_path" ]; then
@@ -19,6 +22,9 @@ checksize_func() {
     fi
 }
 
+# checksum_func <file_path> <crc>
+# - uses: MAX_FILE_CHKSUM_SIZE
+# - sets: same_chksum
 checksum_func() {
     local_file_size=$(stat -c%s "$file_path")
     local func_file_path="$1"
@@ -44,38 +50,49 @@ checksum_func() {
     fi
 }
 
+# enable_flag <flag_name>
+# - creates $sysdir/config/.<flag_name>
 enable_flag() {
     flag="$1"
     touch "$sysdir/config/.$flag"
 }
 
+# flag_enabled <flag_name>
+# - returns 0 if flag file exists
 flag_enabled() {
     flag="$1"
     [ -f "$sysdir/config/.$flag" ]
 }
 
+# is_running <process_name>
+# - returns 0 if process is running
 is_running() {
     process_name="$1"
     pgrep "$process_name" >/dev/null
 }
 
-notify_stop() {
-    notify_peer "stop_now"
-    sleep 2
-    cleanup
-}
+# build_infoPanel_and_log <title> <message>
+# - uses: INFOPANEL_SLEEP (default 0.3s)
+# - shows persistent infoPanel and logs message
+build_infoPanel_and_log() {
+    local title="$1"
+    local message="$2"
+    local delay="${INFOPANEL_SLEEP:-0.3}"
 
-ready_up() {
-    check_stop
-    ping -c 5 $client_ip >/dev/null 2>&1
-    if [ $? -eq 0 ]; then
-        notify_peer "host_ready"
-    else
-        build_infoPanel_and_log "Error" "No connectivity to $client_ip, \n is the client still connected?"
-        notify_stop
+    log "Info Panel: \n\tStage: $title\n\tMessage: $message"
+    if is_running infoPanel; then
+        killall -9 infoPanel
     fi
+    infoPanel --title "$title" --message "$message" --persistent &
+    sync
+    touch /tmp/dismiss_info_panel
+    sync
+    sleep "$delay"
+    sync
 }
 
+# restore_ftp
+# - restores original FTP state based on flags
 restore_ftp() {
     log "Restoring original FTP server"
     killall -9 tcpsvd
@@ -88,6 +105,8 @@ restore_ftp() {
     fi
 }
 
+# udhcpc_control
+# - restarts udhcpc on wlan0
 udhcpc_control() {
     if pgrep udhcpc >/dev/null; then
         killall -9 udhcpc
@@ -96,6 +115,8 @@ udhcpc_control() {
     udhcpc -i wlan0 -s /etc/init.d/udhcpc.script >/dev/null 2>&1 &
 }
 
+# url_encode <string>
+# - percent-encodes string for URLs
 url_encode() {
     local string="$1"
     local length="${#string}"
@@ -113,79 +134,63 @@ url_encode() {
     echo "$encoded"
 }
 
-wait_for_client() {
-    check_stop
-    build_infoPanel_and_log "Hotspot" "Waiting for a client to connect..."
-
-    client_ip=""
-    client_mac=""
-    counter=0
-
-    killall -9 wpa_supplicant
-    killall -9 udhcpc
-
-    sleep 1
-
-    while true; do
-        sta_list=$($sysdir/bin/hostapd_cli all_sta 2>/dev/null)
-        $sysdir/bin/hostapd_cli all_sta flush
-
-        if [ $? -ne 0 ]; then
-            build_infoPanel_and_log "Hotspot" "Hostapd hook failing, retrying."
-            counter=$((counter + 1))
-        fi
-
-        if [ ! -z "$sta_list" ]; then
-            client_mac=$(echo "$sta_list" | awk 'NR==2{print $1; exit}')
-            client_ip=$(arp -an | awk '/"'"$client_mac"'"/ {gsub(/[\(\)]/,""); print $2}')
-
-            if [ ! -z "$client_ip" ]; then
-                case "$client_ip" in
-                192.168.100.*)
-                    log "$sta_list"
-                    log "A client has connected. IP: $client_ip"
-                    build_infoPanel_and_log "Hotspot" "A client has connected! \n IP: $client_ip"
-                    break
-                    ;;
-                esac
-            fi
-        fi
-
-        sleep 1
-        counter=$((counter + 1))
-
-        if [ $counter -ge 30 ]; then
-            log "No client has connected"
-            build_infoPanel_and_log "Hotspot error" "No client has connected. Exiting..."
-            cleanup
-        fi
-    done
-
-    sleep 1
-    log "$client_ip has joined the hotspot"
+# start_ftp [check_stop_message]
+# - starts built-in FTP server for signaling
+# - if a message is provided, check_stop is invoked with it first
+start_ftp() {
+    if [ -n "$1" ]; then
+        check_stop "$1"
+    fi
+    if is_running bftpd; then
+        log "FTP already running, killing to rebind"
+        bftpd_p=$(ps | grep bftpd | grep -v grep | awk '{for(i=4;i<=NF;++i) printf $i\" \"}')
+        killall -9 bftpd
+        killall -9 tcpsvd
+        tcpsvd -E 0.0.0.0 21 ftpd -w / &
+    else
+        tcpsvd -E 0.0.0.0 21 ftpd -w / &
+        log "Starting FTP server"
+    fi
 }
+# check_wifi <use_udhcpc> <hard_fail> <down_wlan1>
+# - use_udhcpc: 1 to call udhcpc_control after wpa_supplicant
+# - hard_fail: 1 to notify_stop on failure, 0 to just pause
+# - down_wlan1: 1 to bring wlan1 down before checks
+check_wifi() {
+    local use_udhcpc="$1"
+    local hard_fail="$2"
+    local down_wlan1="$3"
 
-wait_for_host() {
-    local counter=0
+    if [ "$down_wlan1" -eq 1 ]; then
+        ifconfig wlan1 down
+    fi
 
-    build_infoPanel_and_log "Ready" "Waiting for host to ready up"
-    while true; do
-        sync
-        check_stop
-        for file in /tmp/host_ready; do
-            if [ -f "$file" ]; then
-                build_infoPanel_and_log "Message from host" "Setup complete"
-                rm /tmp/host_ready # be ready for the second use of host_ready flag
-                break 2
-            fi
-        done
+    if ifconfig wlan0 &>/dev/null; then
+        log "Wifi up"
+    else
+        build_infoPanel_and_log "WIFI" "Wifi disabled, starting..."
 
+        /customer/app/axp_test wifion
+        sleep 2
+        ifconfig wlan0 up
         sleep 1
-        counter=$((counter + 1))
+        $miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
 
-        if [ $counter -ge 25 ]; then
-            build_infoPanel_and_log "Error" "The host didn't ready up, cannot continue..."
-            notify_stop
+        if [ "$use_udhcpc" -eq 1 ]; then
+            udhcpc_control
         fi
-    done
+
+        if is_running wpa_supplicant && ifconfig wlan0 >/dev/null 2>&1; then
+            build_infoPanel_and_log "WIFI" "Wifi started."
+        else
+            build_infoPanel_and_log "WIFI" "Unable to start WiFi\n unable to continue."
+            if [ "$hard_fail" -eq 1 ]; then
+                notify_stop
+            else
+                sleep 1
+            fi
+        fi
+
+        sleep 2
+    fi
 }

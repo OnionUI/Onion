@@ -5,11 +5,15 @@
 sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo
 LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
+INFOPANEL_SLEEP=0.5
 
 logfile=pokemon_link
 # Source scripts
 . $sysdir/script/log.sh
+# netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, check_wifi, start_ftp
 . $sysdir/script/netplay/netplay_common.sh
+# netplay_signalling.sh: wait_for_client, ready_up, notify_peer, check_stop, notify_stop
+. $sysdir/script/netplay/netplay_signalling.sh
 
 rm /tmp/stop_now
 host_rom="$1"
@@ -24,26 +28,8 @@ log "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* Easy Netplay Pokemon Host GBA -*-*
 ##Setup.##
 ##########
 
-# We'll need FTP for lightweight signaling - use the built in FTP, it allows us to curl (errors on bftpd re: path)
-start_ftp() {
-	check_stop
-	if is_running bftpd; then
-		log "FTP already running, killing to rebind"
-		bftpd_p=$(ps | grep bftpd | grep -v grep | awk '{for(i=4;i<=NF;++i) printf $i" "}')
-		killall -9 bftpd
-		killall -9 tcpsvd
-		tcpsvd -E 0.0.0.0 21 ftpd -w / &
-	else
-		tcpsvd -E 0.0.0.0 21 ftpd -w / &
-		log "Starting FTP server"
-	fi
-}
 
-# Wait for a hit on the sta list for someone joining the hotspot
-
-# Tell the client we're ready to accept connections
-
-# We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
+# start_retroarch: launch RetroArch in host mode with the local ROM
 start_retroarch() {
 
 	log "\n############################ RETROARCH DEBUGGING ############################"
@@ -60,7 +46,8 @@ start_retroarch() {
 
 	cd /mnt/SDCARD/RetroArch
 	log "Starting RetroArch loaded with $host_rom"
-	(sleep 2 && notify_peer "host_ready" &) &
+	# notify_peer: signal host ready to client
+	(sleep 2 && notify_peer "$client_ip" "host_ready" &) &
 	HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/easynetplay_override.cfg -H -v -L .retroarch/cores/gpsp_libretro.so "$host_rom"
 
 	if [ -n "$PreviousCPUspeed" ]; then
@@ -71,7 +58,7 @@ start_retroarch() {
 	fi
 }
 
-# Cleanup. If you don't call this you don't retransfer the saves - Users cannot under any circumstances miss this function.
+# cleanup: restore network/ftp and clean temp files
 cleanup() {
 	build_infoPanel_and_log "Cleanup" "Cleaning up after Pokemon session\n Do not power off!"
 
@@ -95,35 +82,7 @@ cleanup() {
 	exit
 }
 
-###########
-#Utilities#
-###########
-
-# Use the safe word
-
-# Check stop, if the client tells us to stop we will.
-check_stop() {
-	sync
-	if [ -e "/tmp/stop_now" ]; then
-		build_infoPanel_and_log "Message from client" "The client has had a problem joining the session."
-		sleep 2
-		cleanup
-	fi
-}
-
-notify_peer() {
-	local notify_file="/tmp/$1"
-	touch "$notify_file"
-	sync
-	curl -T "$notify_file" "ftp://${client_ip}/${notify_file}" >/dev/null 2>&1 # the first / after the IP must be not encoded
-
-	if [ $? -eq 0 ]; then
-		log "Successfully transferred $notify_file to ftp://${client_ip}/${notify_file}"
-	else
-		log "Failed to transfer $notify_file to ftp://${client_ip}/${notify_file}"
-	fi
-}
-
+# confirm_join_panel: show host confirmation UI with local ROM image
 confirm_join_panel() {
 	local title="$1"
 	local message="$2"
@@ -154,51 +113,56 @@ confirm_join_panel() {
 	fi
 }
 
+# stripped_game_names: format local ROM display name
 stripped_game_names() {
 	host_game_name="$(basename "${host_rom%.*}")"
 	host_game_name="$(echo "$host_game_name" | sed -e 's/ ([^()]*)//g' -e 's/ [[A-z0-9!+]*]//g' -e 's/([^()]*)//g' -e 's/[[A-z0-9!+]*]//g')"
 	host_game_name="Host (me): \n$host_game_name"
 }
 
-build_infoPanel_and_log() {
-	local title="$1"
-	local message="$2"
-
-	log "Info Panel: \n\tStage: $title\n\tMessage: $message"
-	if is_running infoPanel; then
-		killall -9 infoPanel
-	fi
-	infoPanel --title "$title" --message "$message" --persistent &
-	sync
-	touch /tmp/dismiss_info_panel
-	sync
-	sleep 0.5
-	sync
-}
-
-
-
-
+# build_infoPanel_and_log: show persistent infoPanel and log message
 
 
 #########
 ##Main.##
 #########
 
+# lets_go: main flow for hosting GBA session
 lets_go() {
+	# Allow user to abort via menu while setup runs
 	pressMenu2Kill $(basename $0) &
+
+	# Ensure ROM path is provided
 	if [ -z "$host_rom" ]; then
 		build_infoPanel_and_log "Error" "No ROM path provided."
 		exit 1
 	fi
+
+	# Create hotspot for client
 	. "$sysdir/script/network/hotspot_create.sh"
-	start_ftp
+
+	# Start FTP with preflight stop check
+	start_ftp "The client has had a problem joining the session."
+
+	# Wait for client connection
 	wait_for_client
+
+	# Signal client that host is ready
 	ready_up
+
+	# Build display names for confirmation prompt
 	stripped_game_names
+
+	# Confirm host start with local ROM display
 	confirm_join_panel "Host now?" "$host_game_name"
+
+	# Stop menu watcher before launch
 	pkill -9 pressMenu2Kill
+
+	# Launch RetroArch host session
 	start_retroarch
+
+	# Cleanup and restore state
 	cleanup
 }
 

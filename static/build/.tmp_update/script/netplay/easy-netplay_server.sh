@@ -14,6 +14,7 @@ export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/p
 logfile=easy_netplay
 # Source scripts
 . $sysdir/script/log.sh
+# netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, check_wifi, start_ftp
 . $sysdir/script/netplay/netplay_common.sh
 program=$(basename "$0" .sh)
 
@@ -22,18 +23,6 @@ program=$(basename "$0" .sh)
 ##########
 
 # We'll need FTP to host the cookie to the client - use the built in FTP, it allows us to curl (errors on bftpd re: path)
-start_ftp() {
-	if is_running bftpd; then
-		log "FTP already running, killing to rebind"
-		bftpd_p=$(ps | grep bftpd | grep -v grep | awk '{for(i=4;i<=NF;++i) printf $i" "}')
-		killall -9 bftpd
-		killall -9 tcpsvd
-		tcpsvd -E 0.0.0.0 21 ftpd -w / &
-	else
-		tcpsvd -E 0.0.0.0 21 ftpd -w / &
-		log "Starting FTP server"
-	fi
-}
 
 # Find the recommended core for the current system.
 Get_NetplayCore() {
@@ -144,42 +133,34 @@ cleanup() {
 
 }
 
-###########
-#Utilities#
-###########
-
-build_infoPanel_and_log() {
-	local title="$1"
-	local message="$2"
-
-	log "Info Panel: \n\tStage: $title\n\tMessage: $message"
-	if is_running infoPanel; then
-		killall -9 infoPanel
-	fi
-	infoPanel --title "$title" --message "$message" --persistent &
-	sync
-	touch /tmp/dismiss_info_panel
-	sync
-	sleep 0.3
-	sync
-}
-
-
-
-
-
 #########
 ##Main.##
 #########
 
 lets_go() {
+	# Allow user to abort via menu while setup runs
 	pressMenu2Kill $(basename $0) &
+
+	# Create hotspot for client
 	. "$sysdir/script/network/hotspot_create.sh"
+
+	# Start FTP for cookie transfer
+	# start_ftp: start FTP without preflight
 	start_ftp
+
+	# Determine netplay core based on ROM/core config
 	Get_NetplayCore
+
+	# Write cookie with core/rom metadata
 	create_cookie_info
+
+	# Stop menu watcher before launch
 	pkill -9 pressMenu2Kill
+
+	# Launch RetroArch host session
 	start_retroarch
+
+	# Cleanup and restore state
 	cleanup
 }
 

@@ -6,6 +6,7 @@ sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo
 LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 hostip="192.168.100.100" # This should be the default unless the user has changed it..
+peer_ip="$hostip"
 rm /tmp/stop_now
 client_rom="$1"
 romdirname=$(echo "$client_rom" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
@@ -16,7 +17,10 @@ netplaycore="/mnt/SDCARD/RetroArch/.retroarch/cores/gpsp_libretro.so"
 logfile=pokemon_link
 # Source scripts
 . $sysdir/script/log.sh
+# netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, check_wifi, start_ftp
 . $sysdir/script/netplay/netplay_common.sh
+# netplay_signalling.sh: wait_for_host, check_stop, notify_stop
+. $sysdir/script/netplay/netplay_signalling.sh
 
 log "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* Easy Netplay Pokemon Client GBA -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*"
 
@@ -24,9 +28,7 @@ log "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* Easy Netplay Pokemon Client GBA -*
 ##Setup.##
 ##########
 
-# Wait for the host to tell us it's ready, this happens just before it starts its RA session and we look in /tmp for a file indicator (file removed in host script cleanup)
-
-# Start retroarch with -C in client mode if everything's gone to plan
+# start_retroarch: launch RetroArch in client mode with local ROM
 start_retroarch() {
     build_infoPanel_and_log "Starting RA" "Starting RetroArch"
 
@@ -57,6 +59,7 @@ start_retroarch() {
     fi
 }
 
+# cleanup: restore network/ftp and clean temp files
 cleanup() {
     build_infoPanel_and_log "Cleanup" "Cleaning up after Pokemon session\n Do not power off!"
 
@@ -83,69 +86,10 @@ cleanup() {
     exit
 }
 
-###########
-#Utilities#
-###########
 
-# Use the safe word
+# build_infoPanel_and_log: show persistent infoPanel and log message
 
-# Check stop, if the client tells us to stop we will.
-check_stop() {
-    sync
-    if [ -e "/tmp/stop_now" ]; then
-        build_infoPanel_and_log "Message from client" "The host has had a problem setting up the session"
-        sleep 2
-        cleanup
-    fi
-}
-
-# Notify other MMP
-notify_peer() {
-    local notify_file="/tmp/$1"
-    touch "$notify_file"
-    sync
-    curl -T "$notify_file" "ftp://${hostip}/${notify_file}" >/dev/null 2>&1 # the first / after the IP must be not encoded
-
-    if [ $? -eq 0 ]; then
-        log "Successfully transferred $notify_file to ftp://${hostip}/${notify_file}"
-    else
-        log "Failed to transfer $notify_file to ftp://${hostip}/${notify_file}"
-    fi
-}
-
-# We'll need FTP to transfer files
-start_ftp() {
-    if is_running bftpd; then
-        log "FTP already running, killing to rebind"
-        bftpd_p=$(ps | grep bftpd | grep -v grep | awk '{for(i=4;i<=NF;++i) printf $i" "}')
-        killall -9 bftpd
-        killall -9 tcpsvd
-        tcpsvd -E 0.0.0.0 21 ftpd -w / &
-    else
-        tcpsvd -E 0.0.0.0 21 ftpd -w / &
-        log "Starting FTP server"
-    fi
-}
-
-# This will restore the users original ftp state
-
-
-build_infoPanel_and_log() {
-	local title="$1"
-	local message="$2"
-
-	log "Info Panel: \n\tStage: $title\n\tMessage: $message"
-	if is_running infoPanel; then
-		killall -9 infoPanel
-	fi
-	infoPanel --title "$title" --message "$message" --persistent &
-	sync
-	touch /tmp/dismiss_info_panel
-	sync
-	sleep 0.3
-	sync
-}
-
+# confirm_join_panel: show join confirmation UI with local ROM image
 confirm_join_panel() {
     local title="$1"
     local message="$2"
@@ -169,29 +113,48 @@ confirm_join_panel() {
     fi
 }
 
+# stripped_game_names: format local ROM display name
 stripped_game_names() {
     client_rom_trimmed="$(echo "$client_rom_filename_NoExt" | sed -e 's/ ([^()]*)//g' -e 's/ [[A-z0-9!+]*]//g' -e 's/([^()]*)//g' -e 's/[[A-z0-9!+]*]//g')"
     game_name_client="Client (me): \n$client_rom_trimmed"
 }
-
-
 #########
 ##Main.##
 #########
 
+# lets_go: main flow for joining GBA session
 lets_go() {
+    # Allow user to abort via menu while setup runs
     pressMenu2Kill $(basename $0) &
+
+    # Ensure ROM path is provided
     if [ -z "$client_rom" ]; then
         build_infoPanel_and_log "Error" "No ROM path provided."
         exit 1
     fi
+
+    # Join host hotspot
     . "$sysdir/script/network/hotspot_join.sh"
+
+    # Start FTP for lightweight signaling
     start_ftp
+
+    # Build display names for confirmation prompt
     stripped_game_names
+
+    # Wait for host ready signal
     wait_for_host
+
+    # Confirm join with local ROM display
     confirm_join_panel "Join now?" "Start the game on the host first! \n $game_name_client"
+
+    # Stop menu watcher before launch
     pkill -9 pressMenu2Kill
+
+    # Launch RetroArch client session
     start_retroarch
+
+    # Cleanup and restore state
     cleanup
 }
 

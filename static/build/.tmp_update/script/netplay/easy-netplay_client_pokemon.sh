@@ -8,6 +8,7 @@ miyoodir=/mnt/SDCARD/miyoo
 LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 WPACLI=/customer/app/wpa_cli
 hostip="192.168.100.100" # This should be the default unless the user has changed it..
+peer_ip="$hostip"
 rm /tmp/stop_now
 client_rom="$cookie_rom_path"
 client_rom_filename=$(basename "$client_rom")
@@ -18,7 +19,10 @@ SaveFromGambatte=0
 logfile=pokemon_link
 # Source scripts
 . $sysdir/script/log.sh
+# netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, check_wifi, start_ftp
 . $sysdir/script/netplay/netplay_common.sh
+# netplay_signalling.sh: check_stop, notify_peer, notify_stop, wait_for_host
+. $sysdir/script/netplay/netplay_signalling.sh
 program=$(basename "$0" .sh)
 
 export CurDate=$(date +%Y%m%d_%H%M%S)
@@ -76,7 +80,8 @@ read_cookie() {
 
 # Push our save over to the host - The save will be found based on the rom we've started GLO on and it will look in the $save_dir path for it (see line13) - Backs up first
 backup_and_send_save() {
-    check_stop
+    # check_stop: host reported a setup issue
+    check_stop "The host has had a problem setting up the session"
     missing=""
     build_infoPanel_and_log "Syncing saves" "Syncing our save files with the host"
 
@@ -157,7 +162,8 @@ start_retroarch() {
 # Go into a waiting state for the host to return the save (If you don't call this you don't retransfer the saves - Users cannot under any circumstances miss this function)
 wait_for_save_return() {
     build_infoPanel_and_log "Syncing" "Waiting for host to be ready for save sync"
-    notify_peer "ready_to_receive"
+    # notify_peer: signal ready to receive save
+    notify_peer "$hostip" "ready_to_receive"
 
     sync
 
@@ -244,28 +250,8 @@ cleanup() {
 # Use the safe word
 
 # Check stop, if the client tells us to stop we will.
-check_stop() {
-    sync
-    if [ -e "/tmp/stop_now" ]; then
-        build_infoPanel_and_log "Message from client" "The host has had a problem setting up the session"
-        sleep 2
-        cleanup
-    fi
-}
 
 # Notify other MMP
-notify_peer() {
-    local notify_file="/tmp/$1"
-    touch "$notify_file"
-    sync
-    curl -T "$notify_file" "ftp://${hostip}/${notify_file}" >/dev/null 2>&1 # the first / after the IP must be not encoded
-
-    if [ $? -eq 0 ]; then
-        log "Successfully transferred $notify_file to ftp://${hostip}/${notify_file}"
-    else
-        log "Failed to transfer $notify_file to ftp://${hostip}/${notify_file}"
-    fi
-}
 
 # Function to sync files
 
@@ -513,7 +499,8 @@ sync_file() {
             fi
             sleep 2
             if [ "$file_mandatory" = "-m" ]; then
-                notify_peer "stop_now"
+                # notify_peer: signal stop to host
+                notify_peer "$hostip" "stop_now"
                 cleanup
             fi
         fi
@@ -542,18 +529,6 @@ sync_file() {
 }
 
 # We'll need FTP to transfer files
-start_ftp() {
-    if is_running bftpd; then
-        log "FTP already running, killing to rebind"
-        bftpd_p=$(ps | grep bftpd | grep -v grep | awk '{for(i=4;i<=NF;++i) printf $i" "}')
-        killall -9 bftpd
-        killall -9 tcpsvd
-        tcpsvd -E 0.0.0.0 21 ftpd -w / &
-    else
-        tcpsvd -E 0.0.0.0 21 ftpd -w / &
-        log "Starting FTP server"
-    fi
-}
 
 # Create a cookie with all the required info for the client. (client will use this cookie)
 create_cookie_info() {
@@ -593,21 +568,6 @@ create_cookie_info() {
 # This will restore the users original ftp state
 
 
-build_infoPanel_and_log() {
-	local title="$1"
-	local message="$2"
-
-	log "Info Panel: \n\tStage: $title\n\tMessage: $message"
-	if is_running infoPanel; then
-		killall -9 infoPanel
-	fi
-	infoPanel --title "$title" --message "$message" --persistent &
-	sync
-	touch /tmp/dismiss_info_panel
-	sync
-	sleep 0.3
-	sync
-}
 
 confirm_join_panel() {
     local title="$1"
@@ -654,25 +614,52 @@ stripped_game_names() {
 #########
 
 lets_go() {
+    # Allow user to abort via menu while setup runs
     pressMenu2Kill $(basename $0) &
+
+    # Write cookie for host (core/rom metadata)
     create_cookie_info
+
+    # Join host hotspot
     . "$sysdir/script/network/hotspot_join.sh"
-    start_ftp
+
+    # Start FTP for file transfers
+	# start_ftp: start FTP without preflight
+	start_ftp
+
+    # Send cookie to host
     sync_file "Cookie" "/mnt/SDCARD/RetroArch/retroarch.cookie" 0 0 -f -m
+
+    # Read host cookie and parse paths/checksums
     read_cookie
+
+    # Send local save to host
     backup_and_send_save
-    # backup_save
-    # sync_file Rom "$client_rom" # Doesn't sync anything, just uses the sync function to confirm it exists locally
+
+    # Sync required core, rom, and image
     sync_file "Core" "$core" 1 "$corechecksum" -b -m
     sync_file "Rom" "$rom" 1 "$romchecksum" -b -m
     sync_file "Img" "$Img_path" 0 0 -o
+
+    # Build display names for confirmation prompt
     stripped_game_names
+
+    # Wait for host ready signal
     wait_for_host
+
+    # Confirm join with host/client info
     confirm_join_panel "Join now?" "Start the game on the host first! \n $game_name \n $game_name_client"
+
+    # Stop menu watcher before launch
     pkill -9 pressMenu2Kill
+
+    # Launch RetroArch client session
     start_retroarch
+
+    # Wait for save return from host
     wait_for_save_return
-    # TO DO : export save to Gambatte (with question)
+
+    # Cleanup and restore state
     cleanup
 }
 
