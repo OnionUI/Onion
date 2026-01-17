@@ -22,8 +22,6 @@ program=$(basename "$0" .sh)
 ##Setup.##
 ##########
 
-# We'll need FTP to host the cookie to the client - use the built in FTP, it allows us to curl (errors on bftpd re: path)
-
 # Find the recommended core for the current system.
 Get_NetplayCore() {
 

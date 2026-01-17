@@ -86,9 +86,6 @@ cleanup() {
     exit
 }
 
-
-# build_infoPanel_and_log: show persistent infoPanel and log message
-
 # confirm_join_panel: show join confirmation UI with local ROM image
 confirm_join_panel() {
     local title="$1"

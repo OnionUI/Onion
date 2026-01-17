@@ -28,7 +28,6 @@ log "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* Easy Netplay Pokemon Host GBA -*-*
 ##Setup.##
 ##########
 
-
 # start_retroarch: launch RetroArch in host mode with the local ROM
 start_retroarch() {
 
@@ -119,9 +118,6 @@ stripped_game_names() {
 	host_game_name="$(echo "$host_game_name" | sed -e 's/ ([^()]*)//g' -e 's/ [[A-z0-9!+]*]//g' -e 's/([^()]*)//g' -e 's/[[A-z0-9!+]*]//g')"
 	host_game_name="Host (me): \n$host_game_name"
 }
-
-# build_infoPanel_and_log: show persistent infoPanel and log message
-
 
 #########
 ##Main.##
