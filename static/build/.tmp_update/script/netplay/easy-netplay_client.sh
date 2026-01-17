@@ -15,10 +15,12 @@ export hostip="192.168.100.100" # This should be the default unless the user has
 peer_ip="$hostip"
 
 logfile=easy_netplay
+
 # Source scripts
 . $sysdir/script/log.sh
 # netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, read_cookie, check_wifi, start_ftp
 . $sysdir/script/netplay/netplay_common.sh
+
 program=$(basename "$0" .sh)
 
 ##########
@@ -302,8 +304,6 @@ sync_file() {
 
 }
 
-
-
 # Start retroarch with -C in client mode if everything's gone to plan
 start_retroarch() {
 	build_infoPanel_and_log "Starting RA" "Starting RetroArch"
@@ -344,7 +344,6 @@ wifi_disabled() {
 	[ $(/customer/app/jsonval wifi) -eq 0 ]
 }
 
-
 confirm_join_panel() {
 	local title="$1"
 	local message="$2"
@@ -369,7 +368,6 @@ confirm_join_panel() {
 stripped_game_name() {
 	game_name=$(awk -F'/' '/\[rom\]:/ {print $NF}' /mnt/SDCARD/RetroArch/retroarch.cookie.client | sed 's/\(.*\)\..*/\1/')
 }
-
 
 cleanup() {
 	build_infoPanel_and_log "Cleanup" "Cleaning up after netplay session..."

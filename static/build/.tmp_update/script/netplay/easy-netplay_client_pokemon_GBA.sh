@@ -7,6 +7,8 @@ miyoodir=/mnt/SDCARD/miyoo
 LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 hostip="192.168.100.100" # This should be the default unless the user has changed it..
 peer_ip="$hostip"
+
+# Runtime vars
 rm /tmp/stop_now
 client_rom="$1"
 romdirname=$(echo "$client_rom" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
@@ -15,6 +17,7 @@ client_rom_filename_NoExt="${client_rom_filename%.*}"
 netplaycore="/mnt/SDCARD/RetroArch/.retroarch/cores/gpsp_libretro.so"
 
 logfile=pokemon_link
+
 # Source scripts
 . $sysdir/script/log.sh
 # netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, check_wifi, start_ftp

@@ -9,6 +9,8 @@ sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo
 export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 INFOPANEL_SLEEP=0.5
+
+# Runtime vars
 romfullpath="$1"
 romname=$(basename "$1")
 echo "cookie_core_path $cookie_core_path"
@@ -16,10 +18,12 @@ CurrentSystem=$(echo "$1" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
 NetplayAction="$3" # host or join
 
 logfile=netplay
+
 # Source scripts
 . $sysdir/script/log.sh
 # netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, check_wifi, start_ftp
 . $sysdir/script/netplay/netplay_common.sh
+
 program=$(basename "$0" .sh)
 
 ##########
@@ -107,8 +111,6 @@ Check_PlayerName() {
 ###########
 #Utilities#
 ###########
-
-
 
 #########
 ##Main.##

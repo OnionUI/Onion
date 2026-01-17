@@ -4,11 +4,12 @@
 # Env setup
 sysdir=/mnt/SDCARD/.tmp_update
 miyoodir=/mnt/SDCARD/miyoo
-# save_dir="/mnt/SDCARD/Saves/CurrentProfile/saves/TGB Dual/"
 LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 WPACLI=/customer/app/wpa_cli
 hostip="192.168.100.100" # This should be the default unless the user has changed it..
 peer_ip="$hostip"
+
+# Runtime vars
 rm /tmp/stop_now
 client_rom="$cookie_rom_path"
 client_rom_filename=$(basename "$client_rom")
@@ -17,12 +18,14 @@ client_rom_filename_NoExt="${client_rom_filename%.*}"
 SaveFromGambatte=0
 
 logfile=pokemon_link
+
 # Source scripts
 . $sysdir/script/log.sh
 # netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, read_cookie, check_wifi, start_ftp
 . $sysdir/script/netplay/netplay_common.sh
 # netplay_signalling.sh: check_stop, notify_peer, notify_stop, wait_for_host
 . $sysdir/script/netplay/netplay_signalling.sh
+
 program=$(basename "$0" .sh)
 
 export CurDate=$(date +%Y%m%d_%H%M%S)
@@ -543,7 +546,6 @@ stripped_game_names() {
     client_rom_trimmed="$(echo "$client_rom_filename_NoExt" | sed -e 's/ ([^()]*)//g' -e 's/ [[A-z0-9!+]*]//g' -e 's/([^()]*)//g' -e 's/[[A-z0-9!+]*]//g')"
     game_name_client="\n Client (me): \n$client_rom_trimmed"
 }
-
 
 #########
 ##Main.##

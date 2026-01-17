@@ -8,14 +8,17 @@ LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte
 INFOPANEL_SLEEP=0.5
 
 logfile=pokemon_link
+
 # Source scripts
 . $sysdir/script/log.sh
 # netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, check_wifi, start_ftp
 . $sysdir/script/netplay/netplay_common.sh
 # netplay_signalling.sh: wait_for_client, ready_up, notify_peer, check_stop, notify_stop
 . $sysdir/script/netplay/netplay_signalling.sh
+
 program=$(basename "$0" .sh)
 
+# Runtime vars
 rm /tmp/stop_now
 host_rom="$cookie_rom_path"
 host_rom_filename=$(basename "$host_rom")
@@ -672,8 +675,6 @@ sync_file() {
 
 }
 
-
-
 unpack_rom() {
 	file="$1"
 	folder=$(dirname "$file")
@@ -685,7 +686,6 @@ unpack_rom() {
 		log "File '$file' not found - cannot continue"
 	fi
 }
-
 
 #########
 ##Main.##

@@ -8,6 +8,7 @@ LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte
 INFOPANEL_SLEEP=0.5
 
 logfile=pokemon_link
+
 # Source scripts
 . $sysdir/script/log.sh
 # netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, check_wifi, start_ftp
@@ -15,6 +16,7 @@ logfile=pokemon_link
 # netplay_signalling.sh: wait_for_client, ready_up, notify_peer, check_stop, notify_stop
 . $sysdir/script/netplay/netplay_signalling.sh
 
+# Runtime vars
 rm /tmp/stop_now
 host_rom="$1"
 romdirname=$(echo "$host_rom" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
@@ -74,10 +76,10 @@ cleanup() {
 	rm "/tmp/dismiss_info_panel"
 	sync
 	log "Cleanup done"
-	
+
 	#Rename savestate_auto_load so savestate doesn't overwrite next loadsave
 	mv -f "/mnt/SDCARD/Saves/CurrentProfile/states/gpSP/$host_rom_filename_NoExt.state.auto" "/mnt/SDCARD/Saves/CurrentProfile/states/gpSP/$host_rom_filename_NoExt.state.auto_$CurDate"
-	
+
 	exit
 }
 

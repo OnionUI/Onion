@@ -12,10 +12,12 @@ miyoodir=/mnt/SDCARD/miyoo
 export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 
 logfile=easy_netplay
+
 # Source scripts
 . $sysdir/script/log.sh
 # netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, check_wifi, start_ftp
 . $sysdir/script/netplay/netplay_common.sh
+
 program=$(basename "$0" .sh)
 
 ##########
@@ -28,6 +30,8 @@ Get_NetplayCore() {
 	platform=$(echo "$cookie_rom_path" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
 	netplaycore_info=$(grep "^${platform};" "$sysdir/config/netplay_cores.conf")
 	if [ -n "$netplaycore_info" ]; then
+
+# Runtime vars
 		netplaycore=$(echo "$netplaycore_info" | cut -d ';' -f 2)
 		netplaycore="/mnt/SDCARD/RetroArch/.retroarch/cores/$netplaycore"
 		core_config_folder=$(echo "$netplaycore_info" | cut -d ';' -f 3)
