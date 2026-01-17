@@ -11,15 +11,17 @@ logfile=pokemon_link
 
 # Source scripts
 . $sysdir/script/log.sh
-# netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, check_wifi, start_ftp
+# netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, disable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, check_wifi, start_ftp
 . $sysdir/script/netplay/netplay_common.sh
 # netplay_signalling.sh: wait_for_client, ready_up, notify_peer, check_stop, notify_stop
 . $sysdir/script/netplay/netplay_signalling.sh
 
 program=$(basename "$0" .sh)
 
-# Runtime vars
+# Remove existing stop_now 
 rm /tmp/stop_now
+
+# Runtime vars
 host_rom="$cookie_rom_path"
 host_rom_filename=$(basename "$host_rom")
 host_rom_filename_NoExt="${host_rom_filename%.*}"

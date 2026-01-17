@@ -21,7 +21,7 @@ logfile=pokemon_link
 
 # Source scripts
 . $sysdir/script/log.sh
-# netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, read_cookie, check_wifi, start_ftp
+# netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, disable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, read_cookie, check_wifi, start_ftp
 . $sysdir/script/netplay/netplay_common.sh
 # netplay_signalling.sh: check_stop, notify_peer, notify_stop, wait_for_host
 . $sysdir/script/netplay/netplay_signalling.sh

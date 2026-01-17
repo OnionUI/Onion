@@ -75,10 +75,12 @@ wait_for_client() {
     # check_stop: client reported a setup/join issue
     check_stop "The client has had a problem joining the session."
     build_infoPanel_and_log "Hotspot" "Waiting for a client to connect..."
+    log "wait_for_client: start (sysdir=$sysdir)"
 
     client_ip=""
     client_mac=""
     counter=0
+    lease_file=$(grep -E '^dhcp-leasefile=' "$sysdir/config/dnsmasq.conf" 2>/dev/null | head -n 1 | cut -d'=' -f2)
 
     killall -9 wpa_supplicant
     killall -9 udhcpc
@@ -89,14 +91,29 @@ wait_for_client() {
         sta_list=$($sysdir/bin/hostapd_cli all_sta 2>/dev/null)
         $sysdir/bin/hostapd_cli all_sta flush
 
+        log "wait_for_client: sta_list='${sta_list}'"
+
         if [ $? -ne 0 ]; then
             build_infoPanel_and_log "Hotspot" "Hostapd hook failing, retrying."
             counter=$((counter + 1))
         fi
 
         if [ ! -z "$sta_list" ]; then
-            client_mac=$(echo "$sta_list" | awk 'NR==2{print $1; exit}')
-            client_ip=$(arp -an | awk '/"'"$client_mac"'"/ {gsub(/[\(\)]/,""); print $2}')
+            client_mac=$(printf '%s\n' "$sta_list" | awk 'NR==2{print $1; exit}')
+            client_mac=$(printf '%s' "$client_mac" | tr -cd '0-9a-fA-F:' | tr 'A-F' 'a-f')
+            log "wait_for_client: client_mac='${client_mac}'"
+            if [ -n "$client_mac" ] && [ -n "$lease_file" ] && [ -f "$lease_file" ]; then
+                sync
+                lease_dump=$(cat "$lease_file" 2>/dev/null)
+                client_ip=$(printf '%s\n' "$lease_dump" | awk -v mac="$client_mac" 'tolower($2)==tolower(mac){print $3; exit}')
+            fi
+            if [ -z "$client_ip" ]; then
+                arp_dump=$(arp -an 2>/dev/null)
+                if [ -n "$client_mac" ]; then
+                    client_ip=$(printf '%s\n' "$arp_dump" | awk -v mac="$client_mac" 'tolower($0) ~ tolower(mac) {gsub(/[()]/,"",$2); print $2; exit}')
+                fi
+            fi
+            log "wait_for_client: client_ip='${client_ip}'"
 
             if [ ! -z "$client_ip" ]; then
                 case "$client_ip" in
@@ -105,13 +122,14 @@ wait_for_client() {
                     log "A client has connected. IP: $client_ip"
                     build_infoPanel_and_log "Hotspot" "A client has connected! \n IP: $client_ip"
                     peer_ip="$client_ip"
+                    sync
                     break
                     ;;
                 esac
             fi
         fi
 
-        sleep 1
+        sleep 0.5
         counter=$((counter + 1))
 
         if [ $counter -ge 30 ]; then

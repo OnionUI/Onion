@@ -57,6 +57,13 @@ enable_flag() {
     touch "$sysdir/config/.$flag"
 }
 
+# disable_flag <flag_name>
+# - removes $sysdir/config/.<flag_name>
+disable_flag() {
+    flag="$1"
+    mv "$sysdir/config/.$flag" "$sysdir/config/.$flag_"
+}
+
 # flag_enabled <flag_name>
 # - returns 0 if flag file exists
 flag_enabled() {
@@ -121,17 +128,19 @@ url_encode() {
     local string="$1"
     local length="${#string}"
     local encoded=""
-    local pos c o
+    local pos=0
+    local c o
 
-    for ((pos = 0; pos < length; pos++)); do
-        c=${string:$pos:1}
+    while [ "$pos" -lt "$length" ]; do
+        c=$(printf '%s' "$string" | cut -c $((pos + 1)))
         case "$c" in
         [-_.~a-zA-Z0-9]) o="$c" ;;
-        *) printf -v o '%%%02x' "'${c}" ;;
+        *) o=$(printf '%%%02x' "'$c") ;;
         esac
-        encoded+="$o"
+        encoded="${encoded}${o}"
+        pos=$((pos + 1))
     done
-    echo "$encoded"
+    printf '%s\n' "$encoded"
 }
 
 # read_cookie [verbose]

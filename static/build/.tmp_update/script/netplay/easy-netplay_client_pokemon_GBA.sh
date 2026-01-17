@@ -20,7 +20,7 @@ logfile=pokemon_link
 
 # Source scripts
 . $sysdir/script/log.sh
-# netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, check_wifi, start_ftp
+# netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, disable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, check_wifi, start_ftp
 . $sysdir/script/netplay/netplay_common.sh
 # netplay_signalling.sh: wait_for_host, check_stop, notify_stop
 . $sysdir/script/netplay/netplay_signalling.sh
@@ -133,14 +133,14 @@ lets_go() {
         exit 1
     fi
 
-    # Join host hotspot
-    . "$sysdir/script/network/hotspot_join.sh"
+	# Join host hotspot
+	. "$sysdir/script/network/hotspot_join.sh"
 
-    # Start FTP for lightweight signaling
-    start_ftp
+	# Start FTP for lightweight signaling
+	start_ftp
 
-    # Build display names for confirmation prompt
-    stripped_game_names
+	# Build display names for confirmation prompt
+	stripped_game_names
 
     # Wait for host ready signal
     wait_for_host
