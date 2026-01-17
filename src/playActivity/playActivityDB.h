@@ -212,14 +212,14 @@ PlayActivities *play_activity_find_all(bool include_hidden)
             get_rom_image_path(rom->file_path, rom->image_path);
         }
 
-        entry->play_count = sqlite3_column_int(stmt, 4);
-        entry->play_time_total = sqlite3_column_int(stmt, 5);
-        entry->play_time_average = sqlite3_column_int(stmt, 6);
+        entry->play_count = sqlite3_column_int(stmt, 5);
+        entry->play_time_total = sqlite3_column_int(stmt, 6);
+        entry->play_time_average = sqlite3_column_int(stmt, 7);
         if (sqlite3_column_text(stmt, 8) != NULL) {
-            entry->first_played_at = strdup((const char *)sqlite3_column_text(stmt, 7));
+            entry->first_played_at = strdup((const char *)sqlite3_column_text(stmt, 8));
         }
         if (sqlite3_column_text(stmt, 9) != NULL) {
-            entry->last_played_at = strdup((const char *)sqlite3_column_text(stmt, 8));
+            entry->last_played_at = strdup((const char *)sqlite3_column_text(stmt, 9));
         }
 
         play_activities->play_time_total += entry->play_time_total;

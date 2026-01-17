@@ -260,7 +260,8 @@ void handleKeys(AppState *st)
 void renderNoGamesInfo(AppState *st)
 {
     // clear the list area, important in case all entries were deleted
-    SDL_FillRect(screen, &(SDL_Rect){0, 60, RENDER_WIDTH, RENDER_HEIGHT - st->res->footer->h}, 0);
+    int footer_height = st->res->footer ? st->res->footer->h : 0;
+    SDL_FillRect(screen, &(SDL_Rect){0, 60, RENDER_WIDTH, RENDER_HEIGHT - footer_height}, 0);
 
     // no games played yet
     SDL_Surface *text_line = TTF_RenderUTF8_Blended(resource_getFont(HINT), "No games played yet", theme()->hint.color);
