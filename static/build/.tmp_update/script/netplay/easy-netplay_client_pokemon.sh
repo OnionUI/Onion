@@ -19,7 +19,7 @@ SaveFromGambatte=0
 logfile=pokemon_link
 # Source scripts
 . $sysdir/script/log.sh
-# netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, check_wifi, start_ftp
+# netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, read_cookie, check_wifi, start_ftp
 . $sysdir/script/netplay/netplay_common.sh
 # netplay_signalling.sh: check_stop, notify_peer, notify_stop, wait_for_host
 . $sysdir/script/netplay/netplay_signalling.sh
@@ -31,52 +31,6 @@ log "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* Easy Netplay Pokemon Client -*-*-*
 ##########
 ##Setup.##
 ##########
-
-# Read the cookie and store the paths and checksums into a var.
-read_cookie() {
-    sync
-    while IFS= read -r line; do
-        case $line in
-        "[core]: "*)
-            core="${line##"[core]: "}"
-            ;;
-        "[rom]: "*)
-            rom="${line##"[rom]: "}"
-            ;;
-        "[coresize]: "*)
-            corechecksum="${line##"[coresize]: "}"
-            ;;
-        "[corechksum]: "*)
-            corechecksum="${line##"[corechksum]: "}"
-            ;;
-        "[romsize]: "*)
-            romchecksum="${line##"[romsize]: "}"
-            ;;
-        "[romchksum]: "*)
-            romchecksum="${line##"[romchksum]: "}"
-            ;;
-        "[cpuspeed]: "*)
-            cpuspeed="${line##"[cpuspeed]: "}"
-            ;;
-        esac
-        log "$core $rom $coresize $corechksum $romsize $romchksum"
-    done <"/mnt/SDCARD/RetroArch/retroarch.cookie.client"
-
-    #url encode or curl complains
-    export core_url=$(url_encode "$core")
-    export rom_url=$(url_encode "$rom")
-
-    romdirname=$(echo "$rom" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
-    romName=$(basename "$rom")
-    romNameNoExtension=${romName%.*}
-    Img_path="/mnt/SDCARD/Roms/$romdirname/Imgs/$romNameNoExtension.png"
-    log "Cookie file read :"
-    log "romdirname $romdirname"
-    log "romName $romName"
-    log "romNameNoExtension $romNameNoExtension"
-    log "Img_path $Img_path"
-
-}
 
 # Push our save over to the host - The save will be found based on the rom we've started GLO on and it will look in the $save_dir path for it (see line13) - Backs up first
 backup_and_send_save() {
@@ -124,8 +78,6 @@ backup_and_send_save() {
     fi
 
 }
-
-# Wait for the host to tell us it's ready, this happens just before it starts its RA session and we look in /tmp for a file indicator (file removed in host script cleanup)
 
 # Start retroarch with -C in client mode if everything's gone to plan
 start_retroarch() {
@@ -244,14 +196,6 @@ cleanup() {
 ###########
 #Utilities#
 ###########
-
-# URL encode helper
-
-# Use the safe word
-
-# Check stop, if the client tells us to stop we will.
-
-# Notify other MMP
 
 # Function to sync files
 
@@ -528,8 +472,6 @@ sync_file() {
 
 }
 
-# We'll need FTP to transfer files
-
 # Create a cookie with all the required info for the client. (client will use this cookie)
 create_cookie_info() {
     COOKIE_FILE="/mnt/SDCARD/RetroArch/retroarch.cookie"
@@ -564,10 +506,6 @@ create_cookie_info() {
     fi
 
 }
-
-# This will restore the users original ftp state
-
-
 
 confirm_join_panel() {
     local title="$1"
@@ -607,8 +545,6 @@ stripped_game_names() {
 }
 
 
-
-
 #########
 ##Main.##
 #########
@@ -629,8 +565,8 @@ lets_go() {
     # Send cookie to host
     sync_file "Cookie" "/mnt/SDCARD/RetroArch/retroarch.cookie" 0 0 -f -m
 
-    # Read host cookie and parse paths/checksums
-    read_cookie
+    # Read host cookie and parse paths/checksums (verbose logging)
+    read_cookie 1
 
     # Send local save to host
     backup_and_send_save

@@ -29,8 +29,6 @@ log "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* Easy Netplay Pokemon Host -*-*-*-*
 ##Setup.##
 ##########
 
-# We'll need wifi up for this. Lets try and start it..
-
 # We'll need hotspot to host the local connection
 start_hotspot() {
 	build_infoPanel_and_log "Hotspot" "Starting hotspot..."
@@ -44,8 +42,6 @@ start_hotspot() {
 	enable_flag hotspotState
 	$sysdir/script/network/update_networking.sh hotspot toggle
 }
-
-# We'll need FTP to host the cookie to the client - use the built in FTP, it allows us to curl (errors on bftpd re: path)
 
 # Create a cookie with all the required info for the client. (client will use this cookie)
 create_cookie_info() {
@@ -81,8 +77,6 @@ create_cookie_info() {
 	fi
 
 }
-
-# Wait for a hit on the sta list for someone joining the hotspot
 
 # Backup the save we're going to use before we do anythign else
 host_save_backup() {
@@ -225,8 +219,6 @@ client_rom_rename() {
 	fi
 }
 
-# Tell the client we're ready to accept connections
-
 # We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
 start_retroarch() {
 
@@ -348,13 +340,6 @@ cleanup() {
 ###########
 #Utilities#
 ###########
-
-# URL encode helper
-
-# Use the safe word
-
-# Check stop, if the client tells us to stop we will.
-
 
 # Rename the new save back to the original one ready to be re-transferred
 remove_client_save_suffix() {
@@ -700,11 +685,6 @@ unpack_rom() {
 		log "File '$file' not found - cannot continue"
 	fi
 }
-
-
-
-
-
 
 
 #########

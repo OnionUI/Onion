@@ -17,7 +17,7 @@ peer_ip="$hostip"
 logfile=easy_netplay
 # Source scripts
 . $sysdir/script/log.sh
-# netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, check_wifi, start_ftp
+# netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, read_cookie, check_wifi, start_ftp
 . $sysdir/script/netplay/netplay_common.sh
 program=$(basename "$0" .sh)
 
@@ -26,46 +26,6 @@ program=$(basename "$0" .sh)
 ##########
 
 # Read the cookie and store the paths and checksums into a var.
-read_cookie() {
-	sync
-	while IFS= read -r line; do
-		case $line in
-		"[core]: "*)
-			core="${line##"[core]: "}"
-			;;
-		"[rom]: "*)
-			rom="${line##"[rom]: "}"
-			;;
-		"[coresize]: "*)
-			corechecksum="${line##"[coresize]: "}"
-			;;
-		"[corechksum]: "*)
-			corechecksum="${line##"[corechksum]: "}"
-			;;
-		"[romsize]: "*)
-			romchecksum="${line##"[romsize]: "}"
-			;;
-		"[romchksum]: "*)
-			romchecksum="${line##"[romchksum]: "}"
-			;;
-		"[cpuspeed]: "*)
-			cpuspeed="${line##"[cpuspeed]: "}"
-			;;
-		esac
-		log "$core $rom $coresize $corechksum $romsize $romchksum"
-	done <"/mnt/SDCARD/RetroArch/retroarch.cookie.client"
-
-	#url encode or curl complains
-	export core_url=$(url_encode "$core")
-	export rom_url=$(url_encode "$rom")
-
-	romdirname=$(echo "$rom" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
-	romName=$(basename "$rom")
-	romNameNoExtension=${romName%.*}
-	Img_path="/mnt/SDCARD/Roms/$romdirname/Imgs/$romNameNoExtension.png"
-
-	log "Cookie file read"
-}
 
 sync_file() {
 

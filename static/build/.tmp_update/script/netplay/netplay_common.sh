@@ -134,6 +134,59 @@ url_encode() {
     echo "$encoded"
 }
 
+# read_cookie [verbose]
+# - parses /mnt/SDCARD/RetroArch/retroarch.cookie.client into core/rom/checksum vars
+# - sets: core_url, rom_url, romdirname, romName, romNameNoExtension, Img_path
+read_cookie() {
+    local verbose="$1"
+    sync
+    while IFS= read -r line; do
+        case $line in
+        "[core]: "*)
+            core="${line##"[core]: "}"
+            ;;
+        "[rom]: "*)
+            rom="${line##"[rom]: "}"
+            ;;
+        "[coresize]: "*)
+            corechecksum="${line##"[coresize]: "}"
+            ;;
+        "[corechksum]: "*)
+            corechecksum="${line##"[corechksum]: "}"
+            ;;
+        "[romsize]: "*)
+            romchecksum="${line##"[romsize]: "}"
+            ;;
+        "[romchksum]: "*)
+            romchecksum="${line##"[romchksum]: "}"
+            ;;
+        "[cpuspeed]: "*)
+            cpuspeed="${line##"[cpuspeed]: "}"
+            ;;
+        esac
+        log "$core $rom $coresize $corechksum $romsize $romchksum"
+    done <"/mnt/SDCARD/RetroArch/retroarch.cookie.client"
+
+    # url encode or curl complains
+    export core_url=$(url_encode "$core")
+    export rom_url=$(url_encode "$rom")
+
+    romdirname=$(echo "$rom" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
+    romName=$(basename "$rom")
+    romNameNoExtension=${romName%.*}
+    Img_path="/mnt/SDCARD/Roms/$romdirname/Imgs/$romNameNoExtension.png"
+
+    if [ "$verbose" = "1" ]; then
+        log "Cookie file read :"
+        log "romdirname $romdirname"
+        log "romName $romName"
+        log "romNameNoExtension $romNameNoExtension"
+        log "Img_path $Img_path"
+    else
+        log "Cookie file read"
+    fi
+}
+
 # start_ftp [check_stop_message]
 # - starts built-in FTP server for signaling
 # - if a message is provided, check_stop is invoked with it first
