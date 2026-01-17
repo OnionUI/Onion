@@ -86,7 +86,9 @@ SDL_Surface *loadRomImage(AppState *st, const char *image_path)
 {
     if (!st->res->default_image_loaded) {
         st->res->default_image = IMG_Load("/mnt/SDCARD/miyoo/app/skin/thumb-default.png");
-        st->res->default_image = scaleImage(st->res->default_image, IMG_MAX_WIDTH, IMG_MAX_HEIGHT);
+        if (st->res->default_image) {
+            st->res->default_image = scaleImage(st->res->default_image, IMG_MAX_WIDTH, IMG_MAX_HEIGHT);
+        }
         st->res->default_image_loaded = true;
     }
 
@@ -192,6 +194,33 @@ bool deletePlayActivity(AppState *st)
                 // since we don't want to reload the list, fix some values manually
                 st->play_activities->play_time_total -= st->play_activities->play_activity[st->activity_list.active_pos]->play_time_total;
 
+                // free the deleted item's memory
+                PlayActivity *deleted_pa = st->play_activities->play_activity[st->activity_list.active_pos];
+                if (deleted_pa) {
+                    if (deleted_pa->rom) {
+                        if (deleted_pa->rom->image_path)
+                            free(deleted_pa->rom->image_path);
+                        if (deleted_pa->rom->name)
+                            free(deleted_pa->rom->name);
+                        if (deleted_pa->rom->type)
+                            free(deleted_pa->rom->type);
+                        if (deleted_pa->rom->file_path)
+                            free(deleted_pa->rom->file_path);
+                        free(deleted_pa->rom);
+                    }
+                    if (deleted_pa->first_played_at)
+                        free(deleted_pa->first_played_at);
+                    if (deleted_pa->last_played_at)
+                        free(deleted_pa->last_played_at);
+                    free(deleted_pa);
+                }
+
+                // free the list item's icon if it's not the default image
+                if (st->activity_list.items[st->activity_list.active_pos].icon_ptr != NULL &&
+                    st->activity_list.items[st->activity_list.active_pos].icon_ptr != st->res->default_image) {
+                    SDL_FreeSurface((SDL_Surface *)st->activity_list.items[st->activity_list.active_pos].icon_ptr);
+                }
+
                 for (int i = st->activity_list.active_pos; i < st->play_activities->count - 1; i++) {
                     st->play_activities->play_activity[i] = st->play_activities->play_activity[i + 1];
                     st->activity_list.items[i] = st->activity_list.items[i + 1];
@@ -265,23 +294,35 @@ void renderNoGamesInfo(AppState *st)
 
     // no games played yet
     SDL_Surface *text_line = TTF_RenderUTF8_Blended(resource_getFont(HINT), "No games played yet", theme()->hint.color);
-    int text_x = (screen->w - text_line->w) / 2;
-    int text_y = (screen->h - text_line->h) / 2 - 20;
-    SDL_BlitSurface(text_line, NULL, screen, &(SDL_Rect){text_x, text_y, 0, 0});
-    SDL_FreeSurface(text_line);
+    if (text_line) {
+        int text_x = (screen->w - text_line->w) / 2;
+        int text_y = (screen->h - text_line->h) / 2 - 20;
+        SDL_BlitSurface(text_line, NULL, screen, &(SDL_Rect){text_x, text_y, 0, 0});
+        SDL_FreeSurface(text_line);
+    }
 
     // time to play
     text_line = TTF_RenderUTF8_Blended(resource_getFont(HINT), "Time to play!", theme()->hint.color);
-    text_x = (screen->w - text_line->w) / 2;
-    text_y = (screen->h - text_line->h) / 2 + 20;
-    SDL_BlitSurface(text_line, NULL, screen, &(SDL_Rect){text_x, text_y, 0, 0});
-    SDL_FreeSurface(text_line);
+    if (text_line) {
+        int text_x = (screen->w - text_line->w) / 2;
+        int text_y = (screen->h - text_line->h) / 2 + 20;
+        SDL_BlitSurface(text_line, NULL, screen, &(SDL_Rect){text_x, text_y, 0, 0});
+        SDL_FreeSurface(text_line);
+    }
 }
 
 void renderLoadingText()
 {
     TTF_Font *font40 = TTF_OpenFont("/customer/app/Exo-2-Bold-Italic.ttf", 40);
+    if (!font40)
+        return;
+
     SDL_Surface *loadingText = TTF_RenderUTF8_Blended(font40, "Loading...", (SDL_Color){255, 255, 255});
+    if (!loadingText) {
+        TTF_CloseFont(font40);
+        return;
+    }
+
     int text_x = (screen->w - loadingText->w) / 2;
     int text_y = (screen->h - loadingText->h) / 2;
     SDL_BlitSurface(loadingText, NULL, screen, &(SDL_Rect){text_x, text_y, 0, 0});
@@ -299,6 +340,9 @@ void renderCustomFooterInfo(AppState *st)
     char total_items_str[STR_MAX];
     snprintf(total_items_str, STR_MAX, "%d/%d", st->activity_list.active_pos + 1, st->activity_list.item_count);
     SDL_Surface *total_items = TTF_RenderUTF8_Blended(resource_getFont(HINT), total_items_str, theme()->hint.color);
+    if (!total_items)
+        return;
+
     SDL_Rect total_items_rect = {RENDER_WIDTH - total_items->w - 20, RENDER_HEIGHT - st->res->footer->h / 2 - total_items->h / 2};
     SDL_BlitSurface(total_items, NULL, screen, &total_items_rect);
     SDL_FreeSurface(total_items);

@@ -135,17 +135,21 @@ void theme_renderListCustom(SDL_Surface *screen, List *list, ListRenderParams_s 
             if (digit_width == 0) {
                 char *tmp_str = "7"; // our font is monospace, but others?
                 SDL_Surface *sdl_tmp = TTF_RenderUTF8_Blended(list_font, tmp_str, theme()->list.color);
-                digit_width = sdl_tmp->w;
-                SDL_FreeSurface(sdl_tmp);
+                if (sdl_tmp) {
+                    digit_width = sdl_tmp->w;
+                    SDL_FreeSurface(sdl_tmp);
+                }
             }
             char index_str[STR_MAX];
             snprintf(index_str, STR_MAX, "%d", i + 1);
             offset_x += 10 + strlen(index_str) * digit_width;
 
             SDL_Surface *index_label = TTF_RenderUTF8_Blended(list_font, index_str, theme()->list.color);
-            SDL_Rect index_pos = {digit_width, item_bg_rect.y + index_label->h};
-            SDL_BlitSurface(index_label, NULL, screen, &index_pos);
-            SDL_FreeSurface(index_label);
+            if (index_label) {
+                SDL_Rect index_pos = {digit_width, item_bg_rect.y + index_label->h};
+                SDL_BlitSurface(index_label, NULL, screen, &index_pos);
+                SDL_FreeSurface(index_label);
+            }
 
             label_end = RENDER_WIDTH - 80 - strlen(index_str) * digit_width; // less space as number grows
             label_y = 30;                                                    // give the description more space
