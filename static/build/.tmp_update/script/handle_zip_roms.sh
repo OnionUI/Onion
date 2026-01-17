@@ -25,9 +25,7 @@ handle_compressed_roms() {
     return 0
   fi
 
-  if [ "$parent_folder" != "GBA" ] && [ "$parent_folder" != "GG" ] && [ ! -f "$fz_file" ];then # List of all emulators that do not handle correctly compressed roms
-                                                                                               # Also checks if the user defined to use this script via the fz_file (Fast zip)
-                                                                       
+  if [ ! -f "$fz_file" ];then  # Checks if the user defined to use this script via the fz_file (Fast zip)
     absolute_rom_path="$rompath" # In the case of the emulators that handle everything correctly we can just pass to retroarch to handle it
     return 0
   fi
