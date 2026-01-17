@@ -242,7 +242,7 @@ fi
 #Roms loop
 for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 	! -name '.*' ! -name '*.xml' ! -name '*.miyoocmd' ! -name '*.cfg' ! -name '*.db' \
-	! -path '*/Imgs/*' ! -path '*/.game_config/*' $romfilter"); do
+	! -path '*/Imgs/*' ! -path '*/.*/*' $romfilter"); do
 
     echo "-------------------------------------------------"
     let romcount++;

@@ -12,7 +12,7 @@ Onion now includes an internal scraper ([Scraper](../apps/scraper)). However for
 
 ## File type and placement
 
-The image file format for scraped artwork is _.PNG_, with a max size of 250px (H) X 360px (W). The images need to be placed into the `Roms/<gamesystem>/Imgs` folder. 
+The image file format for scraped artwork is _.PNG_, with a max size of 250px (W) X 360px (H). The images need to be placed into the `Roms/<gamesystem>/Imgs` folder. 
 
 The `Imgs` folder name is case sensitive (must have a capital `I`). Examples would be like the following:    
 `Roms/FC/Imgs`  

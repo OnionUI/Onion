@@ -133,10 +133,10 @@ if ! [ -z "$CurrentRom" ]; then
     
 fi
 
-#eval echo "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f ! -name '.*' ! -name '*.xml' ! -name '*.db' ! -path '*/Imgs/*' ! -path '*/.game_config/*' $romfilter"      # for debugging
+#eval echo "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f ! -name '.*' ! -name '*.xml' ! -name '*.db' ! -path '*/Imgs/*' ! -path '*/.*/*' $romfilter"      # for debugging
 for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 	! -name '.*' ! -name '*.xml' ! -name '*.miyoocmd' ! -name '*.cfg' ! -name '*.db' \
-	! -path '*/Imgs/*' ! -path '*/.game_config/*' $romfilter"); do
+	! -path '*/Imgs/*' ! -path '*/.*/*' $romfilter"); do
 	
     echo "-------------------------------------------------"
     let romcount++;

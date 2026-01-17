@@ -26,6 +26,7 @@ move_runtime_logs() {
 
 exporter() {
     log "Exporting and archiving logs"
+    rm -rf $filename
     move_runtime_logs
     sync
     sleep 1
