@@ -929,10 +929,10 @@ void menu_tools(void *_)
                                  "descending from Z to A.\n");
         list_addItemWithInfoNote(&_menu_tools,
                                  (ListItem){
-                                     .label = "Restore all deleted activity tracker entries",
-                                     .action = tool_restorePlayActivityHiddenEntries},
+                                    .label = "Restore all deleted activity tracker entries",
+                                    .action = tool_restorePlayActivityHiddenEntries},
                                  "Use this tool to restore all previously\n"
-                                 "deleted activitytracker entries.\n");
+                                 "deleted activity tracker entries.\n");
     }
     menu_stack[++menu_level] = &_menu_tools;
     header_changed = true;

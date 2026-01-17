@@ -221,8 +221,11 @@ bool list_keyUp(List *list, bool key_repeat)
     static int key_hold_duration = 0;
     static int scroll_speed = 1;
 
-    if (key_repeat && list->active_pos == 0)
+    if (key_repeat && list->active_pos == 0) {
+        key_hold_duration = 0;
+        scroll_speed = 1;
         return false;
+    }
 
     int old_pos = list->active_pos;
 

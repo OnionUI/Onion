@@ -233,19 +233,47 @@ PlayActivities *play_activity_find_all(bool include_hidden)
 
 void free_play_activities(PlayActivities *pa_ptr)
 {
-    for (int i = 0; i < pa_ptr->count; i++) {
-        free(pa_ptr->play_activity[i]->rom->image_path);
-        free(pa_ptr->play_activity[i]->rom->name);
-        free(pa_ptr->play_activity[i]->rom->type);
-        free(pa_ptr->play_activity[i]->rom->file_path);
-        free(pa_ptr->play_activity[i]->first_played_at);
-        free(pa_ptr->play_activity[i]->last_played_at);
-        free(pa_ptr->play_activity[i]->rom);
-        free(pa_ptr->play_activity[i]->first_played_at);
-        free(pa_ptr->play_activity[i]->last_played_at);
-        free(pa_ptr->play_activity[i]);
+    if (pa_ptr == NULL) {
+        return;
     }
-    free(pa_ptr->play_activity);
+
+    if (pa_ptr->play_activity != NULL) {
+        for (int i = 0; i < pa_ptr->count; i++) {
+            PlayActivity *pa = pa_ptr->play_activity[i];
+            if (pa == NULL) {
+                continue;
+            }
+
+            if (pa->rom != NULL) {
+                if (pa->rom->image_path != NULL) {
+                    free(pa->rom->image_path);
+                }
+                if (pa->rom->name != NULL) {
+                    free(pa->rom->name);
+                }
+                if (pa->rom->type != NULL) {
+                    free(pa->rom->type);
+                }
+                if (pa->rom->file_path != NULL) {
+                    free(pa->rom->file_path);
+                }
+                free(pa->rom);
+            }
+
+            if (pa->first_played_at != NULL) {
+                free(pa->first_played_at);
+            }
+            if (pa->last_played_at != NULL) {
+                free(pa->last_played_at);
+            }
+
+            free(pa);
+        }
+    }
+
+    if (pa_ptr->play_activity != NULL) {
+        free(pa_ptr->play_activity);
+    }
     free(pa_ptr);
 }
 

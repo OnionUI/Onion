@@ -7,4 +7,4 @@ ${sqlite3_binary} ${database_file} <<EOF
 UPDATE rom SET deletion_id = 0;
 EOF
 
-return 0
+exit 0
