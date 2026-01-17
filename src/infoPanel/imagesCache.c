@@ -43,6 +43,20 @@ SDL_Surface *scaleImageIfNecessary(SDL_Surface *image, SDL_Rect target, bool str
 
 SDL_Surface *loadImage(const char *image_path, SDL_Surface *screen)
 {
+    DEBUG_PRINT(("loadImage: %s\n", image_path));
+    if (!image_path) {
+        printf("Error: Image path is NULL\n");
+        return NULL;
+    }
+    if (strlen(image_path) == 0) {
+        printf("Error: Image path is empty\n");
+        return NULL;
+    }
+    if (!screen) {
+        printf("Error: Screen is NULL\n");
+        return NULL;
+    }
+    DEBUG_PRINT(("Loading image: %s\n", image_path));
     SDL_Surface *image = IMG_Load(image_path);
 
     if (!image) {
