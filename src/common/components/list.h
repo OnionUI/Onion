@@ -12,7 +12,7 @@
 
 #define MAX_NUM_VALUES 100
 #define SCROLL_ACCELERATION_THRESHOLD 10
-#define SCROLL_ACCELLERATION_MAX_SPEED 4
+#define SCROLL_ACCELERATION_MAX_SPEED 4
 
 typedef enum list_type { LIST_SMALL,
                          LIST_LARGE } ListType;
@@ -231,7 +231,7 @@ bool list_keyUp(List *list, bool key_repeat)
 
     if (key_repeat) {
         key_hold_duration++;
-        if (scroll_speed < SCROLL_ACCELLERATION_MAX_SPEED && key_hold_duration % SCROLL_ACCELERATION_THRESHOLD == 0)
+        if (scroll_speed < SCROLL_ACCELERATION_MAX_SPEED && key_hold_duration % SCROLL_ACCELERATION_THRESHOLD == 0)
             printf("scroll_speed: %d\n", ++scroll_speed);
     }
     else {
@@ -279,7 +279,7 @@ bool list_keyDown(List *list, bool key_repeat)
     int old_pos = list->active_pos;
 
     if (key_repeat) {
-        if (scroll_speed < SCROLL_ACCELLERATION_MAX_SPEED && ++key_hold_duration % SCROLL_ACCELERATION_THRESHOLD == 0)
+        if (scroll_speed < SCROLL_ACCELERATION_MAX_SPEED && ++key_hold_duration % SCROLL_ACCELERATION_THRESHOLD == 0)
             printf("scroll_speed: %d\n", ++scroll_speed);
     }
     else {
