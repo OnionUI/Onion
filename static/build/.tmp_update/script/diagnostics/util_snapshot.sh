@@ -50,7 +50,7 @@ main() {
 snapshot() {
     system_healthcheck
     wifi_healthcheck
-    export_ra_cfg
+    # export_ra_cfg
     create_dir_logs
     create_appcfg_list
     log "Snapshot generated"

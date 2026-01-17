@@ -7,8 +7,10 @@ defautTheme="/mnt/SDCARD/Themes/Silky by DiMo/"
 progdir=`cd -- "$(dirname "$0")" >/dev/null 2>&1; pwd -P`
 cd $progdir
 
-# Save current time
-./saveTime.sh
+if [ ! -f /tmp/rtc_available ]; then
+  # Save current time
+  ./saveTime.sh
+fi
 sync
 
 # Save current Favourites + RecentList lists
@@ -46,5 +48,7 @@ if [ -e "$currentThemefile" ]; then
 fi
 themeSwitcher --reapply_icons
 
-# Load current time
-./loadTime.sh
+if [ ! -f /tmp/rtc_available ]; then
+  # Load current time
+  ./loadTime.sh
+fi
