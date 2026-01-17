@@ -32,6 +32,35 @@
 static bool quit = false;
 static KeyState keystate[320] = {(KeyState)0};
 
+void __showInfoDialog(const char *title, const char *message)
+{
+    bool confirm_quit = false;
+    SDLKey changed_key = SDLK_UNKNOWN;
+
+    SDL_Surface *background_surface = SDL_CreateRGBSurface(SDL_HWSURFACE, 640, 480, 32, 0, 0, 0, 0);
+    SDL_BlitSurface(screen, NULL, background_surface, NULL);
+
+    theme_renderDialog(screen, title, message, false);
+    SDL_BlitSurface(screen, NULL, video, NULL);
+    SDL_Flip(video);
+
+    while (!confirm_quit) {
+        if (updateKeystate(keystate, &confirm_quit, true, &changed_key)) {
+            if ((changed_key == SW_BTN_A || changed_key == SW_BTN_B || changed_key == SW_BTN_SELECT) && keystate[changed_key] == PRESSED) {
+                confirm_quit = true;
+                sound_change();
+            }
+        }
+    }
+    SDL_FreeSurface(background_surface);
+}
+
+void showInfoDialog(List *list)
+{
+    ListItem *item = list_currentItem(list);
+    __showInfoDialog(item->label, item->info_note);
+}
+
 static void sigHandler(int sig)
 {
     switch (sig) {
@@ -57,6 +86,7 @@ int main(int argc, char *argv[])
     char message_str[STR_MAX] = "";
     bool required = false;
     int selected = 0;
+    bool glo = false;
 
     pargs = malloc(MAX_ELEMENTS * sizeof(char *));
 
@@ -75,6 +105,11 @@ int main(int argc, char *argv[])
             if (strcmp(argv[i], "-r") == 0 ||
                 strcmp(argv[i], "--required") == 0) {
                 required = true;
+                continue;
+            }
+            if (strcmp(argv[i], "-g") == 0 ||
+                strcmp(argv[i], "--glo") == 0) {
+                glo = true;
                 continue;
             }
             if (strcmp(argv[i], "-s") == 0 ||
@@ -105,12 +140,22 @@ int main(int argc, char *argv[])
     }
 
     List list = list_create(pargc, LIST_SMALL);
-
-    for (i = 0; i < pargc; i++) {
-        ListItem item = {.action_id = i, .action = NULL};
-        strncpy(item.label, pargs[i], STR_MAX - 1);
-        printf_debug("Adding list item: %s (%d)\n", item.label, item.action_id);
-        list_addItem(&list, item);
+    if (glo) {
+        for (i = 0; i < (pargc >> 1); i++) {
+            ListItem item = {.action_id = i, .action = NULL};
+            strncpy(item.label, pargs[i], STR_MAX - 1);
+            strncpy(item.info_note, pargs[i + (pargc >> 1)], STR_MAX - 1);
+            printf_debug("Adding list item: %s %s (%d)\n", item.label, item.info_note, item.action_id);
+            list_addItemWithInfoNote(&list, item, item.info_note);
+        }
+    }
+    else {
+        for (i = 0; i < pargc; i++) {
+            ListItem item = {.action_id = i, .action = NULL};
+            strncpy(item.label, pargs[i], STR_MAX - 1);
+            printf_debug("Adding list item: %s (%d)\n", item.label, item.action_id);
+            list_addItem(&list, item);
+        }
     }
 
     list_scrollTo(&list, selected);
@@ -154,6 +199,7 @@ int main(int argc, char *argv[])
 
     SDLKey changed_key = SDLK_UNKNOWN;
     bool key_changed = false;
+    bool info_showned = false;
 
 #ifdef PLATFORM_MIYOOMINI
     bool first_draw = true;
@@ -203,9 +249,20 @@ int main(int argc, char *argv[])
                 return_code = list_currentItem(&list)->action_id;
                 quit = true;
             }
+            if (changed_key == SW_BTN_SELECT && keystate[SW_BTN_SELECT] == PRESSED) {
+                if (list_hasInfoNote(&list)) {
+                    sound_change();
+                    showInfoDialog(&list);
+                }
+                info_showned = true;
+                key_changed = true;
 
-            if (!required && changed_key == SW_BTN_B &&
-                keystate[SW_BTN_B] == RELEASED) {
+                header_changed = true; // We need to do this because some themes will darken the more times you check the info
+                footer_changed = true; // So we need to force it to reload
+            }
+
+            else if (!required && changed_key == SW_BTN_B &&
+                     keystate[SW_BTN_B] == PRESSED) {
                 quit = true;
             }
         }
@@ -226,7 +283,7 @@ int main(int argc, char *argv[])
                 theme_renderHeader(screen, has_title ? title_str : NULL,
                                    !has_title);
             }
-            if (list_changed) {
+            if (list_changed || info_showned) {
                 theme_renderList(screen, &list);
 
                 if (has_message)
@@ -251,6 +308,7 @@ int main(int argc, char *argv[])
             header_changed = false;
             list_changed = false;
             battery_changed = false;
+            info_showned = false;
 
 #ifdef PLATFORM_MIYOOMINI
             first_draw = false;
@@ -296,7 +354,6 @@ int main(int argc, char *argv[])
 #ifndef PLATFORM_MIYOOMINI
     msleep(200); // to clear SDL input on quit
 #endif
-
     SDL_Quit();
 
     return return_code;
