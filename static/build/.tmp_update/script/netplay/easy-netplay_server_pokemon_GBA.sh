@@ -7,7 +7,9 @@ miyoodir=/mnt/SDCARD/miyoo
 LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 
 logfile=pokemon_link
+# Source scripts
 . $sysdir/script/log.sh
+. $sysdir/script/netplay/netplay_common.sh
 
 rm /tmp/stop_now
 host_rom="$1"
@@ -38,69 +40,8 @@ start_ftp() {
 }
 
 # Wait for a hit on the sta list for someone joining the hotspot
-wait_for_client() {
-	check_stop
-	build_infoPanel_and_log "Hotspot" "Waiting for a client to connect..."
-
-	client_ip=""
-	client_mac=""
-	counter=0
-
-	killall -9 wpa_supplicant
-	killall -9 udhcpc
-
-	sleep 1
-
-	while true; do
-		sta_list=$($sysdir/bin/hostapd_cli all_sta 2>/dev/null)
-		$sysdir/bin/hostapd_cli all_sta flush
-
-		if [ $? -ne 0 ]; then
-			build_infoPanel_and_log "Hotspot" "Hostapd hook failing, retrying."
-			counter=$((counter + 1))
-		fi
-
-		if [ ! -z "$sta_list" ]; then
-			client_mac=$(echo "$sta_list" | awk 'NR==2{print $1; exit}')
-			client_ip=$(arp -an | awk '/'"$client_mac"'/ {gsub(/[\(\)]/,""); print $2}')
-
-			if [ ! -z "$client_ip" ]; then
-				case "$client_ip" in
-				192.168.100.*)
-					log "$sta_list"
-					log "A client has connected. IP: $client_ip"
-					build_infoPanel_and_log "Hotspot" "A client has connected! \n IP: $client_ip"
-					break
-					;;
-				esac
-			fi
-		fi
-
-		sleep 1
-		counter=$((counter + 1))
-
-		if [ $counter -ge 30 ]; then
-			log "No client has connected"
-			build_infoPanel_and_log "Hotspot error" "No client has connected. Exiting..."
-			cleanup
-		fi
-	done
-
-	sleep 1
-	log "$client_ip has joined the hotspot"
-}
 
 # Tell the client we're ready to accept connections
-ready_up() {
-	check_stop
-	ping -c 5 $client_ip >/dev/null 2>&1
-	if [ $? -eq 0 ]; then
-		notify_peer "host_ready"
-	else
-		build_infoPanel_and_log "Error" "No connectivity to $client_ip, \n is the client still connected?"
-		notify_stop
-	fi
-}
 
 # We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
 start_retroarch() {
@@ -159,11 +100,6 @@ cleanup() {
 ###########
 
 # Use the safe word
-notify_stop() {
-	notify_peer "stop_now"
-	sleep 2
-	cleanup
-}
 
 # Check stop, if the client tells us to stop we will.
 check_stop() {
@@ -240,40 +176,10 @@ build_infoPanel_and_log() {
 	sync
 }
 
-restore_ftp() {
-	log "Restoring original FTP server"
-	killall -9 tcpsvd
-	if flag_enabled ftpState; then
-		if flag_enabled authftpState; then
-			bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpdauth.conf &
-		else
-			bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpd.conf &
-		fi
-	fi
-}
 
-flag_enabled() {
-	flag="$1"
-	[ -f "$sysdir/config/.$flag" ]
-}
 
-udhcpc_control() {
-	if pgrep udhcpc >/dev/null; then
-		killall -9 udhcpc
-	fi
-	sleep 1
-	udhcpc -i wlan0 -s /etc/init.d/udhcpc.script >/dev/null 2>&1 &
-}
 
-is_running() {
-	process_name="$1"
-	pgrep "$process_name" >/dev/null
-}
 
-enable_flag() {
-	flag="$1"
-	touch "$sysdir/config/.$flag"
-}
 
 #########
 ##Main.##

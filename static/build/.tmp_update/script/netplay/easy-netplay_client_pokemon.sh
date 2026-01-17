@@ -15,9 +15,10 @@ client_rom_filename_NoExt="${client_rom_filename%.*}"
 
 SaveFromGambatte=0
 
-## Source global utils
 logfile=pokemon_link
+# Source scripts
 . $sysdir/script/log.sh
+. $sysdir/script/netplay/netplay_common.sh
 program=$(basename "$0" .sh)
 
 export CurDate=$(date +%Y%m%d_%H%M%S)
@@ -120,31 +121,6 @@ backup_and_send_save() {
 }
 
 # Wait for the host to tell us it's ready, this happens just before it starts its RA session and we look in /tmp for a file indicator (file removed in host script cleanup)
-wait_for_host() {
-
-    local counter=0
-
-    build_infoPanel_and_log "Ready" "Waiting for host to ready up"
-    while true; do
-        sync
-        check_stop
-        for file in /tmp/host_ready; do
-            if [ -f "$file" ]; then
-                build_infoPanel_and_log "Message from host" "Setup complete"
-                rm /tmp/host_ready # be ready for the second use of host_ready flag
-                break 2
-            fi
-        done
-
-        sleep 1
-        counter=$((counter + 1))
-
-        if [ $counter -ge 25 ]; then
-            build_infoPanel_and_log "Error" "The host didn't ready up, cannot continue..."
-            notify_stop
-        fi
-    done
-}
 
 # Start retroarch with -C in client mode if everything's gone to plan
 start_retroarch() {
@@ -264,40 +240,8 @@ cleanup() {
 ###########
 
 # URL encode helper
-url_encode() {
-    encoded_str=$(echo "$*" | awk '
-    BEGIN {
-	split ("1 2 3 4 5 6 7 8 9 A B C D E F", hextab, " ")
-	hextab [0] = 0
-	for ( i=1; i<=255; ++i ) ord [ sprintf ("%c", i) "" ] = i + 0
-    }
-    {
-	encoded = ""
-	for ( i=1; i<=length ($0); ++i ) {
-	    c = substr ($0, i, 1)
-	    if ( c ~ /[a-zA-Z0-9.-]/ ) {
-		encoded = encoded c		# safe character
-	    } else if ( c == " " ) {
-		encoded = encoded "%20"	# special handling
-	    } else {
-		# unsafe character, encode it as a two-digit hex-number
-		lo = ord [c] % 16
-		hi = int (ord [c] / 16);
-		encoded = encoded "%" hextab [hi] hextab [lo]
-	    }
-	}
-	    print encoded
-    }
-')
-    echo "$encoded_str"
-}
 
 # Use the safe word
-notify_stop() {
-    notify_peer "stop_now"
-    sleep 2
-    cleanup
-}
 
 # Check stop, if the client tells us to stop we will.
 check_stop() {
@@ -647,22 +591,7 @@ create_cookie_info() {
 }
 
 # This will restore the users original ftp state
-restore_ftp() {
-    log "Restoring original FTP server"
-    killall -9 tcpsvd
-    if flag_enabled ftpState; then
-        if flag_enabled authftpState; then
-            bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpdauth.conf &
-        else
-            bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpd.conf &
-        fi
-    fi
-}
 
-flag_enabled() {
-    flag="$1"
-    [ -f "$sysdir/config/.$flag" ]
-}
 
 build_infoPanel_and_log() {
 	local title="$1"
@@ -717,58 +646,8 @@ stripped_game_names() {
     game_name_client="\n Client (me): \n$client_rom_trimmed"
 }
 
-checksum_func() {
-    local_file_size=$(stat -c%s "$file_path")
-    local func_file_path="$1"
-    local CRC="$2"
 
-    ########################## File checksum check : same_chksum = 0 different, 1 identical , 2 unknown
 
-    if [ "$CRC" != "0" ]; then # file_checksum=0 means skip the difference check = always replace
-        local_file_checksum=$(xcrc "$func_file_path")
-
-        if [ "$local_file_size" -gt "$MAX_FILE_CHKSUM_SIZE" ]; then
-            log "File size too big for checksum: it would be too long"
-            same_chksum=2
-        else
-            if [ "$CRC" == "$local_file_checksum" ]; then
-                same_chksum=1
-            else
-                same_chksum=0
-            fi
-        fi
-    else
-        log "Skipping checksum check."
-        same_chksum=1 # fake same size for skipping
-    fi
-}
-
-checksize_func() {
-
-    local func_file_path="$1"
-    local filesize_tocheck="$2"
-    local_file_size=$(stat -c%s "$func_file_path")
-
-    ########################## File size check   same_size = 0 different, 1 identical , 2 unknown
-
-    if echo "$filesize_tocheck" | grep -q "^[0-9][0-9]*$"; then # check if the remote file size is a numeric value
-        if [ "$filesize_tocheck" -eq "$local_file_size" ]; then
-            log "Same size as remote"
-            same_size=1
-        else
-            log "Files size are different"
-            same_size=0
-        fi
-    else
-        log "Impossible to get file size : wrong parameter."
-        same_size=2
-    fi
-}
-
-is_running() {
-    process_name="$1"
-    pgrep "$process_name" >/dev/null
-}
 
 #########
 ##Main.##

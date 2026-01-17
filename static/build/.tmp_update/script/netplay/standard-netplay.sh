@@ -15,7 +15,9 @@ CurrentSystem=$(echo "$1" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
 NetplayAction="$3" # host or join
 
 logfile=netplay
+# Source scripts
 . $sysdir/script/log.sh
+. $sysdir/script/netplay/netplay_common.sh
 program=$(basename "$0" .sh)
 
 ##########
@@ -143,10 +145,6 @@ build_infoPanel_and_log() {
 	sync
 }
 
-is_running() {
-	process_name="$1"
-	pgrep "$process_name" >/dev/null
-}
 
 #########
 ##Main.##

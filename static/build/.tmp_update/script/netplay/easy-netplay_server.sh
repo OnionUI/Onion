@@ -12,7 +12,9 @@ miyoodir=/mnt/SDCARD/miyoo
 export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 
 logfile=easy_netplay
+# Source scripts
 . $sysdir/script/log.sh
+. $sysdir/script/netplay/netplay_common.sh
 program=$(basename "$0" .sh)
 
 ##########
@@ -162,35 +164,9 @@ build_infoPanel_and_log() {
 	sync
 }
 
-restore_ftp() {
-	log "Restoring original FTP server"
-	killall -9 tcpsvd
-	if flag_enabled ftpState; then
-		if flag_enabled authftpState; then
-			bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpdauth.conf &
-		else
-			bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpd.conf &
-		fi
-	fi
-}
 
-flag_enabled() {
-	flag="$1"
-	[ -f "$sysdir/config/.$flag" ]
-}
 
-udhcpc_control() {
-	if pgrep udhcpc >/dev/null; then
-		killall -9 udhcpc
-	fi
-	sleep 1
-	udhcpc -i wlan0 -s /etc/init.d/udhcpc.script >/dev/null 2>&1 &
-}
 
-is_running() {
-	process_name="$1"
-	pgrep "$process_name" >/dev/null
-}
 
 #########
 ##Main.##

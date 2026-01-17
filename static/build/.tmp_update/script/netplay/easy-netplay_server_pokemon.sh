@@ -7,7 +7,9 @@ miyoodir=/mnt/SDCARD/miyoo
 LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
 
 logfile=pokemon_link
+# Source scripts
 . $sysdir/script/log.sh
+. $sysdir/script/netplay/netplay_common.sh
 program=$(basename "$0" .sh)
 
 rm /tmp/stop_now
@@ -113,57 +115,6 @@ create_cookie_info() {
 }
 
 # Wait for a hit on the sta list for someone joining the hotspot
-wait_for_client() {
-	check_stop
-	build_infoPanel_and_log "Hotspot" "Waiting for a client to connect..."
-
-	client_ip=""
-	client_mac=""
-	counter=0
-
-	killall -9 wpa_supplicant
-	killall -9 udhcpc
-
-	sleep 1
-
-	while true; do
-		sta_list=$($sysdir/bin/hostapd_cli all_sta 2>/dev/null)
-		$sysdir/bin/hostapd_cli all_sta flush
-
-		if [ $? -ne 0 ]; then
-			build_infoPanel_and_log "Hotspot" "Hostapd hook failing, retrying."
-			counter=$((counter + 1))
-		fi
-
-		if [ ! -z "$sta_list" ]; then
-			client_mac=$(echo "$sta_list" | awk 'NR==2{print $1; exit}')
-			client_ip=$(arp -an | awk '/'"$client_mac"'/ {gsub(/[\(\)]/,""); print $2}')
-
-			if [ ! -z "$client_ip" ]; then
-				case "$client_ip" in
-				192.168.100.*)
-					log "$sta_list"
-					log "A client has connected. IP: $client_ip"
-					build_infoPanel_and_log "Hotspot" "A client has connected! \n IP: $client_ip"
-					break
-					;;
-				esac
-			fi
-		fi
-
-		sleep 1
-		counter=$((counter + 1))
-
-		if [ $counter -ge 30 ]; then
-			log "No client has connected"
-			build_infoPanel_and_log "Hotspot error" "No client has connected. Exiting..."
-			cleanup
-		fi
-	done
-
-	sleep 1
-	log "$client_ip has joined the hotspot"
-}
 
 # Backup the save we're going to use before we do anythign else
 host_save_backup() {
@@ -303,16 +254,6 @@ client_rom_rename() {
 }
 
 # Tell the client we're ready to accept connections
-ready_up() {
-	check_stop
-	ping -c 5 $client_ip >/dev/null 2>&1
-	if [ $? -eq 0 ]; then
-		notify_peer "host_ready"
-	else
-		build_infoPanel_and_log "Error" "No connectivity to $client_ip, \n is the client still connected?"
-		notify_stop
-	fi
-}
 
 # We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
 start_retroarch() {
@@ -433,40 +374,8 @@ cleanup() {
 ###########
 
 # URL encode helper
-url_encode() {
-	encoded_str=$(echo "$*" | awk '
-    BEGIN {
-	split ("1 2 3 4 5 6 7 8 9 A B C D E F", hextab, " ")
-	hextab [0] = 0
-	for ( i=1; i<=255; ++i ) ord [ sprintf ("%c", i) "" ] = i + 0
-    }
-    {
-	encoded = ""
-	for ( i=1; i<=length ($0); ++i ) {
-	    c = substr ($0, i, 1)
-	    if ( c ~ /[a-zA-Z0-9.-]/ ) {
-		encoded = encoded c		# safe character
-	    } else if ( c == " " ) {
-		encoded = encoded "%20"	# special handling
-	    } else {
-		# unsafe character, encode it as a two-digit hex-number
-		lo = ord [c] % 16
-		hi = int (ord [c] / 16);
-		encoded = encoded "%" hextab [hi] hextab [lo]
-	    }
-	}
-	    print encoded
-    }
-')
-	echo "$encoded_str"
-}
 
 # Use the safe word
-notify_stop() {
-	notify_peer "stop_now"
-	sleep 2
-	cleanup
-}
 
 # Check stop, if the client tells us to stop we will.
 check_stop() {
@@ -821,53 +730,7 @@ sync_file() {
 
 }
 
-checksum_func() {
-	local_file_size=$(stat -c%s "$file_path")
-	local func_file_path="$1"
-	local CRC="$2"
 
-	########################## File checksum check : same_chksum = 0 different, 1 identical , 2 unknown
-
-	if [ "$CRC" != "0" ]; then # file_checksum=0 means skip the difference check = always replace
-		local_file_checksum=$(xcrc "$func_file_path")
-
-		if [ "$local_file_size" -gt "$MAX_FILE_CHKSUM_SIZE" ]; then
-			log "File size too big for checksum: it would be too long"
-			same_chksum=2
-		else
-			if [ "$CRC" == "$local_file_checksum" ]; then
-				same_chksum=1
-			else
-				same_chksum=0
-			fi
-		fi
-	else
-		log "Skipping checksum check."
-		same_chksum=1 # fake same size for skipping
-	fi
-}
-
-checksize_func() {
-
-	local func_file_path="$1"
-	local filesize_tocheck="$2"
-	local_file_size=$(stat -c%s "$func_file_path")
-
-	########################## File size check   same_size = 0 different, 1 identical , 2 unknown
-
-	if echo "$filesize_tocheck" | grep -q "^[0-9][0-9]*$"; then # check if the remote file size is a numeric value
-		if [ "$filesize_tocheck" -eq "$local_file_size" ]; then
-			log "Same size as remote"
-			same_size=1
-		else
-			log "Files size are different"
-			same_size=0
-		fi
-	else
-		log "Impossible to get file size : wrong parameter."
-		same_size=2
-	fi
-}
 
 unpack_rom() {
 	file="$1"
@@ -897,40 +760,10 @@ build_infoPanel_and_log() {
 	sync
 }
 
-restore_ftp() {
-	log "Restoring original FTP server"
-	killall -9 tcpsvd
-	if flag_enabled ftpState; then
-		if flag_enabled authftpState; then
-			bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpdauth.conf &
-		else
-			bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpd.conf &
-		fi
-	fi
-}
 
-flag_enabled() {
-	flag="$1"
-	[ -f "$sysdir/config/.$flag" ]
-}
 
-udhcpc_control() {
-	if pgrep udhcpc >/dev/null; then
-		killall -9 udhcpc
-	fi
-	sleep 1
-	udhcpc -i wlan0 -s /etc/init.d/udhcpc.script >/dev/null 2>&1 &
-}
 
-is_running() {
-	process_name="$1"
-	pgrep "$process_name" >/dev/null
-}
 
-enable_flag() {
-	flag="$1"
-	touch "$sysdir/config/.$flag"
-}
 
 #########
 ##Main.##

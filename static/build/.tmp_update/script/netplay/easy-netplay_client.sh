@@ -14,7 +14,9 @@ export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/p
 export hostip="192.168.100.100" # This should be the default unless the user has changed it..
 
 logfile=easy_netplay
+# Source scripts
 . $sysdir/script/log.sh
+. $sysdir/script/netplay/netplay_common.sh
 program=$(basename "$0" .sh)
 
 ##########
@@ -338,53 +340,7 @@ sync_file() {
 
 }
 
-checksum_func() {
-	local_file_size=$(stat -c%s "$file_path")
-	local func_file_path="$1"
-	local CRC="$2"
 
-	########################## File checksum check : same_chksum = 0 different, 1 identical , 2 unknown
-
-	if [ "$CRC" != "0" ]; then # file_checksum=0 means skip the difference check = always replace
-		local_file_checksum=$(xcrc "$func_file_path")
-
-		if [ "$local_file_size" -gt "$MAX_FILE_CHKSUM_SIZE" ]; then
-			log "File size too big for checksum: it would be too long"
-			same_chksum=2
-		else
-			if [ "$CRC" == "$local_file_checksum" ]; then
-				same_chksum=1
-			else
-				same_chksum=0
-			fi
-		fi
-	else
-		log "Skipping checksum check."
-		same_chksum=1 # fake same size for skipping
-	fi
-}
-
-checksize_func() {
-
-	local func_file_path="$1"
-	local filesize_tocheck="$2"
-	local_file_size=$(stat -c%s "$func_file_path")
-
-	########################## File size check   same_size = 0 different, 1 identical , 2 unknown
-
-	if echo "$filesize_tocheck" | grep -q "^[0-9][0-9]*$"; then # check if the remote file size is a numeric value
-		if [ "$filesize_tocheck" -eq "$local_file_size" ]; then
-			log "Same size as remote"
-			same_size=1
-		else
-			log "Files size are different"
-			same_size=0
-		fi
-	else
-		log "Impossible to get file size : wrong parameter."
-		same_size=2
-	fi
-}
 
 # Start retroarch with -C in client mode if everything's gone to plan
 start_retroarch() {
@@ -421,33 +377,6 @@ start_retroarch() {
 ###########
 
 # URL encode helper
-url_encode() {
-	encoded_str=$(echo "$*" | awk '
-    BEGIN {
-	split ("1 2 3 4 5 6 7 8 9 A B C D E F", hextab, " ")
-	hextab [0] = 0
-	for ( i=1; i<=255; ++i ) ord [ sprintf ("%c", i) "" ] = i + 0
-    }
-    {
-	encoded = ""
-	for ( i=1; i<=length ($0); ++i ) {
-	    c = substr ($0, i, 1)
-	    if ( c ~ /[a-zA-Z0-9.-]/ ) {
-		encoded = encoded c		# safe character
-	    } else if ( c == " " ) {
-		encoded = encoded "%20"	# special handling
-	    } else {
-		# unsafe character, encode it as a two-digit hex-number
-		lo = ord [c] % 16
-		hi = int (ord [c] / 16);
-		encoded = encoded "%" hextab [hi] hextab [lo]
-	    }
-	}
-	    print encoded
-    }
-')
-	echo "$encoded_str"
-}
 
 wifi_disabled() {
 	[ $(/customer/app/jsonval wifi) -eq 0 ]
@@ -494,10 +423,6 @@ stripped_game_name() {
 	game_name=$(awk -F'/' '/\[rom\]:/ {print $NF}' /mnt/SDCARD/RetroArch/retroarch.cookie.client | sed 's/\(.*\)\..*/\1/')
 }
 
-is_running() {
-	process_name="$1"
-	pgrep "$process_name" >/dev/null
-}
 
 cleanup() {
 	build_infoPanel_and_log "Cleanup" "Cleaning up after netplay session..."

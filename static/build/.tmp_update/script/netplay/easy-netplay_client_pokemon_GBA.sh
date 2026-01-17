@@ -13,9 +13,10 @@ client_rom_filename=$(basename "$client_rom")
 client_rom_filename_NoExt="${client_rom_filename%.*}"
 netplaycore="/mnt/SDCARD/RetroArch/.retroarch/cores/gpsp_libretro.so"
 
-## Source global utils
 logfile=pokemon_link
+# Source scripts
 . $sysdir/script/log.sh
+. $sysdir/script/netplay/netplay_common.sh
 
 log "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* Easy Netplay Pokemon Client GBA -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*"
 
@@ -24,31 +25,6 @@ log "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* Easy Netplay Pokemon Client GBA -*
 ##########
 
 # Wait for the host to tell us it's ready, this happens just before it starts its RA session and we look in /tmp for a file indicator (file removed in host script cleanup)
-wait_for_host() {
-
-    local counter=0
-
-    build_infoPanel_and_log "Ready" "Waiting for host to ready up"
-    while true; do
-        sync
-        check_stop
-        for file in /tmp/host_ready; do
-            if [ -f "$file" ]; then
-                build_infoPanel_and_log "Message from host" "Setup complete"
-                rm /tmp/host_ready # be ready for the second use of host_ready flag
-                break 2
-            fi
-        done
-
-        sleep 1
-        counter=$((counter + 1))
-
-        if [ $counter -ge 25 ]; then
-            build_infoPanel_and_log "Error" "The host didn't ready up, cannot continue..."
-            notify_stop
-        fi
-    done
-}
 
 # Start retroarch with -C in client mode if everything's gone to plan
 start_retroarch() {
@@ -112,11 +88,6 @@ cleanup() {
 ###########
 
 # Use the safe word
-notify_stop() {
-    notify_peer "stop_now"
-    sleep 2
-    cleanup
-}
 
 # Check stop, if the client tells us to stop we will.
 check_stop() {
@@ -157,22 +128,7 @@ start_ftp() {
 }
 
 # This will restore the users original ftp state
-restore_ftp() {
-    log "Restoring original FTP server"
-    killall -9 tcpsvd
-    if flag_enabled ftpState; then
-        if flag_enabled authftpState; then
-            bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpdauth.conf &
-        else
-            bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpd.conf &
-        fi
-    fi
-}
 
-flag_enabled() {
-    flag="$1"
-    [ -f "$sysdir/config/.$flag" ]
-}
 
 build_infoPanel_and_log() {
 	local title="$1"
@@ -218,10 +174,6 @@ stripped_game_names() {
     game_name_client="Client (me): \n$client_rom_trimmed"
 }
 
-is_running() {
-    process_name="$1"
-    pgrep "$process_name" >/dev/null
-}
 
 #########
 ##Main.##
