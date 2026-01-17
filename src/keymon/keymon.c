@@ -260,14 +260,17 @@ void deepsleep(void)
 //
 void suspend_exec(int timeout)
 {
-    bool stay_awake = timeout == -1;
     keyinput_disable();
 
     // pause playActivity
     system("playActivity stop_all");
 
-    // suspend
-    if (!stay_awake) {
+    if (temp_flag_get("stay_awake")) {
+        // stay awake (keep processes running and volume on)
+        timeout = -1; // no timeout
+    }
+    else {
+        // suspend processes
         suspend(0);
         setVolume(0);
     }
@@ -341,9 +344,13 @@ void suspend_exec(int timeout)
 
 void turnOffScreen(void)
 {
-    int timeout = (settings.sleep_timer + SHUTDOWN_MIN) * 60000;
-    bool stay_awake = settings.sleep_timer == 0 || temp_flag_get("stay_awake");
-    suspend_exec(stay_awake ? -1 : timeout);
+    if (settings.sleep_timer == 0) {
+        suspend_exec(-1); // no sleep timeout
+    }
+    else {
+        int timeout = (settings.sleep_timer + SHUTDOWN_MIN) * 60000;
+        suspend_exec(timeout);
+    }
 }
 
 /**
