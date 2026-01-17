@@ -35,7 +35,7 @@ log "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* Easy Netplay Pokemon Client -*-*-*
 ##Setup.##
 ##########
 
-# Push our save over to the host - The save will be found based on the rom we've started GLO on and it will look in the $save_dir path for it (see line13) - Backs up first
+# Push our save over to the host - The save will be found based on the rom we've started GLO on and it will look in the $save_dir path for it - Backs up first
 backup_and_send_save() {
     # check_stop: host reported a setup issue
     check_stop "The host has had a problem setting up the session"
