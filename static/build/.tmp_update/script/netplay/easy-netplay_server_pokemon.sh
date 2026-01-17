@@ -725,7 +725,6 @@ lets_go() {
 	# Create hotspot for client
 	. "$sysdir/script/network/hotspot_create.sh"
 
-	# Start FTP with preflight stop check
 	# start_ftp: preflight check_stop for client join issues
 	start_ftp "The client has had a problem joining the session."
 

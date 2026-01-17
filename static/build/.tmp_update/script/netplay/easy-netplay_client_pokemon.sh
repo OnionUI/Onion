@@ -623,7 +623,6 @@ lets_go() {
     # Join host hotspot
     . "$sysdir/script/network/hotspot_join.sh"
 
-    # Start FTP for file transfers
 	# start_ftp: start FTP without preflight
 	start_ftp
 

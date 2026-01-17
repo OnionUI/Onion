@@ -144,7 +144,6 @@ lets_go() {
 	# Create hotspot for client
 	. "$sysdir/script/network/hotspot_create.sh"
 
-	# Start FTP for cookie transfer
 	# start_ftp: start FTP without preflight
 	start_ftp
 
