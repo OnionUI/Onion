@@ -1,5 +1,7 @@
 .DS_Store
 .vscode/
+!.vscode/launch.json
+!.vscode/tasks.json
 *.o
 /src/**/*.log
 /build/
