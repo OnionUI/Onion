@@ -143,8 +143,11 @@ int main(int argc, char *argv[])
     if (glo) {
         for (i = 0; i < (pargc >> 1); i++) {
             ListItem item = {.action_id = i, .action = NULL};
-            strncpy(item.label, pargs[i], STR_MAX - 1);
-            strncpy(item.info_note, pargs[i + (pargc >> 1)], STR_MAX - 1);
+            char *str = str_replace(pargs[i], "\/n", "\n");
+            strncpy(item.label, str, STR_MAX - 1);
+            str = str_replace(pargs[i + (pargc >> 1)], "\/n", "\n");
+            strncpy(item.info_note, str, STR_MAX - 1);
+            free(str);
             printf_debug("Adding list item: %s %s (%d)\n", item.label, item.info_note, item.action_id);
             list_addItemWithInfoNote(&list, item, item.info_note);
         }

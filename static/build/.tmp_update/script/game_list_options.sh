@@ -197,9 +197,9 @@ main() {
         fz_file="$(realpath "$(dirname "$rompath")")"/.fz
         extract_roms_state=""
         if [ -f "$fz_file" ];then
-          extract_roms_state="(On)"
+          extract_roms_state="On"
         else
-          extract_roms_state="(Off)"
+          extract_roms_state="Off"
         fi
         add_menu_option extract_roms "Pre-extract Roms: $extract_roms_state" "Extracts roms for faster loads while in GameSwitcher"
     fi
