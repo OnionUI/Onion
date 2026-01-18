@@ -1,0 +1,76 @@
+{
+    "version": "0.2.0",
+    "inputs": [
+        {
+            "id": "remoteProgram",
+            "type": "promptString",
+            "description": "Remote program path (on device)",
+            "default": "/mnt/SDCARD/App/PlayActivity/playActivityUI"
+        },
+        {
+            "id": "localProgram",
+            "type": "promptString",
+            "description": "Local program with symbols",
+            "default": "${workspaceFolder}/build/App/PlayActivity/playActivityUI"
+        }
+    ],
+    "configurations": [
+        {
+            "name": "Remote Debug: PlayActivityUI",
+            "type": "cppdbg",
+            "request": "launch",
+            "preLaunchTask": "remote: debug prep (PlayActivityUI)",
+            "program": "${workspaceFolder}/build/App/PlayActivity/playActivityUI",
+            "cwd": "${workspaceFolder}",
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb",
+            "miDebuggerServerAddress": "${config:onion.debug.targetHost}:${config:onion.debug.gdbPort}",
+            "stopAtEntry": false,
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "Remote Debug: gameSwitcher",
+            "type": "cppdbg",
+            "request": "launch",
+            "preLaunchTask": "remote: debug prep (gameSwitcher)",
+            "program": "${workspaceFolder}/build/.tmp_update/bin/gameSwitcher",
+            "cwd": "${workspaceFolder}",
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb",
+            "miDebuggerServerAddress": "${config:onion.debug.targetHost}:${config:onion.debug.gdbPort}",
+            "stopAtEntry": false,
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "Remote Debug: custom path",
+            "type": "cppdbg",
+            "request": "launch",
+            "preLaunchTask": "remote: debug prep (custom)",
+            "program": "${input:localProgram}",
+            "cwd": "${workspaceFolder}",
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb",
+            "miDebuggerServerAddress": "${config:onion.debug.targetHost}:${config:onion.debug.gdbPort}",
+            "stopAtEntry": false,
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+    ]
+}

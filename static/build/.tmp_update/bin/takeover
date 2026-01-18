@@ -1,0 +1,5 @@
+#!/bin/sh
+
+kill -9 $(pgrep -f "/customer/main")
+kill -9 $(pgrep -f "runtime.sh")
+pkill -15 MainUI

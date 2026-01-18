@@ -1,0 +1,96 @@
+{
+    "version": "2.0.0",
+    "inputs": [
+        {
+            "id": "remoteProgram",
+            "type": "promptString",
+            "description": "Remote program path (on device)",
+            "default": "/mnt/SDCARD/App/PlayActivity/playActivityUI"
+        }
+    ],
+    "tasks": [
+        {
+            "label": "build: PlayActivityUI (dev)",
+            "type": "shell",
+            "command": "make -C ${workspaceFolder}/src/playActivityUI dev BUILD_DIR=${workspaceFolder}/build/App/PlayActivity"
+        },
+        {
+            "label": "deploy: PlayActivityUI (dev)",
+            "type": "shell",
+            "command": "sshpass -p onion ssh onion@${config:onion.debug.targetHost} 'killall gdbserver >/dev/null 2>&1 || true; killall playActivityUI >/dev/null 2>&1 || true; rm -f /mnt/SDCARD/App/PlayActivity/playActivityUI'; sshpass -p onion scp ${workspaceFolder}/build/App/PlayActivity/playActivityUI onion@${config:onion.debug.targetHost}:/mnt/SDCARD/App/PlayActivity/"
+        },
+        {
+            "label": "build: gameSwitcher (dev)",
+            "type": "shell",
+            "command": "make -C ${workspaceFolder}/src/gameSwitcher dev BUILD_DIR=${workspaceFolder}/build/.tmp_update/bin"
+        },
+        {
+            "label": "deploy: gameSwitcher (dev)",
+            "type": "shell",
+            "command": "sshpass -p onion ssh onion@${config:onion.debug.targetHost} 'killall gdbserver >/dev/null 2>&1 || true; killall gameSwitcher >/dev/null 2>&1 || true; rm -f /mnt/SDCARD/.tmp_update/bin/gameSwitcher'; sshpass -p onion scp ${workspaceFolder}/build/.tmp_update/bin/gameSwitcher onion@${config:onion.debug.targetHost}:/mnt/SDCARD/.tmp_update/bin/"
+        },
+        {
+            "label": "remote: takeover+gdbserver (PlayActivityUI)",
+            "type": "shell",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "build: PlayActivityUI (dev)",
+                "deploy: PlayActivityUI (dev)"
+            ],
+            "command": "sshpass -p onion ssh onion@${config:onion.debug.targetHost} 'killall gdbserver >/dev/null 2>&1 || true; takeover; nohup gdbserver :${config:onion.debug.gdbPort} /mnt/SDCARD/App/PlayActivity/playActivityUI >/tmp/gdbserver.log 2>&1 & echo READY'"
+        },
+        {
+            "label": "remote: takeover+gdbserver (gameSwitcher)",
+            "type": "shell",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "build: gameSwitcher (dev)",
+                "deploy: gameSwitcher (dev)"
+            ],
+            "command": "sshpass -p onion ssh onion@${config:onion.debug.targetHost} 'killall gdbserver >/dev/null 2>&1 || true; takeover; nohup gdbserver :${config:onion.debug.gdbPort} /mnt/SDCARD/.tmp_update/bin/gameSwitcher >/tmp/gdbserver.log 2>&1 & echo READY'"
+        },
+        {
+            "label": "remote: takeover+gdbserver (custom)",
+            "type": "shell",
+            "command": "sshpass -p onion ssh onion@${config:onion.debug.targetHost} 'killall gdbserver >/dev/null 2>&1 || true; takeover; nohup gdbserver :${config:onion.debug.gdbPort} ${input:remoteProgram} >/tmp/gdbserver.log 2>&1 & echo READY'"
+        },
+        {
+            "label": "remote: stream gdbserver log",
+            "type": "shell",
+            "command": "sshpass -p onion ssh onion@${config:onion.debug.targetHost} 'tail -f /tmp/gdbserver.log'",
+            "isBackground": true,
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            }
+        },
+        {
+            "label": "remote: debug prep (PlayActivityUI)",
+            "type": "shell",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "remote: takeover+gdbserver (PlayActivityUI)"
+            ],
+            "command": "echo ready"
+        },
+        {
+            "label": "remote: debug prep (gameSwitcher)",
+            "type": "shell",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "remote: takeover+gdbserver (gameSwitcher)"
+            ],
+            "command": "echo ready"
+        },
+        {
+            "label": "remote: debug prep (custom)",
+            "type": "shell",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "remote: takeover+gdbserver (custom)"
+            ],
+            "command": "echo ready"
+        }
+    ]
+}
