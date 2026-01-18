@@ -152,7 +152,7 @@ void theme_renderListCustom(SDL_Surface *screen, List *list, ListRenderParams_s 
             }
 
             label_end = 640 * g_scale - 80 * g_scale - strlen(index_str) * digit_width; // less space as number grows
-            label_y = 30;                                                    // give the description more space
+            label_y = 30;                                                               // give the description more space
             if (list->active_pos == i)
                 description_color = theme()->title.color; // make the selected item's description pop
         }
