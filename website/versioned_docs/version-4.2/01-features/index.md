@@ -196,8 +196,8 @@ Check the <a href="included-apps">included apps</a> documentation for more infor
 
 :::note <a href="network-features">Network Features</a>
 For the Miyoo Mini Plus (equiped with wifi) Onion offers many additional possibilites :<br />
-- [Multiplayer / Netplay](multiplayer) : play in multiplayer over internet or on you lcoal network to your favorite retro games:
-- [Easy Netplay](multiplayer/easynetplay): play multiplayer games anywhere (compatible with GBC/GBC Pokemon trading !)
+- [Multiplayer / Netplay](multiplayer) : play in multiplayer over internet or on you local network to your favorite retro games:
+- [Easy Netplay](multiplayer/easynetplay): play multiplayer games anywhere (compatible with GB/GBC Pokemon trading !)
 - [OTA (Over The Air) updates](apps/ota-update) : update Onion directly from your MMP
 - [Automatic date/time synchronisation](apps/tweaks#set-automatically-via-the-internet) (NTP, via Tweaks app)
 - [Retroachivements](https://www.retroarch.com/?page=achievements)

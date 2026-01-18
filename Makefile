@@ -1,8 +1,8 @@
 ###########################################################
 
 TARGET=Onion
-VERSION=4.4.0-beta2
-RA_SUBVERSION=1.20.0
+VERSION=4.4.0-beta-20260117
+RA_SUBVERSION=1.22.2
 
 ###########################################################
 
@@ -272,7 +272,7 @@ external-libs:
 test: external-libs
 	@mkdir -p $(BUILD_TEST_DIR)/infoPanel_test_data && cd $(TEST_SRC_DIR) && BUILD_DIR=$(BUILD_TEST_DIR)/ make dev
 	@cp -R $(TEST_SRC_DIR)/infoPanel_test_data $(BUILD_TEST_DIR)/
-	cd $(BUILD_TEST_DIR) && ./test
+	cd $(BUILD_TEST_DIR) && LD_LIBRARY_PATH=$(ROOT_DIR)/lib/ ./test
 
 static-analysis: external-libs
 	@cd $(ROOT_DIR) && cppcheck -I $(INCLUDE_DIR) --enable=all $(SRC_DIR)

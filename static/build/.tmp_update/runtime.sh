@@ -322,8 +322,10 @@ launch_game() {
     save_settings
 
     if check_is_game "$cmd"; then
+        # Extract rom path
         rompath=$(echo "$cmd" | awk '{ st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3)}')
 
+        # Check for custom launch script
         if echo "$rompath" | grep -q ":"; then
             launch_script=$(echo "$rompath" | awk '{split($0,a,":"); print a[1]}')
             rompath=$(echo "$rompath" | awk '{split($0,a,":"); print a[2]}')
@@ -334,14 +336,19 @@ launch_game() {
         romext=$(echo "$(basename "$rompath")" | awk -F. '{print tolower($NF)}')
 
         if [ "$romext" != "miyoocmd" ]; then
+            # Resolve real path
             if [ -f "$rompath" ]; then
                 rompath=$(realpath "$rompath")
             fi
+
+            # Update cmd_to_run with resolved path
             if [ "$rompath" != "$orig_path" ]; then
                 temp=$(cat $sysdir/cmd_to_run.sh)
                 cmd_replaced=$(echo "$temp" | rev | sed 's/^"[^"]*"//g' | rev)"\"$rompath\""
                 echo "$cmd_replaced" > $sysdir/cmd_to_run.sh
             fi
+
+            # Game config path
             romcfgpath="$(dirname "$rompath")/.game_config/$(basename "$rompath" ".$romext").cfg"
             log "rompath: $rompath (ext: $romext)"
             log "romcfgpath: $romcfgpath"
@@ -357,6 +364,7 @@ launch_game() {
 
     if [ $is_game -eq 1 ]; then
         if [ -f "$launch_script" ] && cat "$launch_script" | grep -q '.retroarch/cores'; then
+            # Override core if needed
             override_game_core "$romcfgpath" "$launch_script"
         fi
 
@@ -438,7 +446,7 @@ launch_game() {
         infoPanel --title "Fatal error occurred" --message "The program exited unexpectedly.\n(Error code: $retval)" --auto
     fi
 
-    launch_game_postprocess $is_game "$cmd" "$rompath"
+    launch_game_postprocess $is_game "$rompath"
 }
 
 force_retroarch_cfg() {
@@ -487,8 +495,7 @@ override_game_core() {
 
 launch_game_postprocess() {
     is_game=$1
-    cmd="$2"
-    rompath="$3"
+    rompath="$2"
 
     # Reset CPU frequency
     echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
@@ -501,10 +508,15 @@ launch_game_postprocess() {
         cd $sysdir
         playActivity stop "$rompath"
 
-        if echo "$cmd" | grep -q "/tmp/reset.cfg"; then
-            echo "$cmd" | sed 's/ --appendconfig \"\/tmp\/reset.cfg\"//g' > $sysdir/cmd_to_run.sh
-        elif echo "$cmd" | grep -q "/tmp/auto_load_state.cfg"; then
-            echo "$cmd" | sed 's/ --appendconfig \"\/tmp\/auto_load_state.cfg\"//g' > $sysdir/cmd_to_run.sh
+        # Remove appended configs if quick switch not used
+        if [ ! -f /tmp/quick_switch ]; then
+            cmd=$(cat $sysdir/cmd_to_run.sh)
+
+            if echo "$cmd" | grep -q "/tmp/reset.cfg"; then
+                echo "$cmd" | sed 's/ --appendconfig \"\/tmp\/reset.cfg\"//g' > $sysdir/cmd_to_run.sh
+            elif echo "$cmd" | grep -q "/tmp/auto_load_state.cfg"; then
+                echo "$cmd" | sed 's/ --appendconfig \"\/tmp\/auto_load_state.cfg\"//g' > $sysdir/cmd_to_run.sh
+            fi
         fi
 
         if [ -f /tmp/.lowBat ]; then

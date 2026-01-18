@@ -319,12 +319,13 @@ bool history_getRomscreenPath(char *path_out)
 
 void resumeGame(int index)
 {
-    FILE *file = fopen(getMiyooRecentFilePath(), "r");
+    const char *recentPath = getMiyooRecentFilePath();
+    FILE *file = fopen(recentPath, "r");
 
     int type;
 
     if (!file) {
-        fprintf(stderr, "Can't open file %s\n", getMiyooRecentFilePath());
+        fprintf(stderr, "Can't open file %s\n", recentPath);
         return;
     }
 
@@ -406,29 +407,34 @@ void resumeGame(int index)
             char LaunchCommand[STR_MAX * 3];
 
             fclose(file);
+            file = NULL;
             sprintf(LaunchCommand, "LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so \"%s\" \"%s\"", launch, rompath);
 
             remove("/mnt/SDCARD/.tmp_update/.runGameSwitcher");
-            printf_debug("resume game: %s\n", LaunchCommand);
 
+            // move selected rom to top of recent list for quick switch
             if (lineCount > 1) {
                 temp_flag_set("quick_switch", true);
 
-                char *line_n = file_read_lineN(getMiyooRecentFilePath(), lineCount);
-                file_add_line_to_beginning(getMiyooRecentFilePath(), line_n);
-                file_delete_line(getMiyooRecentFilePath(), lineCount + 1);
+                char *line_n = file_read_lineN(recentPath, lineCount);
+                file_add_line_to_beginning(recentPath, line_n);
+                file_delete_line(recentPath, lineCount + 1);
                 free(line_n);
             }
 
             file_put_sync(fp, CMD_TO_RUN_PATH, "%s", LaunchCommand);
+            printf_debug("resume game: %s\n", LaunchCommand);
 
             temp_flag_set("force_auto_load_state", true);
 
             sync();
-            return;
+            break;
         }
     }
-    fclose(file);
+
+    if (file != NULL) {
+        fclose(file);
+    }
 }
 
 void set_resumeGame(void)
