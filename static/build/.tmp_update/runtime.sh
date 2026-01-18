@@ -8,13 +8,19 @@ logfile=$(basename "$0" .sh)
 . $sysdir/script/log.sh
 
 MODEL_MM=283
+MODEL_MMF=285
 MODEL_MMP=354
 screen_resolution="640x480"
 
 main() {
     # Set model ID
-    axp 0 > /dev/null
-    export DEVICE_ID=$([ $? -eq 0 ] && echo $MODEL_MMP || echo $MODEL_MM)
+    if [ -e /dev/input/event1 ]; then
+        export DEVICE_ID=$MODEL_MMF
+    elif axp 0 > /dev/null 2>&1; then
+        export DEVICE_ID=$MODEL_MMP
+    else
+        export DEVICE_ID=$MODEL_MM
+    fi
     echo -n "$DEVICE_ID" > /tmp/deviceModel
 
     SERIAL_NUMBER=$(read_uuid)
@@ -45,7 +51,7 @@ main() {
     # Check is charging
     if [ $DEVICE_ID -eq $MODEL_MM ]; then
         is_charging=$(cat /sys/devices/gpiochip0/gpio/gpio59/value)
-    elif [ $DEVICE_ID -eq $MODEL_MMP ]; then
+    elif [ $DEVICE_ID -eq $MODEL_MMF ] || [ $DEVICE_ID -eq $MODEL_MMP ]; then
         axp_status="0x$(axp 0 | cut -d':' -f2)"
         is_charging=$([ $(($axp_status & 0x4)) -eq 4 ] && echo 1 || echo 0)
     fi
@@ -68,6 +74,7 @@ main() {
 
     cd $sysdir
     bootScreen "Boot"
+    get_screen_resolution
 
     # Set filebrowser branding to "Onion" and apply custom theme
     if [ -f "$sysdir/config/filebrowser/first.run" ]; then
@@ -100,7 +107,7 @@ main() {
         rm -f "$sysdir/cmd_to_run.sh" 2> /dev/null
     fi
 
-    if [ $DEVICE_ID -eq $MODEL_MMP ] && [ -f /mnt/SDCARD/RetroArch/retroarch_miyoo354 ]; then
+    if [ $DEVICE_ID -eq $MODEL_MMF ] || [ $DEVICE_ID -eq $MODEL_MMP ] && [ -f /mnt/SDCARD/RetroArch/retroarch_miyoo354 ]; then
         # Mount miyoo354 RA version
         mount -o bind /mnt/SDCARD/RetroArch/retroarch_miyoo354 /mnt/SDCARD/RetroArch/retroarch
     fi
@@ -452,38 +459,11 @@ EOM
     rm /tmp/onion_ra_patch.cfg
 }
 
-override_game_core() {
-    romcfgpath="$1"
-    launch_path="$2"
+# override_game_core() 
+# This paragraph will cause the contents of the simulator launch.sh to be skipped and cannot be executed, 
+# such as video teaching examples in ARCADE scripts, archive transformation in GBA scripts, etc. 
+# If you need to keep it, it is recommended to consider using this fast load in game switching.
 
-    if [ -f "$romcfgpath" ]; then
-        romcfg=$(cat "$romcfgpath")
-        retroarch_core=$(get_info_value "$romcfg" core)
-    fi
-
-    if grep -q "default_core=" "$launch_path"; then
-        default_core="$(cat "$launch_path" | grep "default_core=" | head -1 | awk '{split($0,a,"="); print a[2]}' | xargs)_libretro"
-    else
-        default_core=$(cat "$launch_path" | grep ".retroarch/cores/" | awk '{st = index($0,".retroarch/cores/"); s = substr($0,st+17); st2 = index(s,".so"); print substr(s,0,st2-1)}' | xargs)
-    fi
-
-    if [ "$retroarch_core" == "" ]; then
-        retroarch_core="$default_core"
-    fi
-
-    corepath=".retroarch/cores/$retroarch_core.so"
-
-    if [ -f "/mnt/SDCARD/RetroArch/$corepath" ] && echo "$cmd" | grep -qv "retroarch/cores"; then # Do not override game core when launching from GS
-        if echo "$cmd" | grep -q "/tmp/reset.cfg"; then
-            echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v --appendconfig \"/tmp/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
-        elif [ -f /tmp/force_auto_load_state ]; then
-            echo -e "savestate_auto_load = \"true\"\nconfig_save_on_exit = \"false\"\n" > /tmp/auto_load_state.cfg
-            echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v --appendconfig \"/tmp/auto_load_state.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
-        else
-            echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
-        fi
-    fi
-}
 
 launch_game_postprocess() {
     is_game=$1
@@ -734,7 +714,7 @@ init_system() {
     ip addr add 127.0.0.1/8 dev lo
     ifconfig lo up
 
-    if [ $DEVICE_ID -eq $MODEL_MMP ] && [ -f $sysdir/config/.lcdvolt ]; then
+    if [ $DEVICE_ID -eq $MODEL_MMF ] || [ $DEVICE_ID -eq $MODEL_MMP ] && [ -f $sysdir/config/.lcdvolt ]; then
         $sysdir/script/lcdvolt.sh 2> /dev/null
     fi
 
@@ -757,7 +737,8 @@ init_system() {
     echo $brightness_raw > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
     echo 1 > /sys/class/pwm/pwmchip0/pwm0/enable
 
-    get_screen_resolution
+    # Avoid the flower screen in the 285 startup screen
+    change_resolution "640x480"
 }
 
 device_uuid=$(read_uuid)
