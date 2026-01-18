@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
         overlay_resume();
     }
     else {
-        printf_debug("Resuming game - current_game : %i - index: %i", appState.current_game, game_list[appState.current_game].index);
+        printf_debug("Resuming game - current_game : %i - index: %i\n", appState.current_game, game_list[appState.current_game].index);
         resumeGame(game_list[appState.current_game].index);
         overlay_exit();
         render_showFullscreenMessage("LOADING", true);
