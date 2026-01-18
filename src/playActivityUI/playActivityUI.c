@@ -290,7 +290,7 @@ void renderNoGamesInfo(AppState *st)
 {
     // clear the list area, important in case all entries were deleted
     int footer_height = st->res->footer ? st->res->footer->h : 0;
-    SDL_FillRect(screen, &(SDL_Rect){0, 60, RENDER_WIDTH, RENDER_HEIGHT - footer_height}, 0);
+    SDL_FillRect(screen, &(SDL_Rect){0, 60, screen->w, screen->h - footer_height}, 0);
 
     // no games played yet
     SDL_Surface *text_line = TTF_RenderUTF8_Blended(resource_getFont(HINT), "No games played yet", theme()->hint.color);
@@ -343,7 +343,7 @@ void renderCustomFooterInfo(AppState *st)
     if (!total_items)
         return;
 
-    SDL_Rect total_items_rect = {RENDER_WIDTH - total_items->w - 20, RENDER_HEIGHT - st->res->footer->h / 2 - total_items->h / 2};
+    SDL_Rect total_items_rect = {screen->w - total_items->w - 20, screen->h - st->res->footer->h / 2 - total_items->h / 2};
     SDL_BlitSurface(total_items, NULL, screen, &total_items_rect);
     SDL_FreeSurface(total_items);
 }
@@ -356,7 +356,7 @@ AppState *init()
     log_setName("playActivityUI");
     print_debug("Debug logging enabled");
     getDeviceModel();
-    SDL_InitDefault(true);
+    SDL_InitDefault();
 
     renderLoadingText();
 
@@ -435,7 +435,7 @@ int main()
         if (st->footer_changed || st->all_changed) {
             START_TIMER(tm_renderFooter);
             if (st->res->footer) {
-                SDL_Rect footer_rect = {0, RENDER_HEIGHT - st->res->footer->h};
+                SDL_Rect footer_rect = {0, screen->h - st->res->footer->h};
                 SDL_BlitSurface(st->res->footer, NULL, screen,
                                 &footer_rect);
                 if (st->play_activities->count > 0)

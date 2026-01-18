@@ -31,7 +31,7 @@ static bool g_save_thread_success = false;
 
 void popMenu_destroy(void)
 {
-    list_free(&appState.pop_menu_list);
+    list_free(&appState.pop_menu_list, NULL);
 }
 
 static bool _hasSaveStates(Game_s *game)
