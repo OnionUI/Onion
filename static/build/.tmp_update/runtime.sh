@@ -126,18 +126,21 @@ main() {
         rm -f "$sysdir/cmd_to_run.sh" 2> /dev/null
     fi
 
-    startup_app=$(cat $sysdir/config/startup/app)
+    # Only launch startup app if not quick switching
+    if [ ! -f /tmp/quick_switch ]; then
+        startup_app=$(cat $sysdir/config/startup/app)
 
-    if [ $startup_app -eq 1 ]; then
-        log "\n\n:: STARTUP APP: GameSwitcher\n\n"
-        touch $sysdir/.runGameSwitcher
-    elif [ $startup_app -eq 2 ]; then
-        log "\n\n:: STARTUP APP: RetroArch\n\n"
-        echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v" > $sysdir/cmd_to_run.sh
-        touch /tmp/quick_switch
-    elif [ $startup_app -eq 3 ]; then
-        log "\n\n:: STARTUP APP: AdvanceMENU\n\n"
-        touch /tmp/run_advmenu
+        if [ $startup_app -eq 1 ]; then
+            log "\n\n:: STARTUP APP: GameSwitcher\n\n"
+            touch $sysdir/.runGameSwitcher
+        elif [ $startup_app -eq 2 ]; then
+            log "\n\n:: STARTUP APP: RetroArch\n\n"
+            echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v" > $sysdir/cmd_to_run.sh
+            touch /tmp/quick_switch
+        elif [ $startup_app -eq 3 ]; then
+            log "\n\n:: STARTUP APP: AdvanceMENU\n\n"
+            touch /tmp/run_advmenu
+        fi
     fi
 
     state_change check_switcher
