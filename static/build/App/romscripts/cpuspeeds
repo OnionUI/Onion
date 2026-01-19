@@ -1,0 +1,16 @@
+#!/bin/sh
+AppDir=$(pwd)
+AppExecutable="cpuspeeds.py"
+Arguments=""
+KillAudioserver=0
+PerformanceMode=0
+CONFIG_DIR="$1"
+if [ "$PerformanceMode" = "1" ]; then echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor; fi
+cd "$AppDir"
+HOME="$AppDir"
+ParasytePath="/mnt/SDCARD/.tmp_update/lib/parasyte"
+export PYTHONPATH=$ParasytePath/python2.7:$ParasytePath/python2.7/site-packages:$ParasytePath/python2.7/lib-dynload
+export PYTHONHOME=$ParasytePath/python2.7:$ParasytePath/python2.7/site-packages:$ParasytePath/python2.7/lib-dynload
+export LD_LIBRARY_PATH=$ParasytePath:$ParasytePath/python2.7/:$ParasytePath/python2.7/lib-dynload:$LD_LIBRARY_PATH
+eval /mnt/SDCARD/.tmp_update/bin/parasyte/python2 "$AppExecutable" "$CONFIG_DIR"
+unset LD_PRELOAD
