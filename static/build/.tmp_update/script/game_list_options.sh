@@ -8,9 +8,14 @@ recentlist=/mnt/SDCARD/Roms/recentlist.json
 recentlist_hidden=/mnt/SDCARD/Roms/recentlist-hidden.json
 recentlist_temp=/tmp/recentlist-temp.json
 
-UI_TITLE="GLO"
+save_dir=/mnt/SDCARD/Saves/CurrentProfile/saves
+gpsp_migration_log="$save_dir/gpSP/migration_status.log"
 
 mkdir -p $radir/cores/cache
+
+# Logging setup
+logfile=$(basename "$0" .sh)
+. $sysdir/script/log.sh
 
 cd $sysdir
 
@@ -53,7 +58,7 @@ menu_option_info=""
 main() {
     
     if [ ! -f ./cmd_to_run.sh ]; then
-        echo "cmd_to_run.sh not found"
+        log "cmd_to_run.sh not found"
         exit 1
     fi
 
@@ -69,22 +74,20 @@ main() {
     mv $recentlist_temp $currentrecentlist
 
     if [ $current_tab -eq $TAB_GAMES ]; then
-        echo "tab: games"
+        log "tab: games"
     elif [ $current_tab -eq $TAB_FAVORITES ]; then
-        echo "tab: favorites"
+        log "tab: favorites"
     elif [ $current_tab -eq $TAB_APPS ]; then
-        echo "tab: apps"
+        log "tab: apps"
     elif [ $current_tab -eq $TAB_RECENTS ]; then
-        echo "tab: recents"
+        log "tab: recents"
     elif [ $current_tab -eq $TAB_EXPERT ]; then
-        echo "tab: expert"
+        log "tab: expert"
     fi
 
     if [ $current_tab -eq $TAB_APPS ]; then
         exit
     fi
-
-    rm -f ./cmd_to_run.sh 2> /dev/null
 
     emupath=$(dirname $(echo "$cmd" | awk '{ gsub(/"/, "", $2); st = index($2,".."); if (st) { print substr($2,0,st) } else { print $2 } }'))
 
@@ -117,20 +120,20 @@ main() {
         emulabel="Recents"
     fi
 
-    echo "cmd: $cmd"
+    log "cmd: $cmd"
     # example: LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so "/mnt/SDCARD/Emu/GBATEST/../../.tmp_update/proxy.sh" "/mnt/SDCARD/Emu/GBATEST/../../Roms/GBATEST/mGBA/Final Fantasy IV Advance (U).zip"
-    echo "romtype: $romtype"
-    echo "rompath: $rompath"
+    log "romtype: $romtype"
+    log "rompath: $rompath"
     # example: "/mnt/SDCARD/Emu/GBATEST/../../Roms/GBATEST/mGBA/Final Fantasy IV Advance (U).zip"
-    echo "romext: $romext"
+    log "romext: $romext"
 
-    echo "emupath: $emupath"
-    echo "emulabel: $emulabel"
+    log "emupath: $emupath"
+    log "emulabel: $emulabel"
 
-    echo "romroot: $romroot"
-    echo "launch: $launch_path"
+    log "romroot: $romroot"
+    log "launch: $launch_path"
 
-    echo "has_networking: $has_networking"
+    log "has_networking: $has_networking"
 
     skip_game_options=0
 
@@ -161,38 +164,46 @@ main() {
                 add_reset_core=1
             fi
 
-            add_menu_option reset_game "Reset game" "Resets the game"
+            add_menu_option reset_game "Reset game" "Starts the game without\nloading the auto save state"
         fi
 
         romdirname=$(echo "$rompath" | sed "s/^.*Roms\///g" | cut -d "/" -f1)
-        manpath="/mnt/SDCARD/Roms/$romdirname/Manuals/$(basename "$rompath" ".$romext").pdf"
+        romname=$(basename "$rompath" ".$romext")
+        manpath="/mnt/SDCARD/Roms/$romdirname/Manuals/$romname.pdf"
 
-        echo "romdirname: $romdirname"
-        echo "manpath: $manpath"
+        log "romdirname: $romdirname"
+        log "manpath: $manpath"
 
         if [ -f "$manpath" ]; then
-            add_menu_option open_manual "Game manual" "Opens the Game Manual"
+            add_menu_option open_manual "Game manual" "Opens the manual for this game"
         fi
 
-        add_menu_option change_core "$game_core_label" "Change the core for this game" 
+        add_menu_option change_core "$game_core_label" "Change the RetroArch core\nused to run this game"
 
         if [ $add_reset_core -eq 1 ]; then
-            add_menu_option reset_core "Restore default core" "Restores the default core for this rom"
+            add_menu_option reset_core "Restore default core" "Restores the default core\nfor this rom"
+        fi
+
+        # Add "Migrate mGBA Save" option dynamically
+        if [ "$retroarch_core" == "gpsp_libretro" ] && [ -f "$save_dir/mGBA/$romname.srm" ]; then
+            add_menu_option transfer_mgba_save "Transfer mGBA save" \
+                "Transfer mGBA save to gpSP.\nConfirmation will be requested if a\nnon-empty save already exists." \
+                "$romname"
         fi
     fi # skip_game_options
 
     if [ $current_tab -eq $TAB_GAMES ]; then
         if [ -f "$emupath/active_filter" ]; then
             filter_kw=$(cat "$emupath/active_filter")
-            add_menu_option clear_filter "Clear filter" "Clears the filter"
-            add_menu_option filter_roms "Filter: $filter_kw" "Define a filter"
+            add_menu_option clear_filter "Clear filter" "Clear the current rom list filter"
+            add_menu_option filter_roms "Current filter: $filter_kw" "Change the rom list filter"
         else
-            add_menu_option filter_roms "Filter list" "Define a filter"
+            add_menu_option filter_roms "Filter list" "Filter the rom list by keyword"
         fi
     fi
 
     if [ $current_tab -eq $TAB_GAMES ] || [ $current_tab -eq $TAB_EXPERT ]; then
-        add_menu_option refresh_roms "Refresh list" "Refresh the rom list"
+        add_menu_option refresh_roms "Refresh list" "Refresh the rom list\n(re-scan for new games)"
     fi
 
     add_script_files "$globalscriptdir"
@@ -211,26 +222,56 @@ main() {
         add_script_files "$emupath/romscripts"
     fi
 
-    # Show GLO menu
-    runcmd="LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so prompt -t \"$UI_TITLE\" -g $(list_args "$menu_option_labels" "$menu_option_info")"
-    echo -e "\n\n=================================================================================================="
-    echo -e "> $runcmd\n\n"
-    eval $runcmd
+    log "\n\n=================================================================================================="
+    
+    # Display menu and get user selection
+    show_prompt
     retcode=$?
 
-    echo -e "\n\n=================================================================================================="
-    echo "retcode: $retcode"
+    log "\n\n=================================================================================================="
+    log "retcode: $retcode"
 
-    # Execute action
+    # Execute chosen action
     menu_action=$(get_item "$menu_options" $retcode)
     menu_arg=$(get_item "$menu_option_args" $retcode)
     runcmd="$menu_action $menu_arg"
-    echo -e "> $runcmd"
-    echo -e "\n\n==================================================================================================\n\n"
+    log "> $runcmd"
+    log "\n\n==================================================================================================\n\n"
     eval $runcmd
-    echo -e "\n\n=================================================================================================="
+    log "\n\n=================================================================================================="
+
+    rm -f ./cmd_to_run.sh 2> /dev/null
 
     exit 1
+}
+
+show_prompt() {
+    scriptfile=$(mktemp)
+
+    # Start command (use printf because info can contain newlines)
+    echo -n "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so prompt -t \"GLO\" -i" > "$scriptfile"
+
+    echo "$menu_option_labels" | while IFS= read -r label; do
+        printf ' "%s"' "$label"
+    done >> "$scriptfile"
+
+    echo "$menu_option_info" | while IFS= read -r info; do
+        info_with_real_newlines=$(printf "%s" "$info" | sed 's/\\n/\n/g')
+        printf ' "%s"' "$info_with_real_newlines"
+    done >> "$scriptfile"
+
+    echo >> "$scriptfile"  # ensure script ends with newline
+
+    log "Executing prompt script: $(cat "$scriptfile")"
+
+    chmod +x "$scriptfile"
+
+    sh "$scriptfile"
+    retcode=$?
+
+    rm -f "$scriptfile"
+
+    return $retcode
 }
 
 check_is_game() {
@@ -251,8 +292,8 @@ add_script_files() {
             fi
 
             require_networking=$([ $(get_info_value "$(cat "$entry")" require_networking) -eq 1 ] && echo 1 || echo 0)
-            echo "$entry"
-            echo "require_networking: $require_networking"
+            log "$entry"
+            log "require_networking: $require_networking"
 
             if [ $has_networking -eq 0 ] && [ $require_networking -eq 1 ]; then
                 continue
@@ -271,9 +312,14 @@ add_script_files() {
 
             scriptlabel=$(echo "$scriptlabel" | sed "s/%LIST%/$emulabel/g")
 
+            scriptinfo=$(get_info_value "$(cat "$entry")" scriptinfo)
+            if [ "$scriptinfo" == "" ]; then
+                scriptinfo="Runs the script:\n$scriptlabel"
+            fi
+
             if [ "$scriptlabel" != "none" ]; then
-                echo "adding romscript: $scriptlabel"
-                add_menu_option run_script "$scriptlabel" "Runs the script: $scriptlabel" "$entry"
+                log "adding romscript: $scriptlabel"
+                add_menu_option run_script "$scriptlabel" "$scriptinfo" "$entry"
             fi
         done
     fi
@@ -285,26 +331,31 @@ add_menu_option() {
     info="$3"
     args="$4"
 
+    # Escape newlines in the info message for proper passing to `prompt`
+    escaped_info=$(echo -e "$info" | sed ':a;N;$!ba;s/\n/\\n/g')
+
     if [ "$menu_options" == "" ]; then
         menu_options="$action"
         menu_option_labels="$label"
         menu_option_args="\"$args\""
-        menu_option_info="$info"
+        menu_option_info="$escaped_info"
     else
-        menu_options=$(echo -e "$menu_options\n$action")
-        menu_option_labels=$(echo -e "$menu_option_labels\n$label")
-        menu_option_args=$(echo -e "$menu_option_args\n\"$args\"")
-        menu_option_info=$(echo -e "$menu_option_info\n$info")
+        menu_options="$menu_options
+$action"
+        menu_option_labels="$menu_option_labels
+$label"
+        menu_option_args="$menu_option_args
+\"$args\""
+        menu_option_info="$menu_option_info
+$escaped_info"
     fi
 }
 
-list_args() {
-  echo -e "$1\n$2" | awk '{print "\\\""$0"\\\""}' | xargs echo
-}
-
 get_item() {
-    index=$2
-    echo "$1" | sed "$((index + 1))q;d"
+    content="$1"
+    index="$2"
+    # Convert escaped newlines (\\n) back into real lines and extract the correct line
+    echo -e "$content" | sed "$((index + 1))q;d"
 }
 
 get_core_info() {
@@ -327,8 +378,8 @@ get_core_info() {
         retroarch_core="$default_core"
     fi
 
-    echo "default_core: $default_core"
-    echo "retroarch_core: $retroarch_core"
+    log "default_core: $default_core"
+    log "retroarch_core: $retroarch_core"
 
     corepath="$radir/cores/$retroarch_core.so"
     coreinfopath="$radir/cores/$retroarch_core.info"
@@ -337,30 +388,29 @@ get_core_info() {
 }
 
 get_info_value() {
-    echo "$1" | grep "$2\b" | awk '{split($0,a,/\s*=\s*/); print a[2]}' | tr -d '"' | tr -d '\n'
+    echo "$1" | grep "$2\b" | awk '{split($0,a,/\s*=\s*/); print a[2]}' | tr -d '"' | tr -d '\n' | tr -d '\r'
 }
 
 get_json_value() {
-    echo "$1" | grep "\"$2\"\s*:" | awk '{split($0,a,/\s*:\s*/); print a[2]}' | awk -F'"' '{print $2}' | tr -d '\n'
+    echo "$1" | grep "\"$2\"\s*:" | awk '{split($0,a,/\s*:\s*/); print a[2]}' | awk -F'"' '{print $2}' | tr -d '\n' | tr -d '\r'
 }
 
 reset_game() {
-    echo ":: reset_game $*"
-    echo -e "savestate_auto_load = \"false\"\nconfig_save_on_exit = \"false\"\n" > /tmp/reset.cfg
-    echo "LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./retroarch -v --appendconfig \"/tmp/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+    log ":: reset_game $*"
+    touch /tmp/reset_game
     add_game_to_recent_list
     exit 0
 }
 
 open_manual() {
-    echo ":: open_manual $*"
+    log ":: open_manual $*"
     if [ -f "$manpath" ]; then
         LD_LIBRARY_PATH="$sysdir/lib/parasyte:$LD_LIBRARY_PATH" $sysdir/bin/green/green "$manpath"
     fi
 }
 
 change_core() {
-    echo ":: change_core $*"
+    log ":: change_core $*"
     ext="$romext"
     is_archive=""
 
@@ -374,16 +424,16 @@ change_core() {
                 zip_files=$(./bin/7z l -ba "$rompath" | awk '{$1="";$2="";$3="";print $0;}' | sort -n -r)
             fi
 
-            echo "zip/7z output:"
-            echo "$zip_files"
+            log "zip/7z output:"
+            log "$zip_files"
 
             inner_name=$(basename "$(echo "$zip_files" | grep "[!]")")
             if [ "$inner_name" == "" ]; then
                 inner_name=$(basename "$(echo "$zip_files" | head -n 1)")
             fi
             ext=$(echo "$inner_name" | awk -F. '{print tolower($NF)}')
-            echo "inner extension: $ext"
-            echo "-------------------------------------"
+            log "inner extension: $ext"
+            log "-------------------------------------"
 
         fi
     fi
@@ -448,8 +498,8 @@ change_core() {
         fi
     done
 
-    echo "cores: $available_cores"
-    echo "corenames: $available_corenames"
+    log "cores: $available_cores"
+    log "corenames: $available_corenames"
 
     if [ $is_valid -eq 0 ]; then
         infoPanel --title "GAME CORE (.$ext)" --message "Not available for this rom\n(.$ext files)" --auto
@@ -466,7 +516,7 @@ change_core() {
 
     new_core=$(echo $available_cores | awk -v N=$((retcode + 1)) '{print $N}')
 
-    echo "new default core: $new_core"
+    log "new default core: $new_core"
 
     if [ "$new_core" == "$default_core" ]; then
         reset_core
@@ -498,7 +548,7 @@ get_core_extensions() {
 }
 
 rename_rom() {
-    echo ":: rename_rom $*"
+    log ":: rename_rom $*"
     prev_name="$(basename "$rompath" ".$romext")"
     runcmd="LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so ./bin/kbinput -i \"$prev_name\" -t \"RENAME ROM\""
 
@@ -508,7 +558,7 @@ rename_rom() {
     kboutput=$(cat temp | tail -1)
     rm -f temp
 
-    echo "kb retcode: $retcode"
+    log "kb retcode: $retcode"
 
     if [ $retcode -ne 0 ]; then
         return
@@ -516,33 +566,33 @@ rename_rom() {
 
     new_name="$kboutput"
 
-    echo "rename: '$prev_name' -> '$new_name'"
+    log "rename: '$prev_name' -> '$new_name'"
 
     cd $sysdir
     ./bin/renameRom "$rompath" "$new_name"
 }
 
 clear_filter() {
-    echo ":: clear_filter $*"
-    echo "./bin/filter clear_filter \"$emupath\""
+    log ":: clear_filter $*"
+    log "./bin/filter clear_filter \"$emupath\""
     filter clear_filter "$emupath"
 }
 
 filter_roms() {
-    echo ":: filter_roms $*"
-    echo "./bin/filter filter \"$emupath\""
+    log ":: filter_roms $*"
+    log "./bin/filter filter \"$emupath\""
     filter filter "$emupath"
 }
 
 refresh_roms() {
-    echo ":: refresh_roms $*"
-    echo "./bin/filter refresh \"$emupath\""
+    log ":: refresh_roms $*"
+    log "./bin/filter refresh \"$emupath\""
     filter refresh "$emupath"
     ./script/reset_list.sh "$romroot"
 }
 
 run_script() {
-    echo ":: run_script $*"
+    log ":: run_script $*"
     scriptpath="$1"
     if [ -f "$scriptpath" ]; then
         cd "$emupath"
@@ -551,6 +601,26 @@ run_script() {
         exit $?
     else
         infoPanel --title "SCRIPT NOT FOUND" --message "$(basename "$scriptpath")" --auto
+    fi
+}
+
+transfer_mgba_save() {
+    log ":: transfer_mgba_save $*"
+    romname="$1"
+
+    # Call the external transfer script, prompting user if needed
+    $sysdir/script/transfer_mgba_save.sh "$romname"
+
+    if [ $? -eq 0 ]; then
+        log "Transfer successful, marking migration as done for ROM: $romname"
+
+        # Remove rom from migration needed list
+        if [ -f "$gpsp_migration_log" ]; then
+            sed -i "/^$romname$/d" "$gpsp_migration_log"
+        fi
+
+        # Show info panel
+        infoPanel --title "MIGRATION SUCCESSFUL" --message "mGBA save transferred to gpSP." --auto
     fi
 }
 

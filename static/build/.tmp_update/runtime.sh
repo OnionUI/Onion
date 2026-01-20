@@ -441,7 +441,7 @@ launch_game() {
         infoPanel --title "Fatal error occurred" --message "The program exited unexpectedly.\n(Error code: $retval)" --auto
     fi
 
-    launch_game_postprocess $is_game "$rompath"
+    launch_game_postprocess $is_game "$launch_script" "$rompath"
 }
 
 force_retroarch_cfg() {
@@ -459,38 +459,91 @@ override_game_core() {
     romcfgpath="$1"
     launch_path="$2"
 
+    retroarch_core=""
+
+    # Determine the appropriate appendconfig
+    if [ -f /tmp/reset_game ]; then
+        echo -e "savestate_auto_load = \"false\"\nconfig_save_on_exit = \"false\"\n" > /tmp/reset.cfg
+        appendconfig="/tmp/reset.cfg"
+        rm /tmp/reset_game
+    elif [ -f /tmp/force_auto_load_state ]; then
+        echo -e "savestate_auto_load = \"true\"\nconfig_save_on_exit = \"false\"\n" > /tmp/auto_load_state.cfg
+        appendconfig="/tmp/auto_load_state.cfg"
+        rm /tmp/force_auto_load_state
+    else
+        appendconfig=""
+    fi
+
+    # Extract the core name from the ROM's config file
     if [ -f "$romcfgpath" ]; then
         romcfg=$(cat "$romcfgpath")
         retroarch_core=$(get_info_value "$romcfg" core)
     fi
 
-    if grep -q "default_core=" "$launch_path"; then
-        default_core="$(cat "$launch_path" | grep "default_core=" | head -1 | awk '{split($0,a,"="); print a[2]}' | xargs)_libretro"
-    else
-        default_core=$(cat "$launch_path" | grep ".retroarch/cores/" | awk '{st = index($0,".retroarch/cores/"); s = substr($0,st+17); st2 = index(s,".so"); print substr(s,0,st2-1)}' | xargs)
-    fi
+    # Check if core override is specified in the ROM's config
+    if [ ! -z "$retroarch_core" ]; then
+        corepath=".retroarch/cores/$retroarch_core.so"
+        log "Overriding core to: $retroarch_core"
 
-    if [ "$retroarch_core" == "" ]; then
-        retroarch_core="$default_core"
-    fi
-
-    corepath=".retroarch/cores/$retroarch_core.so"
-
-    if [ -f "/mnt/SDCARD/RetroArch/$corepath" ] && echo "$cmd" | grep -qv "retroarch/cores"; then # Do not override game core when launching from GS
-        if echo "$cmd" | grep -q "/tmp/reset.cfg"; then
-            echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v --appendconfig \"/tmp/reset.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
-        elif [ -f /tmp/force_auto_load_state ]; then
-            echo -e "savestate_auto_load = \"true\"\nconfig_save_on_exit = \"false\"\n" > /tmp/auto_load_state.cfg
-            echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v --appendconfig \"/tmp/auto_load_state.cfg\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+        if [ -f "/mnt/SDCARD/RetroArch/$corepath" ]; then
+            if [ -z "$appendconfig" ]; then
+                # No appendconfig needed
+                echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+            else
+                # Inject appendconfig directly into the final runtime command
+                echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v --appendconfig \"$appendconfig\" -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+            fi
+            return 0 # Success
         else
-            echo "LD_PRELOAD=$miyoodir/lib/libpadsp.so ./retroarch -v -L \"$corepath\" \"$rompath\"" > $sysdir/cmd_to_run.sh
+            log "Specified core not found: $corepath"
+        fi
+    fi
+
+    # Add appendconfig to the launch script if necessary
+    if [ ! -z "$appendconfig" ]; then
+        if grep -q -- "--appendconfig" "$launch_path"; then
+            # Update existing appendconfig in the script
+            sed -i "s|--appendconfig \".*\"|--appendconfig \"$appendconfig\"|g" "$launch_path"
+            log "Updated existing appendconfig in launch script: $appendconfig (path: $launch_path)"
+        else
+            # Inject appendconfig argument into the command
+            sed -i "s|./retroarch -v|& --appendconfig \"$appendconfig\"|g" "$launch_path"
+            log "Injected appendconfig into launch script: $appendconfig (path: $launch_path)"
+        fi
+    fi
+}
+
+cleanup_appendconfig() {
+    launch_path="$1"
+
+    if [ ! -f /tmp/quick_switch ]; then
+        # Cleanup `cmd_to_run.sh` by removing any existing appendconfig
+        if [ -f "$sysdir/cmd_to_run.sh" ]; then
+            cmd=$(cat $sysdir/cmd_to_run.sh)
+            if echo "$cmd" | grep -q "/tmp/reset.cfg"; then
+                echo "$cmd" | sed 's/ --appendconfig \"\/tmp\/reset.cfg\"//g' > $sysdir/cmd_to_run.sh
+            elif echo "$cmd" | grep -q "/tmp/auto_load_state.cfg"; then
+                echo "$cmd" | sed 's/ --appendconfig \"\/tmp\/auto_load_state.cfg\"//g' > $sysdir/cmd_to_run.sh
+            fi
+        fi
+    fi
+
+    # Clean up launch_path: Remove explicit appendconfig paths
+    if [ -w "$launch_path" ]; then
+        if grep -q '/tmp/reset.cfg' "$launch_path"; then
+            sed -i 's| --appendconfig "/tmp/reset.cfg"||g' "$launch_path"
+            log "Removed /tmp/reset.cfg from $launch_path"
+        elif grep -q '/tmp/auto_load_state.cfg' "$launch_path"; then
+            sed -i 's| --appendconfig "/tmp/auto_load_state.cfg"||g' "$launch_path"
+            log "Removed /tmp/auto_load_state.cfg from $launch_path"
         fi
     fi
 }
 
 launch_game_postprocess() {
     is_game=$1
-    rompath="$2"
+    launch_path="$2"
+    rompath="$3"
 
     # Reset CPU frequency
     echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
@@ -503,16 +556,8 @@ launch_game_postprocess() {
         cd $sysdir
         playActivity stop "$rompath"
 
-        # Remove appended configs if quick switch not used
-        if [ ! -f /tmp/quick_switch ]; then
-            cmd=$(cat $sysdir/cmd_to_run.sh)
-
-            if echo "$cmd" | grep -q "/tmp/reset.cfg"; then
-                echo "$cmd" | sed 's/ --appendconfig \"\/tmp\/reset.cfg\"//g' > $sysdir/cmd_to_run.sh
-            elif echo "$cmd" | grep -q "/tmp/auto_load_state.cfg"; then
-                echo "$cmd" | sed 's/ --appendconfig \"\/tmp\/auto_load_state.cfg\"//g' > $sysdir/cmd_to_run.sh
-            fi
-        fi
+        # Remove appended configs
+        cleanup_appendconfig "$launch_path"
 
         if [ -f /tmp/.lowBat ]; then
             bootScreen lowBat
