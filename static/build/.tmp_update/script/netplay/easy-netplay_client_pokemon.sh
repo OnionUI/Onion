@@ -21,7 +21,7 @@ logfile=pokemon_link
 
 # Source scripts
 . $sysdir/script/log.sh
-# easy-netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, disable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, read_cookie, check_wifi, start_ftp, sync_file
+# easy-netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, disable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, strip_game_name, read_cookie, check_wifi, start_ftp, sync_file
 . $sysdir/script/netplay/easy-netplay_common.sh
 # easy-netplay_signalling.sh: check_stop, notify_peer, notify_stop, wait_for_host
 . $sysdir/script/netplay/easy-netplay_signalling.sh
@@ -231,10 +231,10 @@ confirm_join_panel() {
 }
 
 stripped_game_names() {
-    game_name="Host: \n$(basename "${rom%.*}")"
-    game_name="$(echo "$game_name" | sed -e 's/ ([^()]*)//g' -e 's/ [[A-z0-9!+]*]//g' -e 's/([^()]*)//g' -e 's/[[A-z0-9!+]*]//g')"
+    host_name_trimmed="$(strip_game_name "$(basename "${rom%.*}")")"
+    game_name="Host: \n$host_name_trimmed"
 
-    client_rom_trimmed="$(echo "$client_rom_filename_NoExt" | sed -e 's/ ([^()]*)//g' -e 's/ [[A-z0-9!+]*]//g' -e 's/([^()]*)//g' -e 's/[[A-z0-9!+]*]//g')"
+    client_rom_trimmed="$(strip_game_name "$client_rom_filename_NoExt")"
     game_name_client="\n Client (me): \n$client_rom_trimmed"
 }
 

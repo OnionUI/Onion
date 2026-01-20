@@ -11,7 +11,7 @@ logfile=pokemon_link
 
 # Source scripts
 . $sysdir/script/log.sh
-# easy-netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, disable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, check_wifi, start_ftp
+# easy-netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, disable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, strip_game_name, check_wifi, start_ftp
 . $sysdir/script/netplay/easy-netplay_common.sh
 # easy-netplay_signalling.sh: wait_for_client, ready_up, notify_peer, check_stop, notify_stop
 . $sysdir/script/netplay/easy-netplay_signalling.sh
@@ -116,8 +116,7 @@ confirm_join_panel() {
 
 # stripped_game_names: format local ROM display name
 stripped_game_names() {
-	host_game_name="$(basename "${host_rom%.*}")"
-	host_game_name="$(echo "$host_game_name" | sed -e 's/ ([^()]*)//g' -e 's/ [[A-z0-9!+]*]//g' -e 's/([^()]*)//g' -e 's/[[A-z0-9!+]*]//g')"
+	host_game_name="$(strip_game_name "$(basename "${host_rom%.*}")")"
 	host_game_name="Host (me): \n$host_game_name"
 }
 

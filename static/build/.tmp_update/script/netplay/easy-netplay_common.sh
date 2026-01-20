@@ -1,12 +1,24 @@
 # Shared netplay helpers
 
 # Tunables
-NETPLAY_FTP_CHECK_RETRIES=5
-NETPLAY_FTP_CHECK_DELAY=1
-NETPLAY_FTP_READY_DELAY=3
-NETPLAY_FTP_DOWNLOAD_RETRIES=5
-NETPLAY_FTP_DOWNLOAD_DELAY=1
-NETPLAY_FTP_HEAD_TIMEOUT=2
+# seconds unless stated otherwise; bytes unless stated otherwise
+NETPLAY_FTP_CHECK_RETRIES=3 # ftp head retry count for preflight checks
+NETPLAY_FTP_CHECK_DELAY=1 # delay between ftp head retries
+NETPLAY_FTP_READY_DELAY=3 # wait before first ftp head to allow peer ftp start
+NETPLAY_FTP_DOWNLOAD_RETRIES=5 # download retry count per file
+NETPLAY_FTP_DOWNLOAD_DELAY=1 # delay between download retries
+NETPLAY_FTP_HEAD_TIMEOUT=2 # curl connect timeout for ftp head
+NETPLAY_UDHCPC_RESTART_DELAY=1 # delay before restarting udhcpc
+NETPLAY_FTP_START_DELAY=0.5 # wait after starting ftp before checks
+NETPLAY_WIFI_POWER_ON_DELAY=2 # delay after wifi power-on
+NETPLAY_WIFI_UP_DELAY=1 # delay after bringing wlan0 up
+NETPLAY_WIFI_POST_START_DELAY=2 # delay after wifi start sequence
+NETPLAY_WIFI_SOFT_FAIL_DELAY=1 # delay after wifi soft-fail
+NETPLAY_SYNC_MAX_FILE_CHKSUM_SIZE=26214400 # max file size to allow checksum
+NETPLAY_SYNC_MAX_FILE_DL_SIZE=104857600 # max file size to allow download
+NETPLAY_COOKIE_MAX_FILE_SIZE=26214400 # max file size for cookie checksum entries
+NETPLAY_SYNC_FAIL_DELAY=2 # delay after sync failures before cleanup
+NETPLAY_INFOPANEL_SLEEP_DEFAULT=0.3 # default infoPanel delay when INFOPANEL_SLEEP is unset
 
 # checksize_func <file_path> <remote_size>
 # - sets: same_size (0 different, 1 identical, 2 unknown)
@@ -35,7 +47,7 @@ checksize_func() {
 }
 
 # checksum_func <file_path> <crc>
-# - uses: MAX_FILE_CHKSUM_SIZE
+# - uses: NETPLAY_SYNC_MAX_FILE_CHKSUM_SIZE
 # - sets: same_chksum
 checksum_func() {
     local_file_size=$(stat -c%s "$file_path")
@@ -47,7 +59,7 @@ checksum_func() {
     if [ "$CRC" != "0" ]; then # file_checksum=0 means skip the difference check = always replace
         local_file_checksum=$(xcrc "$func_file_path")
 
-        if [ "$local_file_size" -gt "$MAX_FILE_CHKSUM_SIZE" ]; then
+        if [ "$local_file_size" -gt "$NETPLAY_SYNC_MAX_FILE_CHKSUM_SIZE" ]; then
             log "File size too big for checksum: it would be too long"
             same_chksum=2
         else
@@ -92,12 +104,12 @@ is_running() {
 }
 
 # build_infoPanel_and_log <title> <message>
-# - uses: INFOPANEL_SLEEP (default 0.3s)
+# - uses: INFOPANEL_SLEEP or NETPLAY_INFOPANEL_SLEEP_DEFAULT
 # - shows persistent infoPanel and logs message
 build_infoPanel_and_log() {
     local title="$1"
     local message="$2"
-    local delay="${INFOPANEL_SLEEP:-0.3}"
+    local delay="${INFOPANEL_SLEEP:-$NETPLAY_INFOPANEL_SLEEP_DEFAULT}"
 
     log "Info Panel: \n\tStage: $title\n\tMessage: $message"
     if is_running infoPanel; then
@@ -131,7 +143,7 @@ udhcpc_control() {
     if pgrep udhcpc >/dev/null; then
         killall -9 udhcpc
     fi
-    sleep 1
+    sleep "$NETPLAY_UDHCPC_RESTART_DELAY"
     udhcpc -i wlan0 -s /etc/init.d/udhcpc.script >/dev/null 2>&1 &
 }
 
@@ -173,6 +185,12 @@ url_encode() {
     done
 
     printf '%s\n' "$encoded"
+}
+
+# strip_game_name <name>
+# - strips region/version tags and returns cleaned name
+strip_game_name() {
+    echo "$1" | sed -e 's/ ([^()]*)//g' -e 's/ [[A-z0-9!+]*]//g' -e 's/([^()]*)//g' -e 's/[[A-z0-9!+]*]//g'
 }
 
 # read_cookie [verbose]
@@ -233,8 +251,6 @@ read_cookie() {
 # - sync_type: -o overwrite if different, -f force, -b backup, -c check only
 # - mandatory: -m to cleanup on failure
 sync_file() {
-	MAX_FILE_CHKSUM_SIZE=26214400
-	MAX_FILE_DL_SIZE=104857600
 
 	file_type="$1"            # Used in displayed message and some custom actions
 	file_path="$2"            # Local file path
@@ -312,10 +328,10 @@ sync_file() {
 
 	########################## exception : max file size check on the remote
 	if echo "$remote_file_size" | grep -q "^[0-9][0-9]*$"; then
-		if [ "$remote_file_size" -le "$MAX_FILE_DL_SIZE" ]; then
-			log "Remote file size ok: $remote_file_size bytes  (<= $MAX_FILE_DL_SIZE bytes)"
+		if [ "$remote_file_size" -le "$NETPLAY_SYNC_MAX_FILE_DL_SIZE" ]; then
+			log "Remote file size ok: $remote_file_size bytes  (<= $NETPLAY_SYNC_MAX_FILE_DL_SIZE bytes)"
 		else
-			log "Remote file size too big: $remote_file_size bytes (> $MAX_FILE_DL_SIZE bytes)"
+			log "Remote file size too big: $remote_file_size bytes (> $NETPLAY_SYNC_MAX_FILE_DL_SIZE bytes)"
 			run_sync=0
 		fi
 	else
@@ -438,7 +454,7 @@ sync_file() {
 			mv "${file_path}_old" "$file_path"
 			log "backup restored"
 		fi
-		sleep 2
+		sleep "$NETPLAY_SYNC_FAIL_DELAY"
 		if [ "$file_mandatory" = "-m" ]; then
 			if [ "$file_type" != "Img" ]; then
 				if type notify_peer >/dev/null 2>&1; then
@@ -474,7 +490,7 @@ sync_file() {
 				mv "${file_path}_old" "$file_path"
 				log "backup restored"
 			fi
-			sleep 2
+			sleep "$NETPLAY_SYNC_FAIL_DELAY"
 			if [ "$file_mandatory" = "-m" ]; then
 				if type notify_peer >/dev/null 2>&1; then
 					notify_peer "$remote_ip" "stop_now"
@@ -493,7 +509,6 @@ sync_file() {
 # - writes core/rom/checksum/cpuspeed into retroarch.cookie
 create_cookie_info() {
     COOKIE_FILE="/mnt/SDCARD/RetroArch/retroarch.cookie"
-    MAX_FILE_SIZE_BYTES=26214400
 
     echo "[core]: $netplaycore" >"$COOKIE_FILE"
     echo "[rom]: $cookie_rom_path" >>"$COOKIE_FILE"
@@ -501,7 +516,7 @@ create_cookie_info() {
     if [ -s "$netplaycore" ]; then
         log "Writing core size"
         core_size=$(stat -c%s "$netplaycore")
-        if [ "$core_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
+        if [ "$core_size" -gt "$NETPLAY_COOKIE_MAX_FILE_SIZE" ]; then
             echo "[corechksum]: 0" >>"$COOKIE_FILE"
         else
             echo "[corechksum]: $(xcrc "$netplaycore")" >>"$COOKIE_FILE"
@@ -511,7 +526,7 @@ create_cookie_info() {
     if [ -s "$cookie_rom_path" ]; then
         rom_size=$(stat -c%s "$cookie_rom_path")
         log "Cookie local rom size : $rom_size"
-        if [ "$rom_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
+        if [ "$rom_size" -gt "$NETPLAY_COOKIE_MAX_FILE_SIZE" ]; then
             echo "[romchksum]: 0" >>"$COOKIE_FILE"
         else
             echo "[romchksum]: $(xcrc "$cookie_rom_path")" >>"$COOKIE_FILE"
@@ -542,7 +557,7 @@ start_ftp() {
         log "Starting FTP server"
     fi
     check_ftp_local
-    sleep 0.5
+    sleep "$NETPLAY_FTP_START_DELAY"
 }
 
 # check_ftp_local [port]
@@ -589,9 +604,9 @@ check_wifi() {
         build_infoPanel_and_log "WIFI" "Wifi disabled, starting..."
 
         /customer/app/axp_test wifion
-        sleep 2
+        sleep "$NETPLAY_WIFI_POWER_ON_DELAY"
         ifconfig wlan0 up
-        sleep 1
+        sleep "$NETPLAY_WIFI_UP_DELAY"
         $miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
 
         if [ "$use_udhcpc" -eq 1 ]; then
@@ -605,10 +620,10 @@ check_wifi() {
             if [ "$hard_fail" -eq 1 ]; then
                 notify_stop
             else
-                sleep 1
+                sleep "$NETPLAY_WIFI_SOFT_FAIL_DELAY"
             fi
         fi
 
-        sleep 2
+        sleep "$NETPLAY_WIFI_POST_START_DELAY"
     fi
 }
