@@ -2,11 +2,7 @@
 # Used within GLO as an addon script.
 
 # Env setup
-sysdir=/mnt/SDCARD/.tmp_update
-miyoodir=/mnt/SDCARD/miyoo
-LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
-hostip="192.168.100.100" # This should be the default unless the user has changed it..
-peer_ip="$hostip"
+. /mnt/SDCARD/.tmp_update/script/netplay/easy-netplay_env.sh
 
 # Runtime vars
 rm /tmp/stop_now

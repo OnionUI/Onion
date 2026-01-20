@@ -5,9 +5,7 @@
 # Used within GLO as an addon script.
 
 # Env setup
-sysdir=/mnt/SDCARD/.tmp_update
-miyoodir=/mnt/SDCARD/miyoo
-export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
+. /mnt/SDCARD/.tmp_update/script/netplay/easy-netplay_env.sh
 INFOPANEL_SLEEP=0.5
 
 # Runtime vars

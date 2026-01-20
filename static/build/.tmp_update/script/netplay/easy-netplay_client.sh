@@ -8,11 +8,8 @@
 # Used within GLO as an addon script.
 
 # Env setup
-sysdir=/mnt/SDCARD/.tmp_update
-miyoodir=/mnt/SDCARD/miyoo
-export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
-export hostip="192.168.100.100" # This should be the default unless the user has changed it..
-peer_ip="$hostip"
+# easy-netplay_env.sh: sysdir, miyoodir, LD_LIBRARY_PATH, hostip, peer_ip
+. /mnt/SDCARD/.tmp_update/script/netplay/easy-netplay_env.sh
 
 logfile=easy_netplay
 
