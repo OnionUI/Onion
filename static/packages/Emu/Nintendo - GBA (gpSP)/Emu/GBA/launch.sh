@@ -61,7 +61,7 @@ fi
 
 # Write core setting to rom config if not default
 if [ "$default_core" != "gpsp" ]; then
-    mkdir -p "$(dirname "$romcfgpath")"
+    mkdir -p "$config_dir"
     echo "core = \"${default_core}_libretro\"" > "$romcfgpath"
 fi
 

@@ -1,4 +1,6 @@
 #!/bin/sh
+scriptinfo="Opens AdvanceMENU with the\nselected emulator."
+
 emupath="$2"
 sysdir=/mnt/SDCARD/.tmp_update
 advmenu_rc_path=/mnt/SDCARD/BIOS/.advance/advmenu.rc
