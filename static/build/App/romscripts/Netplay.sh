@@ -2,6 +2,7 @@
 # echo $0 $*
 
 scriptlabel="DynamicLabel"
+scriptinfo="Launches the Netplay menu\nfor the selected ROM."
 sysdir=/mnt/SDCARD/.tmp_update
 require_networking=1
 

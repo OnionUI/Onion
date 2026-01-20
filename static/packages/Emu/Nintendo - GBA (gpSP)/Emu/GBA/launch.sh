@@ -2,55 +2,67 @@
 echo $0 $*
 progdir=$(dirname "$0")
 homedir=$(dirname "$1")
-savedir=/mnt/SDCARD/Saves/CurrentProfile/saves
-statedir=/mnt/SDCARD/Saves/CurrentProfile/states
+save_dir=/mnt/SDCARD/Saves/CurrentProfile/saves
+state_dir=/mnt/SDCARD/Saves/CurrentProfile/states
+migration_log="$save_dir/gpSP/migration_status.log"
 
-# extract rom name without extension
-romname=$(basename "$1" | sed 's/\.[^.]*$//')
-romcfgpath="$homedir/.game_config/$romname.cfg"
+# Ensure migration log exists
+touch "$migration_log"
 
-gpsp_state="$statedir/gpSP/$romname.state.auto"
-mgba_state="$statedir/mGBA/$romname.state.auto"
+# Extract ROM name without the extension
+romname="${1##*/}"
+romname="${romname%.*}"
 
-gpsp_save="$savedir/gpSP/$romname.srm"
-mgba_save="$savedir/mGBA/$romname.srm"
+config_dir="$homedir/.game_config"
+romcfgpath="$config_dir/$romname.cfg"
+auto_core_marker="$config_dir/${romname}.auto_core_switched"
+
+gpsp_state="$state_dir/gpSP/$romname.state.auto"
+mgba_state="$state_dir/mGBA/$romname.state.auto"
+
+mgba_save="$save_dir/mGBA/$romname.srm"
 
 default_core=gpsp
 
-# check if gpSP save states exist
-if [ ! -f "$gpsp_state" ] && [ ! -f "$gpsp_save" ]; then
-    if [ -f "$mgba_save" ]; then
-        LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so /mnt/SDCARD/.tmp_update/bin/prompt -r \
-            -t "GBA CORE CHANGED" \
-            -m "Default GBA core is now gpSP.\nDo you want to transfer your\nmGBA save file for this game?" \
-            "Transfer save to gpSP" \
-            "Keep playing with mGBA"
-
-        retcode=$?
-
-        if [ $retcode -eq 0 ]; then
-            # remove weird gpSP file if it exists
-            if [ -f "$savedir/gpSP" ]; then
-                rm -f "$savedir/gpSP"
-            fi
-
-            # create gpSP save directory
-            mkdir -p "$savedir/gpSP"
-
-            # transfer save file
-            cp "$mgba_save" "$gpsp_save"
-        else
-            default_core=mgba
-        fi
-    elif [ -f "$mgba_state" ]; then
+# Switch to mGBA if no gpSP state but mGBA state exists
+if [ ! -f "$auto_core_marker" ]; then
+    if [ ! -f "$gpsp_state" ] && [ -f "$mgba_state" ]; then
         default_core=mgba
+        # Mark this switch as completed so it's only done once
+        touch "$auto_core_marker"
     fi
 fi
 
-# if core is mgba, create a config file
-if [ "$default_core" = "mgba" ]; then
-    mkdir -p "$homedir/.game_config"
-    echo "core = \"mgba_libretro\"" > "$romcfgpath"
+# Helper: Check if the ROM exists in the migration log
+needs_migration() {
+    grep -Fxq "$romname" "$migration_log" && return 0 || return 1
+}
+
+# Show info panel about migration
+if [ "$default_core" = "gpsp" ] && [ -f "$mgba_save" ] && needs_migration; then
+    infoPanel \
+        --title "mGBA to gpSP migration" \
+        --message "Conflicting GBA saves found.\n\
+Default core is gpSP.\n\
+\n\
+In GLO (press Y in game list):\n\
+- Transfer mGBA save: Overwrite gpSP save\n\
+- Game core: Use mGBA for this game\n\
+\n\
+Press OK to load gpSP save."
+    if [ $? -eq 0 ]; then
+        # If not canceled, remove from migration log
+        sed -i "/^$romname$/d" "$migration_log"
+    else
+        # If canceled, exit without launching
+        exit 0
+    fi
+fi
+
+# Write core setting to rom config if not default
+if [ "$default_core" != "gpsp" ]; then
+    mkdir -p "$config_dir"
+    echo "core = \"${default_core}_libretro\"" > "$romcfgpath"
 fi
 
 cd /mnt/SDCARD/RetroArch
