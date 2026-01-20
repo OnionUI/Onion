@@ -144,9 +144,6 @@ lets_go() {
 	# Wait for client connection
 	wait_for_client
 
-	# Signal client that host is ready
-	ready_up
-
 	# Build display names for confirmation prompt
 	stripped_game_names
 
