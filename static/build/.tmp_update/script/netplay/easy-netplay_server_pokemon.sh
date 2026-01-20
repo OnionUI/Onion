@@ -607,7 +607,7 @@ sync_file() {
 		fi
 
 		log "Starting to download $file_type from $file_url"
-		curl_output=$(curl -sS -o "$file_path" "$file_url" 2>&1)
+		curl_output=$(curl -S -o "$file_path" "$file_url" 2>&1)
 		curl_exit=$?
 
 		if [ $curl_exit -eq 0 ]; then
