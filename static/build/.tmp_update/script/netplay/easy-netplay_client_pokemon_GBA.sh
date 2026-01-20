@@ -20,10 +20,10 @@ logfile=pokemon_link
 
 # Source scripts
 . $sysdir/script/log.sh
-# netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, disable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, check_wifi, start_ftp
-. $sysdir/script/netplay/netplay_common.sh
-# netplay_signalling.sh: wait_for_host, check_stop, notify_stop
-. $sysdir/script/netplay/netplay_signalling.sh
+# easy-netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, disable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, check_wifi, start_ftp
+. $sysdir/script/netplay/easy-netplay_common.sh
+# easy-netplay_signalling.sh: wait_for_host, check_stop, notify_stop
+. $sysdir/script/netplay/easy-netplay_signalling.sh
 
 log "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* Easy Netplay Pokemon Client GBA -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*"
 

@@ -15,8 +15,8 @@ logfile=easy_netplay
 
 # Source scripts
 . $sysdir/script/log.sh
-# netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, disable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, check_wifi, start_ftp
-. $sysdir/script/netplay/netplay_common.sh
+# easy-netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, disable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, check_wifi, start_ftp
+. $sysdir/script/netplay/easy-netplay_common.sh
 
 program=$(basename "$0" .sh)
 
@@ -51,40 +51,6 @@ Get_NetplayCore() {
 }
 
 # Create a cookie with all the required info for the client. (client will use this cookie)
-create_cookie_info() {
-	COOKIE_FILE="/mnt/SDCARD/RetroArch/retroarch.cookie"
-	MAX_FILE_SIZE_BYTES=26214400
-
-	echo "[core]: $netplaycore" >"$COOKIE_FILE"
-	echo "[rom]: $cookie_rom_path" >>"$COOKIE_FILE"
-
-	if [ -s "$netplaycore" ]; then
-		log "Writing core size"
-		core_size=$(stat -c%s "$netplaycore")
-		if [ "$core_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
-			echo "[corechksum]: 0" >>"$COOKIE_FILE"
-		else
-			echo "[corechksum]: $(xcrc "$netplaycore")" >>"$COOKIE_FILE"
-		fi
-	fi
-
-	if [ -s "$cookie_rom_path" ]; then
-		log "Writing rom size"
-		rom_size=$(stat -c%s "$cookie_rom_path")
-		if [ "$rom_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
-			echo "[romchksum]: 0" >>"$COOKIE_FILE"
-		else
-			echo "[romchksum]: $(xcrc "$cookie_rom_path")" >>"$COOKIE_FILE"
-		fi
-	fi
-
-	if [ -s "$cpuspeed" ]; then
-		echo "[cpuspeed]: $cpuspeed" >>"$COOKIE_FILE"
-		log "Writing cpuspeed: $cpuspeed"
-	fi
-
-}
-
 # We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
 start_retroarch() {
     log "RetroArch" "Starting RetroArch..."
