@@ -18,7 +18,7 @@ NETPLAY_SYNC_MAX_FILE_CHKSUM_SIZE=26214400 # max file size to allow checksum
 NETPLAY_SYNC_MAX_FILE_DL_SIZE=104857600 # max file size to allow download
 NETPLAY_COOKIE_MAX_FILE_SIZE=26214400 # max file size for cookie checksum entries
 NETPLAY_SYNC_FAIL_DELAY=2 # delay after sync failures before cleanup
-NETPLAY_INFOPANEL_SLEEP_DEFAULT=0.3 # default infoPanel delay when INFOPANEL_SLEEP is unset
+NETPLAY_INFOPANEL_SLEEP=0.5 # infoPanel delay
 
 # checksize_func <file_path> <remote_size>
 # - sets: same_size (0 different, 1 identical, 2 unknown)
@@ -104,12 +104,12 @@ is_running() {
 }
 
 # build_infoPanel_and_log <title> <message>
-# - uses: INFOPANEL_SLEEP or NETPLAY_INFOPANEL_SLEEP_DEFAULT
+# - uses: NETPLAY_INFOPANEL_SLEEP
 # - shows persistent infoPanel and logs message
 build_infoPanel_and_log() {
     local title="$1"
     local message="$2"
-    local delay="${INFOPANEL_SLEEP:-$NETPLAY_INFOPANEL_SLEEP_DEFAULT}"
+    local delay="$NETPLAY_INFOPANEL_SLEEP"
 
     log "Info Panel: \n\tStage: $title\n\tMessage: $message"
     if is_running infoPanel; then

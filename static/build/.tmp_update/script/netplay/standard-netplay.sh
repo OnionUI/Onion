@@ -6,7 +6,6 @@
 
 # Env setup
 . /mnt/SDCARD/.tmp_update/script/netplay/easy-netplay_env.sh
-INFOPANEL_SLEEP=0.5
 
 # Runtime vars
 romfullpath="$1"
