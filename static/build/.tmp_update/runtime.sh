@@ -601,6 +601,7 @@ launch_switcher() {
 
 check_off_order() {
     if [ -f /tmp/.offOrder ]; then
+        playActivity close
         touch /tmp/shutting_down
 
         #EmuDeck - CheckOff scripts

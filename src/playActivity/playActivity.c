@@ -12,7 +12,8 @@ void printUsage()
            "       playActivity stop [rom_path]  -> Stop the counter for this rom\n"
            "       playActivity stop_all         -> Stop the counter for all roms\n"
            "       playActivity migrate          -> Migrate the old database (prior to Onion 4.2.0) to SQLite\n"
-           "       playActivity fix_paths        -> Change all absolute paths to relative paths\n");
+           "       playActivity fix_paths        -> Change all absolute paths to relative paths\n"
+           "       playActivity close            -> Closes the Database\n");
 }
 
 int main(int argc, char *argv[])
@@ -59,6 +60,9 @@ int main(int argc, char *argv[])
         }
         else if (strcmp(argv[i], "list") == 0) {
             play_activity_list_all();
+        }
+        else if (strcmp(argv[i], "close") == 0) {
+            play_activity_db_close();
         }
         else {
             printf("Error: Invalid argument '%s'\n", argv[1]);

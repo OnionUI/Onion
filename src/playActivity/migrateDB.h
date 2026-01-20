@@ -159,16 +159,16 @@ void migrateDB(void)
                 // Check if ROM does not already exist
                 sql = sqlite3_mprintf("SELECT * FROM rom WHERE file_path = '%q' LIMIT 1;", cache_db_item->path);
 
-                if (sqlite3_prepare_v2(play_activity_db, sql, -1, &stmt, NULL) != SQLITE_OK) {
-                    printf("%s: %s\n", sqlite3_errmsg(play_activity_db), sqlite3_sql(stmt));
+                if (sqlite3_prepare_v2(play_activity_db_writer, sql, -1, &stmt, NULL) != SQLITE_OK) {
+                    printf("%s: %s\n", sqlite3_errmsg(play_activity_db_writer), sqlite3_sql(stmt));
                 }
 
                 if (sqlite3_step(stmt) != SQLITE_ROW) {
                     // Rom not already inserted
                     __db_insert_rom_from_cache(cache_db_item);
 
-                    if (sqlite3_prepare_v2(play_activity_db, "SELECT last_insert_rowid()", -1, &stmt, NULL) != SQLITE_OK) {
-                        printf("%s: %s\n", sqlite3_errmsg(play_activity_db), sqlite3_sql(stmt));
+                    if (sqlite3_prepare_v2(play_activity_db_writer, "SELECT last_insert_rowid()", -1, &stmt, NULL) != SQLITE_OK) {
+                        printf("%s: %s\n", sqlite3_errmsg(play_activity_db_writer), sqlite3_sql(stmt));
                     }
                     else if (sqlite3_step(stmt) == SQLITE_ROW) {
                         rom_id = sqlite3_column_int(stmt, 0);
@@ -202,29 +202,29 @@ void migrateDB(void)
             */
             // Game existence in the DB check
             sql = sqlite3_mprintf("SELECT * FROM rom WHERE name IS '%q' LIMIT 1;", rom_list[i].name);
-            int rc = sqlite3_prepare_v2(play_activity_db, sql, -1, &stmt, NULL);
+            int rc = sqlite3_prepare_v2(play_activity_db_writer, sql, -1, &stmt, NULL);
 
             if (rc != SQLITE_OK) {
-                printf("%s: %s\n", sqlite3_errmsg(play_activity_db), sqlite3_sql(stmt));
+                printf("%s: %s\n", sqlite3_errmsg(play_activity_db_writer), sqlite3_sql(stmt));
             }
 
             if (sqlite3_step(stmt) != SQLITE_ROW) {
                 // Game not found
 
                 sql = sqlite3_mprintf("INSERT INTO rom(type, name, file_path, image_path) VALUES('ORPHAN', %Q, '', '');", rom_list[i].name);
-                int rc = sqlite3_exec(play_activity_db, sql, NULL, NULL, NULL);
+                int rc = sqlite3_exec(play_activity_db_writer, sql, NULL, NULL, NULL);
                 sqlite3_free(sql);
 
                 if (rc != SQLITE_OK) {
-                    printf("%s: %s\n", sqlite3_errmsg(play_activity_db), sqlite3_sql(stmt));
+                    printf("%s: %s\n", sqlite3_errmsg(play_activity_db_writer), sqlite3_sql(stmt));
                     continue;
                 }
                 // Retrieve ROM id by its name
 
-                rc = sqlite3_prepare_v2(play_activity_db, "SELECT last_insert_rowid()", -1, &stmt, NULL);
+                rc = sqlite3_prepare_v2(play_activity_db_writer, "SELECT last_insert_rowid()", -1, &stmt, NULL);
 
                 if (rc != SQLITE_OK) {
-                    printf("%s: %s\n", sqlite3_errmsg(play_activity_db), sqlite3_sql(stmt));
+                    printf("%s: %s\n", sqlite3_errmsg(play_activity_db_writer), sqlite3_sql(stmt));
                     continue;
                 }
                 if (sqlite3_step(stmt) == SQLITE_ROW) {
@@ -257,10 +257,10 @@ void migrateDB(void)
         // The Rom is found or has been successfully inserted in the db
         // Search for a previous play time migration (Same rom_id + created_at = 0)
         sql = sqlite3_mprintf("SELECT rom_id FROM play_activity WHERE rom_id = %d AND created_at = 0;", rom_id);
-        int rc = sqlite3_prepare_v2(play_activity_db, sql, -1, &stmt, NULL);
+        int rc = sqlite3_prepare_v2(play_activity_db_writer, sql, -1, &stmt, NULL);
 
         if (rc != SQLITE_OK) {
-            printf("%s\n", sqlite3_errmsg(play_activity_db));
+            printf("%s\n", sqlite3_errmsg(play_activity_db_writer));
             continue;
         }
         else {
@@ -280,11 +280,11 @@ void migrateDB(void)
                                       "(%d,%d,0,0);", // Imported times have the particularity of having a "created_at" at 0.
                                       rom_id, rom_list[i].playTime);
 
-                if (sqlite3_exec(play_activity_db, sql, NULL, NULL, NULL) == SQLITE_OK) {
+                if (sqlite3_exec(play_activity_db_writer, sql, NULL, NULL, NULL) == SQLITE_OK) {
                     totalImported++;
                 }
                 else {
-                    printf("%s: %s\n", sqlite3_errmsg(play_activity_db), sqlite3_sql(stmt));
+                    printf("%s: %s\n", sqlite3_errmsg(play_activity_db_writer), sqlite3_sql(stmt));
                 }
                 sqlite3_free(sql);
             }
