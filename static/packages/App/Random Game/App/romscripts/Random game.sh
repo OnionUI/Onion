@@ -1,5 +1,6 @@
 #!/bin/sh
 scriptlabel="Random game (%LIST%)"
+scriptinfo="Launches a random game\nfrom the selected list."
 
 TAB_GAMES=1
 TAB_FAVORITES=2

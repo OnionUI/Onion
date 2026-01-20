@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
     char message_str[STR_MAX] = "";
     bool required = false;
     int selected = 0;
-    bool glo = false;
+    bool has_info = false;
 
     pargs = malloc(MAX_ELEMENTS * sizeof(char *));
 
@@ -107,9 +107,9 @@ int main(int argc, char *argv[])
                 required = true;
                 continue;
             }
-            if (strcmp(argv[i], "-g") == 0 ||
-                strcmp(argv[i], "--glo") == 0) {
-                glo = true;
+            if (strcmp(argv[i], "-i") == 0 ||
+                strcmp(argv[i], "--info") == 0) {
+                has_info = true;
                 continue;
             }
             if (strcmp(argv[i], "-s") == 0 ||
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
     }
 
     List list = list_create(pargc, LIST_SMALL);
-    if (glo) {
+    if (has_info) {
         for (i = 0; i < (pargc >> 1); i++) {
             ListItem item = {.action_id = i, .action = NULL};
             strncpy(item.label, pargs[i], STR_MAX - 1);
