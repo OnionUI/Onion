@@ -417,9 +417,6 @@ lets_go() {
 	sync_file "Rom" "$client_rom" 1 "$romchecksum" -b -m
 	client_rom_rename
 
-	# Signal client that host is ready
-	ready_up
-
 	# Sync client image for confirmation display
 	sync_file "Img" "$client_Img_path" 0 0 -o
 

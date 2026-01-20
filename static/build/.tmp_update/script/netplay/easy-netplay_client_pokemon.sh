@@ -101,7 +101,6 @@ start_retroarch() {
         echo -n $cpuspeed >"/mnt/SDCARD/Saves/CurrentProfile/config/${core_config_folder}/cpuclock.txt"
     fi
 
-    wait_for_host # we wait a second flag triggered from the host once RA is running
     cd /mnt/SDCARD/RetroArch
     log "Starting RetroArch loaded with $rom and $client_rom"
     HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/easynetplay_override.cfg -C $hostip -L "$core" --subsystem "gb_link_2p" "$rom" "$client_rom"
@@ -219,7 +218,6 @@ confirm_join_panel() {
         fi
     fi
 
-    # TO DO : allow to confirm only once the host has started
     infoPanel -t "$title" -m "$message"
     retcode=$?
 
@@ -276,7 +274,7 @@ lets_go() {
     wait_for_host
 
     # Confirm join with host/client info
-    confirm_join_panel "Join now?" "Start the game on the host first! \n $game_name \n $game_name_client"
+    confirm_join_panel "Join now?" "$game_name \n $game_name_client"
 
     # Stop menu watcher before launch
     pkill -9 pressMenu2Kill

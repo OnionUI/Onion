@@ -148,7 +148,7 @@ wait_for_client() {
 wait_for_host() {
     local counter=0
 
-    build_infoPanel_and_log "Ready" "Waiting for host to ready up"
+    build_infoPanel_and_log "Ready" "Waiting for host to start game"
     while true; do
         sync
         # check_stop: host reported a setup issue
