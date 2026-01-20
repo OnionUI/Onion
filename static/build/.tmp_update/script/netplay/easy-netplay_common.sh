@@ -193,6 +193,18 @@ strip_game_name() {
     echo "$1" | sed -e 's/ ([^()]*)//g' -e 's/ [[A-z0-9!+]*]//g' -e 's/([^()]*)//g' -e 's/[[A-z0-9!+]*]//g'
 }
 
+# wifi_disabled
+# - returns 0 if wifi is disabled
+wifi_disabled() {
+    [ $(/customer/app/jsonval wifi) -eq 0 ]
+}
+
+# stripped_game_name
+# - reads rom name from retroarch.cookie.client and strips extension
+stripped_game_name() {
+    game_name=$(awk -F'/' '/\\[rom\\]:/ {print $NF}' /mnt/SDCARD/RetroArch/retroarch.cookie.client | sed 's/\\(.*\\)\\..*/\\1/')
+}
+
 # read_cookie [verbose]
 # - parses /mnt/SDCARD/RetroArch/retroarch.cookie.client into core/rom/checksum vars
 # - sets: core_url, rom_url, romdirname, romName, romNameNoExtension, Img_path
