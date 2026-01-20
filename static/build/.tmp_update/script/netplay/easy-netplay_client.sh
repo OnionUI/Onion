@@ -53,7 +53,7 @@ sync_file() {
 
 	# some useful vars
 	dir_path=$(dirname "$file_path")
-	file_url="ftp://${hostip}/$(url_encode "${file_path#*/}")"
+	file_url="ftp://${hostip}/$(url_encode_path "${file_path#*/}")"
 
 	echo "############################ DEBUGGING #######################################"
 	echo file_type $file_type
@@ -89,9 +89,9 @@ sync_file() {
 	else
 		remote_file_size=$(echo "$RequestResult" | grep -i "Content-Length" | awk '{print $2}')
 		if ! echo "$remote_file_size" | grep -q "^[0-9][0-9]*$"; then # check if the remote file size is a numeric value
-			log "Impossible to get remote file size."
+			log "Non-numeric remote file size: '$remote_file_size'"
+			log "HEAD response: $RequestResult"
 			same_size=0
-			run_sync=0
 		else
 			log "remote_file_size: $remote_file_size"
 		fi
@@ -118,11 +118,15 @@ sync_file() {
 	fi
 
 	########################## exception : max file size check on the remote
-	if [ "$remote_file_size" -le "$MAX_FILE_DL_SIZE" ]; then
-		log "Remote file size ok: $remote_file_size bytes  (<= $MAX_FILE_DL_SIZE bytes)"
+	if echo "$remote_file_size" | grep -q "^[0-9][0-9]*$"; then
+		if [ "$remote_file_size" -le "$MAX_FILE_DL_SIZE" ]; then
+			log "Remote file size ok: $remote_file_size bytes  (<= $MAX_FILE_DL_SIZE bytes)"
+		else
+			log "Remote file size too big: $remote_file_size bytes (> $MAX_FILE_DL_SIZE bytes)"
+			run_sync=0
+		fi
 	else
-		log "Remote file size too big: $remote_file_size bytes (> $MAX_FILE_DL_SIZE bytes)"
-		run_sync=0
+		log "Skipping max file size check due to non-numeric remote size: '$remote_file_size'"
 	fi
 
 	##########################  We have all the required information, depending the choosen option we run the copy or not
@@ -228,12 +232,14 @@ sync_file() {
 		fi
 
 		log "Starting to download $file_type from $file_url"
-		curl -o "$file_path" "$file_url" >/dev/null 2>&1
+		curl_output=$(curl -S -o "$file_path" "$file_url" 2>&1)
+		curl_exit=$?
 
-		if [ $? -eq 0 ]; then
+		if [ $curl_exit -eq 0 ]; then
 			log "$file_type download completed"
 		else
-			log "$file_type download failed"
+			log "$file_type download failed (curl exit=$curl_exit)"
+			log "curl error: $curl_output"
 		fi
 
 	fi

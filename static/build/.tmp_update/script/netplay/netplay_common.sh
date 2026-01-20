@@ -1,24 +1,25 @@
 # Shared netplay helpers
 
-# checksize_func
-# - uses: file_check_size, file_path, remote_file_checksum
-# - sets: same_size
+# checksize_func <file_path> <remote_size>
+# - sets: same_size (0 different, 1 identical, 2 unknown)
 checksize_func() {
-    if [ "$file_check_size" -eq 1 ]; then
-        if [ -e "$file_path" ]; then
-            local_file_size=$(stat -c%s "$file_path")
-            if [ "$remote_file_checksum" == "0" ]; then
-                same_size=1
-            elif [ "$local_file_size" -eq "$remote_file_checksum" ]; then
+    local func_file_path="${1:-$file_path}"
+    local filesize_tocheck="${2:-$remote_file_size}"
+
+    if [ -e "$func_file_path" ]; then
+        local_file_size=$(stat -c%s "$func_file_path")
+        if echo "$filesize_tocheck" | grep -q "^[0-9][0-9]*$"; then
+            if [ "$filesize_tocheck" -eq "$local_file_size" ]; then
                 same_size=1
             else
                 same_size=0
             fi
         else
-            same_size=0
+            log "Non-numeric remote file size for checksize_func: '$filesize_tocheck'"
+            same_size=2
         fi
     else
-        same_size=1
+        same_size=0
     fi
 }
 
@@ -46,7 +47,8 @@ checksum_func() {
             fi
         fi
     else
-        same_chksum=0
+        log "Skipping checksum check."
+        same_chksum=1
     fi
 }
 
@@ -125,21 +127,48 @@ udhcpc_control() {
 # url_encode <string>
 # - percent-encodes string for URLs
 url_encode() {
-    local string="$1"
-    local length="${#string}"
-    local encoded=""
-    local pos=0
-    local c o
+    encoded_str=$(echo "$*" | awk '
+    BEGIN {
+	split ("1 2 3 4 5 6 7 8 9 A B C D E F", hextab, " ")
+	hextab [0] = 0
+	for ( i=1; i<=255; ++i ) ord [ sprintf ("%c", i) "" ] = i + 0
+    }
+    {
+	encoded = ""
+	for ( i=1; i<=length ($0); ++i ) {
+	    c = substr ($0, i, 1)
+	    if ( c ~ /[a-zA-Z0-9.-]/ ) {
+		encoded = encoded c		# safe character
+	    } else if ( c == " " ) {
+		encoded = encoded "%20"	# special handling
+	    } else {
+		# unsafe character, encode it as a two-digit hex-number
+		lo = ord [c] % 16
+		hi = int (ord [c] / 16);
+		encoded = encoded "%" hextab [hi] hextab [lo]
+	    }
+	}
+	    print encoded
+    }
+')
+    echo "$encoded_str"
+}
 
-    while [ "$pos" -lt "$length" ]; do
-        c=$(printf '%s' "$string" | cut -c $((pos + 1)))
-        case "$c" in
-        [-_.~a-zA-Z0-9]) o="$c" ;;
-        *) o=$(printf '%%%02x' "'$c") ;;
-        esac
-        encoded="${encoded}${o}"
-        pos=$((pos + 1))
+# url_encode_path <path>
+# - encodes each path segment but keeps '/'
+url_encode_path() {
+    local path="$1"
+    local encoded=""
+    local IFS='/'
+    local part
+
+    for part in $path; do
+        if [ -n "$encoded" ]; then
+            encoded="${encoded}/"
+        fi
+        encoded="${encoded}$(url_encode "$part")"
     done
+
     printf '%s\n' "$encoded"
 }
 
