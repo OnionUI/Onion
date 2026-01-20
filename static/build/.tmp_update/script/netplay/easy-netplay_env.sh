@@ -9,3 +9,5 @@ export LD_LIBRARY_PATH
 hostip="${hostip:-192.168.100.100}" # default unless overridden by caller
 peer_ip="${peer_ip:-$hostip}"
 export hostip peer_ip
+
+iw wlan0 set power_save off

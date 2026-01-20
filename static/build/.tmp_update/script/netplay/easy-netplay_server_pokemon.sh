@@ -283,27 +283,17 @@ client_save_send() {
 
 # Cleanup. If you don't call this you don't retransfer the saves - Users cannot under any circumstances miss this function.
 cleanup() {
-	build_infoPanel_and_log "Cleanup" "Cleaning up after Pokemon session\n Do not power off!"
-
-	pkill -9 pressMenu2Kill
-
-	. "$sysdir/script/network/hotspot_cleanup.sh"
-
-	restore_ftp
-
-	# Remove some files we prepared and received
-	rm "/tmp/host_ready"
-	rm "$save_new_path"
-	rm "$client_rom_clone"
-	rm "/tmp/ready_to_send"
-	rm "/tmp/ready_to_receive"
-	rm "/tmp/MISSING.srm"
-	rm "/tmp/stop_now"
-	disable_flag hotspotState
-	rm "/tmp/dismiss_info_panel"
-	sync
-	log "Cleanup done"
-	exit
+	netplay_cleanup \
+		"Cleaning up after Pokemon session\n Do not power off!" \
+		1 1 0 1 \
+		"/tmp/host_ready" \
+		"$save_new_path" \
+		"$client_rom_clone" \
+		"/tmp/ready_to_send" \
+		"/tmp/ready_to_receive" \
+		"/tmp/MISSING.srm" \
+		"/tmp/stop_now" \
+		"/tmp/dismiss_info_panel"
 }
 
 ###########

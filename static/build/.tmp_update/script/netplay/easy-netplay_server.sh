@@ -82,22 +82,12 @@ start_retroarch() {
 
 # cleanup: restore wifi/ftp and remove session temp files
 cleanup() {
-	build_infoPanel_and_log "Cleanup" "Cleaning up after netplay session..."
-
-	pkill -9 pressMenu2Kill
-
-	. "$sysdir/script/network/hotspot_cleanup.sh"
-
-	restore_ftp
-
-	# Remove some files we prepared and received
 	log "Removing stale files"
-	rm "/mnt/SDCARD/RetroArch/retroarch.cookie"
-	rm "/tmp/dismiss_info_panel"
-	sync
-	log "Cleanup done"
-	exit
-
+	netplay_cleanup \
+		"Cleaning up after netplay session..." \
+		1 1 0 0 \
+		"/mnt/SDCARD/RetroArch/retroarch.cookie" \
+		"/tmp/dismiss_info_panel"
 }
 
 #########

@@ -193,6 +193,55 @@ strip_game_name() {
     echo "$1" | sed -e 's/ ([^()]*)//g' -e 's/ [[A-z0-9!+]*]//g' -e 's/([^()]*)//g' -e 's/[[A-z0-9!+]*]//g'
 }
 
+# remove_files
+# - removes files if they exist
+remove_files() {
+    local f
+    for f in "$@"; do
+        if [ -n "$f" ] && [ -e "$f" ]; then
+            echo "Removing: $f"
+            rm -f "$f"
+        fi
+    done
+}
+
+# netplay_cleanup <message> <hotspot_cleanup> <restore_ftp> <kill_infopanel> <disable_hotspot_flag> [files...]
+# - runs common cleanup steps and exits
+netplay_cleanup() {
+    local message="$1"
+    local do_hotspot_cleanup="$2"
+    local do_restore_ftp="$3"
+    local do_kill_infopanel="$4"
+    local do_disable_hotspot="$5"
+    shift 5
+
+    build_infoPanel_and_log "Cleanup" "$message"
+
+    pkill -9 pressMenu2Kill
+
+    if [ "$do_kill_infopanel" -eq 1 ] && is_running infoPanel; then
+        killall -9 infoPanel
+    fi
+
+    if [ "$do_hotspot_cleanup" -eq 1 ]; then
+        . "$sysdir/script/network/hotspot_cleanup.sh"
+    fi
+
+    if [ "$do_restore_ftp" -eq 1 ]; then
+        restore_ftp
+    fi
+
+    remove_files "$@"
+
+    if [ "$do_disable_hotspot" -eq 1 ]; then
+        disable_flag hotspotState
+    fi
+
+    sync
+    log "Cleanup done"
+    exit
+}
+
 # wifi_disabled
 # - returns 0 if wifi is disabled
 wifi_disabled() {

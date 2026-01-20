@@ -17,7 +17,8 @@ logfile=pokemon_link
 
 # Source scripts
 . $sysdir/script/log.sh
-# easy-netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, disable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, strip_game_name, read_cookie, check_wifi, start_ftp, sync_file
+# easy-netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, disable_flag, flag_enabled, is_running,
+# restore_ftp, udhcpc_control, url_encode, strip_game_name, read_cookie, check_wifi, start_ftp, sync_file
 . $sysdir/script/netplay/easy-netplay_common.sh
 # easy-netplay_signalling.sh: check_stop, notify_peer, notify_stop, wait_for_host
 . $sysdir/script/netplay/easy-netplay_signalling.sh
@@ -162,34 +163,20 @@ wait_for_save_return() {
 
 # cleanup: restore wifi/ftp and remove session temp files
 cleanup() {
-    build_infoPanel_and_log "Cleanup" "Cleaning up after Pokemon session\n Do not power off!"
-
-    pkill -9 pressMenu2Kill
-
-    if is_running infoPanel; then
-        killall -9 infoPanel
-    fi
-
-    # restore_wifi_state
-    . "$sysdir/script/network/hotspot_cleanup.sh"
-    restore_ftp
-
-    # Remove some files we prepared and received
     log "Removing stale files"
-    rm "/tmp/host_ready"
-    rm "/tmp/ready_to_send"
-    rm "/tmp/ready_to_receive"
-    rm "${save_file_matched}_rcvd"
-    rm "/tmp/MISSING.srm"
-    rm "/tmp/stop_now"
-    rm "/tmp/wpa_supplicant.conf_bk"
-    rm "/mnt/SDCARD/RetroArch/retroarch.cookie.client"
-    rm "/mnt/SDCARD/RetroArch/retroarch.cookie"
-    rm "/tmp/dismiss_info_panel"
-    sync
-
-    log "Cleanup done"
-    exit
+    netplay_cleanup \
+        "Cleaning up after Pokemon session\n Do not power off!" \
+        1 1 1 0 \
+        "/tmp/host_ready" \
+        "/tmp/ready_to_send" \
+        "/tmp/ready_to_receive" \
+        "${save_file_matched}_rcvd" \
+        "/tmp/MISSING.srm" \
+        "/tmp/stop_now" \
+        "/tmp/wpa_supplicant.conf_bk" \
+        "/mnt/SDCARD/RetroArch/retroarch.cookie.client" \
+        "/mnt/SDCARD/RetroArch/retroarch.cookie" \
+        "/tmp/dismiss_info_panel"
 }
 
 ###########

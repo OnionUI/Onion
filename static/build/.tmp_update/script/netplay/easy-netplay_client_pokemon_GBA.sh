@@ -59,29 +59,14 @@ start_retroarch() {
 
 # cleanup: restore network/ftp and clean temp files
 cleanup() {
-    build_infoPanel_and_log "Cleanup" "Cleaning up after Pokemon session\n Do not power off!"
-
-    pkill -9 pressMenu2Kill
-
-    if is_running infoPanel; then
-        killall -9 infoPanel
-    fi
-
-    # restore_wifi_state
-    . "$sysdir/script/network/hotspot_cleanup.sh"
-    restore_ftp
-
-    # Remove some files we prepared and received
     log "Removing stale files"
-    rm "/tmp/host_ready"
-    rm "/tmp/stop_now"
-    rm "/tmp/wpa_supplicant.conf_bk"
-    rm "/tmp/dismiss_info_panel"
-    sync
-
-    log "Cleanup done"
-
-    exit
+    netplay_cleanup \
+        "Cleaning up after Pokemon session\n Do not power off!" \
+        1 1 1 0 \
+        "/tmp/host_ready" \
+        "/tmp/stop_now" \
+        "/tmp/wpa_supplicant.conf_bk" \
+        "/tmp/dismiss_info_panel"
 }
 
 # confirm_join_panel: show join confirmation UI with local ROM image

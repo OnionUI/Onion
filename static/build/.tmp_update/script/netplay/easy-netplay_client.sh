@@ -15,7 +15,8 @@ logfile=easy_netplay
 
 # Source scripts
 . $sysdir/script/log.sh
-# easy-netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, disable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, strip_game_name, wifi_disabled, stripped_game_name, read_cookie, check_wifi, start_ftp, sync_file
+# easy-netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, disable_flag, flag_enabled, is_running, restore_ftp, 
+# udhcpc_control, url_encode, strip_game_name, wifi_disabled, stripped_game_name, read_cookie, check_wifi, start_ftp, sync_file
 . $sysdir/script/netplay/easy-netplay_common.sh
 
 program=$(basename "$0" .sh)
@@ -82,25 +83,11 @@ confirm_join_panel() {
 
 # cleanup: restore wifi/ftp and remove session temp files
 cleanup() {
-	build_infoPanel_and_log "Cleanup" "Cleaning up after netplay session..."
-
-	pkill -9 pressMenu2Kill
-
-	if is_running infoPanel; then
-		killall -9 infoPanel
-	fi
-	rm /tmp/dismiss_info_panel
-
-	sync
-
-	# restore_wifi_state
-	. "$sysdir/script/network/hotspot_cleanup.sh"
-
-	rm "/mnt/SDCARD/RetroArch/retroarch.cookie.client"
-
-	log "Cleanup done"
-	sync
-	exit
+	netplay_cleanup \
+		"Cleaning up after netplay session..." \
+		1 0 1 0 \
+		"/tmp/dismiss_info_panel" \
+		"/mnt/SDCARD/RetroArch/retroarch.cookie.client"
 }
 
 #########

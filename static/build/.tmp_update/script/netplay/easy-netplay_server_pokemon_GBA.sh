@@ -59,26 +59,15 @@ start_retroarch() {
 
 # cleanup: restore network/ftp and clean temp files
 cleanup() {
-	build_infoPanel_and_log "Cleanup" "Cleaning up after Pokemon session\n Do not power off!"
-
-	pkill -9 pressMenu2Kill
-
-	. "$sysdir/script/network/hotspot_cleanup.sh"
-
-	restore_ftp
-
-	# Remove some files we prepared and received
-	rm "/tmp/host_ready"
-	rm "/tmp/stop_now"
-	disable_flag hotspotState
-	rm "/tmp/dismiss_info_panel"
-	sync
-	log "Cleanup done"
-
-	#Rename savestate_auto_load so savestate doesn't overwrite next loadsave
+	# Rename savestate_auto_load so savestate doesn't overwrite next loadsave
 	mv -f "/mnt/SDCARD/Saves/CurrentProfile/states/gpSP/$host_rom_filename_NoExt.state.auto" "/mnt/SDCARD/Saves/CurrentProfile/states/gpSP/$host_rom_filename_NoExt.state.auto_$CurDate"
 
-	exit
+	netplay_cleanup \
+		"Cleaning up after Pokemon session\n Do not power off!" \
+		1 1 0 1 \
+		"/tmp/host_ready" \
+		"/tmp/stop_now" \
+		"/tmp/dismiss_info_panel"
 }
 
 # confirm_join_panel: show host confirmation UI with local ROM image
