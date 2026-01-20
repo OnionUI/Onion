@@ -62,6 +62,9 @@ cleanup() {
 	# Rename savestate_auto_load so savestate doesn't overwrite next loadsave
 	mv -f "/mnt/SDCARD/Saves/CurrentProfile/states/gpSP/$host_rom_filename_NoExt.state.auto" "/mnt/SDCARD/Saves/CurrentProfile/states/gpSP/$host_rom_filename_NoExt.state.auto_$CurDate"
 
+	# message: cleanup infoPanel text
+	# args: hotspot_cleanup restore_ftp kill_infopanel disable_hotspot_flag
+	# remove files
 	netplay_cleanup \
 		"Cleaning up after Pokemon session\n Do not power off!" \
 		1 1 0 1 \

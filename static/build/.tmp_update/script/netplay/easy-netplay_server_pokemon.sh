@@ -283,6 +283,9 @@ client_save_send() {
 
 # Cleanup. If you don't call this you don't retransfer the saves - Users cannot under any circumstances miss this function.
 cleanup() {
+	# message: cleanup infoPanel text
+	# args: hotspot_cleanup restore_ftp kill_infopanel disable_hotspot_flag
+	# remove files
 	netplay_cleanup \
 		"Cleaning up after Pokemon session\n Do not power off!" \
 		1 1 0 1 \

@@ -60,6 +60,9 @@ start_retroarch() {
 # cleanup: restore network/ftp and clean temp files
 cleanup() {
     log "Removing stale files"
+    # message: cleanup infoPanel text
+    # args: hotspot_cleanup restore_ftp kill_infopanel disable_hotspot_flag
+    # remove files
     netplay_cleanup \
         "Cleaning up after Pokemon session\n Do not power off!" \
         1 1 1 0 \

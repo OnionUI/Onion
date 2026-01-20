@@ -83,6 +83,9 @@ confirm_join_panel() {
 
 # cleanup: restore wifi/ftp and remove session temp files
 cleanup() {
+	# message: cleanup infoPanel text
+	# args: hotspot_cleanup restore_ftp kill_infopanel disable_hotspot_flag
+	# remove files
 	netplay_cleanup \
 		"Cleaning up after netplay session..." \
 		1 0 1 0 \
