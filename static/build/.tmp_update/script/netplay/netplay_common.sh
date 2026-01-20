@@ -1,8 +1,8 @@
 # Shared netplay helpers
 
 # Tunables
-NETPLAY_FTP_CHECK_RETRIES=${NETPLAY_FTP_CHECK_RETRIES:-5}
-NETPLAY_FTP_CHECK_DELAY=${NETPLAY_FTP_CHECK_DELAY:-1}
+NETPLAY_FTP_CHECK_RETRIES=${NETPLAY_FTP_CHECK_RETRIES:-3}
+NETPLAY_FTP_CHECK_DELAY=${NETPLAY_FTP_CHECK_DELAY:-0.5}
 
 # checksize_func <file_path> <remote_size>
 # - sets: same_size (0 different, 1 identical, 2 unknown)
@@ -275,16 +275,23 @@ ensure_ftp_head() {
 
     while [ $attempt -le $NETPLAY_FTP_CHECK_RETRIES ]; do
         log "FTP check attempt $attempt/$NETPLAY_FTP_CHECK_RETRIES for $remote_ip"
-        ping -c 1 "$remote_ip" >/dev/null 2>&1
+        ping -c 2 "$remote_ip" >/dev/null 2>&1
         if [ $? -ne 0 ]; then
             log "Ping to $remote_ip failed (attempt $attempt)"
         fi
 
-        ftp_head_result=$(curl -I --connect-timeout 3 "$url" 2>&1)
+        ftp_head_result=$(curl -sS -I --connect-timeout 3 "$url" 2>&1)
         ftp_head_exit=$?
 
         if [ $ftp_head_exit -eq 0 ]; then
             return 0
+        fi
+
+        if [ $ftp_head_exit -eq 9 ]; then
+            log "FTP path denied for $remote_ip (curl exit=$ftp_head_exit)"
+            log "FTP HEAD error: $ftp_head_result"
+            build_infoPanel_and_log "Sync Failed" "FTP path denied at $remote_ip."
+            return 1
         fi
 
         if echo "$ftp_head_result" | grep -q "The file does not exist"; then
