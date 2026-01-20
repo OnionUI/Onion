@@ -1,5 +1,9 @@
 # Shared netplay helpers
 
+# Tunables
+NETPLAY_FTP_CHECK_RETRIES=${NETPLAY_FTP_CHECK_RETRIES:-5}
+NETPLAY_FTP_CHECK_DELAY=${NETPLAY_FTP_CHECK_DELAY:-1}
+
 # checksize_func <file_path> <remote_size>
 # - sets: same_size (0 different, 1 identical, 2 unknown)
 checksize_func() {
@@ -242,6 +246,65 @@ start_ftp() {
         tcpsvd -E 0.0.0.0 21 ftpd -w / &
         log "Starting FTP server"
     fi
+    check_ftp_local
+    sleep 0.5
+}
+
+# check_ftp_local [port]
+# - logs whether tcpsvd is running and its args/port
+check_ftp_local() {
+    local port="${1:-21}"
+    if pgrep tcpsvd >/dev/null; then
+        local tcpsvd_ps
+        tcpsvd_ps=$(ps | grep tcpsvd | grep -v grep)
+        log "FTP tcpsvd running (expected port $port): $tcpsvd_ps"
+    else
+        log "FTP tcpsvd not running (expected port $port)"
+        build_infoPanel_and_log "FTP Error" "FTP server failed to start."
+    fi
+}
+
+# ensure_ftp_head <url> <remote_ip> <mandatory>
+# - pings remote and performs FTP HEAD with retries
+# - sets: ftp_head_result, ftp_head_exit
+ensure_ftp_head() {
+    local url="$1"
+    local remote_ip="$2"
+    local mandatory="$3"
+    local attempt=1
+
+    while [ $attempt -le $NETPLAY_FTP_CHECK_RETRIES ]; do
+        log "FTP check attempt $attempt/$NETPLAY_FTP_CHECK_RETRIES for $remote_ip"
+        ping -c 1 "$remote_ip" >/dev/null 2>&1
+        if [ $? -ne 0 ]; then
+            log "Ping to $remote_ip failed (attempt $attempt)"
+        fi
+
+        ftp_head_result=$(curl -I --connect-timeout 3 "$url" 2>&1)
+        ftp_head_exit=$?
+
+        if [ $ftp_head_exit -eq 0 ]; then
+            return 0
+        fi
+
+        if echo "$ftp_head_result" | grep -q "The file does not exist"; then
+            log "FTP reachable but file missing for $remote_ip"
+            return 0
+        fi
+
+        log "FTP HEAD failed for $remote_ip (curl exit=$ftp_head_exit)"
+        log "FTP HEAD error: $ftp_head_result"
+        attempt=$((attempt + 1))
+        sleep "$NETPLAY_FTP_CHECK_DELAY"
+    done
+
+    build_infoPanel_and_log "Sync Failed" "Unable to reach FTP server at $remote_ip."
+    if [ "$mandatory" = "-m" ]; then
+        if type cleanup >/dev/null 2>&1; then
+            cleanup
+        fi
+    fi
+    return 1
 }
 # check_wifi <use_udhcpc> <hard_fail> <down_wlan1>
 # - use_udhcpc: 1 to call udhcpc_control after wpa_supplicant

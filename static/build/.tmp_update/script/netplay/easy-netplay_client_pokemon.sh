@@ -227,6 +227,7 @@ sync_file() {
     # some useful vars
     dir_path=$(dirname "$file_path")
     file_url="ftp://${hostip}/$(url_encode_path "${file_path#*/}")"
+    remote_ip="$hostip"
 
     log -e "\n############################ SYNC_FILE DEBUGGING ############################"
     log file_type $file_type
@@ -245,7 +246,12 @@ sync_file() {
     sync_success=
     run_sync= # tell if the sync task must be done or not
 
-    RequestResult=$(curl -I "$file_url" 2>&1)
+    if ! ensure_ftp_head "$file_url" "$remote_ip" "$file_mandatory"; then
+        same_size=0
+        run_sync=0
+        sync_success=0
+    fi
+    RequestResult="$ftp_head_result"
 
     if [[ $RequestResult == *"The file does not exist"* ]]; then
         log "The remote file does not exist."
