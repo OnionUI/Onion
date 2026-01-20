@@ -1,8 +1,12 @@
 # Shared netplay helpers
 
 # Tunables
-NETPLAY_FTP_CHECK_RETRIES=${NETPLAY_FTP_CHECK_RETRIES:-5}
-NETPLAY_FTP_CHECK_DELAY=${NETPLAY_FTP_CHECK_DELAY:-1}
+NETPLAY_FTP_CHECK_RETRIES=5
+NETPLAY_FTP_CHECK_DELAY=1
+NETPLAY_FTP_READY_DELAY=3
+NETPLAY_FTP_DOWNLOAD_RETRIES=5
+NETPLAY_FTP_DOWNLOAD_DELAY=1
+NETPLAY_FTP_HEAD_TIMEOUT=2
 
 # checksize_func <file_path> <remote_size>
 # - sets: same_size (0 different, 1 identical, 2 unknown)
@@ -12,15 +16,18 @@ checksize_func() {
 
     if [ -e "$func_file_path" ]; then
         local_file_size=$(stat -c%s "$func_file_path")
+        log "checksize_func: local_file_size=$local_file_size for $func_file_path"
+        log "checksize_func: remote_file_size='$filesize_tocheck'"
         if echo "$filesize_tocheck" | grep -q "^[0-9][0-9]*$"; then
             if [ "$filesize_tocheck" -eq "$local_file_size" ]; then
                 same_size=1
             else
                 same_size=0
             fi
+            log "checksize_func: same_size=$same_size (numeric compare)"
         else
-            log "Non-numeric remote file size for checksize_func: '$filesize_tocheck'"
-            same_size=2
+            log "Non-numeric remote file size for checksize_func: '$filesize_tocheck' (skipping size check)"
+            same_size=1
         fi
     else
         same_size=0
@@ -128,10 +135,19 @@ udhcpc_control() {
     udhcpc -i wlan0 -s /etc/init.d/udhcpc.script >/dev/null 2>&1 &
 }
 
-# url_encode <string>
-# - percent-encodes string for URLs
+# url_encode <path>
+# - encodes each path segment but keeps '/'
 url_encode() {
-    encoded_str=$(echo "$*" | awk '
+    local path="$1"
+    local encoded=""
+    local IFS='/'
+    local part
+
+    for part in $path; do
+        if [ -n "$encoded" ]; then
+            encoded="${encoded}/"
+        fi
+        encoded="${encoded}$(echo "$part" | awk '
     BEGIN {
 	split ("1 2 3 4 5 6 7 8 9 A B C D E F", hextab, " ")
 	hextab [0] = 0
@@ -141,7 +157,7 @@ url_encode() {
 	encoded = ""
 	for ( i=1; i<=length ($0); ++i ) {
 	    c = substr ($0, i, 1)
-	    if ( c ~ /[a-zA-Z0-9.-]/ ) {
+	    if ( c ~ /[a-zA-Z0-9._-]/ ) {
 		encoded = encoded c		# safe character
 	    } else if ( c == " " ) {
 		encoded = encoded "%20"	# special handling
@@ -153,24 +169,7 @@ url_encode() {
 	    }
 	}
 	    print encoded
-    }
-')
-    echo "$encoded_str"
-}
-
-# url_encode_path <path>
-# - encodes each path segment but keeps '/'
-url_encode_path() {
-    local path="$1"
-    local encoded=""
-    local IFS='/'
-    local part
-
-    for part in $path; do
-        if [ -n "$encoded" ]; then
-            encoded="${encoded}/"
-        fi
-        encoded="${encoded}$(url_encode "$part")"
+    }')"
     done
 
     printf '%s\n' "$encoded"
@@ -265,46 +264,14 @@ check_ftp_local() {
 }
 
 # ensure_ftp_head <url> <remote_ip> <mandatory>
-# - pings remote and performs FTP HEAD with retries
+# - give peer time to start FTP before first transfer, then do a quick HEAD
 # - sets: ftp_head_result, ftp_head_exit
 ensure_ftp_head() {
-    local url="$1"
-    local remote_ip="$2"
-    local mandatory="$3"
-    local attempt=1
-
-    while [ $attempt -le $NETPLAY_FTP_CHECK_RETRIES ]; do
-        log "FTP check attempt $attempt/$NETPLAY_FTP_CHECK_RETRIES for $remote_ip"
-        ping -c 1 "$remote_ip" >/dev/null 2>&1
-        if [ $? -ne 0 ]; then
-            log "Ping to $remote_ip failed (attempt $attempt)"
-        fi
-
-        ftp_head_result=$(curl -I --connect-timeout 3 "$url" 2>&1)
-        ftp_head_exit=$?
-
-        if [ $ftp_head_exit -eq 0 ]; then
-            return 0
-        fi
-
-        if echo "$ftp_head_result" | grep -q "The file does not exist"; then
-            log "FTP reachable but file missing for $remote_ip"
-            return 0
-        fi
-
-        log "FTP HEAD failed for $remote_ip (curl exit=$ftp_head_exit)"
-        log "FTP HEAD error: $ftp_head_result"
-        attempt=$((attempt + 1))
-        sleep "$NETPLAY_FTP_CHECK_DELAY"
-    done
-
-    build_infoPanel_and_log "Sync Failed" "Unable to reach FTP server at $remote_ip."
-    if [ "$mandatory" = "-m" ]; then
-        if type cleanup >/dev/null 2>&1; then
-            cleanup
-        fi
-    fi
-    return 1
+    # wait for peer tcpsvd to be ready (reduces race on first FTP request)
+    sleep "$NETPLAY_FTP_READY_DELAY"
+    ftp_head_result=$(curl -sS -I --connect-timeout "$NETPLAY_FTP_HEAD_TIMEOUT" "$1" 2>&1)
+    ftp_head_exit=$?
+    return 0
 }
 # check_wifi <use_udhcpc> <hard_fail> <down_wlan1>
 # - use_udhcpc: 1 to call udhcpc_control after wpa_supplicant

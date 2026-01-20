@@ -226,7 +226,7 @@ sync_file() {
 
     # some useful vars
     dir_path=$(dirname "$file_path")
-    file_url="ftp://${hostip}/$(url_encode_path "${file_path#*/}")"
+    file_url="ftp://${hostip}/$(url_encode "${file_path#*/}")"
     remote_ip="$hostip"
 
     log -e "\n############################ SYNC_FILE DEBUGGING ############################"
@@ -405,22 +405,37 @@ sync_file() {
         fi
 
         log "Starting to download $file_type from $file_url"
-        curl_output=$(curl -S -o "$file_path" "$file_url" 2>&1)
-        curl_exit=$?
+        download_attempt=1
+        while [ $download_attempt -le $NETPLAY_FTP_DOWNLOAD_RETRIES ]; do
+            curl_output=$(curl -S -o "$file_path" "$file_url" 2>&1)
+            curl_exit=$?
 
-        if [ $curl_exit -eq 0 ]; then
-            log "$file_type download completed"
-        else
-            log "$file_type download failed (curl exit=$curl_exit)"
+            if [ $curl_exit -eq 0 ]; then
+                log "$file_type download completed"
+                break
+            fi
+
+            log "$file_type download failed (curl exit=$curl_exit, attempt $download_attempt/$NETPLAY_FTP_DOWNLOAD_RETRIES)"
             log "curl error: $curl_output"
-        fi
+            if [ $curl_exit -eq 9 ] || [ $curl_exit -eq 78 ]; then
+                log "FTP path denied for $file_url"
+                break
+            fi
+
+            download_attempt=$((download_attempt + 1))
+            sleep "$NETPLAY_FTP_DOWNLOAD_DELAY"
+        done
 
     fi
 
     ###################### FINAL CHECK RESULT #########################
 
     if [ ! -e "$file_path" ]; then
-        build_infoPanel_and_log "Sync Failed" "Failed to download the $file_type file."
+        if [ "$file_type" = "Img" ]; then
+            log "Image not found on peer; continuing without image."
+        else
+            build_infoPanel_and_log "Sync Failed" "Failed to download the $file_type file."
+        fi
 
         # copy has failed : restoring the original file
         if [ $file_type != "Rom" ] && [ $file_type != "Core" ]; then
@@ -428,7 +443,11 @@ sync_file() {
             log "backup restored"
         fi
         sleep 2
-        [ "$file_mandatory" = "-m" ] && cleanup
+        if [ "$file_mandatory" = "-m" ]; then
+            if [ "$file_type" != "Img" ]; then
+                cleanup
+            fi
+        fi
 
     else
 
