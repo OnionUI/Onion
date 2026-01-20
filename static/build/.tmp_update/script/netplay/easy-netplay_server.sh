@@ -25,7 +25,7 @@ program=$(basename "$0" .sh)
 ##########
 
 # Find the recommended core for the current system.
-Get_NetplayCore() {
+get_netplay_core() {
 
 	platform=$(echo "$cookie_rom_path" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
 	netplaycore_info=$(grep "^${platform};" "$sysdir/config/netplay_cores.conf")
@@ -116,7 +116,7 @@ lets_go() {
 	start_ftp
 
 	# Determine netplay core based on ROM/core config
-	Get_NetplayCore
+	get_netplay_core
 
 	# Write cookie with core/rom metadata
 	create_cookie_info

@@ -33,7 +33,7 @@ program=$(basename "$0" .sh)
 # We'll need wifi up for this. Lets try and start it..
 
 # Find the recommended core for the current system.
-Get_NetplayCore() {
+get_netplay_core() {
 	platform="$1"
 	netplaycore_info=$(grep "^${platform};" "$sysdir/config/netplay_cores.conf")
 
@@ -122,7 +122,7 @@ lets_go() {
 	check_wifi 0 0 1
 
 	# Determine netplay core based on platform
-	Get_NetplayCore "$CurrentSystem"
+	get_netplay_core "$CurrentSystem"
 	if [ $? -eq 0 ]; then
 		echo "*****************************************"
 		echo "romfullpath: $romfullpath"
