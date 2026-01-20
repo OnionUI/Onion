@@ -27,8 +27,7 @@ program=$(basename "$0" .sh)
 ##Setup.##
 ##########
 
-# Read the cookie and store the paths and checksums into a var.
-
+# sync_file: download/verify remote file over ftp
 sync_file() {
 
 	MAX_FILE_CHKSUM_SIZE=26214400
@@ -375,6 +374,7 @@ wifi_disabled() {
 	[ $(/customer/app/jsonval wifi) -eq 0 ]
 }
 
+# confirm_join_panel: show join confirmation UI with ROM image
 confirm_join_panel() {
 	local title="$1"
 	local message="$2"
@@ -396,10 +396,12 @@ confirm_join_panel() {
 	fi
 }
 
+# stripped_game_name: format game name for display
 stripped_game_name() {
 	game_name=$(awk -F'/' '/\[rom\]:/ {print $NF}' /mnt/SDCARD/RetroArch/retroarch.cookie.client | sed 's/\(.*\)\..*/\1/')
 }
 
+# cleanup: restore wifi/ftp and remove session temp files
 cleanup() {
 	build_infoPanel_and_log "Cleanup" "Cleaning up after netplay session..."
 

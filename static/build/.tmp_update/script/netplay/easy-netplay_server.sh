@@ -50,8 +50,7 @@ Get_NetplayCore() {
 
 }
 
-# Create a cookie with all the required info for the client. (client will use this cookie)
-# We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
+# start_retroarch: launch RetroArch host with selected core and ROM
 start_retroarch() {
     log "RetroArch" "Starting RetroArch..."
     echo "*****************************************"
@@ -82,6 +81,7 @@ start_retroarch() {
     fi
 }
 
+# cleanup: restore wifi/ftp and remove session temp files
 cleanup() {
 	build_infoPanel_and_log "Cleanup" "Cleaning up after netplay session..."
 

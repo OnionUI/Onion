@@ -164,6 +164,7 @@ wait_for_save_return() {
     fi
 }
 
+# cleanup: restore wifi/ftp and remove session temp files
 cleanup() {
     build_infoPanel_and_log "Cleanup" "Cleaning up after Pokemon session\n Do not power off!"
 
@@ -199,7 +200,7 @@ cleanup() {
 #Utilities#
 ###########
 
-# Create a cookie with all the required info for the client. (client will use this cookie)
+# confirm_join_panel: show join confirmation UI with host/client images
 confirm_join_panel() {
     local title="$1"
     local message="$2"
@@ -228,6 +229,7 @@ confirm_join_panel() {
     fi
 }
 
+# stripped_game_names: format host/client display names
 stripped_game_names() {
     host_name_trimmed="$(strip_game_name "$(basename "${rom%.*}")")"
     game_name="Host: \n$host_name_trimmed"

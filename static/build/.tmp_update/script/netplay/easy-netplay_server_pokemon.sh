@@ -322,6 +322,7 @@ remove_client_save_suffix() {
 	fi
 }
 
+# confirm_join_panel: show host confirmation UI with host/client images
 confirm_join_panel() {
 	local title="$1"
 	local message="$2"
@@ -358,6 +359,7 @@ confirm_join_panel() {
 	fi
 }
 
+# stripped_game_names: format host/client display names
 stripped_game_names() {
 	host_game_name="$(strip_game_name "$(basename "${host_rom%.*}")")"
 	host_game_name="Host (me): \n$host_game_name"
@@ -366,6 +368,7 @@ stripped_game_names() {
 	client_game_name="\n Client: \n$client_rom_trimmed"
 }
 
+# unpack_rom: extract archive into its folder
 unpack_rom() {
 	file="$1"
 	folder=$(dirname "$file")
