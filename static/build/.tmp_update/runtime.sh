@@ -6,6 +6,7 @@ export PATH="$sysdir/bin:$PATH"
 
 logfile=$(basename "$0" .sh)
 . $sysdir/script/log.sh
+. $sysdir/script/handle_zip_roms.sh
 
 MODEL_MM=283
 MODEL_MMP=354
@@ -315,11 +316,18 @@ launch_game() {
 
     start_audioserver
     save_settings
-
+    
     if check_is_game "$cmd"; then
         # Extract rom path
         rompath=$(echo "$cmd" | awk '{ st = index($0,"\" \""); print substr($0,st+3,length($0)-st-3)}')
+        romext=$(echo "$(basename "$rompath")" | awk -F. '{print tolower($NF)}')
 
+        if [ "$romext" == "zip" ] || [ "$romext" == "7z" ];then
+            handle_compressed_roms "$rompath"
+            rompath="$absolute_rom_path"
+        fi
+       
+        
         # Check for custom launch script
         if echo "$rompath" | grep -q ":"; then
             launch_script=$(echo "$rompath" | awk '{split($0,a,":"); print a[1]}')
@@ -327,8 +335,9 @@ launch_game() {
             echo "LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so \"$launch_script\" \"$rompath\"" > $sysdir/cmd_to_run.sh
         fi
 
-        orig_path="$rompath"
         romext=$(echo "$(basename "$rompath")" | awk -F. '{print tolower($NF)}')
+        
+        orig_path="$rompath"
 
         if [ "$romext" != "miyoocmd" ]; then
             # Resolve real path
