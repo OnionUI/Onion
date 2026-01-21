@@ -1,5 +1,8 @@
 # Shared netplay helpers
 
+# logging (needed by helpers in this file)
+. $sysdir/script/log.sh
+
 # Tunables
 # seconds unless stated otherwise; bytes unless stated otherwise
 NETPLAY_FTP_CHECK_RETRIES=3 # ftp head retry count for preflight checks

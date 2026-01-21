@@ -7,7 +7,6 @@
 logfile=pokemon_link
 
 # Source scripts
-. $sysdir/script/log.sh
 # easy-netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, disable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, strip_game_name, check_wifi, start_ftp, sync_file
 . $sysdir/script/netplay/easy-netplay_common.sh
 # easy-netplay_signalling.sh: wait_for_client, ready_up, notify_peer, check_stop, notify_stop

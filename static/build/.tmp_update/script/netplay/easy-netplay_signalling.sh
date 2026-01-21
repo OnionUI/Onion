@@ -132,6 +132,7 @@ wait_for_client() {
         sleep 0.5
         counter=$((counter + 1))
 
+        # wait for 15 seconds, then bail
         if [ $counter -ge 30 ]; then
             log "No client has connected"
             build_infoPanel_and_log "Hotspot error" "No client has connected. Exiting..."
