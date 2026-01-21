@@ -25,17 +25,16 @@ program=$(basename "$0" .sh)
 
 # Find the recommended core for the current system.
 get_netplay_core() {
-
 	platform=$(echo "$cookie_rom_path" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
 	netplaycore_info=$(grep "^${platform};" "$sysdir/config/netplay_cores.conf")
-	if [ -n "$netplaycore_info" ]; then
 
-# Runtime vars
+	if [ -n "$netplaycore_info" ]; then
 		netplaycore=$(echo "$netplaycore_info" | cut -d ';' -f 2)
 		netplaycore="/mnt/SDCARD/RetroArch/.retroarch/cores/$netplaycore"
 		core_config_folder=$(echo "$netplaycore_info" | cut -d ';' -f 3)
 		cpuspeed=$(echo "$netplaycore_info" | cut -d ';' -f 4)
 	fi
+
 	if [ -n "$netplaycore" ]; then
 		if [ "$netplaycore" = "none" ]; then
 			build_infoPanel_and_log "Netplay impossible" "$platform not compatible with Netplay"
@@ -45,8 +44,8 @@ get_netplay_core() {
 	else
 		netplaycore="$cookie_core_path"
 	fi
+	
 	return 0
-
 }
 
 # start_retroarch: launch RetroArch host with selected core and ROM

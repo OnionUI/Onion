@@ -189,7 +189,6 @@ client_rom_rename() {
 
 # We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
 start_retroarch() {
-
 	log "\n############################ RETROARCH DEBUGGING ############################"
 	log "host_rom: $host_rom"
 	log "client_rom_clone: ${client_rom_clone}"
