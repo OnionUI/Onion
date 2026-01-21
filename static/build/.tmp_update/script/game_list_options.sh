@@ -210,8 +210,8 @@ main() {
         else
           extract_roms_state="Off"
         fi
-        add_menu_option extract_roms "Pre-extract Roms: $extract_roms_state" "Extracts roms for faster loads while in GameSwitcher"
         add_menu_option refresh_roms "Refresh list" "Refresh the rom list\n(re-scan for new games)"
+        add_menu_option extract_roms "Pre-extract Roms: $extract_roms_state" "Extracts roms for faster loads\nwhile in GameSwitcher"
     fi
 
     add_script_files "$globalscriptdir"
