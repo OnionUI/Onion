@@ -62,8 +62,9 @@ backup_and_send_save() {
         cp -f "$save_tgbdual" "${save_tgbdual}_$CurDate"
         save_file_matched="$save_tgbdual"
     else
-        touch "/tmp/MISSING.srm"
-        save_file_matched="/tmp/MISSING.srm"
+        missing=1
+        touch "/tmp/missing_save.srm"
+        save_file_matched="/tmp/missing_save.srm"
     fi
 
     save_file_stripped="${save_file_matched##*/}"
@@ -73,6 +74,8 @@ backup_and_send_save() {
     curl -T "$save_file_matched" "ftp://$hostip/tmp/$encoded_save_file"
 
     if [ "$missing" = "1" ]; then
+        # hitting this block means we cannot send a save to the host
+        # in some games, such as pokemon this means the host would start a blank save
         build_infoPanel_and_log "Save not found" "You don't have a save for this game, \n or we failed to find it. Cannot continue \n Notified host."
         notify_stop
     fi
@@ -131,6 +134,7 @@ wait_for_save_return() {
         counter=$((counter + 1))
 
         if [ $counter -ge 30 ]; then
+            # if we've hit this block the save won't be retransferred, if this happens progress during this session is lost.
             build_infoPanel_and_log "Error" "The Host didn't ready up, cannot continue..."
             log "We ran out of time waiting for the host to ready up, possibly due to host->client connecitivity"
             sleep 1
@@ -174,7 +178,7 @@ cleanup() {
         "/tmp/ready_to_send" \
         "/tmp/ready_to_receive" \
         "${save_file_matched}_rcvd" \
-        "/tmp/MISSING.srm" \
+        "/tmp/missing_save.srm" \
         "/tmp/stop_now" \
         "/tmp/wpa_supplicant.conf_bk" \
         "/mnt/SDCARD/RetroArch/retroarch.cookie.client" \

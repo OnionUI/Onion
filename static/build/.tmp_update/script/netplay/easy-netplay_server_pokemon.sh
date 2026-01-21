@@ -89,7 +89,7 @@ client_save_get() {
 		sync
 		for file in /tmp/*.srm; do
 			if [ -f "$file" ]; then
-				if [ "$(basename "$file")" = "MISSING.srm" ]; then
+				if [ "$(basename "$file")" = "missing_save.srm" ]; then
 					build_infoPanel_and_log "Sync error" "Client advises they don't have a save file. \n Cannot continue."
 					notify_stop
 				else
@@ -293,7 +293,7 @@ cleanup() {
 		"$client_rom_clone" \
 		"/tmp/ready_to_send" \
 		"/tmp/ready_to_receive" \
-		"/tmp/MISSING.srm" \
+		"/tmp/missing_save.srm" \
 		"/tmp/stop_now" \
 		"/tmp/dismiss_info_panel"
 }
