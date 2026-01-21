@@ -121,7 +121,7 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/mainUiBatPerc && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/keymon && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/playActivity && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/sqldaemon && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/sqlmon && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/themeSwitcher && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/tweaks && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/packageManager && BUILD_DIR=$(BIN_DIR) make

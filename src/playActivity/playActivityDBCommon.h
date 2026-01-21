@@ -1,9 +1,6 @@
 
 #ifndef PLAY_ACTIVITY_COMMON_H
 #define PLAY_ACTIVITY_COMMON_H
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif // !_GNU_SOURCE
 
 #define PLAY_ACTIVITY_DB_NEW_FILE "/mnt/SDCARD/Saves/CurrentProfile/play_activity/play_activity_db.sqlite"
 #define ROMS_FOLDER "/mnt/SDCARD/Roms"
@@ -25,6 +22,7 @@ typedef struct PlayActivitiesUI PlayActivitiesUI;
 #define GET_PLAY_TIME "GET_PLAY_TIME"
 #define GET_PLAY_TIME_TOTAL "GET_PLAY_TIME_TOTAL"
 #define CLOSE_DB "CLOSE_DB"
+int asprintf(char **strp, const char *fmt, ...);
 
 struct ROM {
     int id;

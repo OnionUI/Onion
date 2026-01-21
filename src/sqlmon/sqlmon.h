@@ -1,6 +1,6 @@
 
-#ifndef PLAY_ACTIVITY_DAEMON_H
-#define PLAY_ACTIVITY_DAEMON_H
+#ifndef SQLMON_H
+#define SQLMON_H
 
 #include "../playActivity/cacheDB.h"
 #include "../playActivity/playActivityDBCommon.h"

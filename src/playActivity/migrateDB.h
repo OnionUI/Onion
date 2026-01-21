@@ -37,7 +37,7 @@ int __db_insert_rom(const char *rom_type, const char *rom_name, const char *file
     printf_debug("play_activity_db_prepare(%s)\n", sql);
     if (play_activity_db == NULL) {
         printf("DB is not open");
-        return NULL;
+        return -1;
     }
     sqlite3_stmt *stmt = NULL;
     if (sqlite3_prepare_v2(play_activity_db, sql, -1, &stmt, NULL) != SQLITE_OK) {

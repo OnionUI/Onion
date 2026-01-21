@@ -83,6 +83,9 @@ main() {
     # Start the key monitor
     keymon &
 
+    # Start the sql server
+    sqlmon &
+
     # Init
     rm /tmp/.offOrder 2> /dev/null
     HOME=/mnt/SDCARD/RetroArch/

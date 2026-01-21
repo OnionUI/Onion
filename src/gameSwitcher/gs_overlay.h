@@ -150,9 +150,9 @@ void overlay_exit(void)
 
         // wait up to 5 seconds for RetroArch to exit
         for (int i = 0; i < 10; i++) {
-            msleep(500);  // 0.5s x 10 = 5s
+            msleep(500); // 0.5s x 10 = 5s
             if (system("pidof retroarch > /dev/null") != 0) {
-                break;  // retroarch is gone
+                break; // retroarch is gone
             }
         }
 
