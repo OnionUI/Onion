@@ -54,7 +54,7 @@ include ./src/common/commands.mk
 
 ###########################################################
 
-.PHONY: all version print-version core apps external release clean deepclean git-clean with-toolchain patch lib test
+.PHONY: all version print-version core apps external release clean deepclean git-clean git-submodules with-toolchain toolchain patch lib test external-libs static-analysis format dev asan pwd
 
 all: dist
 
@@ -125,14 +125,20 @@ BUILD_START_TIME := $(shell date +%s)
 build: core apps external
 	@$(ECHO) $(PRINT_DONE)
 
-# Core component list
-CORE_COMPONENTS := bootScreen chargingState gameSwitcher mainUiBatPerc keymon \
-	playActivity themeSwitcher tweaks packageManager sendkeys setState renameRom \
-	infoPanel prompt batmon easter read_uuid detectKey axp pressMenu2Kill \
-	pngScale libgamename gameNameList sendUDP tree pippi cpuclock
+# Core component list (alphabetical)
+CORE_COMPONENTS := axp batmon bootScreen chargingState cpuclock detectKey easter \
+	gameNameList gameSwitcher infoPanel keymon libgamename mainUiBatPerc \
+	packageManager pippi playActivity pngScale pressMenu2Kill prompt read_uuid \
+	renameRom sendkeys sendUDP setState themeSwitcher tree tweaks
 
-# Binaries to copy to installer
-INSTALLER_BINS := prompt batmon detectKey infoPanel gameNameList playActivity 7z
+# Binaries to copy to installer (alphabetical)
+INSTALLER_BINS := 7z batmon detectKey gameNameList infoPanel playActivity prompt
+
+# Third-party components (alphabetical; build logic differs per component)
+THIRD_PARTY_COMPONENTS := DinguxCommander RetroArch-patch SearchFilter Terminal
+
+# Simple apps that just build to BIN_DIR (alphabetical)
+SIMPLE_APPS := clock randomGamePicker
 
 # Build all core components
 # TODO: Parallel builds (-j) cause race conditions because components share
@@ -141,24 +147,27 @@ INSTALLER_BINS := prompt batmon detectKey infoPanel gameNameList playActivity 7z
 core: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
 	@for comp in $(CORE_COMPONENTS); do \
-		cd $(SRC_DIR)/$$comp && BUILD_DIR=$(BIN_DIR) $(MAKE); \
+		cd $(SRC_DIR)/$$comp && BUILD_DIR=$(BIN_DIR) $(MAKE) || exit 1; \
 	done
 # Build installer dependencies
 	@mkdir -p $(INSTALLER_DIR)/bin
 	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(INSTALLER_DIR)/bin/ VERSION=$(VERSION) $(MAKE)
-	@for bin in $(INSTALLER_BINS); do cp $(BIN_DIR)/$$bin $(INSTALLER_DIR)/bin/; done
+	@for bin in $(INSTALLER_BINS); do cp $(BIN_DIR)/$$bin $(INSTALLER_DIR)/bin/ || exit 1; done
 # Override miyoo libraries
 	@cp $(BIN_DIR)/libgamename.so $(BUILD_DIR)/miyoo/lib/
 
 apps: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
+# UI apps have custom BUILD_DIR destinations and post-build res/ copies
 	@cd $(SRC_DIR)/batteryMonitorUI && BUILD_DIR="$(PACKAGES_APP_DEST)/Battery Monitor/App/BatteryMonitorUI" $(MAKE)
 	@find $(SRC_DIR)/batteryMonitorUI -depth -type d -name res -exec cp -r {}/. "$(PACKAGES_APP_DEST)/Battery Monitor/App/BatteryMonitorUI/res/" \;
 	@cd $(SRC_DIR)/playActivityUI && BUILD_DIR="$(PACKAGES_APP_DEST)/Activity Tracker/App/PlayActivity" $(MAKE)
 	@find $(SRC_DIR)/playActivityUI -depth -type d -name res -exec cp -r {}/. "$(PACKAGES_APP_DEST)/Activity Tracker/App/PlayActivity/res/" \;
 	@find $(SRC_DIR)/packageManager -depth -type d -name res -exec cp -r {}/. $(BUILD_DIR)/App/PackageManager/res/ \;
-	@cd $(SRC_DIR)/clock && BUILD_DIR="$(BIN_DIR)" $(MAKE)
-	@cd $(SRC_DIR)/randomGamePicker && BUILD_DIR="$(BIN_DIR)" $(MAKE)
+# Simple apps just build to BIN_DIR
+	@for app in $(SIMPLE_APPS); do \
+		cd $(SRC_DIR)/$$app && BUILD_DIR="$(BIN_DIR)" $(MAKE) || exit 1; \
+	done
 # Preinstalled apps
 	@cp -a "$(PACKAGES_APP_DEST)/Activity Tracker/." $(BUILD_DIR)/
 	@cp -a "$(PACKAGES_APP_DEST)/Quick Guide/." $(BUILD_DIR)/
@@ -224,13 +233,13 @@ clean:
 	@rm -rf $(BUILD_DIR) $(BUILD_TEST_DIR) $(ROOT_DIR)/dist $(TEMP_DIR)/configs
 	@rm -f $(CACHE)/.setup
 	@find include src -type f -name '*.o' -exec rm -f {} \;
+	@find include src -type f -name '*.d' -exec rm -f {} \;
 
 deepclean: clean
 	@rm -rf $(CACHE)
-	@cd $(THIRD_PARTY_DIR)/RetroArch-patch && $(MAKE) clean
-	@cd $(THIRD_PARTY_DIR)/SearchFilter && $(MAKE) clean
-	@cd $(THIRD_PARTY_DIR)/Terminal && $(MAKE) clean
-	@cd $(THIRD_PARTY_DIR)/DinguxCommander && $(MAKE) clean
+	@for comp in $(THIRD_PARTY_COMPONENTS); do \
+		(cd $(THIRD_PARTY_DIR)/$$comp 2>/dev/null && $(MAKE) clean) || true; \
+	done
 
 dev: clean
 	@$(MAKE_DEV)
@@ -252,8 +261,8 @@ $(CACHE)/.docker:
 	@if ! docker image inspect $(TOOLCHAIN) >/dev/null 2>&1; then \
 		docker pull $(TOOLCHAIN); \
 	fi
-	$(makedir) cache
-	$(createfile) $(CACHE)/.docker
+	@$(makedir) cache
+	@$(createfile) $(CACHE)/.docker
 
 # Interactive toolchain shell
 toolchain: $(CACHE)/.docker
@@ -272,7 +281,7 @@ external-libs:
 test: external-libs
 	@mkdir -p $(BUILD_TEST_DIR)/infoPanel_test_data && cd $(TEST_SRC_DIR) && BUILD_DIR=$(BUILD_TEST_DIR)/ $(MAKE) dev
 	@cp -R $(TEST_SRC_DIR)/infoPanel_test_data $(BUILD_TEST_DIR)/
-	cd $(BUILD_TEST_DIR) && LD_LIBRARY_PATH=$(ROOT_DIR)/lib/ ./test
+	@cd $(BUILD_TEST_DIR) && LD_LIBRARY_PATH=$(ROOT_DIR)/lib/ ./test
 
 static-analysis: external-libs
 	@cd $(ROOT_DIR) && cppcheck -I $(INCLUDE_DIR) --enable=all $(SRC_DIR)
