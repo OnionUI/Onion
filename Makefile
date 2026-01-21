@@ -54,7 +54,7 @@ include ./src/common/commands.mk
 
 ###########################################################
 
-.PHONY: all version core apps external release clean deepclean git-clean with-toolchain patch lib test
+.PHONY: all version print-version core apps external release clean deepclean git-clean with-toolchain patch lib test
 
 all: dist
 
@@ -83,7 +83,8 @@ $(CACHE)/.setup: $(CACHE)/.submodules
 # Set version number
 	@mkdir -p $(BUILD_DIR)/.tmp_update/onionVersion
 	@echo -n "v$(VERSION)" > $(BUILD_DIR)/.tmp_update/onionVersion/version.txt
-	@sed -i "s/{VERSION}/$(VERSION)/g" $(BUILD_DIR)/autorun.inf
+	@sed "s/{VERSION}/$(VERSION)/g" $(BUILD_DIR)/autorun.inf > $(BUILD_DIR)/autorun.inf.tmp && \
+		mv $(BUILD_DIR)/autorun.inf.tmp $(BUILD_DIR)/autorun.inf
 # Copy all resources from src folders
 	@find \
 		$(SRC_DIR)/gameSwitcher \
@@ -118,62 +119,46 @@ $(CACHE)/.setup: $(CACHE)/.submodules
 # Set flag: finished setup
 	@touch $(CACHE)/.setup
 
+# Capture build start time
+BUILD_START_TIME := $(shell date +%s)
+
 build: core apps external
 	@$(ECHO) $(PRINT_DONE)
 
+# Core component list
+CORE_COMPONENTS := bootScreen chargingState gameSwitcher mainUiBatPerc keymon \
+	playActivity themeSwitcher tweaks packageManager sendkeys setState renameRom \
+	infoPanel prompt batmon easter read_uuid detectKey axp pressMenu2Kill \
+	pngScale libgamename gameNameList sendUDP tree pippi cpuclock
+
+# Binaries to copy to installer
+INSTALLER_BINS := prompt batmon detectKey infoPanel gameNameList playActivity 7z
+
+# Build all core components
+# TODO: Parallel builds (-j) cause race conditions because components share
+# ../common/utils/*.o files. To enable parallelism, each component needs to
+# build .o files into its own directory (e.g., using -o $(BUILD_DIR)/%.o).
 core: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
-# Build Onion binaries
-	@cd $(SRC_DIR)/bootScreen && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/chargingState && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/gameSwitcher && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/mainUiBatPerc && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/keymon && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/playActivity && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/themeSwitcher && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/tweaks && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/packageManager && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/sendkeys && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/setState && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/renameRom && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/infoPanel && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/prompt && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/batmon && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/easter && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/read_uuid && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/detectKey && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/axp && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/pressMenu2Kill && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/pngScale && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/libgamename && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/gameNameList && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/sendUDP && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/tree && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/pippi && BUILD_DIR=$(BIN_DIR) make
-	@cd $(SRC_DIR)/cpuclock && BUILD_DIR=$(BIN_DIR) make
-
-# Build dependencies for installer
+	@for comp in $(CORE_COMPONENTS); do \
+		cd $(SRC_DIR)/$$comp && BUILD_DIR=$(BIN_DIR) $(MAKE); \
+	done
+# Build installer dependencies
 	@mkdir -p $(INSTALLER_DIR)/bin
-	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(INSTALLER_DIR)/bin/ VERSION=$(VERSION) make
-	@cp $(BIN_DIR)/prompt $(INSTALLER_DIR)/bin/
-	@cp $(BIN_DIR)/batmon $(INSTALLER_DIR)/bin/
-	@cp $(BIN_DIR)/detectKey $(INSTALLER_DIR)/bin/
-	@cp $(BIN_DIR)/infoPanel $(INSTALLER_DIR)/bin/
-	@cp $(BIN_DIR)/gameNameList $(INSTALLER_DIR)/bin/
-	@cp $(BIN_DIR)/playActivity $(INSTALLER_DIR)/bin/
-	@cp $(BIN_DIR)/7z $(INSTALLER_DIR)/bin/
-# Overrider miyoo libraries
+	@cd $(SRC_DIR)/installUI && BUILD_DIR=$(INSTALLER_DIR)/bin/ VERSION=$(VERSION) $(MAKE)
+	@for bin in $(INSTALLER_BINS); do cp $(BIN_DIR)/$$bin $(INSTALLER_DIR)/bin/; done
+# Override miyoo libraries
 	@cp $(BIN_DIR)/libgamename.so $(BUILD_DIR)/miyoo/lib/
 
 apps: $(CACHE)/.setup
 	@$(ECHO) $(PRINT_RECIPE)
-	@cd $(SRC_DIR)/batteryMonitorUI && BUILD_DIR="$(PACKAGES_APP_DEST)/Battery Monitor/App/BatteryMonitorUI" make
+	@cd $(SRC_DIR)/batteryMonitorUI && BUILD_DIR="$(PACKAGES_APP_DEST)/Battery Monitor/App/BatteryMonitorUI" $(MAKE)
 	@find $(SRC_DIR)/batteryMonitorUI -depth -type d -name res -exec cp -r {}/. "$(PACKAGES_APP_DEST)/Battery Monitor/App/BatteryMonitorUI/res/" \;
-	@cd $(SRC_DIR)/playActivityUI && BUILD_DIR="$(PACKAGES_APP_DEST)/Activity Tracker/App/PlayActivity" make
+	@cd $(SRC_DIR)/playActivityUI && BUILD_DIR="$(PACKAGES_APP_DEST)/Activity Tracker/App/PlayActivity" $(MAKE)
 	@find $(SRC_DIR)/playActivityUI -depth -type d -name res -exec cp -r {}/. "$(PACKAGES_APP_DEST)/Activity Tracker/App/PlayActivity/res/" \;
 	@find $(SRC_DIR)/packageManager -depth -type d -name res -exec cp -r {}/. $(BUILD_DIR)/App/PackageManager/res/ \;
-	@cd $(SRC_DIR)/clock && BUILD_DIR="$(BIN_DIR)" make
-	@cd $(SRC_DIR)/randomGamePicker && BUILD_DIR="$(BIN_DIR)" make
+	@cd $(SRC_DIR)/clock && BUILD_DIR="$(BIN_DIR)" $(MAKE)
+	@cd $(SRC_DIR)/randomGamePicker && BUILD_DIR="$(BIN_DIR)" $(MAKE)
 # Preinstalled apps
 	@cp -a "$(PACKAGES_APP_DEST)/Activity Tracker/." $(BUILD_DIR)/
 	@cp -a "$(PACKAGES_APP_DEST)/Quick Guide/." $(BUILD_DIR)/
@@ -185,7 +170,7 @@ $(THIRD_PARTY_DIR)/RetroArch-patch/bin/retroarch_miyoo354:
 	@$(ECHO) $(PRINT_RECIPE)
 # RetroArch
 	@$(ECHO) $(COLOR_BLUE)"\n-- Build RetroArch"$(COLOR_NORMAL)
-	@cd $(THIRD_PARTY_DIR)/RetroArch-patch && make
+	@cd $(THIRD_PARTY_DIR)/RetroArch-patch && $(MAKE)
 
 external: $(CACHE)/.setup $(THIRD_PARTY_DIR)/RetroArch-patch/bin/retroarch_miyoo354
 	@$(ECHO) $(PRINT_RECIPE)
@@ -195,15 +180,15 @@ external: $(CACHE)/.setup $(THIRD_PARTY_DIR)/RetroArch-patch/bin/retroarch_miyoo
 	@$(BUILD_DIR)/.tmp_update/script/build_ext_cache.sh $(BUILD_DIR)/RetroArch/.retroarch
 # SearchFilter
 	@$(ECHO) $(COLOR_BLUE)"\n-- Build SearchFilter"$(COLOR_NORMAL)
-	@cd $(THIRD_PARTY_DIR)/SearchFilter && make build && cp -a build/. $(BUILD_DIR)
+	@cd $(THIRD_PARTY_DIR)/SearchFilter && $(MAKE) build && cp -a build/. $(BUILD_DIR)
 	@cp -a $(BUILD_DIR)/App/Search/. "$(PACKAGES_APP_DEST)/Search (Find your games)/App/Search"
 	@mv -f $(BUILD_DIR)/App/Filter/* "$(PACKAGES_APP_DEST)/List shortcuts (Filter+Refresh)/App/Filter"
 	@rmdir $(BUILD_DIR)/App/Filter
 # Other
 	@$(ECHO) $(COLOR_BLUE)"\n-- Build Terminal"$(COLOR_NORMAL)
-	@cd $(THIRD_PARTY_DIR)/Terminal && make && cp ./st "$(BIN_DIR)"
+	@cd $(THIRD_PARTY_DIR)/Terminal && $(MAKE) && cp ./st "$(BIN_DIR)"
 	@$(ECHO) $(COLOR_BLUE)"\n-- Build DinguxCommander"$(COLOR_NORMAL)
-	@cd $(THIRD_PARTY_DIR)/DinguxCommander && make && cp ./output/DinguxCommander "$(PACKAGES_APP_DEST)/File Explorer (DinguxCommander)/App/Commander_Italic"
+	@cd $(THIRD_PARTY_DIR)/DinguxCommander && $(MAKE) && cp ./output/DinguxCommander "$(PACKAGES_APP_DEST)/File Explorer (DinguxCommander)/App/Commander_Italic"
 
 dist: build
 	@$(ECHO) $(PRINT_RECIPE)
@@ -226,6 +211,7 @@ dist: build
 	@cd $(BUILD_DIR) && 7z a -mtm=off $(DIST_DIR)/miyoo/app/.tmp_update/onion.pak . -x!RetroArch -bsp1 -bso0
 	@echo " DONE"
 	@$(ECHO) $(PRINT_DONE)
+	@echo "Build completed in $$(($$(date +%s) - $(BUILD_START_TIME)))s"
 
 release: dist
 	@$(ECHO) $(PRINT_RECIPE)
@@ -237,14 +223,14 @@ clean:
 	@$(ECHO) $(PRINT_RECIPE)
 	@rm -rf $(BUILD_DIR) $(BUILD_TEST_DIR) $(ROOT_DIR)/dist $(TEMP_DIR)/configs
 	@rm -f $(CACHE)/.setup
-	@find include src -type f -name *.o -exec rm -f {} \;
+	@find include src -type f -name '*.o' -exec rm -f {} \;
 
 deepclean: clean
 	@rm -rf $(CACHE)
-	@cd $(THIRD_PARTY_DIR)/RetroArch-patch && make clean
-	@cd $(THIRD_PARTY_DIR)/SearchFilter && make clean
-	@cd $(THIRD_PARTY_DIR)/Terminal && make clean
-	@cd $(THIRD_PARTY_DIR)/DinguxCommander && make clean
+	@cd $(THIRD_PARTY_DIR)/RetroArch-patch && $(MAKE) clean
+	@cd $(THIRD_PARTY_DIR)/SearchFilter && $(MAKE) clean
+	@cd $(THIRD_PARTY_DIR)/Terminal && $(MAKE) clean
+	@cd $(THIRD_PARTY_DIR)/DinguxCommander && $(MAKE) clean
 
 dev: clean
 	@$(MAKE_DEV)
@@ -281,10 +267,10 @@ patch:
 	@chmod a+x $(ROOT_DIR)/.github/create_patch.sh && $(ROOT_DIR)/.github/create_patch.sh
 
 external-libs:
-	@cd $(ROOT_DIR)/include/SDL && make clean && make
+	@cd $(ROOT_DIR)/include/SDL && $(MAKE) clean && $(MAKE)
 
 test: external-libs
-	@mkdir -p $(BUILD_TEST_DIR)/infoPanel_test_data && cd $(TEST_SRC_DIR) && BUILD_DIR=$(BUILD_TEST_DIR)/ make dev
+	@mkdir -p $(BUILD_TEST_DIR)/infoPanel_test_data && cd $(TEST_SRC_DIR) && BUILD_DIR=$(BUILD_TEST_DIR)/ $(MAKE) dev
 	@cp -R $(TEST_SRC_DIR)/infoPanel_test_data $(BUILD_TEST_DIR)/
 	cd $(BUILD_TEST_DIR) && LD_LIBRARY_PATH=$(ROOT_DIR)/lib/ ./test
 
