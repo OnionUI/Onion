@@ -103,18 +103,20 @@ wait_for_ip() {
 	ip addr flush dev wlan0
 
 	while [ -z "$IP" ]; do
-		IP=$(ip route get 1 2>/dev/null | awk '{print $NF;exit}')
+		# prefer direct interface address (works even if route not set yet)
+		IP=$(ip -4 addr show wlan0 2>/dev/null | awk '/inet /{sub(/\\/.*$/,"",$2);print $2;exit}')
+		[ -z "$IP" ] && IP=$(ip route get 1 2>/dev/null | awk '{print $NF;exit}')
 		sleep 0.5
 		counter=$((counter + 1))
 
-		if [ $counter -eq 20 ]; then
+		if [ $counter -eq 40 ]; then
 			$display_func "Fallback" "Using static IP..."
 			killall -9 udhcpc
 			ip addr flush dev wlan0
 			RAND_IP=$((101 + RANDOM % 150))
 			ip addr add 192.168.100.$RAND_IP/24 dev wlan0
 			ip route add default via 192.168.100.100
-		elif [ $counter -ge 40 ]; then
+		elif [ $counter -ge 80 ]; then
 			$display_func "Failed to connect!" "Could not get an IP in 20 seconds.\n Try again"
 			sleep 1
 			$cleanup_func

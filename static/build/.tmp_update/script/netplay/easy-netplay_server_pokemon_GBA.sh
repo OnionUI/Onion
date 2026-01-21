@@ -2,13 +2,17 @@
 # Used within GLO as an addon script.
 
 # Env setup
-sysdir=/mnt/SDCARD/.tmp_update
-miyoodir=/mnt/SDCARD/miyoo
-LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
+. /mnt/SDCARD/.tmp_update/script/netplay/easy-netplay_env.sh
 
 logfile=pokemon_link
-. $sysdir/script/log.sh
 
+# Source scripts
+# easy-netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, disable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, strip_game_name, format_game_name, check_wifi, start_ftp
+. $sysdir/script/netplay/easy-netplay_common.sh
+# easy-netplay_signalling.sh: wait_for_client, ready_up, notify_peer, check_stop, notify_stop
+. $sysdir/script/netplay/easy-netplay_signalling.sh
+
+# Runtime vars
 rm /tmp/stop_now
 host_rom="$1"
 romdirname=$(echo "$host_rom" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
@@ -22,87 +26,7 @@ log "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* Easy Netplay Pokemon Host GBA -*-*
 ##Setup.##
 ##########
 
-# We'll need FTP for lightweight signaling - use the built in FTP, it allows us to curl (errors on bftpd re: path)
-start_ftp() {
-	check_stop
-	if is_running bftpd; then
-		log "FTP already running, killing to rebind"
-		bftpd_p=$(ps | grep bftpd | grep -v grep | awk '{for(i=4;i<=NF;++i) printf $i" "}')
-		killall -9 bftpd
-		killall -9 tcpsvd
-		tcpsvd -E 0.0.0.0 21 ftpd -w / &
-	else
-		tcpsvd -E 0.0.0.0 21 ftpd -w / &
-		log "Starting FTP server"
-	fi
-}
-
-# Wait for a hit on the sta list for someone joining the hotspot
-wait_for_client() {
-	check_stop
-	build_infoPanel_and_log "Hotspot" "Waiting for a client to connect..."
-
-	client_ip=""
-	client_mac=""
-	counter=0
-
-	killall -9 wpa_supplicant
-	killall -9 udhcpc
-
-	sleep 1
-
-	while true; do
-		sta_list=$($sysdir/bin/hostapd_cli all_sta 2>/dev/null)
-		$sysdir/bin/hostapd_cli all_sta flush
-
-		if [ $? -ne 0 ]; then
-			build_infoPanel_and_log "Hotspot" "Hostapd hook failing, retrying."
-			counter=$((counter + 1))
-		fi
-
-		if [ ! -z "$sta_list" ]; then
-			client_mac=$(echo "$sta_list" | awk 'NR==2{print $1; exit}')
-			client_ip=$(arp -an | awk '/'"$client_mac"'/ {gsub(/[\(\)]/,""); print $2}')
-
-			if [ ! -z "$client_ip" ]; then
-				case "$client_ip" in
-				192.168.100.*)
-					log "$sta_list"
-					log "A client has connected. IP: $client_ip"
-					build_infoPanel_and_log "Hotspot" "A client has connected! \n IP: $client_ip"
-					break
-					;;
-				esac
-			fi
-		fi
-
-		sleep 1
-		counter=$((counter + 1))
-
-		if [ $counter -ge 30 ]; then
-			log "No client has connected"
-			build_infoPanel_and_log "Hotspot error" "No client has connected. Exiting..."
-			cleanup
-		fi
-	done
-
-	sleep 1
-	log "$client_ip has joined the hotspot"
-}
-
-# Tell the client we're ready to accept connections
-ready_up() {
-	check_stop
-	ping -c 5 $client_ip >/dev/null 2>&1
-	if [ $? -eq 0 ]; then
-		notify_peer "host_ready"
-	else
-		build_infoPanel_and_log "Error" "No connectivity to $client_ip, \n is the client still connected?"
-		notify_stop
-	fi
-}
-
-# We'll start Retroarch in host mode with -H with the core and rom paths loaded in.
+# start_retroarch: launch RetroArch in host mode with the local ROM
 start_retroarch() {
 
 	log "\n############################ RETROARCH DEBUGGING ############################"
@@ -119,7 +43,8 @@ start_retroarch() {
 
 	cd /mnt/SDCARD/RetroArch
 	log "Starting RetroArch loaded with $host_rom"
-	(sleep 2 && notify_peer "host_ready" &) &
+	# notify_peer: signal host ready to client
+	(sleep 2 && notify_peer "$client_ip" "host_ready" &) &
 	HOME=/mnt/SDCARD/RetroArch ./retroarch --appendconfig=./.retroarch/easynetplay_override.cfg -H -v -L .retroarch/cores/gpsp_libretro.so "$host_rom"
 
 	if [ -n "$PreviousCPUspeed" ]; then
@@ -130,64 +55,23 @@ start_retroarch() {
 	fi
 }
 
-# Cleanup. If you don't call this you don't retransfer the saves - Users cannot under any circumstances miss this function.
+# cleanup: restore network/ftp and clean temp files
 cleanup() {
-	build_infoPanel_and_log "Cleanup" "Cleaning up after Pokemon session\n Do not power off!"
-
-	pkill -9 pressMenu2Kill
-
-	. "$sysdir/script/network/hotspot_cleanup.sh"
-
-	restore_ftp
-
-	# Remove some files we prepared and received
-	rm "/tmp/host_ready"
-	rm "/tmp/stop_now"
-	disable_flag hotspotState
-	rm "/tmp/dismiss_info_panel"
-	sync
-	log "Cleanup done"
-	
-	#Rename savestate_auto_load so savestate doesn't overwrite next loadsave
+	# Rename savestate_auto_load so savestate doesn't overwrite next loadsave
 	mv -f "/mnt/SDCARD/Saves/CurrentProfile/states/gpSP/$host_rom_filename_NoExt.state.auto" "/mnt/SDCARD/Saves/CurrentProfile/states/gpSP/$host_rom_filename_NoExt.state.auto_$CurDate"
-	
-	exit
+
+	# message: cleanup infoPanel text
+	# args: hotspot_cleanup restore_ftp kill_infopanel disable_hotspot_flag
+	# remove files
+	netplay_cleanup \
+		"Cleaning up after Pokemon session\n Do not power off!" \
+		1 1 0 1 \
+		"/tmp/host_ready" \
+		"/tmp/stop_now" \
+		"/tmp/dismiss_info_panel"
 }
 
-###########
-#Utilities#
-###########
-
-# Use the safe word
-notify_stop() {
-	notify_peer "stop_now"
-	sleep 2
-	cleanup
-}
-
-# Check stop, if the client tells us to stop we will.
-check_stop() {
-	sync
-	if [ -e "/tmp/stop_now" ]; then
-		build_infoPanel_and_log "Message from client" "The client has had a problem joining the session."
-		sleep 2
-		cleanup
-	fi
-}
-
-notify_peer() {
-	local notify_file="/tmp/$1"
-	touch "$notify_file"
-	sync
-	curl -T "$notify_file" "ftp://${client_ip}/${notify_file}" >/dev/null 2>&1 # the first / after the IP must be not encoded
-
-	if [ $? -eq 0 ]; then
-		log "Successfully transferred $notify_file to ftp://${client_ip}/${notify_file}"
-	else
-		log "Failed to transfer $notify_file to ftp://${client_ip}/${notify_file}"
-	fi
-}
-
+# confirm_join_panel: show host confirmation UI with local ROM image
 confirm_join_panel() {
 	local title="$1"
 	local message="$2"
@@ -218,81 +102,43 @@ confirm_join_panel() {
 	fi
 }
 
-stripped_game_names() {
-	host_game_name="$(basename "${host_rom%.*}")"
-	host_game_name="$(echo "$host_game_name" | sed -e 's/ ([^()]*)//g' -e 's/ [[A-z0-9!+]*]//g' -e 's/([^()]*)//g' -e 's/[[A-z0-9!+]*]//g')"
-	host_game_name="Host (me): \n$host_game_name"
-}
-
-build_infoPanel_and_log() {
-	local title="$1"
-	local message="$2"
-
-	log "Info Panel: \n\tStage: $title\n\tMessage: $message"
-	if is_running infoPanel; then
-		killall -9 infoPanel
-	fi
-	infoPanel --title "$title" --message "$message" --persistent &
-	sync
-	touch /tmp/dismiss_info_panel
-	sync
-	sleep 0.5
-	sync
-}
-
-restore_ftp() {
-	log "Restoring original FTP server"
-	killall -9 tcpsvd
-	if flag_enabled ftpState; then
-		if flag_enabled authftpState; then
-			bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpdauth.conf &
-		else
-			bftpd -d -c /mnt/SDCARD/.tmp_update/config/bftpd.conf &
-		fi
-	fi
-}
-
-flag_enabled() {
-	flag="$1"
-	[ -f "$sysdir/config/.$flag" ]
-}
-
-udhcpc_control() {
-	if pgrep udhcpc >/dev/null; then
-		killall -9 udhcpc
-	fi
-	sleep 1
-	udhcpc -i wlan0 -s /etc/init.d/udhcpc.script >/dev/null 2>&1 &
-}
-
-is_running() {
-	process_name="$1"
-	pgrep "$process_name" >/dev/null
-}
-
-enable_flag() {
-	flag="$1"
-	touch "$sysdir/config/.$flag"
-}
-
 #########
 ##Main.##
 #########
 
+# lets_go: main flow for hosting GBA session
 lets_go() {
+	# Allow user to abort via menu while setup runs
 	pressMenu2Kill $(basename $0) &
+
+	# Ensure ROM path is provided
 	if [ -z "$host_rom" ]; then
 		build_infoPanel_and_log "Error" "No ROM path provided."
 		exit 1
 	fi
+
+	# Create hotspot for client
 	. "$sysdir/script/network/hotspot_create.sh"
-	start_ftp
+
+	# Start FTP with preflight stop check
+	start_ftp "The client has had a problem joining the session."
+
+	# Wait for client connection
 	wait_for_client
-	ready_up
-	stripped_game_names
+
+	# Build display names for confirmation prompt
+	host_game_name=$(format_game_name "$(basename "${host_rom%.*}")" "Host (me)")
+
+	# Confirm host start with local ROM display
 	confirm_join_panel "Host now?" "$host_game_name"
+
+	# Stop menu watcher before launch
 	pkill -9 pressMenu2Kill
+
+	# Launch RetroArch host session
 	start_retroarch
+
+	# Cleanup and restore state
 	cleanup
 }
 

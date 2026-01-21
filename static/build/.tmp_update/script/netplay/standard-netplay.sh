@@ -5,9 +5,9 @@
 # Used within GLO as an addon script.
 
 # Env setup
-sysdir=/mnt/SDCARD/.tmp_update
-miyoodir=/mnt/SDCARD/miyoo
-export LD_LIBRARY_PATH="/lib:/config/lib:$miyoodir/lib:$sysdir/lib:$sysdir/lib/parasyte"
+. /mnt/SDCARD/.tmp_update/script/netplay/easy-netplay_env.sh
+
+# Runtime vars
 romfullpath="$1"
 romname=$(basename "$1")
 echo "cookie_core_path $cookie_core_path"
@@ -15,7 +15,11 @@ CurrentSystem=$(echo "$1" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
 NetplayAction="$3" # host or join
 
 logfile=netplay
-. $sysdir/script/log.sh
+
+# Source scripts
+# easy-netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, disable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, check_wifi, start_ftp
+. $sysdir/script/netplay/easy-netplay_common.sh
+
 program=$(basename "$0" .sh)
 
 ##########
@@ -23,32 +27,9 @@ program=$(basename "$0" .sh)
 ##########
 
 # We'll need wifi up for this. Lets try and start it..
-check_wifi() {
-	ifconfig wlan1 down
-	if ifconfig wlan0 &>/dev/null; then
-		log "Wifi up"
-	else
-		build_infoPanel_and_log "WIFI" "Wifi disabled, starting..."
-
-		/customer/app/axp_test wifion
-		sleep 2
-		ifconfig wlan0 up
-		sleep 1
-		$miyoodir/app/wpa_supplicant -B -D nl80211 -iwlan0 -c /appconfigs/wpa_supplicant.conf
-
-		if is_running wpa_supplicant && ifconfig wlan0 >/dev/null 2>&1; then
-			build_infoPanel_and_log "WIFI" "Wifi started."
-		else
-			build_infoPanel_and_log "WIFI" "Unable to start WiFi\n unable to continue."
-			sleep 1
-		fi
-
-		sleep 2
-	fi
-}
 
 # Find the recommended core for the current system.
-Get_NetplayCore() {
+get_netplay_core() {
 	platform="$1"
 	netplaycore_info=$(grep "^${platform};" "$sysdir/config/netplay_cores.conf")
 
@@ -127,34 +108,17 @@ Check_PlayerName() {
 #Utilities#
 ###########
 
-build_infoPanel_and_log() {
-	local title="$1"
-	local message="$2"
-
-	log "Info Panel: \n\tStage: $title\n\tMessage: $message"
-	if is_running infoPanel; then
-		killall -9 infoPanel
-	fi
-	infoPanel --title "$title" --message "$message" --persistent &
-	sync
-	touch /tmp/dismiss_info_panel
-	sync
-	sleep 0.5
-	sync
-}
-
-is_running() {
-	process_name="$1"
-	pgrep "$process_name" >/dev/null
-}
-
 #########
 ##Main.##
 #########
 
 lets_go() {
-	check_wifi
-	Get_NetplayCore "$CurrentSystem"
+	# Ensure WiFi is ready (no udhcpc, soft fail, down wlan1)
+	# check_wifi: no udhcpc, soft fail, down wlan1
+	check_wifi 0 0 1
+
+	# Determine netplay core based on platform
+	get_netplay_core "$CurrentSystem"
 	if [ $? -eq 0 ]; then
 		echo "*****************************************"
 		echo "romfullpath: $romfullpath"
@@ -166,7 +130,11 @@ lets_go() {
 	else
 		exit
 	fi
+
+	# Validate player name before launch
 	Check_PlayerName
+
+	# Launch RetroArch netplay session
 	start_retroarch
 }
 

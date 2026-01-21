@@ -78,6 +78,7 @@ start_hotspot() {
 	$sysdir/bin/hostapd -P /var/run/hostapd.pid -B -i wlan1 $sysdir/config/hostapd.conf &
 	$sysdir/bin/dnsmasq --conf-file=$sysdir/config/dnsmasq.conf -u root &
 	ip route add default via $gateway0addr
+	iw wlan1 set power_save off
 
 	if pgrep "hostapd" >/dev/null; then
 		$log_func "Started with IP of: $hotspot0addr, subnet of: $subnetmask"
