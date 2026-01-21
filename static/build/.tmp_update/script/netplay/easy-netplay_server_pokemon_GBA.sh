@@ -7,7 +7,7 @@
 logfile=pokemon_link
 
 # Source scripts
-# easy-netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, disable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, strip_game_name, check_wifi, start_ftp
+# easy-netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, disable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, strip_game_name, format_game_name, check_wifi, start_ftp
 . $sysdir/script/netplay/easy-netplay_common.sh
 # easy-netplay_signalling.sh: wait_for_client, ready_up, notify_peer, check_stop, notify_stop
 . $sysdir/script/netplay/easy-netplay_signalling.sh
@@ -102,12 +102,6 @@ confirm_join_panel() {
 	fi
 }
 
-# stripped_game_names: format local ROM display name
-stripped_game_names() {
-	host_game_name="$(strip_game_name "$(basename "${host_rom%.*}")")"
-	host_game_name="Host (me): \n$host_game_name"
-}
-
 #########
 ##Main.##
 #########
@@ -133,7 +127,7 @@ lets_go() {
 	wait_for_client
 
 	# Build display names for confirmation prompt
-	stripped_game_names
+	host_game_name=$(format_game_name "$(basename "${host_rom%.*}")" "Host (me)")
 
 	# Confirm host start with local ROM display
 	confirm_join_panel "Host now?" "$host_game_name"

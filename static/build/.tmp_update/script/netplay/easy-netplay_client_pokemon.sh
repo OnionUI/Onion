@@ -17,7 +17,7 @@ logfile=pokemon_link
 
 # Source scripts
 # easy-netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, disable_flag, flag_enabled, is_running,
-# restore_ftp, udhcpc_control, url_encode, strip_game_name, read_cookie, check_wifi, start_ftp, sync_file
+# restore_ftp, udhcpc_control, url_encode, strip_game_name, format_game_name, read_cookie, check_wifi, start_ftp, sync_file
 . $sysdir/script/netplay/easy-netplay_common.sh
 # easy-netplay_signalling.sh: check_stop, notify_peer, notify_stop, wait_for_host
 . $sysdir/script/netplay/easy-netplay_signalling.sh
@@ -180,8 +180,8 @@ cleanup() {
         "/tmp/missing_save.srm" \
         "/tmp/stop_now" \
         "/tmp/wpa_supplicant.conf_bk" \
-        "/mnt/SDCARD/RetroArch/retroarch.cookie.client" \
-        "/mnt/SDCARD/RetroArch/retroarch.cookie" \
+        "$COOKIE_CLIENT_PATH" \
+        "$COOKIE_FILE" \
         "/tmp/dismiss_info_panel"
 }
 
@@ -218,15 +218,6 @@ confirm_join_panel() {
     fi
 }
 
-# stripped_game_names: format host/client display names
-stripped_game_names() {
-    host_name_trimmed="$(strip_game_name "$(basename "${rom%.*}")")"
-    game_name="Host: \n$host_name_trimmed"
-
-    client_rom_trimmed="$(strip_game_name "$client_rom_filename_NoExt")"
-    game_name_client="\n Client (me): \n$client_rom_trimmed"
-}
-
 #########
 ##Main.##
 #########
@@ -240,12 +231,13 @@ lets_go() {
 
     # Join host hotspot
     . "$sysdir/script/network/hotspot_join.sh"
+    build_infoPanel_and_log "Connected" "Client IP: ${IP:-unknown}\nHost IP: $hostip"
 
 	# start_ftp: start FTP without preflight
 	start_ftp
 
     # Send cookie to host
-    sync_file "Cookie" "/mnt/SDCARD/RetroArch/retroarch.cookie" 0 0 -f -m
+    sync_file "Cookie" "$COOKIE_FILE" 0 0 -f -m
 
     # Read host cookie and parse paths/checksums (verbose logging)
     read_cookie 1
@@ -259,7 +251,8 @@ lets_go() {
     sync_file "Img" "$Img_path" 0 0 -o
 
     # Build display names for confirmation prompt
-    stripped_game_names
+    game_name=$(format_game_name "$(basename "${rom%.*}")" "Host")
+    game_name_client=$(format_game_name "$client_rom_filename_NoExt" "Client (me)" "\n ")
 
     # Wait for host ready signal
     wait_for_host

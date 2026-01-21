@@ -14,8 +14,8 @@
 logfile=easy_netplay
 
 # Source scripts
-# easy-netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, disable_flag, flag_enabled, is_running, restore_ftp, 
-# udhcpc_control, url_encode, strip_game_name, wifi_disabled, stripped_game_name, read_cookie, check_wifi, start_ftp, sync_file
+# easy-netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, disable_flag, flag_enabled, is_running, restore_ftp,
+# udhcpc_control, url_encode, strip_game_name, format_game_name, wifi_disabled, read_cookie, check_wifi, start_ftp, sync_file
 . $sysdir/script/netplay/easy-netplay_common.sh
 
 program=$(basename "$0" .sh)
@@ -89,7 +89,7 @@ cleanup() {
 		"Cleaning up after netplay session..." \
 		1 0 1 0 \
 		"/tmp/dismiss_info_panel" \
-		"/mnt/SDCARD/RetroArch/retroarch.cookie.client"
+		"$COOKIE_CLIENT_PATH"
 }
 
 #########
@@ -102,9 +102,10 @@ lets_go() {
 
 	# Join host hotspot
 	. "$sysdir/script/network/hotspot_join.sh"
+	build_infoPanel_and_log "Connected" "Client IP: ${IP:-unknown}\nHost IP: $hostip"
 
 	# Fetch cookie from host
-	sync_file "Cookie" "/mnt/SDCARD/RetroArch/retroarch.cookie" 0 0 -f -m
+	sync_file "Cookie" "$COOKIE_FILE" 0 0 -f -m
 
 	# Read host cookie and parse paths/checksums
 	read_cookie
@@ -115,7 +116,7 @@ lets_go() {
 	sync_file "Img" "$Img_path" 0 0 -o
 
 	# Build display name for confirmation prompt
-	stripped_game_name
+	game_name=$(format_game_name "$(basename "${rom%.*}")")
 
 	# Stop menu watcher before launch
 	pkill -9 pressMenu2Kill

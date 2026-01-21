@@ -22,6 +22,8 @@ NETPLAY_SYNC_MAX_FILE_DL_SIZE=104857600 # max file size to allow download
 NETPLAY_COOKIE_MAX_FILE_SIZE=26214400 # max file size for cookie checksum entries
 NETPLAY_SYNC_FAIL_DELAY=2 # delay after sync failures before cleanup
 NETPLAY_INFOPANEL_SLEEP=0.5 # infoPanel delay
+COOKIE_CLIENT_PATH="/mnt/SDCARD/RetroArch/retroarch.cookie.client"
+COOKIE_FILE="/mnt/SDCARD/RetroArch/retroarch.cookie"
 
 # checksize_func <file_path> <remote_size>
 # - sets: same_size (0 different, 1 identical, 2 unknown)
@@ -196,6 +198,23 @@ strip_game_name() {
     echo "$1" | sed -e 's/ ([^()]*)//g' -e 's/ [[A-z0-9!+]*]//g' -e 's/([^()]*)//g' -e 's/[[A-z0-9!+]*]//g'
 }
 
+# format_game_name <name> [label] [prefix]
+# - label adds "<label>: \n" before the name
+# - prefix allows leading newline/spacing (e.g. "\n ")
+format_game_name() {
+    local name="$1"
+    local label="$2"
+    local prefix="$3"
+    local trimmed
+
+    trimmed=$(strip_game_name "$name")
+    if [ -n "$label" ]; then
+        printf '%s%s: \n%s' "$prefix" "$label" "$trimmed"
+    else
+        printf '%s%s' "$prefix" "$trimmed"
+    fi
+}
+
 # remove_files
 # - removes files if they exist
 remove_files() {
@@ -254,14 +273,8 @@ wifi_disabled() {
     [ $(/customer/app/jsonval wifi) -eq 0 ]
 }
 
-# stripped_game_name
-# - reads rom name from retroarch.cookie.client and strips extension
-stripped_game_name() {
-    game_name=$(awk -F'/' '/\\[rom\\]:/ {print $NF}' /mnt/SDCARD/RetroArch/retroarch.cookie.client | sed 's/\\(.*\\)\\..*/\\1/')
-}
-
 # read_cookie [verbose]
-# - parses /mnt/SDCARD/RetroArch/retroarch.cookie.client into core/rom/checksum vars
+# - parses "$COOKIE_CLIENT_PATH" into core/rom/checksum vars
 # - sets: core_url, rom_url, romdirname, romName, romNameNoExtension, Img_path
 read_cookie() {
     local verbose="$1"
@@ -291,7 +304,7 @@ read_cookie() {
             ;;
         esac
         log "$core $rom $coresize $corechksum $romsize $romchksum"
-    done <"/mnt/SDCARD/RetroArch/retroarch.cookie.client"
+    done <"$COOKIE_CLIENT_PATH"
 
     # url encode or curl complains
     export core_url=$(url_encode "$core")
@@ -575,8 +588,6 @@ sync_file() {
 # create_cookie_info
 # - writes core/rom/checksum/cpuspeed into retroarch.cookie
 create_cookie_info() {
-    COOKIE_FILE="/mnt/SDCARD/RetroArch/retroarch.cookie"
-
     echo "[core]: $netplaycore" >"$COOKIE_FILE"
     echo "[rom]: $cookie_rom_path" >>"$COOKIE_FILE"
 

@@ -87,7 +87,7 @@ cleanup() {
 	netplay_cleanup \
 		"Cleaning up after netplay session..." \
 		1 1 0 0 \
-		"/mnt/SDCARD/RetroArch/retroarch.cookie" \
+		"$COOKIE_FILE" \
 		"/tmp/dismiss_info_panel"
 }
 

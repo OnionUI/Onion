@@ -7,7 +7,7 @@
 logfile=pokemon_link
 
 # Source scripts
-# easy-netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, disable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, strip_game_name, check_wifi, start_ftp, sync_file
+# easy-netplay_common.sh: build_infoPanel_and_log, checksize_func, checksum_func, enable_flag, disable_flag, flag_enabled, is_running, restore_ftp, udhcpc_control, url_encode, strip_game_name, format_game_name, check_wifi, start_ftp, sync_file
 . $sysdir/script/netplay/easy-netplay_common.sh
 # easy-netplay_signalling.sh: wait_for_client, ready_up, notify_peer, check_stop, notify_stop
 . $sysdir/script/netplay/easy-netplay_signalling.sh
@@ -154,7 +154,7 @@ client_read_cookie() {
 			;;
 		esac
 		log "$core $rom $coresize $corechksum $romsize $romchksum"
-	done <"/mnt/SDCARD/RetroArch/retroarch.cookie.client"
+	done <"$COOKIE_CLIENT_PATH"
 
 	#url encode or curl complains
 	export core_url=$(url_encode "$core")
@@ -347,15 +347,6 @@ confirm_join_panel() {
 	fi
 }
 
-# stripped_game_names: format host/client display names
-stripped_game_names() {
-	host_game_name="$(strip_game_name "$(basename "${host_rom%.*}")")"
-	host_game_name="Host (me): \n$host_game_name"
-
-	client_rom_trimmed="$(strip_game_name "$(basename "${client_rom%.*}")")"
-	client_game_name="\n Client: \n$client_rom_trimmed"
-}
-
 # unpack_rom: extract archive into its folder
 unpack_rom() {
 	file="$1"
@@ -394,7 +385,7 @@ lets_go() {
 	wait_for_client
 
 	# Send cookie to client (downloaded as retroarch.cookie.client)
-	sync_file "Cookie" "/mnt/SDCARD/RetroArch/retroarch.cookie" 0 0 -f -m
+	sync_file "Cookie" "$COOKIE_FILE" 0 0 -f -m
 
 	# Read client cookie for display and params
 	client_read_cookie
@@ -412,7 +403,8 @@ lets_go() {
 	sync_file "Img" "$client_Img_path" 0 0 -o
 
 	# Build display names for confirmation prompt
-	stripped_game_names
+	host_game_name=$(format_game_name "$(basename "${host_rom%.*}")" "Host (me)")
+	client_game_name=$(format_game_name "$(basename "${client_rom%.*}")" "Client" "\n ")
 
 	# Confirm host start with host/client info
 	confirm_join_panel "Host now?" "$host_game_name \n $client_game_name"

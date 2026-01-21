@@ -147,8 +147,6 @@ wait_for_client() {
 # wait_for_host
 # - waits for /tmp/host_ready signal
 wait_for_host() {
-    local counter=0
-
     build_infoPanel_and_log "Ready" "Waiting for host to start game"
     while true; do
         sync
@@ -163,11 +161,5 @@ wait_for_host() {
         done
 
         sleep 1
-        counter=$((counter + 1))
-
-        if [ $counter -ge 25 ]; then
-            build_infoPanel_and_log "Error" "The host didn't ready up, cannot continue..."
-            notify_stop
-        fi
     done
 }
