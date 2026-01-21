@@ -64,7 +64,16 @@ print-version:
 	@echo Onion v$(VERSION)
 	@echo RetroArch sub-v$(RA_SUBVERSION)
 
-$(CACHE)/.setup:
+# Auto-init submodules if missing
+$(CACHE)/.submodules:
+	@if [ ! -f "$(THIRD_PARTY_DIR)/RetroArch-patch/Makefile" ]; then \
+		$(ECHO) "Initializing git submodules..."; \
+		git submodule update --init --recursive; \
+	fi
+	@$(makedir) $(CACHE)
+	@$(createfile) $(CACHE)/.submodules
+
+$(CACHE)/.setup: $(CACHE)/.submodules
 	@$(ECHO) $(PRINT_RECIPE)
 	@mkdir -p $(BUILD_DIR) $(DIST_DIR) $(RELEASE_DIR)
 	@rsync -a --exclude='.gitkeep' $(STATIC_BUILD)/ $(BUILD_DIR)
@@ -252,15 +261,20 @@ git-submodules:
 pwd:
 	@echo $(ROOT_DIR)
 
+# Pull Docker image if not present locally (skips pull on ARM64 Mac)
 $(CACHE)/.docker:
-	docker pull $(TOOLCHAIN)
+	@if ! docker image inspect $(TOOLCHAIN) >/dev/null 2>&1; then \
+		docker pull $(TOOLCHAIN); \
+	fi
 	$(makedir) cache
 	$(createfile) $(CACHE)/.docker
 
+# Interactive toolchain shell
 toolchain: $(CACHE)/.docker
 	docker run -it --rm -v "$(ROOT_DIR)":/root/workspace $(TOOLCHAIN) /bin/bash
 
-with-toolchain: $(CACHE)/.docker
+# Run make inside toolchain: make with-toolchain CMD=<target>
+with-toolchain: $(CACHE)/.docker $(CACHE)/.submodules
 	docker run --rm -v "$(ROOT_DIR)":/root/workspace $(TOOLCHAIN) /bin/bash -c "source /root/.bashrc; make $(CMD)"
 
 patch:
