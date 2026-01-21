@@ -10,4 +10,5 @@ hostip="${hostip:-192.168.100.100}" # default unless overridden by caller
 peer_ip="${peer_ip:-$hostip}"
 export hostip peer_ip
 
+# turn off power save on the wifi - this is turned back on in the netplay_cleanup function
 iw wlan0 set power_save off

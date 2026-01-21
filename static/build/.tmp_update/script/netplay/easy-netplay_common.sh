@@ -237,6 +237,9 @@ netplay_cleanup() {
         disable_flag hotspotState
     fi
 
+    # reset power save on the wifi
+    iw wlan0 set power_save on
+
     sync
     log "Cleanup done"
     exit
