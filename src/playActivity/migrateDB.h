@@ -21,49 +21,6 @@ static DBHandle __migrate_cache_handles[MIGRATE_DB_MAX_FILES];
 static int __migrate_cache_count = 0;
 
 static sqlite3 *play_activity_db = NULL;
-void play_activity_db_open(void)
-{
-    if (play_activity_db != NULL)
-        return;
-
-    bool play_activity_db_created = is_file(PLAY_ACTIVITY_DB_NEW_FILE);
-
-    mkdir("/mnt/SDCARD/Saves/CurrentProfile/play_activity/", 0777);
-
-    if (sqlite3_open(PLAY_ACTIVITY_DB_NEW_FILE, &play_activity_db) != SQLITE_OK) {
-        printf("%s\n", sqlite3_errmsg(play_activity_db));
-        sqlite3_close(play_activity_db);
-        play_activity_db = NULL;
-        return;
-    }
-
-    if (!play_activity_db_created) {
-        sqlite3_exec(play_activity_db,
-                     "DROP TABLE IF EXISTS rom;"
-                     "CREATE TABLE rom(id INTEGER PRIMARY KEY, type TEXT, name TEXT, file_path TEXT, image_path TEXT, created_at INTEGER DEFAULT (strftime('%s', 'now')), updated_at INTEGER);"
-                     "CREATE UNIQUE INDEX rom_id_index ON rom(id);",
-                     NULL, NULL, NULL);
-        sqlite3_exec(play_activity_db,
-                     "DROP TABLE IF EXISTS play_activity;"
-                     "CREATE TABLE play_activity(rom_id INTEGER, play_time INTEGER, created_at INTEGER DEFAULT (strftime('%s', 'now')), updated_at INTEGER);"
-                     "CREATE INDEX play_activity_rom_id_index ON play_activity(rom_id);",
-                     NULL, NULL, NULL);
-    }
-}
-
-sqlite3_stmt *play_activity_db_prepare(char *sql)
-{
-    printf_debug("play_activity_db_prepare(%s)\n", sql);
-    if (play_activity_db == NULL) {
-        printf("DB is not open");
-        return NULL;
-    }
-    sqlite3_stmt *stmt = NULL;
-    if (sqlite3_prepare_v2(play_activity_db, sql, -1, &stmt, NULL) != SQLITE_OK) {
-        printf("%s: %s\n", sqlite3_errmsg(play_activity_db), sqlite3_sql(stmt));
-    }
-    return stmt;
-}
 
 int __db_insert_rom(const char *rom_type, const char *rom_name, const char *file_path, const char *image_path)
 {
@@ -77,7 +34,15 @@ int __db_insert_rom(const char *rom_type, const char *rom_name, const char *file
     sqlite3_exec(play_activity_db, sql, NULL, NULL, NULL);
     sqlite3_free(sql);
 
-    sqlite3_stmt *stmt = play_activity_db_prepare("SELECT id FROM rom WHERE ROWID = last_insert_rowid()");
+    printf_debug("play_activity_db_prepare(%s)\n", sql);
+    if (play_activity_db == NULL) {
+        printf("DB is not open");
+        return NULL;
+    }
+    sqlite3_stmt *stmt = NULL;
+    if (sqlite3_prepare_v2(play_activity_db, sql, -1, &stmt, NULL) != SQLITE_OK) {
+        printf("%s: %s\n", sqlite3_errmsg(play_activity_db), sqlite3_sql(stmt));
+    }
     if (sqlite3_step(stmt) == SQLITE_ROW) {
         rom_id = sqlite3_column_int(stmt, 0);
     }
@@ -165,7 +130,32 @@ void migrateDB(void)
     int totalOrphan = 0;
 
     printf("\n%d games to migrate\n", rom_list_len);
-    play_activity_db_open();
+    if (play_activity_db != NULL)
+        return;
+
+    bool play_activity_db_created = is_file(PLAY_ACTIVITY_DB_NEW_FILE);
+
+    mkdir("/mnt/SDCARD/Saves/CurrentProfile/play_activity/", 0777);
+
+    if (sqlite3_open(PLAY_ACTIVITY_DB_NEW_FILE, &play_activity_db) != SQLITE_OK) {
+        printf("%s\n", sqlite3_errmsg(play_activity_db));
+        sqlite3_close(play_activity_db);
+        play_activity_db = NULL;
+        return;
+    }
+
+    if (!play_activity_db_created) {
+        sqlite3_exec(play_activity_db,
+                     "DROP TABLE IF EXISTS rom;"
+                     "CREATE TABLE rom(id INTEGER PRIMARY KEY, type TEXT, name TEXT, file_path TEXT, image_path TEXT, created_at INTEGER DEFAULT (strftime('%s', 'now')), updated_at INTEGER);"
+                     "CREATE UNIQUE INDEX rom_id_index ON rom(id);",
+                     NULL, NULL, NULL);
+        sqlite3_exec(play_activity_db,
+                     "DROP TABLE IF EXISTS play_activity;"
+                     "CREATE TABLE play_activity(rom_id INTEGER, play_time INTEGER, created_at INTEGER DEFAULT (strftime('%s', 'now')), updated_at INTEGER);"
+                     "CREATE INDEX play_activity_rom_id_index ON play_activity(rom_id);",
+                     NULL, NULL, NULL);
+    }
 
     for (int i = 0; i < LEGACY_DB_MAX; i++) {
         if ((strlen(rom_list[i].name) == 0) || (rom_list[i].playTime) == 0) {
