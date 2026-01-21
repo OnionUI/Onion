@@ -1,62 +1,9 @@
-
-#include "./cacheDB.h"
-#include <csignal>
-#include <dirent.h>
-#include <libgen.h>
-#include <limits.h>
-#include <sqlite3/sqlite3.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/socket.h>
-#include <sys/stat.h>
-#include <sys/un.h>
-
-#include "../play_activity/playActivityDBCommon.h"
-#include "utils/file.h"
-#include "utils/log.h"
-#include "utils/msleep.h"
-#include "utils/str.h"
-
-sqlite3_stmt *total_play_time;
-sqlite3_stmt *find_all;
-sqlite3_stmt *insert_rom;
-sqlite3_stmt *rom_id;
-sqlite3_stmt *update_rom;
-sqlite3_stmt *orphan_rom;
-sqlite3_stmt *rom_by_path;
-sqlite3_stmt *rom_playtime;
-sqlite3_stmt *active_closed_activity;
-sqlite3_stmt *activity_start;
-sqlite3_stmt *activity_stop;
-sqlite3_stmt *activity_stop_all;
-sqlite3_stmt *delete_null_entry;
-sqlite3_stmt *get_file_path;
-sqlite3_stmt *update_file_path;
-sqlite3_stmt *update_file_path_cache;
-
-static sqlite3 *play_activity_db_reader = NULL;
-static sqlite3 *play_activity_db_writer = NULL;
-
-static bool quit = false;
-
-static void sigHandler(int sig)
-{
-    switch (sig) {
-    case SIGINT:
-    case SIGTERM:
-        quit = true;
-        break;
-    default:
-        break;
-    }
-}
+#include "sqldaemon.h"
 
 void sql_shutdown();
-bool prepare_statements();
+int prepare_statements();
 
-bool init()
+int init()
 {
 
     bool play_activity_db_created = is_file(PLAY_ACTIVITY_DB_NEW_FILE);
@@ -64,7 +11,7 @@ bool init()
     mkdir("/mnt/SDCARD/Saves/CurrentProfile/play_activity/", 0777);
 
     if (sqlite3_open_v2(PLAY_ACTIVITY_DB_NEW_FILE, &play_activity_db_writer, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL) != SQLITE_OK) {
-        printf("%s\n", sqlite3_errmsg(play_activity_db_writer));
+        printf_debug("%s\n", sqlite3_errmsg(play_activity_db_writer));
         return 0;
     }
 
@@ -74,6 +21,7 @@ bool init()
                      "CREATE TABLE rom(id INTEGER PRIMARY KEY, type TEXT, name TEXT, file_path TEXT, image_path TEXT, created_at INTEGER DEFAULT (strftime('%s', 'now')), updated_at INTEGER);"
                      "CREATE UNIQUE INDEX rom_id_index ON rom(id);",
                      NULL, NULL, NULL);
+
         sqlite3_exec(play_activity_db_writer,
                      "DROP TABLE IF EXISTS play_activity;"
                      "CREATE TABLE play_activity(rom_id INTEGER, play_time INTEGER, created_at INTEGER DEFAULT (strftime('%s', 'now')), updated_at INTEGER);"
@@ -81,10 +29,11 @@ bool init()
                      NULL, NULL, NULL);
     }
     sqlite3_exec(play_activity_db_writer, "PRAGMA synchronous = FULL;", NULL, NULL, NULL);
+    sqlite3_exec(play_activity_db_writer, "PRAGMA journal_mode=WAL;", NULL, NULL, NULL);
     sqlite3_busy_timeout(play_activity_db_writer, 5000);
 
     if (sqlite3_open_v2(PLAY_ACTIVITY_DB_NEW_FILE, &play_activity_db_reader, SQLITE_OPEN_READONLY, NULL) != SQLITE_OK) {
-        printf("%s\n", sqlite3_errmsg(play_activity_db_reader));
+        printf_debug("%s\n", sqlite3_errmsg(play_activity_db_reader));
         play_activity_db_reader = NULL;
         return 0;
     }
@@ -116,8 +65,8 @@ int prepare_statements()
                                  "WHERE play_time_total > 60;",
                                  -1, &total_play_time, NULL);
     if (ret != SQLITE_OK) {
-        fprintf(stderr, "Failed to prepare statement: %s\n",
-                sqlite3_errmsg(play_activity_db_reader));
+        printf_debug("Failed to prepare statement: %s\n",
+                     sqlite3_errmsg(play_activity_db_reader));
         return 0;
     }
 
@@ -135,110 +84,130 @@ int prepare_statements()
                              "ORDER BY play_time_total DESC;",
                              -1, &find_all, NULL);
     if (ret != SQLITE_OK) {
-        fprintf(stderr, "Failed to prepare statement: %s\n",
-                sqlite3_errmsg(play_activity_db_reader));
+        printf_debug("Failed to prepare statement: %s\n",
+                     sqlite3_errmsg(play_activity_db_reader));
         return 0;
     }
 
     ret = sqlite3_prepare_v2(play_activity_db_writer, "INSERT INTO rom(type, name, file_path, image_path) VALUES(?,?,?,?)", -1, &insert_rom, NULL);
     if (ret != SQLITE_OK) {
-        fprintf(stderr, "Failed to prepare statement: %s\n",
-                sqlite3_errmsg(play_activity_db_writer));
+        printf_debug("Failed to prepare statement: %s\n",
+                     sqlite3_errmsg(play_activity_db_writer));
         return 0;
     }
 
     // Here we use writer because its dependent on the last insert
     ret = sqlite3_prepare_v2(play_activity_db_writer, "SELECT id FROM rom WHERE ROWID = last_insert_rowid()", -1, &rom_id, NULL);
     if (ret != SQLITE_OK) {
-        fprintf(stderr, "Failed to prepare statement: %s\n",
-                sqlite3_errmsg(play_activity_db_writer));
+        printf_debug("Failed to prepare statement: %s\n",
+                     sqlite3_errmsg(play_activity_db_writer));
         return 0;
     }
 
     ret = sqlite3_prepare_v2(play_activity_db_writer, "UPDATE rom SET type = ?, name = ?, file_path = ?, image_path = ? WHERE id = ?;", -1, &update_rom, NULL);
     if (ret != SQLITE_OK) {
-        fprintf(stderr, "Failed to prepare statement: %s\n",
-                sqlite3_errmsg(play_activity_db_writer));
+        printf_debug("Failed to prepare statement: %s\n",
+                     sqlite3_errmsg(play_activity_db_writer));
         return 0;
     }
 
     ret = sqlite3_prepare_v2(play_activity_db_reader, "SELECT id FROM rom WHERE (name=? OR name=?) AND type='ORPHAN' LIMIT 1;", -1, &orphan_rom, NULL);
     if (ret != SQLITE_OK) {
-        fprintf(stderr, "Failed to prepare statement: %s\n",
-                sqlite3_errmsg(play_activity_db_reader));
+        printf_debug("Failed to prepare statement: %s\n",
+                     sqlite3_errmsg(play_activity_db_reader));
         return 0;
     }
 
     ret = sqlite3_prepare_v2(play_activity_db_reader, "SELECT id FROM rom WHERE file_path=? LIMIT 1;", -1, &rom_by_path, NULL);
     if (ret != SQLITE_OK) {
-        fprintf(stderr, "Failed to prepare statement: %s\n",
-                sqlite3_errmsg(play_activity_db_reader));
+        printf_debug("Failed to prepare statement: %s\n",
+                     sqlite3_errmsg(play_activity_db_reader));
         return 0;
     }
 
-    ret = sqlite3_prepare_v2(play_activity_db_reader, "SELECT SUM(play_activity.play_time) FROM play_activity \
-                                      JOIN rom on play_activity.rom_id = rom.id \
-                                      WHERE rom.file_path=? LIMIT 1;",
+    ret = sqlite3_prepare_v2(play_activity_db_reader, "SELECT SUM(play_time) FROM play_activity WHERE rom_id = ?;",
                              -1, &rom_playtime, NULL);
     if (ret != SQLITE_OK) {
-        fprintf(stderr, "Failed to prepare statement: %s\n",
-                sqlite3_errmsg(play_activity_db_reader));
+        printf_debug("Failed to prepare statement: %s\n",
+                     sqlite3_errmsg(play_activity_db_reader));
         return 0;
     }
 
     ret = sqlite3_prepare_v2(play_activity_db_reader, "SELECT * FROM play_activity WHERE rom_id = ? AND play_time IS NULL;", -1, &active_closed_activity, NULL);
     if (ret != SQLITE_OK) {
-        fprintf(stderr, "Failed to prepare statement: %s\n",
-                sqlite3_errmsg(play_activity_db_reader));
+        printf_debug("Failed to prepare statement: %s\n",
+                     sqlite3_errmsg(play_activity_db_reader));
         return 0;
     }
     ret = sqlite3_prepare_v2(play_activity_db_writer, "INSERT INTO play_activity(rom_id) VALUES(?);", -1, &activity_start, NULL);
     if (ret != SQLITE_OK) {
-        fprintf(stderr, "Failed to prepare statement: %s\n",
-                sqlite3_errmsg(play_activity_db_writer));
+        printf_debug("Failed to prepare statement: %s\n",
+                     sqlite3_errmsg(play_activity_db_writer));
         return 0;
     }
 
-    ret = sqlite3_prepare_v2(play_activity_db_writer, "UPDATE play_activity SET play_time = (strftime('%%s', 'now')) - created_at, updated_at = (strftime('%%s', 'now')) WHERE rom_id = ? AND play_time IS NULL;", -1, &activity_stop, NULL);
+    ret = sqlite3_prepare_v2(play_activity_db_writer, "UPDATE play_activity SET play_time = (strftime('%s', 'now')) - created_at, updated_at = (strftime('%s', 'now')) WHERE rom_id = ? AND play_time IS NULL;", -1, &activity_stop, NULL);
 
     if (ret != SQLITE_OK) {
-        fprintf(stderr, "Failed to prepare statement: %s\n",
-                sqlite3_errmsg(play_activity_db_writer));
+        printf_debug("Failed to prepare statement: %s\n",
+                     sqlite3_errmsg(play_activity_db_writer));
         return 0;
     }
     ret = sqlite3_prepare_v2(play_activity_db_writer, "UPDATE play_activity SET play_time = (strftime('%s', 'now')) - created_at, updated_at = (strftime('%s', 'now')) WHERE play_time IS NULL;", -1, &activity_stop_all, NULL);
     if (ret != SQLITE_OK) {
-        fprintf(stderr, "Failed to prepare statement: %s\n",
-                sqlite3_errmsg(play_activity_db_writer));
+        printf_debug("Failed to prepare statement: %s\n",
+                     sqlite3_errmsg(play_activity_db_writer));
         return 0;
     }
 
     ret = sqlite3_prepare_v2(play_activity_db_writer, "DELETE FROM play_activity WHERE play_time < 0;", -1, &delete_null_entry, NULL);
     if (ret != SQLITE_OK) {
-        fprintf(stderr, "Failed to prepare statement: %s\n",
-                sqlite3_errmsg(play_activity_db_writer));
+        printf_debug("Failed to prepare statement: %s\n",
+                     sqlite3_errmsg(play_activity_db_writer));
         return 0;
     }
-    ret = sqlite3_prepare_v2(play_activity_db_reader, "SELECT id, file_path FROM rom WHERE file_path LIKE '/mnt/SDCARD/%%';", -1, &get_file_path, NULL);
+    ret = sqlite3_prepare_v2(play_activity_db_reader, "SELECT id, file_path FROM rom WHERE file_path LIKE '/mnt/SDCARD/%';", -1, &get_file_path, NULL);
     if (ret != SQLITE_OK) {
-        fprintf(stderr, "Failed to prepare statement: %s\n",
-                sqlite3_errmsg(play_activity_db_reader));
+        printf_debug("Failed to prepare statement: %s\n",
+                     sqlite3_errmsg(play_activity_db_reader));
         return 0;
     }
 
     ret = sqlite3_prepare_v2(play_activity_db_writer, "UPDATE rom SET file_path = ? WHERE id = ?;", -1, &update_file_path, NULL);
     if (ret != SQLITE_OK) {
-        fprintf(stderr, "Failed to prepare statement: %s\n",
-                sqlite3_errmsg(play_activity_db_writer));
+        printf_debug("Failed to prepare statement: %s\n",
+                     sqlite3_errmsg(play_activity_db_writer));
         return 0;
     }
     ret = sqlite3_prepare_v2(play_activity_db_writer, "UPDATE rom SET file_path = ?, type = ? WHERE id = ?;", -1, &update_file_path_cache, NULL);
     if (ret != SQLITE_OK) {
-        fprintf(stderr, "Failed to prepare statement: %s\n",
-                sqlite3_errmsg(play_activity_db_writer));
+        printf_debug("Failed to prepare statement: %s\n",
+                     sqlite3_errmsg(play_activity_db_writer));
         return 0;
     }
     return 1;
+}
+void strip_newline(char *str)
+{
+    if (!str)
+        return;
+    size_t len = strlen(str);
+    while (len > 0 && (str[len - 1] == '\n' || str[len - 1] == '\r')) {
+        str[len - 1] = '\0';
+        len--;
+    }
+}
+sqlite3_stmt *clone_statement(sqlite3_stmt *src, sqlite3 *db)
+{
+    sqlite3_stmt *new_stmt = NULL;
+
+    const char *sql = sqlite3_sql(src);
+
+    if (sqlite3_prepare_v2(db, sql, -1, &new_stmt, NULL) != SQLITE_OK) {
+        return NULL;
+    }
+
+    return new_stmt;
 }
 
 void get_rom_image_path(char *rom_file, char *out_image_path)
@@ -269,7 +238,7 @@ int play_activity_db_transaction(int (*exec_transaction)(void))
 //     int rc = sqlite3_step(stmt);
 //
 //     if (rc != SQLITE_ROW && rc != SQLITE_DONE)
-//         fprintf(stderr, "Error stepping statement: %s\n", sqlite3_errmsg(play_activity_db_reader));
+//         printf_debug( "Error stepping statement: %s\n", sqlite3_errmsg(play_activity_db_reader));
 //
 //     return rc;
 // }
@@ -295,15 +264,17 @@ int play_activity_db_execute(sqlite3_stmt *sql)
 
 int play_activity_get_total_play_time(void)
 {
-    int total_play_time = 0;
+    int total_play_time_int = 0;
     sqlite3_stmt *stmt = total_play_time;
     int ret = sqlite3_step(stmt);
 
     if (ret == SQLITE_ROW) {
-        total_play_time = sqlite3_column_int(stmt, 0);
+        total_play_time_int = sqlite3_column_int(stmt, 0);
     }
+    sqlite3_step(stmt); // Flush statement
+    printf_debug("Play time for User is %d\n", total_play_time_int);
 
-    return total_play_time;
+    return total_play_time_int;
 }
 
 PlayActivities *play_activity_find_all(void)
@@ -365,30 +336,6 @@ PlayActivities *play_activity_find_all(void)
     return play_activities;
 }
 
-void free_play_activities(PlayActivities *pa_ptr)
-{
-    for (int i = 0; i < pa_ptr->count; i++) {
-        free(pa_ptr->play_activity[i]->first_played_at);
-        free(pa_ptr->play_activity[i]->last_played_at);
-        free(pa_ptr->play_activity[i]->rom);
-        free(pa_ptr->play_activity[i]);
-    }
-    free(pa_ptr->play_activity);
-    free(pa_ptr);
-}
-
-void __ensure_rel_path(char *rel_path, const char *rom_path)
-{
-    if (!file_path_relative_to(rel_path, ROMS_FOLDER, rom_path)) {
-        if (strstr(rom_path, "../../Roms/") != NULL) {
-            strcpy(rel_path, str_split(strdup((const char *)rom_path), "../../Roms/"));
-        }
-        else {
-            strcpy(rel_path, str_replace(strdup((const char *)rom_path), "/mnt/SDCARD/Roms/", ""));
-        }
-    }
-}
-
 int __db_insert_rom(const char *rom_type, const char *rom_name, const char *file_path, const char *image_path)
 {
     int rom_id = ROM_NOT_FOUND;
@@ -403,7 +350,7 @@ int __db_insert_rom(const char *rom_type, const char *rom_name, const char *file
 
     int ret = play_activity_db_execute(insert_rom);
 
-    sqlite3_stmt *stmt = last_insert_rowid;
+    sqlite3_stmt *stmt = insert_rom;
     ret = sqlite3_step(stmt);
 
     if (ret == SQLITE_ROW) {
@@ -423,14 +370,14 @@ void __db_update_rom(int rom_id, const char *rom_type, const char *rom_name, con
 {
     char rel_path[PATH_MAX];
     __ensure_rel_path(rel_path, file_path);
-    sqlite3_bind_text(update_rom, 1, rom_type, -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(update_rom, 2, rom_name, -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(update_rom, 3, file_path, -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(update_rom, 4, image_path, -1, SQLITE_TRANSIENT);
+    sqlite3_stmt *stmt = clone_statement(update_rom, play_activity_db_writer);
+    sqlite3_bind_text(stmt, 1, rom_type, -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 2, rom_name, -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 3, file_path, -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 4, image_path, -1, SQLITE_TRANSIENT);
 
-    play_activity_db_execute(update_rom);
-    sqlite3_reset(update_rom);
-    sqlite3_clear_bindings(update_rom);
+    play_activity_db_execute(stmt);
+    sqlite3_finalize(stmt);
 }
 
 void __db_update_rom_from_cache(int rom_id, CacheDBItem *cache_db_item)
@@ -445,10 +392,10 @@ int __db_get_orphan_rom_id(const char *rom_path)
     char *file_name = basename(_file_name);
     char *rom_name = file_removeExtension(file_name);
 
-    sqlite3_bind_text(orphan_rom, 1, rom_name, -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(orphan_rom, 2, file_name, -1, SQLITE_TRANSIENT);
+    sqlite3_stmt *stmt = clone_statement(orphan_rom, play_activity_db_reader);
+    sqlite3_bind_text(stmt, 1, rom_name, -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 2, file_name, -1, SQLITE_TRANSIENT);
 
-    sqlite3_stmt *stmt = orphan_rom;
     free(rom_name);
     free(_file_name);
     int ret = sqlite3_step(stmt);
@@ -456,8 +403,7 @@ int __db_get_orphan_rom_id(const char *rom_path)
     if (ret == SQLITE_ROW) {
         rom_id = sqlite3_column_int(stmt, 0);
     }
-    sqlite3_reset(orphan_rom);
-    sqlite3_clear_bindings(orphan_rom);
+    sqlite3_finalize(stmt);
 
     return rom_id;
 }
@@ -469,17 +415,15 @@ int __db_get_rom_id_by_path(const char *rom_path)
     char rel_path[PATH_MAX];
     __ensure_rel_path(rel_path, rom_path);
 
-    sqlite3_bind_text(rom_by_path, 1, rel_path, -1, SQLITE_TRANSIENT);
+    sqlite3_stmt *stmt = clone_statement(rom_by_path, play_activity_db_reader);
+    sqlite3_bind_text(stmt, 1, rel_path, -1, SQLITE_TRANSIENT);
 
-    sqlite3_stmt *stmt = rom_by_path;
     int ret = sqlite3_step(stmt);
 
     if (ret == SQLITE_ROW) {
         rom_id = sqlite3_column_int(stmt, 0);
     }
-
-    sqlite3_reset(rom_by_path);
-    sqlite3_clear_bindings(rom_by_path);
+    sqlite3_finalize(stmt);
 
     return rom_id;
 }
@@ -544,17 +488,19 @@ int play_activity_transaction_rom_find_by_file_path(const char *rom_path, bool c
 
 int play_activity_get_play_time(const char *rom_path)
 {
+
     int play_time = 0;
-
-    sqlite3_bind_text(rom_playtime, 1, rom_path, -1, SQLITE_TRANSIENT);
-    sqlite3_stmt *stmt = rom_playtime;
-    int ret = sqlite3_step(stmt);
-
-    if (ret == SQLITE_ROW) {
-        play_time = sqlite3_column_int(stmt, 0);
+    int rom_id = __db_rom_find_by_file_path(rom_path, false);
+    if (rom_id != ROM_NOT_FOUND) {
+        sqlite3_stmt *stmt = clone_statement(rom_playtime, play_activity_db_reader);
+        sqlite3_bind_int(stmt, 1, rom_id);
+        if (sqlite3_step(stmt) == SQLITE_ROW) {
+            play_time = sqlite3_column_int(stmt, 0);
+        }
+        sqlite3_finalize(stmt);
     }
-    sqlite3_reset(rom_playtime);
-    sqlite3_clear_bindings(rom_playtime);
+
+    printf_debug("Play time for %s is %d\n", rom_path, play_time);
     return play_time;
 }
 
@@ -630,11 +576,11 @@ bool play_activity_start(char *rom_file_path)
 
 bool play_activity_resume(void)
 {
-    print_debug("\n:: play_activity_resume()");
+    print_debug("\n:: play_activity_resume()\n");
 
     int rom_id = play_activity_db_transaction(__db_get_active_closed_activity);
     if (rom_id == ROM_NOT_FOUND) {
-        printf("Error: no active rom\n");
+        print_debug("Error: no active rom\n");
         return false;
     }
     sqlite3_bind_int(activity_start, 1, rom_id);
@@ -665,13 +611,13 @@ bool play_activity_stop(char *rom_file_path)
 }
 void play_activity_stop_all(void)
 {
-    print_debug("\n:: play_activity_stop_all()");
+    print_debug("\n:: play_activity_stop_all()\n");
     play_activity_db_execute(activity_stop_all);
 }
 
 void play_activity_fix_paths(void)
 {
-    print_debug("\n:: play_activity_fix_paths()");
+    print_debug("\n:: play_activity_fix_paths()\n");
 
     sqlite3_stmt *stmt = get_file_path;
     int ret = sqlite3_step(stmt);
@@ -711,6 +657,18 @@ void play_activity_fix_paths(void)
         ret = sqlite3_step(stmt);
     }
 }
+
+void free_play_activities(PlayActivities *pa_ptr)
+{
+    for (int i = 0; i < pa_ptr->count; i++) {
+        free(pa_ptr->play_activity[i]->first_played_at);
+        free(pa_ptr->play_activity[i]->last_played_at);
+        free(pa_ptr->play_activity[i]->rom);
+        free(pa_ptr->play_activity[i]);
+    }
+    free(pa_ptr->play_activity);
+    free(pa_ptr);
+}
 void play_activity_list_all(void)
 {
     print_debug("\n:: play_activity_list_all()");
@@ -718,7 +676,7 @@ void play_activity_list_all(void)
     int total_play_time = play_activity_get_total_play_time();
     PlayActivities *pas = play_activity_find_all();
 
-    printf("\n");
+    print_debug("\n");
 
     for (int i = 0; i < pas->count; i++) {
         PlayActivity *entry = pas->play_activity[i];
@@ -727,50 +685,84 @@ void play_activity_list_all(void)
         file_cleanName(rom_name, rom->name);
         char play_time[STR_MAX];
         str_serializeTime(play_time, entry->play_time_total);
-        printf("%03d: %s (%s) [%s]\n", i + 1, rom_name, play_time, rom->type);
+        printf_debug("%03d: %s (%s) [%s]\n", i + 1, rom_name, play_time, rom->type);
     }
 
     char total_str[25];
     str_serializeTime(total_str, total_play_time);
-    printf("\nTotal: %s\n", total_str);
+    printf_debug("\nTotal: %s\n", total_str);
 
     free_play_activities(pas);
 }
 
-void handle_client(int client_fd)
+void write_fd(const char *msg, int fd)
 {
+    if (write(fd, msg, strlen(msg)) < 0)
+        print_debug("Unable to write message to socket\n");
+
+    fsync(fd);
+}
+
+static void handle_client(void *fd_ptr)
+{
+    int client_fd = *(int *)fd_ptr;
+    free(fd_ptr);
     char buffer[BUF_SIZE];
     int bytes = read(client_fd, buffer, BUF_SIZE - 1);
     if (bytes <= 0) {
         close(client_fd);
         return;
     }
+    printf_debug("Command received from client %s\n", buffer);
     buffer[bytes] = '\0';
+    strip_newline(buffer);
+    char *msg;
 
-    // Simple protocol: first word = command
-    if (strncmp(buffer, "READ ", 5) == 0) {
-        // execute_read(client_fd, buffer + 5);
+    if (strncmp(buffer, GET_PLAY_TIME_TOTAL, strlen(GET_PLAY_TIME_TOTAL)) == 0) {
+        int play_time = play_activity_get_total_play_time();
+        msg = (char *)(malloc(sizeof(char) * 25));
+        if (!msg)
+            print_debug("Unable to alloc string for play time\n");
+        else if (snprintf(msg, 25, "%d", play_time) < 0)
+            print_debug("Unable to transform int into string\n");
     }
-    else if (strncmp(buffer, "WRITE ", 6) == 0) {
+    else if (strncmp(buffer, GET_PLAY_TIME, strlen(GET_PLAY_TIME)) == 0) {
+        int play_time = play_activity_get_play_time(&buffer[strlen(GET_PLAY_TIME) + 1]);
+        msg = (char *)(malloc(sizeof(char) * 25));
+        if (!msg)
+            print_debug("Unable to alloc string for play time\n");
+        else if (snprintf(msg, 25, "%d", play_time) < 0) {
+            print_debug("Unable to transform int into string\n");
+        }
+    }
+    else if (strncmp(buffer, CLOSE_DB, strlen(CLOSE_DB)) == 0) {
         // execute_write(buffer + 6);
-        const char *msg = "OK\n";
-        write(client_fd, msg, strlen(msg));
+        msg = strdup("OK");
+        quit = 1;
     }
-    else {
-        const char *msg = "Unknown command\n";
-        write(client_fd, msg, strlen(msg));
-    }
+    else
+        msg = "Unknown command\n";
+
+    printf_debug("Command sent to client %s\n", msg);
+    write_fd(msg, client_fd);
+    free(msg);
 
     close(client_fd);
 }
 
 int main(int argc, char *argv[])
 {
+
+    log_setName("sqldaemon");
+    print_debug("\n\nDebug logging enabled");
+
+    signal(SIGINT, sigHandler);
+    signal(SIGTERM, sigHandler);
     quit = init();
 
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd == -1) {
-        printf("Unable to alloc a socket for the play activity daemon\n");
+        print_debug("Unable to alloc a socket for the play activity daemon\n");
         sql_shutdown();
         return EXIT_FAILURE;
     }
@@ -782,26 +774,36 @@ int main(int argc, char *argv[])
 
     if (bind(server_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
 
-        printf("Unable to start bind socket of the play activity daemon\n");
+        print_debug("Unable to start bind socket of the play activity daemon\n");
         return EXIT_FAILURE;
     }
     if (listen(server_fd, 5) == -1) {
-        printf("Unable to start listening\n");
+        print_debug("Unable to start listening\n");
         sql_shutdown();
         return EXIT_FAILURE;
     }
 
-    printf("PlayActivity SQLite daemon running on port %d\n", PORT);
+    printf_debug("PlayActivity SQLite daemon running on port %d\n", PORT);
 
     while (quit) {
         int client_fd = accept(server_fd, NULL, NULL);
         if (client_fd < 0)
             continue;
-        handle_client(client_fd);
+
+        pthread_t thread_id;
+        int *fd_ptr = malloc(sizeof(int));
+        if (!fd_ptr) {
+            print_debug("Unable to alloc int for new thread");
+            close(client_fd);
+            continue;
+        }
+        *fd_ptr = client_fd;
+        pthread_create(&thread_id, NULL, (void *)handle_client, (void *)fd_ptr);
+        pthread_detach(thread_id);
     }
 
-    if (fd >= 0) {
-        close(fd);
+    if (server_fd >= 0) {
+        close(server_fd);
     }
     sql_shutdown();
     return EXIT_SUCCESS;
