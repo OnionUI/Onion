@@ -22,6 +22,7 @@ NETPLAY_SYNC_MAX_FILE_DL_SIZE=104857600 # max file size to allow download
 NETPLAY_COOKIE_MAX_FILE_SIZE=26214400 # max file size for cookie checksum entries
 NETPLAY_SYNC_FAIL_DELAY=2 # delay after sync failures before cleanup
 NETPLAY_INFOPANEL_SLEEP=0.5 # infoPanel delay
+NETPLAY_FTP_HEAD_READY=0 # flag to avoid repeated FTP warmup delays
 COOKIE_CLIENT_PATH="/mnt/SDCARD/RetroArch/retroarch.cookie.client"
 COOKIE_FILE="/mnt/SDCARD/RetroArch/retroarch.cookie"
 
@@ -656,10 +657,15 @@ check_ftp_local() {
 # - give peer time to start FTP before first transfer, then do a quick HEAD
 # - sets: ftp_head_result, ftp_head_exit
 ensure_ftp_head() {
-    # wait for peer tcpsvd to be ready (reduces race on first FTP request)
-    sleep "$NETPLAY_FTP_READY_DELAY"
+    # wait for peer tcpsvd only on the first HEAD; subsequent calls skip delay once ready
+    if [ "${NETPLAY_FTP_HEAD_READY:-0}" -eq 0 ]; then
+        sleep "$NETPLAY_FTP_READY_DELAY"
+    fi
     ftp_head_result=$(curl -sS -I --connect-timeout "$NETPLAY_FTP_HEAD_TIMEOUT" "$1" 2>&1)
     ftp_head_exit=$?
+    if [ $ftp_head_exit -eq 0 ]; then
+        NETPLAY_FTP_HEAD_READY=1
+    fi
     return 0
 }
 
