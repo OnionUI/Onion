@@ -1,5 +1,6 @@
 #!/bin/sh
 scriptlabel="Scraper (%LIST%)"
+scriptinfo="Launches the scraper\nfor the selected system."
 require_networking=1
 echo $0 $*
 
