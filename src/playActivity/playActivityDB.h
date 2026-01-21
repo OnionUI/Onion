@@ -45,10 +45,61 @@ int send_command(const char *cmd, char *buf)
     return total_bytes;
 }
 
-void play_activity_start(char *rom_file_path) {}
-void play_activity_resume() {}
-void play_activity_stop(char *rom_file_path) {}
-void play_activity_stop_all() {}
+void play_activity_start(char *rom_file_path)
+{
+
+    char buf[BUF_SIZE];
+    char *command;
+    if (asprintf(&command, "%s %s", START_PLAY_ACTIVITY, rom_file_path) < 0) {
+        print_debug("Unable to alloc string for command\n");
+        return;
+    }
+
+    int nbytes = send_command(command, buf);
+    if (nbytes == 0 || nbytes == BUF_SIZE) {
+        free(command);
+        return;
+    }
+
+    free(command);
+}
+void play_activity_resume()
+{
+
+    char buf[BUF_SIZE];
+
+    int nbytes = send_command(RESUME_PLAY_ACTIVITY, buf);
+    if (nbytes == 0 || nbytes == BUF_SIZE) {
+        return;
+    }
+}
+void play_activity_stop(char *rom_file_path)
+{
+
+    char buf[BUF_SIZE];
+    char *command;
+    if (asprintf(&command, "%s %s", STOP_PLAY_ACTIVITY, rom_file_path) < 0) {
+        print_debug("Unable to alloc string for command\n");
+        return;
+    }
+
+    int nbytes = send_command(command, buf);
+    if (nbytes == 0 || nbytes == BUF_SIZE) {
+        free(command);
+        return;
+    }
+
+    free(command);
+}
+void play_activity_stop_all()
+{
+    char buf[BUF_SIZE];
+
+    int nbytes = send_command(STOP_ALL_PLAY_ACTIVITY, buf);
+    if (nbytes == 0 || nbytes == BUF_SIZE) {
+        return;
+    }
+}
 void play_activity_db_close()
 {
 

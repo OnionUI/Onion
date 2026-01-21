@@ -21,6 +21,10 @@ typedef struct PlayActivitiesUI PlayActivitiesUI;
 
 #define GET_PLAY_TIME "GET_PLAY_TIME"
 #define GET_PLAY_TIME_TOTAL "GET_PLAY_TIME_TOTAL"
+#define START_PLAY_ACTIVITY "START_PLAY_ACTIVITY"
+#define RESUME_PLAY_ACTIVITY "RESUME_PLAY_ACTIVITY"
+#define STOP_PLAY_ACTIVITY "STOP_PLAY_ACTIVITY"
+#define STOP_ALL_PLAY_ACTIVITY "STOP_ALL_PLAY_ACTIVITY"
 #define CLOSE_DB "CLOSE_DB"
 int asprintf(char **strp, const char *fmt, ...);
 
