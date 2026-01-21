@@ -144,6 +144,23 @@ wait_for_client() {
     log "$client_ip has joined the hotspot"
 }
 
+# wait_for_client_network: ensure client responds to ping before transfers
+wait_for_client_network() {
+    local counter=0
+    build_infoPanel_and_log "Hotspot" "Client connected.\nWaiting for client network..."
+    while true; do
+        if ping -c 1 -W 1 "$client_ip" >/dev/null 2>&1; then
+            log "Client network reachable at $client_ip"
+            break
+        fi
+        sleep 1
+        counter=$((counter + 1))
+        if [ $((counter % 10)) -eq 0 ]; then
+            build_infoPanel_and_log "Hotspot" "Still waiting for client network...\nIP: $client_ip"
+        fi
+    done
+}
+
 # wait_for_host
 # - waits for /tmp/host_ready signal
 wait_for_host() {

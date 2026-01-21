@@ -44,9 +44,9 @@ backup_and_send_save() {
 
     if [ -f "$save_gambatte" ]; then
         SaveFromGambatte=1
-        log "Gambatte save file detected."
-        log "Backing up Gambatte save file to: $client_rom_filename_NoExt.srm_$Curdate"
+        log "Gambatte save file detected. Backing up Gambatte save file to: $client_rom_filename_NoExt.srm_$Curdate"
         cp -f "$save_gambatte" "${save_gambatte}_$CurDate"
+        log_file_state "Gambatte save (backed up)" "$save_gambatte"
         if [ -f "$save_tgbdual" ]; then
             confirm_join_panel "Continue ?" "There is a local save for\n$client_rom_filename_NoExt\nfor TGB Dual and for Gambatte.\n Gambatte save will be used by default."
             log "Existing TGB Dual save file detected. Continue with Gambatte save."
@@ -56,9 +56,10 @@ backup_and_send_save() {
         cp -f "$save_gambatte" "$save_tgbdual"
         save_file_matched="$save_gambatte"
     elif [ -f "$save_tgbdual" ]; then
-        log "No Gambatte save file detected, using TGB Dual save file instead."
+        log "No Gambatte save file detected, using TGB Dual"
         log "Backing up current TGB Dual save file to: $client_rom_filename_NoExt.srm_$Curdate"
         cp -f "$save_tgbdual" "${save_tgbdual}_$CurDate"
+        log_file_state "TGB Dual save (backed up)" "$save_tgbdual"
         save_file_matched="$save_tgbdual"
     else
         missing=1
@@ -69,8 +70,10 @@ backup_and_send_save() {
     save_file_stripped="${save_file_matched##*/}"
     encoded_save_file=$(url_encode "$save_file_stripped")
     log "encoded_save_file: $encoded_save_file"
+    log_file_state "Save selected for upload" "$save_file_matched"
 
     curl -T "$save_file_matched" "ftp://$hostip/tmp/$encoded_save_file"
+    log "curl exit status (upload save)=$?"
 
     if [ "$missing" = "1" ]; then
         # hitting this block means we cannot send a save to the host
@@ -92,6 +95,7 @@ start_retroarch() {
     log "core_config_folder: $core_config_folder"
     log "cpuspeed: $cpuspeed"
     log "hostip: $hostip"
+    log_file_state "Client save (pre-RA)" "$save_file_matched"
     log "###############################################################################"
 
     if [ -n "$cpuspeed" ]; then
@@ -146,11 +150,14 @@ wait_for_save_return() {
 
     received_save="/tmp/$(basename "$save_file_matched")_rcvd"
 
+    log_file_state "Received save (raw)" "$received_save"
+    log_file_state "Local save before merge" "$save_file_matched"
     log "cp -f \"$received_save\" \"$save_file_matched\""
     cp -f "${received_save}" "$save_file_matched"
     cp_exit_status=$?
 
     if [ $cp_exit_status -eq 0 ]; then
+        log_file_state "Local save after merge" "$save_file_matched"
         if [ $SaveFromGambatte -eq 1 ]; then
             mv -f "/mnt/SDCARD/Saves/CurrentProfile/states/Gambatte/$client_rom_filename_NoExt.state.auto" "/mnt/SDCARD/Saves/CurrentProfile/states/Gambatte/$client_rom_filename_NoExt.state.auto_$CurDate"
         else

@@ -5,7 +5,6 @@
 . /mnt/SDCARD/.tmp_update/script/netplay/easy-netplay_env.sh
 
 # Runtime vars
-rm /tmp/stop_now
 client_rom="$1"
 romdirname=$(echo "$client_rom" | grep -o '/Roms/[^/]*' | cut -d'/' -f3)
 client_rom_filename=$(basename "$client_rom")
@@ -66,7 +65,6 @@ cleanup() {
         "Cleaning up after Pokemon session\n Do not power off!" \
         1 1 1 0 \
         "/tmp/host_ready" \
-        "/tmp/stop_now" \
         "/tmp/wpa_supplicant.conf_bk" \
         "/tmp/dismiss_info_panel"
 }

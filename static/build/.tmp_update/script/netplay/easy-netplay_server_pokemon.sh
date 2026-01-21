@@ -26,6 +26,22 @@ netplaycore="/mnt/SDCARD/RetroArch/.retroarch/cores/tgbdual_libretro.so"
 SaveFromGambatte=0
 export CurDate=$(date +%Y%m%d_%H%M%S)
 log "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* Easy Netplay Pokemon Host -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*\ndate : $CurDate"
+
+# Helper: capture quick state of a file for debugging save/rom transfer issues.
+log_file_state() {
+	local label="$1"
+	local path="$2"
+	if [ -f "$path" ]; then
+		# Prefer stat, fall back to wc -c for size
+		local size
+		size=$(stat -c%s "$path" 2>/dev/null || wc -c <"$path")
+		local md5
+		md5=$(md5sum "$path" 2>/dev/null | awk '{print $1}')
+		log "$label: exists size=${size} md5=${md5:-N/A} path=$path"
+	else
+		log "$label: missing path=$path"
+	fi
+}
 ##########
 ##Setup.##
 ##########
@@ -58,11 +74,13 @@ host_save_backup() {
 		log "Gambatte save file detected."
 		log "Backing up Gambatte save file to: $host_rom_filename_NoExt.srm_$Curdate"
 		cp -f "$save_gambatte" "${save_gambatte}_$CurDate"
+		log_file_state "Gambatte save (backed up)" "$save_gambatte"
 		SaveFromGambatte=1
 		if [ -f "$save_tgbdual" ]; then
 			confirm_join_panel "Continue ?" "There is a local save for\n$host_rom_filename_NoExt\nfor TGB Dual and for Gambatte.\n Gambatte save will be used by default."
 			log "Backing up the existing TGB Dual save file to: $host_rom_filename_NoExt.srm_$Curdate"
 			cp -f "$save_tgbdual" "${save_tgbdual}_$CurDate"
+			log_file_state "Existing TGB Dual save (backed up)" "$save_tgbdual"
 		fi
 		# copy save from Gambatte to TGB Dual
 		cp -f "$save_gambatte" "$save_tgbdual"
@@ -70,6 +88,7 @@ host_save_backup() {
 		log "No Gambatte save file detected, using TGB Dual save file instead."
 		log "Backing up current TGB Dual save file to: $host_rom_filename_NoExt.srm_$Curdate"
 		cp -f "$save_tgbdual" "${save_tgbdual}_$CurDate"
+		log_file_state "TGB Dual save (backed up)" "$save_tgbdual"
 	fi
 
 	sync
@@ -88,6 +107,7 @@ client_save_get() {
 		sync
 		for file in /tmp/*.srm; do
 			if [ -f "$file" ]; then
+				log_file_state "Incoming client save candidate" "$file"
 				if [ "$(basename "$file")" = "missing_save.srm" ]; then
 					build_infoPanel_and_log "Sync error" "Client advises they don't have a save file. \n Cannot continue."
 					notify_stop
@@ -119,6 +139,7 @@ client_save_rename() {
 		save_new_path="/mnt/SDCARD/Saves/CurrentProfile/saves/TGB Dual/$save_new_name"
 		mv "$client_save_file" "$save_new_path"
 		log "Save file found and processed - old save path:$client_save_file, new save path:$save_new_path "
+		log_file_state "Client save after move" "$save_new_path"
 		sync
 	else
 		build_infoPanel_and_log "Syncing" "Save file not found, cannot continue"
@@ -193,6 +214,8 @@ start_retroarch() {
 	log "client_rom_clone: ${client_rom_clone}"
 	log "netplaycore: $netplaycore"
 	log "cpuspeed: $cpuspeed"
+	log_file_state "Host save (pre-RA)" "$save_tgbdual"
+	log_file_state "Client save (pre-RA)" "$save_new_path"
 	log "###############################################################################"
 
 	if [ -n "$cpuspeed" ]; then
@@ -273,8 +296,10 @@ client_save_send() {
 
 	if [ $curl_exit_status -eq 0 ]; then
 		build_infoPanel_and_log "Syncing" "Client save returned!"
+		log_file_state "Save returned to client (local copy)" "$save_new_path"
 	else
 		build_infoPanel_and_log "Syncing" "Failed to return the client save \n Progress has likely been lost \n Curl exit code: $curl_exit_status"
+		log "curl exit status while returning client save: $curl_exit_status"
 	fi
 }
 
@@ -383,6 +408,7 @@ lets_go() {
 
 	# Wait for client connection
 	wait_for_client
+	wait_for_client_network
 
 	# Send cookie to client (downloaded as retroarch.cookie.client)
 	sync_file "Cookie" "$COOKIE_FILE" 0 0 -f -m

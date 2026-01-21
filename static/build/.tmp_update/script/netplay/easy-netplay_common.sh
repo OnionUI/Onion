@@ -705,3 +705,18 @@ check_wifi() {
         sleep "$NETPLAY_WIFI_POST_START_DELAY"
     fi
 }
+
+# capture quick state of a file for debugging save/rom transfer issues.
+log_file_state() {
+    local label="$1"
+    local path="$2"
+    if [ -f "$path" ]; then
+        local size
+        size=$(stat -c%s "$path" 2>/dev/null || wc -c <"$path")
+        local md5
+        md5=$(md5sum "$path" 2>/dev/null | awk '{print $1}')
+        log "$label: exists size=${size} md5=${md5:-N/A} path=$path"
+    else
+        log "$label: missing path=$path"
+    fi
+}
