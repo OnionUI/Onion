@@ -1,0 +1,9 @@
+# FAQ restructure commits (2026-01-21)
+# These commits split the monolithic FAQ into topic-based pages.
+# Use: git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# Copy index.mdx to topic files (preparation step)
+e2bf7a85a2636b5e90933177a37753cfe3a5f18b
+
+# Trim each topic file to relevant content only
+20c242944fa204cb92d2b06b53460562b05bbb3b
