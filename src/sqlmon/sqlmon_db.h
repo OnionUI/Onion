@@ -49,14 +49,15 @@ int init()
     }
     sqlite3_exec(play_activity_db_writer, "PRAGMA synchronous = FULL;", NULL, NULL, NULL);
     sqlite3_exec(play_activity_db_writer, "PRAGMA journal_mode=WAL;", NULL, NULL, NULL);
-    sqlite3_busy_timeout(play_activity_db_writer, 5000);
+    sqlite3_busy_timeout(play_activity_db_writer, 1000);
 
     if (sqlite3_open_v2(PLAY_ACTIVITY_DB_NEW_FILE, &play_activity_db_reader, SQLITE_OPEN_READONLY, NULL) != SQLITE_OK) {
         printf_debug("%s\n", sqlite3_errmsg(play_activity_db_reader));
         play_activity_db_reader = NULL;
+        sql_shutdown();
         return 0;
     }
-    sqlite3_busy_timeout(play_activity_db_reader, 5000);
+    sqlite3_busy_timeout(play_activity_db_reader, 1000);
     return prepare_statements();
 }
 
@@ -81,17 +82,10 @@ void sql_shutdown()
     sqlite3_finalize(update_file_path);
     sqlite3_finalize(update_file_path_cache);
 
-    int ret;
-    do {
-        ret = sqlite3_close(play_activity_db_writer);
-        msleep(50);
-    } while (ret == SQLITE_BUSY);
+    sqlite3_close(play_activity_db_writer);
     play_activity_db_writer = NULL;
 
-    do {
-        ret = sqlite3_close(play_activity_db_reader);
-        msleep(50);
-    } while (ret == SQLITE_BUSY);
+    sqlite3_close(play_activity_db_reader);
     play_activity_db_reader = NULL;
 }
 
@@ -408,7 +402,7 @@ void __db_update_rom(int rom_id, const char *rom_type, const char *rom_name, con
     sqlite3_finalize(stmt);
 }
 
-void __db_update_rom_from_cache(int rom_id, CacheDBItem *cache_db_item)
+void __db_update_rom_from_cache(const int rom_id, CacheDBItem *cache_db_item)
 {
     __db_update_rom(rom_id, cache_db_item->cache_path, cache_db_item->name, cache_db_item->path, cache_db_item->imgpath);
 }
@@ -456,7 +450,7 @@ int __db_get_rom_id_by_path(const char *rom_path)
     return rom_id;
 }
 
-int __db_rom_find_by_file_path(const char *rom_path, bool create_or_update)
+int __db_rom_find_by_file_path(const char *rom_path, const bool create_or_update)
 {
     printf_debug("rom_find_by_file_path('%s')\n", rom_path);
 
@@ -506,7 +500,7 @@ int __db_rom_find_by_file_path(const char *rom_path, bool create_or_update)
 
     return rom_id;
 }
-int play_activity_transaction_rom_find_by_file_path(const char *rom_path, bool create_or_update)
+int play_activity_transaction_rom_find_by_file_path(const char *rom_path, const bool create_or_update)
 {
     int retval;
 
@@ -584,7 +578,7 @@ int __db_get_active_closed_activity(void)
     return rom_id;
 }
 
-bool play_activity_start(char *rom_file_path)
+bool play_activity_start(const char *rom_file_path)
 {
     printf_debug("\n:: play_activity_start(%s)\n", rom_file_path);
     int rom_id = play_activity_transaction_rom_find_by_file_path(rom_file_path, true);
@@ -621,7 +615,7 @@ bool play_activity_resume(void)
     return true;
 }
 
-bool play_activity_stop(char *rom_file_path)
+bool play_activity_stop(const char *rom_file_path)
 {
     printf_debug("\n:: play_activity_stop(%s)\n", rom_file_path);
     int rom_id = play_activity_transaction_rom_find_by_file_path(rom_file_path, false);

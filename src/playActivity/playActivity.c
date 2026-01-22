@@ -1,4 +1,5 @@
 #include "./playActivity.h"
+#include "playActivityDB.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,6 +15,7 @@ void printUsage()
            "       playActivity migrate          -> Migrate the old database (prior to Onion 4.2.0) to SQLite\n"
            "       playActivity fix_paths        -> Change all absolute paths to relative paths\n"
            "       playActivity time [rom_path]  -> Gets the playtime of a specific rom\n"
+           "       playActivity playtime [rom_path]  -> Gets the playtime of a specific rom\n"
            "       playActivity close            -> Closes the Database\n");
 }
 
@@ -36,6 +38,9 @@ int main(int argc, char *argv[])
                 printUsage();
                 return EXIT_FAILURE;
             }
+        }
+        else if (strcmp(argv[i], "playtime") == 0) {
+            play_activity_get_total_play_time();
         }
         else if (strcmp(argv[i], "resume") == 0) {
             play_activity_resume();
