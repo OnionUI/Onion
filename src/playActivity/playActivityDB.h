@@ -94,6 +94,8 @@ void play_activity_db_open(void)
                      "CREATE INDEX play_activity_rom_id_index ON play_activity(rom_id);",
                      NULL, NULL, NULL);
     }
+    sqlite3_exec(play_activity_db, "PRAGMA journal_mode=WAL;", NULL, NULL, NULL);
+    sqlite3_busy_timeout(play_activity_db, 3000);
 }
 
 int play_activity_db_transaction(int (*exec_transaction)(void))
