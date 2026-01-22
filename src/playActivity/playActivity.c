@@ -13,6 +13,7 @@ void printUsage()
            "       playActivity stop_all         -> Stop the counter for all roms\n"
            "       playActivity migrate          -> Migrate the old database (prior to Onion 4.2.0) to SQLite\n"
            "       playActivity fix_paths        -> Change all absolute paths to relative paths\n"
+           "       playActivity time [rom_path]  -> Gets the playtime of a specific rom\n"
            "       playActivity close            -> Closes the Database\n");
 }
 
@@ -38,6 +39,16 @@ int main(int argc, char *argv[])
         }
         else if (strcmp(argv[i], "resume") == 0) {
             play_activity_resume();
+        }
+        else if (strcmp(argv[i], "time") == 0) {
+            if (i + 1 < argc) {
+                play_activity_get_play_time(argv[++i]);
+            }
+            else {
+                printf("Error: Missing rom_path argument\n");
+                printUsage();
+                return EXIT_FAILURE;
+            }
         }
         else if (strcmp(argv[i], "stop") == 0) {
             if (i + 1 < argc) {
