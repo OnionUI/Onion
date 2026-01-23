@@ -83,7 +83,7 @@ main() {
     # Start the key monitor
     keymon &
 
-    # Start the sql server
+    # Start the sql daemon
     sqlmon &
 
     # Init

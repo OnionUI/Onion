@@ -49,7 +49,7 @@ int init()
     }
     sqlite3_exec(play_activity_db_writer, "PRAGMA synchronous = FULL;", NULL, NULL, NULL);
     sqlite3_exec(play_activity_db_writer, "PRAGMA journal_mode=WAL;", NULL, NULL, NULL);
-    sqlite3_busy_timeout(play_activity_db_writer, 1000);
+    sqlite3_busy_timeout(play_activity_db_writer, 5000);
 
     if (sqlite3_open_v2(PLAY_ACTIVITY_DB_NEW_FILE, &play_activity_db_reader, SQLITE_OPEN_READONLY, NULL) != SQLITE_OK) {
         printf_debug("%s\n", sqlite3_errmsg(play_activity_db_reader));
@@ -57,7 +57,7 @@ int init()
         sql_shutdown();
         return 0;
     }
-    sqlite3_busy_timeout(play_activity_db_reader, 1000);
+    sqlite3_busy_timeout(play_activity_db_reader, 5000);
     return prepare_statements();
 }
 
