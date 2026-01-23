@@ -1,0 +1,59 @@
+---
+slug: /faq/various
+description: General questions about Onion including overclocking and CFW vs OS explanation
+---
+
+import DynamicFAQSection from '@site/src/components/DynamicFAQSection';
+
+
+# Various
+
+*![](https://user-images.githubusercontent.com/98862735/178853267-a5d384f8-ad62-4ffa-a8e7-45abf38e742d.png)*
+
+
+<DynamicFAQSection>
+
+<details><summary>
+
+### Why Onion is <u>not a CFW (custom firmware)</u>?
+
+</summary>
+
+Onion doesn't modify the firmware of your Miyoo Mini so this is not a CFW. It can be considered more as an OS.
+The way how your Miyoo Mini is booting will not change and it is a good thing because:
+- it avoids the risk of bad flash.
+- the original firmware of the Miyoo Mini starts up really fast !
+After the boot, the first binary launched from the SD card by the firmware is the Onion scripts directly, making the boot of Onion OS fast and safe.
+
+> Notes:  
+> The community is working on [a real alternative firmware](https://github.com/orgs/miyoo-oss/repositories). It's currently not usable with Onion. The objective is to obtain a better control of the hardware part and a more recent linux kernel which could simplify the compilation of additional apps.
+
+</details>
+
+<details><summary>
+
+### How to <u>overclock</u> my Miyoo Mini?
+
+</summary>
+
+It is possible to overclock your device starting from Onion 4.2.0. The speed improvement can be up to 20% and is very noticeable. The current overclocking procedure is a manual process.
+
+To overclock Retroarch for all cores, create a `cpuclock.txt` text file in the main Retroarch folder (e.g. `Retroarch/cpuclock.txt`) containing just the 4-digit Mhz number of the desired overclock speed (e.g. `1600`).
+
+To overclock just a specific Retroarch core, create the `cpuclock.txt` text file within that core's configuration folder in `Saves/CurrentProfile/config/<core>/`. For example, if you want to improve the PSX speed of PCSX-ReARMed (which will allow you to enable *enhanced resolution* for many additional games) you can create a `cpuclock.txt` file containing `1600` inside `Saves/CurrentProfile/config/PCSX-ReARMed/`.
+
+The maximum device overclock speeds are:
+- Miyoo Mini: 1700Mhz (1600 recommended for optimal stability)
+- Miyoo Mini Plus: 1900Mhz (1800 recommended for optimal stability)
+
+:::warning
+
+Using values higher than the recommended ones will impact stability or damage your device.
+
+:::
+
+https://youtu.be/2ptdAy3nZ8Y
+
+</details>
+
+</DynamicFAQSection>

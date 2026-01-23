@@ -1,0 +1,196 @@
+---
+slug: /faq/troubleshooting
+description: Solutions for common Onion issues including boot loops, games not launching, and Wi-Fi problems
+---
+
+import DynamicFAQSection from '@site/src/components/DynamicFAQSection';
+import IconLink from '@site/src/components/IconLink';
+
+
+# Troubleshooting
+
+*![](https://user-images.githubusercontent.com/98862735/178853267-a5d384f8-ad62-4ffa-a8e7-45abf38e742d.png)*
+
+
+<DynamicFAQSection>
+
+<details><summary>
+
+### I just installed Onion, why do some <u>games no longer launch</u>?
+
+</summary>
+
+There can be a few reasons why you may find a specific system does not launch games after installing Onion:  
+* If you have added games post installation, you may need to update your rom caches, from the `Games` tab press the <kbd>SELECT</kbd> button to open the context menu and choose the `Refresh all roms` option.
+* Ensure you are using supported rom extensions and that both your rom folder and Bios file(s) are named exactly as detailed in our [Emulators Section](/docs/emulators).  
+* Save states can, on occasion, be incompatible between core versions/updates. Delete the `Saves/CurrentProfile/states/[system]` folder for the given system.
+* If none of the above points have resolved your issue, it is recommended to source and test with alternative roms (those that come with the Mini are of very poor quality). 
+
+> Notes:  
+> [Rom folders](/docs/emulators/folders) and [Bios](/docs/emulators#bios-files) filenames are case sensitive.  
+> It is strongly advised not to use the Miyoo provided SD card or USB Card Reader as both are very prone to data corruption and failure and will cause issues.  
+
+</details>
+
+
+<details><summary>
+
+### I have upgraded to a newer version of Onion and some <u>games are running slower or too fast</u>? 
+
+</summary>
+
+If you experience slower (or faster) gameplay than usual for some games following an Onion upgrade, we recommend that you create an in-game Save and then delete your Save States. Save States are stored inside `Saves/CurrentProfile/states/[CORENAME]/`
+
+> Please see other solutions here within this FAQ with regards to managing Save States and Saves.
+
+</details>
+
+
+<details><summary>
+
+### I am stuck in a <u>black screen boot-loop</u>, how can I get back into Onion?
+
+</summary>
+
+If you launched a rom or a file that is incompatible with the core, it can cause a black screen. Onion's auto-resume feature can mean you returning to this same black screen on each boot. 
+
+You can hold down <kbd>POWER</kbd> for 10+ seconds (wait for 2nd rumble) to break out of this behaviour and return you to MainUI.
+
+If this still does not work for you, you can disable the next auto-resume by inserting your SD card into your PC and deleting the file `cmd_to_run.sh` inside the `.tmp_update` folder
+
+</details>
+
+<details><summary>
+
+### Why are my <u>favorites deleted</u> or missing thumbnails?
+
+</summary>
+
+There is a known bug in the Miyoo binaries which can cause the favorites list to become corrupted.  
+It appears to most commonly occur if duplicate game names (even roms from different consoles) are added to your favouites so care should be taken to avoid this.
+
+Since Miyoo have not shared their source code, the Onion team are unable to fix the cause.  
+Onion does include a Tweaks tool which can repair the corruption. This tool is located in:  
+**Apps** › **Tweaks** › **Tools** › **Favorites: Fix thumbnails and duplicates**.
+
+</details>
+
+
+<details><summary>
+
+### My <u>play activity is lost</u> or corrupted, how can I recover it?
+
+</summary>
+
+If a RetroArch core fails abruptly or has memory leak issues, it can sometimes cause a game to freeze.  
+Exiting the game with the <kbd>MENU</kbd> button during this failure, may on rare occasions, corrupt the play activity database.
+
+**FIX 1 (Mainly for 4.2 beta users)**  
+If you have a `playActivityTMP.db` file in `/mnt/SDCARD/Saves/CurrentProfile/saves/`, just rename it to `playActivity.db`
+
+**FIX 2**  
+Onion keeps versioned backups of your play activity in case of such corruption:
+
+- Versioned backups are created and stored in `/mnt/SDCARD/Saves/CurrentProfile/saves/PlayActivityBackup/`.
+- Your current play times are stored in `/mnt/SDCARD/Saves/CurrentProfile/saves/playActivity.db`.  
+
+> To restore from a backup:  
+> - Navigate to `/Saves/CurrentProfile/saves/PlayActivityBackup/` and find the database file that has a size of 0KB.  
+> - The the highest numbered version just before it will be the most recent good backup.  
+> - Make a copy and rename it (from `playActivity[nn].db`  to `playActivity.db`).  
+> - Copy it to `/Saves/CurrentProfile/saves/`, replacing the one located there.  
+
+</details>
+
+
+<details><summary>
+
+### Why is my <u>battery percentage fluctuating</u> and how do I know if the device is fully charged?
+
+</summary>
+
+**Charging Indicators**  
+The left most LED on the top of the Mini will turn blue when a full charge is reached.
+The blue LED on the MMP is unfortunately non-functional, the red LED will turn off when fully charged.
+
+**MM v2:** Miyoo recommends 5V 1A and it must be USB-A to USB-C _(USB-C to USB-C charging is not supported)_.
+**MMP and MM v4:** Supports USB-C to USB-C charging (the support is limited, and some chargers will not be accepted / start charging)
+
+![LED Indicators-500](https://user-images.githubusercontent.com/98862735/189775988-b6b4062d-f231-4351-9a79-6920498f1554.png)
+
+**Battery Percentage Fluctuations**  
+The Mini has no Battery Management System so Onion calculates the remaining battery percentage based on the voltage.  
+Environment changes and power draw will affect the determined percentage which can fluctuate greatly.  
+
+> This may appear jarring but is perfectly normal. If you go from playing a resource hungry system (PS1), to playing something less intensive (GB) then you will likely see an increase in percentage. 
+> Depending on the health (and thus voltage output) of your battery, it may not reach 100% in Onion when fully charged.   
+>  
+> The Onion battery capacity estimation is constantly pooling in the background for more precise results over time. This is the best method that is possible on this device, improved over stock and the same method used by the RA build and in MiniUI. 
+
+:::tip Reducing Battery Usage
+1. Lowering display brightness (preferably below 70%)
+2. Use headphones - the speaker is the most battery-hungry component!
+3. Disable Wi-Fi when not in use (the Wi-Fi chip is a major power draw as well)
+:::
+
+The below testing output demonstrates GBA running at 50% display brightness for almost 8hrs of play time.
+
+![battery-600](https://user-images.githubusercontent.com/98862735/189774379-33b77793-bc36-4563-acbe-357713b4964e.png)
+
+</details>
+
+
+<details><summary>
+
+### I just downloaded an app or a standalone emulator and <u>the sound seems broken</u>?
+
+</summary>
+
+It is likely due to a lack of compatibility with the Miyoo audio server.
+To cope with this, just rename the `launch.sh` file in your app folder to `launch2.sh`, then extract this file to the app folder: <IconLink icon="folder_zip" href="https://github.com/OnionUI/Onion/files/9041212/launch.zip">launch.zip</IconLink>
+
+</details>
+
+
+<details><summary>
+
+### How do I enable <u>logging in RetroArch</u>?
+
+</summary>
+
+In order to troubleshoot a particular game or emulator failure or issue, you may wish to enable RetroArch logging:
+
+* Go to **Apps** › **RetroArch** › **Settings** › **Logging** and enable **Log to File**.  
+* Back out to the main RetroArch menu, and go to **Configuration File** and choose **Save Current Configuration**.  
+* Launch the game(s), or perform the action you are trying to troubleshoot.  
+* The output log file will be written to `.tmp_update/logs/retroarch.log`.  
+
+</details>
+
+<details><summary>
+
+### My <u>Wi-Fi won't connect</u> as it contains special characters, what do I do?
+
+</summary>
+
+There's currently an issue in MainUI that prevents Wi-Fi from associating when it contains special characters.
+
+Currently, there's no fix due to MainUI being closed source however there are various workarounds:
+
+- Edit your `wpa_supplicant.conf` file via the File Explorer (file found in `/appconfigs/wpa_supplicant.conf`)
+- Use third-party apps such as: <IconLink icon="open_in_new" href="https://github.com/XK9274/better-wifi-miyoo">XK9274/better-wifi-miyoo</IconLink>, which supports most special characters
+- Use Onion's built in WPS function (if your router supports pinless WPS). You can find this in **Tweaks** › **Network** › **WPS**.
+
+</details>
+
+<details><summary>
+
+### How to make the audio with <u>headphones louder</u>?
+
+</summary>
+
+START + L2 / R2 Adjust volume boost ([see shortcuts](/docs/apps/shortcuts))
+
+</details>
+
+</DynamicFAQSection>

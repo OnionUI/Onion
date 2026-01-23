@@ -1,0 +1,148 @@
+---
+slug: /faq/emulator-settings
+description: RetroArch settings, scaling, control remapping, and RTC configuration in Onion
+---
+
+import DynamicFAQSection from '@site/src/components/DynamicFAQSection';
+
+
+# Emulator Settings
+
+*![](https://user-images.githubusercontent.com/98862735/178853267-a5d384f8-ad62-4ffa-a8e7-45abf38e742d.png)*
+
+
+<DynamicFAQSection>
+
+<details><summary>
+
+### How can I change a game's <u>scaling or make it fullscreen</u>?
+
+</summary>
+
+- Launch the game and press <kbd>MENU</kbd>+<kbd>SELECT</kbd> to go into the RetroArch menu.  
+- Press <kbd>B</kbd> to go back one level in the RA menu and select `Settings` › `Video` › `Scaling`   
+- Here you can toggle:  
+  - `Integer Scale` - show the game in its original resolution (scale only in whole pixels).  
+  - `Keep Aspect Ratio` - **enabled:** fit to screen, **disabled:** stretch.  
+
+> Notes:  
+> You will need to save overrides to commit this change, see 'How do I save RetroArch settings?' below for instructions.
+
+</details>
+
+
+<details><summary>
+
+### How do I <u>save RetroArch settings</u>?
+
+</summary>
+
+When you make changes in RetroArch you must apply these using "Overrides" for them to take effect. 
+
+- Launch the game and press <kbd>MENU</kbd>+<kbd>SELECT</kbd> to go into the RetroArch menu. 
+- Make your desired changes.
+- Then go to `Quick Menu` › `Overrides` and select one of the following:  
+  - `Save Game Overrides` - for just this game.  
+  - `Save Core Overrides` - for everything the core plays.  
+  - `Save Content Overrides` - for everything in the same Rom folder.  
+
+> Notes:  
+> `Content Overrides` are recommended over `Core Overrides` since some cores serve multiple systems. 
+> For more information regarding RetroArch overrides please review the [libretro documentation here](https://docs.libretro.com/guides/overrides/).
+
+</details>
+
+
+<details><summary>
+
+### How do I <u>reset RetroArch settings</u> to the Onion defaults?
+
+</summary>
+
+Resetting your global configuration from within RA itself will break Onion functionality as this restores 'out of the box' RA defaults. Instead:
+ 
+- Go to your Apps section and open `Tweaks`. 
+- Scroll to `Advanced`  and choose `Reset Settings...` › `Reset RetroArch main configuration`
+
+> Notes:  
+> You should always in the first instance, save your changes to Retroarch settings as "Overrides" rather than saving changes to the main (global) configuration (see other questions in this FAQ re saving RetroArch settings).
+> This will make it far easier to revert a change by deleting the overrides from within the RA `Overrides` menu.  
+
+</details>
+
+
+<details><summary>
+
+### How do I <u>bind `Fast Forward`</u> to a single button?
+
+</summary>
+
+To do this, launch a game from the system to want to change.
+
+- Press <kbd>MENU</kbd>+<kbd>SELECT</kbd> to go into the RetroArch quick menu
+- Choose `Controls` › `Port 1 Controls`.
+- Navigate to the key you wish to assign and press <kbd>A</kbd> to view a list of the various available functions (i.e. `Fast Forward`)
+- Confirm your selection with <kbd>A</kbd>.
+- The changes are saved automatically, just go back two levels and choose `Resume`.
+
+> Notes:  
+> This only works for certain systems (e.g. GB, GBC, GBA, etc.), and you have to hold the button to fast forward, whereas the global shortcut <kbd>MENU</kbd>+<kbd>R</kbd> is "press to toggle".  
+> For more information regarding RetroArch inputs and controls please review the [libretro documentation here](https://docs.libretro.com/guides/input-and-controls/).
+
+<p align="center"><img src="https://user-images.githubusercontent.com/44569252/189953701-265409db-d081-4c3b-bfc1-fb051af70f08.png" width="320px" /></p>
+
+
+</details>
+
+
+<details><summary>
+
+### How do I <u>remap in-game controls</u>?
+
+</summary>
+
+To do this, launch a game from the system to want to change.
+
+- Press <kbd>MENU</kbd>+<kbd>SELECT</kbd> to go into the RetroArch quick menu
+- Choose `Controls` › `Port 1 Controls`.
+- Navigate to the key you wish to reassign and press <kbd>A</kbd> to view a list of the various in-game controls available.
+- Confirm your selection with <kbd>A</kbd>.
+- The changes are saved automatically when exiting the menu.
+
+**Saving individual game, core, or content remaps**
+   - After making the changes as above, press <kbd>B</kbd> to go back one level.
+   - Then go to `Manage Remap Files` and choose one of the following:
+      - `Save Game Remap File` - for just this game.
+      - `Save Core Remap File` - for everything the core plays.
+      - `Save Content Remap File` - for everything in the same Rom folder.
+
+> Notes:  
+> Highlighting a mapped key and pressing <kbd>Y</kbd> will clear/disable it.  
+> `Content Remap File` saving is recommended over `Core Remap File` as some cores serve multiple systems.  
+> For more information regarding RetroArch inputs and controls please review the [libretro documentation here](https://docs.libretro.com/guides/input-and-controls/).
+
+</details>
+
+
+<details><summary>
+
+### How do I <u>set the in game time</u> or RTC, for games like Pokemon?
+
+</summary>
+
+Games such as the Pokemon and Zelda series, included a crystal oscillator in the cartridge to keep an accurate clock.  
+This 'Real Time Clock' allowed the game to track time of day and day of the week, to trigger certain in-game events.  
+
+The Miyoo Mini does not have a built-in clock and so cannot measure the progress of time when powered off.  
+Onion features two ways in which you can manage the emulated in-game time (or RTC).  
+
+- **Automatically**: By default, 4hrs will be added to the clock every time you boot your device.  
+    You can adjust this amount in `Apps` > `Tweaks` > `System` > `Startup`.  
+- **Manually**: You can specify the date and time in the Clock App, installed via `Apps` > `Package Manager`.    
+
+> Notes:  
+> In-game time will advance normally during gameplay and _only_ stops when the device is shutdown.  
+
+</details>
+
+</DynamicFAQSection>
