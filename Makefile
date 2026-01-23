@@ -54,7 +54,7 @@ include ./src/common/commands.mk
 
 ###########################################################
 
-.PHONY: all version core apps external release clean deepclean git-clean with-toolchain patch lib test
+.PHONY: all version core apps external release clean deepclean git-clean with-toolchain patch lib test test-shell test-shell-debug test-all
 
 all: dist
 
@@ -227,7 +227,8 @@ release: dist
 clean:
 	@$(ECHO) $(PRINT_RECIPE)
 	@rm -rf $(BUILD_DIR) $(BUILD_TEST_DIR) $(ROOT_DIR)/dist $(TEMP_DIR)/configs
-	@rm -f $(CACHE)/.setup
+	@rm -f $(CACHE)/.setup $(CACHE)/.shell-test-image
+	@docker rmi onion-shell-test:latest 2>/dev/null || true
 	@find include src -type f -name *.o -exec rm -f {} \;
 
 deepclean: clean
@@ -279,3 +280,27 @@ static-analysis: external-libs
 
 format:
 	@find ./src -regex '.*\.\(c\|h\|cpp\|hpp\)' -exec clang-format -style=file -i {} \;
+
+# Shell script testing (Docker + BATS)
+SHELL_TEST_IMAGE := onion-shell-test:latest
+SHELL_TEST_DIR := $(TEST_SRC_DIR)/shell-tests
+
+$(CACHE)/.shell-test-image: $(SHELL_TEST_DIR)/Dockerfile
+	docker build -t $(SHELL_TEST_IMAGE) $(SHELL_TEST_DIR)
+	$(createfile) $(CACHE)/.shell-test-image
+
+test-shell: $(CACHE)/.shell-test-image
+	@$(ECHO) $(COLOR_BLUE)"Running shell tests..."$(COLOR_NORMAL)
+	docker run --rm \
+		-v "$(ROOT_DIR)":/root/workspace:ro \
+		$(SHELL_TEST_IMAGE) \
+		-r /root/workspace/test/shell-tests/
+
+test-shell-debug: $(CACHE)/.shell-test-image
+	@$(ECHO) $(COLOR_BLUE)"Starting interactive debug session..."$(COLOR_NORMAL)
+	docker run -it --rm \
+		-v "$(ROOT_DIR)":/root/workspace \
+		--entrypoint /bin/bash \
+		$(SHELL_TEST_IMAGE)
+
+test-all: test test-shell
