@@ -83,6 +83,9 @@ main() {
     # Start the key monitor
     keymon &
 
+    # Start the sql daemon
+    sqlmon &
+
     # Init
     rm /tmp/.offOrder 2> /dev/null
     HOME=/mnt/SDCARD/RetroArch/
@@ -646,6 +649,7 @@ launch_switcher() {
 
 check_off_order() {
     if [ -f /tmp/.offOrder ]; then
+        playActivity close
         touch /tmp/shutting_down
 
         #EmuDeck - CheckOff scripts

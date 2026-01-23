@@ -2,12 +2,15 @@
 #define CACHE_DB_H
 
 #include <libgen.h>
+#include <linux/limits.h>
 #include <sqlite3/sqlite3.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 
+#include "utils/file.h"
+#include "utils/log.h"
 #include "utils/str.h"
 
 #define CACHE_NOT_FOUND -1

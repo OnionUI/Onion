@@ -1,4 +1,5 @@
 #include "./playActivity.h"
+#include "playActivityDB.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,7 +13,10 @@ void printUsage()
            "       playActivity stop [rom_path]  -> Stop the counter for this rom\n"
            "       playActivity stop_all         -> Stop the counter for all roms\n"
            "       playActivity migrate          -> Migrate the old database (prior to Onion 4.2.0) to SQLite\n"
-           "       playActivity fix_paths        -> Change all absolute paths to relative paths\n");
+           "       playActivity fix_paths        -> Change all absolute paths to relative paths\n"
+           "       playActivity time [rom_path]  -> Gets the playtime of a specific rom\n"
+           "       playActivity playtime [rom_path]  -> Gets the playtime of a specific rom\n"
+           "       playActivity close            -> Closes the Database\n");
 }
 
 int main(int argc, char *argv[])
@@ -35,8 +39,21 @@ int main(int argc, char *argv[])
                 return EXIT_FAILURE;
             }
         }
+        else if (strcmp(argv[i], "playtime") == 0) {
+            play_activity_get_total_play_time();
+        }
         else if (strcmp(argv[i], "resume") == 0) {
             play_activity_resume();
+        }
+        else if (strcmp(argv[i], "time") == 0) {
+            if (i + 1 < argc) {
+                play_activity_get_play_time(argv[++i]);
+            }
+            else {
+                printf("Error: Missing rom_path argument\n");
+                printUsage();
+                return EXIT_FAILURE;
+            }
         }
         else if (strcmp(argv[i], "stop") == 0) {
             if (i + 1 < argc) {
@@ -59,6 +76,9 @@ int main(int argc, char *argv[])
         }
         else if (strcmp(argv[i], "list") == 0) {
             play_activity_list_all();
+        }
+        else if (strcmp(argv[i], "close") == 0) {
+            play_activity_db_close();
         }
         else {
             printf("Error: Invalid argument '%s'\n", argv[1]);
