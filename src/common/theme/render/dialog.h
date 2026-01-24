@@ -145,7 +145,7 @@ void theme_renderInfoPanel(SDL_Surface *screen, const char *title_str, const cha
         char *str = str_replace(message_newline, "\\n", "\n");
         message = theme_textboxSurface(str, resource_getFont(TITLE), theme()->list.color, ALIGN_CENTER);
         if (message) {
-            SDL_Rect message_rect = {320, 240};
+            SDL_Rect message_rect = {(g_display.width) / 2, (g_display.height) / 2};
             message_rect.x -= message->w / 2;
             message_rect.y -= message->h / 2;
             SDL_BlitSurface(message, NULL, screen, &message_rect);
