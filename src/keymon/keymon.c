@@ -285,6 +285,7 @@ void suspend_exec(int timeout)
     uint32_t repeat_power = 0;
     uint32_t killexit = 0;
     int suspend_lid_state = read_lid_state(); // Store initial lid state
+    int suspend_start = getMilliseconds();
     
     // Use shorter poll timeout for lid detection on flip devices
     int poll_timeout = (DEVICE_ID == MIYOO285) ? 500 : ((timeout == -1) ? -1 : timeout);
@@ -328,6 +329,14 @@ void suspend_exec(int timeout)
                     break;
                 }
                 suspend_lid_state = current_lid;
+                if (timeout != -1 &&
+                    (getMilliseconds() - suspend_start) >= timeout) {
+                    // Timeout elapsed: match non-flip shutdown behavior
+                    system_powersave_off();
+                    resume();
+                    usleep(150000);
+                    deepsleep();
+                }
                 continue;
             }
             
