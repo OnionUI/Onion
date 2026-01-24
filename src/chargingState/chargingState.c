@@ -199,7 +199,7 @@ int main(void)
 
         if (!suspended) {
             if (ticks - display_timer >= DISPLAY_TIMEOUT) {
-                if (IS_MIYOO_PLUS_OR_FLIP()) {
+                if (HAS_AXP()) {
                     quit = true;
                     turn_off = true;
                     break;

@@ -272,8 +272,10 @@ int main(int argc, char *argv[])
     value_setFrameThrottle();
     value_setSwapTriggers();
 
-    if (IS_MIYOO_PLUS_OR_FLIP()) {
+    if (DEVICE_ID == MIYOO354) {
         value_setLcdVoltage();
+    }
+    if (HAS_WIFI()) {
         check_networkChanged();
     }
 

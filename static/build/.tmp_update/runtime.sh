@@ -23,6 +23,12 @@ main() {
     fi
     echo -n "$DEVICE_ID" > /tmp/deviceModel
 
+    # HW capability flags
+    HAS_AXP=0
+    if [ $DEVICE_ID -eq $MODEL_MMF ] || [ $DEVICE_ID -eq $MODEL_MMP ]; then
+        HAS_AXP=1
+    fi
+
     SERIAL_NUMBER=$(read_uuid)
     echo -n "$SERIAL_NUMBER" > /tmp/deviceSN
 
@@ -51,7 +57,7 @@ main() {
     # Check is charging
     if [ $DEVICE_ID -eq $MODEL_MM ]; then
         is_charging=$(cat /sys/devices/gpiochip0/gpio/gpio59/value)
-    elif [ $DEVICE_ID -eq $MODEL_MMF ] || [ $DEVICE_ID -eq $MODEL_MMP ]; then
+    elif [ $HAS_AXP -eq 1 ]; then
         axp_status="0x$(axp 0 | cut -d':' -f2)"
         is_charging=$([ $(($axp_status & 0x4)) -eq 4 ] && echo 1 || echo 0)
     fi
@@ -648,14 +654,8 @@ check_hide_recents() {
 mainui_target=$miyoodir/app/MainUI
 
 mount_main_ui() {
-    # Flip uses 354 MainUI binaries for 640x480 theme compatibility
-    mainui_model=$DEVICE_ID
-    if [ $DEVICE_ID -eq $MODEL_MMF ]; then
-        mainui_model=$MODEL_MMP
-    fi
-    
     mainui_mode=$([ -f $sysdir/config/.showExpert ] && echo "expert" || echo "clean")
-    mainui_srcname="MainUI-$mainui_model-$mainui_mode"
+    mainui_srcname="MainUI-$DEVICE_ID-$mainui_mode"
     mainui_mount=$(basename "$(cat /proc/self/mountinfo | grep $mainui_target | cut -d' ' -f4)")
 
     if [ "$mainui_mount" != "$mainui_srcname" ]; then
@@ -748,10 +748,8 @@ init_system() {
     ip addr add 127.0.0.1/8 dev lo
     ifconfig lo up
 
-    if [ $DEVICE_ID -eq $MODEL_MMF ] || [ $DEVICE_ID -eq $MODEL_MMP ]; then
-        if [ -f $sysdir/config/.lcdvolt ]; then
-            $sysdir/script/lcdvolt.sh 2> /dev/null
-        fi
+    if [ $DEVICE_ID -eq $MODEL_MMP ] && [ -f $sysdir/config/.lcdvolt ]; then
+        $sysdir/script/lcdvolt.sh 2> /dev/null
     fi
 
     start_audioserver

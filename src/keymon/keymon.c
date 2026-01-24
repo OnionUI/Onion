@@ -287,7 +287,7 @@ void suspend_exec(int timeout)
     int suspend_lid_state = read_lid_state(); // Store initial lid state
     
     // Use shorter poll timeout for lid detection on flip devices
-    int poll_timeout = (DEVICE_ID == MIYOO285) ? 500 : timeout;
+    int poll_timeout = (DEVICE_ID == MIYOO285) ? 500 : ((timeout == -1) ? -1 : timeout);
 
     while (1) {
         int ready = poll(fds, 1, poll_timeout);
@@ -483,7 +483,7 @@ int main(void)
     
     printf_debug("Device detected: DEVICE_ID=%d (283=MM, 285=Flip, 354=Plus)", DEVICE_ID);
 
-    if (IS_MIYOO_PLUS_OR_FLIP()) {
+    if (HAS_AXP()) {
         // set hardware poweroff time to 10s
         axp_write(0x36, axp_read(0x36) | 3);
     }
@@ -691,7 +691,7 @@ int main(void)
                             setVolumeRaw(0, -3);
                         break;
                     case SELECT:
-                        if (DEVICE_ID == MIYOO285 || DEVICE_ID == MIYOO354)
+                        if (IS_MIYOO_PLUS_OR_FLIP())
                             break; // disable this shortcut for MMP/MMF
                         // SELECT + L2 : brightness down
                         if (config_flag_get(".altBrightness"))
@@ -729,7 +729,7 @@ int main(void)
                             setVolumeRaw(0, +3);
                         break;
                     case SELECT:
-                        if (DEVICE_ID == MIYOO285 || DEVICE_ID == MIYOO354)
+                        if (IS_MIYOO_PLUS_OR_FLIP())
                             break; // disable this shortcut for MMP/MMF
                         // SELECT + R2 : brightness up
                         if (config_flag_get(".altBrightness"))
