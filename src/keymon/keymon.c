@@ -51,12 +51,113 @@
 #define REPEAT_SEC(val) ((val * 1000 - 250) / 50)
 #define PIDMAX 32
 
+// MMF headphone jack GPIO detection
+// Credit to Tenlevels for original patch, minor modifications made for device model check.
+#define HEADPHONE_DETECT_GPIO "/sys/class/gpio/gpio45/value"
+#define AUDIO_SWITCH_GPIO "/sys/class/gpio/gpio44/value"
+#define GPIO_EXPORT_PATH "/sys/class/gpio/export"
+#define GPIO45_DIRECTION "/sys/class/gpio/gpio45/direction"
+#define GPIO44_DIRECTION "/sys/class/gpio/gpio44/direction"
+
+static bool headphone_jack_available = false;
+static int last_jack_state = -1;
+
+static void gpioWriteInt(const char *path, int value)
+{
+    FILE *f = fopen(path, "w");
+    if (f) {
+        fprintf(f, "%d", value);
+        fclose(f);
+    }
+}
+
+static void gpioWriteStr(const char *path, const char *str)
+{
+    FILE *f = fopen(path, "w");
+    if (f) {
+        fprintf(f, "%s", str);
+        fclose(f);
+    }
+}
+
+static int gpioReadInt(const char *path)
+{
+    FILE *f = fopen(path, "r");
+    if (!f)
+        return -1;
+    int val = -1;
+    if (fscanf(f, "%d", &val) != 1)
+        val = -1;
+    fclose(f);
+    return val;
+}
+
+static void initHeadphoneJack(void)
+{
+    if (DEVICE_ID != MIYOO285) {
+        headphone_jack_available = false;
+        return;
+    }
+
+    // Export GPIO 45 (headphone detect) if not already exported
+    if (access(HEADPHONE_DETECT_GPIO, F_OK) != 0) {
+        gpioWriteInt(GPIO_EXPORT_PATH, 45);
+        usleep(50000);
+    }
+
+    // Export GPIO 44 (audio switch) if not already exported
+    if (access(AUDIO_SWITCH_GPIO, F_OK) != 0) {
+        gpioWriteInt(GPIO_EXPORT_PATH, 44);
+        usleep(50000);
+    }
+
+    // Set GPIO 45 as input (headphone detect)
+    if (access(GPIO45_DIRECTION, F_OK) == 0)
+        gpioWriteStr(GPIO45_DIRECTION, "in");
+
+    // Set GPIO 44 as output (audio switch)
+    if (access(GPIO44_DIRECTION, F_OK) == 0)
+        gpioWriteStr(GPIO44_DIRECTION, "out");
+
+    headphone_jack_available = (access(HEADPHONE_DETECT_GPIO, F_OK) == 0);
+
+    // Initialize audio routing based on current jack state
+    if (headphone_jack_available) {
+        last_jack_state = gpioReadInt(HEADPHONE_DETECT_GPIO);
+        if (last_jack_state != -1)
+            gpioWriteInt(AUDIO_SWITCH_GPIO, last_jack_state);
+    }
+}
+
+static void checkHeadphoneJack(void)
+{
+    if (!headphone_jack_available)
+        return;
+
+    int current_state = gpioReadInt(HEADPHONE_DETECT_GPIO);
+    if (current_state == -1)
+        return;
+
+    if (current_state != last_jack_state) {
+        last_jack_state = current_state;
+        // Switch audio routing: 1 = headphones, 0 = speaker
+        gpioWriteInt(AUDIO_SWITCH_GPIO, current_state);
+
+        // Restore volume when headphones connected
+        if (current_state == 1)
+            setVolume(settings.mute ? 0 : settings.volume);
+    }
+}
+
 uint32_t suspendpid[PIDMAX];
 
 const int KONAMI_CODE[] = {HW_BTN_UP, HW_BTN_UP, HW_BTN_DOWN, HW_BTN_DOWN,
                            HW_BTN_LEFT, HW_BTN_RIGHT, HW_BTN_LEFT, HW_BTN_RIGHT,
                            HW_BTN_B, HW_BTN_A};
 const int KONAMI_CODE_LENGTH = sizeof(KONAMI_CODE) / sizeof(KONAMI_CODE[0]);
+
+// Forward declarations
+int read_lid_state(void);
 
 void takeScreenshot(void)
 {
@@ -281,9 +382,14 @@ void suspend_exec(int timeout)
 
     uint32_t repeat_power = 0;
     uint32_t killexit = 0;
+    int suspend_lid_state = read_lid_state(); // Store initial lid state
+    int suspend_start = getMilliseconds();
+    
+    // Use shorter poll timeout for lid detection on flip devices
+    int poll_timeout = (DEVICE_ID == MIYOO285) ? 500 : ((timeout == -1) ? -1 : timeout);
 
     while (1) {
-        int ready = poll(fds, 1, timeout);
+        int ready = poll(fds, 1, poll_timeout);
 
         if (ready > 0) {
             read(input_fd, &ev, sizeof(ev));
@@ -313,7 +419,26 @@ void suspend_exec(int timeout)
             }
         }
         else if (!ready && !battery_isCharging()) {
-            // shutdown
+            // Check lid state on flip devices before shutdown
+            if (DEVICE_ID == MIYOO285) {
+                int current_lid = read_lid_state();
+                if (current_lid == 1 && suspend_lid_state == 0) {
+                    print_debug("Lid opened during suspend, waking up");
+                    break;
+                }
+                suspend_lid_state = current_lid;
+                if (timeout != -1 &&
+                    (getMilliseconds() - suspend_start) >= timeout) {
+                    // Timeout elapsed: match non-flip shutdown behavior
+                    system_powersave_off();
+                    resume();
+                    usleep(150000);
+                    deepsleep();
+                }
+                continue;
+            }
+            
+            // Original timeout shutdown behavior (non-flip devices)
             system_powersave_off();
             resume();
             usleep(150000);
@@ -323,6 +448,7 @@ void suspend_exec(int timeout)
 
     // resume
     system_powersave_off();
+    
     if (killexit) {
         resume();
         usleep(150000);
@@ -333,9 +459,7 @@ void suspend_exec(int timeout)
     display_setBrightness(settings.brightness);
     setVolume(settings.mute ? 0 : settings.volume);
     if (!killexit) {
-        // resume processes
         resume();
-        // resume playActivity
         system("playActivity resume");
     }
 
@@ -375,6 +499,7 @@ void cpuClockHotkey(int adjust)
     int min_cpu_clock = 500; // ?
     int max_cpu_clock;
     switch (DEVICE_ID) {
+    case MIYOO285:
     case MIYOO354:
         max_cpu_clock = 1800;
         break;
@@ -425,6 +550,32 @@ static void signal_refresh(int sig)
 }
 
 //
+//    Read lid state for Miyoo Mini Flip
+//    Returns: 1 if lid is open, 0 if lid is closed, -1 on error
+//
+int read_lid_state(void)
+{
+    if (DEVICE_ID != MIYOO285) {
+        return -1; // Not a flip
+    }
+    
+    FILE *fp = fopen("/sys/devices/soc0/soc/soc:hall-mh248/hallvalue", "r");
+    if (!fp) {
+        return -1; // Error reading lid state
+    }
+    
+    char buf[2];
+    size_t read_bytes = fread(buf, 1, 1, fp);
+    fclose(fp);
+    
+    if (read_bytes != 1) {
+        return -1;
+    }
+    
+    return (buf[0] == '1') ? 1 : 0;  // '1' = open, '0' = closed
+}
+
+//
 //    Main
 //
 int main(void)
@@ -436,13 +587,16 @@ int main(void)
     log_setName("keymon");
 
     getDeviceModel();
+    
+    printf_debug("Device detected: DEVICE_ID=%d (283=MM, 285=Flip, 354=Plus)", DEVICE_ID);
 
-    if (DEVICE_ID == MIYOO354) {
+    if (HAS_AXP()) {
         // set hardware poweroff time to 10s
         axp_write(0x36, axp_read(0x36) | 3);
     }
 
     settings_init();
+    initHeadphoneJack();
 
     // Set Initial Volume / Brightness
     setVolume(settings.mute ? 0 : settings.volume);
@@ -484,6 +638,23 @@ int main(void)
     int hibernate_time;
     int elapsed_sec = 0;
 
+    // Lid state tracking for Miyoo Mini Flip
+    int last_lid_state = -1;
+    int current_lid_state = -1;
+
+    if (DEVICE_ID == MIYOO285) {
+        last_lid_state = read_lid_state();
+        current_lid_state = last_lid_state;
+        if (last_lid_state == -1) {
+            // Fallback: assume open if read fails
+            print_debug("Warning: Unable to read lid state, assuming open");
+            last_lid_state = 1;
+            current_lid_state = 1;
+        } else {
+            printf_debug("Initial lid state: %s", last_lid_state == 1 ? "open" : "closed");
+        }
+    }
+
     bool delete_flag = false;
     bool settings_changed = false;
 
@@ -493,7 +664,10 @@ int main(void)
     time_t fav_last_modified = time(NULL);
 
     while (1) {
-        if (poll(fds, 1, (CHECK_SEC - elapsed_sec) * 1000) > 0) {
+        int poll_timeout_ms = (DEVICE_ID == MIYOO285) ? 500 : ((CHECK_SEC - elapsed_sec) * 1000);
+        int poll_result = poll(fds, 1, poll_timeout_ms);
+        
+        if (poll_result > 0) {
             if (!keyinput_isValid())
                 continue;
             val = ev.value;
@@ -625,8 +799,8 @@ int main(void)
                             setVolumeRaw(0, -3);
                         break;
                     case SELECT:
-                        if (DEVICE_ID == MIYOO354)
-                            break; // disable this shortcut for MMP
+                        if (IS_MIYOO_PLUS_OR_FLIP())
+                            break; // disable this shortcut for MMP/MMF
                         // SELECT + L2 : brightness down
                         if (config_flag_get(".altBrightness"))
                             break;
@@ -663,8 +837,8 @@ int main(void)
                             setVolumeRaw(0, +3);
                         break;
                     case SELECT:
-                        if (DEVICE_ID == MIYOO354)
-                            break; // disable this shortcut for MMP
+                        if (IS_MIYOO_PLUS_OR_FLIP())
+                            break; // disable this shortcut for MMP/MMF
                         // SELECT + R2 : brightness up
                         if (config_flag_get(".altBrightness"))
                             break;
@@ -887,12 +1061,57 @@ int main(void)
             }
 
             hibernate_start = getMilliseconds();
-            elapsed_sec = (hibernate_start - ticks) / 1000;
-            if (elapsed_sec < CHECK_SEC)
-                continue;
+        }
+        
+        // Check lid state for Miyoo Mini Flip - poll every iteration (500ms)
+        if (DEVICE_ID == MIYOO285) {
+            current_lid_state = read_lid_state();
+            
+            if (current_lid_state != -1 && last_lid_state != -1 && 
+                current_lid_state != last_lid_state) {
+                
+                printf_debug("Lid state change: %d -> %d", last_lid_state, current_lid_state);
+                
+                if (current_lid_state == 0) {
+                    printf_debug("Lid closed detected, action: %d", settings.lid_close_action);
+                    
+                    switch (settings.lid_close_action) {
+                        case 0: // Suspend
+                            if (settings.disable_standby) {
+                                deepsleep();
+                            }
+                            else {
+                                turnOffScreen();
+                                hibernate_start = getMilliseconds();
+                            }
+                            break;
+                        case 1: // Shutdown
+                            print_debug("Shutting down due to lid close");
+                            deepsleep();
+                            break;
+                        case 2: // Nothing
+                            print_debug("Lid close action: Nothing");
+                            break;
+                    }
+                }
+                else {
+                    print_debug("Lid opened detected");
+                }
+                
+                last_lid_state = current_lid_state;
+            }
+            // Update last_lid_state even if it hasn't changed to handle initial -1 case
+            else if (current_lid_state != -1 && last_lid_state == -1) {
+                last_lid_state = current_lid_state;
+            }
         }
 
-        // Comes here every CHECK_SEC(def:15) seconds interval
+        checkHeadphoneJack();
+        
+        elapsed_sec = (getMilliseconds() - ticks) / 1000;
+        if (elapsed_sec < CHECK_SEC)
+            continue;
+
         if (delete_flag) {
             if (exists("/tmp/state_changed")) {
                 system_state_update();

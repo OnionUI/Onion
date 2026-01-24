@@ -73,7 +73,7 @@ bool battery_isCharging(void)
 
         return charging == '1';
     }
-    else if (DEVICE_ID == MIYOO354) {
+    else if (IS_MIYOO_PLUS_OR_FLIP()) {
         char *cmd = "cd /customer/app/ ; ./axp_test";
         int batJsonSize = 100;
         char buf[batJsonSize];
