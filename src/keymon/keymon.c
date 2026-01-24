@@ -51,6 +51,104 @@
 #define REPEAT_SEC(val) ((val * 1000 - 250) / 50)
 #define PIDMAX 32
 
+// MMF headphone jack GPIO detection
+// Credit to Tenlevels for original patch, minor modifications made for device model check.
+#define HEADPHONE_DETECT_GPIO "/sys/class/gpio/gpio45/value"
+#define AUDIO_SWITCH_GPIO "/sys/class/gpio/gpio44/value"
+#define GPIO_EXPORT_PATH "/sys/class/gpio/export"
+#define GPIO45_DIRECTION "/sys/class/gpio/gpio45/direction"
+#define GPIO44_DIRECTION "/sys/class/gpio/gpio44/direction"
+
+static bool headphone_jack_available = false;
+static int last_jack_state = -1;
+
+static void gpioWriteInt(const char *path, int value)
+{
+    FILE *f = fopen(path, "w");
+    if (f) {
+        fprintf(f, "%d", value);
+        fclose(f);
+    }
+}
+
+static void gpioWriteStr(const char *path, const char *str)
+{
+    FILE *f = fopen(path, "w");
+    if (f) {
+        fprintf(f, "%s", str);
+        fclose(f);
+    }
+}
+
+static int gpioReadInt(const char *path)
+{
+    FILE *f = fopen(path, "r");
+    if (!f)
+        return -1;
+    int val = -1;
+    if (fscanf(f, "%d", &val) != 1)
+        val = -1;
+    fclose(f);
+    return val;
+}
+
+static void initHeadphoneJack(void)
+{
+    if (DEVICE_ID != MIYOO285) {
+        headphone_jack_available = false;
+        return;
+    }
+
+    // Export GPIO 45 (headphone detect) if not already exported
+    if (access(HEADPHONE_DETECT_GPIO, F_OK) != 0) {
+        gpioWriteInt(GPIO_EXPORT_PATH, 45);
+        usleep(50000);
+    }
+
+    // Export GPIO 44 (audio switch) if not already exported
+    if (access(AUDIO_SWITCH_GPIO, F_OK) != 0) {
+        gpioWriteInt(GPIO_EXPORT_PATH, 44);
+        usleep(50000);
+    }
+
+    // Set GPIO 45 as input (headphone detect)
+    if (access(GPIO45_DIRECTION, F_OK) == 0)
+        gpioWriteStr(GPIO45_DIRECTION, "in");
+
+    // Set GPIO 44 as output (audio switch)
+    if (access(GPIO44_DIRECTION, F_OK) == 0)
+        gpioWriteStr(GPIO44_DIRECTION, "out");
+
+    headphone_jack_available = (access(HEADPHONE_DETECT_GPIO, F_OK) == 0);
+
+    // Initialize audio routing based on current jack state
+    if (headphone_jack_available) {
+        last_jack_state = gpioReadInt(HEADPHONE_DETECT_GPIO);
+        if (last_jack_state != -1)
+            gpioWriteInt(AUDIO_SWITCH_GPIO, last_jack_state);
+    }
+}
+
+static void checkHeadphoneJack(void)
+{
+    if (!headphone_jack_available)
+        return;
+
+    int current_state = gpioReadInt(HEADPHONE_DETECT_GPIO);
+    if (current_state == -1)
+        return;
+
+    if (current_state != last_jack_state) {
+        last_jack_state = current_state;
+        // Switch audio routing: 1 = headphones, 0 = speaker
+        gpioWriteInt(AUDIO_SWITCH_GPIO, current_state);
+
+        // Restore volume when headphones connected
+        if (current_state == 1)
+            setVolume(settings.mute ? 0 : settings.volume);
+    }
+}
+
 uint32_t suspendpid[PIDMAX];
 
 const int KONAMI_CODE[] = {HW_BTN_UP, HW_BTN_UP, HW_BTN_DOWN, HW_BTN_DOWN,
@@ -498,6 +596,7 @@ int main(void)
     }
 
     settings_init();
+    initHeadphoneJack();
 
     // Set Initial Volume / Brightness
     setVolume(settings.mute ? 0 : settings.volume);
@@ -1006,6 +1105,8 @@ int main(void)
                 last_lid_state = current_lid_state;
             }
         }
+
+        checkHeadphoneJack();
         
         elapsed_sec = (getMilliseconds() - ticks) / 1000;
         if (elapsed_sec < CHECK_SEC)
