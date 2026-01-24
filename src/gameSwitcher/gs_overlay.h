@@ -33,6 +33,9 @@ void setFbAsFirstRomScreen(void)
         game->romScreen = NULL;
     }
 
+    // Sync with current framebuffer resolution before capture
+    display_getRenderResolution();
+
     game->romScreen = SDL_CreateRGBSurface(SDL_SWSURFACE, g_display.width, g_display.height, 32, 0, 0, 0, 0);
     display_readCurrentBuffer(&g_display, (uint32_t *)game->romScreen->pixels, (rect_t){0, 0, g_display.width, g_display.height}, true, false);
 
@@ -123,6 +126,9 @@ void overlay_resume(void)
             SDL_BlitSurface(screen_backup, NULL, screen, NULL);
             SDL_FreeSurface(screen_backup);
         }
+
+        // Sync with current framebuffer resolution before resume
+        display_getRenderResolution();
 
         render();
 
