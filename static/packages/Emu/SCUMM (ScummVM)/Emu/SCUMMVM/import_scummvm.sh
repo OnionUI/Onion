@@ -41,7 +41,7 @@ main() {
     fi
 
     if [ ! -f "$scummvm_config" ]; then
-        infoPanel -t "$ui_title" -m "No scan found\n \nPlease run import first" --auto 2> /dev/null
+        infoPanel -t "$ui_title" -m "No scan found\n\nPlease run import first" --auto 2> /dev/null
         exit
     fi
 
