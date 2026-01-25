@@ -652,6 +652,8 @@ launch_switcher() {
 
 check_off_order() {
     if [ -f /tmp/.offOrder ]; then
+        
+        $sysdir/bin/clearfb --sync
         touch /tmp/shutting_down
 
         #EmuDeck - CheckOff scripts
@@ -660,8 +662,6 @@ check_off_order() {
         for check_off_script in $check_off_scripts; do
             sh "$check_off_script"
         done
-
-        $sysdir/bin/clearfb --sync
         bootScreen "$1" &
         sleep 1 # Allow the bootScreen to be displayed
         shutdown
