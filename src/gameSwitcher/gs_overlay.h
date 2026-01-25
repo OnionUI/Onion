@@ -45,10 +45,7 @@ static bool _isContentNameInInfo(const char *content_info, const char *content_n
 {
     const char *found = strstr(content_info, content_name);
     if (found != NULL) {
-        const char *after = found + strlen(content_name);
-        bool has_prefix = (found == content_info) || (*(found - 1) == ',');
-        bool has_suffix = (*after == ',' || *after == '\0');
-        return has_prefix && has_suffix;
+        return *(found - 1) == ',' && *(found + strlen(content_name)) == ',';
     }
     return false;
 }
