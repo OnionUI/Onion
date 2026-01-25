@@ -219,7 +219,9 @@ launch_main_ui() {
     mute_theme_bgm
 
     # Clear framebuffer before MainUI launch
-    $sysdir/bin/clearfb --sync
+    if [ -f /tmp/new_res_available ]; then
+        $sysdir/bin/clearfb --sync
+    fi
 
     # MainUI launch
     cd $miyoodir/app
@@ -239,7 +241,9 @@ launch_main_ui() {
     fi
 
     $sysdir/bin/freemma
-    $sysdir/bin/clearfb --sync
+    if [ -f /tmp/new_res_available ]; then
+        $sysdir/bin/clearfb --sync
+    fi
     mv -f /tmp/cmd_to_run.sh $sysdir/cmd_to_run.sh
 
     set_prev_state "mainui"
@@ -653,7 +657,9 @@ launch_switcher() {
 check_off_order() {
     if [ -f /tmp/.offOrder ]; then
         
-        $sysdir/bin/clearfb --sync
+        if [ -f /tmp/new_res_available ]; then
+            $sysdir/bin/clearfb --sync
+        fi
         touch /tmp/shutting_down
 
         #EmuDeck - CheckOff scripts
