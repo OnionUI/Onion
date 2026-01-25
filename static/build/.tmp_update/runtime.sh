@@ -218,6 +218,9 @@ launch_main_ui() {
 
     mute_theme_bgm
 
+    # Clear framebuffer before MainUI launch
+    $sysdir/bin/clearfb --sync
+
     # MainUI launch
     cd $miyoodir/app
     PATH="$miyoodir/app:$PATH" \
@@ -236,6 +239,7 @@ launch_main_ui() {
     fi
 
     $sysdir/bin/freemma
+    $sysdir/bin/clearfb --sync
     mv -f /tmp/cmd_to_run.sh $sysdir/cmd_to_run.sh
 
     set_prev_state "mainui"
@@ -409,6 +413,9 @@ launch_game() {
                 sync
             fi
 
+            # Clear framebuffer before game launch
+            $sysdir/bin/clearfb --sync
+
             # GAME LAUNCH
             cd /mnt/SDCARD/RetroArch
             force_retroarch_cfg
@@ -420,6 +427,7 @@ launch_game() {
             if [ -f /tmp/new_res_available ]; then
                 # Restore resolution
                 change_resolution "640x480"
+                $sysdir/bin/clearfb --sync
             fi
 
             if [ $is_game -eq 1 ] && [ ! -f /tmp/.offOrder ] && [ -f /tmp/.displaySavingMessage ]; then
@@ -655,6 +663,7 @@ check_off_order() {
             sh "$check_off_script"
         done
 
+        $sysdir/bin/clearfb --sync
         bootScreen "$1" &
         sleep 1 # Allow the bootScreen to be displayed
         shutdown
