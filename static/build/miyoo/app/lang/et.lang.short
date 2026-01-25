@@ -1,0 +1,22 @@
+{
+	"88":	"VALI",
+	"89":	"TAGASI",
+	"90":	"NAV",
+	"91":	"MENÜÜ",
+	"92":	"Jätka",
+	"93":	"Salvesta",
+	"94":	"Laadi",
+	"95":	"Helitugevus",
+	"96":	"Välju menüüsse",
+	"97":	"Olek %d/%d",
+	"98":	"Tühi",
+	"99":	"Pole pisipilti",
+	"100":	"Laadimine ebaõnnestus",
+	"101":	"Salvestamine ebaõnnestus",
+	"102":	"Pesa %d salvestatud",
+	"103":  "Täisekraan",
+	"104":  "SEES",
+	"105":  "VÄLJAS",
+	"106":  "Täpsem",
+    "138":  "Võrgumäng"	
+}

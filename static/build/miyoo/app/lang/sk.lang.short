@@ -1,0 +1,22 @@
+{
+	"88":	"VYBRAŤ",
+	"89":	"SPÄŤ",
+	"90":	"NAV",
+	"91":	"MENU",
+	"92":	"Pokračovať",
+	"93":	"Uložiť",
+	"94":	"Načítať",
+	"95":	"Hlasitosť",
+	"96":	"Ukončiť do menu",
+	"97":	"Stav %d/%d",
+	"98":	"Prázdne",
+	"99":	"Žiadny náhľad",
+	"100":	"Načítanie zlyhalo",
+	"101":	"Ukladanie zlyhalo",
+	"102":	"Slot %d uložený",
+	"103":  "Celá obrazovka",
+	"104":  "ZAPNUTÉ",
+	"105":  "VYPNUTÉ",
+	"106":  "Pokročilé",
+    "138":  "Sieťová hra"
+}
