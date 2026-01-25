@@ -389,6 +389,12 @@ launch_game() {
         playActivity start "$rompath"
     fi
 
+    # Detect quick switch before cleanup
+    is_quick_switch=0
+    if [ -f /tmp/quick_switch ] || [ -f /tmp/force_auto_load_state ]; then
+        is_quick_switch=1
+    fi
+
     # Prevent quick switch loop
     rm -f /tmp/quick_switch 2> /dev/null
     rm -f /tmp/force_auto_load_state 2> /dev/null
@@ -405,13 +411,19 @@ launch_game() {
             "$rompath" "$rompath" "$emupath"
             retval=$?
         else
-            # Change resolution if needed
-            if [ -f /tmp/new_res_available ] && [ -f "$full_resolution_path" ]; then
-                log "Found full_resolution file, changing resolution to 560p"
-                # Clear framebuffer before game launch
-                $sysdir/bin/clearfb --sync
-                change_resolution
-            fi  
+            # Change resolution if needed or clear framebuffer for quick switch
+            if [ -f /tmp/new_res_available ]; then
+                if [ -f "$full_resolution_path" ]; then
+                    log "Found full_resolution file, changing resolution to 560p"
+                    # Clear framebuffer before game launch
+                    $sysdir/bin/clearfb --sync
+                    change_resolution
+                elif [ $is_quick_switch -eq 1 ]; then
+                    # Clear framebuffer for quick switch when not changing resolution
+                    log "Quick switch detected, clearing framebuffer"
+                    $sysdir/bin/clearfb --sync
+                fi
+            fi
 
             if [ $is_game -eq 1 ] && [ ! -f /tmp/new_res_available ]; then
                 infoPanel --message "LOADING" --persistent --romscreen &
