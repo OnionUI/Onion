@@ -404,17 +404,16 @@ launch_game() {
             # Change resolution if needed
             if [ -f /tmp/new_res_available ] && [ -f "$full_resolution_path" ]; then
                 log "Found full_resolution file, changing resolution to 560p"
+                # Clear framebuffer before game launch
+                $sysdir/bin/clearfb --sync
                 change_resolution
-            fi
+            fi  
 
             if [ $is_game -eq 1 ] && [ ! -f /tmp/new_res_available ]; then
                 infoPanel --message "LOADING" --persistent --romscreen &
                 touch /tmp/dismiss_info_panel
                 sync
             fi
-
-            # Clear framebuffer before game launch
-            $sysdir/bin/clearfb --sync
 
             # GAME LAUNCH
             cd /mnt/SDCARD/RetroArch
@@ -427,7 +426,6 @@ launch_game() {
             if [ -f /tmp/new_res_available ]; then
                 # Restore resolution
                 change_resolution "640x480"
-                $sysdir/bin/clearfb --sync
             fi
 
             if [ $is_game -eq 1 ] && [ ! -f /tmp/.offOrder ] && [ -f /tmp/.displaySavingMessage ]; then
