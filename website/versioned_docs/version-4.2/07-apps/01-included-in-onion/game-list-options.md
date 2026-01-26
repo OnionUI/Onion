@@ -10,7 +10,7 @@ slug: /apps/game-list-options
 Game List Options (GLO menu) is a tool for performing actions for the selected game or for the entire list. <br />
 Press <kbd>Y</kbd> in a game list then from this menu you can choose the Retroarch core, download the image cover of your game (wifi/MMP required), launch a Netplay session, reset your game (to skip the last save state), filter the list of games with a keyword,...
 
-Thanks to GLO menu flexibility, you can even add your own scripts here !*
+Thanks to GLO menu flexibility, you can even add your own scripts here!*
 
 ## Usage
 
