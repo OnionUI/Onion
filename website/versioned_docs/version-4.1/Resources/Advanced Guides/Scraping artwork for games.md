@@ -41,17 +41,17 @@ The `Imgs` folder name is case sensitive (must have a capital `I`). Examples wou
 - Download template from the Retro Game Handhelds Discord:<br/>
 [Skraper_Mix_-_Miyoo_Mini_Big_Zoom_by_AchillesPDX.zip](https://cdn.discordapp.com/attachments/979073647685795880/1061416580380119081/Skraper_Mix_-_Miyoo_Mini_Big_Zoom_by_AchillesPDX.zip) - _Template by: AchillesPDX_
 - Extract the _.ZIP_ file into the following _Skraper_ folder: `.\Skraper-#.#.#\Mixes\`
-- Via the "ALL SYSTEMS"selection on the left, go to the "_MEDIA_" tab -> Clear the "_Fetched Media List_" of all but one image type by pressing the "_minus_" button.
+- Via the "ALL SYSTEMS" selection on the left, go to the "_MEDIA_" tab -> Clear the "_Fetched Media List_" of all but one image type by pressing the "_minus_" button.
 - Change the "_Media type:_" to: "_USER PROVIDED MIX_" and click on the file icon to the right
 - Select the extracted: `Miyoo Mini Big Zoom.xml`
-- Disable settings "_Resize width to_" , "_Resize height to_" , "_Keep Image Ratio_" 
+- Disable settings "_Resize width to_", "_Resize height to_", "_Keep Image Ratio_" 
 
 > _**- OR -**_
 
 **Customize Image:**
 - Via "ALL SYSTEMS" on the left, go to the "_MEDIA_" tab -> Enable & set "_Resize width to_" to 250 and enable "_Keep Image Ratio_"    
 - Select the image type you don't want in the "_Fetched Media List_" and press the "_minus_" button, so there's only one picture.   
-   > You can change how the image mix looks with the two buttons under "_Media type_",  I recommend changing "_4 IMAGES MIX_" to "_Screenscraper's Recalbox Mix V2_", but use whatever you prefer.
+   > You can change how the image mix looks with the two buttons under "_Media type_", I recommend changing "_4 IMAGES MIX_" to "_Screenscraper's Recalbox Mix V2_", but use whatever you prefer.
    > If you choose a picture that's taller than it's wide, like the boxart, set "_Resize height to_" to 360 and disable "_Keep Image Ratio_"
 
 ### Output Settings:
