@@ -100,7 +100,7 @@ All the necessary files (except licensed game files) are now hosted on the:
 ### New apps
 
 - **Random Game** - *launch a random game from any cached system - credit: @marchiore*
-- **Video Player** (FFplay) - *watch your favorite 4:3 or 16:9 video content - credit: Steward-Fu , @bobotrax  , @schmurtzm* 
+- **Video Player** (FFplay) - *watch your favorite 4:3 or 16:9 video content - credit: Steward-Fu, @bobotrax, @schmurtzm* 
 - **PDF Reader** (Green) - *ideal for looking up clues in game manuals  - credit: Steward-Fu*
 - **Ebook Reader** (Pixel Reader) - *well suited for reading walkthroughs on the go  - credit: [ealang](https://github.com/ealang/pixel-reader)*
 
@@ -114,7 +114,7 @@ All the necessary files (except licensed game files) are now hosted on the:
 
 ### Other exciting features
 
-- **Automatic import of ScummVM games**:  games are now automatically imported in Onion thanks to a new script created - no more manual shortcuts to create! (@schmurtzm)
+- **Automatic import of ScummVM games**: games are now automatically imported in Onion thanks to a new script created - no more manual shortcuts to create! (@schmurtzm)
 - A new core option has been added to ScummVM: "Target FPS for stutter reduction" allows to run some heavy games with less audio stuttering - unique to Onion! (@schmurtzm)
 - Improved **color palette organization** for GB: an organization by palette style (Essentials, Subtle, Single_Color, Multicolor, Hardware, Nintendo_Official, Extras, Others) unique to Onion ! (Jeltron & @schmurtzm)
 - mGBA **[one-key fast forward button](https://github.com/schmurtzm/mgba/commit/99387c04ae2879692ee9ff199dc68b6c162f0a8a)** - <kbd>R2</kbd> by default (@schmurtzm)
