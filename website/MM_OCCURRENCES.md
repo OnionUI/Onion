@@ -1,138 +1,36 @@
-# MM Occurrences in Website Section
+# Website Documentation Update - MM/MMP Abbreviations Replaced
 
-**Analysis Date:** January 30, 2026
+**Update Date:** January 30, 2026
 
-This document lists all occurrences of "MM" (Miyoo Mini) references found in the website documentation as of the analysis date. This is a point-in-time snapshot created to fulfill a specific task requirement.
+This document previously cataloged all "MM" (Miyoo Mini) and "MMP" (Miyoo Mini Plus) abbreviations in the website documentation. As of this update, all abbreviations have been replaced with their full device names for better clarity.
+
+## Changes Made
+
+All instances of:
+- **MM** → replaced with **Miyoo Mini**
+- **MM v2** → replaced with **Miyoo Mini v2**
+- **MM v4** → replaced with **Miyoo Mini v4**
+- **MMP** → replaced with **Miyoo Mini Plus**
+
+## Files Updated
+
+### Current Documentation (docs/)
+1. `docs/02-installation/index.mdx` - Updated tab label and firmware notes
+2. `docs/03-faq/index.mdx` - Updated charging specifications
+3. `docs/07-apps/01-included-in-onion/tweaks.mdx` - Updated feature descriptions
+4. `docs/04-emulators/02-consoles/22-nec-turbografx-16.md` - Updated emulator note
+
+### Blog/Release Notes
+5. `blog/release-notes/2023-10-17-release-notes-4.2.0/index.mdx` - Updated bug fix notes and feature descriptions
+
+### Versioned Documentation (version-4.2)
+6. `versioned_docs/version-4.2/02-installation/index.mdx` - Updated tab label and notes
+7. `versioned_docs/version-4.2/03-faq/index.mdx` - Updated charging specifications
+8. `versioned_docs/version-4.2/07-apps/01-included-in-onion/tweaks.mdx` - Updated feature descriptions
 
 ## Summary
 
-- **Total MM occurrences**: 12 (excluding this document itself)
-- **Total MMP occurrences**: 11 (Miyoo Mini Plus)
-- **Files with MM references**: 7
-- **Directories searched**: `docs/`, `blog/`, `versioned_docs/`, `src/`
-  - `docs/`: 7 occurrences
-  - `blog/`: 1 occurrence
-  - `versioned_docs/`: 4 occurrences
-  - `src/`: 0 occurrences
-
-## Detailed List of MM Occurrences
-
-### 1. Installation Documentation (`docs/02-installation/index.mdx`)
-
-**Line 38:**
-```
-<TabItem value="mm" label="Miyoo Mini (MM)">
-```
-- Context: Tab item label for Miyoo Mini device
-
-**Line 56:**
-```
-   - `2023 10 27 1401` ✔️ (**only for MM v4**)
-```
-- Context: Firmware version compatibility note for MM v4
-
-**Line 58:**
-```
-Firmware `2023 10 27 1401` and newer in conjunction with Onion 4.3 allow the MM v4 to run games at 752x560.
-```
-- Context: Explanation of firmware capabilities for MM v4
-
-**Line 60:**
-```
-:::note Firmware downloads (MM)
-```
-- Context: Note section header for MM firmware downloads
-
-### 2. Tweaks Documentation (`docs/07-apps/01-included-in-onion/tweaks.mdx`)
-
-**Line 475:**
-```
-<div>Change the shortcut for brightness (on MM only).</div>
-```
-- Context: Feature description specific to MM device
-
-### 3. FAQ Documentation (`docs/03-faq/index.mdx`)
-
-**Line 341:**
-```
-**MM v2:** Miyoo recommends 5V 1A and it must be USB-A to USB-C _(USB-C to USB-C charging is not supported)_.
-```
-- Context: Charging specifications for MM v2
-
-**Line 342:**
-```
-**MMP and MM v4:** Supports USB-C to USB-C charging (the support is limited, and some chargers will not be accepted / start charging)
-```
-- Context: Charging specifications for MM v4 (and MMP)
-
-### 4. Release Notes (`blog/release-notes/2023-10-17-release-notes-4.2.0/index.mdx`)
-
-**Line 362:**
-```
-* Fixed the "About Device" screen displaying the wrong model number on the MM - *by @tGecko*
-```
-- Context: Bug fix note for MM device
-
-## Versioned Documentation (version-4.2)
-
-The following occurrences are found in the versioned documentation for version 4.2:
-
-### 5. Versioned Installation Documentation (`versioned_docs/version-4.2/02-installation/index.mdx`)
-
-**Line 38:**
-```
-<TabItem value="mm" label="Miyoo Mini (MM)">
-```
-- Context: Tab item label for Miyoo Mini device (version 4.2 docs)
-
-**Line 57:**
-```
-:::note Firmware downloads (MM)
-```
-- Context: Note section header for MM firmware downloads (version 4.2 docs)
-
-### 6. Versioned Tweaks Documentation (`versioned_docs/version-4.2/07-apps/01-included-in-onion/tweaks.mdx`)
-
-**Line 392:**
-```
-<div>Change the shortcut for brightness (on MM only).</div>
-```
-- Context: Feature description specific to MM device (version 4.2 docs)
-
-### 7. Versioned FAQ Documentation (`versioned_docs/version-4.2/03-faq/index.mdx`)
-
-**Line 252:**
-```
-**MM:** Miyoo recommends 5V 1A and it must be USB-A to USB-C _(USB-C to USB-C charging is not supported)_.
-```
-- Context: Charging specifications for MM (version 4.2 docs)
-
-## Additional Information
-
-### Device Variants Referenced
-
-1. **MM** - Miyoo Mini (base device)
-2. **MM v2** - Miyoo Mini version 2
-3. **MM v4** - Miyoo Mini version 4
-4. **MMP** - Miyoo Mini Plus (related device with enhanced features)
-
-### Common Contexts
-
-- Installation and firmware compatibility
-- Device-specific features and settings
-- Charging specifications
-- Bug fixes and improvements
-
-### Notes
-
-- "MM" specifically refers to the Miyoo Mini gaming device
-- Some features are exclusive to certain MM versions (e.g., "MM v4 only")
-- Many features distinguish between MM and MMP capabilities
-- Occurrences of "MM" within words like "SCUMMVM" and "COMMODORE" were excluded from this list as they are not references to the Miyoo Mini device
-- **Complete coverage**: This document includes searches across ALL website subdirectories:
-  - `docs/` - Current documentation
-  - `blog/` - Release notes and blog posts
-  - `versioned_docs/` - Previous version documentation (4.0, 4.1, 4.2)
-  - `src/` - Source code for website components
-  - Configuration files (JSON, YAML, JS)
-- Versioned documentation (version 4.2) contains similar references to the current docs but with some differences in line numbers and content
+- **Total replacements**: 12 MM occurrences + 11 MMP occurrences = 23 total
+- **Files modified**: 8 files across docs/, blog/, and versioned_docs/
+- **Scope**: Complete replacement of all device abbreviations with full names
+- **Result**: Improved documentation clarity and readability
