@@ -8,7 +8,7 @@ slug: /apps/game-list-options
 
 ## Presentation
 Game List Options (GLO menu) is a tool for performing actions for the selected game or for the entire list. <br />
-Press <kbd>Y</kbd> in a game list, then from this menu you can choose the Retroarch core, download the image cover of your game (WiFi/Miyoo Mini Plus required), launch a Netplay session, reset your game (to skip the last save state), filter the list of games with a keyword, and more.
+Press <kbd>Y</kbd> in a game list, then from this menu you can choose the RetroArch core, download the image cover of your game (Wi-Fi/Miyoo Mini Plus required), launch a Netplay session, reset your game (to skip the last save state), filter the list of games with a keyword, and more.
 
 Thanks to GLO menu flexibility, you can even add your own scripts here !*
 
@@ -29,7 +29,7 @@ GLO Menu is a native application of Onion, it is installed by default.
 ### Scripts available in Onion
 
 - **Reset game** - *load game without save state, useful to start a game from beginning*
-- **Game core** - *set custom Retroarch core per game, useful to switch from mGBA to gPSP for example*
+- **Game core** - *set custom RetroArch core per game, useful to switch from mGBA to gPSP for example*
 - **Filter list** - *use a keyword to filter the list*
 - **Refresh roms** - *refresh the list’s game cache, useful when you have added some games*
 - *Custom scripts:*
@@ -53,7 +53,7 @@ The existing scripts are a great source of inspiration for your future script. H
 
 *Some useful variables: *
 
-- `require_networking=1` will show this GLO entry only on the Miyoo Mini Plus, which is equipped with WiFi.
+- `require_networking=1` will show this GLO entry only on the Miyoo Mini Plus, which is equipped with Wi-Fi.
 - `%LIST%` is the name of the current system (for example GENESIS)
 - `$1` will contain the full path of the selected rom 
 - `$2` will contain the full path of the current emulator
