@@ -23,7 +23,7 @@ A full RetroArch in a such tiny device! RetroArch is regularly updated from the 
 - Customs cores
 - Fine-tuned with optimal best settings for the Miyoo Mini in mind
 - Automatically choosing the best resolution for your device
-  - 640x480 for the Miyoo Mini v1-3 and the Miyoo Mini+
+  - 640x480 for the Miyoo Mini v1-3 and the Miyoo Mini Plus
   - 752x560 for the Miyoo Mini v4 with firmware >= `202310271401`
 - Can also work as a game launcher  
   > Cores embedded, playlists and favorites unlocked

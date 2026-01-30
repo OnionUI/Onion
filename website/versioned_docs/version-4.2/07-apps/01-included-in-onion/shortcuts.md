@@ -127,7 +127,7 @@ Shortcuts in Onion are managed by an app called `keymon`. This app has no graphi
             <td><em>Always</em></td>
         </tr>
         <tr>
-            <td><b>MM:</b> <kbd>SELECT</kbd> + <kbd>L2</kbd> / <kbd>R2</kbd><br /><b>MMP:</b> <kbd>MENU</kbd> +
+            <td><b>Miyoo Mini:</b> <kbd>SELECT</kbd> + <kbd>L2</kbd> / <kbd>R2</kbd><br /><b>Miyoo Mini Plus:</b> <kbd>MENU</kbd> +
                 <kbd>VOL</kbd></td>
             <td>Adjust brightness</td>
             <td><em>Always</em></td>
@@ -143,7 +143,7 @@ Shortcuts in Onion are managed by an app called `keymon`. This app has no graphi
             <td><em>Always</em></td>
         </tr>
         <tr>
-            <td><b>MMP:</b> <kbd>VOL+</kbd> + <kbd>VOL-</kbd></td>
+            <td><b>Miyoo Mini Plus:</b> <kbd>VOL+</kbd> + <kbd>VOL-</kbd></td>
             <td>Toggle mute</td>
             <td><em>Always</em></td>
         </tr>
@@ -163,8 +163,8 @@ Shortcuts in Onion are managed by an app called `keymon`. This app has no graphi
             <td><em>Always</em></td>
         </tr>
         <tr>
-            <td><b>MMP:</b> <kbd>POWER</kbd> <sup>hold 10s</sup></td>
-            <td>Cut off power (on regular MM you need to disconnect the battery)</td>
+            <td><b>Miyoo Mini Plus:</b> <kbd>POWER</kbd> <sup>hold 10s</sup></td>
+            <td>Cut off power (on regular Miyoo Mini you need to disconnect the battery)</td>
             <td><em>Always</em></td>
         </tr>
     </tbody>

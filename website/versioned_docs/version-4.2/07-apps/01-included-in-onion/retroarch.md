@@ -9,7 +9,7 @@ slug: /apps/retroarch
 
 ## Presentation
 
-A full Retroarch in a such tiny device ! Retroarch is regularly updated from the offcial repository. 
+A full RetroArch in such a tiny device! RetroArch is regularly updated from the official repository. 
 
 <p align="center"><img src="https://user-images.githubusercontent.com/44569252/189438841-f419f936-6376-436e-89b5-78ce1f88494f.png" width="320" /></p>
 
@@ -46,9 +46,9 @@ A full Retroarch in a such tiny device ! Retroarch is regularly updated from the
 
 Running from apps section allows you to start RetroArch without immediately loading a game, useful for changing global settings in RetroArch.
 
-To display the Retroarch Menu press <kbd>Menu</kbd> + <kbd>Select</kbd>.
+To display the RetroArch Menu, press <kbd>Menu</kbd> + <kbd>Select</kbd>.
 
-Meny additional shortcuts are available for Retroarch, do not forget to check [Onion in-game shortcuts](shortcuts).
+Many additional shortcuts are available for RetroArch; do not forget to check [Onion in-game shortcuts](shortcuts).
 
 
 ## Advanced

@@ -8,8 +8,8 @@ description: Set your Onion's time
 
 ## Presentation
 
-Simple clock app which allows you to manually set the clock of your device. Especially useful for the Miyoo Mini which doesn't have an internal RTC (which means that the time is reset at each boot). By default, Onion preserves the current time during shutdown, and upon the subsequent boot, it is restored with 4 hours added.
-If RTC is present, which is the case with newer Miyoo Mini+, or if it is modded in, the time is not restored or advanced but will instead be set by RTC.
+Simple clock app which allows you to manually set the clock of your device. Especially useful for the Miyoo Mini, which doesn't have an internal RTC (which means that the time is reset at each boot). By default, Onion preserves the current time during shutdown, and upon the subsequent boot, it is restored with 4 hours added.
+If RTC is present, which is the case with newer Miyoo Mini Plus models, or if it is modded in, the time is not restored or advanced but will instead be set by RTC.
 
 ![](./assets/clock.png)
 

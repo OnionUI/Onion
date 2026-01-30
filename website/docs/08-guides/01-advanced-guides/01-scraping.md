@@ -56,7 +56,7 @@ The `Imgs` folder name is case sensitive (must have a capital `I`). Examples wou
 - Via the "ALL SYSTEMS"selection on the left, go to the "_MEDIA_" tab -> Clear the "_Fetched Media List_" of all but one image type by pressing the "_minus_" button.
 - Change the "_Media type:_" to: "_USER PROVIDED MIX_" and click on the file icon to the right
 - Select the extracted: `Miyoo Mini Big Zoom.xml`
-- Disable settings "_Resize width to_" , "_Resize height to_" , "_Keep Image Ratio_" 
+- Disable settings "_Resize width to_", "_Resize height to_", "_Keep Image Ratio_" 
 
 > _**- OR -**_
 
@@ -83,6 +83,6 @@ This will automatically scrape images to the correct folders for Miyoo Mini.
 https://www.youtube.com/watch?v=RFu2DKRDq7o
 
 
-#### EASY Scraping art for retro games (MiYoo Mini Skraper tutorial on Onion OS) _by TechDweeb_
+#### EASY Scraping art for retro games (Miyoo Mini Skraper tutorial on OnionOS) _by TechDweeb_
 
 https://www.youtube.com/watch?v=DguILcIyZQE&ab_channel=TechDweeb

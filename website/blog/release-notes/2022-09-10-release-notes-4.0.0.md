@@ -35,7 +35,7 @@ This release introduces a new app, *Tweaks*, containing everything you need to *
 - **RetroArch:** supports save state thumbnails, less on-screen notifications
 - **File Explorer:** Updated color scheme, fullscreen image viewer (with navigation)
 - Retired unused cores: `mame2003` (use `mame2003-plus` instead), `fbalpha` (use `fbalpha2012` instead)
-- Updated/added cores: ` Fake-08 (pico8)` , `blueMSX` and `fMSX`, 
+- Updated/added cores: `Fake-08 (pico8)`, `blueMSX`, and `fMSX` 
 - New experimental emulator: `PCSX-ReARMed standalone` and `mame2003-extreme`
 - New theme features: custom boot/shutdown/save splash, charging animation (up to 24 frames), more options for battery percentage
 

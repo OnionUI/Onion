@@ -38,5 +38,5 @@ On demanding games like Grim Fandango, you can adjust "Target FPS for stutter re
 
 :::note
 ScummVM Standalone (not a RetroArch core but the native ScummVM reimplementation) can be found in the "Expert" section of [Package Manager](../apps/package-manager). It offers much improved performances (Grim, Monkey Island 4 or Blade Runner works perfectly).
-However its integration in Onion is not perfect : no automatic save states, no resume at boot , different shortcuts...
+However, its integration in Onion is not perfect: no automatic save states, no resume at boot, different shortcuts...
 :::
