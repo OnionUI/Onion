@@ -7,7 +7,7 @@ slug: /network/http
 
 ![](https://github.com/OnionUI/Onion/assets/47260768/27adb5f7-2665-4b82-a8e0-9311651d89e1)
 
-The built-in HTTP file server will allow you to manage your files through a web browser on your phone, a PC or a tablet. Think of it as a website, hosted by your Miyoo Mini+. 
+The built-in HTTP file server will allow you to manage your files through a web browser on your phone, a PC or a tablet. Think of it as a website, hosted by your Miyoo Mini Plus. 
 
 
 ## Features
