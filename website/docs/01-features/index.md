@@ -160,7 +160,7 @@ Onion has its own emulators, many optimizations on the **RetroArch** cores but a
 <img src="https://user-images.githubusercontent.com/44569252/226447388-8c9c95f1-536a-4946-8b0f-f4b8ead0e97e.png" width="320" />
 
 :::note <a href="apps/game-list-options">Game List Options overview</a>
-**Game List Options** (GLO Menu) is a tool to make actions for the selected game or the entire list. Press <kbd>Y</kbd> in a game list then from this menu you can choose the **RetroArch** core, download the image cover of your game (WiFi/MMP required), launch a Netplay session, reset your game (to skip the last save state), filter the list of games with a keyword,...<br />Thanks to GLO Menu's flexibility, you can even add your own scripts here!*
+**Game List Options** (GLO Menu) is a tool to make actions for the selected game or the entire list. Press <kbd>Y</kbd> in a game list, then from this menu you can choose the **RetroArch** core, download the image cover of your game (WiFi/Miyoo Mini Plus required), launch a Netplay session, reset your game (to skip the last save state), filter the list of games with a keyword, and more.<br />Thanks to GLO Menu's flexibility, you can even add your own scripts here!*
 :::
 
 
@@ -218,10 +218,10 @@ Check the <a href="included-apps">included apps</a> documentation for more infor
 For the Miyoo Mini Plus (equipped with wifi) Onion offers many additional possibilities :<br />
 - [Multiplayer/Netplay](multiplayer): play in multiplayer over internet or on your local network to your favorite retro games:
 - [Easy Netplay](multiplayer/easynetplay): play multiplayer games anywhere (compatible with GB/GBC Pokemon trading!)
-- [OTA (Over The Air) updates](apps/ota-update): update Onion directly from your MMP
+- [OTA (Over The Air) updates](apps/ota-update): update Onion directly from your Miyoo Mini Plus
 - [Automatic date/time synchronisation](apps/tweaks#set-automatically-via-the-internet) (NTP, via Tweaks app)
 - [Retroachivements](https://www.retroarch.com/?page=achievements)
-- [Scraper](/docs/apps/scraper): import game covers directly from your MMP
+- [Scraper](/docs/apps/scraper): import game covers directly from your Miyoo Mini Plus
 - [Network Services](network-features): [Samba/SMB share](network/samba), [http server](network/http), [SSH](network/ssh), [FTP](network/ftp), [Telnet](network/telnet), [Hotspot](network/hotspot), [VNC server](network/vnc)...
 :::
 
