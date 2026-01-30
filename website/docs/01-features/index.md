@@ -137,7 +137,7 @@ It allows you to change the color temperature of the screen to have more eye com
 
 :::note <a href="apps/retroarch">RetroArch overview</a>
 A full **RetroArch** in a such tiny device! **RetroArch** is regularly updated from the official repository. Onion benefits from dedicated drivers created by [Eggs](https://discordapp.com/users/778867980096241715) for precision and performance.
-Dedicated customizations are also included: All the cores are configured with attention to detail, [custom overlays and custom filters](apps/retroarch#customized-overlays-and-filters) made specially for the Miyoo Mini screen. 
+Dedicated customizations are also included: All the cores are configured with attention to detail, [custom overlays and custom filters](apps/RetroArch#customized-overlays-and-filters) made specially for the Miyoo Mini screen. 
 :::
 
 ## <sup><img src={require('./assets/optimized.png').default} style={{width: 54}} /></sup>Optimized emulators
@@ -160,7 +160,7 @@ Onion has its own emulators, many optimizations on the **RetroArch** cores but a
 <img src="https://user-images.githubusercontent.com/44569252/226447388-8c9c95f1-536a-4946-8b0f-f4b8ead0e97e.png" width="320" />
 
 :::note <a href="apps/game-list-options">Game List Options overview</a>
-**Game List Options** (GLO Menu) is a tool to make actions for the selected game or the entire list. Press <kbd>Y</kbd> in a game list, then from this menu you can choose the **RetroArch** core, download the image cover of your game (WiFi/Miyoo Mini Plus required), launch a Netplay session, reset your game (to skip the last save state), filter the list of games with a keyword, and more.<br />Thanks to GLO Menu's flexibility, you can even add your own scripts here!*
+**Game List Options** (GLO Menu) is a tool to make actions for the selected game or the entire list. Press <kbd>Y</kbd> in a game list, then from this menu you can choose the **RetroArch** core, download the image cover of your game (Wi-Fi/Miyoo Mini Plus required), launch a Netplay session, reset your game (to skip the last save state), filter the list of games with a keyword, and more.<br />Thanks to GLO Menu's flexibility, you can even add your own scripts here!*
 :::
 
 
@@ -220,7 +220,7 @@ For the Miyoo Mini Plus (equipped with Wi-Fi) Onion offers many additional possi
 - [Easy Netplay](multiplayer/easynetplay): play multiplayer games anywhere (compatible with GB/GBC Pokemon trading!)
 - [OTA (Over The Air) updates](apps/ota-update): update Onion directly from your Miyoo Mini Plus
 - [Automatic date/time synchronisation](apps/tweaks#set-automatically-via-the-internet) (NTP, via Tweaks app)
-- [Retroachivements](https://www.retroarch.com/?page=achievements)
+- [RetroAchievements](https://www.retroarch.com/?page=achievements)
 - [Scraper](/docs/apps/scraper): import game covers directly from your Miyoo Mini Plus
 - [Network Services](network-features): [Samba/SMB share](network/samba), [http server](network/http), [SSH](network/ssh), [FTP](network/ftp), [Telnet](network/telnet), [Hotspot](network/hotspot), [VNC server](network/vnc)...
 :::

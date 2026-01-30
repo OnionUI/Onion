@@ -8,7 +8,7 @@ slug: /apps/game-list-options
 
 ## Presentation
 Game List Options (GLO menu) is a tool for performing actions for the selected game or for the entire list. <br />
-Press <kbd>Y</kbd> in a game list, then from this menu you can choose the RetroArch core, download the image cover of your game (WiFi/Miyoo Mini Plus required), launch a Netplay session, reset your game (to skip the last save state), filter the list of games with a keyword, and more.
+Press <kbd>Y</kbd> in a game list, then from this menu you can choose the RetroArch core, download the image cover of your game (Wi-Fi/Miyoo Mini Plus required), launch a Netplay session, reset your game (to skip the last save state), filter the list of games with a keyword, and more.
 
 Thanks to GLO menu flexibility, you can even add your own scripts here!
 
@@ -35,7 +35,7 @@ GLO Menu is a native application of Onion, it is installed by default.
 - *Custom scripts:*
   - **Random game**: *added by Random Game app - launches a random game from the list*
   - **Set time**: *added by Clock app - quick access to setting date and time*
-- *WiFi scripts: <sub>(Miyoo Mini Plus only)</sub>*
+- *Wi-Fi scripts: <sub>(Miyoo Mini Plus only)</sub>*
   - **Scraper**: *Download image covers for your games. <a href="scraper">More details here</a>*
   - **Netplay**: *Launch or join a multiplayer game. <a href="../multiplayer">More details here</a>*
 
@@ -53,7 +53,7 @@ The existing scripts are a great source of inspiration for your future script. H
 
 *Some useful variables: *
 
-- `require_networking=1`: will show this GLO entry only on the Miyoo Mini Plus, which is equipped with WiFi
+- `require_networking=1`: will show this GLO entry only on the Miyoo Mini Plus, which is equipped with Wi-Fi
 - `%LIST%`: is the name of the current system (for example GENESIS)
 - `$1`: will contain the full path of the selected rom 
 - `$2`: will contain the full path of the current emulator

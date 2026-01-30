@@ -13,6 +13,6 @@ slug: /emulators/lowresnx
 
 
 Like Pico-8, Chailove, MicroW8 or LÖVE, [LowRes NX](https://lowresnx.inutilis.com/) is a framework for making 2D games. 
-This Retroarch core uses the BASIC language to allow you to create your own retro games on a virtual game console.
+This RetroArch core uses the BASIC language to allow you to create your own retro games on a virtual game console.
 
 You can discover [a lot of their games here](https://lowresnx.inutilis.com/programs.php?category=featured).
