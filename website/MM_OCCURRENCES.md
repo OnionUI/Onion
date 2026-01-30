@@ -8,7 +8,7 @@ This document lists all occurrences of "MM" (Miyoo Mini) references found in the
 
 - **Total MM occurrences**: 12 (excluding this document itself)
 - **Total MMP occurrences**: 11 (Miyoo Mini Plus)
-- **Files with MM references**: 8
+- **Files with MM references**: 7
 - **Directories searched**: `docs/`, `blog/`, `versioned_docs/`, `src/`
   - `docs/`: 7 occurrences
   - `blog/`: 1 occurrence
