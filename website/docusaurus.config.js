@@ -18,7 +18,7 @@ const oembedOpts = {
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'Onion',
-  tagline: 'OS overhaul for Miyoo Mini and Mini+',
+  tagline: 'OS overhaul for Miyoo Mini and Mini Plus',
   favicon: 'img/favicon.png',
   trailingSlash: false,
 
