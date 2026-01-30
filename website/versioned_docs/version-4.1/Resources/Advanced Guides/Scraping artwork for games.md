@@ -64,4 +64,4 @@ This will automatically scrape images to the correct folders for Miyoo Mini.
 
 ### YouTube Tutorials:
 - [Add Stunning Boxart To Your Miyoo Mini In Two Easy Ways | Complete Tutorial](https://www.youtube.com/watch?v=RFu2DKRDq7o) _by RetroBreeze_
-- [EASY Scraping art for retro games (MiYoo Mini Skraper tutorial on Onion OS)](https://www.youtube.com/watch?v=DguILcIyZQE&ab_channel=TechDweeb) _by TechDweeb_
+- [EASY Scraping art for retro games (Miyoo Mini Skraper tutorial on OnionOS)](https://www.youtube.com/watch?v=DguILcIyZQE&ab_channel=TechDweeb) _by TechDweeb_
