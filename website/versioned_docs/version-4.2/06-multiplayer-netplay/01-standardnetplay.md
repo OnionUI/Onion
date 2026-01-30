@@ -35,7 +35,7 @@ Each game you'll create will be available over internet and your local network, 
 
 2. Press <kbd>Y</kbd> to open GLO
 
-3. Choose `Netplay` -> `Host` -> `Standard Netplay (use current wifi)`
+3. Choose `Netplay` -> `Host` -> `Standard Netplay (use current Wi-Fi)`
  
 Your Onion netplay session is now ready to be joined from your local home network or even on the other side of the world.
 
@@ -46,7 +46,7 @@ Your Onion netplay session is now ready to be joined from your local home networ
 
 2. Press <kbd>Y</kbd> to open GLO
 
-3. Choose `Netplay` -> `Join` -> `Standard Netplay (use current wifi)`
+3. Choose `Netplay` -> `Join` -> `Standard Netplay (use current Wi-Fi)`
 
 4. Press Menu + Select to display the retroarch menu, go into Netplay and then click on :
 	- `Refresh Netplay Host List` -> to display hosted games over internet
