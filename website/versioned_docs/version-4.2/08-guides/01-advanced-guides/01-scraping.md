@@ -83,6 +83,6 @@ This will automatically scrape images to the correct folders for Miyoo Mini.
 https://www.youtube.com/watch?v=RFu2DKRDq7o
 
 
-#### EASY Scraping art for retro games (MiYoo Mini Skraper tutorial on Onion OS) _by TechDweeb_
+#### EASY Scraping art for retro games (Miyoo Mini Skraper tutorial on OnionOS) _by TechDweeb_
 
 https://www.youtube.com/watch?v=DguILcIyZQE&ab_channel=TechDweeb
