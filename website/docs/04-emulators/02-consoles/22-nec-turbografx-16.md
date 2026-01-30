@@ -13,5 +13,5 @@ slug: /emulators/turbografx
 - Bios: None
 
 :::note
-"Beetle PCE" slower than "Beetle PCE Fast" but more accurate, full speed with a 1900mhz [overclock](../faq#how-to-overclock-my-miyoo-mini), so more reserved to MMP.
+"Beetle PCE" slower than "Beetle PCE Fast" but more accurate, full speed with a 1900mhz [overclock](../faq#how-to-overclock-my-miyoo-mini), so more reserved to Miyoo Mini Plus.
 :::
