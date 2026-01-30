@@ -29,7 +29,7 @@ GLO Menu is a native application of Onion, it is installed by default.
 ### Scripts available in Onion
 
 - **Reset game**: *load game without save state, useful to start a game from beginning*
-- **Game core**: *set custom Retroarch core per game, useful to switch from mGBA to gPSP for example*
+- **Game core**: *set custom RetroArch core per game, useful to switch from mGBA to gPSP for example*
 - **Filter list**: *use a keyword to filter the list*
 - **Refresh roms**: *refresh the list’s game cache, useful when you have added some games*
 - *Custom scripts:*

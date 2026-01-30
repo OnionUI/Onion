@@ -41,7 +41,7 @@ Concerning multidisc games :
 ## Notes on PCSX-ReARMed standalone
 
 PCSX-ReARMed standalone (not a RetroArch core but the classical emulator) offers much improved performances. It allows for using *enhanced resolution* in most games.
-However its integration in Onion is not perfect : no automatic save states, no resume at boot , different shortcuts...
+However, its integration in Onion is not perfect: no automatic save states, no resume at boot, different shortcuts...
 
 ## Notes on Duckstation/SwanStation
 

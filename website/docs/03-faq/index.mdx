@@ -77,7 +77,7 @@ To create a miyoogamelist, review [the guide here](https://github.com/OnionUI/On
 > The guide includes a "cleanup" script for use with [xmlstarlet](http://xmlstar.sourceforge.net/) but an issue with viewing PDF files in a browser means the script does not copy well. Either open the PDF in a reader application (i.e. Adobe Acrobat) or use [this batch file](https://github.com/OnionUI/Onion/files/9050636/gamelist.xml-to-miyoogamelist.xml-Clean-Up-Script.zip) to run the script
 
 
-**Note**: There is an **alternate method** of creating the '**miyoogamelist.xml**' file using a simple _PowerShell script_ which does not have any 3rd party dependencies other than Windows and PowerShell itself. There are _two versions_ of the script which are , depending on your preferences:
+**Note**: There is an **alternate method** of creating the '**miyoogamelist.xml**' file using a simple _PowerShell script_ which does not have any 3rd party dependencies other than Windows and PowerShell itself. There are _two versions_ of the script, depending on your preferences:
 * [More human readable, less efficient](https://github.com/OnionUI/Onion/blob/main/files/20230617/New-MiyooGameListXmlFormatted.ps1).
 * [Less human readable, more efficient](https://github.com/OnionUI/Onion/blob/main/files/20230617/New-MiyooGameListXml.ps1).
 
@@ -676,9 +676,9 @@ After the boot, the first binary launched from the SD card by the firmware is th
 
 It is possible to overclock your device starting from Onion 4.2.0. The speed improvement can be up to 20% and is very noticeable. The current overclocking procedure is a manual process.
 
-To overclock Retroarch for all cores, create a `cpuclock.txt` text file in the main Retroarch folder (e.g. `Retroarch/cpuclock.txt`) containing just the 4-digit Mhz number of the desired overclock speed (e.g. `1600`).
+To overclock RetroArch for all cores, create a `cpuclock.txt` text file in the main RetroArch folder (e.g. `Retroarch/cpuclock.txt`) containing just the 4-digit Mhz number of the desired overclock speed (e.g. `1600`).
 
-To overclock just a specific Retroarch core, create the `cpuclock.txt` text file within that core's configuration folder in `Saves/CurrentProfile/config/<core>/`. For example, if you want to improve the PSX speed of PCSX-ReARMed (which will allow you to enable *enhanced resolution* for many additional games) you can create a `cpuclock.txt` file containing `1600` inside `Saves/CurrentProfile/config/PCSX-ReARMed/`.
+To overclock just a specific RetroArch core, create the `cpuclock.txt` text file within that core's configuration folder in `Saves/CurrentProfile/config/<core>/`. For example, if you want to improve the PSX speed of PCSX-ReARMed (which will allow you to enable *enhanced resolution* for many additional games), you can create a `cpuclock.txt` file containing `1600` inside `Saves/CurrentProfile/config/PCSX-ReARMed/`.
 
 The maximum device overclock speeds are:
 - Miyoo Mini: 1700Mhz (1600 recommended for optimal stability)

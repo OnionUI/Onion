@@ -207,11 +207,11 @@ Please always use one of these 3 scripts as a template to add your own port.
  * `running command line` : Do not modify this (it is standardized)   
 
 
-**Specific to retroarch script :**
+**Specific to RetroArch script:**
 
  * `Core` : then name of the core that will be used without `_libretro.so`, for example `ecwolf` for Wolfenstein  
  * `RomDir` : similar to `GameDir` : it is the path where your rom is located in `Roms/PORTS/Games/[Game folder]/`  
- * `RomFile` : it is the name of the rom that will be passed as a parameter to the retroarch core, will be also used to detect the presence of the game when running `~Import ports` script from the rom list. (the `Core` will be used for detection if not specified).  
+ * `RomFile`: it is the name of the rom that will be passed as a parameter to the RetroArch core, will be also used to detect the presence of the game when running `~Import ports` script from the rom list. (the `Core` will be used for detection if not specified).  
 
 
 > **Notes about the `~Import ports` script :**  

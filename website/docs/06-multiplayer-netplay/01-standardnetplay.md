@@ -9,7 +9,7 @@ slug: /multiplayer/standardnetplay
 
 *Fight against your friends remotely!*
 
-**Standard Netplay:** a feature to create and join Retroarch multiplayer sessions easily.
+**Standard Netplay:** a feature to create and join RetroArch multiplayer sessions easily.
 
 Each game you'll create will be available over internet and your local network, making it easy for your friends to join in your game.
 
@@ -19,7 +19,7 @@ Each game you'll create will be available over internet and your local network, 
 
 - Easy host setup
 
-- Optimized Retroarch configuration
+- Optimized RetroArch configuration
 
 - Automatic core selection for Netplay
 
@@ -48,7 +48,7 @@ Your Onion netplay session is now ready to be joined from your local home networ
 
 3. Choose `Netplay` -> `Join a session...` -> `Standard Netplay (use current wifi)`
 
-4. Press Menu + Select to display the retroarch menu, go into Netplay and then click on :
+4. Press Menu + Select to display the RetroArch menu, go into Netplay and then click on:
 	- `Refresh Netplay Host List` -> to display hosted games over internet
 	- `Refresh Netplay Lan List` -> to display hosted games over your local network
 	
