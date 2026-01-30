@@ -1016,7 +1016,7 @@ For more detailed information and tips on Arcade emulation, checkout the awesome
 - Extensions: `.vms` `.bin`
 - Bios: None
 > **Notes** (Credit: dwmccoy)  
-> A pixelated screen displays on launch. Open Retroarch (<kbd>MENU</kbd>+<kbd>SELECT</kbd>) and choose `Close Content`. Now select `History` and load the game file you just closed. Choose Run. The game should now display correctly but plays too fast. To fix this go back into RetroArch and set `Automatic Frame Delay` to ON in the Latency Menu.
+> A pixelated screen displays on launch. Open RetroArch (<kbd>MENU</kbd>+<kbd>SELECT</kbd>) and choose `Close Content`. Now select `History` and load the game file you just closed. Choose Run. The game should now display correctly but plays too fast. To fix this go back into RetroArch and set `Automatic Frame Delay` to ON in the Latency Menu.
 
 <img alt="experimental" src="https://user-images.githubusercontent.com/44569252/190520187-500c6659-b99b-497a-b2f3-817f1e6e2669.png" />
 </td></table>

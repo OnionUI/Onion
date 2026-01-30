@@ -63,7 +63,7 @@ Choose your prefered region. If no media is found for your country code, other c
 Select where the covers will be searched.
 - ScreenScraper is probably the best supplied, it supports all the media types proposed in Scraper and it also allows to search by CRC which provide a lot of additional matches.
 - Launchbox offers a fast alternative to ScreenScraper.
-- RetroArch is quite fast the the match level is low.
+- RetroArch is quite fast but the match level is low.
 
 ### Screenscraper: account settings
 

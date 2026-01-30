@@ -136,8 +136,8 @@ It allows you to change the color temperature of the screen to have more eye com
 
 
 :::note <a href="apps/retroarch">RetroArch overview</a>
-A full **RetroArch** in a such tiny device! **RetroArch** is regularly updated from the official repository. Onion benefits from dedicated drivers created by [Eggs](https://discordapp.com/users/778867980096241715) for precision and performance.
-Dedicated customizations are also included: All the cores are configured with attention to detail, [custom overlays and custom filters](apps/RetroArch#customized-overlays-and-filters) made specially for the Miyoo Mini screen. 
+A full **RetroArch** in such a tiny device! **RetroArch** is regularly updated from the official repository. Onion benefits from dedicated drivers created by [Eggs](https://discordapp.com/users/778867980096241715) for precision and performance.
+Dedicated customizations are also included: All the cores are configured with attention to detail, [custom overlays and custom filters](apps/retroarch#customized-overlays-and-filters) made specially for the Miyoo Mini screen. 
 :::
 
 ## <sup><img src={require('./assets/optimized.png').default} style={{width: 54}} /></sup>Optimized emulators
