@@ -6,10 +6,14 @@ This document lists all occurrences of "MM" (Miyoo Mini) references found in the
 
 ## Summary
 
-- **Total MM occurrences**: 8
+- **Total MM occurrences**: 12 (excluding this document itself)
 - **Total MMP occurrences**: 11 (Miyoo Mini Plus)
-- **Files with MM references**: 4
-- **Files with MMP references**: 4
+- **Files with MM references**: 8
+- **Directories searched**: `docs/`, `blog/`, `versioned_docs/`, `src/`
+  - `docs/`: 7 occurrences
+  - `blog/`: 1 occurrence
+  - `versioned_docs/`: 4 occurrences
+  - `src/`: 0 occurrences
 
 ## Detailed List of MM Occurrences
 
@@ -69,6 +73,40 @@ Firmware `2023 10 27 1401` and newer in conjunction with Onion 4.3 allow the MM 
 ```
 - Context: Bug fix note for MM device
 
+## Versioned Documentation (version-4.2)
+
+The following occurrences are found in the versioned documentation for version 4.2:
+
+### 5. Versioned Installation Documentation (`versioned_docs/version-4.2/02-installation/index.mdx`)
+
+**Line 38:**
+```
+<TabItem value="mm" label="Miyoo Mini (MM)">
+```
+- Context: Tab item label for Miyoo Mini device (version 4.2 docs)
+
+**Line 57:**
+```
+:::note Firmware downloads (MM)
+```
+- Context: Note section header for MM firmware downloads (version 4.2 docs)
+
+### 6. Versioned Tweaks Documentation (`versioned_docs/version-4.2/07-apps/01-included-in-onion/tweaks.mdx`)
+
+**Line 392:**
+```
+<div>Change the shortcut for brightness (on MM only).</div>
+```
+- Context: Feature description specific to MM device (version 4.2 docs)
+
+### 7. Versioned FAQ Documentation (`versioned_docs/version-4.2/03-faq/index.mdx`)
+
+**Line 252:**
+```
+**MM:** Miyoo recommends 5V 1A and it must be USB-A to USB-C _(USB-C to USB-C charging is not supported)_.
+```
+- Context: Charging specifications for MM (version 4.2 docs)
+
 ## Additional Information
 
 ### Device Variants Referenced
@@ -91,3 +129,10 @@ Firmware `2023 10 27 1401` and newer in conjunction with Onion 4.3 allow the MM 
 - Some features are exclusive to certain MM versions (e.g., "MM v4 only")
 - Many features distinguish between MM and MMP capabilities
 - Occurrences of "MM" within words like "SCUMMVM" and "COMMODORE" were excluded from this list as they are not references to the Miyoo Mini device
+- **Complete coverage**: This document includes searches across ALL website subdirectories:
+  - `docs/` - Current documentation
+  - `blog/` - Release notes and blog posts
+  - `versioned_docs/` - Previous version documentation (4.0, 4.1, 4.2)
+  - `src/` - Source code for website components
+  - Configuration files (JSON, YAML, JS)
+- Versioned documentation (version 4.2) contains similar references to the current docs but with some differences in line numbers and content
