@@ -116,7 +116,7 @@ Thanks to `Activity Tracker` app you can :
 
 
 :::note <a href="apps/retroarch">RetroArch overview</a>
-A full Retroarch in a such tiny device ! Retroarch is regularly updated from the offcial repository. Onion benefits to dedicated drivers created by [Eggs](https://discordapp.com/users/778867980096241715) for precision and performance.
+A full RetroArch in such a tiny device! RetroArch is regularly updated from the official repository. Onion benefits from dedicated drivers created by [Eggs](https://discordapp.com/users/778867980096241715) for precision and performance.
 Dedicated customizations are also included: all the cores are configured with attention to detail, [custom overlays and custom filters](apps/retroarch#customized-overlays-and-filters) made specially for the Miyoo Mini screen. 
 :::
 
@@ -140,7 +140,7 @@ Onion has its own emulators, many optimizations on the RetroArch cores, but also
 <img src="https://user-images.githubusercontent.com/44569252/226447388-8c9c95f1-536a-4946-8b0f-f4b8ead0e97e.png" width="320" />
 
 :::note <a href="apps/game-list-options">Game List Options overview</a>
-*Game List Options (GLO Menu) is a tool to make actions for the selected game or the entire list. Press <kbd>Y</kbd> in a game list, then from this menu you can choose the RetroArch core, download the image cover of your game (WiFi/Miyoo Mini Plus required), launch a Netplay session, reset your game (to skip the last save state), filter the list of games with a keyword, and more.<br />Thanks to GLO menu flexibility, you can even add your own scripts here!*
+*Game List Options (GLO Menu) is a tool to make actions for the selected game or the entire list. Press <kbd>Y</kbd> in a game list, then from this menu you can choose the RetroArch core, download the image cover of your game (Wi-Fi/Miyoo Mini Plus required), launch a Netplay session, reset your game (to skip the last save state), filter the list of games with a keyword, and more.<br />Thanks to GLO menu flexibility, you can even add your own scripts here!*
 :::
 
 

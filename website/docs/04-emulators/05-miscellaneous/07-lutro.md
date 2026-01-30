@@ -12,6 +12,6 @@ slug: /emulators/lutro
 - Bios: None
 
 
-Like Pico-8, Chailove, MicroW8 or LowRes NX, [Lutro](https://lutro.libretro.com/) is a framework for making 2D games. This Retroarch core uses the LÖVE API to allow you to create your own retro games on a virtual game console.
+Like Pico-8, Chailove, MicroW8 or LowRes NX, [Lutro](https://lutro.libretro.com/) is a framework for making 2D games. This RetroArch core uses the LÖVE API to allow you to create your own retro games on a virtual game console.
 
 However the compatibility is concerning to [a short list of Löve games](https://buildbot.libretro.com/assets/cores/Lutro/).

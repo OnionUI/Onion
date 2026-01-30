@@ -24,7 +24,7 @@ https://www.youtube.com/watch?v=CGKX6yPG2nE
 ## Notes on GnGeo
 
 The GnGeo is an AES/MVS Neo Geo emulator (without NG-CD support) based of MAME ROMsets.
-This emulator is a standalone emulator (not Retroarch core) which natively supports GNO files.
+This emulator is a standalone emulator (not RetroArch core) which natively supports GNO files.
 GnGeo is interesting because of loading times. Tested a few big games like kof2000 and it starts just a few seconds instead of 45 seconds. The framerate is also very good.
 
 Interesting information about GnGeo [here](https://github.com/TriForceX/MiyooCFW/discussions/369) (with compatibility list).

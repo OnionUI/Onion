@@ -64,7 +64,7 @@ While MAME supports many classic arcade games, for best compatibility and perfor
 
 Both MAME and FB require your romsets to be matched exactly to the emulator version so you will need to source the recommended romsets. MAME romsets are not compatible with FB cores (and vice versa) and not every game in a full romset will be playable but the majority will be.  
 
-Arcade roms in general do not play well with save states (some will work but the majority don’t), you can [disable auto-loading of save states](faq#how-do-i-disable-auto-load-save-states) in the Retroarch menu (and save content or core overrides).  
+Arcade roms in general do not play well with save states (some will work but the majority don’t), you can [disable auto-loading of save states](faq#how-do-i-disable-auto-load-save-states) in the RetroArch menu (and save content or core overrides).  
 
 MAME and FB both rely on internal databases to translate the rom file name into the displayed game name, some games may be missing from the db. You should never rename these roms, instead you can use the [miyoogamelist](faq#how-can-i-use-a-miyoogamelistxml-to-customise-game-names) functionality to give your arcade roms appropriate names.   
 
@@ -87,7 +87,7 @@ For more detailed information and tips on Arcade emulation, checkout the awesome
 
 > **Notes**
 > 
-> MAME does not play well with save states this is a core issue and cannot be fixed. It is recommended to disable 'auto-loading of save states' in the Retroarch menu (and save core overrides).
+> MAME does not play well with save states this is a core issue and cannot be fixed. It is recommended to disable 'auto-loading of save states' in the RetroArch menu (and save core overrides).
 >
 > An onscreen message saying ‘This Game Will Not Work’ is MAME letting you know that the game is not emulated in the MAME version and you will not find a compatible/playable rom for that game.
 >
@@ -354,7 +354,7 @@ For more detailed information and tips on Arcade emulation, checkout the awesome
 > See [this link](https://docs.libretro.com/library/puae/) for more information.
 > - <kbd>SELECT</kbd> toggles the onscreen keyboard, <kbd>L</kbd> & <kbd>R</kbd> are mapped to the mouse buttons.
 > - This emulator will play Amiga CD32 games though some perform better than others.
-> - Setting CPU speed to -700 (negative 700) in the Retroarch menu may improve A1200/CD32 performance.
+> - Setting CPU speed to -700 (negative 700) in the RetroArch menu may improve A1200/CD32 performance.
 > - Other Core Settings that might be useful for some games are frameskip set to 1, or setting off the blitter wait in Video options.
 > - Some games will have stuttering audio or behave very slowly regardless of the CPU speed, frameskip etc. Many of these games will work fine if you find another format for them. .hdf (hard disk files) are the most problematic. .adf or .lha games usually work better although you might have to open RA options to switch or add floppy disks when required. If you find a game that won't run correctly no matter the options you set for it, simply try to find another version in another format.
 
@@ -1016,7 +1016,7 @@ For more detailed information and tips on Arcade emulation, checkout the awesome
 - Extensions: `.vms` `.bin`
 - Bios: None
 > **Notes** (Credit: dwmccoy)  
-> A pixelated screen displays on launch. Open Retroarch (<kbd>MENU</kbd>+<kbd>SELECT</kbd>) and choose `Close Content`. Now select `History` and load the game file you just closed. Choose Run. The game should now display correctly but plays too fast. To fix this go back into Retroarch and set `Automatic Frame Delay` to ON in the Latency Menu.
+> A pixelated screen displays on launch. Open RetroArch (<kbd>MENU</kbd>+<kbd>SELECT</kbd>) and choose `Close Content`. Now select `History` and load the game file you just closed. Choose Run. The game should now display correctly but plays too fast. To fix this go back into RetroArch and set `Automatic Frame Delay` to ON in the Latency Menu.
 
 <img alt="experimental" src="https://user-images.githubusercontent.com/44569252/190520187-500c6659-b99b-497a-b2f3-817f1e6e2669.png" />
 </td></table>

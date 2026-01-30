@@ -15,7 +15,7 @@ If RTC is present, which is the case with newer Miyoo Mini Plus models, or if it
 
 
 :::note
-On the Miyoo Mini Plus, Onion can use the WiFi connection to set the time at each boot. Configure it from [Tweaks app](tweaks#set-automatically-via-the-internet).
+On the Miyoo Mini Plus, Onion can use the Wi-Fi connection to set the time at each boot. Configure it from [Tweaks app](tweaks#set-automatically-via-the-internet).
 :::
 
 ## Usage

@@ -9,7 +9,7 @@ slug: /multiplayer/standardnetplay
 
 *Fight against your friends remotely!*
 
-**Standard Netplay:** a feature to create and join Retroarch multiplayer sessions easily.
+**Standard Netplay:** a feature to create and join RetroArch multiplayer sessions easily.
 
 Each game you'll create will be available over internet and your local network, making it easy for your friends to join in your game.
 
@@ -19,7 +19,7 @@ Each game you'll create will be available over internet and your local network, 
 
 - Easy host setup
 
-- Optimized Retroarch configuration
+- Optimized RetroArch configuration
 
 - Automatic core selection for Netplay
 

@@ -51,4 +51,4 @@ rename your `.wad` file in necessary, caps are important.
 
 > **Notes**
 > 
-> Copy your *Wolfenstein 3D*, *Spear of Destiny*, or *Super Noah's Ark 3D* DOS folder into the wolf rom folder. If while using the Retroarch ecwolf core you find you can't start Wolfenstein, make sure there's only one `.exe` in the Wolfenstein dos subfolder. Files like catalog.exe should be deleted from this subfolder.
+> Copy your *Wolfenstein 3D*, *Spear of Destiny*, or *Super Noah's Ark 3D* DOS folder into the wolf rom folder. If while using the RetroArch ecwolf core you find you can't start Wolfenstein, make sure there's only one `.exe` in the Wolfenstein dos subfolder. Files like catalog.exe should be deleted from this subfolder.

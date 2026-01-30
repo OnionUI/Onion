@@ -1,6 +1,6 @@
 ---
 slug: /apps/ota-update
-description: Update your Onion using WiFi
+description: Update your Onion using Wi-Fi
 ---
 
 # Onion OTA update
@@ -10,7 +10,7 @@ description: Update your Onion using WiFi
 
 ## Presentation
 
-Using WiFi, this app allows you to update your Onion without even touching your SD card or a computer.  
+Using Wi-Fi, this app allows you to update your Onion without even touching your SD card or a computer.  
 Allows you to select stable or beta channel.
 
 ![](./assets/ota-update.png)

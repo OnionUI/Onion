@@ -188,7 +188,7 @@ To install these you just have to extract the contents of the archive to the roo
 Ports are now launched with the script included in their own shortcut.
 These shortcut scripts are standardized in 3 different kind : 
 * Standalone port launcher (for example [Hocoslamfy](https://github.com/OnionUI/Ports-Collection/blob/main/Hocoslamfy/Roms/PORTS/Shortcuts/Reflex/Hocoslamfy.notfound))
-* Retroarch port launcher (for example [Dinothawr](https://github.com/OnionUI/Ports-Collection/blob/main/Dinothawr/Roms/PORTS/Shortcuts/Puzzle%20games/Dinothawr.notfound))
+* RetroArch port launcher (for example [Dinothawr](https://github.com/OnionUI/Ports-Collection/blob/main/Dinothawr/Roms/PORTS/Shortcuts/Puzzle%20games/Dinothawr.notfound))
 * Python port launcher (for example [Double Cross](https://github.com/OnionUI/Ports-Collection/blob/main/Double%20Cross%20v.2.0%20(PyGame)/Roms/PORTS/Shortcuts/Puzzle%20games/Double%20Cross%20v.2.0%20(PyGame).notfound))
 
 Please always use one of these 3 scripts as a template to add your own port.

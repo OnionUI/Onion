@@ -12,7 +12,7 @@ slug: /emulators/chailove
 - Bios: None
 
 
-Like Pico-8, Lowres NX, MicroW8 or LÖVE, [ChaiLove](https://docs.libretro.com/library/chailove/) is a framework for making 2D games. This Retroarch core, inspired by LÖVE engine, uses the ChaiScript scripting language. 
+Like Pico-8, Lowres NX, MicroW8 or LÖVE, [ChaiLove](https://docs.libretro.com/library/chailove/) is a framework for making 2D games. This RetroArch core, inspired by LÖVE engine, uses the ChaiScript scripting language. 
 
 However the compatibility concerns to [a short list of Löve games](https://buildbot.libretro.com/assets/cores/ChaiLove/) (less than 10 games).
 

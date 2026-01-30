@@ -70,5 +70,5 @@ In game you can double click on menu button to quickly switch to the previous ga
 
 
 :::info standalone emulators are not compatible
-Game Switcher builds on Retroarch's Save State functionality so it's not compatible with standalone emulators.
+Game Switcher builds on RetroArch's Save State functionality so it's not compatible with standalone emulators.
 :::

@@ -63,7 +63,7 @@ While MAME supports many classic arcade games, for best compatibility and perfor
 
 Both MAME and FB require your romsets to be matched exactly to the emulator version so you will need to source the recommended romsets. MAME romsets are not compatible with FB cores (and vice versa) and not every game in a full romset will be playable but the majority will be.
 
-Arcade roms in general do not play well with save states (some will work but the majority don’t), you can disable 'auto-loading of save states' in the Retroarch menu (and save content or core overrides). For more detailed information and tips on Arcade emulation, checkout the awesome [Ultimate Miyoo Mini Arcade Guide for Onion](https://www.reddit.com/r/MiyooMini/comments/vfirs8/ultimate_miyoo_mini_arcade_guide_onion_os/) by lordelan.
+Arcade roms in general do not play well with save states (some will work but the majority don’t), you can disable 'auto-loading of save states' in the RetroArch menu (and save content or core overrides). For more detailed information and tips on Arcade emulation, checkout the awesome [Ultimate Miyoo Mini Arcade Guide for Onion](https://www.reddit.com/r/MiyooMini/comments/vfirs8/ultimate_miyoo_mini_arcade_guide_onion_os/) by lordelan.
 
 ### **Arcade** (Default) ✔
 
@@ -81,7 +81,7 @@ Arcade roms in general do not play well with save states (some will work but the
 
 > **Notes**
 > 
-> MAME does not play well with save states this is a core issue and cannot be fixed. It is recommended to disable 'auto-loading of save states' in the Retroarch menu (and save core overrides).
+> MAME does not play well with save states this is a core issue and cannot be fixed. It is recommended to disable 'auto-loading of save states' in the RetroArch menu (and save core overrides).
 >
 > An onscreen message saying ‘This Game Will Not Work’ is MAME letting you know that the game is not emulated in the MAME version and you will not find a compatible/playable rom for that game.
 >
@@ -345,7 +345,7 @@ Arcade roms in general do not play well with save states (some will work but the
 > See [this link](https://docs.libretro.com/library/puae/) for more information.
 > - <kbd>SELECT</kbd> toggles the onscreen keyboard, <kbd>L</kbd> & <kbd>R</kbd> are mapped to the mouse buttons.
 > - This emulator will play Amiga CD32 games though some perform better than others.
-> - Setting CPU speed to -700 (negative 700) in the Retroarch menu may improve A1200/CD32 performance.
+> - Setting CPU speed to -700 (negative 700) in the RetroArch menu may improve A1200/CD32 performance.
 
 <img alt="verified" src="https://user-images.githubusercontent.com/44569252/189995592-9d9e4702-e237-40a2-a0b7-b5e4578f0d7d.png" />
 </td></table>
@@ -1004,7 +1004,7 @@ Arcade roms in general do not play well with save states (some will work but the
 - Extensions: `.vms` `.bin`
 - Bios: None
 > **Notes** (Credit: dwmccoy)  
-> A pixelated screen displays on launch. Open Retroarch (<kbd>MENU</kbd>+<kbd>SELECT</kbd>) and choose `Close Content`. Now select `History` and load the game file you just closed. Choose Run. The game should now display correctly but plays too fast. To fix this go back into Retroarch and set `Automatic Frame Delay` to ON in the Latency Menu.
+> A pixelated screen displays on launch. Open RetroArch (<kbd>MENU</kbd>+<kbd>SELECT</kbd>) and choose `Close Content`. Now select `History` and load the game file you just closed. Choose Run. The game should now display correctly but plays too fast. To fix this go back into RetroArch and set `Automatic Frame Delay` to ON in the Latency Menu.
 
 <img alt="experimental" src="https://user-images.githubusercontent.com/44569252/190520187-500c6659-b99b-497a-b2f3-817f1e6e2669.png" />
 </td></table>
