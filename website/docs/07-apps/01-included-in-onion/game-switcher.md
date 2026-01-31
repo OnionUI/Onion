@@ -18,7 +18,7 @@ The GameSwitcher is designed to be the central user interface of Onion. It allow
 <td width="33%" align="center" valign="top"><img src="https://user-images.githubusercontent.com/44569252/189434217-72ef0daf-c630-4ec9-b96a-30fd76cb709f.png"/></td>
 <td width="33%" align="center" valign="top"><img src="https://user-images.githubusercontent.com/44569252/189434224-aeba7b8f-c881-4784-ba2f-65c60d41d20c.png"/></td>
 </tr><tr>
-<td align="center" valign="top"><p><i>Game Switcher, detailed view with current game playtime / total playtime </i></p></td>
+<td align="center" valign="top"><p><i>Game Switcher, detailed view with current game playtime/total playtime </i></p></td>
 <td align="center" valign="top"><p><i>Game Switcher, fullscreen mode after pressing <kbd>Y</kbd></i></p></td>
 </tr></table>
 </p>

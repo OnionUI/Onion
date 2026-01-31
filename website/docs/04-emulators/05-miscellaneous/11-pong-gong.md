@@ -2,7 +2,7 @@
 slug: /emulators/pong
 ---
 
-# Pong / Gong ✔
+# Pong/Gong ✔
 
 <img src="https://raw.githubusercontent.com/OnionUI/Onion/main/static/packages/Emu/Ports%20Collection/Roms/PORTS/Imgs/Pong%20(Gong).png" align="right" width="240" />
 

@@ -67,7 +67,7 @@ Take a screenshot. a png file will be saved in /Screenshots in SD. (Same functio
 </details>
 
 
-### GameSwitcher / Main UI tight integration    
+### GameSwitcher/Main UI tight integration    
 <img src="https://user-images.githubusercontent.com/16885275/177045714-bc6ab713-4fbf-49b8-b34c-f8ac1ce5e034.png" width="350"/>
 
     Change brightness with the up and down key.    
@@ -110,7 +110,7 @@ Take a screenshot. a png file will be saved in /Screenshots in SD. (Same functio
 
     (v3.12.2)
     Option to turn off button vibrations feedback. (Add a .noVibration file in the .tmp_update folder)
-    Save states / auto save states times reduced: Faster exit time to the menu.
+    Save states/auto save states times reduced: Faster exit time to the menu.
     Onion timers integration in the Keymon, boot script and play activity UI.
     (The RetroArch ones had a bug that added hundreds of hours erratically)
     The activity time is properly paused when the device is in sleep mode, even if it is not a RetroArch game.
@@ -122,6 +122,6 @@ Take a screenshot. a png file will be saved in /Screenshots in SD. (Same functio
 
     GameSwitcher changes:      
         Total time display.    
-        Game launch / No game screen freeze fix.    
+        Game launch/No game screen freeze fix.    
     Keymon:      
         Start button waking up the device fix.    

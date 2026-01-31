@@ -16,7 +16,7 @@ slug: /emulators/superbroswar
 - Bios: None
 
 
-Super Mario War / Super Cat Wars is a fan-made multiplayer Super Mario Bros. Very customizable with many mods.
+Super Mario War/Super Cat Wars is a fan-made multiplayer Super Mario Bros. Very customizable with many mods.
 Onion includes the RetroArch core. The standalone version (which includes the multiplayer mode) will be distributed as a port in the Onion Ports repository.
 The RetroArch core version allows you to fight against enemies controlled by the computer.
 

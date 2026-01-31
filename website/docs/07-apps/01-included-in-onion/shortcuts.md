@@ -133,7 +133,7 @@ Shortcuts in Onion are managed by an app called `keymon`. This app has no graphi
         </tr>
         <tr>
             <td><kbd>Menu</kbd> + <kbd>A</kbd> <sup>hold 2s</sup></td>
-            <td>Launch / stop screen recorder</td>
+            <td>Launch/stop screen recorder</td>
             <td><em>Always</em></td>
         </tr>
         <tr>

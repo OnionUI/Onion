@@ -28,4 +28,4 @@ File Explorer is available in [Package Manager](package-manager).
 
 ## Advanced
 
-[File Explorer / DinguxCommander source code](https://github.com/OnionUI/app-DinguxCommander/).
+[File Explorer/DinguxCommander source code](https://github.com/OnionUI/app-DinguxCommander/).

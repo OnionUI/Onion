@@ -3,7 +3,7 @@ slug: /network/ssh
 ---
 
 
-# SSH / SFTP
+# SSH/SFTP
 
 *![](https://github.com/OnionUI/Onion/assets/47260768/903ea3ab-00fb-4c01-857a-ca5b5ae24f08)*
 
