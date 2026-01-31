@@ -100,7 +100,7 @@ All the necessary files (except licensed game files) are now hosted on the:
 ### New apps
 
 - **Random Game** - *launch a random game from any cached system - credit: @marchiore*
-- **Video Player** (FFplay) - *watch your favorite 4:3 or 16:9 video content - credit: Steward-Fu, @bobotrax, @schmurtzm* 
+- **Video Player** (FFplay) - *watch your favorite 4:3 or 16:9 video content - credit: Steward-Fu , @bobotrax  , @schmurtzm* 
 - **PDF Reader** (Green) - *ideal for looking up clues in game manuals  - credit: Steward-Fu*
 - **Ebook Reader** (Pixel Reader) - *well suited for reading walkthroughs on the go  - credit: [ealang](https://github.com/ealang/pixel-reader)*
 

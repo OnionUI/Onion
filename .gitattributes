@@ -21,3 +21,6 @@ website/yarn.lock linguist-generated=true
 # Prevent versioned docs from being modified (historical documentation)
 website/versioned_docs/** linguist-generated=true
 website/versioned_sidebars/** linguist-generated=true
+
+# Prevent blog posts and release notes from being modified (historical content)
+website/blog/** linguist-generated=true
