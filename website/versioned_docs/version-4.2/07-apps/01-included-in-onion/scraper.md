@@ -1,18 +1,18 @@
 ---
 slug: /apps/scraper
-description: Download your box arts using Wi-Fi
+description: Download your box arts using WiFi
 ---
 
 # Scraper
 
 A missing illustration in your game list ? Onion Scraper can solve that !
-Using Wi-Fi (so Miyoo Mini Plus only), this app allows you to download game covers without even touching your SD card or a computer.  
+Using WiFi (so Miyoo Mini Plus only), this app allows you to download game covers without even touching your SD card or a computer.  
 
 https://www.youtube.com/watch?v=lOMP0ozb0I0
 
 ## Features
 
-- Automatically download covers from 3 different sources (ScreenScraper, RetroArch and Launchbox)
+- Automatically download covers from 3 different sources (ScreenScraper, Retroarch and Launchbox)
 - Media type selection (Boxart, 3D, Screenshot, Title Screen, Marquee, Mix)
 - Prefered region selection (will give a priority to the covers from your own region)
 - Manage ScreenScraper accounts (less errors and faster when registered / logged in)
@@ -51,7 +51,7 @@ Choose the desired kind of media.
 | Screenscraper Mix V1      |![](./assets/scraper_mix1.png)       | SS               |
 | Screenscraper Mix V2      |![](./assets/scraper_mix2.png)       | SS               |
 
-<sup>SS = Screenscraper, LB = Launchbox, RA = RetroArch</sup>
+<sup>SS = Screenscraper, LB = Launchbox, RA = Retroarch</sup>
 
 
 ### Region selection
@@ -63,7 +63,7 @@ Choose your prefered region. If no media is found for your country code, other c
 Select where the covers will be searched.
 - ScreenScraper is probably the best supplied, it supports all the media types proposed in Scraper and it also allows to search by CRC which provide a lot of additional matches.
 - Launchbox offers a fast alternative to ScreenScraper.
-- RetroArch is quite fast but the match level is low.
+- Retroarch is quite fast the the match level is low.
 
 ### Screenscraper: account settings
 

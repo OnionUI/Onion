@@ -17,3 +17,7 @@ static/configs/.tmp_update/config/group text eol=lf
 
 # Prevent yarn.lock from being automatically reformatted
 website/yarn.lock linguist-generated=true
+
+# Prevent versioned docs from being modified (historical documentation)
+website/versioned_docs/** linguist-generated=true
+website/versioned_sidebars/** linguist-generated=true

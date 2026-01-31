@@ -46,7 +46,7 @@ To browse to your shared folders within Windows:
 
 1. Hit the start button
 
-2. Now, type in the IP address of your Miyoo Mini Plus in this format: \\\x.x.x.x, e.g: 
+2. Now, type in the IP address of your MMP in this format: \\\x.x.x.x, e.g: 
 
    ![](https://github.com/OnionUI/Onion/assets/47260768/9cf02397-09fb-4517-8ede-7b6dc44ee2b4)
 

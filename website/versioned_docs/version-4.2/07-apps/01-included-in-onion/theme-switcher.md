@@ -8,7 +8,7 @@ slug: /apps/theme-switcher
 
 ## Presentation
 
-Onion loves themes. Themes in Onion are two things:
+Onion loves themes. Themes in Onion are two things :
 - [A fabulous theme repository](https://github.com/OnionUI/Themes/blob/main/README.md) with a very active participation from Onion community <sup><sub>❤️</sub></sup>
 - An application called Theme-switcher included in Onion which allows to preview and change themes.
 

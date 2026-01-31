@@ -1,6 +1,6 @@
 ---
 slug: /apps/ota-update
-description: Update your Onion using Wi-Fi
+description: Update your Onion using WiFi
 ---
 
 # Onion OTA update
@@ -10,14 +10,14 @@ description: Update your Onion using Wi-Fi
 
 ## Presentation
 
-Using Wi-Fi, this app allows you to update your Onion without even touching your SD card or a computer.  
+Using WiFi, this app allows you to update your Onion without even touching your SD card or a computer.  
 Allows you to select stable or beta channel.
 
 ![](./assets/ota-update.png)
 
 ## Usage
 
-Onion OTA update is available in [Package Manager](package-manager). It will work only with Wi-Fi / Miyoo Mini Plus.
+Onion OTA update is available in [Package Manager](package-manager). It will work only with Wifi / Miyoo Mini Plus.
 
 Once installed run it from Apps section.
 
@@ -28,8 +28,8 @@ Once installed run it from Apps section.
 ### detailed features
 
 - stable or beta channel available (set on beta currently)
-- check and enable Wi-Fi connection if necessary
-- compare current Onion version vs Last released version on GitHub
+- check and enable wifi connection if necessary
+- compare current Onion version vs Last released version on Github
 - displays the size of the release before downloading
 - verify the size of the downloaded file before applying
 - check the current space available before applying update (currently 1GB is required)
