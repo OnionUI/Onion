@@ -1,6 +1,6 @@
 ---
 slug: /apps/cloud-saves
-description: Utilizing rclone, upload and download saves to and from your Miyoo Mini Plus..
+description: Utilizing rclone, upload and download saves to and from your MMP.
 ---
 
 # Cloud Saves
@@ -8,4 +8,4 @@ description: Utilizing rclone, upload and download saves to and from your Miyoo 
 
 [**Cloud Saves - official page**](https://github.com/hotcereal/cloud-saves-miyoo-mini-plus)
 
-Utilizing rclone, upload and download saves to and from your Miyoo Mini Plus..
+Utilizing rclone, upload and download saves to and from your MMP.

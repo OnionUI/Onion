@@ -7,7 +7,7 @@ slug: /network/ftp
 
 ![](https://github.com/OnionUI/Onion/assets/47260768/7bfac01d-bfaa-4565-b10b-b2b2a0ea7f9c)
 
-Much like the HTTP server, FTP provides a method of transferring files between your Miyoo Mini Plus and other devices, such as a PC, phone, or tablet. You'll need an FTP client installed on the second device.
+Much like the HTTP server, FTP provides a method of transferring files between your MMP and other devices, such as a PC, phone, or tablet. You'll need an FTP client installed on the second device.
 
 
 ## Features
