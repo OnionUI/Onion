@@ -39,9 +39,9 @@ This release introduces a new app, *Tweaks*, containing everything you need to *
 - New experimental emulator: `PCSX-ReARMed standalone` and `mame2003-extreme`
 - New theme features: custom boot/shutdown/save splash, charging animation (up to 24 frames), more options for battery percentage
 
-## Ports collection
+## Ports Collection
 
-- The *Ports collection* binaries have moved to `Roms/PORTS`, and a reinstall via Package Manager is required.
+- The *Ports Collection* binaries have moved to `Roms/PORTS`, and a reinstall via Package Manager is required.
 
 ## ScummVM game list
 

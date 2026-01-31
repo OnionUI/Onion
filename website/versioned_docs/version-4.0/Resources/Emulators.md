@@ -1279,7 +1279,7 @@ For convenience, a list of Rom folder names for all *fully supported* cores is d
 | Nintendo Super Nintendo       | `SFC`                       |
 | Nintendo Virtual Boy          | `VB`                        |
 | PICO-8                        | `PICO`                      |
-| Ports collection              | `PORTS`                     |
+| Ports Collection              | `PORTS`                     |
 | ScummVM                       | `SCUMMVM`                   |
 | Sega 32X                      | `THIRTYTWOX`                |
 | Sega CD                       | `SEGACD`                    |

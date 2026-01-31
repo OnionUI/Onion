@@ -19,7 +19,7 @@ tags: [release-notes, stable]
 
     Light sleep mode on power tap.     
     Deep sleep mode on long power press.   
-    Save and show the game switcher on a menu button tap.   
+    Save and show the GameSwitcher on a menu button tap.   
     Save and exit game on menu button long press.   
 
     The hibernation is properly implemented (The device will save and goes to sleep after X minutes without touching a button) 
@@ -67,15 +67,15 @@ Take a screenshot. a png file will be saved in /Screenshots in SD. (Same functio
 </details>
 
 
-### Game switcher / Main UI tight integration    
+### GameSwitcher / Main UI tight integration    
 <img src="https://user-images.githubusercontent.com/16885275/177045714-bc6ab713-4fbf-49b8-b34c-f8ac1ce5e034.png" width="350"/>
 
     Change brightness with the up and down key.    
-    MainUI and the game switcher are merged and they use the same launch script.     
+    MainUI and the GameSwitcher are merged and they use the same launch script.     
     The game screens are now compressed. (from 1mo to 20-100ko)    
     Bootup script rewritten.     
 
-### New ports in the port collection (Credits: r0b0-tr0n, Schmurtz)   
+### New ports in the Ports Collection (Credits: r0b0-tr0n, Schmurtz)   
 <img src="https://user-images.githubusercontent.com/16885275/177214139-b874b0e6-df84-4c9c-a12c-c827ae82747e.png" width="500"/>   
 
     New entries:  
@@ -120,7 +120,7 @@ Take a screenshot. a png file will be saved in /Screenshots in SD. (Same functio
 <img src="https://user-images.githubusercontent.com/16885275/178365221-0af0b012-0e6a-45cf-b341-823a5dfa98cc.png" width="350"/>  
 
 
-    Game switcher changes:      
+    GameSwitcher changes:      
         Total time display.    
         Game launch / No game screen freeze fix.    
     Keymon:      

@@ -23,7 +23,7 @@ The DS console had 2 screens so R2 key allow you to switch between these 2 scree
 
 The Drastic (<kbd>Menu</kbd> + <kbd>Select</kbd> ) menu has been revised and a new custom has been created to offer you more settings (CPU speed, display disposition, ... ).
 
-Drastic is the first standalone emulator (not RetroArch core) which is compatible with Onion game Switcher: you can power-off the device and resume it at boot, you can browse your last played NDS games in the game Switcher.
+Drastic is the first standalone emulator (not RetroArch core) which is compatible with Onion GameSwitcher: you can power-off the device and resume it at boot, you can browse your last played NDS games in the GameSwitcher.
 
 Drastic is compatible with the Miyoo Mini v4 resolution (752 x 560).
 
