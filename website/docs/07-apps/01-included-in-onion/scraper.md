@@ -73,7 +73,7 @@ Select where the covers will be searched.
 
 ### Toggle background Scraping
 
-Allows to download covers in background, which means that you can use your MMP while it is downloading your covers.
+Allows to download covers in background, which means that you can use your Miyoo Mini Plus while it is downloading your covers.
 
 
 

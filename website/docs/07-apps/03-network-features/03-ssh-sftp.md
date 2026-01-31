@@ -7,7 +7,7 @@ slug: /network/ssh
 
 *![](https://github.com/OnionUI/Onion/assets/47260768/903ea3ab-00fb-4c01-857a-ca5b5ae24f08)*
 
-SSH provides a secure command line method to communicate with your MMP.
+SSH provides a secure command line method to communicate with your Miyoo Mini Plus.
 
 SFTP provides a secure file transfer method.
 
