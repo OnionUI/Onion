@@ -15,7 +15,7 @@ slug: /emulators/arcade/default
 - Required rom set version: `MAME 2003-Plus Reference: Full Non-Merged Romsets`
 - Samples: Audio Samples for Mame2003Plus should be placed in the `/BIOS/mame2003-plus/samples` folder
  
-MAME does not play well with save states this is a core issue and cannot be fixed. It is recommended to disable 'auto-loading of save states' in the RetroArch menu (and save core overrides).
+MAME does not play well with save states this is a core issue and cannot be fixed. It is recommended to disable 'auto-loading of save states' in the Retroarch menu (and save core overrides).
 
 An onscreen message saying ‘This Game Will Not Work’ is MAME letting you know that the game is not emulated in the MAME version and you will not find a compatible/playable rom for that game.
 

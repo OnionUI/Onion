@@ -9,7 +9,7 @@ slug: /apps/retroarch
 
 ## Presentation
 
-A full RetroArch in such a tiny device! RetroArch is regularly updated from the official repository. 
+A full Retroarch in a such tiny device ! Retroarch is regularly updated from the offcial repository. 
 
 <p align="center"><img src="https://user-images.githubusercontent.com/44569252/189438841-f419f936-6376-436e-89b5-78ce1f88494f.png" width="320" /></p>
 
@@ -46,14 +46,14 @@ A full RetroArch in such a tiny device! RetroArch is regularly updated from the 
 
 Running from apps section allows you to start RetroArch without immediately loading a game, useful for changing global settings in RetroArch.
 
-To display the RetroArch Menu, press <kbd>Menu</kbd> + <kbd>Select</kbd>.
+To display the Retroarch Menu press <kbd>Menu</kbd> + <kbd>Select</kbd>.
 
-Many additional shortcuts are available for RetroArch; do not forget to check [Onion in-game shortcuts](shortcuts).
+Meny additional shortcuts are available for Retroarch, do not forget to check [Onion in-game shortcuts](shortcuts).
 
 
 ## Advanced
 
-### <sub>[Onion RetroArch Repository](https://github.com/OnionUI/RetroArch)</sub>
+### <sub>[Onion Retroarch Repository](https://github.com/OnionUI/RetroArch)</sub>
 
 ### <sub>customized overlays and filters</sub>
 [Here](https://github.com/OnionUI/Onion/discussions/708) you'll find some advices to customize overlays and filters.<br /><sup>(Jeltr0n overlays and filters are now directly included in Onion, no need to download them).</sup>
@@ -74,4 +74,4 @@ Many additional shortcuts are available for RetroArch; do not forget to check [O
 
 ### <sub>Overclocking</sub>
 
-Onion's RetroArch includes overclocking feature. There's no UI for it currently. This feature is described [in this post](https://github.com/OnionUI/Onion/issues/768#issuecomment-1659968668).
+Onion's Retroarch includes overclocking feature. There's no UI for it currently. This feature is described [in this post](https://github.com/OnionUI/Onion/issues/768#issuecomment-1659968668).

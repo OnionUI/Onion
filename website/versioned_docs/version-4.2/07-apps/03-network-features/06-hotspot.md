@@ -28,7 +28,7 @@ Press <kbd>A</kbd> or use the arrow keys to enable to the hotspot.
 
 ## Connecting
 
-On another device, you'll now see that your Miyoo Mini Plus is broadcasting an SSID.
+On another device you'll now see that your MMP is broadcasting an SSID.
 
 ![](https://github.com/OnionUI/Onion/assets/47260768/09d21b12-d488-461a-a31a-fef511ca6d0f)
 

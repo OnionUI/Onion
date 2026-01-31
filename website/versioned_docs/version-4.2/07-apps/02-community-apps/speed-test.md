@@ -1,6 +1,6 @@
 ---
 slug: /apps/speed-test
-description: An app to allow testing internet speed on the Miyoo Mini Plus.
+description: An app to allow testing internet speed on the miyoo mini plus.
 ---
 
 # Speed Test
@@ -9,4 +9,4 @@ description: An app to allow testing internet speed on the Miyoo Mini Plus.
 
 [**Speed Test - official page**](https://github.com/josegonzalez/miyoo-speedtest)
 
-An app to allow testing internet speed on the Miyoo Mini Plus.
+An app to allow testing internet speed on the miyoo mini plus.

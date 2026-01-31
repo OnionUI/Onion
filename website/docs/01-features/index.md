@@ -218,10 +218,10 @@ Check the <a href="included-apps">included apps</a> documentation for more infor
 For the Miyoo Mini Plus (equipped with Wi-Fi) Onion offers many additional possibilities:<br />
 - [Multiplayer/Netplay](multiplayer): play in multiplayer over internet or on your local network to your favorite retro games:
 - [Easy Netplay](multiplayer/easynetplay): play multiplayer games anywhere (compatible with GB/GBC Pokemon trading!)
-- [OTA (Over The Air) updates](apps/ota-update): update Onion directly from your Miyoo Mini Plus
+- [OTA (Over The Air) updates](apps/ota-update): update Onion directly from your MMP
 - [Automatic date/time synchronisation](apps/tweaks#set-automatically-via-the-internet) (NTP, via Tweaks app)
 - [RetroAchievements](https://www.retroarch.com/?page=achievements)
-- [Scraper](/docs/apps/scraper): import game covers directly from your Miyoo Mini Plus
+- [Scraper](/docs/apps/scraper): import game covers directly from your MMP
 - [Network Services](network-features): [Samba/SMB share](network/samba), [http server](network/http), [SSH](network/ssh), [FTP](network/ftp), [Telnet](network/telnet), [Hotspot](network/hotspot), [VNC server](network/vnc)...
 :::
 
@@ -248,7 +248,7 @@ MainUI is the main interface of Onion provided by Miyoo and modified by Onion Te
   <sup>Credit: Eggs</sup>
 - New default theme inspired by the Lilla theme by Evolve  
   <sup>Credit: DiMo</sup>
-- OnionOS icon by Evolve
+- Onion icon by Evolve
 - Textures are compressed for faster results  
   <sup>Credit: DiMo</sup>
 - Box art size fix in the included themes  

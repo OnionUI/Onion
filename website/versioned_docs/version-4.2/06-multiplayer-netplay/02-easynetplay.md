@@ -10,7 +10,7 @@ slug: /multiplayer/easynetplay
 
 *Fight against your friends or fight alongside them, the easy way!*
 
-**Easy Netplay:** a feature for convenience that streamlines multiplayer gaming: play from anywhere with all nearby Miyoo Mini Plus without any Wi-Fi or RetroArch configuration.
+**Easy Netplay:** a feature for convenience that streamlines multiplayer gaming: play from anywhere with all nearby Miyoo Mini Plus without any wifi or Retroarch configuration.
 
 This tool effortlessly sets up a hotspot, launches RetroArch and enables Netplay on the host side. On the client side, it joins the hotspot, checks the core and ROM checksums and connects to the RetroArch session, ensuring a seamless and enjoyable multiplayer experience.
 

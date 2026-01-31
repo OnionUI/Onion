@@ -42,7 +42,7 @@ Search also allows to filter a game list to include only games containing a spec
 
 - *Filter* is accessible via the `GLO Menu` When in a game list, press <kbd>Y</kbd>
   - **Filter:** Will prompt you to enter a keyword for filtering the selected game list.
-  - in your filtered game list you will find 3 new options:
+  - in your filtered game list you will find 3 new options :
     - **~Clear filter:** Will remove the current filter to display your full game list again.
     - **~Filter: "keyword":** run filter app again to quickly modify your keywork.
     - **~Refresh roms:** Will refresh roms only for the current filtered game list.

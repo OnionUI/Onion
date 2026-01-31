@@ -40,3 +40,10 @@ src/sendUDP/sendUDP
 src/tree/tree
 src/pippi/pippi
 src/cpuclock/cpuclock
+
+# AI-generated documentation files (should not be committed)
+BRANCH_WORK_SUMMARY.md
+CHANGES_SUMMARY.md
+LINK_VERIFICATION_REPORT.md
+**/MM_OCCURRENCES.md
+**/PROOFREADING_SUMMARY.md

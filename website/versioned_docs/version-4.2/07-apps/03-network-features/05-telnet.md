@@ -6,7 +6,7 @@ slug: /network/telnet
 
 *![](https://github.com/OnionUI/Onion/assets/47260768/62ee0d6c-1cce-43a4-976a-c8212850bf2f)*
 
-Telnet provides an unencrypted command line method to communicate with your Miyoo Mini Plus.
+Telnet provides an unencrypted command line method to communicate with your Miyoo Mini+.
 
 
 ## Features
