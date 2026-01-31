@@ -12,7 +12,7 @@ slug: /emulators/nds
 />
 
 - Alias: *DS*, *NDS*
-- Emulator: **Drastic**
+- Emulator: **DraStic**
 - Rom Folder: `NDS`
 - Extensions: `.nds` `.zip` `.7z` `.rar`
 - Bios: None
@@ -21,13 +21,13 @@ Nintendo DS emulator has been ported to Miyoo Mini by Steward-Fu.
 
 The DS console had 2 screens so R2 key allow you to switch between these 2 screens. It's also possible to display both screens at the same time. Then <kbd>L2</kbd> allows to display the stylus and then DPAD is used to move touch pen and A button acts touch point.
 
-The Drastic (<kbd>Menu</kbd> + <kbd>Select</kbd> ) menu has been revised and a new custom has been created to offer you more settings (CPU speed, display disposition, ... ).
+The DraStic (<kbd>Menu</kbd> + <kbd>Select</kbd> ) menu has been revised and a new custom has been created to offer you more settings (CPU speed, display disposition, ... ).
 
-Drastic is the first standalone emulator (not RetroArch core) which is compatible with Onion game Switcher : you can power-off the device and resume it at boot, you can browse your last played NDS games in the game Switcher.
+DraStic is the first standalone emulator (not RetroArch core) which is compatible with Onion GameSwitcher: you can power-off the device and resume it at boot, you can browse your last played NDS games in the GameSwitcher.
 
-Drastic is compatible with the Miyoo Mini v4 resolution (752 x 560).
+DraStic is compatible with the Miyoo Mini v4 resolution (752 x 560).
 
-For more details about advanced configuration check the [Steward-Fu Drastic Github repository](https://github.com/steward-fu/nds/blob/master/README.mdetting-file-drasticresourcessettingsjson).
+For more details about advanced configuration check the [Steward-Fu DraStic GitHub repository](https://github.com/steward-fu/nds).
 
 ## Hotkeys
 
@@ -83,10 +83,10 @@ For more details about advanced configuration check the [Steward-Fu Drastic Gith
 
 
 
-## Migration from previous Drastic versions
+## Migration from previous DraStic versions
 
-If you have installed Drastic manually with Steward-Fu version before Onion 4.3.0 then your Drastic installation will be migrated during the installation of Onion 4.3.0.
-All your saves and save states will be automatically moved to `Saves/CurrentProfile/states/Drastic`, the official Drastic version compatible with Onion will be automatically installed and your old manual Drastic installation will be removed. Your roms will not move.
+If you have installed DraStic manually with Steward-Fu version before Onion 4.3.0 then your DraStic installation will be migrated during the installation of Onion 4.3.0.
+All your saves and save states will be automatically moved to `Saves/CurrentProfile/states/Drastic`, the official DraStic version compatible with Onion will be automatically installed and your old manual DraStic installation will be removed. Your roms will not move.
 
 Note that you'll find a backup of your previous NDS installation in `Emu/NDS_old.7z` or `Emu/drastic_old.7z`.
 

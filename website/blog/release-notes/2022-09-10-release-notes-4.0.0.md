@@ -21,7 +21,7 @@ This release introduces a new app, *Tweaks*, containing everything you need to *
 - **Tweaks:** A new app for making Onion your own!
    - System settings: Startup behavior, auto-save and exit, vibration
    - **Custom shortcuts:** Single/long/double press <kbd>MENU</kbd>, and launch apps or tools via <kbd>X</kbd> or <kbd>Y</kbd> in MainUI
-      - **Known limitation:** Some apps can't be launched this way (for now only Music Player / GMU is known not to support this)
+      - **Known limitation:** Some apps can't be launched this way (for now only Music Player/GMU is known not to support this)
    - Personalize the UI: Show/hide recents/expert tabs, theme overrides
    - Advanced: Quick access to advanced emulator settings, plus a submenu to reset different settings
    - **Tools:** Sort favorites, fix thumbnails, remove OSX system files
@@ -39,9 +39,9 @@ This release introduces a new app, *Tweaks*, containing everything you need to *
 - New experimental emulator: `PCSX-ReARMed standalone` and `mame2003-extreme`
 - New theme features: custom boot/shutdown/save splash, charging animation (up to 24 frames), more options for battery percentage
 
-## Ports collection
+## Ports Collection
 
-- The *Ports collection* binaries have moved to `Roms/PORTS`, and a reinstall via Package Manager is required.
+- The *Ports Collection* binaries have moved to `Roms/PORTS`, and a reinstall via Package Manager is required.
 
 ## ScummVM game list
 

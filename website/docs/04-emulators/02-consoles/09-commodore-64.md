@@ -18,7 +18,7 @@ slug: /emulators/c64
 
 You can convert `.d64` to `.crt` thanks to [disk2easyflash](https://csdb.dk/release/?id=150323).
 
-Command line to convert :
+Command line to convert:
 `disk2easyflash.exe -c mygame.d64 mygame.crt`
 
 `.crt` games boot in only few seconds but are only compatible with Vice core and not Frodo core.

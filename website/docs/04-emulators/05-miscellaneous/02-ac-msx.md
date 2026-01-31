@@ -2,7 +2,7 @@
 slug: /emulators/msx
 ---
 
-# ASCII Corporation / Microsoft - MSX ✔
+# ASCII Corporation/Microsoft - MSX ✔
 
 <img src="https://user-images.githubusercontent.com/44569252/188293033-01d4c7e1-cf05-408a-8f2d-a29497c07064.png" align="right" width="240" />
 

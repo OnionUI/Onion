@@ -14,10 +14,10 @@ Onion loves themes. Themes in Onion are two things:
 
 <p align="center">
 
-![](./assets/themeswitcher.png)<br /><center><sub>The Game Switcher app.</sub></center>
+![](./assets/themeswitcher.png)<br /><center><sub>The GameSwitcher app.</sub></center>
 
 <a href="https://github.com/OnionUI/Themes/blob/main/README.md"><img src="https://user-images.githubusercontent.com/44569252/189352231-03ae9688-a859-41c2-a8e3-4eba8ef360c8.png" /></a>
-<center><sub>here you can see that the theme impacts the main page, the consoles sub sections and the Game Switcher</sub></center></p>
+<center><sub>here you can see that the theme impacts the main page, the consoles sub sections and the GameSwitcher</sub></center></p>
 
 
 ## Usage

@@ -48,7 +48,7 @@ Your Onion netplay session is now ready to be joined from your local home networ
 
 3. Choose `Netplay` -> `Join` -> `Standard Netplay (use current Wi-Fi)`
 
-4. Press Menu + Select to display the retroarch menu, go into Netplay and then click on :
+4. Press Menu + Select to display the retroarch menu, go into Netplay and then click on:
 	- `Refresh Netplay Host List` -> to display hosted games over internet
 	- `Refresh Netplay Lan List` -> to display hosted games over your local network
 	

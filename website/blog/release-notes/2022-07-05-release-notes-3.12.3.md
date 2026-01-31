@@ -19,7 +19,7 @@ tags: [release-notes, stable]
 
     Light sleep mode on power tap.     
     Deep sleep mode on long power press.   
-    Save and show the game switcher on a menu button tap.   
+    Save and show the GameSwitcher on a menu button tap.   
     Save and exit game on menu button long press.   
 
     The hibernation is properly implemented (The device will save and goes to sleep after X minutes without touching a button) 
@@ -67,18 +67,18 @@ Take a screenshot. a png file will be saved in /Screenshots in SD. (Same functio
 </details>
 
 
-### Game switcher / Main UI tight integration    
+### GameSwitcher/Main UI tight integration    
 <img src="https://user-images.githubusercontent.com/16885275/177045714-bc6ab713-4fbf-49b8-b34c-f8ac1ce5e034.png" width="350"/>
 
     Change brightness with the up and down key.    
-    MainUI and the game switcher are merged and they use the same launch script.     
+    MainUI and the GameSwitcher are merged and they use the same launch script.     
     The game screens are now compressed. (from 1mo to 20-100ko)    
     Bootup script rewritten.     
 
-### New ports in the port collection (Credits : r0b0-tr0n, Schmurtz)   
+### New ports in the Ports Collection (Credits: r0b0-tr0n, Schmurtz)   
 <img src="https://user-images.githubusercontent.com/16885275/177214139-b874b0e6-df84-4c9c-a12c-c827ae82747e.png" width="500"/>   
 
-    New entries :  
+    New entries:  
     Quake   
     CannonBall   
     Flashback   
@@ -92,7 +92,7 @@ Take a screenshot. a png file will be saved in /Screenshots in SD. (Same functio
 
 [Ports Help (Credits : r0b0-tr0n)](https://github.com/OnionUI/Onion/files/9044872/Ports.Help.pdf)
 
-### Revamped Wiki (Credits : Olywa123) 
+### Revamped Wiki (Credits: Olywa123) 
 [<img title="GBMini by Kitsuvi" width="350px" src="https://user-images.githubusercontent.com/16885275/177215817-21a20392-3cd3-4b37-a667-ee42dbc93450.jpg?raw=true" />](https://github.com/Sichroteph/Onion/wiki/2.-Onion-Emulators-&-Ports) &nbsp; 
 
 ### Gamelists are accepted in every console by default (Olywa123)
@@ -110,18 +110,18 @@ Take a screenshot. a png file will be saved in /Screenshots in SD. (Same functio
 
     (v3.12.2)
     Option to turn off button vibrations feedback. (Add a .noVibration file in the .tmp_update folder)
-    Save states / auto save states times reduced : Faster exit time to the menu.
+    Save states/auto save states times reduced: Faster exit time to the menu.
     Onion timers integration in the Keymon, boot script and play activity UI.
     (The RetroArch ones had a bug that added hundreds of hours erratically)
     The activity time is properly paused when the device is in sleep mode, even if it is not a RetroArch game.
     
-    (v3.12.3) (Files updated : onionLauncher, keymon_onion, menuBar.png)     
+    (v3.12.3) (Files updated: onionLauncher, keymon_onion, menuBar.png)     
 
 <img src="https://user-images.githubusercontent.com/16885275/178365221-0af0b012-0e6a-45cf-b341-823a5dfa98cc.png" width="350"/>  
 
 
-    Game switcher changes :      
+    GameSwitcher changes:      
         Total time display.    
-        Game launch / No game screen freeze fix.    
-    Keymon :      
+        Game launch/No game screen freeze fix.    
+    Keymon:      
         Start button waking up the device fix.    

@@ -99,7 +99,7 @@ The **Search** application is the perfect companion for large game collections. 
 
 :::note <a href="apps/theme-switcher">Theme-switcher overview</a>
 Onion loves themes. Onion **Themes** allows you to customize the background, the entry categories, console icons, music background, fonts... And best of all, the chosen theme impacts all Onion's internal applications!<br />
-**Themes** in Onion are two things : <br /> 
+**Themes** in Onion are two things: <br /> 
 - [A fabulous theme repository](https://github.com/OnionUI/Themes/blob/main/README.md) with a very active participation from Onion community <sup><sub>❤️</sub></sup>
 - An application called <a href="apps/theme-switcher">Theme-switcher</a> included in Onion which allows to preview and change themes.
 :::
@@ -110,7 +110,7 @@ Onion loves themes. Onion **Themes** allows you to customize the background, the
 <p align="center"><img src={require('./assets/activity-tracker.webp').default} style={{width: 320}} /></p>
 
 :::note <a href="apps/activity-tracker">Activity Tracker overview</a>
-Thanks to **Activity Tracker** app you can : 
+Thanks to **Activity Tracker** app you can: 
 - Track your game playtimes.
 - View your total playtime in the top bar.
 - Share your playtimes by taking a screenshot (press <kbd>MENU</kbd>+<kbd>POWER</kbd> - screenshot is saved in `Screenshots` folder).
@@ -240,7 +240,7 @@ Simply copy this folder when you want to backup your data.
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179305495-2ae1f522-6918-469f-a2eb-63dd30262e17.png" width="54" /></sup>MainUI improvements
 
 :::note MainUI improvements
-MainUI is the main interface of Onion provided by Miyoo and modified by Onion Team with these improvements :
+MainUI is the main interface of Onion provided by Miyoo and modified by Onion Team with these improvements:
 
 - Battery percentage is shown in the top bar  
   > You can configure the battery percentage visibility and color in the theme configuration file. It is also possible to make a theme that only shows the percentage text.

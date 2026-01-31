@@ -3,7 +3,7 @@ slug: /ports
 ---
 
 
-# Ports collection
+# Ports Collection
 
 
 *![](https://user-images.githubusercontent.com/98862735/177056415-02a5f05e-7e95-4184-900a-c0e7945d9207.png)*
@@ -173,7 +173,7 @@ To install these you just have to extract the contents of the archive to the roo
 5. Extract the archive to the root of your SD card  
 6. Manually populate each `Roms/PORTS/Games/[Game folder]/` with your old assets, as detailed in the `_required_files.txt` file for each  
 7. We have pre-configured many things, so during your copy paste of your assets, do not overwrite the existing files  
-8. Run the `~import ports` script from the ports games list : it will refresh the list of ports which are present  
+8. Run the `~import ports` script from the ports games list: it will refresh the list of ports which are present  
 
 > **Notes:**  
 > Also see [this helpful video tutorial](https://www.youtube.com/watch?v=ifBQ-1KC570) by _Retro Breeze_  
@@ -210,11 +210,11 @@ Please always use one of these 3 scripts as a template to add your own port.
 **Specific to RetroArch script:**
 
  * `Core`: then name of the core that will be used without `_libretro.so`, for example `ecwolf` for Wolfenstein  
- * `RomDir`: similar to `GameDir` : it is the path where your rom is located in `Roms/PORTS/Games/[Game folder]/`  
+ * `RomDir`: similar to `GameDir`: it is the path where your rom is located in `Roms/PORTS/Games/[Game folder]/`  
  * `RomFile`: it is the name of the rom that will be passed as a parameter to the RetroArch core, will be also used to detect the presence of the game when running `~Import ports` script from the rom list. (the `Core` will be used for detection if not specified) 
 
 
-> **Notes about the `~Import ports` script :**  
+> **Notes about the `~Import ports` script:**  
 > The import script reads the content of each shortcut (`.port` and `.notfound`) files to find the field `GameDataFile`  
 > `GameDataFile="CP01.MAP"` for example. If the file `CP01.MAP` exists in the `Roms/PORTS/Games/[Game folder]/` directory, then the shortcut is renamed with `.port` extension and will be displayed in the roms list otherwise it will be named with `.notfound`  
 

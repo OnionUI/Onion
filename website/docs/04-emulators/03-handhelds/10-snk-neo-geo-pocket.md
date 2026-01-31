@@ -2,7 +2,7 @@
 slug: /emulators/ngp
 ---
 
-# SNK - Neo Geo Pocket / Color ✔
+# SNK - Neo Geo Pocket/Color ✔
 
 <img src="https://user-images.githubusercontent.com/44569252/188292915-121919d6-665e-499c-a3e8-451e31d1f54d.png" align="right" width="240" />
 

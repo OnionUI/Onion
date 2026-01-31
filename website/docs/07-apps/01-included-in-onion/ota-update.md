@@ -29,7 +29,7 @@ Once installed run it from Apps section.
 
 - stable or beta channel available (set on beta currently)
 - check and enable Wi-Fi connection if necessary
-- compare current Onion version vs last released version on Github
+- compare current Onion version vs last released version on GitHub
 - displays the size of the release before downloading
 - verify the size of the downloaded file before applying
 - check the current space available before applying update (currently 1GB is required)

@@ -22,7 +22,7 @@ https://www.youtube.com/watch?v=8-GnEP1zC6g
 - Backup process to avoid any data loss
 
 :::info No GBA support
-This feature only supports **GB** and **GBC** games (**Red**, **Blue**, **Yellow** / **Gold**, **Silver**, **Crystal**)  
+This feature only supports **GB** and **GBC** games (**Red**, **Blue**, **Yellow**/**Gold**, **Silver**, **Crystal**)  
 :::
 
 

@@ -45,7 +45,7 @@ GLO Menu is a native application of Onion, it is installed by default.
 GLO Menu allows you to create your own scripts.
 The GLO scripts are located in `sdcard/App/romscripts`. 
 
-The existing scripts are a great source of inspiration for your future script. Here some examples : 
+The existing scripts are a great source of inspiration for your future script. Here some examples: 
 - [Scraper script](https://github.com/OnionUI/Onion/blob/main/static/build/App/romscripts/emu/Scraper.sh) (Good example to use rom path)
 - [Random game script](https://github.com/OnionUI/Onion/blob/main/static/packages/App/Random%20Game/App/romscripts/Random%20game.sh) (good example to get the current section)
 - [Netplay script](https://github.com/OnionUI/Onion/blob/main/static/build/App/romscripts/emu/Netplay.sh) (good example for dynamic labels entry in GLO menu)

@@ -25,4 +25,4 @@ A viewer for your screenshots.
 
 ## Advanced
 
-[File Explorer / DinguxCommander source code](https://github.com/OnionUI/app-DinguxCommander/).
+[File Explorer/DinguxCommander source code](https://github.com/OnionUI/app-DinguxCommander/).
