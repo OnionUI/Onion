@@ -92,7 +92,7 @@ Take a screenshot. a png file will be saved in /Screenshots in SD. (Same functio
 
 [Ports Help (Credits : r0b0-tr0n)](https://github.com/OnionUI/Onion/files/9044872/Ports.Help.pdf)
 
-### Revamped Wiki (Credits : Olywa123) 
+### Revamped Wiki (Credits: Olywa123) 
 [<img title="GBMini by Kitsuvi" width="350px" src="https://user-images.githubusercontent.com/16885275/177215817-21a20392-3cd3-4b37-a667-ee42dbc93450.jpg?raw=true" />](https://github.com/Sichroteph/Onion/wiki/2.-Onion-Emulators-&-Ports) &nbsp; 
 
 ### Gamelists are accepted in every console by default (Olywa123)
