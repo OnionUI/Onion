@@ -4,7 +4,7 @@
 
 ### Core team
 
-- **Aemiii91** - *Lead Developer - tremendous work reorganizing the github, automations and workflow. Actively working to improve the binaries, build structure and implement amazing new features such as Tweaks, Search/Filter and a simplified installation process.*
+- **Aemiii91** - *Lead Developer - tremendous work reorganizing the GitHub, automations and workflow. Actively working to improve the binaries, build structure and implement amazing new features such as Tweaks, Search/Filter and a simplified installation process.*
 - **Schmurtz** - *Technical Research & Development - Contributes greatly to Onion features like Ports, the Favorite Collection Manager, Easy Logotweak & new keymon features. He is also constantly finding ways to improve the RetroArch experience and enhance the available cores.*
 - **Olywa123** - *Documentation Management & Support - Amazing help to hundreds of Onion users, he made a lot of contributions like various documents/wiki/tutorials that eased the user experience tremendously.*
 - **DiMo** - *UI/UX Design - A lot of contributions, he made the default Onion theme and helped to improve theme capabilities, charging animations.*
