@@ -27,7 +27,7 @@ DraStic is the first standalone emulator (not RetroArch core) which is compatibl
 
 DraStic is compatible with the Miyoo Mini v4 resolution (752 x 560).
 
-For more details about advanced configuration check the [Steward-Fu DraStic GitHub repository](https://github.com/steward-fu/nds/blob/master/README.mdetting-file-drasticresourcessettingsjson).
+For more details about advanced configuration check the [Steward-Fu DraStic GitHub repository](https://github.com/steward-fu/nds).
 
 ## Hotkeys
 
