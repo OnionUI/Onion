@@ -39,7 +39,7 @@ The `Imgs` folder name is case sensitive (must have a capital `I`). Examples wou
 
 ### Media selection
 
-**Use a (_Great!_) Custom Image Template Designed for OnionOS:**
+**Use a (_Great!_) Custom Image Template Designed for Onion:**
 
 **_Examples:_**<br/>
 ![image](https://user-images.githubusercontent.com/56418567/212767886-753a83ae-2f56-4255-a22d-f658ba656690.png)
@@ -83,6 +83,6 @@ This will automatically scrape images to the correct folders for Miyoo Mini.
 https://www.youtube.com/watch?v=RFu2DKRDq7o
 
 
-#### EASY Scraping art for retro games (Miyoo Mini Skraper tutorial on OnionOS) _by TechDweeb_
+#### EASY Scraping art for retro games (Miyoo Mini Skraper tutorial on Onion) _by TechDweeb_
 
 https://www.youtube.com/watch?v=DguILcIyZQE&ab_channel=TechDweeb

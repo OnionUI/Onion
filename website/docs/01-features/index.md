@@ -248,7 +248,7 @@ MainUI is the main interface of Onion provided by Miyoo and modified by Onion Te
   <sup>Credit: Eggs</sup>
 - New default theme inspired by the Lilla theme by Evolve  
   <sup>Credit: DiMo</sup>
-- OnionOS icon by Evolve
+- Onion icon by Evolve
 - Textures are compressed for faster results  
   <sup>Credit: DiMo</sup>
 - Box art size fix in the included themes  
