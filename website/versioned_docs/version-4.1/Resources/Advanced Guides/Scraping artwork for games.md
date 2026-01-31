@@ -44,7 +44,7 @@ The `Imgs` folder name is case sensitive (must have a capital `I`). Examples wou
 - Via the "ALL SYSTEMS"selection on the left, go to the "_MEDIA_" tab -> Clear the "_Fetched Media List_" of all but one image type by pressing the "_minus_" button.
 - Change the "_Media type:_" to: "_USER PROVIDED MIX_" and click on the file icon to the right
 - Select the extracted: `Miyoo Mini Big Zoom.xml`
-- Disable settings "_Resize width to_" , "_Resize height to_" , "_Keep Image Ratio_" 
+- Disable settings "_Resize width to_", "_Resize height to_", "_Keep Image Ratio_" 
 
 > _**- OR -**_
 

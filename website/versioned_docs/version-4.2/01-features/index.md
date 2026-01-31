@@ -90,7 +90,7 @@ Search also allows to filter a game list to include only games containing a spec
 
 :::note <a href="apps/theme-switcher">Theme-switcher overview</a>
 Onion loves themes. In Onion themes allow to customize the background, the entry categories, console icons, music bacground, fonts... And best of all, the chosen theme impacts all Onion's internal applications!<br />
-Themes in Onion are two things : <br /> 
+Themes in Onion are two things: <br /> 
 - [A fabulous theme repository](https://github.com/OnionUI/Themes/blob/main/README.md) with a very active participation from Onion community <sup><sub>❤️</sub></sup>
 - An application called <a href="apps/theme-switcher">Theme-switcher</a> included in Onion which allows to preview and change themes.
 :::
@@ -101,7 +101,7 @@ Themes in Onion are two things : <br />
 <p align="center"><img src={require('./assets/activity-tracker.webp').default} style={{width: 320}} /></p>
 
 :::note <a href="apps/activity-tracker">Activity Tracker overview</a>
-Thanks to `Activity Tracker` app you can : 
+Thanks to `Activity Tracker` app you can: 
 - Track your game playtimes.
 - View your total playtime in the top bar.
 - Share your playtimes by taking a screenshot (press <kbd>MENU</kbd>+<kbd>POWER</kbd> - screenshot is saved in `Screenshots` folder).
@@ -179,7 +179,7 @@ More than 60 game ports pre-configured !
 <img title="Included apps" src={require('./assets/apps.gif').default} style={{width: 320}} />
 
 :::note <a href="included-apps">Included apps</a>
-Onion also contains many additional apps like :<br />
+Onion also contains many additional apps like:<br />
 - [a video player](apps/video-player)
 - [a music player](apps/music-player)
 - [a file explorer](apps/file-explorer)
@@ -196,13 +196,13 @@ Check the <a href="included-apps">included apps</a> documentation for more infor
 
 :::note <a href="network-features">Network Features</a>
 For the Miyoo Mini Plus (equipped with Wi-Fi) Onion offers many additional possibilities:<br />
-- [Multiplayer / Netplay](multiplayer) : play in multiplayer over internet or on you local network to your favorite retro games:
+- [Multiplayer / Netplay](multiplayer): play in multiplayer over internet or on you local network to your favorite retro games:
 - [Easy Netplay](multiplayer/easynetplay): play multiplayer games anywhere (compatible with GB/GBC Pokemon trading !)
 - [OTA (Over The Air) updates](apps/ota-update): update Onion directly from your Miyoo Mini Plus
 - [Automatic date/time synchronisation](apps/tweaks#set-automatically-via-the-internet) (NTP, via Tweaks app)
 - [Retroachivements](https://www.retroarch.com/?page=achievements)
 - [Scraper](/docs/apps/scraper): import game covers directly from your Miyoo Mini Plus
-- [Network Services](network-features) : [Samba/SMB share](network/samba), [http server](network/http), [SSH](network/ssh), [FTP](network/ftp), [Telnet](network/telnet), [Hotspot](network/hotspot)...
+- [Network Services](network-features): [Samba/SMB share](network/samba), [http server](network/http), [SSH](network/ssh), [FTP](network/ftp), [Telnet](network/telnet), [Hotspot](network/hotspot)...
 :::
 
 
@@ -220,7 +220,7 @@ Simply copy this folder when you want to backup your data.
 ## <sup><img align="left" src="https://user-images.githubusercontent.com/44569252/179305495-2ae1f522-6918-469f-a2eb-63dd30262e17.png" width="54" /></sup>MainUI improvements
 
 :::note MainUI improvements
-MainUI is the main interface of Onion provided by Miyoo and modified by Onion Team with these improvements :
+MainUI is the main interface of Onion provided by Miyoo and modified by Onion Team with these improvements:
 
 - Battery percentage is shown in the top bar  
   > You can configure the battery percentage visibility and color in the theme configuration file. It is also possible to make a theme that only shows the percentage text.

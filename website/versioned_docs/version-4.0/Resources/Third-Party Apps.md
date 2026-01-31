@@ -29,11 +29,11 @@ This utility will modify your firmware, there is a (very low) risk of bricking y
 
 Improving on the [Steward-fu release](https://steward-fu.github.io/website/handheld/miyoo-mini/parasyte_build_ffplay.htm), the dependency on Parasyte is now removed with necessary libraries included.  
 Many formats are supported, after a few tests a little everything below 1080p is supported. The easiest way is to test!
-### Installation :
+### Installation:
 - Download the [latest version of ffplay](https://github.com/bobotrax/ffplay_Miyoo/releases) from the release page.
 - Extract the contents of the archive to the root of the SD card.
 - Place your videos in the `Videos` folder (Media/Videos), you can create Subfolders can be used inside your Videos folders but ONLY one level deep (i.e. Media/Videos/DargonBall).
-### Usage :
+### Usage:
 A new `Videos` item is now available in `Games` your videos will be accessible there.<br/>
 You can delete a video with the <kbd>SELECT</kbd> key and click on `Delete`.<br/>
 If you don't see your videos think to refresh the list with the key <kbd>SELECT</kbd> on the `Videos` item as for the `ROMS`.
@@ -109,7 +109,7 @@ If you don't see your videos think to refresh the list with the key <kbd>SELECT<
 </tbody>
 </table>
 
-### How to force 16:9 startup :
+### How to force 16:9 startup:
 Rename the file Emu/ffplay/bin/ffplay to Emu/ffplay/bin/ffplay_4_3<br/>
 Then<br/>
 Rename the file Emu/ffplay/bin/ffplay_16_9 to Emu/ffplay/bin/ffplay<br/>

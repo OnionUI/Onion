@@ -75,10 +75,10 @@ Take a screenshot. a png file will be saved in /Screenshots in SD. (Same functio
     The game screens are now compressed. (from 1mo to 20-100ko)    
     Bootup script rewritten.     
 
-### New ports in the port collection (Credits : r0b0-tr0n, Schmurtz)   
+### New ports in the port collection (Credits: r0b0-tr0n, Schmurtz)   
 <img src="https://user-images.githubusercontent.com/16885275/177214139-b874b0e6-df84-4c9c-a12c-c827ae82747e.png" width="500"/>   
 
-    New entries :  
+    New entries:  
     Quake   
     CannonBall   
     Flashback   
@@ -110,18 +110,18 @@ Take a screenshot. a png file will be saved in /Screenshots in SD. (Same functio
 
     (v3.12.2)
     Option to turn off button vibrations feedback. (Add a .noVibration file in the .tmp_update folder)
-    Save states / auto save states times reduced : Faster exit time to the menu.
+    Save states / auto save states times reduced: Faster exit time to the menu.
     Onion timers integration in the Keymon, boot script and play activity UI.
     (The RetroArch ones had a bug that added hundreds of hours erratically)
     The activity time is properly paused when the device is in sleep mode, even if it is not a RetroArch game.
     
-    (v3.12.3) (Files updated : onionLauncher, keymon_onion, menuBar.png)     
+    (v3.12.3) (Files updated: onionLauncher, keymon_onion, menuBar.png)     
 
 <img src="https://user-images.githubusercontent.com/16885275/178365221-0af0b012-0e6a-45cf-b341-823a5dfa98cc.png" width="350"/>  
 
 
-    Game switcher changes :      
+    Game switcher changes:      
         Total time display.    
         Game launch / No game screen freeze fix.    
-    Keymon :      
+    Keymon:      
         Start button waking up the device fix.    
