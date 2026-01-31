@@ -41,7 +41,7 @@ Using Splore you can browse, search and play through cartridges listed on the Le
 * **Work in Progress**: Incomplete cartridges currently in development.
 * **Jam**: Cartridges developed for game jam events hosted regularly by Lexaloffle.
 * **Lucky Draw**: A random game selection.
-* **Search**: Allows you to search for cartridges based on their names and description. Use the the up/down buttons to select an alphanumeric character and the right/left buttons to move between slots.
+* **Search**: Allows you to search for cartridges based on their names and description. Use the up/down buttons to select an alphanumeric character and the right/left buttons to move between slots.
 * **/ (File Browser)**: Allows you to browse the local filesystem. You can access the cache for previously launched Splore games (`splore`) or the cartridges located in your `/Roms/PICO/` directory.
 
 Press <kbd>START</kbd> while selecting a game to access game options. From here you can:

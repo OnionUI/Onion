@@ -55,7 +55,7 @@ Many additional shortcuts are available for RetroArch, do not forget to check [O
 
 ## Advanced
 
-### <sub>[Onion Retroarch Repository](https://github.com/OnionUI/RetroArch)</sub>
+### <sub>[Onion RetroArch Repository](https://github.com/OnionUI/RetroArch)</sub>
 
 ### <sub>Customized overlays and filters</sub>
 You'll find some advices to customize overlays and filters [Here](https://github.com/OnionUI/Onion/discussions/708).<br /><sup>(Jeltr0n overlays and filters are now directly included in Onion, no need to download them).</sup>

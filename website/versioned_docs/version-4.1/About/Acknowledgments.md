@@ -13,7 +13,7 @@
 ### Contributors
 - **jimgray** - *the original creator of Onion, without him the Onion community wouldn't have existed!*
 - **eggs** - *His retroarch port and tools are incredible. We are so gifted to have him working on this handheld. He also made the background onion process (keymon) that we still use in a modified form.*
-- **[Shaun Inman](http://shauninman.com/)** - *Inspiration, miyoo mini and mainUI hacks, commander port*
+- **[Shaun Inman](http://shauninman.com/)** - *Inspiration, Miyoo Mini and mainUI hacks, commander port*
 - **[Introkun](https://github.com/introkun)** - *Improving apps (Clock, infoPanel/Screenshot Viewer), various optimisations, debugging & code reviews*
 - **[StupidHoroscope](https://github.com/StupidHoroscope)** - *For his excellent build of ScummVM and ports/engines such as NBlood, Rednukem & PCExhumed*
 - **[marchiore](https://github.com/marchiore)** - *Created the random game app for V4.1*

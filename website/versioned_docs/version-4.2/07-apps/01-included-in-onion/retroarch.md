@@ -53,7 +53,7 @@ Many additional shortcuts are available for RetroArch; do not forget to check [O
 
 ## Advanced
 
-### <sub>[Onion Retroarch Repository](https://github.com/OnionUI/RetroArch)</sub>
+### <sub>[Onion RetroArch Repository](https://github.com/OnionUI/RetroArch)</sub>
 
 ### <sub>customized overlays and filters</sub>
 [Here](https://github.com/OnionUI/Onion/discussions/708) you'll find some advices to customize overlays and filters.<br /><sup>(Jeltr0n overlays and filters are now directly included in Onion, no need to download them).</sup>
@@ -74,4 +74,4 @@ Many additional shortcuts are available for RetroArch; do not forget to check [O
 
 ### <sub>Overclocking</sub>
 
-Onion's Retroarch includes overclocking feature. There's no UI for it currently. This feature is described [in this post](https://github.com/OnionUI/Onion/issues/768#issuecomment-1659968668).
+Onion's RetroArch includes overclocking feature. There's no UI for it currently. This feature is described [in this post](https://github.com/OnionUI/Onion/issues/768#issuecomment-1659968668).

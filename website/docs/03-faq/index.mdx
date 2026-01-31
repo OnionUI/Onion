@@ -119,7 +119,7 @@ Your first task is to find cheat files for your games (usually provided in `.cht
 2. Extract it and go into the `cht` directory (you will see cheats sorted by console),
 3. Copy directories for consoles you want to your Miyoo Mini's SD card, into the `RetroArch/.retroarch/cheats` directory (you might have to enable showing hidden directories if you can't see the `.retroarch` directory),
 4. Inside the `.retroarch` directory there will be a `retroarch.cfg` file, which you need to open in a text editor. Find the line with the option `quick_menu_show_cheats` and set it to `"true"` (so the whole line should be `quick_menu_show_cheats = "true"`),
-5. Eject your SD card from your computer and plug it into the Miyoo Mini, then open up your favourite game (for which you have downloaded cheats),
+5. Eject your SD card from your computer and plug it into the Miyoo Mini, then open up your favorite game (for which you have downloaded cheats),
 6. Enter the RetroArch menu (press `Menu`, hold it, then press `Select`) and find the `Cheats › Load Cheat File (Replace)` option. There you can find the cheat file in one of the directories. After choosing it you will be returned back to the cheats menu, but now you should see a number of cheats at the bottom (e.g. `Cheat #0`),
 7. Select one of them, then toggle the `Enabled` switch to enable it.
 
@@ -566,7 +566,7 @@ Resetting your global configuration from within RA itself will break Onion funct
 - Scroll to `Advanced`  and choose `Reset Settings...` › `Reset RetroArch main configuration`
 
 > Notes:  
-> You should always in the first instance, save your changes to Retroarch settings as "Overrides" rather than saving changes to the main (global) configuration (see other questions in this FAQ re saving RetroArch settings).
+> You should always in the first instance, save your changes to RetroArch settings as "Overrides" rather than saving changes to the main (global) configuration (see other questions in this FAQ re saving RetroArch settings).
 > This will make it far easier to revert a change by deleting the overrides from within the RA `Overrides` menu.  
 
 </details>
@@ -676,7 +676,7 @@ After the boot, the first binary launched from the SD card by the firmware is th
 
 It is possible to overclock your device starting from Onion 4.2.0. The speed improvement can be up to 20% and is very noticeable. The current overclocking procedure is a manual process.
 
-To overclock RetroArch for all cores, create a `cpuclock.txt` text file in the main RetroArch folder (e.g. `Retroarch/cpuclock.txt`) containing just the 4-digit Mhz number of the desired overclock speed (e.g. `1600`).
+To overclock RetroArch for all cores, create a `cpuclock.txt` text file in the main RetroArch folder (e.g. `RetroArch/cpuclock.txt`) containing just the 4-digit Mhz number of the desired overclock speed (e.g. `1600`).
 
 To overclock just a specific RetroArch core, create the `cpuclock.txt` text file within that core's configuration folder in `Saves/CurrentProfile/config/<core>/`. For example, if you want to improve the PSX speed of PCSX-ReARMed (which will allow you to enable *enhanced resolution* for many additional games), you can create a `cpuclock.txt` file containing `1600` inside `Saves/CurrentProfile/config/PCSX-ReARMed/`.
 

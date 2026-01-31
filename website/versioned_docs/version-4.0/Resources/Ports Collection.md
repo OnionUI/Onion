@@ -1,7 +1,7 @@
 ![Ports](https://user-images.githubusercontent.com/98862735/177056415-02a5f05e-7e95-4184-900a-c0e7945d9207.png)
 
 Onion 3.11 introduced a new *Ports Collection* feature. 
-The Ports Collection allows you to have all your favourite ports located in one `Ports` *system* folder within the Games tab. 
+The Ports Collection allows you to have all your favorite ports located in one `Ports` *system* folder within the Games tab. 
 Several ports are already configured for use with this feature (you will need to add your game files) and more will be added in future releases. 
 
 Included Ports so far are: Cave Story, Doom, Doom 2, Duke Nukem 3D, Ganbare natsuki san, vvvvvv
