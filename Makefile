@@ -287,6 +287,7 @@ SHELL_TEST_DIR := $(TEST_SRC_DIR)/shell-tests
 
 $(CACHE)/.shell-test-image: $(SHELL_TEST_DIR)/Dockerfile
 	docker build -t $(SHELL_TEST_IMAGE) $(SHELL_TEST_DIR)
+	@mkdir -p $(CACHE)
 	$(createfile) $(CACHE)/.shell-test-image
 
 test-shell: $(CACHE)/.shell-test-image
