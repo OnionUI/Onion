@@ -5,7 +5,12 @@
 #include <stdio.h>
 
 #define MIYOO283 283
+#define MIYOO285 285
 #define MIYOO354 354
+
+#define IS_MIYOO_PLUS_OR_FLIP() (DEVICE_ID == MIYOO285 || DEVICE_ID == MIYOO354)
+#define HAS_AXP() IS_MIYOO_PLUS_OR_FLIP()
+#define HAS_WIFI() IS_MIYOO_PLUS_OR_FLIP()
 
 static int DEVICE_ID;
 static char DEVICE_SN[13];
@@ -13,6 +18,7 @@ static char DEVICE_SN[13];
 /**
  * @brief Get device model
  * MM = Miyoo mini
+ * MMF = Miyoo mini flip
  * MMP = Miyoo mini plus
  */
 

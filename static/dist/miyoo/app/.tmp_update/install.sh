@@ -15,6 +15,7 @@ export PATH="$sysdir/bin:$PATH"
 unset LD_PRELOAD
 
 MODEL_MM=283
+MODEL_MMF=285
 MODEL_MMP=354
 
 install_ra=1
@@ -142,7 +143,14 @@ cleanup() {
 DEVICE_ID=0
 
 check_device_model() {
-    DEVICE_ID=$([ -f /customer/app/axp_test ] && echo $MODEL_MMP || echo $MODEL_MM)
+    # Check for hall sensor (more reliable) OR event1 for Flip detection
+    if [ -e /sys/devices/soc0/soc/soc:hall-mh248/hallvalue ] || [ -e /dev/input/event1 ]; then
+        DEVICE_ID=$MODEL_MMF
+    elif [ -f /customer/app/axp_test ]; then
+        DEVICE_ID=$MODEL_MMP
+    else
+        DEVICE_ID=$MODEL_MM
+    fi
     echo -n "$DEVICE_ID" > /tmp/deviceModel
 }
 

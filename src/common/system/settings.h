@@ -67,6 +67,7 @@ typedef struct settings_s {
     char blue_light_time[16];
     char blue_light_time_off[16];
     bool rtc_available;
+    int lid_close_action;
 
     char mainui_button_x[JSON_STRING_LEN];
     char mainui_button_y[JSON_STRING_LEN];
@@ -121,6 +122,7 @@ static settings_s __default_settings = (settings_s){
     .blue_light_time = "20:00",
     .blue_light_time_off = "08:00",
     .pwmfrequency = 7,
+    .lid_close_action = 0,
     .mainui_button_x = "",
     .mainui_button_y = "",
     //utility
@@ -232,6 +234,7 @@ void settings_load(void)
     config_get("display/blueLightRGB", CONFIG_INT, &settings.blue_light_rgb);
     config_get("pwmfrequency", CONFIG_INT, &settings.pwmfrequency);
     config_get("recCountdown", CONFIG_INT, &settings.rec_countdown);
+    config_get("flip/lidCloseAction", CONFIG_INT, &settings.lid_close_action);
 
     if (config_flag_get(".menuInverted")) { // flag is deprecated, but keep compatibility
         settings.ingame_single_press = 2;
@@ -362,6 +365,7 @@ void settings_save(void)
     config_setNumber("display/blueLightRGB", settings.blue_light_rgb);
     config_setString("display/blueLightTime", settings.blue_light_time);
     config_setString("display/blueLightTimeOff", settings.blue_light_time_off);
+    config_setNumber("flip/lidCloseAction", settings.lid_close_action);
 
     config_setNumber("pwmfrequency", settings.pwmfrequency);
     // remove deprecated flags
