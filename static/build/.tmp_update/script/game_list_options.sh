@@ -203,7 +203,15 @@ main() {
     fi
 
     if [ $current_tab -eq $TAB_GAMES ] || [ $current_tab -eq $TAB_EXPERT ]; then
+        fz_file="$(realpath "$(dirname "$rompath")")"/.fz
+        extract_roms_state=""
+        if [ -f "$fz_file" ];then
+          extract_roms_state="On"
+        else
+          extract_roms_state="Off"
+        fi
         add_menu_option refresh_roms "Refresh list" "Refresh the rom list\n(re-scan for new games)"
+        add_menu_option extract_roms "Pre-extract Roms: $extract_roms_state" "Extracts roms for faster loads\nwhile in GameSwitcher"
     fi
 
     add_script_files "$globalscriptdir"
@@ -590,6 +598,17 @@ refresh_roms() {
     filter refresh "$emupath"
     ./script/reset_list.sh "$romroot"
 }
+
+extract_roms() {
+  echo ":: extract_roms $*"
+  fz_file="$(realpath $(dirname "$rompath"))"/.fz
+  if [ -f "$fz_file" ];then
+    rm -f "$fz_file"
+  else
+    touch "$fz_file"
+  fi
+}
+
 
 run_script() {
     log ":: run_script $*"

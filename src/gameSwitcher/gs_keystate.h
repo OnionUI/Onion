@@ -35,6 +35,50 @@ static AppKeyState_s _gs_keystate = {
     .button_y_repeat = 0,
 };
 
+void removeTemporaryRom(char *rom_path, char *rom_name)
+{
+    char *rom_file = strstr(rom_path, rom_name);
+    if (!rom_file) {
+        print_debug("Invalid input passed\n");
+        return;
+    }
+
+    char *temp_folder = strdup(rom_path);
+    if (!temp_folder) {
+        print_debug("Unable to duplicate path of rom to another string\n");
+        return;
+    }
+
+    temp_folder[strlen(temp_folder) - strlen(rom_file) - 1] = '\0';
+    if (asprintf(&temp_folder, "%s/.tmp", temp_folder) < 0) {
+        print_debug("Unable to allocate string for path of temporary rom folder\n");
+        return;
+    }
+
+    DIR *rom_dir = opendir(temp_folder);
+    if (!rom_dir) {
+        print_debug("Unable to open rom folder\n");
+        free(temp_folder);
+        return;
+    }
+    struct dirent *file;
+    while ((file = readdir(rom_dir)) != NULL) {
+        if (strstr(file->d_name, rom_name)) {
+            char *temp_file;
+            if (asprintf(&temp_file, "%s/%s", temp_folder, file->d_name) < 0) {
+                print_debug("Unable to allocate string for the path of the temporary rom\n");
+            }
+            else {
+                remove(temp_file);
+                free(temp_file);
+            }
+        }
+    }
+
+    free(temp_folder);
+    closedir(rom_dir);
+}
+
 void removeCurrentItem()
 {
     Game_s *game = &game_list[appState.current_game];
@@ -53,6 +97,11 @@ void removeCurrentItem()
         if (strncmp(game->recentItem.imgpath, ROM_SCREENS_DIR, strlen(ROM_SCREENS_DIR)) == 0) {
             remove(game->recentItem.imgpath);
         }
+    }
+
+    const char *ext = file_getExtension(game->recentItem.rompath);
+    if (!strcmp(ext, "zip") || !strcmp(ext, "7z")) {
+        removeTemporaryRom(game->recentItem.rompath, game->rom_name);
     }
 
     // Copy next element value to current element
