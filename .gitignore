@@ -40,3 +40,4 @@ src/sendUDP/sendUDP
 src/tree/tree
 src/pippi/pippi
 src/cpuclock/cpuclock
+scripts/kids_mode_patch.sh

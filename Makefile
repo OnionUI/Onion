@@ -49,6 +49,18 @@ GTEST_INCLUDE_DIR = /usr/include/
 endif
 
 TOOLCHAIN := aemiii91/miyoomini-toolchain:latest
+DOCKER_PLATFORM ?=
+
+# The toolchain image is amd64-only. On Apple Silicon, run it via emulation.
+ifeq ($(shell uname -m),arm64)
+ifeq ($(DOCKER_PLATFORM),)
+DOCKER_PLATFORM := linux/amd64
+endif
+endif
+
+ifneq ($(DOCKER_PLATFORM),)
+PLATFORM_FLAG := --platform $(DOCKER_PLATFORM)
+endif
 
 include ./src/common/commands.mk
 
@@ -129,6 +141,7 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/renameRom && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/infoPanel && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/prompt && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/pinpad && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/batmon && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/easter && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/read_uuid && BUILD_DIR=$(BIN_DIR) make
@@ -253,15 +266,15 @@ pwd:
 	@echo $(ROOT_DIR)
 
 $(CACHE)/.docker:
-	docker pull $(TOOLCHAIN)
+	docker pull $(PLATFORM_FLAG) $(TOOLCHAIN)
 	$(makedir) cache
 	$(createfile) $(CACHE)/.docker
 
 toolchain: $(CACHE)/.docker
-	docker run -it --rm -v "$(ROOT_DIR)":/root/workspace $(TOOLCHAIN) /bin/bash
+	docker run $(PLATFORM_FLAG) -it --rm -v "$(ROOT_DIR)":/root/workspace $(TOOLCHAIN) /bin/bash
 
 with-toolchain: $(CACHE)/.docker
-	docker run --rm -v "$(ROOT_DIR)":/root/workspace $(TOOLCHAIN) /bin/bash -c "source /root/.bashrc; make $(CMD)"
+	docker run $(PLATFORM_FLAG) --rm -v "$(ROOT_DIR)":/root/workspace $(TOOLCHAIN) /bin/bash -c "source /root/.bashrc; make $(CMD)"
 
 patch:
 	@chmod a+x $(ROOT_DIR)/.github/create_patch.sh && $(ROOT_DIR)/.github/create_patch.sh
