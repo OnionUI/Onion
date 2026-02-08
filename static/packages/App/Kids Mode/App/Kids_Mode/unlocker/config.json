@@ -1,0 +1,7 @@
+{
+    "label": "Kids Unlock",
+    "icon": "../../Icons/Default/app/guest_on.png",
+    "iconsel": "",
+    "launch": "launch.sh",
+    "description": "Enter PIN to unlock Kids Mode"
+}

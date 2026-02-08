@@ -1,0 +1,7 @@
+{
+    "label": "Kids Mode [ON]",
+    "icon": "../../Icons/Default/app/guest_on.png",
+    "iconsel": "",
+    "launch": "launch.sh",
+    "description": "Unlock to restore normal mode"
+}

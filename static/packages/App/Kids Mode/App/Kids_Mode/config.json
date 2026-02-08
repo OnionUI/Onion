@@ -1,0 +1,7 @@
+{
+    "label": "Kids Mode [OFF]",
+    "icon": "../../Icons/Default/app/guest_off.png",
+    "iconsel": "",
+    "launch": "launch.sh",
+    "description": "Lock apps and games behind a PIN"
+}
