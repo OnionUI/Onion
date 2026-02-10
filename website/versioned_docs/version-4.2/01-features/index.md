@@ -89,7 +89,7 @@ Search also allows to filter a game list to include only games containing a spec
 
 
 :::note <a href="apps/theme-switcher">Theme-switcher overview</a>
-Onion loves themes. In Onion themes allow to customize the background, the entry categories, console icons, music bacground, fonts... And best of all, the chosen theme impacts all Onion's internal applications!<br />
+Onion loves themes. In Onion themes allow to customize the background, the entry categories, console icons, music background, fonts... And best of all, the chosen theme impacts all Onion's internal applications!<br />
 Themes in Onion are two things : <br /> 
 - [A fabulous theme repository](https://github.com/OnionUI/Themes/blob/main/README.md) with a very active participation from Onion community <sup><sub>❤️</sub></sup>
 - An application called <a href="apps/theme-switcher">Theme-switcher</a> included in Onion which allows to preview and change themes.
@@ -116,8 +116,8 @@ Thanks to `Activity Tracker` app you can :
 
 
 :::note <a href="apps/retroarch">Retroarch overview</a>
-A full Retroarch in a such tiny device ! Retroarch is regularly updated from the offcial repository. Onion benefits to dedicated drivers created by [Eggs](https://discordapp.com/users/778867980096241715) for precision and performance.
-Dedicated customations are also included : all the core are configured with attention to detail, [custom overlays and custom filters](apps/retroarch#customized-overlays-and-filters) made specially for the Miyoo Mini screen. 
+A full Retroarch in a such tiny device ! Retroarch is regularly updated from the official repository. Onion benefits to dedicated drivers created by [Eggs](https://discordapp.com/users/778867980096241715) for precision and performance.
+Dedicated customizations are also included : all the core are configured with attention to detail, [custom overlays and custom filters](apps/retroarch#customized-overlays-and-filters) made specially for the Miyoo Mini screen. 
 :::
 
 ## <sup><img src={require('./assets/optimized.png').default} style={{width: 54}} /></sup>Optimized emulators
@@ -195,7 +195,7 @@ Check the <a href="included-apps">included apps</a> documentation for more infor
 <img title="Included apps" src={require('./assets/network-features.gif').default} style={{width: 320}} />
 
 :::note <a href="network-features">Network Features</a>
-For the Miyoo Mini Plus (equiped with wifi) Onion offers many additional possibilites :<br />
+For the Miyoo Mini Plus (equipped with wifi) Onion offers many additional possibilities :<br />
 - [Multiplayer / Netplay](multiplayer) : play in multiplayer over internet or on you local network to your favorite retro games:
 - [Easy Netplay](multiplayer/easynetplay): play multiplayer games anywhere (compatible with GB/GBC Pokemon trading !)
 - [OTA (Over The Air) updates](apps/ota-update) : update Onion directly from your MMP
