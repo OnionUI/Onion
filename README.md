@@ -13,8 +13,8 @@
 </p>
 
 <p align="center">
-<a href="https://github.com/OnionUI/Themes/blob/main/README.md"><img alt="Getting Started" src="https://user-images.githubusercontent.com/44569252/226488035-e321e466-87c3-431f-bc81-52eb6a33c225.png"></a>
-<a href="https://onionui.github.io/docs/ports"><img alt="Features" src="https://user-images.githubusercontent.com/44569252/228782816-cd9c479f-4c46-46ba-abd5-42158d19de7b.png"></a>
+<a href="https://github.com/OnionUI/Themes/blob/main/README.md"><img alt="Themes" src="https://user-images.githubusercontent.com/44569252/226488035-e321e466-87c3-431f-bc81-52eb6a33c225.png"></a>
+<a href="https://onionui.github.io/docs/ports"><img alt="Ports" src="https://user-images.githubusercontent.com/44569252/228782816-cd9c479f-4c46-46ba-abd5-42158d19de7b.png"></a>
 </p>
 
 
