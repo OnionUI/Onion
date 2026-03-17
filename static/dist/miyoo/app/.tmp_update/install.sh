@@ -375,6 +375,7 @@ run_installation() {
     fi
 
     rm -f $sysdir/config/currentSlide 2> /dev/null
+    promote_initial_seed
     sync
 }
 
@@ -717,6 +718,32 @@ unzip_progress() {
 
 free_mma() {
     /mnt/SDCARD/.tmp_update/bin/freemma
+}
+
+promote_initial_seed() {
+    staged_zip=$(ls "$sysdir/download/Onion-v"*.zip 2>/dev/null | head -1)
+    [ -z "$staged_zip" ] && return 0
+
+    staged_idx=$(ls "$sysdir/download/Onion-v"*.caidx 2>/dev/null | head -1)
+
+    echo ":: Promote initial seed: $(basename $staged_zip)"
+    mkdir -p "$sysdir/seed"
+    rm -f "$sysdir/seed"/Onion-v*.zip "$sysdir/seed"/Onion-v*.caidx
+
+    seed_zip="$sysdir/seed/$(basename $staged_zip)"
+    seed_idx="${seed_zip%.zip}.caidx"
+
+    mv "$staged_zip" "$seed_zip"
+
+    if [ -n "$staged_idx" ]; then
+        mv "$staged_idx" "$seed_idx"
+    elif [ -f "$sysdir/bin/desync" ]; then
+        echo ":: Generating seed index (no .caidx found)..."
+        "$sysdir/bin/desync" make "$seed_idx" "$seed_zip"
+    fi
+
+    echo "$(basename $staged_zip .zip)" > "$sysdir/seed/seed_version.txt"
+    sync
 }
 
 main

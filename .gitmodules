@@ -10,3 +10,6 @@
 [submodule "third-party/RetroArch-patch"]
 	path = third-party/RetroArch-patch
 	url = https://github.com/OnionUI/RetroArch-patch
+[submodule "third-party/desync"]
+	path = third-party/desync
+	url = https://github.com/folbricht/desync

@@ -9,7 +9,7 @@ RA_SUBVERSION=1.22.2-1
 ifneq ($(VERSION_OVERRIDE),)
 VERSION = $(VERSION_OVERRIDE)
 endif
- 
+
 RELEASE_NAME := $(TARGET)-v$(VERSION)
 
 ifdef OS
@@ -43,6 +43,8 @@ PACKAGES_EMU_DEST   := $(PACKAGES_DIR)/Emu
 PACKAGES_APP_DEST   := $(PACKAGES_DIR)/App
 PACKAGES_RAPP_DEST  := $(PACKAGES_DIR)/RApp
 TEMP_DIR            := $(ROOT_DIR)/cache/temp
+DESYNC_SRC          := $(THIRD_PARTY_DIR)/desync
+CHUNK_STORE         := $(RELEASE_DIR)/chunks.castr
 INCLUDE_DIR         := $(ROOT_DIR)/include
 ifeq (,$(GTEST_INCLUDE_DIR))
 GTEST_INCLUDE_DIR = /usr/include/
@@ -54,7 +56,7 @@ include ./src/common/commands.mk
 
 ###########################################################
 
-.PHONY: all version core apps external release clean deepclean git-clean with-toolchain patch lib test
+.PHONY: all version core apps external release chunk clean deepclean git-clean with-toolchain patch lib test desync-bin desync-host
 
 all: dist
 
@@ -178,8 +180,32 @@ $(THIRD_PARTY_DIR)/RetroArch-patch/bin/retroarch_miyoo354:
 	@$(ECHO) $(COLOR_BLUE)"\n-- Build RetroArch"$(COLOR_NORMAL)
 	@cd $(THIRD_PARTY_DIR)/RetroArch-patch && make
 
+$(DESYNC_SRC)/go.mod:
+	git submodule update --init third-party/desync
+
+$(BIN_DIR)/desync: $(DESYNC_SRC)/go.mod
+	@$(ECHO) $(COLOR_BLUE)"\n-- Build desync (ARM)"$(COLOR_NORMAL)
+	@cd $(DESYNC_SRC) && GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=0 \
+		PATH="$$PATH:/usr/local/go/bin" go build -ldflags="-s -w" -o $(BIN_DIR)/desync ./cmd/desync
+
+desync-bin: $(BIN_DIR)/desync
+
+$(CACHE)/desync: $(DESYNC_SRC)/go.mod
+	@$(ECHO) $(COLOR_BLUE)"\n-- Build desync (host)"$(COLOR_NORMAL)
+	@mkdir -p $(CACHE)
+	@cd $(DESYNC_SRC) && PATH="$$PATH:/usr/local/go/bin" \
+		go build -ldflags="-s -w" -o $(CACHE)/desync ./cmd/desync
+
+desync-host: $(CACHE)/desync
+
 external: $(CACHE)/.setup $(THIRD_PARTY_DIR)/RetroArch-patch/bin/retroarch_miyoo354
 	@$(ECHO) $(PRINT_RECIPE)
+# Add desync to installer (must be pre-built on host with: make desync-bin)
+	@if [ -f $(BIN_DIR)/desync ]; then \
+		cp $(BIN_DIR)/desync $(INSTALLER_DIR)/bin/; \
+	else \
+		echo "WARNING: desync not found — run 'make desync-bin' on the host before building"; \
+	fi
 # Add RetroArch
 	@cp $(THIRD_PARTY_DIR)/RetroArch-patch/bin/* $(BUILD_DIR)/RetroArch/
 	@echo $(RA_SUBVERSION) > $(BUILD_DIR)/RetroArch/onion_ra_version.txt
@@ -201,27 +227,38 @@ dist: build
 # Package configs
 	@cp -R $(TEMP_DIR)/configs/Saves/CurrentProfile/ $(TEMP_DIR)/configs/Saves/GuestProfile
 	@echo -n "Packaging configs..."
-	@cd $(TEMP_DIR)/configs && 7z a -mtm=off $(BUILD_DIR)/.tmp_update/config/configs.pak . -bsp1 -bso0
+	@cd $(TEMP_DIR)/configs && 7z a -ms=off -mtm=off $(BUILD_DIR)/.tmp_update/config/configs.pak . -bsp1 -bso0
 	@echo " DONE"
 	@rm -rf $(TEMP_DIR)/configs
 	@rmdir $(TEMP_DIR)
 # Package RetroArch separately
 	@echo -n "Packaging RetroArch..."
-	@cd $(BUILD_DIR) && 7z a -mtm=off retroarch.pak ./RetroArch -bsp1 -bso0
+	@cd $(BUILD_DIR) && 7z a -ms=off -mtm=off retroarch.pak ./RetroArch -bsp1 -bso0
 	@echo " DONE"
 	@mkdir -p $(DIST_DIR)/RetroArch
 	@mv $(BUILD_DIR)/retroarch.pak $(DIST_DIR)/RetroArch/
 	@echo $(RA_SUBVERSION) > $(DIST_DIR)/RetroArch/ra_package_version.txt
 # Package Onion core
 	@echo -n "Packaging Onion..."
-	@cd $(BUILD_DIR) && 7z a -mtm=off $(DIST_DIR)/miyoo/app/.tmp_update/onion.pak . -x!RetroArch -bsp1 -bso0
+	@cd $(BUILD_DIR) && 7z a -ms=off -mtm=off $(DIST_DIR)/miyoo/app/.tmp_update/onion.pak . -x!RetroArch -bsp1 -bso0
 	@echo " DONE"
 	@$(ECHO) $(PRINT_DONE)
 
 release: dist
 	@$(ECHO) $(PRINT_RECIPE)
 	@rm -f $(RELEASE_DIR)/$(RELEASE_NAME).zip
-	@cd $(DIST_DIR) && 7z a -mtc=off $(RELEASE_DIR)/$(RELEASE_NAME).zip . -bsp1 -bso0
+	@find $(DIST_DIR) -type f -exec touch -t 198001010000 {} +
+	@cd $(DIST_DIR) && 7z a $(RELEASE_DIR)/$(RELEASE_NAME).zip . -bsp1 -bso0
+	@$(ECHO) $(PRINT_DONE)
+
+chunk:
+	@$(ECHO) $(PRINT_RECIPE)
+	@echo "Generating desync index and chunks..."
+	@mkdir -p $(CHUNK_STORE)
+	@$(CACHE)/desync make \
+		-s $(CHUNK_STORE) -m 512:1024:2048 \
+		$(RELEASE_DIR)/$(RELEASE_NAME).caidx \
+		$(RELEASE_DIR)/$(RELEASE_NAME).zip
 	@$(ECHO) $(PRINT_DONE)
 
 clean:
@@ -242,7 +279,7 @@ dev: clean
 
 asan: clean
 	@$(MAKE_ASAN)
-	
+
 git-clean:
 	@git clean -xfd -e .vscode
 

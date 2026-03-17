@@ -1,6 +1,10 @@
 #!/bin/sh
 # OTA updates for Onion.
 cmd=$1
+chunk_download=0
+for arg in "$@"; do
+	[ "$arg" = "--chunk" ] && chunk_download=1
+done
 sysdir=/mnt/SDCARD/.tmp_update
 
 # Colors
@@ -12,6 +16,9 @@ NC='\033[0m' # No Color
 
 # Repository name :
 GITHUB_REPOSITORY=OnionUI/Onion
+
+# Chunk store for desync delta downloads (can be overridden via environment)
+CHUNK_STORE_URL=${CHUNK_STORE_URL:-https://onionui.github.io/Onion/chunks/}
 
 # channel : stable or beta
 channel=$(cat "$sysdir/config/ota_channel" 2> /dev/null)
@@ -60,8 +67,15 @@ check_available_space() {
 	mount_point=$(mount | grep -m 1 '/mnt/SDCARD' | awk '{print $1}') # it could be /dev/mmcblk0p1 or /dev/mmcblk0
 	available_space=$(df -m $mount_point | awk 'NR==2{print $4}')
 
-	# Check available space
-	if [ "$available_space" -lt "1000" ]; then
+	# Account for existing seed zip (seed + new download must coexist during update)
+	seed_size=0
+	seed_zip=$(ls "$sysdir/seed/Onion-v"*.zip 2>/dev/null | head -1)
+	[ -n "$seed_zip" ] && seed_size=$(du -m "$seed_zip" | awk '{print $1}')
+
+	# download (~1000MB) + seed on disk + ~300MB extraction headroom
+	required=$((seed_size + 1300))
+
+	if [ "$available_space" -lt "$required" ]; then
 		echo -e "${RED}Available space is insufficient on SD card${NC}\n"
 		echo -ne "${YELLOW}"
 		read -n 1 -s -r -p "Press A to exit"
@@ -127,6 +141,7 @@ get_release_info() {
 	Release_asset=$(echo "$Release_assets_info" | jq '.assets[]? | select(.name | contains("Onion-v"))')
 
 	Release_url=$(echo $Release_asset | jq '.browser_download_url' | tr -d '"')
+	Release_caidx_url=$(echo "$Release_assets_info" | jq -r '.assets[]? | select(.name | endswith(".caidx")) | .browser_download_url')
 	Release_FullVersion=$(echo $Release_asset | jq '.name' | tr -d "\"" | sed 's/^Onion-v//g' | sed 's/\.zip$//g')
 	Release_Version=$(echo $Release_FullVersion | sed 's/-.*$//g')
 	Release_size=$(echo $Release_asset | jq -r '.size')
@@ -164,10 +179,41 @@ get_release_info() {
 	return 0
 }
 
+do_download() {
+	seed_zip=$(ls "$sysdir/seed/Onion-v"*.zip 2>/dev/null | head -1)
+	seed_idx=$(ls "$sysdir/seed/Onion-v"*.caidx 2>/dev/null | head -1)
+	desync_bin="$sysdir/bin/desync"
+	out_zip="$sysdir/download/$Release_Version.zip"
+	out_idx="$sysdir/download/$Release_Version.caidx"
+
+	# Always fetch the index (it's small) so it can seed future updates
+	if [ -n "$Release_caidx_url" ]; then
+		wget --no-check-certificate "$Release_caidx_url" -O "$out_idx"
+	fi
+
+	if [ "$chunk_download" -eq 1 ] && [ -f "$out_idx" ] && [ -f "$desync_bin" ] && [ -n "$seed_zip" ] && [ -n "$seed_idx" ]; then
+		echo -ne "\n${BLUE}== Delta download via desync (seed: $(basename $seed_zip)) ==${NC}\n"
+		"$desync_bin" extract \
+			-s "$CHUNK_STORE_URL" \
+			--seed "$seed_idx:$seed_zip" \
+			"$out_idx" \
+			"$out_zip"
+		if [ $? -eq 0 ]; then return 0; fi
+		echo -e "${YELLOW}desync failed — falling back to full download${NC}"
+		rm -f "$out_zip"
+	fi
+
+	echo -ne "\n${BLUE}== Downloading Onion $Release_Version ($channel channel) ==${NC}\n"
+	wget --no-check-certificate "$Release_url" -O "$out_zip"
+}
+
 download_update() {
 	echo -ne "${YELLOW}"
 	read -n 1 -s -r -p "Press A to continue"
 	echo -ne "${NC}"
+
+	# Clean up any stale partial download from a previous failed attempt
+	rm -f "$sysdir/download/"*.zip "$sysdir/download/"*.caidx
 
 	Mychoice=$(echo -e "No\nYes" | $sysdir/script/shellect.sh -t "Download $Release_Version ($Release_size_MB) ?" -b "Press A to validate your choice.")
 	clear
@@ -184,11 +230,9 @@ download_update() {
 		fsck.fat -a $mount_point
 
 		mkdir -p $sysdir/download/
-		echo -ne "\n\n" \
-			"${BLUE}== Downloading Onion $Release_Version ($channel channel) ==${NC}\n"
 		/mnt/SDCARD/.tmp_update/bin/freemma > NUL
 		sync
-		wget --no-check-certificate $Release_url -O "$sysdir/download/$Release_Version.zip"
+		do_download
 		echo -ne "\n\n" \
 			"${GREEN}================== Download done ==================${NC}\n"
 		sync
@@ -225,6 +269,16 @@ apply_update() {
 		if [ $? -eq 0 ]; then
 			echo -e "${GREEN}Decompression successful.${NC}"
 			sync
+
+			# Promote downloaded zip and index to seed for next OTA delta update
+			mkdir -p $sysdir/seed
+			rm -f $sysdir/seed/Onion-v*.zip $sysdir/seed/Onion-v*.caidx
+			mv "$sysdir/download/$Release_Version.zip" "$sysdir/seed/$Release_Version.zip"
+			[ -f "$sysdir/download/$Release_Version.caidx" ] && \
+				mv "$sysdir/download/$Release_Version.caidx" "$sysdir/seed/$Release_Version.caidx"
+			echo "$Release_Version" > $sysdir/seed/seed_version.txt
+			sync
+
 			sleep 3
 			echo -ne "\n\n" \
 				"Update $Release_Version applied.\n" \
