@@ -1,3 +1,0 @@
-Use it with Bilinear filter and, if necessary, with Aspect Ratio ON to avoid any gradient artifacts. It's not always possible to use AR ON, as some games have large overscans or pixel ratios that are far from square (images will look much more distorted than with AR OFF), and in other cases some games could have a better matching scanlines with AR OFF. Just try it with AR ON/OFF and choose what looks best for you in each system. On the Amiga, for example, it would vary depending on what screen mode the game is using. I don't recommend using "integer scaling", as the images will look too sharp and less CRT.
-
-Use this color setting in the MM+: 7-10-14-18. You will notice a considerable boost in brightness, colors and contrast, making it ideal to use with these overlays.
