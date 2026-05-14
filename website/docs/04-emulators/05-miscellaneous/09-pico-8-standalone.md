@@ -29,7 +29,7 @@ This is an alternative to the RetroArch `fake-08` core, which has access to all 
 Do not use the FTP wireless transfer service to place these files on the SD card, as it may strip their execution privileges and cause the application to fail to launch.
 :::
 
-3. Afterwards, launch Splore from the `Run PICO-8 with Splore` option under the Onion *Expert* submenu (available under *Apps* in the main menu).
+3. Afterwards, launch Splore from the `Run PICO-8 with Splore` option under the Onion *Expert* submenu (available under *Apps* in the main menu). If you do not see the `Run PICO-8 with Splore` option, or experience an error when attempting to play your PICO-8 roms, go back to the main *Expert* submenu, press SELECT on the `PICO-8 standalone` icon, and Refresh all roms.
 
 ## Basic Usage
 
