@@ -52,6 +52,7 @@ void get_rom_image_path(char *rom_file, char *out_image_path)
 {
     if (str_endsWith(rom_file, ".p8") || str_endsWith(rom_file, ".png")) {
         snprintf(out_image_path, STR_MAX - 1, "/mnt/SDCARD/Roms/%s", rom_file);
+        return;
     }
 
     char *clean_rom_name = file_removeExtension(basename(rom_file));
