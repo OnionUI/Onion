@@ -8,3 +8,15 @@ LDFLAGS := $(LDFLAGS) -L../lib -s -lSDL_image -lSDL -lSDL_rotozoom -lgtest -lgte
 
 include ../src/common/commands.mk
 include ../src/common/recipes.mk
+
+$(TARGET): screen-time-tests
+
+.PHONY: screen-time-tests clean-screen-time-tests
+
+screen-time-tests:
+	@$(MAKE) -C screenTime
+
+clean: clean-screen-time-tests
+
+clean-screen-time-tests:
+	@$(MAKE) -C screenTime clean

@@ -121,6 +121,7 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/mainUiBatPerc && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/keymon && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/playActivity && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/screenTime && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/themeSwitcher && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/tweaks && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/packageManager && BUILD_DIR=$(BIN_DIR) make
@@ -273,6 +274,7 @@ test: external-libs
 	@mkdir -p $(BUILD_TEST_DIR)/infoPanel_test_data && cd $(TEST_SRC_DIR) && BUILD_DIR=$(BUILD_TEST_DIR)/ make dev
 	@cp -R $(TEST_SRC_DIR)/infoPanel_test_data $(BUILD_TEST_DIR)/
 	cd $(BUILD_TEST_DIR) && LD_LIBRARY_PATH=$(ROOT_DIR)/lib/ ./test
+	cd $(BUILD_TEST_DIR) && LD_LIBRARY_PATH=$(ROOT_DIR)/lib/ ./test_screenTime
 
 static-analysis: external-libs
 	@cd $(ROOT_DIR) && cppcheck -I $(INCLUDE_DIR) --enable=all $(SRC_DIR)

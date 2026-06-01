@@ -153,6 +153,9 @@ int main(int argc, char *argv[])
                 if (menu_level == 0)
                     quit = true;
                 else {
+                    if (isMenu(&_menu_screen_time))
+                        screen_time_lock_settings();
+
                     menu_stack[menu_level] = NULL;
                     menu_level--;
                     header_changed = true;

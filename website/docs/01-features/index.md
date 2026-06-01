@@ -16,6 +16,7 @@ description: Overview of the most important features
 <a href="#search"><img title="Search" src="https://user-images.githubusercontent.com/44569252/189498482-2590f31f-cca2-46e9-a316-3af98828446a.png" width="48" /></a>
 <a href="#themes"><img title="Themes" src="https://user-images.githubusercontent.com/44569252/179304061-647e63ff-5113-4a8a-aaa9-4dfda248d54e.png" width="48" /></a>
 <a href="#activity-tracker"><img title="Activity Tracker" src="https://user-images.githubusercontent.com/44569252/179302722-7fa82e4d-d72d-4b1e-bb4d-96a2a52aaa62.png" width="48" /></a>
+<a href="#screen-time"><img title="Screen Time" src={require('../07-apps/01-included-in-onion/assets/activity-tracker.webp').default} style={{width: 48}} /></a>
 <a href="#blue-light-filter"><img title="Blue light filter" src={require('./assets/blue-light-filter.webp').default} style={{width: 48}} /></a>
 <a href="#screen-recorder"><img title="Screen Recorder" src={require('./assets/screen-recorder.webp').default} style={{width: 48}} /></a>
 <a href="#retroarch"><img title="RetroArch" src="https://user-images.githubusercontent.com/44569252/179318731-7e262588-cb92-4ea3-9001-2991c4f8ccbe.png" width="48" /></a>
@@ -114,6 +115,12 @@ Thanks to **Activity Tracker** app you can :
 - Track your game playtimes.
 - View your total playtime in the top bar.
 - Share your playtimes by taking a screenshot (press <kbd>MENU</kbd>+<kbd>POWER</kbd> - screenshot is saved in `Screenshots` folder).
+:::
+
+## <sup><img align="left" src={require('../07-apps/01-included-in-onion/assets/activity-tracker.webp').default} style={{width: 54}} /></sup>Screen Time
+
+:::note <a href="apps/screen-time">Screen Time overview</a>
+**Screen Time** lets you set daily game time limits from Tweaks, view today's usage, add temporary extra time, and protect changes with a PIN.
 :::
 
 ## <sup><img src={require('./assets/blue-light-filter.webp').default} style={{width: 54}} /></sup>Blue light filter
