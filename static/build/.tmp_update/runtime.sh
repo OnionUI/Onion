@@ -279,6 +279,52 @@ check_is_game() {
     echo "$1" | grep -q "retroarch/cores" || echo "$1" | grep -q "/../../Roms/" || echo "$1" | grep -q "/mnt/SDCARD/Roms/"
 }
 
+screen_time_check_launch() {
+    rompath="$1"
+
+    if ! command -v screenTime > /dev/null 2>&1; then
+        log "screenTime not found, allowing launch"
+        return 0
+    fi
+
+    screen_time_output=$(screenTime check "$rompath" 2>&1)
+    screen_time_rc=$?
+    log "screenTime check: $screen_time_output"
+
+    # screenTime exits 2 only when policy explicitly blocks launch.
+    # Other non-zero statuses indicate an internal error and should not strand the user.
+    if [ $screen_time_rc -eq 2 ]; then
+        return 1
+    fi
+
+    return 0
+}
+
+screen_time_start_monitor() {
+    rompath="$1"
+    launcher_pid="$2"
+
+    screen_time_monitor_pid=""
+    rm -f /tmp/screen_time_limit_hit 2> /dev/null
+
+    if ! command -v screenTime > /dev/null 2>&1; then
+        return 0
+    fi
+
+    screenTime monitor "$rompath" "$launcher_pid" >> /tmp/screenTime.log 2>&1 &
+    screen_time_monitor_pid=$!
+    log "screenTime monitor started: $screen_time_monitor_pid"
+}
+
+screen_time_stop_monitor() {
+    if [ -n "$screen_time_monitor_pid" ]; then
+        kill "$screen_time_monitor_pid" 2> /dev/null
+        wait "$screen_time_monitor_pid" 2> /dev/null
+        log "screenTime monitor stopped: $screen_time_monitor_pid"
+        screen_time_monitor_pid=""
+    fi
+}
+
 change_resolution() {
     res_x=""
     res_y=""
@@ -358,6 +404,15 @@ launch_game() {
     fi
 
     if [ $is_game -eq 1 ]; then
+        if ! screen_time_check_launch "$rompath"; then
+            log "Screen time blocked launch: $rompath"
+            infoPanel --title "Screen time" --message "Daily screen time limit reached." --auto
+            rm -f /tmp/quick_switch 2> /dev/null
+            rm -f /tmp/force_auto_load_state 2> /dev/null
+            retval=0
+            return
+        fi
+
         if [ -f "$launch_script" ] && cat "$launch_script" | grep -q '.retroarch/cores'; then
             # Override core if needed
             override_game_core "$romcfgpath" "$launch_script"
@@ -413,9 +468,19 @@ launch_game() {
             cd /mnt/SDCARD/RetroArch
             force_retroarch_cfg
 
-            # make the cmd_to_run shell env aware of the new timezone
-            TZ="$TZ_VALUE" $sysdir/cmd_to_run.sh
-            retval=$?
+            if [ $is_game -eq 1 ]; then
+                # make the cmd_to_run shell env aware of the new timezone
+                TZ="$TZ_VALUE" $sysdir/cmd_to_run.sh &
+                game_pid=$!
+                screen_time_start_monitor "$rompath" "$game_pid"
+                wait "$game_pid"
+                retval=$?
+                screen_time_stop_monitor
+            else
+                # make the cmd_to_run shell env aware of the new timezone
+                TZ="$TZ_VALUE" $sysdir/cmd_to_run.sh
+                retval=$?
+            fi
 
             if [ -f /tmp/new_res_available ]; then
                 # Restore resolution
@@ -554,6 +619,7 @@ launch_game_postprocess() {
     # TIMER END + SHUTDOWN CHECK
     if [ $is_game -eq 1 ]; then
         cd $sysdir
+        screen_time_stop_monitor
         playActivity stop "$rompath"
 
         # Remove appended configs

@@ -57,6 +57,7 @@ void menu_icons_free_all(void)
 
 static List _menu_main;
 static List _menu_system;
+static List _menu_screen_time;
 static List _menu_date_time;
 static List _menu_system_display;
 static List _menu_user_blue_light;
@@ -79,6 +80,7 @@ void menu_free_all(void)
 {
     list_free(&_menu_main);
     list_free(&_menu_system);
+    list_free(&_menu_screen_time);
     list_free(&_menu_date_time);
     list_free(&_menu_system_display);
     list_free(&_menu_system_startup);
