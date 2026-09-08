@@ -59,8 +59,14 @@ void loadThemeDirectory(const char *theme_dir,
             }
 
             if (is_file(config_path)) {
-                strcpy(themes_out[*count], ep->d_name);
-                *count += 1;
+                if (*count >= NUMBER_OF_THEMES) {
+                    printf_debug("Theme limit reached (%d); ignoring remaining entries in %s\n",
+                                 NUMBER_OF_THEMES, theme_dir);
+                    break;
+                }
+
+                snprintf(themes_out[*count], STR_MAX, "%s", ep->d_name);
+                (*count)++;
             }
         }
         closedir(dp);
@@ -72,8 +78,9 @@ void loadThemeDirectory(const char *theme_dir,
 
 void updatePreviews()
 {
-    system(SCRIPT_DIR "/themes_extract_previews.sh");
-    sync();
+    int result = system(SCRIPT_DIR "/themes_extract_previews.sh");
+    if (result != 0)
+        printf_debug("Theme preview update script failed: %d\n", result);
 }
 
 int listAllThemes(char themes_out[NUMBER_OF_THEMES][STR_MAX], const char *installed_theme, int *installed_page)
