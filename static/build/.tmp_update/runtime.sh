@@ -46,12 +46,22 @@ main() {
     # Start the battery monitor
     batmon &
 
-    # Reapply theme
+    # Reapply theme when this SD is first used on a device.
     system_theme="$(/customer/app/jsonval theme)"
-    active_theme="$(cat $sysdir/config/active_theme)"
+    active_theme="$(cat "$sysdir/config/active_theme" 2>/dev/null)"
+    theme_device_state="$sysdir/config/theme-applied-$SERIAL_NUMBER"
+    applied_theme="$(cat "$theme_device_state" 2>/dev/null)"
 
-    if [ "$system_theme" == "./" ] || [ "$system_theme" != "$active_theme" ] || [ ! -d "$system_theme" ]; then
+    if [ "$system_theme" == "./" ] ||
+        [ "$system_theme" != "$active_theme" ] ||
+        [ ! -d "$system_theme" ] ||
+        [ "$applied_theme" != "$system_theme" ]; then
         themeSwitcher --reapply_icons
+
+        # Re-read: themeSwitcher writes the resolved theme back to settings,
+        # including when it falls back to a different one.
+        system_theme="$(/customer/app/jsonval theme)"
+        echo -n "$system_theme" > "$theme_device_state"
     fi
 
     # Check is charging
