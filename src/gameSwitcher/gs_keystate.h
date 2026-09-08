@@ -37,6 +37,10 @@ static AppKeyState_s _gs_keystate = {
 
 void removeCurrentItem()
 {
+    // The save state scan reads game_list, so let it finish before the
+    // entries below the current one are shifted up.
+    popMenu_finishScan(false);
+
     Game_s *game = &game_list[appState.current_game];
 
     printf_debug("removing: %s\n", game->name);
@@ -213,11 +217,15 @@ void handleUpdateKeystateMain(AppState *state)
 void handleUpdateKeystatePopMenu(AppState *state)
 {
     KeyState *keystate = _gs_keystate.keystate;
-    ListItem *item = list_currentItem(&state->pop_menu_list);
+
+    if (!state->pop_menu_list._created) {
+        return;
+    }
 
     if (keystate[SW_BTN_B] == PRESSED) {
         state->pop_menu_open = false;
         state->changed = true;
+        return;
     }
 
     if (keystate[SW_BTN_A] == PRESSED) {
@@ -226,6 +234,12 @@ void handleUpdateKeystatePopMenu(AppState *state)
     else if (keystate[SW_BTN_A] == RELEASED && _gs_keystate.btn_a_pressed) {
         _gs_keystate.btn_a_pressed = false;
         list_activateItem(&state->pop_menu_list);
+
+        // An action may close or destroy the popup. Do not keep using the
+        // ListItem pointer or list storage after the callback returns.
+        if (state->quit || !state->pop_menu_open || !state->pop_menu_list._created) {
+            return;
+        }
     }
 
     if (keystate[SW_BTN_DOWN] >= PRESSED) {
@@ -237,7 +251,11 @@ void handleUpdateKeystatePopMenu(AppState *state)
             state->changed = true;
     }
 
+    // Navigation or an action can change the active item, so reacquire it.
+    ListItem *item = list_currentItem(&state->pop_menu_list);
     if (item != NULL && item->action_id == POP_MENU_ACTION_LOAD) {
+        popMenu_finishScan(true);
+
         if (keystate[SW_BTN_LEFT] >= PRESSED) {
             if (g_save_state_info.selected_slot > 0) {
                 g_save_state_info.selected_slot--;

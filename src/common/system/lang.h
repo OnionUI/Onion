@@ -34,6 +34,8 @@
 #define LANG_FALLBACK_LOAD "Load"
 #define LANG_FALLBACK_EXIT_TO_MENU "Exit to menu"
 #define LANG_FALLBACK_ADVANCED "Advanced"
+#define LANG_FALLBACK_REMOVE_FAVORITE "Remove favorite"
+#define LANG_FALLBACK_ADD_FAVORITE "Add favorite"
 
 static char **lang_list = NULL;
 
@@ -60,7 +62,9 @@ typedef enum {
     LANG_EXIT = 111,
     LANG_SAVE_EXIT = 112,
     LANG_NEXT = 300,
-    LANG_RESUME_UC = 301
+    LANG_RESUME_UC = 301,
+    LANG_REMOVE_FAVORITE = 302,
+    LANG_ADD_FAVORITE = 303
 } lang_hash;
 
 void lang_removeIconLabels(bool remove_icon_labels, bool remove_hints)

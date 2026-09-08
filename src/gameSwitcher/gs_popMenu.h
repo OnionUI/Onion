@@ -8,6 +8,7 @@
 #include "utils/retroarch_cmd.h"
 
 #include "gs_appState.h"
+#include "gs_favorites.h"
 #include "gs_model.h"
 #include "gs_retroarch.h"
 
@@ -15,6 +16,7 @@
 #define POP_MENU_ACTION_SAVE 1
 #define POP_MENU_ACTION_LOAD 2
 #define POP_MENU_ACTION_EXIT 3
+#define POP_MENU_ACTION_FAVORITE 4
 
 typedef struct {
     int slots[10];
@@ -25,13 +27,23 @@ typedef struct {
 static SaveStateInfo_s g_save_state_info = {.slots = {0}, .slot_count = 0, .selected_slot = 0};
 
 static pthread_t g_scan_thread_pt;
+static bool g_scan_thread_started = false;
+static int g_scan_game_index = -1;
+
+static void setLoadPreview(void);
+static void popMenu_finishScan(bool update_preview);
 
 static bool g_save_thread_running = false;
 static bool g_save_thread_success = false;
 
 void popMenu_destroy(void)
 {
+    // The scan must be joined before the list can be freed. Older code let
+    // _scan_thread() call setLoadPreview() after list_free(), which could
+    // access freed ListItem storage and crash on a later popup open.
+    popMenu_finishScan(false);
     list_free(&appState.pop_menu_list);
+    appState.pop_menu_list = (List){0};
 }
 
 static bool _hasSaveStates(Game_s *game)
@@ -69,15 +81,15 @@ static bool _hasSaveStates(Game_s *game)
 
 static bool _scanSaveStates(Game_s *game, SaveStateInfo_s *info)
 {
+    info->slot_count = 0;
+    info->selected_slot = 0;
+
     char stateDirPath[4096];
     snprintf(stateDirPath, sizeof(stateDirPath), STATES_DIR "/%s", game->core_name);
 
     if (!exists(stateDirPath)) {
         return false;
     }
-
-    info->slot_count = 0;
-    info->selected_slot = 0;
 
     DIR *dir = opendir(stateDirPath);
     if (dir == NULL) {
@@ -155,8 +167,14 @@ static bool createSaveStatePath(Game_s *game, int slot, char *out_path, size_t o
     return true;
 }
 
-static void setLoadPreview()
+static void setLoadPreview(void)
 {
+    if (!appState.pop_menu_list._created ||
+        appState.current_game < 0 ||
+        appState.current_game >= game_list_len) {
+        return;
+    }
+
     ListItem *item = NULL;
     for (int i = 0; i < appState.pop_menu_list.item_count; i++) {
         if (appState.pop_menu_list.items[i].action_id == POP_MENU_ACTION_LOAD) {
@@ -166,6 +184,8 @@ static void setLoadPreview()
     }
 
     if (item != NULL) {
+        item->preview_path[0] = '\0';
+
         if (g_save_state_info.selected_slot >= 0 && g_save_state_info.selected_slot < g_save_state_info.slot_count) {
             const int real_slot = g_save_state_info.slots[g_save_state_info.selected_slot];
             Game_s *game = &game_list[appState.current_game];
@@ -174,9 +194,6 @@ static void setLoadPreview()
             if (createSaveStatePath(game, real_slot, stateFilePath, sizeof(stateFilePath))) {
                 snprintf(item->preview_path, sizeof(item->preview_path), "%s.png", stateFilePath);
             }
-        }
-        else {
-            item->preview_path[0] = '\0';
         }
 
         if (item->preview_ptr != NULL) {
@@ -238,9 +255,33 @@ static void *_save_thread(void *_)
 
 static void *_scan_thread(void *_)
 {
-    _scanSaveStates(&game_list[appState.current_game], &g_save_state_info);
-    setLoadPreview();
+    const int game_index = g_scan_game_index;
+    SaveStateInfo_s result = {.slots = {0}, .slot_count = 0, .selected_slot = 0};
+
+    if (game_index >= 0 && game_index < game_list_len) {
+        _scanSaveStates(&game_list[game_index], &result);
+    }
+
+    // Only publish plain scan data here. ListItem and SDL surface updates
+    // must stay on the main thread.
+    g_save_state_info = result;
     return NULL;
+}
+
+static void popMenu_finishScan(bool update_preview)
+{
+    if (g_scan_thread_started) {
+        pthread_join(g_scan_thread_pt, NULL);
+        g_scan_thread_started = false;
+    }
+
+    if (update_preview &&
+        appState.pop_menu_list._created &&
+        g_scan_game_index == appState.current_game) {
+        setLoadPreview();
+    }
+
+    g_scan_game_index = -1;
 }
 
 static bool _isSaveEnabled(void)
@@ -303,7 +344,10 @@ void action_saveGame(void *_)
 
 void action_loadGame(void *_)
 {
-    if (g_save_state_info.selected_slot < 0 && g_save_state_info.selected_slot >= g_save_state_info.slot_count) {
+    popMenu_finishScan(true);
+
+    if (g_save_state_info.selected_slot < 0 ||
+        g_save_state_info.selected_slot >= g_save_state_info.slot_count) {
         return;
     }
 
@@ -331,6 +375,8 @@ void action_loadGame(void *_)
 
 void popMenu_deleteSaveState(void)
 {
+    popMenu_finishScan(true);
+
     int selected_slot = g_save_state_info.selected_slot;
 
     if (selected_slot < 0 || selected_slot >= g_save_state_info.slot_count) {
@@ -382,6 +428,47 @@ void popMenu_deleteSaveState(void)
     }
 }
 
+// Both labels are Onion additions, registered next to LANG_NEXT and
+// LANG_RESUME_UC. Stock string 55 ("Add to favorites") would have come
+// pre-translated, but runs to 24 characters in some languages, which
+// overflows the popup, so these are deliberately shorter.
+static void _setFavoriteLabel(ListItem *item, bool is_favorite)
+{
+    snprintf(item->label, sizeof(item->label), "%s",
+             is_favorite
+                 ? lang_get(LANG_REMOVE_FAVORITE, LANG_FALLBACK_REMOVE_FAVORITE)
+                 : lang_get(LANG_ADD_FAVORITE, LANG_FALLBACK_ADD_FAVORITE));
+}
+
+void action_toggleFavorite(void *self)
+{
+    (void)self;
+
+    if (appState.current_game < 0 || appState.current_game >= game_list_len) {
+        return;
+    }
+
+    bool is_favorite = false;
+    if (!favorites_toggle(currentGame(), &is_favorite)) {
+        print_debug("Failed to update favorites");
+        return;
+    }
+
+    // Reacquire the item after file I/O instead of retaining the callback
+    // pointer. This stays valid even if popup ownership changes later.
+    if (appState.pop_menu_list._created) {
+        for (int i = 0; i < appState.pop_menu_list.item_count; i++) {
+            ListItem *item = &appState.pop_menu_list.items[i];
+            if (item->action_id == POP_MENU_ACTION_FAVORITE) {
+                _setFavoriteLabel(item, is_favorite);
+                break;
+            }
+        }
+    }
+
+    appState.changed = true;
+}
+
 void action_exitToMenu(void *_)
 {
     appState.exit_to_menu = true;
@@ -391,34 +478,63 @@ void action_exitToMenu(void *_)
 
 void popMenu_create(void)
 {
-    if (!appState.pop_menu_list._created) {
-        printf_debug("Creating pop menu for game %i\n", appState.current_game);
-        appState.pop_menu_list = list_create(4, LIST_SMALL);
+    if (appState.pop_menu_list._created ||
+        game_list_len <= 0 ||
+        appState.current_game < 0 ||
+        appState.current_game >= game_list_len) {
+        return;
+    }
 
+    printf_debug("Creating pop menu for game %i\n", appState.current_game);
+
+    const bool has_save = _isSaveEnabled();
+    const bool has_load = _isLoadEnabled();
+
+    // Five items are currently possible. Keep one spare slot so a future
+    // conditional item cannot silently write past the allocation.
+    appState.pop_menu_list = list_create(6, LIST_SMALL);
+
+    list_addItemWithLang(&appState.pop_menu_list,
+                         (ListItem){.label = LANG_FALLBACK_RESUME, .action = action_resumeGame, .action_id = POP_MENU_ACTION_RESUME},
+                         LANG_RESUME);
+
+    if (has_save) {
         list_addItemWithLang(&appState.pop_menu_list,
-                             (ListItem){.label = LANG_FALLBACK_RESUME, .action = action_resumeGame, .action_id = POP_MENU_ACTION_RESUME},
-                             LANG_RESUME);
+                             (ListItem){.label = LANG_FALLBACK_SAVE, .action = action_saveGame, .action_id = POP_MENU_ACTION_SAVE},
+                             LANG_SAVE);
+    }
 
-        if (_isSaveEnabled()) {
-            list_addItemWithLang(&appState.pop_menu_list,
-                                 (ListItem){.label = LANG_FALLBACK_SAVE, .action = action_saveGame, .action_id = POP_MENU_ACTION_SAVE},
-                                 LANG_SAVE);
-        }
-
-        if (_isLoadEnabled()) {
-            list_addItemWithLang(&appState.pop_menu_list,
-                                 (ListItem){.label = LANG_FALLBACK_LOAD, .action = action_loadGame, .action_id = POP_MENU_ACTION_LOAD},
-                                 LANG_LOAD);
-
-            // Load save states in a thread
-            pthread_create(&g_scan_thread_pt, NULL, _scan_thread, NULL);
-        }
-
+    if (has_load) {
         list_addItemWithLang(&appState.pop_menu_list,
-                             (ListItem){.label = LANG_FALLBACK_EXIT_TO_MENU, .action = action_exitToMenu, .action_id = POP_MENU_ACTION_EXIT},
-                             LANG_EXIT_TO_MENU);
+                             (ListItem){.label = LANG_FALLBACK_LOAD, .action = action_loadGame, .action_id = POP_MENU_ACTION_LOAD},
+                             LANG_LOAD);
+    }
 
-        appState.pop_menu_list.scroll_height = appState.pop_menu_list.item_count;
+    ListItem *favorite_item = list_addItem(
+        &appState.pop_menu_list,
+        (ListItem){.action = action_toggleFavorite, .action_id = POP_MENU_ACTION_FAVORITE});
+    if (favorite_item != NULL) {
+        _setFavoriteLabel(favorite_item, favorites_contains(currentGame()));
+    }
+
+    list_addItemWithLang(&appState.pop_menu_list,
+                         (ListItem){.label = LANG_FALLBACK_EXIT_TO_MENU, .action = action_exitToMenu, .action_id = POP_MENU_ACTION_EXIT},
+                         LANG_EXIT_TO_MENU);
+
+    appState.pop_menu_list.scroll_height = appState.pop_menu_list.item_count;
+
+    if (has_load) {
+        g_save_state_info = (SaveStateInfo_s){.slots = {0}, .slot_count = 0, .selected_slot = 0};
+        g_scan_game_index = appState.current_game;
+
+        if (pthread_create(&g_scan_thread_pt, NULL, _scan_thread, NULL) == 0) {
+            g_scan_thread_started = true;
+        }
+        else {
+            _scanSaveStates(currentGame(), &g_save_state_info);
+            setLoadPreview();
+            g_scan_game_index = -1;
+        }
     }
 }
 
@@ -428,13 +544,17 @@ void renderPopMenu(AppState *state)
         if (!appState.pop_menu_list._created) {
             popMenu_create();
         }
+        if (!appState.pop_menu_list._created) {
+            state->pop_menu_open = false;
+            return;
+        }
 
         ListItem *item = list_currentItem(&appState.pop_menu_list);
         SDL_Surface *transparent_bg = NULL;
 
         if (item != NULL && item->action_id == POP_MENU_ACTION_LOAD) {
             transparent_bg = appState.transparent_bg;
-            pthread_join(g_scan_thread_pt, NULL);
+            popMenu_finishScan(true);
         }
 
         theme_renderPopMenu(screen, state->view_mode == VIEW_NORMAL ? state->header_height : 0, &appState.pop_menu_list, transparent_bg);

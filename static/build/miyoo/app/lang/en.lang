@@ -157,5 +157,7 @@
 	"154": "Fail to connect\nCheck your password\nOr reboot router",
 	"155": "Website",
 	"300": "NEXT",
-	"301": "RESUME"
+	"301": "RESUME",
+	"302": "Remove favorite",
+	"303": "Add favorite"
 }
