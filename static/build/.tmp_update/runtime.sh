@@ -848,7 +848,19 @@ get_screen_resolution() {
         touch /tmp/get_screen_resolution_failed
     fi
 
-    if [ "$screen_resolution" = "752x560" ] && [ "$(/etc/fw_printenv miyoo_version | cut -d'=' -f2)" -ge "202310271401" ]; then
+    if [ -f "$sysdir/config/.force640Res" ]; then
+        log "get_screen_resolution: .force640Res set, forcing 640x480"
+        rm -f /tmp/new_res_available
+        screen_resolution="640x480"
+
+        if [ -x "$sysdir/bin/fbmode" ]; then
+            if ! $sysdir/bin/fbmode 640x480 --pages 3 --preclear --no-clear \
+                --linger 150 --timeout 800; then
+                log "fbmode failed in forced 640 mode, falling back to fbset"
+                fbset -g 640 480 640 1440 32
+            fi
+        fi
+    elif [ "$screen_resolution" = "752x560" ] && [ "$(/etc/fw_printenv miyoo_version | cut -d'=' -f2)" -ge "202310271401" ]; then
         touch /tmp/new_res_available
     else
         # can't use 752x560 without appropriate firmware or screen
