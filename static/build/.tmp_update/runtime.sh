@@ -459,7 +459,11 @@ launch_game() {
 }
 
 force_retroarch_cfg() {
-    # Enable network commands in RetroArch
+    ra_cfg=/mnt/SDCARD/RetroArch/.retroarch/retroarch.cfg
+    if grep -q '^[[:space:]]*network_cmd_enable[[:space:]]*=[[:space:]]*"true"[[:space:]]*$' "$ra_cfg" 2> /dev/null; then
+        return
+    fi
+
     cat > /tmp/onion_ra_patch.cfg <<- EOM
 network_cmd_enable = "true"
 EOM
