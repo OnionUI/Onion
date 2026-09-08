@@ -365,6 +365,13 @@ launch_game() {
         fi
     fi
 
+    play_activity_pid=""
+    services_kill_pid=""
+    if [ $is_game -eq 1 ]; then
+        playActivity start "$rompath" &
+        play_activity_pid=$!
+    fi
+
     full_resolution_path="$(get_full_resolution_path)"
 
     if [ -z "$launch_script" ]; then
@@ -383,16 +390,11 @@ launch_game() {
             echo "$temp" | sed 's/\$/\\\$/g' > $sysdir/cmd_to_run.sh
         fi
 
-        # Kill services for maximum performance
+        # Kill services while remaining launch preparation continues.
         if [ ! -f $sysdir/config/.keepServicesAlive ]; then
-            for process in dropbear bftpd filebrowser telnetd smbd; do
-                if is_running $process; then
-                    killall -9 $process
-                fi
-            done
+            killall -9 dropbear bftpd filebrowser telnetd smbd 2> /dev/null &
+            services_kill_pid=$!
         fi
-
-        playActivity start "$rompath"
     fi
 
     # Prevent quick switch loop
@@ -427,6 +429,16 @@ launch_game() {
             cd /mnt/SDCARD/RetroArch
             force_retroarch_cfg
 
+            # Finish launch-side work before emulator handoff.
+            if [ -n "$services_kill_pid" ]; then
+                wait "$services_kill_pid" 2> /dev/null
+                services_kill_pid=""
+            fi
+            if [ -n "$play_activity_pid" ]; then
+                wait "$play_activity_pid"
+                play_activity_pid=""
+            fi
+
             # make the cmd_to_run shell env aware of the new timezone
             TZ="$TZ_VALUE" $sysdir/cmd_to_run.sh
             retval=$?
@@ -444,6 +456,14 @@ launch_game() {
             fi
         fi
     else
+        if [ -n "$services_kill_pid" ]; then
+            wait "$services_kill_pid" 2> /dev/null
+            services_kill_pid=""
+        fi
+        if [ -n "$play_activity_pid" ]; then
+            wait "$play_activity_pid"
+            play_activity_pid=""
+        fi
         retval=404
     fi
 
