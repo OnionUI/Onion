@@ -19,6 +19,94 @@
 
 static bool quit = false;
 
+#define PREVIEW_CACHE_SIZE 5
+
+typedef struct {
+    int theme_index;
+    unsigned long last_used;
+    SDL_Surface *surface;
+} PreviewCacheEntry;
+
+static unsigned long preview_cache_clock = 0;
+
+static bool resolvePreviewPath(const char *theme_name, char *path,
+                               size_t path_size)
+{
+    snprintf(path, path_size, THEMES_DIR "/%s/preview.png", theme_name);
+    if (is_file(path))
+        return true;
+
+    snprintf(path, path_size, THEMES_DIR "/.previews/%s/preview.png",
+             theme_name);
+    return is_file(path);
+}
+
+static SDL_Surface *loadPreviewSurface(const char *theme_name)
+{
+    char path[STR_MAX * 2];
+    if (!resolvePreviewPath(theme_name, path, sizeof(path)))
+        return NULL;
+
+    SDL_Surface *preview = IMG_Load(path);
+    if (preview == NULL) {
+        printf_debug("Could not load theme preview: %s (%s)\n", path,
+                     IMG_GetError());
+    }
+
+    // Keep the IMG_Load software surface. Converting it with
+    // SDL_DisplayFormat[Alpha]() flips previews on the Miyoo framebuffer.
+    return preview;
+}
+
+static void previewCacheInit(PreviewCacheEntry cache[PREVIEW_CACHE_SIZE])
+{
+    for (int i = 0; i < PREVIEW_CACHE_SIZE; i++) {
+        cache[i].theme_index = -1;
+        cache[i].last_used = 0;
+        cache[i].surface = NULL;
+    }
+}
+
+static SDL_Surface *previewCacheGet(
+    PreviewCacheEntry cache[PREVIEW_CACHE_SIZE],
+    const char themes[NUMBER_OF_THEMES][STR_MAX], int theme_index)
+{
+    preview_cache_clock++;
+
+    for (int i = 0; i < PREVIEW_CACHE_SIZE; i++) {
+        if (cache[i].theme_index == theme_index) {
+            cache[i].last_used = preview_cache_clock;
+            return cache[i].surface;
+        }
+    }
+
+    int slot = 0;
+    for (int i = 0; i < PREVIEW_CACHE_SIZE; i++) {
+        if (cache[i].theme_index < 0) {
+            slot = i;
+            break;
+        }
+        if (cache[i].last_used < cache[slot].last_used)
+            slot = i;
+    }
+
+    if (cache[slot].surface != NULL)
+        SDL_FreeSurface(cache[slot].surface);
+
+    cache[slot].theme_index = theme_index;
+    cache[slot].last_used = preview_cache_clock;
+    cache[slot].surface = loadPreviewSurface(themes[theme_index]);
+    return cache[slot].surface;
+}
+
+static void previewCacheFree(PreviewCacheEntry cache[PREVIEW_CACHE_SIZE])
+{
+    for (int i = 0; i < PREVIEW_CACHE_SIZE; i++) {
+        if (cache[i].surface != NULL)
+            SDL_FreeSurface(cache[i].surface);
+    }
+}
+
 void showCenteredMessage(SDL_Surface *video, SDL_Surface *screen,
                          const char *message_str, TTF_Font *font,
                          SDL_Color color)
@@ -197,24 +285,9 @@ int main(int argc, char *argv[])
     int themes_count = listAllThemes(themes, installed_theme, &installed_page);
     int current_page = installed_page;
 
-    showCenteredMessage(video, screen, "Loading previews...", font30, color_white);
-
-    char preview_path[STR_MAX * 2];
-    SDL_Surface *previews[themes_count];
+    PreviewCacheEntry preview_cache[PREVIEW_CACHE_SIZE];
+    previewCacheInit(preview_cache);
     SDL_Surface *noPreview = IMG_Load("res/noThemePreview.png");
-
-    for (int i = 0; i < themes_count; i++) {
-        snprintf(preview_path, STR_MAX * 2 - 1, THEMES_DIR "/%s/preview.png", themes[i]);
-
-        if (!is_file(preview_path))
-            snprintf(preview_path, STR_MAX * 2 - 1, THEMES_DIR "/.previews/%s/preview.png", themes[i]);
-
-        previews[i] = is_file(preview_path) ? IMG_Load(preview_path) : NULL;
-
-        char loading_msg[STR_MAX];
-        snprintf(loading_msg, STR_MAX - 1, "Loading previews... %d/%d", i + 1, themes_count);
-        showCenteredMessage(video, screen, loading_msg, font30, color_white);
-    }
 
     char cPages[25];
 
@@ -326,11 +399,13 @@ int main(int argc, char *argv[])
             continue;
 
         if (levelPage == 0) {
-            if (previews[current_page] == NULL) {
+            SDL_Surface *preview = previewCacheGet(
+                preview_cache, themes, current_page);
+            if (preview == NULL) {
                 SDL_BlitSurface(noPreview, NULL, screen, &rectThemePreview);
             }
             else {
-                SDL_BlitSurface(previews[current_page], &preview_src_rect, screen, &rectThemePreview);
+                SDL_BlitSurface(preview, &preview_src_rect, screen, &rectThemePreview);
             }
             SDL_BlitSurface(background_page0, NULL, screen, NULL);
 
@@ -407,9 +482,7 @@ int main(int argc, char *argv[])
 
     msleep(100);
 
-    for (int i = 0; i < themes_count; i++) {
-        SDL_FreeSurface(previews[i]);
-    }
+    previewCacheFree(preview_cache);
     SDL_FreeSurface(noPreview);
     SDL_FreeSurface(surfaceArrowLeft);
     SDL_FreeSurface(surfaceArrowRight);
