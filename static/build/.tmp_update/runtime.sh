@@ -684,14 +684,14 @@ check_hide_recents() {
     if [ ! -f $sysdir/config/.showRecents ]; then
         # Hide recents by removing the json file
         if [ -f $recentlist ]; then
-            cat $recentlist $recentlist_hidden > $recentlist_temp
+            cat $recentlist $recentlist_hidden 2>/dev/null | head -n 200 > $recentlist_temp
             mv -f $recentlist_temp $recentlist_hidden
             rm -f $recentlist
         fi
     else
         # Restore recentlist
         if [ -f $recentlist_hidden ]; then
-            cat $recentlist $recentlist_hidden > $recentlist_temp
+            cat $recentlist $recentlist_hidden 2>/dev/null | head -n 200 > $recentlist_temp
             mv -f $recentlist_temp $recentlist
             rm -f $recentlist_hidden
         fi
