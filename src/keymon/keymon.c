@@ -755,6 +755,12 @@ int main(void)
                 break;
             case HW_BTN_SELECT:
                 if (!comboKey_select && val == RELEASED) {
+                    // The cached state is only refreshed on /tmp/state_changed,
+                    // a MENU press or deepsleep(), so it can still be
+                    // MODE_UNKNOWN after boot or stale after returning from a
+                    // game. Re-read it here; this fires once per SELECT tap.
+                    system_state_update();
+
                     if (system_state == MODE_MAIN_UI) {
                         keyinput_send(HW_BTN_MENU, PRESSED);
                         keyinput_send(HW_BTN_MENU, RELEASED);
