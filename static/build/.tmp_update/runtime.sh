@@ -12,6 +12,9 @@ MODEL_MMF=285
 MODEL_MMP=354
 screen_resolution="640x480"
 
+romwinidx_device="/appconfigs/romwinidx.json"
+romwinidx_sd="$sysdir/config/romwinidx.json"
+
 main() {
     # Set model ID based on hardware detection
     if [ -e /sys/devices/soc0/soc/soc:hall-mh248/hallvalue ] || [ -e /dev/input/event1 ]; then
@@ -37,6 +40,7 @@ main() {
     clear_logs
 
     init_system
+    restore_romwinidx
     update_time
 
     # Remount passwd/group to add our own users
@@ -658,9 +662,29 @@ launch_switcher() {
     sync
 }
 
+restore_romwinidx() {
+    if [ -f "$romwinidx_sd" ]; then
+        cp -f "$romwinidx_sd" "$romwinidx_device"
+        log "romwinidx: restored from SD"
+    else
+        rm -f "$romwinidx_device"
+    fi
+}
+
+save_romwinidx() {
+    if [ -f "$romwinidx_device" ]; then
+        cp -f "$romwinidx_device" "$romwinidx_sd"
+        log "romwinidx: saved to SD"
+    else
+        rm -f "$romwinidx_sd"
+    fi
+    sync
+}
+
 check_off_order() {
     if [ -f /tmp/.offOrder ]; then
         touch /tmp/shutting_down
+        save_romwinidx
 
         #EmuDeck - CheckOff scripts
         check_off_scripts=$(find "$sysdir/checkoff" -type f -name "*.sh")
