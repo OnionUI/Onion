@@ -502,14 +502,33 @@ install_configs() {
     mv -f ./temp_keymap.json /mnt/SDCARD/.tmp_update/config/keymap.json
 }
 
+finalize_and_reboot() {
+    sync
+    cd /
+
+    # The installer chain all runs from the card, so install.sh cannot
+    # unmount it itself. bin/shutdown copies itself to /tmp and re-runs
+    # detached, which is what lets it kill the processes holding the mount
+    # and unmount cleanly. It exists once onion.pak has been extracted.
+    if [ -x /mnt/SDCARD/.tmp_update/bin/shutdown ]; then
+        /mnt/SDCARD/.tmp_update/bin/shutdown -r
+        sleep 10
+    fi
+
+    # Reached only before or during extraction, where far less has been
+    # written than a completed install.
+    umount -r /mnt/SDCARD 2> /dev/null
+    reboot
+    sleep 10
+}
+
 check_firmware() {
     echo ":: Check firmware"
     if [ ! -f /customer/lib/libpadsp.so ]; then
         cd $sysdir
         infoPanel -i "res/firmware.png"
         rm -rf $sysdir
-        reboot
-        sleep 10
+        finalize_and_reboot
         exit 0
     fi
 }
@@ -711,9 +730,7 @@ unzip_progress() {
     if [ "$extraction_status" -ne 0 ]; then
         touch $sysdir/.installFailed
         echo ":: Installation failed!"
-        sync
-        reboot
-        sleep 10
+        finalize_and_reboot
         exit 0
     else
         echo "$msg 100%" >> /tmp/.update_msg
@@ -728,6 +745,4 @@ free_mma() {
 }
 
 main
-sync
-reboot
-sleep 10
+finalize_and_reboot
