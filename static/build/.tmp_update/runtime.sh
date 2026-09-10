@@ -12,6 +12,10 @@ MODEL_MMF=285
 MODEL_MMP=354
 screen_resolution="640x480"
 
+romwinidx_device="/appconfigs/romwinidx.json"
+romwinidx_sd="$sysdir/config/romwinidx.json"
+romwinidx_dirty="$sysdir/config/.romwinidx_dirty"
+
 main() {
     # Set model ID based on hardware detection
     if [ -e /sys/devices/soc0/soc/soc:hall-mh248/hallvalue ] || [ -e /dev/input/event1 ]; then
@@ -37,6 +41,7 @@ main() {
     clear_logs
 
     init_system
+    restore_romwinidx
     update_time
 
     # Remount passwd/group to add our own users
@@ -658,9 +663,39 @@ launch_switcher() {
     sync
 }
 
+restore_romwinidx() {
+    # save_romwinidx only runs from check_off_order, so the marker surviving a
+    # boot means the last session never reached a clean shutdown and the device
+    # file holds positions the card copy never received. Restoring would throw
+    # them away, so leave both files alone and let the next clean shutdown
+    # publish whatever the device has.
+    if [ -f "$romwinidx_dirty" ]; then
+        log "romwinidx: unclean shutdown, keeping device file"
+    elif [ -f "$romwinidx_sd" ]; then
+        cp -f "$romwinidx_sd" "$romwinidx_device"
+        log "romwinidx: restored from SD"
+    else
+        rm -f "$romwinidx_device"
+    fi
+
+    touch "$romwinidx_dirty"
+}
+
+save_romwinidx() {
+    if [ -f "$romwinidx_device" ]; then
+        cp -f "$romwinidx_device" "$romwinidx_sd"
+        log "romwinidx: saved to SD"
+    else
+        rm -f "$romwinidx_sd"
+    fi
+    rm -f "$romwinidx_dirty"
+    sync
+}
+
 check_off_order() {
     if [ -f /tmp/.offOrder ]; then
         touch /tmp/shutting_down
+        save_romwinidx
 
         #EmuDeck - CheckOff scripts
         check_off_scripts=$(find "$sysdir/checkoff" -type f -name "*.sh")
