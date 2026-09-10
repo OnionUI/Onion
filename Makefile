@@ -142,6 +142,7 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/tree && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/pippi && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/cpuclock && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/fbmode && BUILD_DIR=$(BIN_DIR) make
 
 # Build dependencies for installer
 	@mkdir -p $(INSTALLER_DIR)/bin

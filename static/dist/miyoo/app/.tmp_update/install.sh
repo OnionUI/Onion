@@ -35,6 +35,14 @@ main() {
         sleep 1
     fi
 
+    # installUI has a fixed 640x480 layout and nothing up to this point has
+    # established a framebuffer geometry, so it starts on whatever the
+    # firmware left active. Clear before the change, not after: the
+    # firmware's contents would otherwise be scanned out at the new stride
+    # until installUI paints over them.
+    dd if=/dev/zero of=/dev/fb0 bs=1M 2> /dev/null
+    fbset -g 640 480 640 960 32
+
     check_device_model
     check_install_ra
 
