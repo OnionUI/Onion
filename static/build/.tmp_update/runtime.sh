@@ -14,6 +14,7 @@ screen_resolution="640x480"
 
 romwinidx_device="/appconfigs/romwinidx.json"
 romwinidx_sd="$sysdir/config/romwinidx.json"
+romwinidx_dirty="$sysdir/config/.romwinidx_dirty"
 
 main() {
     # Set model ID based on hardware detection
@@ -663,12 +664,21 @@ launch_switcher() {
 }
 
 restore_romwinidx() {
-    if [ -f "$romwinidx_sd" ]; then
+    # save_romwinidx only runs from check_off_order, so the marker surviving a
+    # boot means the last session never reached a clean shutdown and the device
+    # file holds positions the card copy never received. Restoring would throw
+    # them away, so leave both files alone and let the next clean shutdown
+    # publish whatever the device has.
+    if [ -f "$romwinidx_dirty" ]; then
+        log "romwinidx: unclean shutdown, keeping device file"
+    elif [ -f "$romwinidx_sd" ]; then
         cp -f "$romwinidx_sd" "$romwinidx_device"
         log "romwinidx: restored from SD"
     else
         rm -f "$romwinidx_device"
     fi
+
+    touch "$romwinidx_dirty"
 }
 
 save_romwinidx() {
@@ -678,6 +688,7 @@ save_romwinidx() {
     else
         rm -f "$romwinidx_sd"
     fi
+    rm -f "$romwinidx_dirty"
     sync
 }
 
