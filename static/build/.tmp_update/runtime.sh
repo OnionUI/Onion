@@ -725,19 +725,22 @@ mount_main_ui() {
 #   times out after 5 seconds, defaults to 640x480
 #
 get_screen_resolution() {
-    max_attempts=10
+    # Poll at 100ms rather than 500ms, keeping the same 5 second ceiling. The
+    # coarse interval could add almost half a second after the driver was
+    # already up. Log the total instead of each attempt: at this interval a
+    # per-attempt line would spawn date and tee up to 50 times per boot.
+    max_attempts=50
     attempt=0
 
     log "get_screen_resolution: start"
     while [ "$attempt" -lt "$max_attempts" ]; do
-        screen_resolution=$(grep 'Current TimingWidth=' /proc/mi_modules/fb/mi_fb0 | sed 's/Current TimingWidth=\([0-9]*\),TimingWidth=\([0-9]*\),.*/\1x\2/')
+        screen_resolution=$(grep 'Current TimingWidth=' /proc/mi_modules/fb/mi_fb0 2> /dev/null | sed 's/Current TimingWidth=\([0-9]*\),TimingWidth=\([0-9]*\),.*/\1x\2/')
         if [ -n "$screen_resolution" ]; then
-            log "get_screen_resolution: success, resolution: $screen_resolution"
+            log "get_screen_resolution: success after $attempt polls, resolution: $screen_resolution"
             break
         fi
-        log "get_screen_resolution: attempt $attempt failed"
         attempt=$((attempt + 1))
-        sleep 0.5
+        sleep 0.1
     done
 
     if [ -z "$screen_resolution" ]; then
