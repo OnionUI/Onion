@@ -32,16 +32,18 @@ Menu_Config()
 	Option3="Scraping sources"
     Option4="Screenscraper: account settings"
     Option5="Toggle background scraping"
-    Option6="Back to Main Menu"
-    
-    Mychoice=$( echo -e "$Option1\n$Option2\n$Option3\n$Option4\n$Option5\n$Option6" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "      --== CONFIGURATION MENU ==--" -b "Press A to validate your choice.")
+    Option6="Toggle discard of embedded PBP art"
+    Option7="Back to Main Menu"
+
+    Mychoice=$( echo -e "$Option1\n$Option2\n$Option3\n$Option4\n$Option5\n$Option6\n$Option7" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "      --== CONFIGURATION MENU ==--" -b "Press A to validate your choice.")
 
     [ "$Mychoice" = "$Option1" ] && Menu_Config_MediaType
     [ "$Mychoice" = "$Option2" ] && Menu_RegionSelection
     [ "$Mychoice" = "$Option3" ] && Menu_Config_ScrapingSource
     [ "$Mychoice" = "$Option4" ] && Menu_Config_SSAccountSettings
     [ "$Mychoice" = "$Option5" ] && Menu_Config_BackgroundScraping
-	[ "$Mychoice" = "$Option6" ] && Menu_Main
+    [ "$Mychoice" = "$Option6" ] && Menu_Config_DiscardEmbedded
+	[ "$Mychoice" = "$Option7" ] && Menu_Main
 	
 	sync
 }
@@ -231,6 +233,47 @@ Menu_Config_BackgroundScraping()
 
         config=$(cat $ScraperConfigFile)
         config=$(echo "$config" | jq --arg ScrapeInBackground "$ScrapeInBackground" '.ScrapeInBackground = $ScrapeInBackground')
+        echo "$config" > $ScraperConfigFile
+        sync
+        Menu_Config
+}
+
+
+##########################################################################################
+
+Menu_Config_DiscardEmbedded()
+{
+    # Check if the configuration file exists
+    if [ ! -f "$ScraperConfigFile" ]; then
+      echo "Error: configuration file not found"
+      read -n 1 -s -r -p "Press A to continue"
+      exit 1
+    fi
+
+    clear
+    echo -e "====================================================\n\n"
+    echo -e "PSX games in PBP format contain a small icon\nextracted locally as a fallback artwork.\n\nWith this option ON, scraping Screenscraper will\ndiscard it and download higher quality boxart.\n\nArt fetched by a scraper is never discarded.\n"
+    echo -e "====================================================\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+    read -n 1 -s -r -p "Press A to continue"
+    clear
+
+    config=$(cat "$ScraperConfigFile")
+    DiscardEmbeddedArt=$(echo "$config" | jq -r '.DiscardEmbeddedArt')
+
+
+    	Mychoice=$( echo -e "No\nYes\nBack to Configuration Menu" | /mnt/SDCARD/.tmp_update/script/shellect.sh -t "Discard embedded PBP art ? (Currently: $DiscardEmbeddedArt)" -b "Press A to validate your choice.")
+
+        if [ "$Mychoice" = "Yes" ]; then
+            DiscardEmbeddedArt="true"
+        elif [ "$Mychoice" = "No" ]; then
+            DiscardEmbeddedArt="false"
+		elif [ "$Mychoice" = "Back to Configuration Menu" ]; then
+			Menu_Config
+			return
+        fi
+
+        config=$(cat $ScraperConfigFile)
+        config=$(echo "$config" | jq --arg DiscardEmbeddedArt "$DiscardEmbeddedArt" '.DiscardEmbeddedArt = $DiscardEmbeddedArt')
         echo "$config" > $ScraperConfigFile
         sync
         Menu_Config

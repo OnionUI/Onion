@@ -19,6 +19,7 @@ if [ -z "$config_json" ] || ! echo "$config_json" | jq . >/dev/null 2>&1; then
       "Screenscraper_enabled": "true",
       "Launchbox_enabled": "true",
       "ScrapeInBackground": "false",
+      "DiscardEmbeddedArt": "true",
       "RetroarchMediaType": "Named_Boxarts",
       "ScreenscraperMediaType": "box-2D",
       "LaunchboxMediaType": "Box - Front",
@@ -34,6 +35,7 @@ updated_config_json=$(echo "$config_json" | jq 'if .screenscraper_username == nu
     | if .Screenscraper_enabled == null then .Screenscraper_enabled = "true" else . end
     | if .Launchbox_enabled == null then .Launchbox_enabled = "true" else . end
     | if .ScrapeInBackground == null then .ScrapeInBackground = "false" else . end
+    | if .DiscardEmbeddedArt == null then .DiscardEmbeddedArt = "true" else . end
     | if .RetroarchMediaType == null then .RetroarchMediaType = "Named_Boxarts" else . end
     | if .ScreenscraperMediaType == null then .ScreenscraperMediaType = "box-2D" else . end
     | if .LaunchboxMediaType == null then .LaunchboxMediaType = "Box - Front" else . end

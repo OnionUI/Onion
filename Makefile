@@ -140,6 +140,7 @@ core: $(CACHE)/.setup
 	@cd $(SRC_DIR)/gameNameList && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/sendUDP && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/tree && BUILD_DIR=$(BIN_DIR) make
+	@cd $(SRC_DIR)/pbpinfo && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/pippi && BUILD_DIR=$(BIN_DIR) make
 	@cd $(SRC_DIR)/cpuclock && BUILD_DIR=$(BIN_DIR) make
 
