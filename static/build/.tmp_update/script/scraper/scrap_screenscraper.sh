@@ -403,14 +403,32 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
     # Cleaning up names
     romName=$(basename "$file")
     romNameNoExtension=${romName%.*}
-	echo $romNameNoExtension	
-    
+	echo $romNameNoExtension
+
+    # PBP (EBOOT) files : extract real title and serial from the embedded PARAM.SFO
+    isPbp=0
+    pbpTitle=""
+    pbpSerial=""
+    case "$(echo "$romName" | tr '[:upper:]' '[:lower:]')" in
+    *.pbp)
+        isPbp=1
+        if pbpMetadata=$(pbpinfo "$file" 2>/dev/null); then
+            pbpTitle=$(echo "$pbpMetadata" | sed -n 's/^TITLE=//p')
+            pbpSerial=$(echo "$pbpMetadata" | sed -n 's/^DISC_ID=//p')
+            [ -n "$pbpSerial" ] && echo "PBP serial : $pbpSerial"
+            [ -n "$pbpTitle" ] && echo "PBP title  : $pbpTitle"
+        else
+            echo -e "${YELLOW}could not read PBP metadata, falling back to file name${NONE}"
+        fi
+        ;;
+    esac
+
     romNameTrimmed="${romNameNoExtension/".nkit"/}"
     romNameTrimmed="${romNameTrimmed//"!"/}"
     romNameTrimmed="${romNameTrimmed//"&"/}"
     romNameTrimmed="${romNameTrimmed/"Disc "/}"
     romNameTrimmed="${romNameTrimmed/"Rev "/}"
-    romNameTrimmed="$(echo "$romNameTrimmed" | sed -e 's/ ([^()]*)//g' -e 's/ [[A-z0-9!+]*]//g' -e 's/([^()]*)//g' -e 's/[[A-z0-9!+]*]//g')"
+    romNameTrimmed="$(echo "$romNameTrimmed" | sed -e 's/ ([^()]*)//g' -e 's/ [[A-z0-9!+-]*]//g' -e 's/([^()]*)//g' -e 's/[[A-z0-9!+-]*]//g')"
     romNameTrimmed="${romNameTrimmed//" - "/"%20"}"
     romNameTrimmed="${romNameTrimmed/"-"/"%20"}"
     romNameTrimmed="${romNameTrimmed//" "/"%20"}"
@@ -425,37 +443,71 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 	
 	else
 		rom_size=$(stat -c%s "$file")
-		url="https://www.screenscraper.fr/api2/jeuInfos.php?devid=${u#???}&devpassword=${p%??}&softname=onion&output=json&ssid=${userSS}&sspassword=${passSS}&crc=&systemeid=${ssSystemID}&romtype=rom&romnom=${romNameTrimmed}.zip&romtaille=${rom_size}"
-    	search_on_screenscraper
-    	
-    	# Don't check art if we didn't get screenscraper game ID
-        if ! [ "$gameIDSS" -eq "$gameIDSS" ] 2> /dev/null; then
+
+		# --- 1) PBP : exact search by serial number (from the embedded PARAM.SFO) ---
+		if [ -n "$pbpSerial" ]; then
+			pbpSerialDashed=$(echo "$pbpSerial" | sed -e 's/^\(.\{4\}\)\([0-9A-Z]\{3,6\}\)$/\1-\2/')
+			echo "Searching by serial : $pbpSerialDashed"
+			url="https://www.screenscraper.fr/api2/jeuInfos.php?devid=${u#???}&devpassword=${p%??}&softname=onion&output=json&ssid=${userSS}&sspassword=${passSS}&crc=&systemeid=${ssSystemID}&romtype=rom&romnom=${pbpSerialDashed}.zip&romtaille=${rom_size}&ssserial=${pbpSerialDashed}"
+			search_on_screenscraper
+		fi
+
+		# --- 2) PBP : search by the real game title (from the embedded PARAM.SFO) ---
+		if [ -z "$gameIDSS" ] && [ -n "$pbpTitle" ]; then
+			pbpTitleTrimmed="$(echo "$pbpTitle" | sed -e 's/ ([^()]*)//g' -e 's/ [[A-z0-9!+-]*]//g' -e 's/([^()]*)//g' -e 's/[[A-z0-9!+-]*]//g' -e 's/^ *//' -e 's/ *$//')"
+			pbpTitleTrimmed="${pbpTitleTrimmed//" - "/"%20"}"
+			pbpTitleTrimmed="${pbpTitleTrimmed/"-"/"%20"}"
+			pbpTitleTrimmed="${pbpTitleTrimmed//" "/"%20"}"
+			url="https://www.screenscraper.fr/api2/jeuInfos.php?devid=${u#???}&devpassword=${p%??}&softname=onion&output=json&ssid=${userSS}&sspassword=${passSS}&crc=&systemeid=${ssSystemID}&romtype=rom&romnom=${pbpTitleTrimmed}.zip&romtaille=${rom_size}"
+			search_on_screenscraper
+		fi
+
+		# --- 3) search by file name (skipped when a PBP title was already tried) ---
+		if [ -z "$gameIDSS" ] && { [ "$isPbp" != "1" ] || [ -z "$pbpTitle" ]; }; then
+			url="https://www.screenscraper.fr/api2/jeuInfos.php?devid=${u#???}&devpassword=${p%??}&softname=onion&output=json&ssid=${userSS}&sspassword=${passSS}&crc=&systemeid=${ssSystemID}&romtype=rom&romnom=${romNameTrimmed}.zip&romtaille=${rom_size}"
+			search_on_screenscraper
+		fi
+
+		# --- 4) last chance : rom checksum (pointless for PBP containers, skip them) ---
+		if [ -z "$gameIDSS" ] && [ "$isPbp" != "1" ]; then
 			# Last chance : we search thanks to rom checksum
 			MAX_FILE_SIZE_BYTES=52428800  #50MB
-			
+
 			if [ "$rom_size" -gt "$MAX_FILE_SIZE_BYTES" ]; then
 				echo -e "${RED}Rom is too big to make a checksum.${NONE}"
 				let Scrap_Fail++;
 				continue;
-				
+
 			else
 				echo -n "CRC check..."
 				CRC=$(xcrc "$file")
 				echo " $CRC"
 				# !!! systemid must not be specified, it impacts the search by CRC but not romtaille (must be > 2 however) or romnom. Most of other parameters than CRC are useless for the request but helps to fill SS database
-				url="https://www.screenscraper.fr/api2/jeuInfos.php?devid=${u#???}&devpassword=${p%??}&softname=onion&output=json&ssid=${userSS}&sspassword=${passSS}&crc=${CRC}&systemeid=&romtype=rom&romnom=${romNameTrimmed}.zip&romtaille=${rom_size}"  
+				url="https://www.screenscraper.fr/api2/jeuInfos.php?devid=${u#???}&devpassword=${p%??}&softname=onion&output=json&ssid=${userSS}&sspassword=${passSS}&crc=${CRC}&systemeid=&romtype=rom&romnom=${romNameTrimmed}.zip&romtaille=${rom_size}"
 				search_on_screenscraper
-				if ! [ "$gameIDSS" -eq "$gameIDSS" ] 2> /dev/null; then	
+				if [ -z "$gameIDSS" ]; then
 					echo -e "${RED}Failed to get game ID${NONE}"
 					let Scrap_Fail++;
 					continue;
 				fi
-				
+
 				RealgameName=$(echo "$api_result" | jq -r '.response.jeu.noms[0].text')
 				echo Real name found : "$RealgameName"
 			fi
+		fi
 
-        fi
+		# --- 5) PBP with no Screenscraper match : use the icon embedded in the file ---
+		if [ "$isPbp" = "1" ] && [ -z "$gameIDSS" ]; then
+			echo -n "No Screenscraper match, trying the PBP embedded icon... "
+			if pbpinfo -i "$file" "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png" 2>/dev/null; then
+				echo -e "${GREEN}Scraped from PBP metadata !${NONE}"
+				let Scrap_Success++;
+			else
+				echo -e "${RED}no embedded icon found${NONE}"
+				let Scrap_Fail++;
+			fi
+			continue;
+		fi
 		
         echo "gameID = $gameIDSS"
 
