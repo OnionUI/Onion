@@ -277,6 +277,7 @@ if [ -f "$ScraperConfigFile" ]; then
     userSS=$(echo "$config" | jq -r '.screenscraper_username')
     passSS=$(echo "$config" | jq -r '.screenscraper_password')
     ScrapeInBackground=$(echo "$config" | jq -r '.ScrapeInBackground')
+    DiscardEmbeddedArt=$(echo "$config" | jq -r '.DiscardEmbeddedArt')
 	u=$(echo "U2FsdGVkX18PKpoEvELyE+5xionDX8iRxAIxJj4FN1U=" | openssl enc -aes-256-cbc -d -a -pbkdf2 -iter 10000 -salt -pass pass:"3x0tVD3jZvElZWRt3V67QQ==")
 	p=$(echo "U2FsdGVkX1/ydn2FWrwYcFVc5gVYgc5kVaJ5jDOeOKE=" |openssl enc -aes-256-cbc -d -a -pbkdf2 -iter 10000 -salt -pass pass:"RuA29ch3zVoodAItmvKKmZ+4Au+5owgvV/ztqRu4NjI=")
 	# Regions order management
@@ -296,6 +297,11 @@ EOF
     fi
 fi
 
+# discard embedded PBP art on scrape unless explicitly disabled
+[ "$DiscardEmbeddedArt" = "false" ] || DiscardEmbeddedArt="true"
+
+# registry of roms whose artwork was extracted locally from PBP internals
+localArtList="/mnt/SDCARD/Roms/$CurrentSystem/Imgs/.pbp_local_art.txt"
 
 
 # TODO : improve or remove this part (now in options)
@@ -437,6 +443,15 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
     #echo $romNameTrimmed # for debugging
 
 
+	# Discard locally extracted PBP art so Screenscraper boxart can be downloaded instead
+	if [ "$isPbp" = "1" ] && [ "$DiscardEmbeddedArt" != "false" ] && \
+	   [ -f "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png" ] && \
+	   grep -qxF "$romNameNoExtension" "$localArtList" 2>/dev/null; then
+		echo -e "${YELLOW}discarding embedded PBP art, fetching higher quality boxart${NONE}"
+		rm -f "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png"
+		grep -Fxv "$romNameNoExtension" "$localArtList" > "$localArtList.tmp" 2>/dev/null && mv "$localArtList.tmp" "$localArtList"
+	fi
+
 	if [ -f "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png" ]; then
 		echo -e "${YELLOW}already Scraped !${NONE}"
 		let Scrap_notrequired++;
@@ -501,6 +516,7 @@ for file in $(eval "find /mnt/SDCARD/Roms/$CurrentSystem -maxdepth 2 -type f \
 			echo -n "No Screenscraper match, trying the PBP embedded icon... "
 			if pbpinfo -i "$file" "/mnt/SDCARD/Roms/$CurrentSystem/Imgs/$romNameNoExtension.png" 2>/dev/null; then
 				echo -e "${GREEN}Scraped from PBP metadata !${NONE}"
+				echo "$romNameNoExtension" >> "$localArtList"
 				let Scrap_Success++;
 			else
 				echo -e "${RED}no embedded icon found${NONE}"
