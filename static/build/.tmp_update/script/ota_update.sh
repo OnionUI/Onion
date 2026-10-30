@@ -88,10 +88,10 @@ enable_wifi() {
 
 check_connection() {
 	echo -n "Checking internet connection... "
-	if wget -q --spider https://github.com > /dev/null; then
+	if curl --cacert "$sysdir/certificates/cacert.pem" --fail --location --silent --show-error --connect-timeout 15 --max-time 45 --output /dev/null https://github.com; then
 		echo -e "${GREEN}OK${NC}"
 	else
-		echo -e "${RED}FAIL${NC}\nError: https://github.com not reachable. Check your wifi connection."
+		echo -e "${RED}FAIL${NC}\nError: HTTPS connection to GitHub failed. See the curl error above."
 		echo -ne "${YELLOW}"
 		read -n 1 -s -r -p "Press A to exit"
 		exit 2
@@ -99,7 +99,7 @@ check_connection() {
 }
 
 run_bootstrap() {
-	curl -k -s https://raw.githubusercontent.com/OnionUI/Onion/main/static/build/.tmp_update/script/ota_bootstrap.sh | sh
+	curl --cacert "$sysdir/certificates/cacert.pem" --silent --show-error https://raw.githubusercontent.com/OnionUI/Onion/main/static/build/.tmp_update/script/ota_bootstrap.sh | sh
 }
 
 channel_choice() {
@@ -113,9 +113,9 @@ get_release_info() {
 
 	# Github source api url
 	if [ "$channel" = "beta" ]; then
-		Release_assets_info=$(curl -k -s https://api.github.com/repos/$GITHUB_REPOSITORY/releases/tags/latest)
+		Release_assets_info=$(curl --cacert "$sysdir/certificates/cacert.pem" --silent --show-error https://api.github.com/repos/$GITHUB_REPOSITORY/releases/tags/latest)
 	else
-		Release_assets_info=$(curl -k -s https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest)
+		Release_assets_info=$(curl --cacert "$sysdir/certificates/cacert.pem" --silent --show-error https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest)
 	fi
 
 	if echo "$Release_assets_info" | grep -q '"message": "Not Found"'; then
@@ -188,7 +188,11 @@ download_update() {
 			"${BLUE}== Downloading Onion $Release_Version ($channel channel) ==${NC}\n"
 		/mnt/SDCARD/.tmp_update/bin/freemma > NUL
 		sync
-		wget --no-check-certificate $Release_url -O "$sysdir/download/$Release_Version.zip"
+		if ! curl --cacert "$sysdir/certificates/cacert.pem" --fail --location --show-error --connect-timeout 15 --retry 2 "$Release_url" --output "$sysdir/download/$Release_Version.zip"; then
+			echo -e "${RED}Error: Download failed. No update has been applied.${NC}"
+			read -n 1 -s -r -p "Press A to exit"
+			exit 5
+		fi
 		echo -ne "\n\n" \
 			"${GREEN}================== Download done ==================${NC}\n"
 		sync
