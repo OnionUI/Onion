@@ -6,7 +6,7 @@ corename = "TIC-80"
 categories = "Game engine"
 license = "MIT"
 permissions = ""
-display_version = "0.80.0"
+display_version = "1.4.1"
 
 # Hardware Information
 manufacturer = "TIC-80"
