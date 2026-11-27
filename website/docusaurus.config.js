@@ -10,10 +10,7 @@ const remarkPingOpts = {
   userURL: (username) => `https://github.com/${username}`
 }
 
-const oembed = require('remark-oembed');
-const oembedOpts = {
-  syncWidget: true
-}
+const youtubeEmbed = require('./src/plugins/remark-youtube-embed');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -60,7 +57,7 @@ const config = {
             },
           },
           remarkPlugins: [
-            [oembed, oembedOpts],
+            youtubeEmbed,
             [remarkPing, remarkPingOpts],
           ],
         },
@@ -251,7 +248,7 @@ const config = {
         truncateMarker: new RegExp("<Truncate \/>"),
         showReadingTime: false,
         remarkPlugins: [
-          [oembed, oembedOpts],
+          youtubeEmbed,
           [remarkPing, remarkPingOpts],
         ],
       }
