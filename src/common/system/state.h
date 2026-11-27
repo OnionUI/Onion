@@ -237,13 +237,74 @@ char *getMiyooRecentFilePath()
     return filename;
 }
 
+#define RECENT_LINE_MAX (STR_MAX * 6)
+#define RECENT_PATH_MAX (STR_MAX * 2)
+
+//
+//    [onion] parse one line of the miyoo recent list
+//    Returns false if the line is not valid JSON, is not a game entry
+//    (type 5 or 17), or if a path does not fit the given buffers.
+//
+static bool history_parseRecentLine(const char *line, char *launch, size_t launch_size,
+                                    char *rompath, size_t rompath_size)
+{
+    bool ok = false;
+    cJSON *root = cJSON_Parse(line);
+    if (root == NULL)
+        return false;
+
+    cJSON *type = cJSON_GetObjectItemCaseSensitive(root, "type");
+    cJSON *rp = cJSON_GetObjectItemCaseSensitive(root, "rompath");
+    cJSON *ln = cJSON_GetObjectItemCaseSensitive(root, "launch");
+
+    if (!cJSON_IsNumber(type) || (type->valueint != 5 && type->valueint != 17))
+        goto done;
+    if (!cJSON_IsString(rp) || rp->valuestring == NULL)
+        goto done;
+
+    const char *rompath_str = rp->valuestring;
+    const char *colon = strchr(rompath_str, ':');
+
+    if (colon != NULL) {
+        // Game launched with the search panel: "launch:rompath"
+        size_t launch_len = (size_t)(colon - rompath_str);
+        if (launch_len >= launch_size || strlen(colon + 1) >= rompath_size)
+            goto done;
+        memcpy(launch, rompath_str, launch_len);
+        launch[launch_len] = '\0';
+        strcpy(rompath, colon + 1);
+    }
+    else {
+        if (strlen(rompath_str) >= rompath_size)
+            goto done;
+        strcpy(rompath, rompath_str);
+
+        launch[0] = '\0';
+        if (cJSON_IsString(ln) && ln->valuestring != NULL) {
+            if (strlen(ln->valuestring) >= launch_size)
+                goto done;
+            strcpy(launch, ln->valuestring);
+        }
+    }
+
+    ok = true;
+
+done:
+    cJSON_Delete(root);
+    return ok;
+}
+
 //
 //    [onion] get recent rom path from miyoo recent list
+//    rom_path must hold at least rom_path_size bytes
 //
-char *history_getRecentPath(char *rom_path)
+char *history_getRecentPath(char *rom_path, size_t rom_path_size)
 {
     FILE *file;
-    char line[STR_MAX * 3];
+    char line[RECENT_LINE_MAX];
+    char launch[RECENT_PATH_MAX];
+    char romPathSearch[RECENT_PATH_MAX];
+    char *result = NULL;
 
     file = fopen(getMiyooRecentFilePath(), "r");
 
@@ -251,70 +312,34 @@ char *history_getRecentPath(char *rom_path)
         return NULL;
     }
 
-    while (fgets(line, STR_MAX * 3, file) != NULL) {
-        char *jsonContent = (char *)malloc(strlen(line) + 1);
-        char romPathSearch[STR_MAX];
-        int type;
-
-        strcpy(jsonContent, line);
-        sscanf(strstr(jsonContent, "\"type\":") + 7, "%d", &type);
-
-        if ((type != 5) && (type != 17)) {
-            free(jsonContent);
-            fclose(file);
-            return NULL;
-        }
-
-        const char *rompathStart = strstr(jsonContent, "\"rompath\":\"") + 11;
-        const char *rompathEnd = strchr(rompathStart, '\"');
-
-        strncpy(romPathSearch, rompathStart, rompathEnd - rompathStart);
-        romPathSearch[rompathEnd - rompathStart] = '\0';
-
-        free(jsonContent);
-
-        // Game launched with the search panel
-        char *colonPosition = strchr(romPathSearch, ':');
-        if (colonPosition != NULL) {
-
-            int position = (int)(colonPosition - romPathSearch);
-            char secondPart[strlen(romPathSearch) - position];
-            strcpy(secondPart, colonPosition + 1);
-            strcpy(romPathSearch, secondPart);
-        }
-
+    // Only the most recent entry is relevant
+    if (fgets(line, sizeof(line), file) != NULL &&
+        history_parseRecentLine(line, launch, sizeof(launch),
+                                romPathSearch, sizeof(romPathSearch))) {
         printf_debug("romPathSearch : %s\n", romPathSearch);
 
-        if (!exists(romPathSearch)) {
-            fclose(file);
-            return NULL;
+        if (exists(romPathSearch) && strlen(romPathSearch) < rom_path_size) {
+            strcpy(rom_path, romPathSearch);
+            result = rom_path;
         }
-
-        strcpy(rom_path, romPathSearch);
-
-        fclose(file);
-        return rom_path;
     }
 
     fclose(file);
-    return NULL;
+    return result;
 }
 
 bool history_getRomscreenPath(char *path_out)
 {
-    char filename[STR_MAX];
-    char file_path[STR_MAX];
+    char file_path[RECENT_PATH_MAX];
 
-    if (history_getRecentPath(file_path) != NULL) {
-        sprintf(filename, "%" PRIu32, FNV1A_Pippip_Yurii(file_path, strlen(file_path)));
+    if (history_getRecentPath(file_path, sizeof(file_path)) == NULL) {
+        return false;
     }
+
     print_debug(file_path);
-    if (strlen(filename) > 0) {
-        sprintf(path_out, "/mnt/SDCARD/Saves/CurrentProfile/romScreens/%s.png", filename);
-        return true;
-    }
-
-    return false;
+    sprintf(path_out, "/mnt/SDCARD/Saves/CurrentProfile/romScreens/%" PRIu32 ".png",
+            FNV1A_Pippip_Yurii(file_path, strlen(file_path)));
+    return true;
 }
 
 void resumeGame(int index)
@@ -322,79 +347,26 @@ void resumeGame(int index)
     const char *recentPath = getMiyooRecentFilePath();
     FILE *file = fopen(recentPath, "r");
 
-    int type;
-
     if (!file) {
         fprintf(stderr, "Can't open file %s\n", recentPath);
         return;
     }
 
-    char jsonContent[STR_MAX * 4];
+    char jsonContent[RECENT_LINE_MAX];
     int validGameCount = -1;
     int lineCount = 0;
 
     while (fgets(jsonContent, sizeof(jsonContent), file) != NULL) {
-        char label[256];
-        char rompath[256];
-        char imgpath[256];
-        char launch[256];
+        char rompath[RECENT_PATH_MAX];
+        char launch[RECENT_PATH_MAX];
         lineCount++;
 
-        sscanf(strstr(jsonContent, "\"type\":") + 7, "%d", &type);
-
-        if ((type != 5) && (type != 17))
+        if (!history_parseRecentLine(jsonContent, launch, sizeof(launch),
+                                     rompath, sizeof(rompath)))
             continue;
 
-        const char *labelStart = strstr(jsonContent, "\"label\":\"");
-        if (labelStart != NULL) {
-            labelStart += 9;
-            const char *labelEnd = strchr(labelStart, '\"');
-            strncpy(label, labelStart, labelEnd - labelStart);
-            label[labelEnd - labelStart] = '\0';
-        }
-        printf_debug("label: %s\n", label);
-        const char *rompathStart = strstr(jsonContent, "\"rompath\":\"");
-        if (rompathStart != NULL) {
-            rompathStart += 11;
-            const char *rompathEnd = strchr(rompathStart, '\"');
-            strncpy(rompath, rompathStart, rompathEnd - rompathStart);
-            rompath[rompathEnd - rompathStart] = '\0';
-        }
+        printf_debug("launch: %s\n", launch);
         printf_debug("rompath: %s\n", rompath);
-        const char *imgpathStart = strstr(jsonContent, "\"imgpath\":\"");
-        if (imgpathStart != NULL) {
-            imgpathStart += 11;
-            const char *imgpathEnd = strchr(imgpathStart, '\"');
-            strncpy(imgpath, imgpathStart, imgpathEnd - imgpathStart);
-            imgpath[imgpathEnd - imgpathStart] = '\0';
-        }
-
-        char *colonPosition = strchr(rompath, ':');
-        if (colonPosition != NULL) {
-
-            int position = (int)(colonPosition - rompath);
-
-            char firstPart[position + 1];
-            strncpy(firstPart, rompath, position);
-            firstPart[position] = '\0';
-
-            char secondPart[strlen(rompath) - position];
-            strcpy(secondPart, colonPosition + 1);
-
-            strcpy(launch, firstPart);
-            strcpy(rompath, secondPart);
-            printf_debug("launch cutted: %s\n", launch);
-            printf_debug("rompath cutted: %s\n", rompath);
-        }
-        else {
-            const char *launchStart = strstr(jsonContent, "\"launch\":\"");
-            if (launchStart != NULL) {
-                launchStart += 10;
-                const char *launchEnd = strchr(launchStart, '\"');
-                strncpy(launch, launchStart, launchEnd - launchStart);
-                launch[launchEnd - launchStart] = '\0';
-            }
-        }
 
         if (!exists(rompath) || !exists(launch))
             continue;
@@ -404,11 +376,11 @@ void resumeGame(int index)
         if (validGameCount == index) {
 
             FILE *fp;
-            char LaunchCommand[STR_MAX * 3];
+            char LaunchCommand[RECENT_PATH_MAX * 2 + 64];
 
             fclose(file);
             file = NULL;
-            sprintf(LaunchCommand, "LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so \"%s\" \"%s\"", launch, rompath);
+            snprintf(LaunchCommand, sizeof(LaunchCommand), "LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so \"%s\" \"%s\"", launch, rompath);
 
             remove("/mnt/SDCARD/.tmp_update/.runGameSwitcher");
 

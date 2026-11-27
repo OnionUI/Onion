@@ -25,8 +25,8 @@ bool __get_path_recent(char *path_out)
     system_state_update();
 
     if (system_state == MODE_GAME && (process_searchpid("retroarch") != 0 || process_searchpid("ra32") != 0)) {
-        char file_path[STR_MAX];
-        if (history_getRecentPath(file_path) != NULL) {
+        char file_path[RECENT_PATH_MAX];
+        if (history_getRecentPath(file_path, sizeof(file_path)) != NULL) {
             no_extension = file_removeExtension(basename(file_path));
             strcat(path_out, no_extension);
             free(no_extension);
