@@ -95,8 +95,10 @@ void file_readLastLine(const char *filename, char *out_str)
         fseek(fd, 0L, SEEK_SET);
 
         int max_len = size < 255 ? size + 1 : 255;
-        if (max_len <= 1)
+        if (max_len <= 1) {
+            fclose(fd);
             return;
+        }
 
         // get the last line
         fseek(fd, -max_len, SEEK_END);
@@ -390,7 +392,8 @@ bool file_findNewest(const char *dir_path, char *newest_file, size_t buffer_size
 }
 char *file_read_lineN(const char *filename, int n)
 {
-    char line[STR_MAX * 4];
+    char *line = NULL;
+    size_t len = 0;
     int lineNumber = 1;
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
@@ -398,20 +401,16 @@ char *file_read_lineN(const char *filename, int n)
         return NULL;
     }
 
-    while (fgets(line, sizeof(line), file) != NULL) {
+    // getline() so that line numbers match real lines, whatever their length
+    while (getline(&line, &len, file) != -1) {
         if (lineNumber == n) {
             fclose(file);
-            char *lineN = malloc(strlen(line) + 1);
-            if (lineN == NULL) {
-                print_debug("Memory allocation error");
-                return NULL;
-            }
-            strcpy(lineN, line);
-            return lineN;
+            return line;
         }
         lineNumber++;
     }
 
+    free(line);
     fclose(file);
     return NULL;
 }
@@ -432,16 +431,19 @@ void file_delete_line(const char *fileName, int n)
         return;
     }
 
-    char line[STR_MAX * 4];
+    char *line = NULL;
+    size_t len = 0;
     int lineNumber = 1;
 
-    while (fgets(line, sizeof(line), file) != NULL) {
+    // getline() so that line numbers match real lines, whatever their length
+    while (getline(&line, &len, file) != -1) {
         if (lineNumber != n) {
             fputs(line, tempFile);
         }
         lineNumber++;
     }
 
+    free(line);
     fclose(file);
     fclose(tempFile);
 

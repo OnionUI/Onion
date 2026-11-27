@@ -51,7 +51,7 @@ RomScreenType_e findRomScreen(const Game_s *game, char *currPicture)
     }
 
     // Check if artwork exists
-    sprintf(currPicture, game->recentItem.imgpath);
+    snprintf(currPicture, STR_MAX * 2, "%s", game->recentItem.imgpath);
     printf_debug("Checking for artwork: %s\n", currPicture);
     if (exists(currPicture)) {
         return ROM_SCREEN_ARTWORK;

@@ -25,8 +25,8 @@ bool __get_path_recent(char *path_out)
     system_state_update();
 
     if (system_state == MODE_GAME && (process_searchpid("retroarch") != 0 || process_searchpid("ra32") != 0)) {
-        char file_path[STR_MAX];
-        if (history_getRecentPath(file_path) != NULL) {
+        char file_path[RECENT_PATH_MAX];
+        if (history_getRecentPath(file_path, sizeof(file_path)) != NULL) {
             no_extension = file_removeExtension(basename(file_path));
             strcat(path_out, no_extension);
             free(no_extension);
@@ -38,8 +38,8 @@ bool __get_path_recent(char *path_out)
         strcat(path_out, "MainUI");
     else if ((system_state == MODE_GAME || system_state == MODE_APPS) && exists(CMD_TO_RUN_PATH)) {
         FILE *fp;
-        char cmd[STR_MAX];
-        file_get(fp, CMD_TO_RUN_PATH, "%[^\n]", cmd);
+        char cmd[STR_MAX * 4] = "";
+        file_get(fp, CMD_TO_RUN_PATH, "%1023[^\n]", cmd);
         printf_debug("cmd: '%s'\n", cmd);
 
         char app_name[STR_MAX];
@@ -48,7 +48,7 @@ bool __get_path_recent(char *path_out)
             state_getAppName(app_name, cmd);
         else {
             no_extension = file_removeExtension(basename(cmd));
-            strcpy(app_name, no_extension);
+            snprintf(app_name, sizeof(app_name), "%s", no_extension);
             free(no_extension);
         }
         printf_debug("app: '%s'\n", app_name);
