@@ -95,7 +95,10 @@ void setEntryDefaultValues(Game_s *game, int index)
 void readHistory()
 {
     FILE *file;
-    char line[STR_MAX * 6];
+    // getline() so that lineNo and the game order match resumeGame()
+    // and file_delete_line(), whatever the line length
+    char *line = NULL;
+    size_t lineSize = 0;
     int numRecents = 0;
 
     const char *recentFilePath = getMiyooRecentFilePath();
@@ -108,7 +111,7 @@ void readHistory()
 
     int lineNo = 0;
 
-    while ((fgets(line, sizeof(line), file) != NULL) && (numRecents < MAX_HISTORY)) {
+    while ((numRecents < MAX_HISTORY) && (getline(&line, &lineSize, file) != -1)) {
         ++lineNo;
 
         if (!parseJsonToRecentItem(line, &game_list[numRecents].recentItem, lineNo)) {
@@ -141,6 +144,7 @@ void readHistory()
         numRecents++;
     }
 
+    free(line);
     fclose(file);
     game_list_len = numRecents;
 }
@@ -190,7 +194,8 @@ void processItem(Game_s *game)
 void readFirstEntry()
 {
     FILE *file;
-    char line[STR_MAX * 6];
+    char *line = NULL;
+    size_t lineSize = 0;
 
     file = fopen(getMiyooRecentFilePath(), "r");
     if (file == NULL) {
@@ -201,7 +206,7 @@ void readFirstEntry()
     int lineNo = -1;
     bool found = false;
 
-    while (fgets(line, sizeof(line), file) != NULL) {
+    while (getline(&line, &lineSize, file) != -1) {
         ++lineNo;
 
         if (parseJsonToRecentItem(line, &game_list[0].recentItem, lineNo)) {
@@ -217,6 +222,7 @@ void readFirstEntry()
         game_list_len = 1;
     }
 
+    free(line);
     fclose(file);
 }
 
